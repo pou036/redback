@@ -3,6 +3,9 @@
 #include "AppFactory.h"
 #include "ModulesApp.h"
 
+// Kernels
+#include "MechHeat.h"
+
 template<>
 InputParameters validParams<RedbackApp>()
 {
@@ -37,6 +40,7 @@ RedbackApp::registerApps()
 void
 RedbackApp::registerObjects(Factory & factory)
 {
+  registerKernel(MechHeat);
 }
 
 void
