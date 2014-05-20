@@ -12,14 +12,14 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "StrainRate.h"
-#include "Function.h"
-#include "SubProblem.h"
+#include "StrainRateAux.h"
 
 template<>
-InputParameters validParams<StrainRate>()
+InputParameters validParams<StrainRateAux>()
 {
-  InputParameters params = validParams<PointValue>();
+  InputParameters params = validParams<AuxKernel>();
+
+  params.addRequiredCoupledVar("temp", "The temperature variable.");
 
   params.addParam<Real>("gr", 1.0, "Gruntfest number.");
   params.addParam<Real>("ar", 1.0, "Arrhenius number.");
@@ -27,19 +27,17 @@ InputParameters validParams<StrainRate>()
   return params;
 }
 
-StrainRate::StrainRate(const std::string & name, InputParameters parameters) :
-    PointValue(name, parameters),
+StrainRateAux::StrainRateAux(const std::string & name, InputParameters parameters) :
+    AuxKernel(name, parameters),
+    _temp(coupledValue("temp")),
     _gr(getParam<Real>("gr")),
     _ar(getParam<Real>("ar"))
 {
 }
 
-StrainRate::~StrainRate()
-{
-}
 
 Real
-StrainRate::variableValue()
+StrainRateAux::computeValue()
 {
-  return _gr * std::exp( ( _ar * _u[0] ) / ( 1 + _u[0] ) );
+  return _gr * std::exp( ( _ar * _temp[_qp] ) / ( 1 + _temp[_qp] ) );
 }

@@ -6,8 +6,12 @@
 // Kernels
 #include "MechHeat.h"
 
+// AuxKernels
+#include "StrainRateAux.h"
+
 // Postprocessors
-#include "StrainRate.h"
+#include "StrainRatePoint.h"
+
 
 template<>
 InputParameters validParams<RedbackApp>()
@@ -45,7 +49,9 @@ RedbackApp::registerObjects(Factory & factory)
 {
   registerKernel(MechHeat);
 
-  registerPostprocessor(StrainRate);
+  registerAux(StrainRateAux);
+
+  registerPostprocessor(StrainRatePoint);
 }
 
 void

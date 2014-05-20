@@ -12,29 +12,40 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef STRAINRATE_H
-#define STRAINRATE_H
+#ifndef STRAINRATEAUX_H
+#define STRAINRATEAUX_H
 
-#include "PointValue.h"
+#include "AuxKernel.h"
+
 
 //Forward Declarations
-class StrainRate;
+class StrainRateAux;
 
 template<>
-InputParameters validParams<StrainRate>();
+InputParameters validParams<StrainRateAux>();
 
-class StrainRate : public PointValue
+/**
+ * Constant auxiliary value
+ */
+class StrainRateAux : public AuxKernel
 {
 public:
-  StrainRate(const std::string & name, InputParameters parameters);
-  virtual ~StrainRate();
-  virtual Real variableValue();
+
+  /**
+   * Factory constructor, takes parameters so that all derived classes can be built using the same
+   * constructor.
+   */
+  StrainRateAux(const std::string & name, InputParameters parameters);
+
+  virtual ~StrainRateAux() {}
 
 protected:
+  virtual Real computeValue();
+
+  const VariableValue & _temp;
+
   Real _gr;
   Real _ar;
 };
 
-
-
-#endif /* STRAINRATE_H */
+#endif //STRAINRATEAUX_H
