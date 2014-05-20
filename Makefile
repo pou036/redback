@@ -4,22 +4,28 @@
 #
 # Optional Environment variables
 # MOOSE_DIR        - Root directory of the MOOSE project 
-# HERD_TRUNK_DIR   - Location of the HERD repository
+# HERD_TRUNK_DIR   - Location of the HERD repository (or parent directory)
 # FRAMEWORK_DIR    - Location of the MOOSE framework
 #
 ###############################################################################
-MODULE_DIR         ?= $(shell dirname `pwd`)
-MOOSE_DIR          ?= $(shell dirname $(MODULE_DIR))
+MOOSE_DIR          ?= $(shell dirname `pwd`)/moose
+HERD_TRUNK_DIR     ?= $(shell dirname `pwd`)
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
 ###############################################################################
+CURRENT_DIR        := $(shell pwd)
 
 # framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
+################################## MODULES ####################################
+ALL_MODULES := yes
+include $(MOOSE_DIR)/modules/modules.mk
+###############################################################################
+
 # dep apps
-APPLICATION_DIR    := $(MODULE_DIR)/stork
-APPLICATION_NAME   := stork
+APPLICATION_DIR    := $(CURRENT_DIR)
+APPLICATION_NAME   := redback
 BUILD_EXEC         := yes
 DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 include            $(FRAMEWORK_DIR)/app.mk

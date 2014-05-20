@@ -5,7 +5,7 @@ import sys, os, inspect
 os.chdir(os.path.abspath(os.path.dirname(sys.argv[0])))
 
 #### Set the name of the application here and moose directory relative to the application
-app_name = 'stork'
+app_name = 'redback'
 
 MOOSE_DIR = os.path.abspath(os.path.join('..', 'moose'))
 #### See if MOOSE_DIR is already in the environment instead
