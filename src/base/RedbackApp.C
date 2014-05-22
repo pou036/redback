@@ -4,7 +4,11 @@
 #include "ModulesApp.h"
 
 // Kernels
+#include "ChemEndo.h"
+#include "ChemPressure.h"
+#include "CubeTerm.h"
 #include "MechHeat.h"
+#include "MechHeatTensor.h"
 
 // AuxKernels
 #include "StrainRateAux.h"
@@ -47,7 +51,11 @@ RedbackApp::registerApps()
 void
 RedbackApp::registerObjects(Factory & factory)
 {
+  registerKernel(ChemEndo);
+  registerKernel(ChemPressure);
+  registerKernel(CubeTerm);
   registerKernel(MechHeat);
+  registerKernel(MechHeatTensor);
 
   registerAux(StrainRateAux);
 
