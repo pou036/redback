@@ -35,6 +35,7 @@ protected:
 
   Real _ar_c;
   Real _da;
+  Real _delta;
 };
 
 

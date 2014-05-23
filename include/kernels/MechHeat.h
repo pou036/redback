@@ -33,8 +33,13 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
+  VariableValue &_pressure;
   Real _gr;
   Real _ar;
+  Real _ar_c;
+  Real _m;
+  Real _delta;
+
 };
 
 

@@ -36,6 +36,7 @@ protected:
   VariableValue &_temp;
   Real _ar_c;
   Real _mu;
+  Real _delta;
 };
 
 

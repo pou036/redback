@@ -22,6 +22,7 @@ InputParameters validParams<ChemEndo>()
 
   params.addParam<Real>("ar_c", 1.0, "Arrhenius chemistry.");
   params.addRequiredParam<Real>("da", "Damkoehler number.");
+  params.addRequiredParam<Real>("delta", "Kamenetskii coefficient.");
 
   return params;
 }
@@ -30,7 +31,8 @@ InputParameters validParams<ChemEndo>()
 ChemEndo::ChemEndo(const std::string & name, InputParameters parameters) :
   Kernel(name, parameters),
   _ar_c(getParam<Real>("ar_c")),
-  _da(getParam<Real>("da"))
+  _da(getParam<Real>("da")),
+  _delta(getParam<Real>("delta"))
 {
 
 }
@@ -43,12 +45,12 @@ ChemEndo::~ChemEndo()
 Real
 ChemEndo::computeQpResidual()
 {
-  return _test[_i][_qp]*_da*std::exp( (_ar_c*_u[_qp]) / (1 + _u[_qp]) );
+  return _test[_i][_qp]*_da*std::exp( (_ar_c*_delta*_u[_qp]) / (1 + _delta*_u[_qp]) );
 }
 
 Real
 ChemEndo::computeQpJacobian()
 {
-  return _test[_i][_qp] * _da * ( _ar_c / ( (1+_u[_qp] ) * (1+_u[_qp] ) ) ) *
-    std::exp( (_ar_c*_u[_qp]) / (1 + _u[_qp]) ) * _phi[_j][_qp];
+  return _test[_i][_qp] * _da * ( _delta*_ar_c / ( (1+_delta*_u[_qp] ) * (1+_delta*_u[_qp] ) ) ) *
+    std::exp( (_ar_c*_delta*_u[_qp]) / (1 + _delta*_u[_qp]) ) * _phi[_j][_qp];
 }
