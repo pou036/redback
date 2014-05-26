@@ -34,11 +34,11 @@ protected:
   virtual Real computeQpJacobian();
 
   VariableValue &_pressure;
-  Real _gr;
-  Real _ar;
-  Real _ar_c;
-  Real _m;
-  Real _delta;
+  MaterialProperty<Real> & _gr;
+  MaterialProperty<Real> & _ar;
+  MaterialProperty<Real> & _ar_c;
+  MaterialProperty<Real> & _m;
+  MaterialProperty<Real> & _delta;
 
 };
 

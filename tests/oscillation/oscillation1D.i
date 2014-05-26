@@ -21,6 +21,8 @@
 
 [AuxVariables]
   [./strain_rate]
+    family = MONOMIAL
+    order = CONSTANT
   [../]
 []
 
@@ -110,6 +112,12 @@
     type = DimensionlessRock
     block = 0
     ar_c = 40
+    m = 3
+    da = 1
+    mu = 1e-3
+    ar = 20
+    gr = 1.2e-7
+    delta = 1e-3
   [../]
 []
 

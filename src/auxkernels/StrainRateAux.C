@@ -21,17 +21,14 @@ InputParameters validParams<StrainRateAux>()
 
   params.addRequiredCoupledVar("temp", "The temperature variable.");
 
-  params.addParam<Real>("gr", 1.0, "Gruntfest number.");
-  params.addParam<Real>("ar", 1.0, "Arrhenius number.");
-
   return params;
 }
 
 StrainRateAux::StrainRateAux(const std::string & name, InputParameters parameters) :
     AuxKernel(name, parameters),
     _temp(coupledValue("temp")),
-    _gr(getParam<Real>("gr")),
-    _ar(getParam<Real>("ar"))
+    _gr(getMaterialProperty<Real>("gr")),
+    _ar(getMaterialProperty<Real>("ar"))
 {
 }
 
@@ -39,5 +36,5 @@ StrainRateAux::StrainRateAux(const std::string & name, InputParameters parameter
 Real
 StrainRateAux::computeValue()
 {
-  return _gr * std::exp( ( _ar * _temp[_qp] ) / ( 1 + _temp[_qp] ) );
+  return _gr[_qp] * std::exp( ( _ar[_qp] * _temp[_qp] ) / ( 1 + _temp[_qp] ) );
 }

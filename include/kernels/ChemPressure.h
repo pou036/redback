@@ -34,9 +34,9 @@ protected:
   virtual Real computeQpJacobian();
 
   VariableValue &_temp;
-  Real _ar_c;
-  Real _mu;
-  Real _delta;
+  MaterialProperty<Real> & _ar_c;
+  MaterialProperty<Real> & _mu;
+  MaterialProperty<Real> & _delta;
 };
 
 

@@ -34,8 +34,8 @@ protected:
   virtual Real computeQpJacobian();
 
   MaterialProperty<Real> & _ar_c;
-  Real _da;
-  Real _delta;
+  MaterialProperty<Real> & _da;
+  MaterialProperty<Real> & _delta;
 };
 
 

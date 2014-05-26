@@ -44,8 +44,8 @@ protected:
 
   const VariableValue & _temp;
 
-  Real _gr;
-  Real _ar;
+  MaterialProperty<Real> & _gr;
+  MaterialProperty<Real> & _ar;
 };
 
 #endif //STRAINRATEAUX_H

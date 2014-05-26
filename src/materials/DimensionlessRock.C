@@ -19,9 +19,13 @@ InputParameters validParams<DimensionlessRock>()
 {
   InputParameters params = validParams<Material>();
 
-  params.addRequiredParam<Real>("gr", "Gruntfest number.");
+  params.addRequiredRangeCheckedParam<Real>("gr", "gr>=0", "Gruntfest number.");
   params.addRequiredParam<Real>("ar", "Arrhenius number.");
   params.addRequiredParam<Real>("ar_c", "Chemical Arrhenius number.");
+  params.addRequiredParam<Real>("delta", "Kamenetskii coefficient.");
+  params.addRequiredParam<Real>("da", "Damkoehler number.");
+  params.addRequiredParam<Real>("mu", "Chemical pressurization coefficient.");
+  params.addRequiredParam<Real>("m", "Rate sensitivity parameter.");
 
   return params;
 }
@@ -31,9 +35,18 @@ DimensionlessRock::DimensionlessRock(const std::string & name, InputParameters p
     _gr_param(getParam<Real>("gr")),
     _ar_param(getParam<Real>("ar")),
     _ar_c_param(getParam<Real>("ar_c")),
+    _delta_param(getParam<Real>("delta")),
+    _da_param(getParam<Real>("da")),
+    _mu_param(getParam<Real>("mu")),
+    _m_param(getParam<Real>("m")),
+
     _gr(declareProperty<Real>("gr")),
     _ar(declareProperty<Real>("ar")),
-    _ar_c(declareProperty<Real>("ar_c"))
+    _ar_c(declareProperty<Real>("ar_c")),
+    _delta(declareProperty<Real>("delta")),
+    _da(declareProperty<Real>("da")),
+    _mu(declareProperty<Real>("mu")),
+    _m(declareProperty<Real>("m"))
 {
 
 }
@@ -44,4 +57,8 @@ DimensionlessRock::computeQpProperties()
   _gr[_qp] = _gr_param;
   _ar[_qp] = _ar_param;
   _ar_c[_qp] = _ar_c_param;
+  _delta[_qp] = _delta_param;
+  _da[_qp] = _da_param;
+  _mu[_qp] = _mu_param;
+  _m[_qp] = _m_param;
 }

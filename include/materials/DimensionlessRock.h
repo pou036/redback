@@ -31,10 +31,14 @@ public:
 
 protected:
   virtual void computeQpProperties();
-  Real _gr_param, _ar_param, _ar_c_param;
+  Real _gr_param, _ar_param, _ar_c_param, _delta_param, _da_param, _mu_param, _m_param;
   MaterialProperty<Real> & _gr;
   MaterialProperty<Real> & _ar;
   MaterialProperty<Real> & _ar_c;
+  MaterialProperty<Real> & _delta;
+  MaterialProperty<Real> & _da;
+  MaterialProperty<Real> & _mu;
+  MaterialProperty<Real> & _m;
 };
 
 #endif //DIMENSIONLESSROCK_H
