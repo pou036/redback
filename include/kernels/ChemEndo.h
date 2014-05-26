@@ -33,7 +33,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  Real _ar_c;
+  MaterialProperty<Real> & _ar_c;
   Real _da;
   Real _delta;
 };

@@ -105,6 +105,14 @@
   [../]
 []
 
+[Materials]
+  [./adim_rock]
+    type = DimensionlessRock
+    block = 0
+    ar_c = 40
+  [../]
+[]
+
 [Postprocessors]
   [./middle_temp]
     type = PointValue

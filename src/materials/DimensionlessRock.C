@@ -12,44 +12,36 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ChemEndo.h"
-
+#include "DimensionlessRock.h"
 
 template<>
-InputParameters validParams<ChemEndo>()
+InputParameters validParams<DimensionlessRock>()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = validParams<Material>();
 
-  params.addRequiredParam<Real>("da", "Damkoehler number.");
-  params.addRequiredParam<Real>("delta", "Kamenetskii coefficient.");
+  params.addRequiredParam<Real>("gr", "Gruntfest number.");
+  params.addRequiredParam<Real>("ar", "Arrhenius number.");
+  params.addRequiredParam<Real>("ar_c", "Chemical Arrhenius number.");
 
   return params;
 }
 
-
-ChemEndo::ChemEndo(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters),
-  _ar_c(getMaterialProperty<Real>("ar_c")),
-  _da(getParam<Real>("da")),
-  _delta(getParam<Real>("delta"))
+DimensionlessRock::DimensionlessRock(const std::string & name, InputParameters parameters) :
+    Material(name, parameters),
+    _gr_param(getParam<Real>("gr")),
+    _ar_param(getParam<Real>("ar")),
+    _ar_c_param(getParam<Real>("ar_c")),
+    _gr(declareProperty<Real>("gr")),
+    _ar(declareProperty<Real>("ar")),
+    _ar_c(declareProperty<Real>("ar_c"))
 {
 
 }
 
-ChemEndo::~ChemEndo()
+void
+DimensionlessRock::computeQpProperties()
 {
-
-}
-
-Real
-ChemEndo::computeQpResidual()
-{
-  return _test[_i][_qp]*_da*std::exp( (_ar_c[_qp]*_delta*_u[_qp]) / (1 + _delta*_u[_qp]) );
-}
-
-Real
-ChemEndo::computeQpJacobian()
-{
-  return _test[_i][_qp] * _da * ( _delta*_ar_c[_qp] / ( (1+_delta*_u[_qp] ) * (1+_delta*_u[_qp] ) ) ) *
-    std::exp( (_ar_c[_qp]*_delta*_u[_qp]) / (1 + _delta*_u[_qp]) ) * _phi[_j][_qp];
+  _gr[_qp] = _gr_param;
+  _ar[_qp] = _ar_param;
+  _ar_c[_qp] = _ar_c_param;
 }

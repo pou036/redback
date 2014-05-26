@@ -10,6 +10,9 @@
 #include "MechHeat.h"
 #include "MechHeatTensor.h"
 
+// Materials
+#include "DimensionlessRock.h"
+
 // AuxKernels
 #include "StrainRateAux.h"
 
@@ -56,6 +59,8 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(CubeTerm);
   registerKernel(MechHeat);
   registerKernel(MechHeatTensor);
+
+  registerMaterial(DimensionlessRock);
 
   registerAux(StrainRateAux);
 
