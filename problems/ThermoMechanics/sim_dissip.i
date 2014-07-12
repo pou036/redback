@@ -1,0 +1,216 @@
+[Mesh]
+  type = FileMesh
+  file = 2d_square_400elements_2corners_inclusion.msh
+[]
+
+[Variables]
+  [./disp_x]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./disp_y]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./disp_z]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./temp]
+  [../]
+[]
+
+[TensorMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    temp = temp
+  [../]
+[]
+
+[Materials]
+  [./felastic0]
+    type = FiniteStrainRatePlasticTemperatureMaterial
+    block = 0
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    C_ijkl = '2.827e5 1.21e5 1.21e5 2.827e5 1.21e5 2.827e5 0.808e5 0.808e5 0.808e5'
+    yield_stress = '0. 445. 0.05 446. 0.1 447. 0.38 448. 0.95 449. 2. 450.'
+    exponent = 2
+    ref_pe_rate = 1e-3
+    temperature = temp
+    activation_energy = 100
+  [../]
+  [./felastic1]
+    type = FiniteStrainPlasticMaterial
+    block = 1
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    C_ijkl = '2.827e4 1.21e4 1.21e4 2.827e4 1.21e4 2.827e4 0.808e4 0.808e4 0.808e4'
+    yield_stress = '0. 445. 0.05 440. 0.1 435. 0.38 430. 0.95 425. 2. 400.'
+    temperature = temp
+  [../]
+[]
+
+[Functions]
+  [./upfunc]
+    type = ParsedFunction
+    value = t
+  [../]
+  [./downfunc]
+    type = ParsedFunction
+    value = -t
+  [../]
+[]
+
+[BCs]
+  [./left_disp]
+    type = FunctionPresetBC
+    variable = disp_x
+    boundary = 3
+    function = downfunc
+  [../]
+  [./right_disp]
+    type = FunctionPresetBC
+    variable = disp_x
+    boundary = 1
+    function = upfunc
+  [../]
+  [./bottom_temp]
+    type = DirichletBC
+    variable = temp
+    boundary = 0
+    value = 1
+  [../]
+  [./top_temp]
+    type = DirichletBC
+    variable = temp
+    boundary = 2
+    value = 1
+  [../]
+[]
+
+[AuxVariables]
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./peeq]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./pe11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./pe22]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./pe33]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[Kernels]
+  [./temp_td]
+    type = TimeDerivative
+    variable = temp
+    block = '0 1'
+  [../]
+  [./temp_diff]
+    type = Diffusion
+    variable = temp
+    block = '0 1'
+  [../]
+  [./temp_dissip]
+    type = MechDissip
+    variable = temp
+    block = 0
+    activation_energy = 100 # MUST be the same as defined in material <TODO>
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_zz]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_zz
+    index_i = 2
+    index_j = 2
+  [../]
+  [./pe11]
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
+    variable = pe11
+    index_i = 0
+    index_j = 0
+  [../]
+  [./pe22]
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
+    variable = pe22
+    index_i = 1
+    index_j = 1
+  [../]
+  [./pe33]
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
+    variable = pe33
+    index_i = 2
+    index_j = 2
+  [../]
+  [./eqv_plastic_strain]
+    type = FiniteStrainPlasticAux
+    variable = peeq
+  [../]
+[]
+
+[Preconditioning]
+  # active = ''
+  [./SMP]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  # Preconditioned JFNK (default)
+  start_time = 0.0
+  end_time = 5e-3
+  dt = 1e-4
+  dtmax = 1
+  dtmin = 1e-7
+  type = Transient
+  solve_type = PJFNK
+  petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
+  petsc_options_value = 'hypre boomeramg cp 201'
+  nl_abs_tol = 1e-10 # 1e-10 to begin with
+  reset_dt = true
+  line_search = basic
+[]
+
+[Outputs]
+  file_base = out
+  output_initial = true
+  exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+[]
+
+[ICs]
+  [./ic_temp]
+    variable = temp
+    value = 1
+    type = ConstantIC
+    block = '0 1'
+  [../]
+[]
+
