@@ -3,6 +3,14 @@
   file = 2d_square_400elements_2corners_inclusion.msh
 []
 
+[MeshModifiers]
+  [./left_mid_point]
+    type = AddExtraNodeset
+    boundary = 4
+    coord = '0.0 0.5'
+  [../]
+[]
+
 [Variables]
   [./disp_x]
     order = FIRST
@@ -30,27 +38,28 @@
 []
 
 [Materials]
-  [./felastic0]
+  [./mat0]
     type = FiniteStrainRatePlasticTemperatureMaterial
     block = 0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
-    C_ijkl = '2.827e5 1.21e5 1.21e5 2.827e5 1.21e5 2.827e5 0.808e5 0.808e5 0.808e5'
-    yield_stress = '0. 445. 0.05 446. 0.1 447. 0.38 448. 0.95 449. 2. 450.'
     exponent = 2
-    ref_pe_rate = 1e-3
+    disp_y = disp_y
+    disp_x = disp_x
+    heat_capacity = 1e5
+    activation_energy = 50
+    C_ijkl = '2.827e5 1.21e5 1.21e5 2.827e5 1.21e5 2.827e5 0.808e5 0.808e5 0.808e5'
     temperature = temp
-    activation_energy = 100
+    yield_stress = '0. 445. 0.05 480. 0.1 500'
+    ref_pe_rate = 1e4
+    disp_z = disp_z
   [../]
-  [./felastic1]
+  [./mat1]
     type = FiniteStrainPlasticMaterial
     block = 1
-    disp_x = disp_x
-    disp_y = disp_y
     disp_z = disp_z
-    C_ijkl = '2.827e4 1.21e4 1.21e4 2.827e4 1.21e4 2.827e4 0.808e4 0.808e4 0.808e4'
-    yield_stress = '0. 445. 0.05 440. 0.1 435. 0.38 430. 0.95 425. 2. 400.'
+    disp_y = disp_y
+    disp_x = disp_x
+    yield_stress = '0. 445. 0.05 480. 0.1 500'
+    C_ijkl = '2.827e5 1.21e5 1.21e5 2.827e5 1.21e5 2.827e5 0.808e5 0.808e5 0.808e5'
     temperature = temp
   [../]
 []
@@ -67,6 +76,7 @@
 []
 
 [BCs]
+  active = 'right_disp left_disp temp_left_mid_pt'
   [./left_disp]
     type = FunctionPresetBC
     variable = disp_x
@@ -90,6 +100,12 @@
     variable = temp
     boundary = 2
     value = 1
+  [../]
+  [./temp_left_mid_pt]
+    type = DirichletBC
+    variable = temp
+    boundary = 4
+    value = 300
   [../]
 []
 
@@ -123,15 +139,15 @@
     block = '0 1'
   [../]
   [./temp_diff]
-    type = Diffusion
+    type = AnisotropicDiffusion
     variable = temp
     block = '0 1'
+    tensor_coeff = '1 0 0 0 1 0 0 0 1'
   [../]
   [./temp_dissip]
     type = MechDissip
     variable = temp
     block = 0
-    activation_energy = 100 # MUST be the same as defined in material <TODO>
   [../]
 []
 
@@ -181,7 +197,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 5e-3
+  end_time = 1
   dt = 1e-4
   dtmax = 1
   dtmin = 1e-7
@@ -208,7 +224,7 @@
 [ICs]
   [./ic_temp]
     variable = temp
-    value = 1
+    value = 300
     type = ConstantIC
     block = '0 1'
   [../]

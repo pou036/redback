@@ -17,6 +17,7 @@ InputParameters validParams<FiniteStrainRatePlasticTemperatureMaterial>()
   params.addRequiredParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addRequiredParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
   params.addRequiredParam<Real>("activation_energy", "Activation energy");
+  params.addRequiredParam<Real>("heat_capacity", "Heat Capacity (rho * Cp)");
   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
   params.addCoupledVar("T", 300, "Temperature in Kelvin");
   
@@ -27,11 +28,17 @@ FiniteStrainRatePlasticTemperatureMaterial::FiniteStrainRatePlasticTemperatureMa
                                                                  InputParameters parameters) :
     FiniteStrainPlasticMaterial(name, parameters),
     _T(coupledValue("T")),
-    _mech_dissipation(declareProperty<Real>("mech_dissipation")),
+ 
     _ref_pe_rate(getParam<Real>("ref_pe_rate")),
     _exponent(getParam<Real>("exponent")),
-    _activation_energy(getParam<Real>("activation_energy")),
-    _gas_constant(getParam<Real>("gas_constant"))
+    _activation_energy_prop(getParam<Real>("activation_energy")),
+    _heat_capacity_prop(getParam<Real>("heat_capacity")),
+    _gas_constant(getParam<Real>("gas_constant")),
+    
+    _activation_energy(declareProperty<Real>("activation_energy")),
+    _mech_dissipation(declareProperty<Real>("mech_dissipation")),
+    _heat_capacity(declareProperty<Real>("heat_capacity"))
+   
  {
 }
 
@@ -40,7 +47,9 @@ FiniteStrainRatePlasticTemperatureMaterial::initQpStatefulProperties()
 {
   _elastic_strain[_qp].zero();
   _stress[_qp].zero();
-  _mech_dissipation[_qp] = 0.0;
+  _activation_energy[_qp] = _activation_energy_prop;
+  _mech_dissipation[_qp] = 0;
+  _heat_capacity[_qp] = _heat_capacity_prop;
   _plastic_strain[_qp].zero();
   _plastic_strain_old[_qp].zero();
   _eqv_plastic_strain[_qp] = 0.0;
@@ -54,7 +63,7 @@ FiniteStrainRatePlasticTemperatureMaterial::computeQpStress()
   _exponential = 1;
   if (_has_T)
   {
-    _exponential = std::exp(-_activation_energy/(_gas_constant *_T[_qp]));
+    _exponential = std::exp(-_activation_energy[_qp]/(_gas_constant *_T[_qp]));
   }
 
   //In elastic problem, all the strain is elastic
@@ -62,7 +71,7 @@ FiniteStrainRatePlasticTemperatureMaterial::computeQpStress()
 
   //Obtain previous plastic rate of deformation tensor
   dp=_plastic_strain_old[_qp];
-
+  
   //Solve J2 plastic constitutive equations based on current strain increment
   //Returns current  stress and plastic rate of deformation tensor
 
@@ -167,7 +176,7 @@ FiniteStrainRatePlasticTemperatureMaterial::returnMap(const RankTwoTensor & sig_
   if (iterisohard>=maxiterisohard)
     mooseError("Constitutive Error-Too many iterations in Hardness Update:Reduce time increment.\n"); //Convergence failure
 
-  // Attempt to calculate mechanical dissipation sigma*\dot{epsilon_plastic} (needed in kernel MechDissip.C)
+  // Compute mechanical dissipation sigma*\dot{epsilon_plastic} (needed in kernel MechDissip.C)
   _mech_dissipation[_qp] =  getSigEqv(sig_new) * _ref_pe_rate * std::pow(macaulayBracket(getSigEqv(sig_new) / yield_stress - 1.0), _exponent)*_exponential;
   
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration

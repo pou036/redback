@@ -21,9 +21,7 @@ InputParameters validParams<MechDissip>()
   InputParameters params = validParams<Kernel>();
 
   params.addCoupledVar("pressure", 0., "Pressure variable.");
-  //params.addRequiredParam<Real>("_ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
-  //params.addRequiredParam<Real>("_exponent", "Exponent for rate dependent plasticity (Perzyna)");
-  params.addRequiredParam<Real>("activation_energy", "Activation energy");
+  //params.addRequiredParam<Real>("activation_energy", "Activation energy");
   params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
 
   return params;
@@ -34,11 +32,11 @@ MechDissip::MechDissip(const std::string & name, InputParameters parameters) :
   Kernel(name, parameters),
   _pressure(coupledValue("pressure")),
   _stress(getMaterialProperty<RankTwoTensor>("stress")),
+  _activation_energy(getMaterialProperty<Real>("activation_energy")),
   _mech_dissipation(getMaterialProperty<Real>("mech_dissipation")),
-  //_ref_pe_rate(getParam<Real>("ref_pe_rate")),
-  //_exponent(getParam<Real>("exponent")),
-  _activation_energy(getParam<Real>("activation_energy")),
-  _gas_constant(getParam<Real>("gas_constant"))
+  _heat_capacity(getMaterialProperty<Real>("heat_capacity")), // rho * Cp
+  //_activation_energy(getParam<Real>("activation_energy")),
+  _gas_constant(getParam<Real>("gas_constant")) 
 {
 
 }
@@ -51,13 +49,13 @@ MechDissip::~MechDissip()
 Real
 MechDissip::computeQpResidual()
 {
-  //std::cout<<_mech_dissipation[_qp]<<std::endl;
-  return -_test[_i][_qp] * _mech_dissipation[_qp];
+  //std::cout<<"In MechDissip.C: heat_capacity="<<_heat_capacity[_qp]<<std::endl;
+  return -_test[_i][_qp] * _mech_dissipation[_qp] / _heat_capacity[_qp];
   
 }
 
 Real
 MechDissip::computeQpJacobian()
 {
-  return -_test[_i][_qp] * _mech_dissipation[_qp] * _activation_energy / (_gas_constant * _u[_qp] * _u[_qp]);
+  return -_test[_i][_qp] * _mech_dissipation[_qp] * _activation_energy[_qp] / (_gas_constant * _heat_capacity[_qp] * _u[_qp] * _u[_qp]);
 }

@@ -24,19 +24,23 @@ protected:
   void getFlowTensor(const RankTwoTensor &, Real, RankTwoTensor &);
 
   VariableValue & _T;
-  
-  MaterialProperty<Real> & _mech_dissipation;
-  
+
+   
   Real _ref_pe_rate;
   Real _exponent;
-  Real _activation_energy;
+  Real _activation_energy_prop, _heat_capacity_prop;
   Real _gas_constant;
-  
+ 
+  MaterialProperty<Real> & _activation_energy;
+  MaterialProperty<Real> & _mech_dissipation;
+  MaterialProperty<Real> & _heat_capacity;
+    
+
   Real _exponential;
   
-    
   Real macaulayBracket(Real);
 
+  
 };
 
 #endif //FINITESTRAINRATEPLASTICTEMPERATUREMATERIAL_H
