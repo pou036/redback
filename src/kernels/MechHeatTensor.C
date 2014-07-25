@@ -21,9 +21,6 @@ InputParameters validParams<MechHeatTensor>()
   InputParameters params = validParams<Kernel>();
 
   params.addCoupledVar("pressure", 0., "Pressure variable.");
-  params.addParam<Real>("gr", 1.0, "Gruntfest number.");
-  params.addParam<Real>("m", 1.0, "Rate sensitivity exponent.");
-  params.addParam<Real>("ar", 1.0, "Arrhenius term.");
 
   return params;
 }
@@ -32,10 +29,11 @@ InputParameters validParams<MechHeatTensor>()
 MechHeatTensor::MechHeatTensor(const std::string & name, InputParameters parameters) :
   Kernel(name, parameters),
   _pressure(coupledValue("pressure")),
+  _equivalent_stress(getMaterialProperty<Real>("equivalent_stress")),
   //_stress(getMaterialProperty<RankTwoTensor>("stress")),
-  _gr(getParam<Real>("gr")),
-  _m(getParam<Real>("m")),
-  _ar(getParam<Real>("ar"))
+  _gr(getMaterialProperty<Real>("gr")),
+  _m(getMaterialProperty<Real>("m")),
+  _ar(getMaterialProperty<Real>("ar"))
 {
 
 }
@@ -50,13 +48,13 @@ MechHeatTensor::computeQpResidual()
 {
   //std::cout<<_stress[_qp].secondInvariant()<<std::endl;
 
-  return -_test[_i][_qp]*_gr*std::pow(1.-_pressure[_qp], _m)*std::exp( (_ar*_u[_qp]) / (1 + _u[_qp]) );
-  //std::pow(3.*_stress[_qp].secondInvariant(), _m)
+  return -_test[_i][_qp]*_equivalent_stress[_qp]*_gr[_qp]*std::pow(1.-_pressure[_qp], _m[_qp])*std::exp( (_ar[_qp]*_u[_qp]) / (1 + _u[_qp]) );
+  //std::pow(3.*_stress[_qp].secondInvariant(), _m[_qp])
 }
 
 Real
 MechHeatTensor::computeQpJacobian()
 {
-  return -_test[_i][_qp] * _gr * std::pow(1.-_pressure[_qp], _m) * ( _ar / ( (1+_u[_qp] ) * (1+_u[_qp] ) ) ) *
-    std::exp( (_ar*_u[_qp]) / (1 + _u[_qp]) ) * _phi[_j][_qp];
+  return -_test[_i][_qp] * _equivalent_stress[_qp] * _gr[_qp] * std::pow(1.-_pressure[_qp], _m[_qp]) * ( _ar[_qp] / ( (1+_u[_qp] ) * (1+_u[_qp] ) ) ) *
+    std::exp( (_ar[_qp]*_u[_qp]) / (1 + _u[_qp]) ) * _phi[_j][_qp];
 }

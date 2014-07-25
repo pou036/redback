@@ -15,7 +15,7 @@
 #ifndef DIMENSIONLESSROCK_H
 #define DIMENSIONLESSROCK_H
 
-#include "Material.h"
+#include "FiniteStrainPlasticMaterial.h"
 
 
 //Forward Declarations
@@ -24,14 +24,22 @@ class DimensionlessRock;
 template<>
 InputParameters validParams<DimensionlessRock>();
 
-class DimensionlessRock : public Material
+class DimensionlessRock : public FiniteStrainPlasticMaterial
 {
 public:
   DimensionlessRock(const std::string & name, InputParameters parameters);
 
 protected:
-  virtual void computeQpProperties();
-  Real _gr_param, _ar_param, _ar_c_param, _delta_param, _da_param, _mu_param, _m_param;
+  virtual void computeQpStress();
+  virtual void initQpStatefulProperties();
+
+  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
+  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
+  void getFlowTensor(const RankTwoTensor &, Real, RankTwoTensor &);
+
+  VariableValue & _T;
+  
+  Real _gr_param, _ar_param, _ar_c_param, _delta_param, _da_param, _mu_param, _m_param, _exponent;
   MaterialProperty<Real> & _gr;
   MaterialProperty<Real> & _ar;
   MaterialProperty<Real> & _ar_c;
@@ -39,6 +47,13 @@ protected:
   MaterialProperty<Real> & _da;
   MaterialProperty<Real> & _mu;
   MaterialProperty<Real> & _m;
+  
+  MaterialProperty<Real> & _equivalent_stress;
+  MaterialProperty<Real> & _mises_strain;;
+  
+  Real _exponential;
+  
+  Real macaulayBracket(Real);
 };
 
 #endif //DIMENSIONLESSROCK_H

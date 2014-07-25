@@ -37,6 +37,7 @@ FiniteStrainRatePlasticTemperatureMaterial::FiniteStrainRatePlasticTemperatureMa
     
     _activation_energy(declareProperty<Real>("activation_energy")),
     _mech_dissipation(declareProperty<Real>("mech_dissipation")),
+    _equivalent_stress(declareProperty<Real>("equivalent_stress")),
     _heat_capacity(declareProperty<Real>("heat_capacity"))
    
  {
@@ -49,6 +50,7 @@ FiniteStrainRatePlasticTemperatureMaterial::initQpStatefulProperties()
   _stress[_qp].zero();
   _activation_energy[_qp] = _activation_energy_prop;
   _mech_dissipation[_qp] = 0;
+  _equivalent_stress[_qp] = 0;
   _heat_capacity[_qp] = _heat_capacity_prop;
   _plastic_strain[_qp].zero();
   _plastic_strain_old[_qp].zero();
@@ -177,7 +179,8 @@ FiniteStrainRatePlasticTemperatureMaterial::returnMap(const RankTwoTensor & sig_
     mooseError("Constitutive Error-Too many iterations in Hardness Update:Reduce time increment.\n"); //Convergence failure
 
   // Compute mechanical dissipation sigma*\dot{epsilon_plastic} (needed in kernel MechDissip.C)
-  _mech_dissipation[_qp] =  getSigEqv(sig_new) * _ref_pe_rate * std::pow(macaulayBracket(getSigEqv(sig_new) / yield_stress - 1.0), _exponent)*_exponential;
+  _equivalent_stress[_qp] =  getSigEqv(sig_new);
+  _mech_dissipation[_qp] =  _equivalent_stress[_qp] * _ref_pe_rate * std::pow(macaulayBracket(getSigEqv(sig_new) / yield_stress - 1.0), _exponent)*_exponential;
   
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;

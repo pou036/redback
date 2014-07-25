@@ -37,6 +37,7 @@ protected:
   MaterialProperty<RankTwoTensor> &_stress; // equivalent stress
   MaterialProperty<Real> & _activation_energy;
   MaterialProperty<Real> & _mech_dissipation;
+  MaterialProperty<Real> & _equivalent_stress;
   MaterialProperty<Real> & _heat_capacity;
   //Real _ref_pe_rate;
   //Real _exponent;

@@ -34,6 +34,7 @@ MechDissip::MechDissip(const std::string & name, InputParameters parameters) :
   _stress(getMaterialProperty<RankTwoTensor>("stress")),
   _activation_energy(getMaterialProperty<Real>("activation_energy")),
   _mech_dissipation(getMaterialProperty<Real>("mech_dissipation")),
+  _equivalent_stress(getMaterialProperty<Real>("equivalent_stress")),
   _heat_capacity(getMaterialProperty<Real>("heat_capacity")), // rho * Cp
   //_activation_energy(getParam<Real>("activation_energy")),
   _gas_constant(getParam<Real>("gas_constant")) 
