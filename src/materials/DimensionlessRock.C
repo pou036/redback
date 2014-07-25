@@ -26,7 +26,7 @@ InputParameters validParams<DimensionlessRock>()
   params.addRequiredParam<Real>("da", "Damkoehler number.");
   params.addRequiredParam<Real>("mu", "Chemical pressurization coefficient.");
   params.addRequiredParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna)");
-  params.addCoupledVar("T", 300, "Temperature in Kelvin");
+  params.addCoupledVar("T", 0, "Temperature in Kelvin");
   
   return params;
 }
@@ -80,8 +80,9 @@ DimensionlessRock::computeQpStress()
   _exponential = 1;
   if (_has_T)
   {
-    _exponential = std::exp(-_ar[_qp]/(1 + _delta[_qp] *_T[_qp]));
-  }
+	  //_exponential = std::exp(-_ar[_qp]/(1 + _delta[_qp] *_T[_qp]));
+	  _exponential = std::exp(-_ar[_qp]) * std::exp(_ar[_qp] * _delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]));
+	  }
   
   // Initialise our made up variables...
   _gr[_qp] = _gr_param;
@@ -206,7 +207,7 @@ DimensionlessRock::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor 
   // Compute equivalent stress
   _equivalent_stress[_qp] = getSigEqv(sig_new);
   // Compute Mises strain
-  _mises_strain[_qp] = 7;
+  _mises_strain[_qp] = flow_incr;
   
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;

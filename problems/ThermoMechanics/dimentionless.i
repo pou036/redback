@@ -43,7 +43,7 @@
     block = 0
     disp_y = disp_y
     disp_x = disp_x
-    C_ijkl = '1.346e+05 5.769e+04 5.769e+04 1.346e+05 5.769e+04 1.346e+05 3.846e+04 3.846e+04 3.846e+04'
+    C_ijkl = '1.346e+01 5.769e+00 5.769e+00 1.346e+01 5.769e+00 1.346e+01 3.846e+00 3.846e+00 3.846e+00'
     temperature = temp
     yield_stress = '0. 1 1. 1'
     disp_z = disp_z
@@ -51,16 +51,16 @@
     m = 2
     da = 1
     mu = 1
-    ar = 100
+    ar = 10
     delta = 1
-    gr = 1e-50
+    gr = 1e3
   [../]
   [./mat1]
     type = DimensionlessRock
     block = 1
     disp_y = disp_y
     disp_x = disp_x
-    C_ijkl = '1.346e+05 5.769e+04 5.769e+04 1.346e+05 5.769e+04 1.346e+05 3.846e+04 3.846e+04 3.846e+04'
+    C_ijkl = '1.346e+00 5.769e-01 5.769e-01 1.346e+00 5.769e-01 1.346e+00 3.846e-01 3.846e-01 3.846e-01'
     temperature = temp
     yield_stress = '0. 0.9 1 0.9'
     disp_z = disp_z
@@ -68,9 +68,9 @@
     m = 2
     da = 1
     mu = 1
-    ar = 100
+    ar = 10
     delta = 1
-    gr = 1e-50
+    gr = 1e2
   [../]
 []
 
@@ -115,11 +115,12 @@
     type = DirichletBC
     variable = temp
     boundary = 4
-    value = 300
+    value = 0
   [../]
 []
 
 [AuxVariables]
+  active = 'mises_stress mises_strain'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -144,10 +145,14 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./mises_strain]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
-  active = 'temp_diff temp_td temp_mht'
+  active = 'temp_diff temp_mht temp_td'
   [./temp_td]
     type = TimeDerivative
     variable = temp
@@ -172,6 +177,7 @@
 []
 
 [AuxKernels]
+  active = 'mises_stress mises_strain'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -208,6 +214,10 @@
     type = MisesStressAux
     variable = mises_stress
   [../]
+  [./mises_strain]
+    type = MisesStrainAux
+    variable = mises_strain
+  [../]
 []
 
 [Preconditioning]
@@ -222,7 +232,7 @@
   # Preconditioned JFNK (default)
   start_time = 0.0
   end_time = 1
-  dt = 1e-4
+  dt = 1e-3
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -248,7 +258,7 @@
 [ICs]
   [./ic_temp]
     variable = temp
-    value = 300
+    value = 0
     type = ConstantIC
     block = '0 1'
   [../]
