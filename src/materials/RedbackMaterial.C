@@ -12,10 +12,10 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "DimensionlessRock.h"
+#include "RedbackMaterial.h"
 
 template<>
-InputParameters validParams<DimensionlessRock>()
+InputParameters validParams<RedbackMaterial>()
 {
   InputParameters params = validParams<FiniteStrainPlasticMaterial>();
 
@@ -26,15 +26,17 @@ InputParameters validParams<DimensionlessRock>()
   params.addRequiredParam<Real>("da", "Damkoehler number.");
   params.addRequiredParam<Real>("mu", "Chemical pressurization coefficient.");
   params.addRequiredParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna)");
-  params.addRequiredCoupledVar("T", "Dimensionless temperature");
-  
+  params.addRequiredCoupledVar("temperature", "Dimensionless temperature");
+  params.addRequiredCoupledVar("pore_pres", "Dimensionless pore pressure");
+
   return params;
 }
 
-DimensionlessRock::DimensionlessRock(const std::string & name, InputParameters parameters) :
+RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters parameters) :
     FiniteStrainPlasticMaterial(name, parameters),
-    _T(coupledValue("T")),
-    
+    _T(coupledValue("temperature")),
+    _pore_pres(coupledValue("pore_pres")),
+
     _gr_param(getParam<Real>("gr")),
     _ar_param(getParam<Real>("ar")),
     _ar_c_param(getParam<Real>("ar_c")),
@@ -64,7 +66,7 @@ DimensionlessRock::DimensionlessRock(const std::string & name, InputParameters p
 
 
 void
-DimensionlessRock::initQpStatefulProperties()
+RedbackMaterial::initQpStatefulProperties()
 {
   _elastic_strain[_qp].zero();
   _stress[_qp].zero();
@@ -76,16 +78,16 @@ DimensionlessRock::initQpStatefulProperties()
 }
 
 void
-DimensionlessRock::computeQpStress()
+RedbackMaterial::computeQpStress()
 {
   RankTwoTensor dp,sig;
-  
+
   _exponential = 1;
   if (_has_T)
   {
     _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
   }
-  
+
   // Initialise our made up variables...
   _gr[_qp] = _gr_param;
   _ar[_qp] = _ar_param;
@@ -95,13 +97,13 @@ DimensionlessRock::computeQpStress()
   _mu[_qp] = _mu_param;
   _m[_qp] = _m_param;
   _exponent = _m[_qp];
-  
+
   //In elastic problem, all the strain is elastic
   _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
 
   //Obtain previous plastic rate of deformation tensor
   dp=_plastic_strain_old[_qp];
-  
+
   //Solve J2 plastic constitutive equations based on current strain increment
   //Returns current  stress and plastic rate of deformation tensor
 
@@ -128,7 +130,7 @@ DimensionlessRock::computeQpStress()
  *plastic rate of deformation tensor.
  */
 void
-DimensionlessRock::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig)
+RedbackMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig)
 {
   RankTwoTensor sig_new, delta_dp, dpn;
   RankTwoTensor flow_tensor, flow_dirn;
@@ -146,7 +148,7 @@ DimensionlessRock::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor 
   iterisohard = 0;
   eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
   yield_stress = getYieldStress(eqvpstrain);
-  
+
   err3 = 1.1 * tol3;
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
@@ -216,22 +218,22 @@ DimensionlessRock::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor 
   // Compute Mechanical Dissipation
   //_mechanical_dissipation[_qp] = _gr[_qp] * std::exp( _T[_qp] ) *
   //    macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 );
-  _mechanical_dissipation[_qp] = _gr[_qp] * getSigEqv(sig_new) / yield_stress * 
+  _mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) * getSigEqv(sig_new) / yield_stress *
        std::pow( macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 ), _exponent) *
        std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
   // Compute Mechanical Dissipation Jacobian
-  _mechanical_dissipation_jac[_qp] = _gr[_qp] * getSigEqv(sig_new) / yield_stress * 
+  _mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) * getSigEqv(sig_new) / yield_stress *
        std::pow( macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 ), _exponent) *
        _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
        (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
-  
+
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
 }
 
 //Obtain derivative of flow potential w.r.t. stress (plastic flow direction)
 void
-DimensionlessRock::getFlowTensor(const RankTwoTensor & sig, Real /*yield_stress*/, RankTwoTensor & flow_tensor)
+RedbackMaterial::getFlowTensor(const RankTwoTensor & sig, Real /*yield_stress*/, RankTwoTensor & flow_tensor)
 {
   RankTwoTensor sig_dev;
   Real sig_eqv, val;
@@ -248,7 +250,7 @@ DimensionlessRock::getFlowTensor(const RankTwoTensor & sig, Real /*yield_stress*
 
 //Jacobian for stress update algorithm
 void
-DimensionlessRock::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr, Real yield_stress, RankFourTensor & dresid_dsig)
+RedbackMaterial::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr, Real yield_stress, RankFourTensor & dresid_dsig)
 {
   unsigned i, j, k ,l;
   RankTwoTensor sig_dev, flow_tensor, flow_dirn,fij;
@@ -295,7 +297,7 @@ DimensionlessRock::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ij
 
 //Macaulay Bracket used in Perzyna Model
 Real
-DimensionlessRock::macaulayBracket(Real val)
+RedbackMaterial::macaulayBracket(Real val)
 {
   if (val > 0.0)
     return val;

@@ -2,7 +2,7 @@
 #define MISESSTRAINAUX_H
 
 #include "AuxKernel.h"
-#include "DimensionlessRock.h"
+#include "RedbackMaterial.h"
 
 //Forward declarations
 class MisesStrainAux;

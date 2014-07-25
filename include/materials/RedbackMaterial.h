@@ -12,22 +12,22 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef DIMENSIONLESSROCK_H
-#define DIMENSIONLESSROCK_H
+#ifndef REDBACKMATERIAL_H
+#define REDBACKMATERIAL_H
 
 #include "FiniteStrainPlasticMaterial.h"
 
 
 //Forward Declarations
-class DimensionlessRock;
+class RedbackMaterial;
 
 template<>
-InputParameters validParams<DimensionlessRock>();
+InputParameters validParams<RedbackMaterial>();
 
-class DimensionlessRock : public FiniteStrainPlasticMaterial
+class RedbackMaterial : public FiniteStrainPlasticMaterial
 {
 public:
-  DimensionlessRock(const std::string & name, InputParameters parameters);
+  RedbackMaterial(const std::string & name, InputParameters parameters);
 
 protected:
   virtual void computeQpStress();
@@ -39,6 +39,7 @@ protected:
   Real macaulayBracket(Real);
 
   VariableValue & _T;
+  VariableValue & _pore_pres;
   
   Real _gr_param, _ar_param, _ar_c_param, _delta_param, _da_param, _mu_param, _m_param, _exponent;
   MaterialProperty<Real> & _gr;
@@ -58,4 +59,4 @@ protected:
   
 };
 
-#endif //DIMENSIONLESSROCK_H
+#endif //REDBACKMATERIAL_H

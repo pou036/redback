@@ -8,12 +8,13 @@
 #include "ChemPressure.h"
 #include "CubeTerm.h"
 #include "MechDissip.h"
-#include "MechHeat.h"
-#include "MechHeatTensor.h"
+//#include "MechHeat.h"
+//#include "MechHeatTensor.h"
 
 // Materials
-#include "DimensionlessRock.h"
+//#include "DimensionlessRock.h"
 #include "FiniteStrainRatePlasticTemperatureMaterial.h"
+#include "RedbackMaterial.h"
 
 // AuxKernels
 #include "StrainRateAux.h"
@@ -65,11 +66,12 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(ChemPressure);
   registerKernel(CubeTerm);
   registerKernel(MechDissip);
-  registerKernel(MechHeat);
-  registerKernel(MechHeatTensor);
+  //registerKernel(MechHeat);
+  //registerKernel(MechHeatTensor);
 
-  registerMaterial(DimensionlessRock);
+  //registerMaterial(DimensionlessRock);
   registerMaterial(FiniteStrainRatePlasticTemperatureMaterial);
+  registerMaterial(RedbackMaterial);
 
   registerAux(StrainRateAux);
   registerAux(MisesStrainAux);

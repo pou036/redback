@@ -33,18 +33,11 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  VariableValue &_pressure;
-  MaterialProperty<RankTwoTensor> &_stress; // equivalent stress
-  MaterialProperty<Real> & _activation_energy;
-  MaterialProperty<Real> & _mech_dissipation;
-  MaterialProperty<Real> & _equivalent_stress;
-  MaterialProperty<Real> & _heat_capacity;
-  //Real _ref_pe_rate;
-  //Real _exponent;
-  //Real _activation_energy;
-  Real _gas_constant;
-      
-  Real macaulayBracket(Real);
+
+  //VariableValue & _pressure;
+  MaterialProperty<Real> & _mechanical_dissipation;
+  MaterialProperty<Real> & _mechanical_dissipation_jac;
+
 };
 
 

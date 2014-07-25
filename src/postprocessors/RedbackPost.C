@@ -15,7 +15,7 @@
 #include "RedbackPost.h"
 #include "Function.h"
 #include "SubProblem.h"
-#include "DimensionlessRock.h"
+#include "RedbackMaterial.h"
 
 template<>
 InputParameters validParams<RedbackPost>()

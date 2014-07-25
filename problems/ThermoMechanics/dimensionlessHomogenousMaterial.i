@@ -53,9 +53,8 @@
 []
 
 [Materials]
-  active = 'mat0'
   [./mat0]
-    type = DimensionlessRock
+    type = RedbackMaterial
     block = '0 1'
     disp_y = disp_y
     disp_x = disp_x
@@ -69,24 +68,8 @@
     mu = 1
     ar = 5
     delta = 1
-    gr = 0.5
-  [../]
-  [./mat1]
-    type = DimensionlessRock
-    block = 1
-    disp_y = disp_y
-    disp_x = disp_x
-    C_ijkl = '1.346e+01 5.769e+00 5.769e+00 1.346e+01 5.769e+00 1.346e+01 3.846e+00 3.846e+00 3.846e+00'
-    temperature = temp
-    yield_stress = '0. 1 1 1'
-    disp_z = disp_z
-    ar_c = 1
-    m = 2
-    da = 1
-    mu = 1
-    ar = 10
-    delta = 1
-    gr = 1e0
+    gr = 3
+    pore_pres = 0
   [../]
 []
 
@@ -107,7 +90,7 @@
 []
 
 [BCs]
-  active = 'left_disp rigth_disp_y left_disp_y temp_box constant_force_right'
+  active = 'constant_force_right temp_box left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -207,7 +190,6 @@
 []
 
 [Kernels]
-  active = 'temp_diff temp_mht temp_td'
   [./temp_td]
     type = TimeDerivative
     variable = temp
@@ -221,11 +203,6 @@
   [../]
   [./temp_dissip]
     type = MechDissip
-    variable = temp
-    block = 0
-  [../]
-  [./temp_mht]
-    type = MechHeatTensor
     variable = temp
     block = '0 1'
   [../]
@@ -286,7 +263,7 @@
 []
 
 [Postprocessors]
-  active = 'temp_centre'
+  active = 'temp_centre mises_stress strain_rate'
   [./test]
     type = StrainRatePoint
     variable = temp
@@ -334,7 +311,7 @@
   line_search = basic
   [./TimeStepper]
     type = SolutionTimeAdaptiveDT
-    dt = 5e-3
+    dt = 1e-3
   [../]
 []
 
