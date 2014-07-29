@@ -52,7 +52,8 @@ DimensionlessRock::DimensionlessRock(const std::string & name, InputParameters p
     _m(declareProperty<Real>("m")),
     
     _equivalent_stress(declareProperty<Real>("equivalent_stress")),
-    _mises_strain(declareProperty<Real>("mises_strain"))
+    _mises_strain(declareProperty<Real>("mises_strain")),
+    _mises_strain_rate(declareProperty<Real>("mises_strain_rate"))
    
   {
 }
@@ -81,7 +82,7 @@ DimensionlessRock::computeQpStress()
   if (_has_T)
   {
 	  //_exponential = std::exp(-_ar[_qp]/(1 + _delta[_qp] *_T[_qp]));
-	  _exponential = std::exp(-_ar[_qp]) * std::exp(_ar[_qp] * _delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]));
+	  _exponential = std::exp(_ar[_qp] * _delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]));
 	  }
   
   // Initialise our made up variables...
@@ -208,6 +209,8 @@ DimensionlessRock::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor 
   _equivalent_stress[_qp] = getSigEqv(sig_new);
   // Compute Mises strain
   _mises_strain[_qp] = flow_incr;
+  // Compute Mises strain rate
+  _mises_strain_rate[_qp] = flow_incr / _dt;
   
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;

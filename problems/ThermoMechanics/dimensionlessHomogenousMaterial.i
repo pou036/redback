@@ -1,0 +1,300 @@
+[Mesh]
+  type = FileMesh
+  file = 2d_square_400elements_2corners_inclusion.msh
+[]
+
+[MeshModifiers]
+  [./left_mid_point]
+    type = AddExtraNodeset
+    boundary = 4
+    coord = '0.0 0.5'
+  [../]
+  [./right_mid_point]
+    type = AddExtraNodeset
+    boundary = 5
+    coord = '1 0.5'
+  [../]
+  [./top_mid_point]
+    type = AddExtraNodeset
+    boundary = 6
+    coord = '0.5 1'
+  [../]
+  [./bottom_mid_point]
+    type = AddExtraNodeset
+    boundary = 7
+    coord = '0.5 0'
+  [../]
+[]
+
+[Variables]
+  [./disp_x]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./disp_y]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./disp_z]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+  [./temp]
+  [../]
+[]
+
+[TensorMechanics]
+  [./solid]
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    temp = temp
+  [../]
+[]
+
+[Materials]
+  active = 'mat0'
+  [./mat0]
+    type = DimensionlessRock
+    block = '0 1'
+    disp_y = disp_y
+    disp_x = disp_x
+    C_ijkl = '1.346e+02 5.769e+01 5.769e+01 1.346e+02 5.769e+01 1.346e+02 3.846e+01 3.846e+01 3.846e+1'
+    temperature = temp
+    yield_stress = '0. 1 1. 1'
+    disp_z = disp_z
+    ar_c = 1
+    m = 2
+    da = 1
+    mu = 1
+    ar = 10
+    delta = 1
+    gr = 1
+  [../]
+  [./mat1]
+    type = DimensionlessRock
+    block = 1
+    disp_y = disp_y
+    disp_x = disp_x
+    C_ijkl = '1.346e+01 5.769e+00 5.769e+00 1.346e+01 5.769e+00 1.346e+01 3.846e+00 3.846e+00 3.846e+00'
+    temperature = temp
+    yield_stress = '0. 1 1 1'
+    disp_z = disp_z
+    ar_c = 1
+    m = 2
+    da = 1
+    mu = 1
+    ar = 10
+    delta = 1
+    gr = 1e0
+  [../]
+[]
+
+[Functions]
+  [./upfunc]
+    type = ParsedFunction
+    value = t
+  [../]
+  [./downfunc]
+    type = ParsedFunction
+    value = -t
+  [../]
+[]
+
+[BCs]
+  active = 'right_disp left_disp left_disp_y temp_mid_pts rigth_disp_y'
+  [./left_disp]
+    type = DirichletBC
+    variable = disp_x
+    boundary = 3
+    value = 0
+  [../]
+  [./right_disp]
+    type = FunctionPresetBC
+    variable = disp_x
+    boundary = 1
+    function = downfunc
+  [../]
+  [./bottom_temp]
+    type = NeumannBC
+    variable = temp
+    boundary = 0
+    value = -1
+  [../]
+  [./top_temp]
+    type = NeumannBC
+    variable = temp
+    boundary = 2
+    value = -1
+  [../]
+  [./temp_right]
+    type = DirichletBC
+    variable = temp
+    boundary = 1
+    value = 0
+  [../]
+  [./left_disp_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = 3
+    value = 0
+  [../]
+  [./temp_mid_pts]
+    type = DirichletBC
+    variable = temp
+    boundary = '4 5 6 7'
+    value = 0
+  [../]
+  [./rigth_disp_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = 1
+    value = 0
+  [../]
+[]
+
+[AuxVariables]
+  active = 'mises_strain mises_stress'
+  [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./peeq]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./pe11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./pe22]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./pe33]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./mises_stress]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./mises_strain]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[Kernels]
+  active = 'temp_mht temp_td'
+  [./temp_td]
+    type = TimeDerivative
+    variable = temp
+    block = '0 1'
+  [../]
+  [./temp_diff]
+    type = AnisotropicDiffusion
+    variable = temp
+    block = '0 1'
+    tensor_coeff = '1 0 0 0 1 0 0 0 1'
+  [../]
+  [./temp_dissip]
+    type = MechDissip
+    variable = temp
+    block = 0
+  [../]
+  [./temp_mht]
+    type = MechHeatTensor
+    variable = temp
+    block = '0 1'
+  [../]
+[]
+
+[AuxKernels]
+  active = 'mises_strain mises_stress'
+  [./stress_zz]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    variable = stress_zz
+    index_i = 2
+    index_j = 2
+  [../]
+  [./pe11]
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
+    variable = pe11
+    index_i = 0
+    index_j = 0
+  [../]
+  [./pe22]
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
+    variable = pe22
+    index_i = 1
+    index_j = 1
+  [../]
+  [./pe33]
+    type = RankTwoAux
+    rank_two_tensor = plastic_strain
+    variable = pe33
+    index_i = 2
+    index_j = 2
+  [../]
+  [./eqv_plastic_strain]
+    type = FiniteStrainPlasticAux
+    variable = peeq
+  [../]
+  [./mises_stress]
+    type = MisesStressAux
+    variable = mises_stress
+  [../]
+  [./mises_strain]
+    type = MisesStrainAux
+    variable = mises_strain
+  [../]
+[]
+
+[Preconditioning]
+  # active = ''
+  [./SMP]
+    type = SMP
+    full = true
+  [../]
+[]
+
+[Executioner]
+  # Preconditioned JFNK (default)
+  start_time = 0.0
+  end_time = 1
+  dt = 1e-3
+  dtmax = 1
+  dtmin = 1e-7
+  type = Transient
+  solve_type = PJFNK
+  petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
+  petsc_options_value = 'hypre boomeramg cp 201'
+  nl_abs_tol = 1e-10 # 1e-10 to begin with
+  reset_dt = true
+  line_search = basic
+[]
+
+[Outputs]
+  file_base = out
+  output_initial = true
+  exodus = true
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
+[]
+
+[ICs]
+  [./ic_temp]
+    variable = temp
+    value = 0
+    type = ConstantIC
+    block = '0 1'
+  [../]
+[]
+

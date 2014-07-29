@@ -35,6 +35,7 @@ protected:
   virtual Real computeQpJacobian();
   VariableValue &_pressure;
   MaterialProperty<Real> & _equivalent_stress;
+  MaterialProperty<Real> & _mises_strain_rate;
   //MaterialProperty<RankTwoTensor> &_stress;
   MaterialProperty<Real> & _gr;
   MaterialProperty<Real> & _m;

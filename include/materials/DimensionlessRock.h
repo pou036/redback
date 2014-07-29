@@ -49,7 +49,8 @@ protected:
   MaterialProperty<Real> & _m;
   
   MaterialProperty<Real> & _equivalent_stress;
-  MaterialProperty<Real> & _mises_strain;;
+  MaterialProperty<Real> & _mises_strain;
+  MaterialProperty<Real> & _mises_strain_rate;
   
   Real _exponential;
   
