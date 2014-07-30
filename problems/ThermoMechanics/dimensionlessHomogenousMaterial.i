@@ -67,9 +67,9 @@
     m = 2
     da = 1
     mu = 1
-    ar = 10
+    ar = 5
     delta = 1
-    gr = 50
+    gr = 0.5
   [../]
   [./mat1]
     type = DimensionlessRock
@@ -91,6 +91,7 @@
 []
 
 [Functions]
+  active = 'spline_IC'
   [./upfunc]
     type = ParsedFunction
     value = t
@@ -99,10 +100,14 @@
     type = ParsedFunction
     value = -t
   [../]
+  [./spline_IC]
+    type = ConstantFunction
+    value = 1
+  [../]
 []
 
 [BCs]
-  active = 'temp_mid_pts left_disp rigth_disp_y left_disp_y constant_force_right'
+  active = 'left_disp rigth_disp_y left_disp_y temp_box constant_force_right'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -127,12 +132,6 @@
     boundary = 2
     value = -1
   [../]
-  [./temp_right]
-    type = DirichletBC
-    variable = temp
-    boundary = 1
-    value = 0
-  [../]
   [./left_disp_y]
     type = DirichletBC
     variable = disp_y
@@ -149,6 +148,12 @@
     type = DirichletBC
     variable = disp_y
     boundary = 1
+    value = 0
+  [../]
+  [./temp_box]
+    type = DirichletBC
+    variable = temp
+    boundary = '0 1 2 3'
     value = 0
   [../]
   [./constant_force_right]
@@ -281,7 +286,7 @@
 []
 
 [Postprocessors]
-  active = 'temp_centre strain_rate mises_stress'
+  active = 'temp_centre'
   [./test]
     type = StrainRatePoint
     variable = temp
@@ -315,17 +320,22 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 1
-  dt = 1e-3
+  end_time = 10
   dtmax = 1
   dtmin = 1e-7
   type = Transient
+  l_max_its = 200
+  nl_max_its = 10
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg cp 201'
   nl_abs_tol = 1e-10 # 1e-10 to begin with
   reset_dt = true
   line_search = basic
+  [./TimeStepper]
+    type = SolutionTimeAdaptiveDT
+    dt = 5e-3
+  [../]
 []
 
 [Outputs]
@@ -340,11 +350,18 @@
 []
 
 [ICs]
+  active = 'ic_temp'
   [./ic_temp]
     variable = temp
     value = 0
     type = ConstantIC
     block = '0 1'
+  [../]
+  [./Spline_IC]
+    function = spline_IC
+    variable = temp
+    type = FunctionIC
+    block = 0
   [../]
 []
 

@@ -56,5 +56,6 @@ MechHeatTensor::computeQpResidual()
 Real
 MechHeatTensor::computeQpJacobian()
 {
-  return -_test[_i][_qp] *_mechanical_dissipation[_qp] * ( _ar[_qp] / ( (1+_u[_qp] ) * (1+_u[_qp] ) ) )  * _phi[_j][_qp];
+  //return -_test[_i][_qp] *_mechanical_dissipation[_qp] * ( _ar[_qp] / ( (1+_u[_qp] ) * (1+_u[_qp] ) ) )  * _phi[_j][_qp];
+  return -_test[_i][_qp] *_mechanical_dissipation[_qp] * _phi[_j][_qp];
 }

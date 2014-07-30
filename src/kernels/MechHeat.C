@@ -46,12 +46,14 @@ MechHeat::~MechHeat()
 Real
 MechHeat::computeQpResidual()
 {
-  return -_test[_i][_qp]*_gr[_qp]*std::pow(1.-_pressure[_qp], _m[_qp])*std::exp( (_ar[_qp]+_ar_c[_qp]*_delta[_qp]*_u[_qp]) / (1 + _delta[_qp]*_u[_qp]) );
+  //return -_test[_i][_qp]*_gr[_qp]*std::pow(1.-_pressure[_qp], _m[_qp])*std::exp( (_ar[_qp]+_ar_c[_qp]*_delta[_qp]*_u[_qp]) / (1 + _delta[_qp]*_u[_qp]) );
+  return -_test[_i][_qp]*_gr[_qp] * std::exp( _u[_qp]);
 }
 
 Real
 MechHeat::computeQpJacobian()
 {
-  return -_test[_i][_qp] * _gr[_qp] * std::pow(1.-_pressure[_qp], _m[_qp]) * (_ar[_qp] - _ar_c[_qp])*_delta[_qp] / ( (1+_delta[_qp]*_u[_qp] ) * (1+_delta[_qp]*_u[_qp] ) ) *
-    std::exp( (_ar[_qp]+_ar_c[_qp]*_delta[_qp]*_u[_qp]) / (1 + _delta[_qp]*_u[_qp]) ) * _phi[_j][_qp];
+  //return -_test[_i][_qp] * _gr[_qp] * std::pow(1.-_pressure[_qp], _m[_qp]) * (_ar[_qp] - _ar_c[_qp])*_delta[_qp] / ( (1+_delta[_qp]*_u[_qp] ) * (1+_delta[_qp]*_u[_qp] ) ) *
+  //  std::exp( (_ar[_qp]+_ar_c[_qp]*_delta[_qp]*_u[_qp]) / (1 + _delta[_qp]*_u[_qp]) ) * _phi[_j][_qp];
+  return -_test[_i][_qp]*_gr[_qp] * std::exp( _u[_qp]) * _phi[_j][_qp];
 }
