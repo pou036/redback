@@ -69,7 +69,7 @@
     mu = 1
     ar = 10
     delta = 1
-    gr = 0.001
+    gr = 50
   [../]
   [./mat1]
     type = DimensionlessRock
@@ -155,7 +155,7 @@
     type = NeumannBC
     variable = disp_x
     boundary = 1
-    value = -2
+    value = 2
   [../]
 []
 

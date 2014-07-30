@@ -175,7 +175,8 @@ DimensionlessRock::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor 
       sig_new += ddsig; //Update stress
       delta_dp -= E_ijkl.invSymm() * ddsig; //Update plastic rate of deformation tensor
 
-      flow_incr_tmp = _dt * std::pow(macaulayBracket(getSigEqv(sig_new) / yield_stress - 1.0), _exponent)*_exponential;
+      flow_incr_tmp = _dt * _exponential *
+          std::pow(macaulayBracket(getSigEqv(sig_new) / yield_stress - 1.0), _exponent);
 
       if (flow_incr_tmp < 0.0) //negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment: Reduce time increment.");
@@ -212,7 +213,9 @@ DimensionlessRock::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor 
   // Compute Mises strain rate
   _mises_strain_rate[_qp] = flow_incr / _dt;
   // Compute Mechanical Dissipation
-  _mechanical_dissipation[_qp]=_gr[_qp] * getSigEqv(sig_new)* std::pow(macaulayBracket(getSigEqv(sig_new) / yield_stress - 1.0), _exponent)*std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
+  _mechanical_dissipation[_qp] = _gr[_qp] * getSigEqv(sig_new) / yield_stress * 
+      std::pow( macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 ), _exponent) *
+      std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
   
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
