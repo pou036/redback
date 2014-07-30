@@ -24,6 +24,7 @@
 
 // Postprocessors
 #include "StrainRatePoint.h"
+#include "RedbackPost.h"
 
 
 template<>
@@ -77,6 +78,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerAux(MechDissipationAux);
 
   registerPostprocessor(StrainRatePoint);
+  registerPostprocessor(RedbackPost);
 }
 
 void

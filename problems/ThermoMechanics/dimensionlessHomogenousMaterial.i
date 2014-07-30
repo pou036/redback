@@ -59,7 +59,7 @@
     block = '0 1'
     disp_y = disp_y
     disp_x = disp_x
-    C_ijkl = '1.346e+02 5.769e+01 5.769e+01 1.346e+02 5.769e+01 1.346e+02 3.846e+01 3.846e+01 3.846e+1'
+    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     temperature = temp
     yield_stress = '0. 1 1. 1'
     disp_z = disp_z
@@ -69,7 +69,7 @@
     mu = 1
     ar = 10
     delta = 1
-    gr = 1
+    gr = 0.001
   [../]
   [./mat1]
     type = DimensionlessRock
@@ -102,7 +102,7 @@
 []
 
 [BCs]
-  active = 'right_disp left_disp left_disp_y temp_mid_pts rigth_disp_y'
+  active = 'temp_mid_pts left_disp rigth_disp_y left_disp_y constant_force_right'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -151,10 +151,16 @@
     boundary = 1
     value = 0
   [../]
+  [./constant_force_right]
+    type = NeumannBC
+    variable = disp_x
+    boundary = 1
+    value = -2
+  [../]
 []
 
 [AuxVariables]
-  active = 'mises_strain mises_stress'
+  active = 'mises_strain mech_diss mises_strain_rate mises_stress'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -183,10 +189,20 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./mises_strain_rate]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./mech_diss]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
 []
 
 [Kernels]
-  active = 'temp_mht temp_td'
+  active = 'temp_diff temp_mht temp_td'
   [./temp_td]
     type = TimeDerivative
     variable = temp
@@ -211,7 +227,7 @@
 []
 
 [AuxKernels]
-  active = 'mises_strain mises_stress'
+  active = 'mises_strain mises_strain_rate mises_stress mech_dissipation'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -251,6 +267,40 @@
   [./mises_strain]
     type = MisesStrainAux
     variable = mises_strain
+  [../]
+  [./mises_strain_rate]
+    type = MisesStrainRateAux
+    variable = mises_strain_rate
+    block = 0
+  [../]
+  [./mech_dissipation]
+    type = MechDissipationAux
+    variable = mech_diss
+    block = 0
+  [../]
+[]
+
+[Postprocessors]
+  active = 'temp_centre strain_rate mises_stress'
+  [./test]
+    type = StrainRatePoint
+    variable = temp
+    point = ' 0.5 0.5 0'
+  [../]
+  [./temp_centre]
+    type = RedbackPost
+    variable = temp
+    point = '0.5 0.5 0'
+  [../]
+  [./strain_rate]
+    type = RedbackPost
+    variable = mises_strain_rate
+    point = '0.5 0.5 0'
+  [../]
+  [./mises_stress]
+    type = RedbackPost
+    variable = mises_stress
+    point = '0.5 0.5 0'
   [../]
 []
 
