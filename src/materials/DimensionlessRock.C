@@ -53,7 +53,8 @@ DimensionlessRock::DimensionlessRock(const std::string & name, InputParameters p
     
     _equivalent_stress(declareProperty<Real>("equivalent_stress")),
     _mises_strain(declareProperty<Real>("mises_strain")),
-    _mises_strain_rate(declareProperty<Real>("mises_strain_rate"))
+    _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
+    _mechanical_dissipation(declareProperty<Real>("mechanical_dissipation"))
    
   {
 }
@@ -81,9 +82,8 @@ DimensionlessRock::computeQpStress()
   _exponential = 1;
   if (_has_T)
   {
-	  //_exponential = std::exp(-_ar[_qp]/(1 + _delta[_qp] *_T[_qp]));
-	  _exponential = std::exp(_ar[_qp] * _delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]));
-	  }
+    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
+  }
   
   // Initialise our made up variables...
   _gr[_qp] = _gr_param;
@@ -211,6 +211,8 @@ DimensionlessRock::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor 
   _mises_strain[_qp] = flow_incr;
   // Compute Mises strain rate
   _mises_strain_rate[_qp] = flow_incr / _dt;
+  // Compute Mechanical Dissipation
+  _mechanical_dissipation[_qp]=_gr[_qp] * getSigEqv(sig_new)* std::pow(macaulayBracket(getSigEqv(sig_new) / yield_stress - 1.0), _exponent)*std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
   
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;

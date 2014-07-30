@@ -18,7 +18,9 @@
 // AuxKernels
 #include "StrainRateAux.h"
 #include "MisesStrainAux.h"
+#include "MisesStrainRateAux.h"
 #include "MisesStressAux.h"
+#include "MechDissipationAux.h"
 
 // Postprocessors
 #include "StrainRatePoint.h"
@@ -70,7 +72,9 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerAux(StrainRateAux);
   registerAux(MisesStrainAux);
+  registerAux(MisesStrainRateAux);
   registerAux(MisesStressAux);
+  registerAux(MechDissipationAux);
 
   registerPostprocessor(StrainRatePoint);
 }

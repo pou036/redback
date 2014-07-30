@@ -51,7 +51,7 @@ protected:
   MaterialProperty<Real> & _equivalent_stress;
   MaterialProperty<Real> & _mises_strain;
   MaterialProperty<Real> & _mises_strain_rate;
-  
+  MaterialProperty<Real> & _mechanical_dissipation;
   Real _exponential;
   
   Real macaulayBracket(Real);

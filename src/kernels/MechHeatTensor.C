@@ -30,7 +30,7 @@ MechHeatTensor::MechHeatTensor(const std::string & name, InputParameters paramet
   Kernel(name, parameters),
   _pressure(coupledValue("pressure")),
   _equivalent_stress(getMaterialProperty<Real>("equivalent_stress")),
-  _mises_strain_rate(getMaterialProperty<Real>("mises_strain_rate")),
+  _mechanical_dissipation(getMaterialProperty<Real>("mechanical_dissipation")),
   //_stress(getMaterialProperty<RankTwoTensor>("stress")),
   _gr(getMaterialProperty<Real>("gr")),
   _m(getMaterialProperty<Real>("m")),
@@ -49,14 +49,12 @@ MechHeatTensor::computeQpResidual()
 {
   //std::cout<<_stress[_qp].secondInvariant()<<std::endl;
 
-  //return -_test[_i][_qp]*_equivalent_stress[_qp]*_gr[_qp]*std::pow(1.-_pressure[_qp], _m[_qp])*std::exp( (_ar[_qp]*_u[_qp]) / (1 + _u[_qp]) );
+  return -_test[_i][_qp]*_mechanical_dissipation[_qp];
   //std::pow(3.*_stress[_qp].secondInvariant(), _m[_qp])
-  return -_test[_i][_qp]*_equivalent_stress[_qp]*_gr[_qp]*_mises_strain_rate[_qp];
 }
 
 Real
 MechHeatTensor::computeQpJacobian()
 {
-  //return -_test[_i][_qp] * _equivalent_stress[_qp] * _gr[_qp] * std::pow(1.-_pressure[_qp], _m[_qp]) * ( _ar[_qp] / ( (1+_u[_qp] ) * (1+_u[_qp] ) ) ) * std::exp( (_ar[_qp]*_u[_qp]) / (1 + _u[_qp]) ) * _phi[_j][_qp];
-  return -_test[_i][_qp] * _equivalent_stress[_qp] * _gr[_qp] *  ( _ar[_qp] / ( (1+_u[_qp] ) * (1+_u[_qp] ) ) ) * _mises_strain_rate[_qp] * _phi[_j][_qp];
+  return -_test[_i][_qp] *_mechanical_dissipation[_qp] * ( _ar[_qp] / ( (1+_u[_qp] ) * (1+_u[_qp] ) ) )  * _phi[_j][_qp];
 }
