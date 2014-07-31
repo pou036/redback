@@ -54,7 +54,8 @@ DimensionlessRock::DimensionlessRock(const std::string & name, InputParameters p
     _equivalent_stress(declareProperty<Real>("equivalent_stress")),
     _mises_strain(declareProperty<Real>("mises_strain")),
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
-    _mechanical_dissipation(declareProperty<Real>("mechanical_dissipation"))
+    _mechanical_dissipation(declareProperty<Real>("mechanical_dissipation")),
+    _mechanical_dissipation_jac(declareProperty<Real>("mechanical_dissipation_jacobian"))
    
   {
 }
@@ -213,11 +214,16 @@ DimensionlessRock::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor 
   // Compute Mises strain rate
   _mises_strain_rate[_qp] = flow_incr / _dt;
   // Compute Mechanical Dissipation
-  // _mechanical_dissipation[_qp] = _gr[_qp] * getSigEqv(sig_new) / yield_stress * 
-  //     std::pow( macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 ), _exponent) *
-  //     std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
-  _mechanical_dissipation[_qp] = _gr[_qp] * std::exp( _T[_qp] ) *
-      macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 );
+  //_mechanical_dissipation[_qp] = _gr[_qp] * std::exp( _T[_qp] ) *
+  //    macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 );
+  _mechanical_dissipation[_qp] = _gr[_qp] * getSigEqv(sig_new) / yield_stress * 
+       std::pow( macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 ), _exponent) *
+       std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
+  // Compute Mechanical Dissipation Jacobian
+  _mechanical_dissipation_jac[_qp] = _gr[_qp] * getSigEqv(sig_new) / yield_stress * 
+       std::pow( macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 ), _exponent) *
+       _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
+       (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
   
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;

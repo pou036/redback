@@ -53,6 +53,7 @@ protected:
   MaterialProperty<Real> & _mises_strain;
   MaterialProperty<Real> & _mises_strain_rate;
   MaterialProperty<Real> & _mechanical_dissipation;
+  MaterialProperty<Real> & _mechanical_dissipation_jac;
   Real _exponential;
   
 };

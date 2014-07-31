@@ -34,14 +34,15 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  VariableValue & _pressure;
+  //VariableValue & _pressure;
 
-  MaterialProperty<Real> & _equivalent_stress;
+  //MaterialProperty<Real> & _equivalent_stress;
   MaterialProperty<Real> & _mechanical_dissipation;
+  MaterialProperty<Real> & _mechanical_dissipation_jac;
   //MaterialProperty<RankTwoTensor> &_stress;
-  MaterialProperty<Real> & _gr;
-  MaterialProperty<Real> & _m;
-  MaterialProperty<Real> & _ar;
+  //MaterialProperty<Real> & _gr;
+  //MaterialProperty<Real> & _m;
+  //MaterialProperty<Real> & _ar;
 
 };
 
