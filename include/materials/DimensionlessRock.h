@@ -36,6 +36,7 @@ protected:
   virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
   void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
   void getFlowTensor(const RankTwoTensor &, Real, RankTwoTensor &);
+  Real macaulayBracket(Real);
 
   VariableValue & _T;
   
@@ -54,7 +55,6 @@ protected:
   MaterialProperty<Real> & _mechanical_dissipation;
   Real _exponential;
   
-  Real macaulayBracket(Real);
 };
 
 #endif //DIMENSIONLESSROCK_H

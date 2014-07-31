@@ -26,7 +26,7 @@ InputParameters validParams<DimensionlessRock>()
   params.addRequiredParam<Real>("da", "Damkoehler number.");
   params.addRequiredParam<Real>("mu", "Chemical pressurization coefficient.");
   params.addRequiredParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna)");
-  params.addCoupledVar("T", 0, "Temperature in Kelvin");
+  params.addRequiredCoupledVar("T", "Dimensionless temperature");
   
   return params;
 }
@@ -216,7 +216,8 @@ DimensionlessRock::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor 
   // _mechanical_dissipation[_qp] = _gr[_qp] * getSigEqv(sig_new) / yield_stress * 
   //     std::pow( macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 ), _exponent) *
   //     std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
-  _mechanical_dissipation[_qp] = _gr[_qp] * std::exp( _T[_qp] );
+  _mechanical_dissipation[_qp] = _gr[_qp] * std::exp( _T[_qp] ) *
+      macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 );
   
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;

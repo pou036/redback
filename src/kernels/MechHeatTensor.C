@@ -49,6 +49,7 @@ MechHeatTensor::computeQpResidual()
 {
   //std::cout<<_stress[_qp].secondInvariant()<<std::endl;
 
+  //return -_test[_i][_qp]*_gr[_qp]*std::exp(_u[_qp]);
   return -_test[_i][_qp]*_mechanical_dissipation[_qp];
   //std::pow(3.*_stress[_qp].secondInvariant(), _m[_qp])
 }
@@ -58,4 +59,5 @@ MechHeatTensor::computeQpJacobian()
 {
   //return -_test[_i][_qp] *_mechanical_dissipation[_qp] * ( _ar[_qp] / ( (1+_u[_qp] ) * (1+_u[_qp] ) ) )  * _phi[_j][_qp];
   return -_test[_i][_qp] *_mechanical_dissipation[_qp] * _phi[_j][_qp];
+  //return -_test[_i][_qp]*_gr[_qp]*std::exp(_u[_qp])*_phi[_j][_qp];
 }

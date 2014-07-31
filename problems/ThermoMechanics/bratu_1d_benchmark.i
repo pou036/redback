@@ -1,8 +1,3 @@
-[GlobalParams]
-  ar = 12
-  gr = 0.1
-[]
-
 [Mesh]
   type = GeneratedMesh
   dim = 1
@@ -27,6 +22,14 @@
   [../]
 []
 
+[AuxVariables]
+  [./stress]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+[]
+
 [Kernels]
   [./td_temp]
     type = TimeDerivative
@@ -39,11 +42,14 @@
   [./mh_temp]
     type = MechHeatTensor
     variable = temp
-    ar_c = 40
-    gr = 1.2e-7
-    m = 3
-    ar = 20
-    delta = 1e-3
+  [../]
+[]
+
+[AuxKernels]
+  [./mises_stress]
+    type = MisesStressAux
+    variable = stress
+    block = 0
   [../]
 []
 
@@ -60,16 +66,22 @@
     boundary = right
     value = 0
   [../]
-  [./disp_x]
-    type = DirichletBC
-    variable = disp_x
-    boundary = 'left right'
-    value = 0
-  [../]
   [./disp_y]
     type = DirichletBC
     variable = disp_y
     boundary = 'left right'
+    value = 0
+  [../]
+  [./disp_x_left]
+    type = DirichletBC
+    variable = disp_x
+    boundary = left
+    value = 1
+  [../]
+  [./disp_x_rigth]
+    type = DirichletBC
+    variable = disp_x
+    boundary = right
     value = 0
   [../]
 []
@@ -88,6 +100,8 @@
     disp_x = disp_x
     yield_stress = '0 1 1 1'
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
+    T = temp
+    gr = 0.88
   [../]
 []
 
@@ -129,6 +143,15 @@
   [./my_tensor_mech]
     disp_y = disp_y
     disp_x = disp_x
+  [../]
+[]
+
+[ICs]
+  [./temp_ic]
+    variable = temp
+    value = 0
+    type = ConstantIC
+    block = 0
   [../]
 []
 
