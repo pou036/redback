@@ -68,7 +68,7 @@
     mu = 1
     ar = 5
     delta = 1
-    gr = 3
+    gr = 0.2
     pore_pres = 0
   [../]
 []
@@ -90,7 +90,7 @@
 []
 
 [BCs]
-  active = 'constant_force_right temp_box left_disp rigth_disp_y left_disp_y'
+  active = 'constant_force_right temp_mid_pts left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -143,12 +143,12 @@
     type = NeumannBC
     variable = disp_x
     boundary = 1
-    value = 2
+    value = -2
   [../]
 []
 
 [AuxVariables]
-  active = 'mises_strain mech_diss mises_strain_rate mises_stress'
+  active = 'mises_strain mech_diss mises_strain_rate mises_stress Mod_Gruntfest_number'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -187,6 +187,11 @@
     family = MONOMIAL
     block = 0
   [../]
+  [./Mod_Gruntfest_number]
+    order = CONSTANT
+    family = MONOMIAL
+    block = '0 1'
+  [../]
 []
 
 [Kernels]
@@ -209,7 +214,7 @@
 []
 
 [AuxKernels]
-  active = 'mises_strain mises_strain_rate mises_stress mech_dissipation'
+  active = 'mises_strain mises_strain_rate mises_stress mech_dissipation Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -243,45 +248,59 @@
     variable = peeq
   [../]
   [./mises_stress]
-    type = MisesStressAux
+    type = MaterialRealAux
     variable = mises_stress
+    property = equivalent_stress
   [../]
   [./mises_strain]
-    type = MisesStrainAux
+    type = MaterialRealAux
     variable = mises_strain
+    property = mises_strain
   [../]
   [./mises_strain_rate]
-    type = MisesStrainRateAux
+    type = MaterialRealAux
     variable = mises_strain_rate
     block = 0
+    property = mises_strain_rate
   [../]
   [./mech_dissipation]
-    type = MechDissipationAux
+    type = MaterialRealAux
     variable = mech_diss
-    block = 0
+    property = mechanical_dissipation
+  [../]
+  [./Gruntfest_Number]
+    type = MaterialRealAux
+    variable = Mod_Gruntfest_number
+    property = mod_gruntfest_number
+    block = '0 1'
   [../]
 []
 
 [Postprocessors]
-  active = 'temp_centre mises_stress strain_rate'
+  active = 'temp_centre mises_stress strain_rate Gruntfest_number'
   [./test]
     type = StrainRatePoint
     variable = temp
     point = ' 0.5 0.5 0'
   [../]
   [./temp_centre]
-    type = RedbackPost
+    type = PointValue
     variable = temp
     point = '0.5 0.5 0'
   [../]
   [./strain_rate]
-    type = RedbackPost
+    type = PointValue
     variable = mises_strain_rate
     point = '0.5 0.5 0'
   [../]
   [./mises_stress]
-    type = RedbackPost
+    type = PointValue
     variable = mises_stress
+    point = '0.5 0.5 0'
+  [../]
+  [./Gruntfest_number]
+    type = PointValue
+    variable = Mod_Gruntfest_number
     point = '0.5 0.5 0'
   [../]
 []
