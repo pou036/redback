@@ -78,7 +78,7 @@ RedbackMaterial::initQpStatefulProperties()
   _plastic_strain[_qp].zero();
   _plastic_strain_old[_qp].zero();
   _eqv_plastic_strain[_qp] = 0.0;
-  _mod_gruntfest_number[_qp]=_gr[_qp];
+
 }
 
 void
@@ -102,16 +102,25 @@ RedbackMaterial::computeQpStress()
   _m[_qp] = _m_param;
   _exponent = _m[_qp];
 
-  if (!_is_mechanics_on)
+  if (not _is_mechanics_on)
   {
-	  // Compute Mechanical Dissipation
-	    _mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
-	         std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
-	    // Compute Mechanical Dissipation Jacobian
-	    _mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
-	         _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
-	         (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
-	  return;
+	// Compute modified Gruntfest number
+	_mod_gruntfest_number[_qp]=_gr[_qp];
+	// Compute Mises strain
+	_mises_strain[_qp] = _exponential * _dt;
+	// Compute Mises strain rate
+	_mises_strain_rate[_qp] = _exponential;
+
+	// Compute Mechanical Dissipation
+	_mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
+	 std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
+	// Compute Mechanical Dissipation Jacobian
+	_mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
+	 _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
+	 (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+
+	//std::cout<<"Gr="<<_mod_gruntfest_number[_qp]<<std::endl;
+	return;
   }
 
   //In elastic problem, all the strain is elastic
@@ -243,8 +252,6 @@ RedbackMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & 
        (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
   _mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig_new) / yield_stress * std::pow( macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 ), _exponent);
-
-
 
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
