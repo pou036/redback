@@ -78,14 +78,14 @@
     m = 1
     da = 1
     mu = 1e-3
-    ar = 20
-    delta = 1e-3
+    ar = 10
+    delta = 1
     disp_y = disp_y
     disp_x = disp_x
     yield_stress = '0 1 1 1'
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     T = temp
-    gr = 0.88
+    gr = 0.1
     pore_pres = 0
     temperature = temp
     is_mechanics_on = false
@@ -112,7 +112,7 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   ss_check_tol = 1e-6
-  end_time = 15
+  end_time = 30
   dtmax = 0.1
   scheme = bdf2
   [./TimeStepper]

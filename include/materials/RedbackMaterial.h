@@ -42,6 +42,7 @@ protected:
   VariableValue & _pore_pres;
   
   Real _gr_param, _ar_param, _ar_c_param, _delta_param, _da_param, _mu_param, _m_param, _exponent;
+  bool _is_mechanics_on;
   MaterialProperty<Real> & _gr;
   MaterialProperty<Real> & _ar;
   MaterialProperty<Real> & _ar_c;

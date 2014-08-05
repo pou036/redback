@@ -26,6 +26,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addRequiredParam<Real>("da", "Damkoehler number.");
   params.addRequiredParam<Real>("mu", "Chemical pressurization coefficient.");
   params.addRequiredParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna)");
+  params.addRequiredParam<bool>("is_mechanics_on", "is mechanics on?");
   params.addRequiredCoupledVar("temperature", "Dimensionless temperature");
   params.addRequiredCoupledVar("pore_pres", "Dimensionless pore pressure");
 
@@ -44,6 +45,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
     _da_param(getParam<Real>("da")),
     _mu_param(getParam<Real>("mu")),
     _m_param(getParam<Real>("m")),
+    _is_mechanics_on(getParam<bool>("is_mechanics_on")),
 
     _gr(declareProperty<Real>("gr")),
     _ar(declareProperty<Real>("ar")),
@@ -76,6 +78,7 @@ RedbackMaterial::initQpStatefulProperties()
   _plastic_strain[_qp].zero();
   _plastic_strain_old[_qp].zero();
   _eqv_plastic_strain[_qp] = 0.0;
+  _mod_gruntfest_number[_qp]=_gr[_qp];
 }
 
 void
@@ -98,6 +101,18 @@ RedbackMaterial::computeQpStress()
   _mu[_qp] = _mu_param;
   _m[_qp] = _m_param;
   _exponent = _m[_qp];
+
+  if (!_is_mechanics_on)
+  {
+	  // Compute Mechanical Dissipation
+	    _mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
+	         std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
+	    // Compute Mechanical Dissipation Jacobian
+	    _mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
+	         _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
+	         (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+	  return;
+  }
 
   //In elastic problem, all the strain is elastic
   _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
@@ -216,6 +231,7 @@ RedbackMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & 
   _mises_strain[_qp] = flow_incr;
   // Compute Mises strain rate
   _mises_strain_rate[_qp] = flow_incr / _dt;
+
   // Compute Mechanical Dissipation
   _mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) * getSigEqv(sig_new) / yield_stress *
        std::pow( macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 ), _exponent) *
@@ -227,6 +243,7 @@ RedbackMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & 
        (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
   _mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig_new) / yield_stress * std::pow( macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 ), _exponent);
+
 
 
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
