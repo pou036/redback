@@ -26,9 +26,8 @@ InputParameters validParams<ChemEndo>()
 
 ChemEndo::ChemEndo(const std::string & name, InputParameters parameters) :
   Kernel(name, parameters),
-  _ar_c(getMaterialProperty<Real>("ar_c")),
-  _da(getMaterialProperty<Real>("da")),
-  _delta(getMaterialProperty<Real>("delta"))
+  _chemical_endothermic_energy(getMaterialProperty<Real>("chemical_endothermic_energy")),
+  _chemical_endothermic_energy_jac(getMaterialProperty<Real>("chemical_endothermic_energy_jacobian"))
 {
 
 }
@@ -41,12 +40,11 @@ ChemEndo::~ChemEndo()
 Real
 ChemEndo::computeQpResidual()
 {
-  return _test[_i][_qp]*_da[_qp]*std::exp( (_ar_c[_qp]*_delta[_qp]*_u[_qp]) / (1 + _delta[_qp]*_u[_qp]) );
+  return _test[_i][_qp]*_chemical_endothermic_energy[_qp];
 }
 
 Real
 ChemEndo::computeQpJacobian()
 {
-  return _test[_i][_qp] * _da[_qp] * ( _delta[_qp]*_ar_c[_qp] / ( (1+_delta[_qp]*_u[_qp] ) * (1+_delta[_qp]*_u[_qp] ) ) ) *
-    std::exp( (_ar_c[_qp]*_delta[_qp]*_u[_qp]) / (1 + _delta[_qp]*_u[_qp]) ) * _phi[_j][_qp];
+  return _test[_i][_qp] * _chemical_endothermic_energy_jac[_qp] * _phi[_j][_qp];
 }

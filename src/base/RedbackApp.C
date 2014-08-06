@@ -15,6 +15,7 @@
 //#include "DimensionlessRock.h"
 #include "FiniteStrainRatePlasticTemperatureMaterial.h"
 #include "RedbackMaterial.h"
+#include "RedbackChemMaterial.h"
 
 // AuxKernels
 //#include "StrainRateAux.h"
@@ -72,6 +73,7 @@ RedbackApp::registerObjects(Factory & factory)
   //registerMaterial(DimensionlessRock);
   registerMaterial(FiniteStrainRatePlasticTemperatureMaterial);
   registerMaterial(RedbackMaterial);
+  registerMaterial(RedbackChemMaterial);
 
   //registerAux(StrainRateAux);
   //registerAux(MisesStrainAux);

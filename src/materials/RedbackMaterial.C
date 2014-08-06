@@ -21,10 +21,7 @@ InputParameters validParams<RedbackMaterial>()
 
   params.addRequiredRangeCheckedParam<Real>("gr", "gr>=0", "Gruntfest number.");
   params.addRequiredParam<Real>("ar", "Arrhenius number.");
-  params.addRequiredParam<Real>("ar_c", "Chemical Arrhenius number.");
   params.addRequiredParam<Real>("delta", "Kamenetskii coefficient.");
-  params.addRequiredParam<Real>("da", "Damkoehler number.");
-  params.addRequiredParam<Real>("mu", "Chemical pressurization coefficient.");
   params.addRequiredParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna)");
   params.addRequiredParam<bool>("is_mechanics_on", "is mechanics on?");
   params.addRequiredCoupledVar("temperature", "Dimensionless temperature");
@@ -40,19 +37,14 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
 
     _gr_param(getParam<Real>("gr")),
     _ar_param(getParam<Real>("ar")),
-    _ar_c_param(getParam<Real>("ar_c")),
     _delta_param(getParam<Real>("delta")),
-    _da_param(getParam<Real>("da")),
-    _mu_param(getParam<Real>("mu")),
     _m_param(getParam<Real>("m")),
     _is_mechanics_on(getParam<bool>("is_mechanics_on")),
 
     _gr(declareProperty<Real>("gr")),
     _ar(declareProperty<Real>("ar")),
-    _ar_c(declareProperty<Real>("ar_c")),
+
     _delta(declareProperty<Real>("delta")),
-    _da(declareProperty<Real>("da")),
-    _mu(declareProperty<Real>("mu")),
     _m(declareProperty<Real>("m")),
     
     _equivalent_stress(declareProperty<Real>("equivalent_stress")),
@@ -95,10 +87,7 @@ RedbackMaterial::computeQpStress()
   // Initialise our made up variables...
   _gr[_qp] = _gr_param;
   _ar[_qp] = _ar_param;
-  _ar_c[_qp] = _ar_c_param;
-  _delta[_qp] = _delta_param;
-  _da[_qp] = _da_param;
-  _mu[_qp] = _mu_param;
+   _delta[_qp] = _delta_param;
   _m[_qp] = _m_param;
   _exponent = _m[_qp];
 
@@ -234,28 +223,37 @@ RedbackMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & 
   if (iterisohard>=maxiterisohard)
     mooseError("Constitutive Error-Too many iterations in Hardness Update:Reduce time increment.\n"); //Convergence failure
 
-  // Compute equivalent stress
-  _equivalent_stress[_qp] = getSigEqv(sig_new);
-  // Compute Mises strain
-  _mises_strain[_qp] = flow_incr;
-  // Compute Mises strain rate
-  _mises_strain_rate[_qp] = flow_incr / _dt;
-
-  // Compute Mechanical Dissipation
-  _mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) * getSigEqv(sig_new) / yield_stress *
-       std::pow( macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 ), _exponent) *
-       std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
-  // Compute Mechanical Dissipation Jacobian
-  _mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) * getSigEqv(sig_new) / yield_stress *
-       std::pow( macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 ), _exponent) *
-       _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
-       (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
-  // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
-  _mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig_new) / yield_stress * std::pow( macaulayBracket( getSigEqv(sig_new) / yield_stress - 1.0 ), _exponent);
-
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
+
+  //Compute the energy dissipation and the properties declared
+   computeEnergyTerms(sig, yield_stress, flow_incr);
+
 }
+
+void
+RedbackMaterial::computeEnergyTerms(RankTwoTensor & sig, Real yield_stress, Real flow_incr)
+{
+	// Compute equivalent stress
+	_equivalent_stress[_qp] = getSigEqv(sig);
+	// Compute Mises strain
+	_mises_strain[_qp] = flow_incr;
+	// Compute Mises strain rate
+	_mises_strain_rate[_qp] = flow_incr / _dt;
+
+	// Compute Mechanical Dissipation
+	_mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) * getSigEqv(sig) / yield_stress *
+		std::pow( macaulayBracket( getSigEqv(sig) / yield_stress - 1.0 ), _exponent) *
+		std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
+	// Compute Mechanical Dissipation Jacobian
+	_mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) * getSigEqv(sig) / yield_stress *
+		std::pow( macaulayBracket( getSigEqv(sig) / yield_stress - 1.0 ), _exponent) *
+		_ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
+		(1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+	// Compute the equivalent Gruntfest number for comparison with SuCCoMBE
+	_mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig) / yield_stress * std::pow( macaulayBracket( getSigEqv(sig) / yield_stress - 1.0 ), _exponent);
+}
+
 
 //Obtain derivative of flow potential w.r.t. stress (plastic flow direction)
 void

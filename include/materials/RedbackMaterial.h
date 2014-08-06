@@ -32,6 +32,7 @@ public:
 protected:
   virtual void computeQpStress();
   virtual void initQpStatefulProperties();
+  virtual void computeEnergyTerms(RankTwoTensor & , Real , Real );
 
   virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
   void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
@@ -41,14 +42,14 @@ protected:
   VariableValue & _T;
   VariableValue & _pore_pres;
   
-  Real _gr_param, _ar_param, _ar_c_param, _delta_param, _da_param, _mu_param, _m_param, _exponent;
+  Real _gr_param, _ar_param, _delta_param, _m_param, _exponent; //_ar_c_param, _da_param, _mu_param,
   bool _is_mechanics_on;
   MaterialProperty<Real> & _gr;
   MaterialProperty<Real> & _ar;
-  MaterialProperty<Real> & _ar_c;
+  //MaterialProperty<Real> & _ar_c;
   MaterialProperty<Real> & _delta;
-  MaterialProperty<Real> & _da;
-  MaterialProperty<Real> & _mu;
+  //MaterialProperty<Real> & _da;
+  //MaterialProperty<Real> & _mu;
   MaterialProperty<Real> & _m;
   
   MaterialProperty<Real> & _equivalent_stress;

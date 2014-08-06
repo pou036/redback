@@ -12,30 +12,40 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CHEMENDO_H
-#define CHEMENDO_H
+#ifndef REDBACKCHEMMATERIAL_H
+#define REDBACKCHEMMATERIAL_H
 
-#include "Kernel.h"
+#include "RedbackMaterial.h"
 
-class ChemEndo;
+
+//Forward Declarations
+class RedbackChemMaterial;
 
 template<>
-InputParameters validParams<ChemEndo>();
+InputParameters validParams<RedbackChemMaterial>();
 
-
-class ChemEndo : public Kernel
+class RedbackChemMaterial : public RedbackMaterial
 {
 public:
-  ChemEndo(const std::string & name, InputParameters parameters);
-  virtual ~ChemEndo();
+  RedbackChemMaterial(const std::string & name, InputParameters parameters);
 
 protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+  virtual void computeQpStress();
+  virtual void initQpStatefulProperties();
+  virtual void computeEnergyTerms(RankTwoTensor & , Real , Real );
 
+  Real  _ar_c_param, _da_param, _mu_param;
+  MaterialProperty<Real> & _ar_c;
+  MaterialProperty<Real> & _da;
+  MaterialProperty<Real> & _mu;
+  
+  MaterialProperty<Real> & _chemical_porosity;
+  MaterialProperty<Real> & _solid_ratio;
   MaterialProperty<Real> & _chemical_endothermic_energy;
   MaterialProperty<Real> & _chemical_endothermic_energy_jac;
+  MaterialProperty<Real> & _chemical_exothermic_energy;
+  MaterialProperty<Real> & _chemical_exothermic_energy_jac;
+  
 };
 
-
-#endif /* CHEMENDO_H */
+#endif //REDBACKCHEMMATERIAL_H
