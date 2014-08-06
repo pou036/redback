@@ -33,7 +33,7 @@ protected:
  
   MaterialProperty<Real> & _activation_energy;
   MaterialProperty<Real> & _mech_dissipation;
-  MaterialProperty<Real> & _equivalent_stress;
+  MaterialProperty<Real> & _mises_stress;
   MaterialProperty<Real> & _heat_capacity;
     
 

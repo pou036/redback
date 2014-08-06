@@ -19,9 +19,10 @@ InputParameters validParams<RedbackMaterial>()
 {
   InputParameters params = validParams<FiniteStrainPlasticMaterial>();
 
+  params.addParam<Real>("phi0", 0, "initial porosity value.");
   params.addRequiredRangeCheckedParam<Real>("gr", "gr>=0", "Gruntfest number.");
   params.addRequiredParam<Real>("ar", "Arrhenius number.");
-  params.addRequiredParam<Real>("delta", "Kamenetskii coefficient.");
+  params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
   params.addRequiredParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna)");
   params.addRequiredParam<bool>("is_mechanics_on", "is mechanics on?");
   params.addRequiredCoupledVar("temperature", "Dimensionless temperature");
@@ -35,6 +36,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
     _T(coupledValue("temperature")),
     _pore_pres(coupledValue("pore_pres")),
 
+    _phi0_param(getParam<Real>("phi0")),
     _gr_param(getParam<Real>("gr")),
     _ar_param(getParam<Real>("ar")),
     _delta_param(getParam<Real>("delta")),
@@ -47,9 +49,15 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
     _delta(declareProperty<Real>("delta")),
     _m(declareProperty<Real>("m")),
     
-    _equivalent_stress(declareProperty<Real>("equivalent_stress")),
+    _porosity(declareProperty<Real>("porosity")),
+    _mises_stress(declareProperty<Real>("mises_stress")),
+    _mean_stress(declareProperty<Real>("mean_stress")),
+
     _mises_strain(declareProperty<Real>("mises_strain")),
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
+    _volumetric_strain(declareProperty<Real>("volumetric_strain")),
+    _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
+
     _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
     _mechanical_dissipation(declareProperty<Real>("mechanical_dissipation")),
     _mechanical_dissipation_jac(declareProperty<Real>("mechanical_dissipation_jacobian"))
@@ -65,12 +73,15 @@ RedbackMaterial::initQpStatefulProperties()
 {
   _elastic_strain[_qp].zero();
   _stress[_qp].zero();
-  _equivalent_stress[_qp] = 0;
+  _mises_stress[_qp] = 0;
   _mises_strain[_qp] = 0;
+  _mean_stress[_qp] = 0;
+  _volumetric_strain[_qp] = 0;
+  _volumetric_strain_rate[_qp] = 0;
   _plastic_strain[_qp].zero();
   _plastic_strain_old[_qp].zero();
   _eqv_plastic_strain[_qp] = 0.0;
-
+  _porosity[_qp] = _phi0_param;
 }
 
 void
@@ -87,7 +98,7 @@ RedbackMaterial::computeQpStress()
   // Initialise our made up variables...
   _gr[_qp] = _gr_param;
   _ar[_qp] = _ar_param;
-   _delta[_qp] = _delta_param;
+  _delta[_qp] = _delta_param;
   _m[_qp] = _m_param;
   _exponent = _m[_qp];
 
@@ -235,7 +246,7 @@ void
 RedbackMaterial::computeEnergyTerms(RankTwoTensor & sig, Real yield_stress, Real flow_incr)
 {
 	// Compute equivalent stress
-	_equivalent_stress[_qp] = getSigEqv(sig);
+	_mises_stress[_qp] = getSigEqv(sig);
 	// Compute Mises strain
 	_mises_strain[_qp] = flow_incr;
 	// Compute Mises strain rate

@@ -5,6 +5,7 @@
 
 // Kernels
 #include "RedbackChemEndo.h"
+#include "RedbackChemExo.h"
 #include "RedbackChemPressure.h"
 //#include "CubeTerm.h"
 #include "RedbackMechDissip.h"
@@ -64,6 +65,7 @@ void
 RedbackApp::registerObjects(Factory & factory)
 {
   registerKernel(RedbackChemEndo);
+  registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
   //registerKernel(RedbackCubeTerm);
   registerKernel(RedbackMechDissip);

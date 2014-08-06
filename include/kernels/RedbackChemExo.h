@@ -12,40 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REDBACKCHEMMATERIAL_H
-#define REDBACKCHEMMATERIAL_H
+#ifndef REDBACKCHEMEXO_H
+#define REDBACKCHEMEXO_H
 
-#include "RedbackMaterial.h"
+#include "Kernel.h"
 
-
-//Forward Declarations
-class RedbackChemMaterial;
+class RedbackChemExo;
 
 template<>
-InputParameters validParams<RedbackChemMaterial>();
+InputParameters validParams<RedbackChemExo>();
 
-class RedbackChemMaterial : public RedbackMaterial
+
+class RedbackChemExo : public Kernel
 {
 public:
-  RedbackChemMaterial(const std::string & name, InputParameters parameters);
+  RedbackChemExo(const std::string & name, InputParameters parameters);
+  virtual ~RedbackChemExo();
 
 protected:
-  virtual void computeQpStress();
-  virtual void initQpStatefulProperties();
-  virtual void computeEnergyTerms(RankTwoTensor & , Real , Real );
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
 
-  Real  _ar_F_param, _ar_R_param, _da_endo_param, _da_exo_param, _mu_param, _Kc_param, _eta1_param, _eta2_param, _Aphi_param;
-  MaterialProperty<Real> & _ar_F;
-  MaterialProperty<Real> & _ar_R;
-  MaterialProperty<Real> & _mu;
-  
-  MaterialProperty<Real> & _chemical_porosity;
-  MaterialProperty<Real> & _solid_ratio;
-  MaterialProperty<Real> & _chemical_endothermic_energy;
-  MaterialProperty<Real> & _chemical_endothermic_energy_jac;
   MaterialProperty<Real> & _chemical_exothermic_energy;
   MaterialProperty<Real> & _chemical_exothermic_energy_jac;
-  
 };
 
-#endif //REDBACKCHEMMATERIAL_H
+
+#endif /* REDBACKCHEMEXO_H */

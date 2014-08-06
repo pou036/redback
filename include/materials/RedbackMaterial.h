@@ -42,19 +42,22 @@ protected:
   VariableValue & _T;
   VariableValue & _pore_pres;
   
-  Real _gr_param, _ar_param, _delta_param, _m_param, _exponent; //_ar_c_param, _da_param, _mu_param,
+  Real _phi0_param, _gr_param, _ar_param, _delta_param, _m_param, _exponent; //_ar_c_param, _da_param, _mu_param,
   bool _is_mechanics_on;
   MaterialProperty<Real> & _gr;
   MaterialProperty<Real> & _ar;
-  //MaterialProperty<Real> & _ar_c;
   MaterialProperty<Real> & _delta;
-  //MaterialProperty<Real> & _da;
-  //MaterialProperty<Real> & _mu;
   MaterialProperty<Real> & _m;
   
-  MaterialProperty<Real> & _equivalent_stress;
+  MaterialProperty<Real> & _porosity;
+  MaterialProperty<Real> & _mises_stress;
+  MaterialProperty<Real> & _mean_stress;
+
   MaterialProperty<Real> & _mises_strain;
   MaterialProperty<Real> & _mises_strain_rate;
+  MaterialProperty<Real> & _volumetric_strain;
+  MaterialProperty<Real> & _volumetric_strain_rate;
+
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _mechanical_dissipation;
   MaterialProperty<Real> & _mechanical_dissipation_jac;
