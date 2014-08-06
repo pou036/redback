@@ -12,30 +12,39 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CHEMENDO_H
-#define CHEMENDO_H
+#include "RedbackChemEndo.h"
 
-#include "Kernel.h"
-
-class ChemEndo;
 
 template<>
-InputParameters validParams<ChemEndo>();
-
-
-class ChemEndo : public Kernel
+InputParameters validParams<RedbackChemEndo>()
 {
-public:
-  ChemEndo(const std::string & name, InputParameters parameters);
-  virtual ~ChemEndo();
+  InputParameters params = validParams<Kernel>();
 
-protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
-
-  MaterialProperty<Real> & _chemical_endothermic_energy;
-  MaterialProperty<Real> & _chemical_endothermic_energy_jac;
-};
+  return params;
+}
 
 
-#endif /* CHEMENDO_H */
+RedbackChemEndo::RedbackChemEndo(const std::string & name, InputParameters parameters) :
+  Kernel(name, parameters),
+  _chemical_endothermic_energy(getMaterialProperty<Real>("chemical_endothermic_energy")),
+  _chemical_endothermic_energy_jac(getMaterialProperty<Real>("chemical_endothermic_energy_jacobian"))
+{
+
+}
+
+RedbackChemEndo::~RedbackChemEndo()
+{
+
+}
+
+Real
+RedbackChemEndo::computeQpResidual()
+{
+  return _test[_i][_qp]*_chemical_endothermic_energy[_qp];
+}
+
+Real
+RedbackChemEndo::computeQpJacobian()
+{
+  return _test[_i][_qp] * _chemical_endothermic_energy_jac[_qp] * _phi[_j][_qp];
+}

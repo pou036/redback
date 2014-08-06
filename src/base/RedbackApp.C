@@ -4,10 +4,10 @@
 #include "ModulesApp.h"
 
 // Kernels
-#include "ChemEndo.h"
-#include "ChemPressure.h"
-#include "CubeTerm.h"
-#include "MechDissip.h"
+#include "RedbackChemEndo.h"
+#include "RedbackChemPressure.h"
+//#include "CubeTerm.h"
+#include "RedbackMechDissip.h"
 //#include "MechHeat.h"
 //#include "MechHeatTensor.h"
 
@@ -25,7 +25,7 @@
 //#include "MechDissipationAux.h"
 
 // Postprocessors
-#include "StrainRatePoint.h"
+//#include "StrainRatePoint.h"
 //#include "RedbackPost.h"
 
 
@@ -63,10 +63,10 @@ RedbackApp::registerApps()
 void
 RedbackApp::registerObjects(Factory & factory)
 {
-  registerKernel(ChemEndo);
-  registerKernel(ChemPressure);
-  registerKernel(CubeTerm);
-  registerKernel(MechDissip);
+  registerKernel(RedbackChemEndo);
+  registerKernel(RedbackChemPressure);
+  //registerKernel(RedbackCubeTerm);
+  registerKernel(RedbackMechDissip);
   //registerKernel(MechHeat);
   //registerKernel(MechHeatTensor);
 
@@ -81,7 +81,7 @@ RedbackApp::registerObjects(Factory & factory)
   //registerAux(MisesStressAux);
   //registerAux(MechDissipationAux);
 
-  registerPostprocessor(StrainRatePoint);
+//  registerPostprocessor(StrainRatePoint);
 //  registerPostprocessor(RedbackPost);
 }
 

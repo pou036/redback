@@ -12,29 +12,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef CUBETERM_H
-#define CUBETERM_H
+#ifndef REDBACKMECHDISSIP_H
+#define REDBACKMECHDISSIP_H
 
+#include "RankTwoTensor.h"
 #include "Kernel.h"
 
-class CubeTerm;
+class RedbackMechDissip;
 
 template<>
-InputParameters validParams<CubeTerm>();
+InputParameters validParams<RedbackMechDissip>();
 
 
-class CubeTerm : public Kernel
+class RedbackMechDissip : public Kernel
 {
 public:
-  CubeTerm(const std::string & name, InputParameters parameters);
-  virtual ~CubeTerm();
+  RedbackMechDissip(const std::string & name, InputParameters parameters);
+  virtual ~RedbackMechDissip();
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  Real _lambda;
+  //VariableValue & _pressure;
+  MaterialProperty<Real> & _mechanical_dissipation;
+  MaterialProperty<Real> & _mechanical_dissipation_jac;
+
 };
 
 
-#endif /* CUBETERM_H */
+#endif /* REDBACKMECHDISSIP_H */

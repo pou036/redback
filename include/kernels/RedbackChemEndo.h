@@ -12,33 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef MECHDISSIP_H
-#define MECHDISSIP_H
+#ifndef REDBACKCHEMENDO_H
+#define REDBACKCHEMENDO_H
 
-#include "RankTwoTensor.h"
 #include "Kernel.h"
 
-class MechDissip;
+class RedbackChemEndo;
 
 template<>
-InputParameters validParams<MechDissip>();
+InputParameters validParams<RedbackChemEndo>();
 
 
-class MechDissip : public Kernel
+class RedbackChemEndo : public Kernel
 {
 public:
-  MechDissip(const std::string & name, InputParameters parameters);
-  virtual ~MechDissip();
+  RedbackChemEndo(const std::string & name, InputParameters parameters);
+  virtual ~RedbackChemEndo();
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  //VariableValue & _pressure;
-  MaterialProperty<Real> & _mechanical_dissipation;
-  MaterialProperty<Real> & _mechanical_dissipation_jac;
-
+  MaterialProperty<Real> & _chemical_endothermic_energy;
+  MaterialProperty<Real> & _chemical_endothermic_energy_jac;
 };
 
 
-#endif /* MECHDISSIP_H */
+#endif /* REDBACKCHEMENDO_H */

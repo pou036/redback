@@ -12,43 +12,46 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ChemPressure.h"
+#include "RedbackMechDissip.h"
 
 
 template<>
-InputParameters validParams<ChemPressure>()
+InputParameters validParams<RedbackMechDissip>()
 {
   InputParameters params = validParams<Kernel>();
 
-  params.addRequiredCoupledVar("temp", "Temperature variable.");
+  //params.addCoupledVar("pressure", 0., "Pressure variable.");
+  //params.addRequiredParam<Real>("activation_energy", "Activation energy");
+  //params.addParam<Real>("gas_constant", 8.3143, "Universal gas constant");
 
   return params;
 }
 
 
-ChemPressure::ChemPressure(const std::string & name, InputParameters parameters) :
+RedbackMechDissip::RedbackMechDissip(const std::string & name, InputParameters parameters) :
   Kernel(name, parameters),
-  _temp(coupledValue("temp")),
-  _ar_c(getMaterialProperty<Real>("ar_c")),
-  _mu(getMaterialProperty<Real>("mu")),
-  _delta(getMaterialProperty<Real>("delta"))
+  //_pressure(coupledValue("pressure")),
+  _mechanical_dissipation(getMaterialProperty<Real>("mechanical_dissipation")),
+  _mechanical_dissipation_jac(getMaterialProperty<Real>("mechanical_dissipation_jacobian"))
 {
 
 }
 
-ChemPressure::~ChemPressure()
+RedbackMechDissip::~RedbackMechDissip()
 {
 
-}
-
-Real
-ChemPressure::computeQpResidual()
-{
-  return -_test[_i][_qp]*_mu[_qp]*std::exp( (_ar_c[_qp]*_delta[_qp]*_temp[_qp]) / (1 + _delta[_qp]*_temp[_qp]) );
 }
 
 Real
-ChemPressure::computeQpJacobian()
+RedbackMechDissip::computeQpResidual()
 {
-  return 0.;
+  //std::cout<<"In RedbackMechDissip.C: heat_capacity="<<_heat_capacity[_qp]<<std::endl;
+	return -_test[_i][_qp]*_mechanical_dissipation[_qp];
+  
+}
+
+Real
+RedbackMechDissip::computeQpJacobian()
+{
+	return -_test[_i][_qp] *_mechanical_dissipation_jac[_qp] * _phi[_j][_qp];
 }

@@ -12,40 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "CubeTerm.h"
+#ifndef REDBACKCHEMPRESSURE_H
+#define REDBACKCHEMPRESSURE_H
 
+#include "Kernel.h"
+
+class RedbackChemPressure;
 
 template<>
-InputParameters validParams<CubeTerm>()
+InputParameters validParams<RedbackChemPressure>();
+
+
+class RedbackChemPressure : public Kernel
 {
-  InputParameters params = validParams<Kernel>();
+public:
+  RedbackChemPressure(const std::string & name, InputParameters parameters);
+  virtual ~RedbackChemPressure();
 
-  params.addParam<Real>("lambda", 1.0, "Lambda parameter.");
+protected:
+  virtual Real computeQpResidual();
+  virtual Real computeQpJacobian();
 
-  return params;
-}
+  VariableValue &_temp;
+  MaterialProperty<Real> & _ar_c;
+  MaterialProperty<Real> & _mu;
+  MaterialProperty<Real> & _delta;
+};
 
 
-CubeTerm::CubeTerm(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters),
-  _lambda(getParam<Real>("lambda"))
-{
-
-}
-
-CubeTerm::~CubeTerm()
-{
-
-}
-
-Real
-CubeTerm::computeQpResidual()
-{
-  return _test[_i][_qp]*_lambda*_u[_qp]*_u[_qp]*_u[_qp];
-}
-
-Real
-CubeTerm::computeQpJacobian()
-{
-  return 3*_test[_i][_qp] * _lambda * _u[_qp]* _u[_qp]  * _phi[_j][_qp];
-}
+#endif /* REDBACKCHEMPRESSURE_H */
