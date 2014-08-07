@@ -40,11 +40,11 @@ RedbackChemExo::~RedbackChemExo()
 Real
 RedbackChemExo::computeQpResidual()
 {
-  return _test[_i][_qp]*_chemical_exothermic_energy[_qp];
+  return -_test[_i][_qp]*_chemical_exothermic_energy[_qp];
 }
 
 Real
 RedbackChemExo::computeQpJacobian()
 {
-  return _test[_i][_qp] * _chemical_exothermic_energy_jac[_qp] * _phi[_j][_qp];
+  return -_test[_i][_qp] * _chemical_exothermic_energy_jac[_qp] * _phi[_j][_qp];
 }

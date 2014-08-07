@@ -83,11 +83,12 @@ void
 RedbackChemMaterial::computeEnergyTerms(RankTwoTensor & sig, Real yield_stress, Real flow_incr)
 {
 	Real omega_rel, temporary, phi_prime, s_prime;
+	//std::cout<<"testing before..." <<std::endl;
 
-	if (_is_mechanics_on)
-	  {
+
 		RedbackMaterial::computeEnergyTerms(sig, yield_stress, flow_incr);
-	  }
+
+	//std::cout<<"testing after..."<<std::endl;
 
 	  /*
 	  * The following calculates the volume ratios of a generic reversible reaction of the form:
@@ -117,6 +118,8 @@ RedbackChemMaterial::computeEnergyTerms(RankTwoTensor & sig, Real yield_stress, 
 	// Compute Endothermic Chemical Energy
 	_chemical_endothermic_energy[_qp] = _da_endo_param * (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp]) *
 			std::exp( (_ar_F[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
+
+	//std::cout<<"testing again... "<<_chemical_endothermic_energy[_qp] <<std::endl;
 
 	// Compute Endothermic Chemical Energy Jacobian
 	_chemical_endothermic_energy_jac[_qp] = _da_endo_param * std::exp( (_ar_F[_qp]) / (1 + _delta[_qp]*_T[_qp]) ) *

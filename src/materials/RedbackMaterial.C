@@ -102,24 +102,12 @@ RedbackMaterial::computeQpStress()
   _m[_qp] = _m_param;
   _exponent = _m[_qp];
 
+
+
   if (not _is_mechanics_on)
   {
-	// Compute modified Gruntfest number
-	_mod_gruntfest_number[_qp]=_gr[_qp];
-	// Compute Mises strain
-	_mises_strain[_qp] = _exponential * _dt;
-	// Compute Mises strain rate
-	_mises_strain_rate[_qp] = _exponential;
+	  computeEnergyTerms(sig, 0, 0);
 
-	// Compute Mechanical Dissipation
-	_mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
-	 std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
-	// Compute Mechanical Dissipation Jacobian
-	_mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
-	 _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
-	 (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
-
-	//std::cout<<"Gr="<<_mod_gruntfest_number[_qp]<<std::endl;
 	return;
   }
 
@@ -245,6 +233,30 @@ RedbackMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & 
 void
 RedbackMaterial::computeEnergyTerms(RankTwoTensor & sig, Real yield_stress, Real flow_incr)
 {
+
+	 if (not _is_mechanics_on)
+	  {
+		// Compute modified Gruntfest number
+		_mod_gruntfest_number[_qp]=_gr[_qp];
+		// Compute Mises strain
+		_mises_strain[_qp] = _exponential * _dt;
+		// Compute Mises strain rate
+		_mises_strain_rate[_qp] = _exponential;
+
+		// Compute Mechanical Dissipation
+		_mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
+		 std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
+		// Compute Mechanical Dissipation Jacobian
+		_mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
+		 _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
+		 (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+
+		//std::cout<<"Gr="<<_mod_gruntfest_number[_qp]<<std::endl;
+
+		return;
+	  }
+
+
 	// Compute equivalent stress
 	_mises_stress[_qp] = getSigEqv(sig);
 	// Compute Mises strain

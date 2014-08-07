@@ -20,6 +20,9 @@ include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## MODULES ####################################
 ALL_MODULES := yes
+
+#TENSOR_MECHANICS := yes 
+
 include $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
