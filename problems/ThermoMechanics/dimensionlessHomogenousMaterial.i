@@ -67,9 +67,9 @@
     da = 1
     mu = 1
     ar = 5
-    delta = 1
     gr = 0.2
     pore_pres = 0
+    is_mechanics_on = true
   [../]
 []
 
@@ -148,7 +148,7 @@
 []
 
 [AuxVariables]
-  active = 'mises_strain mech_diss mises_strain_rate mises_stress Mod_Gruntfest_number'
+  active = 'Mod_Gruntfest_number mises_strain mech_diss mises_strain_rate mises_stress'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -207,7 +207,7 @@
     tensor_coeff = '1 0 0 0 1 0 0 0 1'
   [../]
   [./temp_dissip]
-    type = MechDissip
+    type = RedbackMechDissip
     variable = temp
     block = '0 1'
   [../]
@@ -250,7 +250,7 @@
   [./mises_stress]
     type = MaterialRealAux
     variable = mises_stress
-    property = equivalent_stress
+    property = mises_stress
   [../]
   [./mises_strain]
     type = MaterialRealAux
@@ -277,7 +277,7 @@
 []
 
 [Postprocessors]
-  active = 'temp_centre mises_stress strain_rate Gruntfest_number'
+  active = 'Gruntfest_number temp_centre mises_stress strain_rate'
   [./test]
     type = StrainRatePoint
     variable = temp

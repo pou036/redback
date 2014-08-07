@@ -194,7 +194,7 @@
     tensor_coeff = '1 0 0 0 1 0 0 0 1'
   [../]
   [./temp_dissip]
-    type = MechDissip
+    type = RedbackMechDissip
     variable = temp
   [../]
 []
@@ -236,7 +236,7 @@
   [./mises_stress]
     type = MaterialRealAux
     variable = mises_stress
-    property = equivalent_stress
+    property = mises_stress
   [../]
   [./mises_strain]
     type = MaterialRealAux
