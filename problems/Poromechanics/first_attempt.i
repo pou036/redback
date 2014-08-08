@@ -45,6 +45,8 @@
   [../]
   [./temp]
   [../]
+  [./pore_pressure]
+  [../]
 []
 
 [TensorMechanics]
@@ -53,6 +55,7 @@
     disp_y = disp_y
     disp_z = disp_z
     temp = temp
+    pore_pres = pore_pressure
   [../]
 []
 
@@ -196,6 +199,10 @@
     type = RedbackMechDissip
     variable = temp
   [../]
+  [./td_press]
+    type = TimeDerivative
+    variable = pore_pressure
+  [../]
 []
 
 [AuxKernels]
@@ -331,7 +338,7 @@
 []
 
 [ICs]
-  active = 'ic_temp'
+  active = 'ic_temp press_ic'
   [./ic_temp]
     variable = temp
     value = 0
@@ -342,6 +349,11 @@
     variable = temp
     type = FunctionIC
     block = 0
+  [../]
+  [./press_ic]
+    variable = pore_pressure
+    type = ConstantIC
+    value = 0
   [../]
 []
 
