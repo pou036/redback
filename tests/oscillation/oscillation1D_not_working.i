@@ -24,10 +24,6 @@
     family = MONOMIAL
     order = CONSTANT
   [../]
-  [./stress]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [Kernels]
@@ -76,11 +72,6 @@
     execute_on = timestep
     temp = temp
   [../]
-  [./mises_stress]
-    type = MisesStressAux
-    variable = stress
-    block = 0
-  [../]
 []
 
 [BCs]
@@ -124,9 +115,10 @@
     disp_y = 0
     disp_x = 0
     pore_pres = pressure
-    yield_stress = '0 1'
-    C_ijkl = '1.346e+00 5.769e-01 5.769e-01 1.346e+00 5.769e-01 1.346e+00 3.846e-01 3.846e-01 3.846e-01'
+    yield_stress = '0 1 1 1'
+    C_ijkl = '1 1 1 1 1 1 1 1 1'
     temperature = temp
+    disp_z = 0
   [../]
 []
 

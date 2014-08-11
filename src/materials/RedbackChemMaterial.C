@@ -98,60 +98,62 @@ RedbackChemMaterial::computeEnergyTerms(RankTwoTensor & sig, Real yield_stress, 
 	  * and the solid ratio is the volume of product A over the solid volume V_A+V_AB
 	  */
 
-	// Step 1: calculate the relative rate of reactions
-	omega_rel = _eta2_param * _Kc_param * std::exp( (_ar_F[_qp]-_ar_R[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
+  // Step 1: calculate the relative rate of reactions
+  omega_rel = _eta2_param * _Kc_param * std::exp( (_ar_F[_qp]-_ar_R[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
 
-	// Step 2: calculate the solid ratio
-	_solid_ratio[_qp] = omega_rel/(1 + omega_rel);
+  // Step 2: calculate the solid ratio
+  _solid_ratio[_qp] = omega_rel/(1 + omega_rel);
 
-	// Step 3: calculate the chemical porosity
-	_chemical_porosity[_qp] = _Aphi_param*(1 + _porosity[_qp])/(1+_eta1_param/_solid_ratio[_qp]);
+  // Step 3: calculate the chemical porosity
+  _chemical_porosity[_qp] = _Aphi_param*(1 + _porosity[_qp])/(1+_eta1_param/_solid_ratio[_qp]);
 
-	// Step 4: calculate the partial derivatives for the jacobian
-	temporary = _eta2_param * _Kc_param * (_ar_F[_qp] - _ar_R[_qp]) *_delta[_qp] *std::exp( (_ar_F[_qp]-_ar_R[_qp]) / (1 + _delta[_qp]*_T[_qp]) )
-			 / std::pow(1+_delta[_qp]*_T[_qp], 2) ;
+  // Step 4: calculate the partial derivatives for the jacobian
+  temporary = _eta2_param * _Kc_param * (_ar_F[_qp] - _ar_R[_qp]) *_delta[_qp] *std::exp( (_ar_F[_qp]-_ar_R[_qp]) / (1 + _delta[_qp]*_T[_qp]) )
+       / std::pow(1+_delta[_qp]*_T[_qp], 2) ;
 
-	phi_prime = - temporary*_Aphi_param*_eta1_param*(1-_porosity[_qp]) / std::pow(_eta1_param * std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp])) + (1 + _eta1_param)* std::exp( _ar_F[_qp] / (1 + _delta[_qp]*_T[_qp]) )* _eta2_param * _Kc_param, 2);
+  phi_prime = - temporary*_Aphi_param*_eta1_param*(1-_porosity[_qp]) / std::pow(_eta1_param * std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp])) + (1 + _eta1_param)* std::exp( _ar_F[_qp] / (1 + _delta[_qp]*_T[_qp]) )* _eta2_param * _Kc_param, 2);
 
-	s_prime = - temporary/std::pow(
-			 std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp])) + std::exp( _ar_F[_qp] / (1 + _delta[_qp]*_T[_qp]) )* _eta2_param * _Kc_param, 2);
+  s_prime = - temporary/std::pow(
+       std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp])) + std::exp( _ar_F[_qp] / (1 + _delta[_qp]*_T[_qp]) )* _eta2_param * _Kc_param, 2);
 
-	// Compute Endothermic Chemical Energy
-	_chemical_endothermic_energy[_qp] = _da_endo_param * (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp]) *
-			std::exp( (_ar_F[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
+  // Compute Endothermic Chemical Energy
+  _chemical_endothermic_energy[_qp] = _da_endo_param * (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp]) *
+      std::exp( (_ar_F[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
 
-	//std::cout<<"testing again... "<<_chemical_endothermic_energy[_qp] <<std::endl;
+  //std::cout<<"testing again... "<<_chemical_endothermic_energy[_qp] <<std::endl;
 
-	// Compute Endothermic Chemical Energy Jacobian
-	_chemical_endothermic_energy_jac[_qp] = _da_endo_param * std::exp( (_ar_F[_qp]) / (1 + _delta[_qp]*_T[_qp]) ) *
-			(
-			 _ar_F[_qp] * _delta[_qp] * (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp])
-					/ std::pow(1+_delta[_qp]*_T[_qp], 2)
-			- (1 - _solid_ratio[_qp]) * phi_prime
-			- (1 - _porosity[_qp]) * s_prime
-			);
+  // Compute Endothermic Chemical Energy Jacobian
+  _chemical_endothermic_energy_jac[_qp] = _da_endo_param * std::exp( (_ar_F[_qp]) / (1 + _delta[_qp]*_T[_qp]) ) *
+      (
+       _ar_F[_qp] * _delta[_qp] * (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp])
+          / std::pow(1+_delta[_qp]*_T[_qp], 2)
+      - (1 - _solid_ratio[_qp]) * phi_prime
+      - (1 - _porosity[_qp]) * s_prime
+      );
 
-	// Compute Exothermic Chemical Energy
-	_chemical_exothermic_energy[_qp] = _da_exo_param * (1 - _porosity[_qp]) * _solid_ratio[_qp] * _chemical_porosity[_qp] *
-			std::exp( (_ar_R[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
+  // Compute Exothermic Chemical Energy
+  _chemical_exothermic_energy[_qp] = _da_exo_param * (1 - _porosity[_qp]) * _solid_ratio[_qp] * _chemical_porosity[_qp] *
+      std::exp( (_ar_R[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
 
-	// Compute Exothermic Chemical Energy Jacobian
-	_chemical_exothermic_energy_jac[_qp] = _da_exo_param * std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp]) ) *
-			(
-				_solid_ratio[_qp]*(
-			 _ar_R[_qp] * _delta[_qp] * _chemical_porosity[_qp] *(1 - _porosity[_qp])
-					/ std::pow(1+_delta[_qp]*_T[_qp], 2)
-			+ (1 - _porosity[_qp] - _chemical_porosity[_qp]) * phi_prime )
-			+ _chemical_porosity[_qp]*(1 - _porosity[_qp]) * s_prime
-			);
+  // Compute Exothermic Chemical Energy Jacobian
+  _chemical_exothermic_energy_jac[_qp] = _da_exo_param * std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp]) ) *
+      (
+        _solid_ratio[_qp]*(
+       _ar_R[_qp] * _delta[_qp] * _chemical_porosity[_qp] *(1 - _porosity[_qp])
+          / std::pow(1+_delta[_qp]*_T[_qp], 2)
+      + (1 - _porosity[_qp] - _chemical_porosity[_qp]) * phi_prime )
+      + _chemical_porosity[_qp]*(1 - _porosity[_qp]) * s_prime
+      );
 
-	// Compute Chemical Source/Sink Term for the mass (pore pressure) equation
-	_chemical_source_mass[_qp] = 	_mu[_qp]* (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp]) *std::exp( (_ar_F[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
+  // Compute Chemical Source/Sink Term for the mass (pore pressure) equation
+  _chemical_source_mass[_qp] = 	_mu[_qp]* (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp]) *std::exp( (_ar_F[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
 
-	// Compute Jacobian of Chemical Source/Sink Term for the mass (pore pressure) equation. The corresponding variable is pore pressure
-	_chemical_source_mass_jac[_qp] = 0;
+  // Compute Jacobian of Chemical Source/Sink Term for the mass (pore pressure) equation. The corresponding variable is pore pressure
+  _chemical_source_mass_jac[_qp] = 0;
 
-	// Final Step: Update the total porosity
-	_porosity[_qp] =  _porosity[_qp] + _chemical_porosity[_qp];
+  // Final Step: Update the total porosity
+  _porosity[_qp] =  _porosity[_qp] + _chemical_porosity[_qp];
 
+  // Update Lewis number
+  _lewis_number[_qp] = _lewis_number[_qp]*std::pow((1-_porosity[_qp])/(1-_phi0_param), 2) * std::pow(_phi0_param/_porosity[_qp], 3);
 }

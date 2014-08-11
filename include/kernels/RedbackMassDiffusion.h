@@ -35,7 +35,7 @@ protected:
 
 //  VariableValue & _T;
 
-  RealTensorValue _Le;
+  MaterialProperty<Real> & _Le;
  // MaterialProperty<Real> & _volumetric_strain_rate;
 };
 

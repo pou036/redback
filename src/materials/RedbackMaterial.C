@@ -21,51 +21,70 @@ InputParameters validParams<RedbackMaterial>()
 
   params.addParam<Real>("phi0", 0, "initial porosity value.");
   params.addRequiredRangeCheckedParam<Real>("gr", "gr>=0", "Gruntfest number.");
+  params.addRequiredParam<Real>("ref_lewis_nb", "Reference Lewis number.");
   params.addRequiredParam<Real>("ar", "Arrhenius number.");
   params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
   params.addRequiredParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna)");
   params.addRequiredParam<bool>("is_mechanics_on", "is mechanics on?");
   params.addRequiredCoupledVar("temperature", "Dimensionless temperature");
   params.addRequiredCoupledVar("pore_pres", "Dimensionless pore pressure");
+  params.addParam<MooseEnum>("density_method", RedbackMaterial::densityMethodEnum() = "linear", "The method to describe density evolution with temperature and pore pressure");
+  params.addParam<MooseEnum>("permeability_method", RedbackMaterial::permeabilityMethodEnum() = "KozenyCarman", "The method to describe permeability evolution");
 
   return params;
 }
 
 RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters parameters) :
-    FiniteStrainPlasticMaterial(name, parameters),
-    _T(coupledValue("temperature")),
-    _pore_pres(coupledValue("pore_pres")),
+  FiniteStrainPlasticMaterial(name, parameters),
+  _T(coupledValue("temperature")),
+  _pore_pres(coupledValue("pore_pres")),
 
-    _phi0_param(getParam<Real>("phi0")),
-    _gr_param(getParam<Real>("gr")),
-    _ar_param(getParam<Real>("ar")),
-    _delta_param(getParam<Real>("delta")),
-    _m_param(getParam<Real>("m")),
-    _is_mechanics_on(getParam<bool>("is_mechanics_on")),
+  _phi0_param(getParam<Real>("phi0")),
+  _gr_param(getParam<Real>("gr")),
+  _ar_param(getParam<Real>("ar")),
+  _delta_param(getParam<Real>("delta")),
+  _m_param(getParam<Real>("m")),
+  _is_mechanics_on(getParam<bool>("is_mechanics_on")),
 
-    _gr(declareProperty<Real>("gr")),
-    _ar(declareProperty<Real>("ar")),
+  _gr(declareProperty<Real>("gr")),
+  _ref_lewis_nb(declareProperty<Real>("ref_lewis_nb")),
+  _ar(declareProperty<Real>("ar")),
 
-    _delta(declareProperty<Real>("delta")),
-    _m(declareProperty<Real>("m")),
-    
-    _porosity(declareProperty<Real>("porosity")),
-    _mises_stress(declareProperty<Real>("mises_stress")),
-    _mean_stress(declareProperty<Real>("mean_stress")),
+  _delta(declareProperty<Real>("delta")),
+  _m(declareProperty<Real>("m")),
 
-    _mises_strain(declareProperty<Real>("mises_strain")),
-    _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
-    _volumetric_strain(declareProperty<Real>("volumetric_strain")),
-    _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
+  _porosity(declareProperty<Real>("porosity")),
+  _lewis_number(declareProperty<Real>("lewis_number")),
+  _mises_stress(declareProperty<Real>("mises_stress")),
+  _mean_stress(declareProperty<Real>("mean_stress")),
 
-    _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
-    _mechanical_dissipation(declareProperty<Real>("mechanical_dissipation")),
-    _mechanical_dissipation_jac(declareProperty<Real>("mechanical_dissipation_jacobian"))
-  {
+  _mises_strain(declareProperty<Real>("mises_strain")),
+  _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
+  _volumetric_strain(declareProperty<Real>("volumetric_strain")),
+  _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
+
+  _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
+  _mechanical_dissipation(declareProperty<Real>("mechanical_dissipation")),
+  _mechanical_dissipation_jac(declareProperty<Real>("mechanical_dissipation_jacobian")),
+
+  _density_method((RedbackMaterial::DensityMethod)(int)getParam<MooseEnum>("density_method")),
+  _permeability_method((RedbackMaterial::PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method"))
+{
 }
 
 //=================================================================
 
+MooseEnum
+RedbackMaterial::densityMethodEnum()
+{
+  return MooseEnum("linear");
+}
+
+MooseEnum
+RedbackMaterial::permeabilityMethodEnum()
+{
+  return MooseEnum("KozenyCarman");
+}
 
 void
 RedbackMaterial::initQpStatefulProperties()
@@ -96,18 +115,18 @@ RedbackMaterial::computeQpStress()
 
   // Initialise our made up variables...
   _gr[_qp] = _gr_param;
+  _ref_lewis_nb[_qp] = _ref_lewis_nb_param;
   _ar[_qp] = _ar_param;
   _delta[_qp] = _delta_param;
   _m[_qp] = _m_param;
   _exponent = _m[_qp];
-
+  _lewis_number[_qp] = _ref_lewis_nb[_qp];
 
 
   if (not _is_mechanics_on)
   {
-	  computeEnergyTerms(sig, 0, 0);
-
-	return;
+    computeEnergyTerms(sig, 0, 0);
+    return;
   }
 
   //In elastic problem, all the strain is elastic

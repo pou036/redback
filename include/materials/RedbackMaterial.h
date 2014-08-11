@@ -29,6 +29,24 @@ class RedbackMaterial : public FiniteStrainPlasticMaterial
 public:
   RedbackMaterial(const std::string & name, InputParameters parameters);
 
+  /// Static method for use in validParams for getting the density method
+  static MooseEnum densityMethodEnum();
+
+  // various methods to handle density (variation with T and P)
+  enum DensityMethod
+  {
+    linear
+  };
+
+  /// Static method for use in validParams for getting the permeability method
+  static MooseEnum permeabilityMethodEnum();
+
+  // various methods to handle permeability evolution
+  enum PermeabilityMethod
+  {
+    KozenyCarman
+  };
+
 protected:
   virtual void computeQpStress();
   virtual void initQpStatefulProperties();
@@ -42,14 +60,16 @@ protected:
   VariableValue & _T;
   VariableValue & _pore_pres;
   
-  Real _phi0_param, _gr_param, _ar_param, _delta_param, _m_param, _exponent; //_ar_c_param, _da_param, _mu_param,
+  Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param, _m_param, _exponent; //_ar_c_param, _da_param, _mu_param,
   bool _is_mechanics_on;
   MaterialProperty<Real> & _gr;
+  MaterialProperty<Real> & _ref_lewis_nb;
   MaterialProperty<Real> & _ar;
   MaterialProperty<Real> & _delta;
   MaterialProperty<Real> & _m;
   
   MaterialProperty<Real> & _porosity;
+  MaterialProperty<Real> & _lewis_number;
   MaterialProperty<Real> & _mises_stress;
   MaterialProperty<Real> & _mean_stress;
 
@@ -63,6 +83,8 @@ protected:
   MaterialProperty<Real> & _mechanical_dissipation_jac;
   Real _exponential;
   
+  RedbackMaterial::DensityMethod _density_method;
+  RedbackMaterial::PermeabilityMethod _permeability_method;
 };
 
 #endif //REDBACKMATERIAL_H
