@@ -7,7 +7,7 @@
 #include "RedbackChemEndo.h"
 #include "RedbackChemExo.h"
 #include "RedbackChemPressure.h"
-//#include "CubeTerm.h"
+#include "RedbackMassDiffusion.h"
 #include "RedbackMechDissip.h"
 //#include "MechHeat.h"
 //#include "MechHeatTensor.h"
@@ -67,7 +67,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
-  //registerKernel(RedbackCubeTerm);
+  registerKernel(RedbackMassDiffusion);
   registerKernel(RedbackMechDissip);
   //registerKernel(MechHeat);
   //registerKernel(MechHeatTensor);

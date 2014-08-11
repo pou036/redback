@@ -55,8 +55,9 @@ RedbackChemMaterial::RedbackChemMaterial(const std::string & name, InputParamete
     _chemical_endothermic_energy(declareProperty<Real>("chemical_endothermic_energy")),
     _chemical_endothermic_energy_jac(declareProperty<Real>("chemical_endothermic_energy_jacobian")),
 	_chemical_exothermic_energy(declareProperty<Real>("chemical_exothermic_energy")),
-	_chemical_exothermic_energy_jac(declareProperty<Real>("chemical_exothermic_energy_jacobian"))
-
+	_chemical_exothermic_energy_jac(declareProperty<Real>("chemical_exothermic_energy_jacobian")),
+	_chemical_source_mass(declareProperty<Real>("chemical_source_term_mass")),
+	_chemical_source_mass_jac(declareProperty<Real>("chemical_source_term_mass_jacobian"))
   {
 }
 
@@ -143,6 +144,12 @@ RedbackChemMaterial::computeEnergyTerms(RankTwoTensor & sig, Real yield_stress, 
 			+ (1 - _porosity[_qp] - _chemical_porosity[_qp]) * phi_prime )
 			+ _chemical_porosity[_qp]*(1 - _porosity[_qp]) * s_prime
 			);
+
+	// Compute Chemical Source/Sink Term for the mass (pore pressure) equation
+	_chemical_source_mass[_qp] = 	_mu[_qp]* (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp]) *std::exp( (_ar_F[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
+
+	// Compute Jacobian of Chemical Source/Sink Term for the mass (pore pressure) equation. The corresponding variable is pore pressure
+	_chemical_source_mass_jac[_qp] = 0;
 
 	// Final Step: Update the total porosity
 	_porosity[_qp] =  _porosity[_qp] + _chemical_porosity[_qp];

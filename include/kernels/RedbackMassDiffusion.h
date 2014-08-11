@@ -12,31 +12,32 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REDBACKCHEMPRESSURE_H
-#define REDBACKCHEMPRESSURE_H
+#ifndef REDBACKMASSDIFFUSION_H
+#define REDBACKMASSDIFFUSION_H
 
 #include "Kernel.h"
 
-class RedbackChemPressure;
+class RedbackMassDiffusion;
 
 template<>
-InputParameters validParams<RedbackChemPressure>();
+InputParameters validParams<RedbackMassDiffusion>();
 
 
-class RedbackChemPressure : public Kernel
+class RedbackMassDiffusion : public Kernel
 {
 public:
-  RedbackChemPressure(const std::string & name, InputParameters parameters);
-  virtual ~RedbackChemPressure();
+  RedbackMassDiffusion(const std::string & name, InputParameters parameters);
+  virtual ~RedbackMassDiffusion();
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
- // VariableValue &_temp;
-  MaterialProperty<Real> & _chemical_source_mass;
-   MaterialProperty<Real> & _chemical_source_mass_jac;
+//  VariableValue & _T;
+
+  RealTensorValue _Le;
+ // MaterialProperty<Real> & _volumetric_strain_rate;
 };
 
 
-#endif /* REDBACKCHEMPRESSURE_H */
+#endif /* REDBACKMASSDIFFUSION_H */

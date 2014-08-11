@@ -45,7 +45,8 @@ protected:
   MaterialProperty<Real> & _chemical_endothermic_energy_jac;
   MaterialProperty<Real> & _chemical_exothermic_energy;
   MaterialProperty<Real> & _chemical_exothermic_energy_jac;
-  
+  MaterialProperty<Real> & _chemical_source_mass;
+  MaterialProperty<Real> & _chemical_source_mass_jac;
 };
 
 #endif //REDBACKCHEMMATERIAL_H

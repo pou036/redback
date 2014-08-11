@@ -12,43 +12,38 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "RedbackChemPressure.h"
+#include "RedbackMassDiffusion.h"
 
 
 template<>
-InputParameters validParams<RedbackChemPressure>()
+InputParameters validParams<RedbackMassDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
-
- // params.addRequiredCoupledVar("temp", "Temperature variable.");
-
+  params.addRequiredParam<RealTensorValue>("Lewis_number", "The Tensor form of Lewis number to multiply the Diffusion operator by");
+//  params.addRequiredCoupledVar("temperature", "Temperature variable.");
   return params;
 }
 
-
-RedbackChemPressure::RedbackChemPressure(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters),
- // _temp(coupledValue("temp")),
-  _chemical_source_mass(getMaterialProperty<Real>("chemical_source_mass")),
-  _chemical_source_mass_jac(getMaterialProperty<Real>("chemical_source_term_mass_jacobian"))
-
+RedbackMassDiffusion::RedbackMassDiffusion(const std::string & name, InputParameters parameters) :
+    Kernel(name, parameters),
+//    _T(coupledValue("temperature")),
+    _Le(getParam<RealTensorValue>("Lewis_number"))
+ //   _volumetric_strain_rate(getMaterialProperty<Real>("volumetric_strain_rate"))
 {
-
 }
 
-RedbackChemPressure::~RedbackChemPressure()
+RedbackMassDiffusion::~RedbackMassDiffusion()
 {
-
 }
 
 Real
-RedbackChemPressure::computeQpResidual()
+RedbackMassDiffusion::computeQpResidual()
 {
-  return -_test[_i][_qp]*_chemical_source_mass[_qp];
+  return (_Le * _grad_u[_qp]) * _grad_test[_i][_qp];// + _test[_i][_qp]* _volumetric_strain_rate[_qp];// + _test[_i][_qp]*_T_dot[_qp];
 }
 
 Real
-RedbackChemPressure::computeQpJacobian()
+RedbackMassDiffusion::computeQpJacobian()
 {
-  return -_test[_i][_qp] * _chemical_source_mass_jac[_qp] * _phi[_j][_qp];
+  return (_Le * _grad_phi[_j][_qp]) * _grad_test[_i][_qp];// + _test[_i][_qp] * 0 * _phi[_j][_qp];
 }

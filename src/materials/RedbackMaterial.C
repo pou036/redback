@@ -61,7 +61,6 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
     _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
     _mechanical_dissipation(declareProperty<Real>("mechanical_dissipation")),
     _mechanical_dissipation_jac(declareProperty<Real>("mechanical_dissipation_jacobian"))
-
   {
 }
 
