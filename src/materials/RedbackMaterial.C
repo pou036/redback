@@ -19,7 +19,8 @@ InputParameters validParams<RedbackMaterial>()
 {
   InputParameters params = validParams<FiniteStrainPlasticMaterial>();
 
-  params.addParam<Real>("phi0", 0, "initial porosity value.");
+  //params.addParam<Real>("phi0", 0, "initial porosity value.");
+  params.addRangeCheckedParam<Real>("phi0","phi0>0 & phi0<1", "initial porosity value.");
   params.addRequiredRangeCheckedParam<Real>("gr", "gr>=0", "Gruntfest number.");
   params.addRequiredParam<Real>("ref_lewis_nb", "Reference Lewis number.");
   params.addRequiredParam<Real>("ar", "Arrhenius number.");
@@ -41,6 +42,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
 
   _phi0_param(getParam<Real>("phi0")),
   _gr_param(getParam<Real>("gr")),
+  _ref_lewis_nb_param(getParam<Real>("ref_lewis_nb")),
   _ar_param(getParam<Real>("ar")),
   _delta_param(getParam<Real>("delta")),
   _m_param(getParam<Real>("m")),
@@ -121,7 +123,6 @@ RedbackMaterial::computeQpStress()
   _m[_qp] = _m_param;
   _exponent = _m[_qp];
   _lewis_number[_qp] = _ref_lewis_nb[_qp];
-
 
   if (not _is_mechanics_on)
   {

@@ -26,19 +26,19 @@ InputParameters validParams<FiniteStrainRatePlasticTemperatureMaterial>()
 
 FiniteStrainRatePlasticTemperatureMaterial::FiniteStrainRatePlasticTemperatureMaterial(const std::string & name,
                                                                  InputParameters parameters) :
-    FiniteStrainPlasticMaterial(name, parameters),
-    _T(coupledValue("T")),
- 
-    _ref_pe_rate(getParam<Real>("ref_pe_rate")),
-    _exponent(getParam<Real>("exponent")),
-    _activation_energy_prop(getParam<Real>("activation_energy")),
-    _heat_capacity_prop(getParam<Real>("heat_capacity")),
-    _gas_constant(getParam<Real>("gas_constant")),
-    
-    _activation_energy(declareProperty<Real>("activation_energy")),
-    _mech_dissipation(declareProperty<Real>("mech_dissipation")),
-    _mises_stress(declareProperty<Real>("mises_stress")),
-    _heat_capacity(declareProperty<Real>("heat_capacity"))
+  FiniteStrainPlasticMaterial(name, parameters),
+  _T(coupledValue("T")),
+
+  _ref_pe_rate(getParam<Real>("ref_pe_rate")),
+  _exponent(getParam<Real>("exponent")),
+  _activation_energy_prop(getParam<Real>("activation_energy")),
+  _heat_capacity_prop(getParam<Real>("heat_capacity")),
+  _gas_constant(getParam<Real>("gas_constant")),
+
+  _activation_energy(declareProperty<Real>("activation_energy")),
+  _mech_dissipation(declareProperty<Real>("mech_dissipation")),
+  _mises_stress(declareProperty<Real>("mises_stress")),
+  _heat_capacity(declareProperty<Real>("heat_capacity"))
    
  {
 }
