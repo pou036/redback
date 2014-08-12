@@ -63,10 +63,6 @@ protected:
   MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
 
-  Real _euler_angle_1;
-  Real _euler_angle_2;
-  Real _euler_angle_3;
-
   // vectors to get the input values
   std::vector<Real> _Cijkl_vector;
 
@@ -75,8 +71,6 @@ protected:
 
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
   //RankTwoTensor _strain_increment;
-
-  RealVectorValue _Euler_angles;
 
   /// Current deformation gradient
   //RankTwoTensor _dfgrd;
@@ -102,24 +96,11 @@ protected:
   MaterialProperty<RankTwoTensor> & _plastic_strain_old;
   MaterialProperty<Real> & _eqv_plastic_strain;
   MaterialProperty<Real> & _eqv_plastic_strain_old;
-  Real _rtol;
-  Real _ftol;
-  Real _eptol;
-
-  //virtual void returnMap(const RankTwoTensor & sig_old, const Real eqvpstrain_old, const RankTwoTensor & plastic_strain_old,
-  //                       const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & sig,
-  //                       Real & eqvpstrain, RankTwoTensor & plastic_strain);
 
   virtual Real yieldFunction(const RankTwoTensor & stress, const Real yield_stress);
-  virtual RankTwoTensor dyieldFunction_dstress(const RankTwoTensor & stress);
-  virtual Real dyieldFunction_dinternal(const Real equivalent_plastic_strain);
-  virtual RankTwoTensor flowPotential(const RankTwoTensor & stress);
-  virtual Real internalPotential();
   Real getSigEqv(const RankTwoTensor & stress);
-  //virtual void getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr, RankFourTensor & dresid_dsig);
   Real deltaFunc(unsigned int i, unsigned int j);
   Real getYieldStress(const Real equivalent_plastic_strain);
-  Real getdYieldStressdPlasticStrain(const Real equivalent_plastic_strain);
 
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
   virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);

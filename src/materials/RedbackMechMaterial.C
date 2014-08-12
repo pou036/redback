@@ -62,12 +62,8 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _elasticity_tensor(declareProperty<ElasticityTensorR4>("elasticity_tensor")),
   _Jacobian_mult(declareProperty<ElasticityTensorR4>("Jacobian_mult")),
   // _d_stress_dT(declareProperty<RankTwoTensor>("d_stress_dT")),
-  _euler_angle_1(getParam<Real>("euler_angle_1")),
-  _euler_angle_2(getParam<Real>("euler_angle_2")),
-  _euler_angle_3(getParam<Real>("euler_angle_3")),
   _Cijkl_vector(getParam<std::vector<Real> >("C_ijkl")),
   _Cijkl(),
-  _Euler_angles(_euler_angle_1, _euler_angle_2, _euler_angle_3),
   _has_T(isCoupled("temperature")),
   _T(_has_T ? &coupledValue("temperature") : NULL),
   _fill_method((RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
@@ -87,9 +83,6 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
   _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
   _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
-  _rtol(getParam<Real>("rtol")),
-  _ftol(getParam<Real>("ftol")),
-  _eptol(getParam<Real>("eptol")),
 
   // Copy-paste from FiniteStrainPlasticRateMaterial.C
   _ref_pe_rate(getParam<Real>("ref_pe_rate")),
@@ -402,32 +395,6 @@ RedbackMechMaterial::yieldFunction(const RankTwoTensor & stress, const Real yiel
   return getSigEqv(stress) - yield_stress;
 }
 
-RankTwoTensor
-RedbackMechMaterial::dyieldFunction_dstress(const RankTwoTensor & sig)
-{
-  RankTwoTensor deriv = sig.dsecondInvariant();
-  deriv *= std::pow(3/sig.secondInvariant(), 0.5)/2;
-  return deriv;
-}
-
-Real
-RedbackMechMaterial::dyieldFunction_dinternal(const Real equivalent_plastic_strain)
-{
-  return -getdYieldStressdPlasticStrain(equivalent_plastic_strain);
-}
-
-RankTwoTensor
-RedbackMechMaterial::flowPotential(const RankTwoTensor & sig)
-{
-  return dyieldFunction_dstress(sig); // this plasticity model assumes associative flow
-}
-
-Real
-RedbackMechMaterial::internalPotential()
-{
-  return -1;
-}
-
 Real
 RedbackMechMaterial::getSigEqv(const RankTwoTensor & stress)
 {
@@ -526,7 +493,7 @@ RedbackMechMaterial::getYieldStress(const Real eqpe)
   return 0.0;
 }
 
-Real
+/*Real
 RedbackMechMaterial::getdYieldStressdPlasticStrain(const Real eqpe)
 {
   unsigned nsize;
@@ -554,7 +521,7 @@ RedbackMechMaterial::getdYieldStressdPlasticStrain(const Real eqpe)
   }
 
   return 0.0;
-}
+}*/
 
 Real
 RedbackMechMaterial::macaulayBracket(Real val)
