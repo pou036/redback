@@ -38,6 +38,14 @@ class RedbackMechMaterial : public RedbackMaterial
 {
 public:
   RedbackMechMaterial(const std::string & name, InputParameters parameters);
+  // Redback
+  static MooseEnum yieldCriterionEnum();
+  enum YieldCriterion
+  {
+    J2_plasticity, // Von Mises
+    Drucker_Prager,
+    modified_Cam_Clay
+  };
 
 protected:
   // Copy-paste from TensorMechanicsMaterial.h
@@ -75,8 +83,7 @@ protected:
   /// Current deformation gradient
   //RankTwoTensor _dfgrd;
 
-  bool _has_T;
-  VariableValue * _T; //pointer rather than reference
+  //VariableValue & _T;
 
   /// determines the translation from C_ijkl to the Rank-4 tensor
   RankFourTensor::FillMethod _fill_method;
@@ -112,27 +119,15 @@ protected:
 
   Real macaulayBracket(Real);
 
-
-
-
-
-
-  //  virtual void initQpStatefulProperties();
-//  virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
-
-//  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
-//  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
-//  void getFlowTensor(const RankTwoTensor &, Real, RankTwoTensor &);
-
-//  MaterialProperty<Real> & _mises_stress;
-//  MaterialProperty<Real> & _mean_stress;
-
-//  MaterialProperty<Real> & _volumetric_strain;
-//  MaterialProperty<Real> & _volumetric_strain_rate;
-
-//  Real macaulayBracket(Real);
-
-  
+  // Redback specific
+  MaterialProperty<Real> & _mises_stress;
+  MaterialProperty<Real> & _mean_stress;
+  MaterialProperty<Real> & _volumetric_strain;
+  MaterialProperty<Real> & _volumetric_strain_rate;
+  Real _exponential;
+  YieldCriterion _yield_criterion;
+  Real _slope_yield_surface;  // coefficient for yield surface
+  virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
 };
 
 #endif //REDBACKMECHMATERIAL_H

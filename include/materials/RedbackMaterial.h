@@ -15,7 +15,8 @@
 #ifndef REDBACKMATERIAL_H
 #define REDBACKMATERIAL_H
 
-#include "FiniteStrainPlasticMaterial.h"
+//#include "FiniteStrainPlasticMaterial.h"
+#include "Material.h"
 
 
 //Forward Declarations
@@ -24,7 +25,7 @@ class RedbackMaterial;
 template<>
 InputParameters validParams<RedbackMaterial>();
 
-class RedbackMaterial : public FiniteStrainPlasticMaterial
+class RedbackMaterial : public Material
 {
 public:
   RedbackMaterial(const std::string & name, InputParameters parameters);
@@ -48,20 +49,19 @@ public:
   };
 
 protected:
-  virtual void computeQpStress();
+  virtual void computeQpProperties();
   virtual void initQpStatefulProperties();
-  virtual void computeEnergyTerms(RankTwoTensor & , Real , Real );
+  virtual void computeRedbackTerms();
 
-  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
-  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
-  void getFlowTensor(const RankTwoTensor &, Real, RankTwoTensor &);
-  Real macaulayBracket(Real);
-
+  bool _has_T;
   VariableValue & _T;
+  bool _has_pore_pres;
   VariableValue & _pore_pres;
   
   Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param, _m_param, _exponent; //_ar_c_param, _da_param, _mu_param,
+  Real  _ar_F_param, _ar_R_param, _da_endo_param, _da_exo_param, _mu_param, _Kc_param, _eta1_param, _eta2_param, _Aphi_param;
   bool _is_mechanics_on;
+
   MaterialProperty<Real> & _gr;
   MaterialProperty<Real> & _ref_lewis_nb;
   MaterialProperty<Real> & _ar;
@@ -70,21 +70,33 @@ protected:
   
   MaterialProperty<Real> & _porosity;
   MaterialProperty<Real> & _lewis_number;
-  MaterialProperty<Real> & _mises_stress;
-  MaterialProperty<Real> & _mean_stress;
-
-  MaterialProperty<Real> & _mises_strain;
-  MaterialProperty<Real> & _mises_strain_rate;
-  MaterialProperty<Real> & _volumetric_strain;
-  MaterialProperty<Real> & _volumetric_strain_rate;
 
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _mechanical_dissipation;
   MaterialProperty<Real> & _mechanical_dissipation_jac;
-  Real _exponential;
   
+  MaterialProperty<Real> & _ar_F;
+  MaterialProperty<Real> & _ar_R;
+  MaterialProperty<Real> & _mu;
+
+  MaterialProperty<Real> & _chemical_porosity;
+  MaterialProperty<Real> & _solid_ratio;
+  MaterialProperty<Real> & _chemical_endothermic_energy;
+  MaterialProperty<Real> & _chemical_endothermic_energy_jac;
+  MaterialProperty<Real> & _chemical_exothermic_energy;
+  MaterialProperty<Real> & _chemical_exothermic_energy_jac;
+  MaterialProperty<Real> & _chemical_source_mass;
+  MaterialProperty<Real> & _chemical_source_mass_jac;
+
   RedbackMaterial::DensityMethod _density_method;
-  RedbackMaterial::PermeabilityMethod _permeability_method;
+  RedbackMaterial::PermeabilityMethod _permeability_method; // TODO: remove RedbackMaterial???
+
+  Real _exponential;
+
+  MaterialProperty<Real> & _mises_strain;
+  MaterialProperty<Real> & _mises_strain_rate;
+
+
 };
 
 #endif //REDBACKMATERIAL_H
