@@ -40,7 +40,6 @@ Real
 RedbackMechDissip::computeQpResidual()
 {
   return -_test[_i][_qp]*_mechanical_dissipation[_qp];
-  
 }
 
 Real

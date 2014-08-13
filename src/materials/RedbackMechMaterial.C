@@ -17,7 +17,7 @@
 template<>
 InputParameters validParams<RedbackMechMaterial>()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = validParams<RedbackMaterial>();
 
   // Copy-paste from TensorMechanicsMaterial.C
   params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");

@@ -35,11 +35,11 @@ RedbackMassDiffusion::~RedbackMassDiffusion()
 Real
 RedbackMassDiffusion::computeQpResidual()
 {
-  return (_Le[_qp] * _grad_u[_qp]) * _grad_test[_i][_qp];
+  return ((1/_Le[_qp]) * _grad_u[_qp]) * _grad_test[_i][_qp];
 }
 
 Real
 RedbackMassDiffusion::computeQpJacobian()
 {
-  return (_Le[_qp] * _grad_phi[_j][_qp]) * _grad_test[_i][_qp];
+  return ((1/_Le[_qp])*_grad_phi[_j][_qp]) * _grad_test[_i][_qp];
 }

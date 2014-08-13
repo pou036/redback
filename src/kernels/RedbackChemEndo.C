@@ -46,5 +46,6 @@ RedbackChemEndo::computeQpResidual()
 Real
 RedbackChemEndo::computeQpJacobian()
 {
+  //std::cout<<"chemical endothermic kernel="<<_chemical_endothermic_energy[_qp] <<std::endl;
   return _test[_i][_qp] * _chemical_endothermic_energy_jac[_qp] * _phi[_j][_qp];
 }

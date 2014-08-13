@@ -35,7 +35,7 @@ protected:
 
  // VariableValue &_temp;
   MaterialProperty<Real> & _chemical_source_mass;
-   MaterialProperty<Real> & _chemical_source_mass_jac;
+  MaterialProperty<Real> & _chemical_source_mass_jac;
 };
 
 

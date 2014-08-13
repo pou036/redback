@@ -8,7 +8,7 @@
 []
 
 [Variables]
-  active = 'temp'
+  active = 'pore_pressure'
   [./temp]
   [../]
   [./disp_x]
@@ -21,9 +21,12 @@
     family = MONOMIAL
     block = 0
   [../]
+  [./pore_pressure]
+  [../]
 []
 
 [Kernels]
+  active = 'td_press press_diff chem_press'
   [./td_temp]
     type = TimeDerivative
     variable = temp
@@ -36,10 +39,23 @@
     type = RedbackMechDissip
     variable = temp
   [../]
+  [./td_press]
+    type = TimeDerivative
+    variable = pore_pressure
+  [../]
+  [./press_diff]
+    type = RedbackMassDiffusion
+    variable = pore_pressure
+  [../]
+  [./chem_press]
+    type = RedbackChemPressure
+    variable = pore_pressure
+    block = 0
+  [../]
 []
 
 [BCs]
-  active = 'left_temp right_temp'
+  active = 'press_bc'
   [./left_temp]
     type = DirichletBC
     variable = temp
@@ -70,6 +86,12 @@
     boundary = right
     value = 0
   [../]
+  [./press_bc]
+    type = DirichletBC
+    variable = pore_pressure
+    boundary = 'left right'
+    value = 0
+  [../]
 []
 
 [Materials]
@@ -77,15 +99,16 @@
     type = RedbackMaterial
     block = 0
     m = 1
+    mu = 0.5
     ar = 10
     yield_stress = '0 1 1 1'
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
-    gr = 0.095
-    pore_pres = 0
-    temperature = temp
+    gr = 0.9
+    pore_pres = pore_pressure
+    temperature = 0
     is_mechanics_on = false
     ref_lewis_nb = 1
-    ar_F = 40
+    ar_F = 20
     ar_R = 1
     Aphi = 0
     phi0 = 0.1
@@ -94,7 +117,7 @@
 []
 
 [Postprocessors]
-  active = 'middle_temp'
+  active = 'middle_press'
   [./middle_temp]
     type = PointValue
     variable = temp
@@ -103,6 +126,11 @@
   [./strain]
     type = StrainRatePoint
     variable = temp
+    point = '0 0 0'
+  [../]
+  [./middle_press]
+    type = PointValue
+    variable = pore_pressure
     point = '0 0 0'
   [../]
 []
@@ -128,11 +156,17 @@
 []
 
 [ICs]
+  active = 'press_ic'
   [./temp_ic]
     variable = temp
     value = 0
     type = ConstantIC
     block = 0
+  [../]
+  [./press_ic]
+    variable = pore_pressure
+    type = ConstantIC
+    value = 1
   [../]
 []
 

@@ -19,18 +19,14 @@ template<>
 InputParameters validParams<RedbackChemPressure>()
 {
   InputParameters params = validParams<Kernel>();
-
- // params.addRequiredCoupledVar("temp", "Temperature variable.");
-
   return params;
 }
 
 
 RedbackChemPressure::RedbackChemPressure(const std::string & name, InputParameters parameters) :
   Kernel(name, parameters),
- // _temp(coupledValue("temp")),
   _chemical_source_mass(getMaterialProperty<Real>("chemical_source_mass")),
-  _chemical_source_mass_jac(getMaterialProperty<Real>("chemical_source_term_mass_jacobian"))
+  _chemical_source_mass_jac(getMaterialProperty<Real>("chemical_source_mass_jacobian"))
 
 {
 

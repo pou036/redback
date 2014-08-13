@@ -50,7 +50,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _has_T(isCoupled("temperature")),
   _T(_has_T ? coupledValue("temperature") : _zero), // TODO: should be NULL (but doesn't compile)
   _has_pore_pres(isCoupled("pore_pres")),
-  _pore_pres(_has_pore_pres ? coupledValue("pore_pres"): _zero), // TODO: should be NULL (but doesn't compile)
+  _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero), // TODO: should be NULL (but doesn't compile)
 
   _phi0_param(getParam<Real>("phi0")),
   _gr_param(getParam<Real>("gr")),
@@ -70,6 +70,8 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
 
   _is_mechanics_on(getParam<bool>("is_mechanics_on")),
 
+  _useless_property_old(declarePropertyOld<Real>("gr")), //TODO: find better way to initiate the values.
+
   _gr(declareProperty<Real>("gr")),
   _ref_lewis_nb(declareProperty<Real>("ref_lewis_nb")),
   _ar(declareProperty<Real>("ar")),
@@ -87,21 +89,20 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _ar_R(declareProperty<Real>("ar_R")),
   _mu(declareProperty<Real>("mu")),
 
-  _chemical_porosity(declareProperty<Real>("_chemical_porosity")),
+  _chemical_porosity(declareProperty<Real>("chemical_porosity")),
   _solid_ratio(declareProperty<Real>("solid_ratio")),
   _chemical_endothermic_energy(declareProperty<Real>("chemical_endothermic_energy")),
   _chemical_endothermic_energy_jac(declareProperty<Real>("chemical_endothermic_energy_jacobian")),
   _chemical_exothermic_energy(declareProperty<Real>("chemical_exothermic_energy")),
   _chemical_exothermic_energy_jac(declareProperty<Real>("chemical_exothermic_energy_jacobian")),
-  _chemical_source_mass(declareProperty<Real>("chemical_source_term_mass")),
-  _chemical_source_mass_jac(declareProperty<Real>("chemical_source_term_mass_jacobian")),
+  _chemical_source_mass(declareProperty<Real>("chemical_source_mass")),
+  _chemical_source_mass_jac(declareProperty<Real>("chemical_source_mass_jacobian")),
 
   _density_method((DensityMethod)(int)getParam<MooseEnum>("density_method")),
   _permeability_method((PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method")),
 
   _mises_strain(declareProperty<Real>("mises_strain")),
   _mises_strain_rate(declareProperty<Real>("mises_strain_rate"))
-
 
 {
 }
@@ -123,7 +124,9 @@ RedbackMaterial::permeabilityMethodEnum()
 void
 RedbackMaterial::initQpStatefulProperties()
 {
+
   // Initialise our made up variables...
+  _useless_property_old[_qp] = 0; // TODO: find a better way
   _gr[_qp] = _gr_param;
   _ref_lewis_nb[_qp] = _ref_lewis_nb_param;
   _ar[_qp] = _ar_param;
@@ -138,7 +141,6 @@ RedbackMaterial::initQpStatefulProperties()
   _ar_R[_qp] = _ar_R_param;
   _mu[_qp] = _mu_param;
   _mises_strain[_qp] = 0;
-
 }
 
 void
@@ -154,6 +156,8 @@ RedbackMaterial::computeRedbackTerms()
 {
   Real omega_rel, temporary, phi_prime, s_prime;
 
+  //TODO: put flags for all properties depending on activated variables.
+
   //TODO: do not compute these when mechanics is on (5 fields overwritten)
   _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
   // Compute modified Gruntfest number
@@ -166,6 +170,7 @@ RedbackMaterial::computeRedbackTerms()
   // Compute Mechanical Dissipation
   _mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
       std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
+
   // Compute Mechanical Dissipation Jacobian
   _mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
     _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
@@ -184,23 +189,28 @@ RedbackMaterial::computeRedbackTerms()
   // Step 2: calculate the solid ratio
   _solid_ratio[_qp] = omega_rel/(1 + omega_rel);
 
-  // Step 3: calculate the chemical porosity
-  _chemical_porosity[_qp] = _Aphi_param*(1 + _porosity[_qp])/(1+_eta1_param/_solid_ratio[_qp]);
+  // Step 3: calculate the chemical porosity and update the total porosity
+  _chemical_porosity[_qp] = _Aphi_param*(1 - _phi0_param)/(1+_eta1_param/_solid_ratio[_qp]);
+  _porosity[_qp] =  _phi0_param + _chemical_porosity[_qp];
 
   // Step 4: calculate the partial derivatives for the jacobian
-  temporary = _eta2_param * _Kc_param * (_ar_F[_qp] - _ar_R[_qp]) *_delta[_qp] *std::exp( (_ar_F[_qp]-_ar_R[_qp]) / (1 + _delta[_qp]*_T[_qp]) )
-       / std::pow(1+_delta[_qp]*_T[_qp], 2) ;
+  temporary = _eta2_param * _Kc_param * (_ar_F[_qp] - _ar_R[_qp]) *_delta[_qp] *
+      std::exp( (_ar_F[_qp]-_ar_R[_qp]) / (1 + _delta[_qp]*_T[_qp]) ) / std::pow(1+_delta[_qp]*_T[_qp], 2) ;
 
-  phi_prime = - temporary*_Aphi_param*_eta1_param*(1-_porosity[_qp]) / std::pow(_eta1_param * std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp])) + (1 + _eta1_param)* std::exp( _ar_F[_qp] / (1 + _delta[_qp]*_T[_qp]) )* _eta2_param * _Kc_param, 2);
+  phi_prime = - temporary*_Aphi_param*_eta1_param*(1-_phi0_param) /
+      std::pow(_eta1_param * std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp])) +
+          (1 + _eta1_param)*
+      std::exp( _ar_F[_qp] / (1 + _delta[_qp]*_T[_qp]) )* _eta2_param * _Kc_param, 2);
 
   s_prime = - temporary/std::pow(
-       std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp])) + std::exp( _ar_F[_qp] / (1 + _delta[_qp]*_T[_qp]) )* _eta2_param * _Kc_param, 2);
+       std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp])) +
+       std::exp( _ar_F[_qp] / (1 + _delta[_qp]*_T[_qp]) )* _eta2_param * _Kc_param, 2);
 
   // Compute Endothermic Chemical Energy
   _chemical_endothermic_energy[_qp] = _da_endo_param * (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp]) *
       std::exp( (_ar_F[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
 
-  //std::cout<<"testing again... "<<_chemical_endothermic_energy[_qp] <<std::endl;
+  //std::cout<<"chemical endothermic="<<_chemical_endothermic_energy[_qp] <<std::endl;
 
   // Compute Endothermic Chemical Energy Jacobian
   _chemical_endothermic_energy_jac[_qp] = _da_endo_param * std::exp( (_ar_F[_qp]) / (1 + _delta[_qp]*_T[_qp]) ) *
@@ -231,13 +241,8 @@ RedbackMaterial::computeRedbackTerms()
   // Compute Jacobian of Chemical Source/Sink Term for the mass (pore pressure) equation. The corresponding variable is pore pressure
   _chemical_source_mass_jac[_qp] = 0;
 
-  // Final Step: Update the total porosity
-  _porosity[_qp] =  _porosity[_qp] + _chemical_porosity[_qp];
-
   // Update Lewis number
   _lewis_number[_qp] = _ref_lewis_nb[_qp]*std::pow((1-_porosity[_qp])/(1-_phi0_param), 2) * std::pow(_phi0_param/_porosity[_qp], 3);
-
-
   return;
 }
 
