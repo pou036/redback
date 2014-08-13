@@ -85,7 +85,7 @@
     property = porosity
     block = 0
   [../]
-  [./Lewis number]
+  [./Lewis_number]
     type = MaterialRealAux
     variable = Lewis_number
     property = lewis_number
