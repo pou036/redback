@@ -14,7 +14,6 @@
 #include "RedbackStressDivergenceTensors.h"
 
 // Materials
-#include "FiniteStrainRatePlasticTemperatureMaterial.h"
 #include "RedbackMaterial.h"
 //#include "RedbackChemMaterial.h"
 #include "RedbackMechMaterial.h"
@@ -73,7 +72,6 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackStressDivergenceTensors);
 
 
-  registerMaterial(FiniteStrainRatePlasticTemperatureMaterial);
   registerMaterial(RedbackMaterial);
   //registerMaterial(RedbackChemMaterial);
   registerMaterial(RedbackMechMaterial);

@@ -1,29 +1,9 @@
 [Mesh]
-  type = FileMesh
-  file = ../../meshes/2d_square_400elements_2corners_inclusion.msh
-[]
-
-[MeshModifiers]
-  [./left_mid_point]
-    type = AddExtraNodeset
-    boundary = 4
-    coord = '0.0 0.5'
-  [../]
-  [./right_mid_point]
-    type = AddExtraNodeset
-    boundary = 5
-    coord = '1 0.5'
-  [../]
-  [./top_mid_point]
-    type = AddExtraNodeset
-    boundary = 6
-    coord = '0.5 1'
-  [../]
-  [./bottom_mid_point]
-    type = AddExtraNodeset
-    boundary = 7
-    coord = '0.5 0'
-  [../]
+  type = GeneratedMesh
+  dim = 2
+  nx = 20
+  ny = 10
+  xmax = 1.3
 []
 
 [Variables]
@@ -47,7 +27,7 @@
 [Materials]
   [./mat0]
     type = RedbackMechMaterial
-    block = '0 1'
+    block = 0
     disp_y = disp_y
     disp_x = disp_x
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
@@ -64,6 +44,7 @@
     phi0 = 0.1
     ref_pe_rate = 1
     Aphi = 0
+    slope_yield_surface = 0.2
   [../]
 []
 
@@ -246,7 +227,7 @@
     type = MaterialRealAux
     variable = Mod_Gruntfest_number
     property = mod_gruntfest_number
-    block = '0 1'
+    block = 0
   [../]
 []
 

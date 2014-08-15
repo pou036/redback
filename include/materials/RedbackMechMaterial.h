@@ -104,7 +104,7 @@ protected:
   MaterialProperty<Real> & _eqv_plastic_strain;
   MaterialProperty<Real> & _eqv_plastic_strain_old;
 
-  virtual Real yieldFunction(const RankTwoTensor & stress, const Real yield_stress);
+  //virtual Real yieldFunction(const RankTwoTensor & stress, const Real yield_stress);
   Real getSigEqv(const RankTwoTensor & stress);
   Real deltaFunc(unsigned int i, unsigned int j);
   Real getYieldStress(const Real equivalent_plastic_strain);
@@ -113,6 +113,8 @@ protected:
   virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
   void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
   void getFlowTensor(const RankTwoTensor &, Real, RankTwoTensor &);
+  Real getFlowIncrement(const RankTwoTensor &, Real);
+  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real);
 
   Real _ref_pe_rate;
   Real _exponent;

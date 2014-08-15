@@ -110,6 +110,7 @@ RedbackMechMaterial::yieldCriterionEnum()
 void
 RedbackMechMaterial::initQpStatefulProperties()
 {
+  RedbackMaterial::initQpStatefulProperties();
   _total_strain[_qp].zero();
   _elastic_strain[_qp].zero();
   _stress[_qp].zero();
@@ -273,7 +274,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
     delta_dp.zero();
 
     sig_new = sig_old + E_ijkl * delta_d;
-    flow_incr=_ref_pe_rate*_dt * std::pow(macaulayBracket(getSigEqv(sig_new) / yield_stress - 1.0), _exponent) * _exponential;
+    //flow_incr=_ref_pe_rate*_dt * std::pow(macaulayBracket(getSigEqv(sig_new) / yield_stress - 1.0), _exponent) * _exponential;
+    flow_incr = getFlowIncrement(sig_new, yield_stress);
 
     getFlowTensor(sig_new, yield_stress, flow_tensor);
     flow_dirn = flow_tensor;
@@ -293,7 +295,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
       sig_new += ddsig; //Update stress
       delta_dp -= E_ijkl.invSymm() * ddsig; //Update plastic rate of deformation tensor
 
-      flow_incr_tmp = _ref_pe_rate * _dt * std::pow(macaulayBracket(getSigEqv(sig_new) / yield_stress - 1.0), _exponent) * _exponential;
+      //flow_incr_tmp = _ref_pe_rate * _dt * std::pow(macaulayBracket(getSigEqv(sig_new) / yield_stress - 1.0), _exponent) * _exponential;
+      flow_incr_tmp = getFlowIncrement(sig_new, yield_stress);
 
       if (flow_incr_tmp < 0.0) //negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment: Reduce time increment.");
@@ -331,19 +334,78 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
 }
 
 void
-RedbackMechMaterial::getFlowTensor(const RankTwoTensor & sig, Real /*yield_stress*/, RankTwoTensor & flow_tensor)
+RedbackMechMaterial::getFlowTensor(const RankTwoTensor & sig, Real yield_stress, RankTwoTensor & flow_tensor)
 {
   RankTwoTensor sig_dev;
   Real sig_eqv, val;
+  Real pressure;
 
-  sig_eqv = getSigEqv(sig);
-  sig_dev = sig.deviatoric();
+ sig_dev = sig.deviatoric();
 
-  val = 0.0;
-  if (sig_eqv > 1e-8)
-    val = 3.0 / (2.0 * sig_eqv);
+  switch (_yield_criterion)
+      {
+        case J2_plasticity:
+          sig_eqv = getSigEqv(sig);
+          val = 0.0;
+          if (sig_eqv > 1e-8)
+            val = 3.0 / (2.0 * sig_eqv);
+          flow_tensor = sig_dev * val;
+          break;
+          //return;
+        case Drucker_Prager:
+          sig_eqv = getSigEqv(sig);
+          val = 0.0;
+          if (sig_eqv > 1e-8)
+            val = 3.0 / (2.0 * sig_eqv);
+          flow_tensor = sig_dev * val;
+          flow_tensor.addIa(-_slope_yield_surface/3.0);
+          break;
+          //return;
+        case modified_Cam_Clay:
+          pressure = sig.trace()/3.0;
+          flow_tensor = 3*std::pow(_slope_yield_surface,-2) * sig_dev;
+          flow_tensor.addIa((2*pressure-yield_stress)/3);
+          break;
+          //return;
+        default:
+          mooseError("yieldFunction called with unknown yield_criterion of " << _yield_criterion);
+      }
+  flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm();
+}
 
-  flow_tensor = sig_dev * val;
+Real
+RedbackMechMaterial::getFlowIncrement(const RankTwoTensor & sig, Real yield_stress)
+{
+  return _ref_pe_rate * _dt * std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent) * _exponential;
+  /*switch (_yield_criterion)
+    {
+      case J2_plasticity:
+        return _ref_pe_rate * _dt * std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent) * _exponential;
+      case Drucker_Prager:
+        return _ref_pe_rate * _dt * std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent) * _exponential;
+      case modified_Cam_Clay:
+        return _ref_pe_rate * _dt * std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent) * _exponential;
+      default:
+        mooseError("getFlowIncrement called with unknown yield_criterion of " << _yield_criterion);
+    }*/
+}
+
+Real
+RedbackMechMaterial::getDerivativeFlowIncrement(const RankTwoTensor & sig, Real yield_stress)
+{
+  // Derivative of getFlowIncrement with respect to equivalent stress
+  return _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
+  /*switch (_yield_criterion)
+    {
+      case J2_plasticity:
+        return _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
+      case Drucker_Prager:
+        return _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
+      case modified_Cam_Clay:
+        return _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
+      default:
+        mooseError("getDerivativeFlowIncrement called with unknown yield_criterion of " << _yield_criterion);
+    }*/
 }
 
 void
@@ -411,7 +473,7 @@ RedbackMechMaterial::computeQpStrain(const RankTwoTensor & Fhat)
   _rotation_increment[_qp] = R_incr.transpose();
 }
 
-Real
+/*Real
 RedbackMechMaterial::yieldFunction(const RankTwoTensor & stress, const Real yield_stress)
 {
   Real pressure = stress.trace()/3.0;
@@ -427,7 +489,7 @@ RedbackMechMaterial::yieldFunction(const RankTwoTensor & stress, const Real yiel
       default:
         mooseError("yieldFunction called with unknown yield_criterion of " << _yield_criterion);
     }
-}
+}*/
 
 Real
 RedbackMechMaterial::getSigEqv(const RankTwoTensor & stress)
@@ -453,7 +515,8 @@ RedbackMechMaterial::getJac(const RankTwoTensor & sig, const RankFourTensor & E_
   getFlowTensor(sig, yield_stress, flow_tensor);
 
   flow_dirn = flow_tensor;
-  dfi_dseqv = _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
+  //dfi_dseqv = _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
+  dfi_dseqv = getDerivativeFlowIncrement(sig, yield_stress);
 
   for (i = 0; i < 3; ++i)
     for (j = 0; j < 3; ++j)

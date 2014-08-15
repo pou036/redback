@@ -27,7 +27,6 @@
 []
 
 [Variables]
-  active = 'disp_z disp_y disp_x'
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -64,6 +63,7 @@
     phi0 = 0.1
     ref_pe_rate = 1
     Aphi = 0
+    temperature = temp
   [../]
 []
 
@@ -83,7 +83,7 @@
 []
 
 [BCs]
-  active = 'constant_force_right left_disp rigth_disp_y left_disp_y'
+  active = 'constant_force_right temp_mid_pts left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -187,6 +187,21 @@
   [../]
 []
 
+[Kernels]
+  [./td_temp]
+    type = TimeDerivative
+    variable = temp
+  [../]
+  [./temp_diff]
+    type = Diffusion
+    variable = temp
+  [../]
+  [./temp_dissip]
+    type = RedbackMechDissip
+    variable = temp
+  [../]
+[]
+
 [AuxKernels]
   active = 'mises_strain mises_strain_rate mises_stress mech_dissipation Gruntfest_Number'
   [./stress_zz]
@@ -251,7 +266,6 @@
 []
 
 [Postprocessors]
-  active = 'mises_strain_rate mises_stress mises_strain'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
@@ -319,6 +333,15 @@
     disp_z = disp_z
     disp_y = disp_y
     disp_x = disp_x
+    temp = temp
+  [../]
+[]
+
+[ICs]
+  [./temp_ic]
+    variable = temp
+    type = ConstantIC
+    value = 0
   [../]
 []
 
