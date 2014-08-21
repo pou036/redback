@@ -65,6 +65,7 @@
     ref_pe_rate = 1
     Aphi = 0
     yield_criterion = Drucker_Prager
+    slope_yield_surface = -0.6
   [../]
 []
 
@@ -142,7 +143,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number mises_strain mech_diss mises_strain_rate mises_stress volumetric_strain volumetric_strain_rate mean_stress'
+  active = 'Mod_Gruntfest_number mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -202,7 +203,7 @@
 []
 
 [AuxKernels]
-  active = 'mises_strain mises_strain_rate mises_stress mech_dissipation Gruntfest_Number mean_stress volumetric_strain volumetric_strain_rate'
+  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -281,7 +282,7 @@
 []
 
 [Postprocessors]
-  active = 'mises_strain_rate mises_stress mises_strain mean_stress volumetric_strain volumetric_strain_rate'
+  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress'
   [./mises_stress]
     type = PointValue
     variable = mises_stress

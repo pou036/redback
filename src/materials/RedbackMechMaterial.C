@@ -331,7 +331,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
       _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
       (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
-  _mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent) * _mean_stress[_qp] * std::pow( macaulayBracket(1- _mean_stress[_qp]/p_y), _exponent);
+  _mod_gruntfest_number[_qp] = _gr[_qp] * (getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent) +
+      _mean_stress[_qp] * std::pow( macaulayBracket(1- _mean_stress[_qp]/p_y), _exponent));
   return;
 }
 
@@ -779,14 +780,15 @@ void
 RedbackMechMaterial::getFlowTensorDP(const RankTwoTensor & sig, Real sig_eqv, RankTwoTensor & flow_tensor)
 {
   RankTwoTensor sig_dev;
-  Real val;
+  Real val, pressure;
 
   sig_dev = sig.deviatoric();
+  pressure = sig.trace()/3.0;
   val = 0.0;
   if (sig_eqv > 1e-8)
     val = 3.0 / (2.0 * sig_eqv);
   flow_tensor = sig_dev * val;
-  flow_tensor.addIa(-_slope_yield_surface/3.0);
+  flow_tensor.addIa(-_slope_yield_surface*(pressure > 0 ? 1:-1)/3.0); //(pressure > 0 ? 1:-1) is the sign function
   flow_tensor /= flow_tensor.L2norm();
   //flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm(); // TODO: debugging, returning a tensor of norm sqrt(3/2) to match the J2 case
 
