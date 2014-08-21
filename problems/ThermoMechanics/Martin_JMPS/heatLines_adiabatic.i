@@ -65,20 +65,36 @@
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     temperature = temp
     yield_stress = '0. 1 1. 1'
-    disp_z = 0
+    disp_z = disp_z
     ar_c = 1
     m = 2
     da = 1
     mu = 1
     ar = 5
-    gr = 0.8
+    gr = 1
     pore_pres = 0
     is_mechanics_on = true
   [../]
 []
 
+[Functions]
+  active = 'spline_IC downfunc'
+  [./upfunc]
+    type = ParsedFunction
+    value = t
+  [../]
+  [./downfunc]
+    type = ParsedFunction
+    value = -0.1*t
+  [../]
+  [./spline_IC]
+    type = ConstantFunction
+    value = 1
+  [../]
+[]
+
 [BCs]
-  active = 'constant_force_right temp_box left_disp rigth_disp_y left_disp_y'
+  active = 'right_disp left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -183,18 +199,22 @@
 []
 
 [Kernels]
+  active = 'temp_dissip temp_td'
   [./temp_td]
     type = TimeDerivative
     variable = temp
+    block = 0
   [../]
   [./temp_diff]
     type = AnisotropicDiffusion
     variable = temp
+    block = 0
     tensor_coeff = '1 0 0 0 1 0 0 0 1'
   [../]
   [./temp_dissip]
     type = RedbackMechDissip
     variable = temp
+    block = 0
   [../]
 []
 
@@ -262,7 +282,7 @@
 []
 
 [Postprocessors]
-  active = 'Gruntfest_number temp_centre mises_stress strain_rate'
+  active = 'temp_centre mises_strain strain_rate mises_stress Gruntfest_number'
   [./test]
     type = StrainRatePoint
     variable = temp
@@ -276,16 +296,21 @@
   [./strain_rate]
     type = PointValue
     variable = mises_strain_rate
-    point = '0.5 0.5 0'
+    point = '0 0 0'
   [../]
   [./mises_stress]
     type = PointValue
     variable = mises_stress
-    point = '0.5 0.5 0'
+    point = '0 0 0'
   [../]
   [./Gruntfest_number]
     type = PointValue
     variable = Mod_Gruntfest_number
+    point = '0 0 0'
+  [../]
+  [./mises_strain]
+    type = PointValue
+    variable = mises_strain
     point = '0 0 0'
   [../]
 []
@@ -301,12 +326,12 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 10
+  end_time = 1
   dtmax = 1
   dtmin = 1e-7
   type = Transient
-  l_max_its = 500
-  nl_max_its = 25
+  l_max_its = 200
+  nl_max_its = 10
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg cp 201'
@@ -336,7 +361,7 @@
     variable = temp
     value = 0
     type = ConstantIC
-    block = 0
+    block = '0 1'
   [../]
   [./Spline_IC]
     function = spline_IC

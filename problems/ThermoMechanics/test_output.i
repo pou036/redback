@@ -71,7 +71,7 @@
     da = 1
     mu = 1
     ar = 5
-    gr = 0.8
+    gr = 0.5
     pore_pres = 0
     is_mechanics_on = true
   [../]
@@ -287,6 +287,7 @@
     type = PointValue
     variable = Mod_Gruntfest_number
     point = '0 0 0'
+    outputs = csv_out
   [../]
 []
 
@@ -305,8 +306,8 @@
   dtmax = 1
   dtmin = 1e-7
   type = Transient
-  l_max_its = 500
-  nl_max_its = 25
+  l_max_its = 200
+  nl_max_its = 10
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg cp 201'
@@ -328,6 +329,9 @@
     perf_log = true
     linear_residuals = true
   [../]
+  [./csv_out]
+    type = CSV
+  [../]
 []
 
 [ICs]
@@ -336,7 +340,6 @@
     variable = temp
     value = 0
     type = ConstantIC
-    block = 0
   [../]
   [./Spline_IC]
     function = spline_IC
