@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "RedbackMechMaterial.h"
+#include "Ellipse.h"
 
 #include <cmath> //used for fabs
 
@@ -127,8 +128,8 @@ RedbackMechMaterial::initQpStatefulProperties()
   _volumetric_strain_rate[_qp] = 0;
 
   // Define objects needed all the time
-  _identity_tensor = RankTwoTensor::RankTwoTensor();
-  _identity_tensor.addIa(1.0);
+  //_identity_tensor = RankTwoTensor::RankTwoTensor();
+  //_identity_tensor.addIa(1.0);
 
   // TODO: deal with sign of _slope_yield_surface properly
   //_slope_yield_surface = -_slope_yield_surface;
@@ -338,6 +339,18 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 void
 RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)
 {
+  // Thomas playing, testing the ellipse distance code...
+  Real y[2];
+  y[0] = 3.0;
+  y[1] = 2.0;
+  Real m = 0.5;
+  Real p_c = 2.0;
+  Real x[2];
+  Real d = Ellipse::SqrDistanceCC(m, p_c, y, x);
+  std::cout << "distance to the ellipse: " << d << std::endl;
+  std::cout << "projection point on ellipse: coord(0)=" << x[0] << std::endl;
+  std::cout << "projection point on ellipse: coord(0)=" << x[1] << std::endl << std::endl;
+
   switch (_yield_criterion)
       {
         case J2_plasticity:
