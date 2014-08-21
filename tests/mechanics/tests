@@ -1,0 +1,17 @@
+[Tests]
+  [./test_DruckerPrager_mu03] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'DruckerPrager0.3.i'
+    exodiff = 'DruckerPrager0.3_out.e'
+  [../]
+  [./test_DruckerPrager_mu0]
+    type = 'Exodiff'
+    input = 'DruckerPrager0.i'
+    exodiff = 'DruckerPrager0_out.e'
+  [../]
+  [./test_J2plasticity]
+    type = 'Exodiff'
+    input = 'J2plasticity.i'
+    exodiff = 'J2plasticity_out.e'
+  [../]
+[]

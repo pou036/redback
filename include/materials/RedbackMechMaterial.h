@@ -112,31 +112,31 @@ protected:
   Real getYieldStress(const Real equivalent_plastic_strain);
 
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
-  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
-  virtual void returnMapJ2(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
+  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
+  virtual void returnMapJ2(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
   Real getPressureProjectionDP(Real, Real, Real);
-  virtual void returnMapDP(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
-  virtual void returnMapCC(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
+  virtual void returnMapDP(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
+  virtual void returnMapCC(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
   void getJacJ2(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
-  void getJacDP(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, Real, RankFourTensor &);
+  void getJacDP(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, RankFourTensor &);
   void getJacCC(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
-  void getFlowTensorVolumetricDP(const RankTwoTensor &, Real, RankTwoTensor &);
+  //void getFlowTensorVolumetricDP(const RankTwoTensor &, Real, RankTwoTensor &);
   void getFlowTensorVolumetricCC(const RankTwoTensor &, Real, RankTwoTensor &);
   void getFlowTensorDeviatoricJ2(const RankTwoTensor &, Real, RankTwoTensor &);
-  void getFlowTensorDeviatoricDP(const RankTwoTensor &, Real, RankTwoTensor &);
+  //void getFlowTensorDeviatoricDP(const RankTwoTensor &, Real, RankTwoTensor &);
   void getFlowTensorDP(const RankTwoTensor &, Real, RankTwoTensor &);
   void getFlowTensorDeviatoricCC(const RankTwoTensor &, Real, RankTwoTensor &);
   Real getFlowIncrementDP(Real, Real, Real, Real);
-  Real getFlowIncrementVolumetricDP(Real, Real);
+  //Real getFlowIncrementVolumetricDP(Real, Real);
   Real getFlowIncrementVolumetricCC(const RankTwoTensor &, Real);
   Real getFlowIncrementDeviatoricJ2(const RankTwoTensor &, Real);
-  Real getFlowIncrementDeviatoricDP(Real, Real);
+  //Real getFlowIncrementDeviatoricDP(Real, Real);
   Real getDerivativeFlowIncrementDP(const RankTwoTensor &, Real, Real, Real, Real);
   Real getFlowIncrementDeviatoricCC(const RankTwoTensor &, Real);
-  Real getDerivativeFlowIncrementVolumetricDP(const RankTwoTensor &, Real, Real);
+  //Real getDerivativeFlowIncrementVolumetricDP(const RankTwoTensor &, Real, Real);
   Real getDerivativeFlowIncrementVolumetricCC(const RankTwoTensor &, Real);
   Real getDerivativeFlowIncrementDeviatoricJ2(const RankTwoTensor &, Real);
-  Real getDerivativeFlowIncrementDeviatoricDP(Real, Real);
+  //Real getDerivativeFlowIncrementDeviatoricDP(Real, Real);
   Real getDerivativeFlowIncrementDeviatoricCC(const RankTwoTensor &, Real);
 
   Real _ref_pe_rate;
@@ -153,7 +153,7 @@ protected:
   Real _exponential;
   YieldCriterion _yield_criterion;
   Real _slope_yield_surface;  // coefficient for yield surface
-  virtual void computeRedbackTerms(RankTwoTensor &, Real, Real, Real, Real);
+  virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
 };
 
 #endif //REDBACKMECHMATERIAL_H
