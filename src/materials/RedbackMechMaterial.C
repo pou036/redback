@@ -547,12 +547,16 @@ RedbackMechMaterial::returnMapJ2(const RankTwoTensor & sig_old, const RankTwoTen
   p_y = sig.trace()/3.0;
 }
 
+/**
+ * Compute pressure projection of stress on Drucker-Prager yield surface
+ */
 Real
 RedbackMechMaterial::getPressureProjectionDP(Real pressure, Real sig_eqv, Real cohesion)
 {
   // yield pressure, for non-associative, replace mu^2 with mu*dilatency
-  return (pressure + _slope_yield_surface*(sig_eqv - cohesion))
-      / (1.0 + (_slope_yield_surface) * (_slope_yield_surface));
+  // the "fmin" is to handle the apex. Apparently fmin(1/0, x) = x, so it's always true
+  return fmin(cohesion/_slope_yield_surface, (pressure + _slope_yield_surface*(sig_eqv - cohesion))
+      / (1.0 + (_slope_yield_surface) * (_slope_yield_surface)));
 }
 
 /**
