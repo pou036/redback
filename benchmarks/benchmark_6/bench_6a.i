@@ -64,18 +64,19 @@
     phi0 = 0.1
     ref_pe_rate = 1
     Aphi = 0
+    yield_criterion = Drucker_Prager
   [../]
 []
 
 [Functions]
-  active = ''
+  active = 'downfunc'
   [./upfunc]
     type = ParsedFunction
     value = t
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -t
+    value = -3e-2*t
   [../]
   [./spline_IC]
     type = ConstantFunction
@@ -141,7 +142,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number mises_strain mech_diss mises_strain_rate mises_stress'
+  active = 'Mod_Gruntfest_number mises_strain mech_diss mises_strain_rate mises_stress volumetric_strain volumetric_strain_rate mean_stress'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -185,10 +186,23 @@
     family = MONOMIAL
     block = '0 1'
   [../]
+  [./volumetric_strain]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./volumetric_strain_rate]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./mean_stress]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
 []
 
 [AuxKernels]
-  active = 'mises_strain mises_strain_rate mises_stress mech_dissipation Gruntfest_Number'
+  active = 'mises_strain mises_strain_rate mises_stress mech_dissipation Gruntfest_Number mean_stress volumetric_strain volumetric_strain_rate'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -248,10 +262,26 @@
     property = mod_gruntfest_number
     block = '0 1'
   [../]
+  [./mean_stress]
+    type = MaterialRealAux
+    variable = mean_stress
+    property = mean_stress
+    block = 0
+  [../]
+  [./volumetric_strain]
+    type = MaterialRealAux
+    variable = volumetric_strain
+    property = volumetric_strain
+  [../]
+  [./volumetric_strain_rate]
+    type = MaterialRealAux
+    variable = volumetric_strain_rate
+    property = volumetric_strain_rate
+  [../]
 []
 
 [Postprocessors]
-  active = 'mises_strain_rate mises_stress mises_strain'
+  active = 'mises_strain_rate mises_stress mises_strain mean_stress volumetric_strain volumetric_strain_rate'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
@@ -270,6 +300,21 @@
   [./temp_middle]
     type = PointValue
     variable = temp
+    point = '0 0 0'
+  [../]
+  [./mean_stress]
+    type = PointValue
+    variable = mean_stress
+    point = '0 0 0'
+  [../]
+  [./volumetric_strain]
+    type = PointValue
+    variable = volumetric_strain
+    point = '0 0 0'
+  [../]
+  [./volumetric_strain_rate]
+    type = PointValue
+    variable = volumetric_strain_rate
     point = '0 0 0'
   [../]
 []
@@ -298,7 +343,7 @@
   reset_dt = true
   line_search = basic
   [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
+    type = ConstantDT
     dt = 1e-3
   [../]
 []

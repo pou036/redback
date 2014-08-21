@@ -20,7 +20,9 @@
 #include "ElasticityTensorR4.h"
 #include "RotationTensor.h"
 
+
 #include "RedbackMaterial.h"
+
 //#include "FiniteStrainPlasticMaterial.h"
 
 //Forward Declarations
@@ -122,11 +124,14 @@ protected:
   void getFlowTensorVolumetricCC(const RankTwoTensor &, Real, RankTwoTensor &);
   void getFlowTensorDeviatoricJ2(const RankTwoTensor &, Real, RankTwoTensor &);
   void getFlowTensorDeviatoricDP(const RankTwoTensor &, Real, RankTwoTensor &);
+  void getFlowTensorDP(const RankTwoTensor &, Real, RankTwoTensor &);
   void getFlowTensorDeviatoricCC(const RankTwoTensor &, Real, RankTwoTensor &);
+  Real getFlowIncrementDP(Real, Real, Real, Real);
   Real getFlowIncrementVolumetricDP(Real, Real);
   Real getFlowIncrementVolumetricCC(const RankTwoTensor &, Real);
   Real getFlowIncrementDeviatoricJ2(const RankTwoTensor &, Real);
   Real getFlowIncrementDeviatoricDP(Real, Real);
+  Real getDerivativeFlowIncrementDP(const RankTwoTensor &, Real, Real, Real, Real);
   Real getFlowIncrementDeviatoricCC(const RankTwoTensor &, Real);
   Real getDerivativeFlowIncrementVolumetricDP(const RankTwoTensor &, Real, Real);
   Real getDerivativeFlowIncrementVolumetricCC(const RankTwoTensor &, Real);
@@ -148,7 +153,7 @@ protected:
   Real _exponential;
   YieldCriterion _yield_criterion;
   Real _slope_yield_surface;  // coefficient for yield surface
-  virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
+  virtual void computeRedbackTerms(RankTwoTensor &, Real, Real, Real, Real);
 };
 
 #endif //REDBACKMECHMATERIAL_H
