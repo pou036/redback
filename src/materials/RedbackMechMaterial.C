@@ -555,8 +555,20 @@ RedbackMechMaterial::getPressureProjectionDP(Real pressure, Real sig_eqv, Real c
 {
   // yield pressure, for non-associative, replace mu^2 with mu*dilatency
   // the "fmin" is to handle the apex. Apparently fmin(1/0, x) = x, so it's always true
-  return fmin(cohesion/_slope_yield_surface, (pressure + _slope_yield_surface*(sig_eqv - cohesion))
-      / (1.0 + (_slope_yield_surface) * (_slope_yield_surface)));
+  //return fmin(-cohesion/_slope_yield_surface, (pressure + _slope_yield_surface*(sig_eqv - cohesion))
+  //    / (1.0 + (_slope_yield_surface) * (_slope_yield_surface)));
+
+  if (_slope_yield_surface == 0)
+    return pressure;
+  else if (_slope_yield_surface < 0)
+    return fmin(-cohesion/_slope_yield_surface, (pressure + _slope_yield_surface*(sig_eqv - cohesion))
+        / (1.0 + (_slope_yield_surface) * (_slope_yield_surface)));
+  else
+  {
+    // _slope_yield_surface > 0, for whatever reason...
+    return fmax(-cohesion/_slope_yield_surface, (pressure + _slope_yield_surface*(sig_eqv - cohesion))
+        / (1.0 + (_slope_yield_surface) * (_slope_yield_surface)));
+  }
 }
 
 /**
@@ -653,7 +665,7 @@ RedbackMechMaterial::returnMapDP(const RankTwoTensor & sig_old, const RankTwoTen
 
       err1=resid.L2norm();
     }
-
+    //std::cout << "converged at iter = " << iter << std::endl;
     if (iter>=maxiter)//Convergence failure
       mooseError("Constitutive Error-Too many iterations: Reduce time increment.\n"); //Convergence failure
 
@@ -969,6 +981,7 @@ RedbackMechMaterial::getJacDP(const RankTwoTensor & sig, const RankFourTensor & 
           dft_dsig2(i,j,k,l) = flow_tensor(i,j)*flow_tensor(k,l);
 
   dfd_dsig = dft_dsig1/flow_tensor_norm - 3.0 * dft_dsig2 / (2*sig_eqv*flow_tensor_norm*flow_tensor_norm*flow_tensor_norm); //d_flow_dirn/d_sig
+  //dfd_dsig = dft_dsig1; //d_flow_dirn/d_sig
   dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr + dfi_dsig; //Jacobian
 }
 
