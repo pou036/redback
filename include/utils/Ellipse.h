@@ -55,17 +55,17 @@ class Ellipse
    * @param x: coordinates of projection point on the ellipse
    * @return d: distance from y to ellipse
    */
-  static Real sqrDistanceCC(Real const m, Real const p_c, Real const y[2], Real x[2]);
+  static Real distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real x0, Real x1);
 
   /**
-   * Function to check if given point is outside of ellipse (plasticity zone
-   * for modified Cam-Clay model).
+   * Function to check if given point (y0, y1) is outside of ellipse (plasticity
+   * zone for modified Cam-Clay model).
    * @param m: slope of the critical state line
    * @param p_c: pre-consolidation pressure
    * @param y: coordinates of point to check
    * @return result: boolean, true if strictly outside ellipse
    */
-  static bool isPointOutsideOfEllipse(Real const m, Real const p_c, Real const y[2]);
+  static bool isPointOutsideOfEllipse(Real const m, Real const p_c, Real const y0, Real const y1);
 };
 
 #endif // ELLIPSE_H
