@@ -149,7 +149,7 @@ protected:
   MaterialProperty<Real> & _mean_stress;
   MaterialProperty<Real> & _volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;
-  RankTwoTensor _identity_tensor;
+  //RankTwoTensor _identity_tensor;
   Real _exponential;
   YieldCriterion _yield_criterion;
   Real _slope_yield_surface;  // coefficient for yield surface
