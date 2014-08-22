@@ -129,12 +129,19 @@ RedbackMechMaterial::initQpStatefulProperties()
   _volumetric_strain[_qp] = 0;
   _volumetric_strain_rate[_qp] = 0;
 
-  // Define objects needed all the time
-  //_identity_tensor = RankTwoTensor::RankTwoTensor();
-  //_identity_tensor.addIa(1.0);
+  // TODO: deal with sign of _slope_yield_surface properly in DP case
+  switch (_yield_criterion)
+  {
+  case modified_Cam_Clay:
+    if (_slope_yield_surface == 0)
+      mooseError("modified Cam-Clay cannot deal with 0 CSL slope ('slope_yield_surface')");
+    if (getYieldStress(0) <= 0)
+      mooseError("modified Cam-Clay cannot deal with negative pre-consolidation stress ('yield_stress')");
+    break;
+  default:
+    ;
+  }
 
-  // TODO: deal with sign of _slope_yield_surface properly
-  //_slope_yield_surface = -_slope_yield_surface;
 }
 
 void
@@ -329,11 +336,11 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
   // Compute Mechanical Dissipation Jacobian
   _mechanical_dissipation_jac[_qp] = _gr[_qp] *
-      (getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent) +  _mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp]- p_y), _exponent))*
+      (getSigEqv(sig) * std::pow(1 - _pore_pres[_qp], _exponent) *std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent) +  _mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp]- p_y), _exponent))*
       _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
       (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
-  _mod_gruntfest_number[_qp] = _gr[_qp] * (getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent) +
+  _mod_gruntfest_number[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *(getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent) +
       _mean_stress[_qp] * std::pow( macaulayBracket(1- _mean_stress[_qp]/p_y), _exponent));
   return;
 }
@@ -689,7 +696,6 @@ RedbackMechMaterial::returnMapDP(const RankTwoTensor & sig_old, const RankTwoTen
 void
 RedbackMechMaterial::returnMapCC(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)
 {
-  mooseError("returnMapCC not done\n");
   RankTwoTensor sig_new, delta_dp, dpn;
   RankTwoTensor flow_tensor;
   RankTwoTensor resid,ddsig;
@@ -733,8 +739,12 @@ RedbackMechMaterial::returnMapCC(const RankTwoTensor & sig_old, const RankTwoTen
     //is_plastic = Ellipse::isPointOutsideOfEllipse(_slope_yield_surface, pc, pressure, sig_eqv);
     distance_pq = Ellipse::distanceCC(_slope_yield_surface, pc, pressure, sig_eqv, p_y, q_y);
 
-    //std::cout << "p_y = " << p_y << std::endl;
-    //std::cout << "q_y = " << q_y << std::endl<< std::endl;
+    std::cout << "pressure = " << pressure << std::endl;
+    std::cout << "sig_eqv  = " << sig_eqv << std::endl;
+    std::cout << "M        = " << _slope_yield_surface << std::endl;
+    std::cout << "p_c      = " << pc << std::endl<< std::endl;
+    std::cout << "p_y      = " << p_y << std::endl;
+    std::cout << "q_y      = " << q_y << std::endl<< std::endl;
 
     /*// TODO checking whether in plasticity
     if (sig_eqv < q_y)
@@ -844,9 +854,6 @@ RedbackMechMaterial::getFlowTensorDP(const RankTwoTensor & sig, Real sig_eqv, Ra
 void
 RedbackMechMaterial::getFlowTensorCC(const RankTwoTensor & sig, Real pc, Real pressure, RankTwoTensor & flow_tensor)
 {
-  if (_slope_yield_surface == 0)
-    mooseError("getFlowTensorCC cannot deal with 0 slope");
-
   flow_tensor = 3.0*sig.deviatoric()/(_slope_yield_surface*_slope_yield_surface);
   flow_tensor.addIa((2.0*pressure - pc)*(pressure > 0 ? 1:-1)/3.0);
 

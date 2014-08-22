@@ -132,7 +132,7 @@ RedbackMaterial::initQpStatefulProperties()
   _ar[_qp] = _ar_param;
   _delta[_qp] = _delta_param;
   _m[_qp] = _m_param;
-  _exponent = _m[_qp];
+  _exponent = _m[_qp]; //TODO: get rid of m
   _lewis_number[_qp] = _ref_lewis_nb[_qp];
   _porosity[_qp] = _phi0_param;
   _chemical_porosity[_qp]= 0;
