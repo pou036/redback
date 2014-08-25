@@ -184,7 +184,7 @@ RedbackMaterial::computeRedbackTerms()
   */
 
   // Step 1: calculate the relative rate of reactions
-  omega_rel = _eta2_param * _Kc_param * std::exp( (_ar_F[_qp]-_ar_R[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
+  omega_rel = _eta2_param * _Kc_param * std::exp(- (_ar_F[_qp]-_ar_R[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
 
   // Step 2: calculate the solid ratio
   _solid_ratio[_qp] = omega_rel/(1 + omega_rel);
