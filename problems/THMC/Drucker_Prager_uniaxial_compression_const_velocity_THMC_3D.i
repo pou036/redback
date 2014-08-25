@@ -61,7 +61,7 @@
     ref_pe_rate = 1
     Aphi = 1
     temperature = temp
-    eta2 = 1e-3
+    eta2 = 1e4
     da_exo = 1e-3
     slope_yield_surface = -0.6
     yield_criterion = Drucker_Prager
@@ -76,7 +76,7 @@
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -t
+    value = -10*t
   [../]
   [./spline_IC]
     type = ConstantFunction
@@ -84,7 +84,7 @@
 []
 
 [BCs]
-  active = 'bottom_fix_y corner_point_temp press_corner_point constant_y_velocity_top bottom_fix_x bottom_fix_z top_fix_x top_fix_z'
+  active = 'bottom_fix_x bottom_fix_y bottom_fix_z top_fix_z corner_point_temp press_corner_point constant_y_velocity_top top_fix_x'
   [./temp_box]
     type = NeumannBC
     variable = temp
@@ -440,7 +440,7 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 5e-4
+    dt = 1e-5
   [../]
 []
 
