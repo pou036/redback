@@ -1,25 +1,17 @@
 #!/bin/bash
-app_name='unit'
 
+APPLICATION_NAME=redback
 # If $METHOD is not set, use opt
 if [ -z $METHOD ]; then
   export METHOD=opt
 fi
 
-if [ -e ./unit/moose_unit-$METHOD ]
+if [ -e ./unit/$APPLICATION_NAME-unit-$METHOD ]
 then
-  ./unit/moose_unit-$METHOD
-  if [ $? -eq 0 ]
-  then
-    echo $app_name >> test_results.log
-  fi
-elif [ -e ./moose_unit-$METHOD ]
+  ./unit/$APPLICATION_NAME-unit-$METHOD
+elif [ -e ./$APPLICATION_NAME-unit-$METHOD ]
 then
-  ./moose_unit-$METHOD
-  if [ $? -eq 0 ]
-  then
-    echo $app_name >> ../test_results.log
-  fi
+  ./$APPLICATION_NAME-unit-$METHOD
 else
   echo "Executable missing!"
   exit 1

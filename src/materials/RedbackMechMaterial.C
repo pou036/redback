@@ -17,6 +17,21 @@
 
 #include <cmath> //used for fabs
 
+/**
+RedbackMechMaterial integrates the rate dependent plasticity model of Perzyna (Overstress model) in a
+finite strain framework using return mapping algorithm. Ideally this matrial should inherit from both
+the Redback material and the tensor mechanics finite strain equivalent
+
+Three yield criteria are included:
+1. pressure-independent (J2 plasticity)
+2. linear pressure-dependent (Drucker-Prager with smoothing of the apex)
+3. Non-linear, capped pressur dependent (modified cam clay)
+
+Integration is performed for associative flow rules in an incremental manner using Newton Raphson.
+Isotropic hardening/softening has been incorporated where yield stress as a function of equivalent
+plastic strain has to be specified by the user.
+*/
+
 template<>
 InputParameters validParams<RedbackMechMaterial>()
 {
@@ -331,14 +346,17 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _mises_strain_rate[_qp] = std::pow(2.0/3.0,0.5) * instantaneous_strain_rate.L2norm();
   _volumetric_strain_rate[_qp] = instantaneous_strain_rate.trace()/3.0;
 
-  // Compute Mechanical Dissipation
-  _mechanical_dissipation[_qp] = _gr[_qp]* sig.doubleContraction(instantaneous_strain_rate);
+  // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
+  _mechanical_dissipation[_qp] = _gr[_qp]* std::pow(1 - _pore_pres[_qp], _exponent) *sig.doubleContraction(instantaneous_strain_rate);
 
   // Compute Mechanical Dissipation Jacobian
-  _mechanical_dissipation_jac[_qp] = _gr[_qp] *
-      (getSigEqv(sig) * std::pow(1 - _pore_pres[_qp], _exponent) *std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent) +  _mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp]- p_y), _exponent))*
-      _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
-      (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+  //_mechanical_dissipation_jac[_qp] = _gr[_qp] *
+   //   (getSigEqv(sig) * std::pow(1 - _pore_pres[_qp], _exponent) *std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent) +  _mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp]- p_y), _exponent))*
+   //   _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
+   //   (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+
+  _mechanical_dissipation_jac[_qp] = _mechanical_dissipation[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
   _mod_gruntfest_number[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
       (

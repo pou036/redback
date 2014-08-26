@@ -25,7 +25,7 @@ EllipseTest::~EllipseTest()
 void
 EllipseTest::isPointOutsideOfEllipseTest()
 {
-  CPPUNIT_ASSERT(1 == 0);
+  CPPUNIT_ASSERT(2 == 0);
 }
 
 void

@@ -2,46 +2,48 @@
 ################### MOOSE Application Standard Makefile #######################
 ###############################################################################
 #
-# Required Environment variables (one of the following)
-# PACKAGE_DIR   - Location of the MOOSE redistributable package 
-# CPPUNIT_DIR   - Location of CPPUNIT
-#
 # Optional Environment variables
-# MOOSE_DIR     - Root directory of the MOOSE project 
-# FRAMEWORK_DIR - Location of the MOOSE framework
+# MOOSE_DIR        - Root directory of the MOOSE project 
+# HERD_TRUNK_DIR   - Location of the HERD repository
+# FRAMEWORK_DIR    - Location of the MOOSE framework
 #
 ###############################################################################
-MOOSE_DIR          ?= $(shell dirname `pwd`)/moose
-HERD_TRUNK_DIR     ?= $(shell dirname `pwd`)
+MOOSE_DIR          ?= $(shell dirname `pwd`)/../moose
 FRAMEWORK_DIR      ?= $(MOOSE_DIR)/framework
-PACKAGES_DIR       ?= /opt/moose
-CPPUNIT_DIR        ?= $(PACKAGES_DIR)/cppunit-1.12.1
 ###############################################################################
-
-# Extra stuff for CPPUNIT
-ADDITIONAL_INCLUDES 	:= -I$(CPPUNIT_DIR)/include
-ADDITIONAL_LIBS 	:= -L$(CPPUNIT_DIR)/lib -lcppunit 
+CURRENT_DIR        := $(shell pwd)
 
 # framework
 include $(FRAMEWORK_DIR)/build.mk
 include $(FRAMEWORK_DIR)/moose.mk
 
 ################################## MODULES ####################################
-SOLID_MECHANICS   := yes
+#HEAT_CONDUCTION   := yes
 TENSOR_MECHANICS  := yes
+MISC              := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
-APPLICATION_DIR := $(MOOSE_DIR)/unit
-APPLICATION_NAME := moose_unit
-BUILD_EXEC       := yes
+# Extra stuff for CPPUNIT
+CPPUNIT_DIR 		?= $(PACKAGES_DIR)/cppunit
+ADDITIONAL_INCLUDES 	:= -I$(CPPUNIT_DIR)/include
+ADDITIONAL_LIBS 	:= -L$(CPPUNIT_DIR)/lib -lcppunit
+
+# dep apps
+APPLICATION_DIR    := $(CURRENT_DIR)/..
+APPLICATION_NAME   := redback
+include            $(FRAMEWORK_DIR)/app.mk
+
+APPLICATION_DIR    := $(CURRENT_DIR)
+APPLICATION_NAME   := redback-unit
+BUILD_EXEC         := yes
 DEP_APPS    ?= $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 include $(FRAMEWORK_DIR)/app.mk
 
-# Find all the MOOSE unit test source files and include their dependencies.
-moose_unit_srcfiles := $(shell find $(MOOSE_DIR)/unit -name "*.C")
-moose_unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(moose_unit_srcfiles))
--include $(moose_unit_deps)
+# Find all the REDBACK unit test source files and include their dependencies.
+redback-unit_srcfiles := $(shell find $(CURRENT_DIR) -name "*.C")
+redback-unit_deps := $(patsubst %.C, %.$(obj-suffix).d, $(redback-unit_srcfiles))
+-include $(redback-unit_deps)
 
 ###############################################################################
 # Additional special case targets should be added here
