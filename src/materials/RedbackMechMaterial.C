@@ -373,20 +373,6 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 void
 RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)
 {
-  /*// Thomas playing, testing the ellipse distance code...
-  Real y[2];
-  y[0] = 2;
-  y[1] = 0.25;
-  Real m = 1.5;
-  Real p_c = 2.0;
-  Real x[2];
-  Real d = Ellipse::distanceCC(m, p_c, y, x);
-  std::cout << "distance to the ellipse: " << d << std::endl;
-  std::cout << "projection point on ellipse: coord(0)=" << x[0] << std::endl;
-  std::cout << "projection point on ellipse: coord(0)=" << x[1] << std::endl;
-  bool r = Ellipse::isPointOutsideOfEllipse(m, p_c, y);
-  std::cout << "is point outside ellipse? " << r << std::endl << std::endl;*/
-
   switch (_yield_criterion)
       {
         case J2_plasticity:

@@ -55,7 +55,7 @@ class Ellipse
    * @param x: coordinates of projection point on the ellipse
    * @return d: distance from y to ellipse
    */
-  static Real distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real x0, Real x1);
+  static Real distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1);
 
   /**
    * Function to check if given point (y0, y1) is outside of ellipse (plasticity

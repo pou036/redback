@@ -150,7 +150,7 @@ Ellipse::sqrDistance(Real const e[2], Real const y[2], Real x[2])
 }
 
 Real
-Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real x0, Real x1)
+Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1)
 {
   Real e[2]; // ellipse axes
   Real x[2]; // point coordinates as array
@@ -178,13 +178,13 @@ Ellipse::isPointOutsideOfEllipse(Real const m, Real const p_c, Real const y0, Re
     // p is the major axis
     f = 0.5*std::sqrt((1 - m*m)*p_c*p_c); // p_c can be negative
     return (std::sqrt(std::pow(y0 - 0.5*p_c + f, 2) + y1*y1)
-      +     std::sqrt(std::pow(y0 - 0.5*p_c - f, 2) + y1*y1) > p_c);
+      +     std::sqrt(std::pow(y0 - 0.5*p_c - f, 2) + y1*y1) > std::fabs(p_c));
   }
   else
   {
     // q is the major axis
     f = 0.5*std::sqrt((m*m - 1)*p_c*p_c); // p_c can be negative
     return (std::sqrt(std::pow(y0 - 0.5*p_c, 2) + (y1 + f)*(y1 + f))
-      +     std::sqrt(std::pow(y0 - 0.5*p_c, 2) + (y1 - f)*(y1 - f)) > m*p_c);
+      +     std::sqrt(std::pow(y0 - 0.5*p_c, 2) + (y1 - f)*(y1 - f)) > m*std::fabs(p_c));
   }
 }
