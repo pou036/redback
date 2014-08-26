@@ -146,7 +146,8 @@ protected:
   MaterialProperty<Real> & _mises_strain_rate;
   MaterialProperty<Real> & _volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;
-  //RankTwoTensor _identity_tensor;
+  Real _mixture_compressibility_param;
+  MaterialProperty<Real> & _mixture_compressibility;
   Real _exponential;
   YieldCriterion _yield_criterion;
   Real _slope_yield_surface;  // coefficient for yield surface

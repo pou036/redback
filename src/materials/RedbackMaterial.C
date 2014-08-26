@@ -41,6 +41,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("eta1", 1, "ratio of concentrations (see documentation).");
   params.addParam<Real>("eta2", 1, "ratio of concentrations (see documentation).");
   params.addRangeCheckedParam<Real>("Aphi","Aphi>=0 & Aphi<=1", "percentage of volume change from chemistry contributing to porosity (see documentation)");
+  params.addParam<Real>("pressurization_coefficient", 0, "Pressurization coefficient (Lambda).");
 
   return params;
 }
@@ -67,6 +68,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _eta1_param(getParam<Real>("eta1")),
   _eta2_param(getParam<Real>("eta2")),
   _Aphi_param(getParam<Real>("Aphi")),
+  _pressurization_coefficient_param(getParam<Real>("pressurization_coefficient")),
 
   _is_mechanics_on(getParam<bool>("is_mechanics_on")),
 
@@ -102,7 +104,9 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _permeability_method((PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method")),
 
   _mises_strain(declareProperty<Real>("mises_strain")),
-  _mises_strain_rate(declareProperty<Real>("mises_strain_rate"))
+  _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
+
+  _pressurization_coefficient(declareProperty<Real>("pressurization_coefficient"))
 
 {
 }
@@ -141,6 +145,7 @@ RedbackMaterial::initQpStatefulProperties()
   _ar_R[_qp] = _ar_R_param;
   _mu[_qp] = _mu_param;
   _mises_strain[_qp] = 0;
+  _pressurization_coefficient[_qp] = _pressurization_coefficient_param;
 }
 
 void

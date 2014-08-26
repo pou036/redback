@@ -63,6 +63,7 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
   params.addParam<MooseEnum>("yield_criterion", RedbackMechMaterial::yieldCriterionEnum() = "J2_plasticity", "Yield criterion");
   params.addParam< Real >("slope_yield_surface", 0,"Slope of yield surface (positive, see documentation)");
+  params.addParam< Real >("mixture_compressibility", 1,"Compressibility of the rock+fluid mixture");
 
   return params;
 }
@@ -112,6 +113,8 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
   _volumetric_strain(declareProperty<Real>("volumetric_strain")),
   _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
+  _mixture_compressibility_param(getParam<Real>("mixture_compressibility")),
+  _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
   _yield_criterion((YieldCriterion)(int)getParam<MooseEnum>("yield_criterion")),
   _slope_yield_surface(getParam<Real>("slope_yield_surface"))
 
@@ -143,6 +146,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mises_strain_rate[_qp] = 0;
   _volumetric_strain[_qp] = 0;
   _volumetric_strain_rate[_qp] = 0;
+  _mixture_compressibility[_qp] = _mixture_compressibility_param;
 
   // TODO: deal with sign of _slope_yield_surface properly in DP case
   switch (_yield_criterion)

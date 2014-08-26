@@ -11,7 +11,9 @@
 #include "RedbackChemPressure.h"
 #include "RedbackMassDiffusion.h"
 #include "RedbackMechDissip.h"
+#include "RedbackPoromechanics.h"
 #include "RedbackStressDivergenceTensors.h"
+#include "RedbackThermalPressurization.h"
 
 // Materials
 #include "RedbackMaterial.h"
@@ -69,7 +71,9 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackChemPressure);
   registerKernel(RedbackMassDiffusion);
   registerKernel(RedbackMechDissip);
+  registerKernel(RedbackPoromechanics);
   registerKernel(RedbackStressDivergenceTensors);
+  registerKernel(RedbackThermalPressurization);
 
 
   registerMaterial(RedbackMaterial);
