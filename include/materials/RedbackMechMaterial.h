@@ -121,18 +121,18 @@ protected:
 
   void getJacJ2(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
   void getJacDP(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, RankFourTensor &);
-  void getJacCC(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, RankFourTensor &);
+  void getJacCC(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, RankFourTensor &);
 
   void getFlowTensorCC(const RankTwoTensor &, Real, Real, RankTwoTensor &);
   void getFlowTensorJ2(const RankTwoTensor &, Real, RankTwoTensor &);
   void getFlowTensorDP(const RankTwoTensor &, Real, RankTwoTensor &);
 
-  Real getFlowIncrementCC(Real, Real, Real, Real);
+  Real getFlowIncrementCC(Real, Real, Real, Real, Real);
   Real getFlowIncrementDP(Real, Real, Real, Real);
   Real getFlowIncrementJ2(const RankTwoTensor &, Real);
 
   Real getDerivativeFlowIncrementDP(const RankTwoTensor &, Real, Real, Real, Real);
-  Real getDerivativeFlowIncrementCC(const RankTwoTensor &, Real, Real, Real, Real);
+  Real getDerivativeFlowIncrementCC(const RankTwoTensor &, Real, Real, Real, Real, Real);
   Real getDerivativeFlowIncrementJ2(const RankTwoTensor &, Real);
 
   Real _ref_pe_rate;

@@ -750,12 +750,12 @@ RedbackMechMaterial::returnMapCC(const RankTwoTensor & sig_old, const RankTwoTen
     //is_plastic = Ellipse::isPointOutsideOfEllipse(_slope_yield_surface, pc, pressure, sig_eqv);
     distance_pq = Ellipse::distanceCC(_slope_yield_surface, pc, pressure, sig_eqv, p_y, q_y);
 
-    std::cout << "pressure = " << pressure << std::endl;
+    /*std::cout << "pressure = " << pressure << std::endl;
     std::cout << "sig_eqv  = " << sig_eqv << std::endl;
     std::cout << "M        = " << _slope_yield_surface << std::endl;
     std::cout << "p_c      = " << pc << std::endl<< std::endl;
     std::cout << "p_y      = " << p_y << std::endl;
-    std::cout << "q_y      = " << q_y << std::endl<< std::endl;
+    std::cout << "q_y      = " << q_y << std::endl<< std::endl;*/
 
     /*// TODO checking whether in plasticity
     if (sig_eqv < q_y)
@@ -765,7 +765,7 @@ RedbackMechMaterial::returnMapCC(const RankTwoTensor & sig_old, const RankTwoTen
     }*/
 
     // trying normalizing with the norm of the total vector
-    flow_incr = getFlowIncrementCC(sig_eqv, pressure, q_y, p_y);
+    flow_incr = getFlowIncrementCC(sig_eqv, pressure, pc, q_y, p_y);
     getFlowTensorCC(sig_new, pc, pressure, flow_tensor);
 
     flow_tensor = flow_incr*flow_tensor;
@@ -773,13 +773,14 @@ RedbackMechMaterial::returnMapCC(const RankTwoTensor & sig_old, const RankTwoTen
     resid = flow_tensor - delta_dp;
 
     err1 = resid.L2norm();
+    //std::cout << "first err1=" << err1 <<std::endl;
     //TODO: do not compute flow tensor if in elasticity
 
     while (err1 > tol1  && iter < maxiter) //Stress update iteration (hardness fixed)
     {
       iter++;
 
-      getJacCC(sig_new, E_ijkl, sig_eqv, pressure, p_y, q_y, dr_dsig); //Jacobian = d(residual)/d(sigma)
+      getJacCC(sig_new, E_ijkl, sig_eqv, pressure, pc, p_y, q_y, dr_dsig); //Jacobian = d(residual)/d(sigma)
 
       dr_dsig_inv = dr_dsig.invSymm();
 
@@ -792,7 +793,7 @@ RedbackMechMaterial::returnMapCC(const RankTwoTensor & sig_old, const RankTwoTen
 
       delta_dp -= E_ijkl.invSymm() * ddsig; //Update increment of plastic rate of deformation tensor
 
-      flow_incr = getFlowIncrementCC(sig_eqv, pressure, q_y, p_y);
+      flow_incr = getFlowIncrementCC(sig_eqv, pressure, pc, q_y, p_y);
       if (flow_incr < 0.0) //negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment Drucker-Prager: Reduce time increment.");
       getFlowTensorCC(sig_new, pc, pressure, flow_tensor);
@@ -802,8 +803,9 @@ RedbackMechMaterial::returnMapCC(const RankTwoTensor & sig_old, const RankTwoTen
       resid = flow_tensor - delta_dp; //Residual
 
       err1=resid.L2norm();
+      //std::cout << "err1=" << err1<< " at iter=" << iter <<std::endl;
     }
-
+    //std::cout << "err1=" << err1<< " at iter=" << iter <<std::endl;
     if (iter>=maxiter)//Convergence failure
       mooseError("Constitutive Error-Too many iterations: Reduce time increment.\n"); //Convergence failure
 
@@ -866,7 +868,7 @@ void
 RedbackMechMaterial::getFlowTensorCC(const RankTwoTensor & sig, Real pc, Real pressure, RankTwoTensor & flow_tensor)
 {
   flow_tensor = 3.0*sig.deviatoric()/(_slope_yield_surface*_slope_yield_surface);
-  flow_tensor.addIa((2.0*pressure - pc)*(pressure > 0 ? 1:-1)/3.0);
+  flow_tensor.addIa((2.0*pressure - pc)/3.0); //(pressure > 0 ? 1:-1)
 
   //flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm(); // TODO: do we need to normalise? If so, do we need the sqrt(3/2) factor?
 }
@@ -875,11 +877,16 @@ RedbackMechMaterial::getFlowTensorCC(const RankTwoTensor & sig, Real pc, Real pr
  * Compute the flow incrmement for modified Cam-Clay
  */
 Real
-RedbackMechMaterial::getFlowIncrementCC(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress)
+RedbackMechMaterial::getFlowIncrementCC(Real sig_eqv, Real pressure, Real pc, Real q_yield_stress, Real p_yield_stress)
 {
-  Real flow_incr_vol = _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
-  Real flow_incr_dev = _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv - q_yield_stress), _exponent)* _exponential; // (q_yield_stress > 0 ? 1:-1) is the sign function
-  return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
+  if (Ellipse::isPointOutsideOfEllipse(/*m=*/_slope_yield_surface, /*p_c=*/pc, /*x=*/pressure, /*y=*/sig_eqv))
+  {
+    Real flow_incr_vol = _ref_pe_rate * _dt * std::pow(std::fabs(pressure - p_yield_stress), _exponent) * _exponential;
+    Real flow_incr_dev = _ref_pe_rate * _dt * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent) * _exponential;
+    return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
+  }
+  else
+    return 0;
 }
 
 /**
@@ -923,14 +930,19 @@ RedbackMechMaterial::getDerivativeFlowIncrementDP(const RankTwoTensor & sig, Rea
 }
 
 Real
-RedbackMechMaterial::getDerivativeFlowIncrementCC(const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real q_yield_stress, Real p_yield_stress)
+RedbackMechMaterial::getDerivativeFlowIncrementCC(const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
 {
-  Real delta_lambda_p = _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
-  Real delta_lambda_q = _ref_pe_rate * _dt * std::pow(macaulayBracket((q_yield_stress > 0 ? 1:-1)*(sig_eqv / q_yield_stress - 1.0)), _exponent) * _exponential;
-  Real delta_lambda = (std::pow(delta_lambda_p * delta_lambda_p + delta_lambda_q * delta_lambda_q, 0.5));
-  Real der_flow_incr_dev = _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket((q_yield_stress > 0 ? 1:-1)*(sig_eqv / q_yield_stress - 1.0)), _exponent - 1.0) * _exponential / q_yield_stress;
-  Real der_flow_incr_vol = _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent - 1.0) * _exponential;
-  return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
+  if (Ellipse::isPointOutsideOfEllipse(/*m=*/_slope_yield_surface, /*p_c=*/pc, /*x=*/pressure, /*y=*/sig_eqv))
+  {
+    Real delta_lambda_p = _ref_pe_rate * _dt * std::pow(std::fabs(pressure - p_yield_stress), _exponent) * _exponential;
+    Real delta_lambda_q = _ref_pe_rate * _dt * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent) * _exponential;
+    Real delta_lambda = (std::pow(delta_lambda_p * delta_lambda_p + delta_lambda_q * delta_lambda_q, 0.5));
+    Real der_flow_incr_dev = _ref_pe_rate * _dt * _exponent * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent - 1.0) * _exponential;
+    Real der_flow_incr_vol = _ref_pe_rate * _dt * _exponent * std::pow(std::fabs(pressure - p_yield_stress), _exponent - 1.0) * _exponential;
+    return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
+  }
+  else
+    return 0;
 }
 
 //Jacobian for stress update algorithm
@@ -1042,7 +1054,7 @@ RedbackMechMaterial::getJacDP(const RankTwoTensor & sig, const RankFourTensor & 
 
 void
 RedbackMechMaterial::getJacCC(const RankTwoTensor & sig, const RankFourTensor & E_ijkl,
-    Real sig_eqv, Real pressure, Real p_yield_stress, Real q_yield_stress,
+    Real sig_eqv, Real pressure, Real pc, Real p_yield_stress, Real q_yield_stress,
     RankFourTensor & dresid_dsig)
 {
   unsigned i, j, k ,l;
@@ -1054,10 +1066,11 @@ RedbackMechMaterial::getJacCC(const RankTwoTensor & sig, const RankFourTensor & 
 
   sig_dev = sig.deviatoric();
 
-  flow_incr = getFlowIncrementCC(sig_eqv, pressure, q_yield_stress, p_yield_stress);
+  flow_incr = getFlowIncrementCC(sig_eqv, pressure, pc, q_yield_stress, p_yield_stress);
 
-  dfi_dseqv = getDerivativeFlowIncrementCC(sig, pressure, sig_eqv, q_yield_stress, p_yield_stress);
-  getFlowTensorDP(sig, sig_eqv, flow_dirn);
+  dfi_dseqv = getDerivativeFlowIncrementCC(sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress);
+
+  getFlowTensorCC(sig, pc, pressure, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the residual with respect to stress, dr_dsig
    * It consists of two terms: The first is
@@ -1075,7 +1088,7 @@ RedbackMechMaterial::getJacCC(const RankTwoTensor & sig, const RankFourTensor & 
         for (l = 0; l < 3; ++l)
           dfi_dsig(i,j,k,l) = flow_dirn(i,j) * flow_dirn(k,l) * dfi_dseqv;
 
-  Real flow_tensor_norm = flow_dirn.L2norm();
+  //Real flow_tensor_norm = flow_dirn.L2norm();
 
   // This loop calculates the second term. Read REDBACK's documentation
   // (same as J2 plasticity case)
@@ -1084,7 +1097,7 @@ RedbackMechMaterial::getJacCC(const RankTwoTensor & sig, const RankFourTensor & 
   if (sig_eqv > 1e-8)
   {
     f1 = 3.0 / (_slope_yield_surface * _slope_yield_surface);
-    f2 = 2.0 * (pressure > 0 ? 1:-1) /3.0 - 1.0 / (_slope_yield_surface * _slope_yield_surface);
+    f2 = 2.0 /3.0 - 1.0 / (_slope_yield_surface * _slope_yield_surface);
   }
   for (i = 0; i < 3; ++i)
     for (j = 0; j < 3; ++j)
