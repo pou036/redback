@@ -155,7 +155,7 @@ Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, 
   Real e[2]; // ellipse axes
   Real x[2]; // point coordinates as array
   Real shifted_y[2]; // ellipse axes
-  e[0] = p_c/2.0;
+  e[0] = fabs(p_c)/2.0;
   e[1] = m*e[0];
   // Shift by pc_2 to centre the ellipse on (0,0)
   shifted_y[0] = y0 - p_c/2.0;

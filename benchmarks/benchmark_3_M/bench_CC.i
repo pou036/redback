@@ -67,7 +67,7 @@
 []
 
 [BCs]
-  active = 'constant_force_right left_disp rigth_disp_y left_disp_y'
+  active = 'right_disp left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
