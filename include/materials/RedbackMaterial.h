@@ -60,7 +60,7 @@ protected:
   
   Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param, _m_param, _exponent; //_ar_c_param, _da_param, _mu_param,
   Real  _ar_F_param, _ar_R_param, _da_endo_param, _da_exo_param, _mu_param, _Kc_param, _eta1_param, _eta2_param, _Aphi_param, _pressurization_coefficient_param;
-  bool _is_mechanics_on;
+  bool _is_mechanics_on, _is_chemistry_on;
 
   MaterialProperty<Real> & _useless_property_old; //TODO: this is a useless quantity, just to call initQpStatefulProperties without mechanics. find a better way to initialize
   MaterialProperty<Real> & _gr;

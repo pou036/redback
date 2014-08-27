@@ -1,0 +1,12 @@
+[Tests]
+  [./test_9_THC_no_porosity] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'bench_THC_no_poro.i'
+    exodiff = 'bench_THC_no_poro_out.e'
+  [../]
+  [./test_9_THC_porosity] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'bench_THC_poro.i'
+    exodiff = 'bench_THC_poro_out.e'
+  [../]
+[]

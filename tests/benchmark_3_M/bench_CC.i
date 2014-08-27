@@ -1,22 +1,15 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 6
+  nx = 5
+  ny = 5
   xmin = -1.5
   xmax = 1.5
   ymin = -1
 []
 
-[MeshModifiers]
-  [./middle_left]
-    type = AddExtraNodeset
-    boundary = 4
-    coord = '-1.5 0'
-  [../]
-[]
-
 [Variables]
+  active = 'disp_z disp_y disp_x'
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -42,20 +35,19 @@
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     yield_stress = '0. 1 1. 1'
     disp_z = disp_z
-    m = 3
-    ar = 10
-    gr = 0.3
+    m = 1
+    ar = 1
+    gr = 0.1
     is_mechanics_on = false
     exponent = 1
     ref_lewis_nb = 1
-    ar_F = 20
-    ar_R = 10
+    ar_F = 1
+    ar_R = 1
     phi0 = 0.1
     ref_pe_rate = 1
     Aphi = 0
+    yield_criterion = modified_Cam_Clay
     slope_yield_surface = -0.6
-    da_endo = 1e-7
-    temperature = temp
   [../]
 []
 
@@ -67,7 +59,7 @@
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -3e-2*t
+    value = -0.1*t
   [../]
   [./spline_IC]
     type = ConstantFunction
@@ -75,7 +67,7 @@
 []
 
 [BCs]
-  active = 'constant_force_right temp_mid_pts left_disp rigth_disp_y left_disp_y'
+  active = 'right_disp left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -109,7 +101,7 @@
   [./temp_mid_pts]
     type = DirichletBC
     variable = temp
-    boundary = 4
+    boundary = '4 5 6 7'
     value = 0
   [../]
   [./rigth_disp_y]
@@ -192,26 +184,6 @@
   [../]
 []
 
-[Kernels]
-  active = 'temp_diff td_temp temp_dissip'
-  [./td_temp]
-    type = TimeDerivative
-    variable = temp
-  [../]
-  [./temp_diff]
-    type = Diffusion
-    variable = temp
-  [../]
-  [./temp_dissip]
-    type = RedbackMechDissip
-    variable = temp
-  [../]
-  [./temp_endo_chem]
-    type = RedbackChemEndo
-    variable = temp
-  [../]
-[]
-
 [AuxKernels]
   active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation Gruntfest_Number'
   [./stress_zz]
@@ -254,7 +226,7 @@
   [./mises_strain]
     type = MaterialRealAux
     variable = mises_strain
-    property = eqv_plastic_strain
+    property = mises_strain
   [../]
   [./mises_strain_rate]
     type = MaterialRealAux
@@ -292,6 +264,7 @@
 []
 
 [Postprocessors]
+  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
@@ -340,7 +313,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 1e-2
+  end_time = 0.005
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -359,7 +332,7 @@
 []
 
 [Outputs]
-  file_base = out
+  file_base = bench_CC_out
   output_initial = true
   exodus = true
   [./console]
@@ -374,14 +347,6 @@
     disp_z = disp_z
     disp_y = disp_y
     disp_x = disp_x
-  [../]
-[]
-
-[ICs]
-  [./temp_IC]
-    variable = temp
-    type = ConstantIC
-    value = 0
   [../]
 []
 

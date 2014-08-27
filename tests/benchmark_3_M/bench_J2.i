@@ -3,10 +3,9 @@
   dim = 2
   nx = 5
   ny = 5
-  xmin = -1
-  xmax = 1
+  xmin = -1.5
+  xmax = 1.5
   ymin = -1
-  ymax = 1
 []
 
 [Variables]
@@ -47,8 +46,7 @@
     phi0 = 0.1
     ref_pe_rate = 1
     Aphi = 0
-    yield_criterion = Drucker_Prager
-    slope_yield_surface = 0
+    slope_yield_surface = -0.6
   [../]
 []
 
@@ -227,7 +225,7 @@
   [./mises_strain]
     type = MaterialRealAux
     variable = mises_strain
-    property = eqv_plastic_strain
+    property = mises_strain
   [../]
   [./mises_strain_rate]
     type = MaterialRealAux
@@ -314,7 +312,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 0.002
+  end_time = 0.005
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -333,7 +331,7 @@
 []
 
 [Outputs]
-  file_base = DruckerPrager0_out
+  file_base = bench_J2_out
   output_initial = true
   exodus = true
   [./console]

@@ -8,7 +8,7 @@
 []
 
 [Variables]
-  active = 'temp'
+  active = 'pore_pressure'
   [./temp]
   [../]
   [./disp_x]
@@ -21,10 +21,12 @@
     family = MONOMIAL
     block = 0
   [../]
+  [./pore_pressure]
+  [../]
 []
 
 [Kernels]
-  active = 'td_temp diff_temp mh_temp chem_endo'
+  active = 'td_press chem_press press_diff'
   [./td_temp]
     type = TimeDerivative
     variable = temp
@@ -37,18 +39,23 @@
     type = RedbackMechDissip
     variable = temp
   [../]
-  [./chem_endo]
-    type = RedbackChemEndo
-    variable = temp
+  [./td_press]
+    type = TimeDerivative
+    variable = pore_pressure
   [../]
-  [./Chem_exo]
-    type = RedbackChemExo
-    variable = temp
+  [./press_diff]
+    type = RedbackMassDiffusion
+    variable = pore_pressure
+  [../]
+  [./chem_press]
+    type = RedbackChemPressure
+    variable = pore_pressure
+    block = 0
   [../]
 []
 
 [BCs]
-  active = 'left_temp right_temp'
+  active = 'press_bc'
   [./left_temp]
     type = DirichletBC
     variable = temp
@@ -79,6 +86,12 @@
     boundary = right
     value = 0
   [../]
+  [./press_bc]
+    type = DirichletBC
+    variable = pore_pressure
+    boundary = 'left right'
+    value = 0
+  [../]
 []
 
 [Materials]
@@ -86,27 +99,25 @@
     type = RedbackMaterial
     block = 0
     m = 1
-    mu = 1e-3
+    mu = 0.5
     ar = 10
-    disp_y = disp_y
-    disp_x = disp_x
     yield_stress = '0 1 1 1'
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
-    gr = 2
-    pore_pres = 0
-    temperature = temp
+    gr = 0.9
+    pore_pres = pore_pressure
+    temperature = 0
     is_mechanics_on = false
-    ar_F = 20
-    ar_R = 10
-    Aphi = 0
-    da_endo = 1
     ref_lewis_nb = 1
-    is_chemistry_on = true
+    ar_F = 20
+    ar_R = 1
+    Aphi = 0
+    phi0 = 0.1
+    da_endo = 1
   [../]
 []
 
 [Postprocessors]
-  active = 'middle_temp'
+  active = 'middle_press'
   [./middle_temp]
     type = PointValue
     variable = temp
@@ -117,6 +128,11 @@
     variable = temp
     point = '0 0 0'
   [../]
+  [./middle_press]
+    type = PointValue
+    variable = pore_pressure
+    point = '0 0 0'
+  [../]
 []
 
 [Executioner]
@@ -125,26 +141,33 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   ss_check_tol = 1e-6
-  end_time = 0.2
+  end_time = 4
   dtmax = 0.1
   scheme = bdf2
   [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
-    dt = 1e-2
+    type = ConstantDT
+    dt = 0.1
   [../]
 []
 
 [Outputs]
   exodus = true
   console = true
+  file_base = bench_source_term_out
 []
 
 [ICs]
+  active = 'press_ic'
   [./temp_ic]
     variable = temp
     value = 0
     type = ConstantIC
     block = 0
+  [../]
+  [./press_ic]
+    variable = pore_pressure
+    type = ConstantIC
+    value = 1
   [../]
 []
 

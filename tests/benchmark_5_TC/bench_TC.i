@@ -129,7 +129,7 @@
   dtmax = 0.1
   scheme = bdf2
   [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
+    type = ConstantDT
     dt = 1e-2
   [../]
 []
@@ -137,6 +137,7 @@
 [Outputs]
   exodus = true
   console = true
+  file_base = bench_TC_out
 []
 
 [ICs]

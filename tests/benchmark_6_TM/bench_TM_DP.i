@@ -53,6 +53,7 @@
     phi0 = 0.1
     ref_pe_rate = 1
     Aphi = 0
+    yield_criterion = Drucker_Prager
     slope_yield_surface = -0.6
     da_endo = 1e-7
     temperature = temp
@@ -359,7 +360,7 @@
 []
 
 [Outputs]
-  file_base = out
+  file_base = bench_TM_DP_out
   output_initial = true
   exodus = true
   [./console]

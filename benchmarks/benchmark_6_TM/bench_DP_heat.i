@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 10
+  nx = 10
+  ny = 6
   xmin = -1.5
   xmax = 1.5
   ymin = -1
@@ -194,6 +194,7 @@
 []
 
 [Kernels]
+  active = 'temp_diff td_temp temp_dissip'
   [./td_temp]
     type = TimeDerivative
     variable = temp
@@ -340,7 +341,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 1
+  end_time = 1e-2
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -354,7 +355,7 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 5e-4
+    dt = 1e-3
   [../]
 []
 

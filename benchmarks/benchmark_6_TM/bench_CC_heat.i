@@ -53,6 +53,7 @@
     phi0 = 0.1
     ref_pe_rate = 1
     Aphi = 0
+    yield_criterion = modified_Cam_Clay
     slope_yield_surface = -0.6
     da_endo = 1e-7
     temperature = temp

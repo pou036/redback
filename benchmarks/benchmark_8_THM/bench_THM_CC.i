@@ -31,6 +31,8 @@
   [../]
   [./temp]
   [../]
+  [./pore_pressure]
+  [../]
 []
 
 [Materials]
@@ -43,19 +45,25 @@
     yield_stress = '0. 1 1. 1'
     disp_z = disp_z
     m = 3
+    mu = 1e-3
     ar = 10
-    gr = 0.3
+    gr = 1
     is_mechanics_on = false
-    exponent = 1
+    exponent = 3
     ref_lewis_nb = 1
+    pore_pres = pore_pressure
+    Kc = 1
     ar_F = 20
     ar_R = 10
     phi0 = 0.1
     ref_pe_rate = 1
-    Aphi = 0
-    slope_yield_surface = -0.6
-    da_endo = 1e-7
+    Aphi = 1
+    eta1 = 1e3
+    da_endo = 1e-4
     temperature = temp
+    slope_yield_surface = -0.6
+    yield_criterion = modified_Cam_Clay
+    pressurization_coefficient = 0.5
   [../]
 []
 
@@ -75,7 +83,7 @@
 []
 
 [BCs]
-  active = 'constant_force_right temp_mid_pts left_disp rigth_disp_y left_disp_y'
+  active = 'press_bc constant_force_right temp_mid_pts left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -130,10 +138,16 @@
     boundary = 1
     value = -2
   [../]
+  [./press_bc]
+    type = DirichletBC
+    variable = pore_pressure
+    boundary = 'left right'
+    value = 0
+  [../]
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
+  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress Lewis_number porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -190,10 +204,23 @@
     family = MONOMIAL
     block = 0
   [../]
+  [./porosity]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./Lewis_number]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./solid_ratio]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
-  active = 'temp_diff td_temp temp_dissip'
+  active = 'td_press temp_diff temp_dissip td_temp press_diff thermal_pressurization poromech'
   [./td_temp]
     type = TimeDerivative
     variable = temp
@@ -210,10 +237,32 @@
     type = RedbackChemEndo
     variable = temp
   [../]
+  [./td_press]
+    type = TimeDerivative
+    variable = pore_pressure
+  [../]
+  [./press_diff]
+    type = RedbackMassDiffusion
+    variable = pore_pressure
+  [../]
+  [./chem_press]
+    type = RedbackChemPressure
+    variable = pore_pressure
+    block = 0
+  [../]
+  [./thermal_pressurization]
+    type = RedbackThermalPressurization
+    variable = pore_pressure
+    temperature = temp
+  [../]
+  [./poromech]
+    type = RedbackPoromechanics
+    variable = pore_pressure
+  [../]
 []
 
 [AuxKernels]
-  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation Gruntfest_Number'
+  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation porosity Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -289,6 +338,22 @@
     variable = volumetric_strain_rate
     property = volumetric_strain_rate
   [../]
+  [./porosity]
+    type = MaterialRealAux
+    variable = porosity
+    property = porosity
+    block = 0
+  [../]
+  [./Lewis_number]
+    type = MaterialRealAux
+    variable = Lewis_number
+    property = lewis_number
+  [../]
+  [./solid_ratio]
+    type = MaterialRealAux
+    variable = solid_ratio
+    property = solid_ratio
+  [../]
 []
 
 [Postprocessors]
@@ -327,6 +392,26 @@
     variable = volumetric_strain_rate
     point = '0 0 0'
   [../]
+  [./middle_press]
+    type = PointValue
+    variable = pore_pressure
+    point = '0 0 0'
+  [../]
+  [./porosity_middle]
+    type = PointValue
+    variable = porosity
+    point = '0 0 0'
+  [../]
+  [./Lewis_middle]
+    type = PointValue
+    variable = Lewis_number
+    point = '0 0 0'
+  [../]
+  [./solid_ratio_middle]
+    type = PointValue
+    variable = solid_ratio
+    point = '0 0 0'
+  [../]
 []
 
 [Preconditioning]
@@ -340,7 +425,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 1e-2
+  end_time = 2e-2
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -374,12 +459,19 @@
     disp_z = disp_z
     disp_y = disp_y
     disp_x = disp_x
+    temp = temp
+    pore_pres = pore_pressure
   [../]
 []
 
 [ICs]
   [./temp_IC]
     variable = temp
+    type = ConstantIC
+    value = 0
+  [../]
+  [./press_ic]
+    variable = pore_pressure
     type = ConstantIC
     value = 0
   [../]

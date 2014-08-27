@@ -359,7 +359,7 @@
 []
 
 [Outputs]
-  file_base = out
+  file_base = bench_TM_J2_out
   output_initial = true
   exodus = true
   [./console]

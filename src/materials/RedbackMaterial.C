@@ -20,13 +20,14 @@ InputParameters validParams<RedbackMaterial>()
   InputParameters params = validParams<Material>();
 
   //params.addParam<Real>("phi0", 0, "initial porosity value.");
-  params.addRangeCheckedParam<Real>("phi0","phi0>0 & phi0<1", "initial porosity value.");
+  params.addRangeCheckedParam<Real>("phi0", 0.0, "phi0>=0 & phi0<1", "initial porosity value.");
   params.addRangeCheckedParam<Real>("gr", "gr>=0", "Gruntfest number.");
   params.addParam<Real>("ref_lewis_nb", "Reference Lewis number.");
   params.addParam<Real>("ar", "Arrhenius number.");
   params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
   params.addParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna)");
   params.addRequiredParam<bool>("is_mechanics_on", "is mechanics on?");
+  params.addParam<bool>("is_chemistry_on", false, "is chemistry on?");
   params.addCoupledVar("temperature", "Dimensionless temperature");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
   params.addParam<MooseEnum>("density_method", RedbackMaterial::densityMethodEnum() = "linear", "The method to describe density evolution with temperature and pore pressure");
@@ -71,6 +72,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _pressurization_coefficient_param(getParam<Real>("pressurization_coefficient")),
 
   _is_mechanics_on(getParam<bool>("is_mechanics_on")),
+  _is_chemistry_on(getParam<bool>("is_chemistry_on")),
 
   _useless_property_old(declarePropertyOld<Real>("gr")), //TODO: find better way to initiate the values.
 
@@ -247,7 +249,10 @@ RedbackMaterial::computeRedbackTerms()
   _chemical_source_mass_jac[_qp] = 0;
 
   // Update Lewis number
-  _lewis_number[_qp] = _ref_lewis_nb[_qp]*std::pow((1-_porosity[_qp])/(1-_phi0_param), 2) * std::pow(_phi0_param/_porosity[_qp], 3);
+  if (!_is_chemistry_on || _phi0_param == 0)
+    _lewis_number[_qp] = _ref_lewis_nb[_qp];
+  else
+    _lewis_number[_qp] = _ref_lewis_nb[_qp]*std::pow((1-_porosity[_qp])/(1-_phi0_param), 2) * std::pow(_phi0_param/_porosity[_qp], 3);
   return;
 }
 

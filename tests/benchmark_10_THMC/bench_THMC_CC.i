@@ -1,16 +1,22 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 5
-  ny = 5
-  xmin = -1
-  xmax = 1
+  nx = 4
+  ny = 4
+  xmin = -1.5
+  xmax = 1.5
   ymin = -1
-  ymax = 1
+[]
+
+[MeshModifiers]
+  [./middle_left]
+    type = AddExtraNodeset
+    boundary = 4
+    coord = '-1.5 0'
+  [../]
 []
 
 [Variables]
-  active = 'disp_z disp_y disp_x'
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -25,6 +31,8 @@
   [../]
   [./temp]
   [../]
+  [./pore_pressure]
+  [../]
 []
 
 [Materials]
@@ -36,19 +44,26 @@
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     yield_stress = '0. 1 1. 1'
     disp_z = disp_z
-    m = 1
-    ar = 1
-    gr = 0.1
+    m = 3
+    mu = 1e-3
+    ar = 10
+    gr = 0.2
     is_mechanics_on = false
-    exponent = 1
+    exponent = 3
     ref_lewis_nb = 1
-    ar_F = 1
-    ar_R = 1
+    pore_pres = pore_pressure
+    Kc = 1
+    ar_F = 20
+    ar_R = 10
     phi0 = 0.1
     ref_pe_rate = 1
-    Aphi = 0
-    yield_criterion = J2_plasticity
-    slope_yield_surface = 0
+    Aphi = 1
+    eta1 = 1e3
+    da_endo = 1e-5
+    temperature = temp
+    is_chemistry_on = true
+    slope_yield_surface = -0.6
+    yield_criterion = modified_Cam_Clay
   [../]
 []
 
@@ -68,7 +83,7 @@
 []
 
 [BCs]
-  active = 'constant_force_right left_disp rigth_disp_y left_disp_y'
+  active = 'press_bc constant_force_right temp_mid_pts left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -102,7 +117,7 @@
   [./temp_mid_pts]
     type = DirichletBC
     variable = temp
-    boundary = '4 5 6 7'
+    boundary = 4
     value = 0
   [../]
   [./rigth_disp_y]
@@ -123,10 +138,16 @@
     boundary = 1
     value = -2
   [../]
+  [./press_bc]
+    type = DirichletBC
+    variable = pore_pressure
+    boundary = 'left right'
+    value = 0
+  [../]
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
+  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress Lewis_number porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -183,10 +204,55 @@
     family = MONOMIAL
     block = 0
   [../]
+  [./porosity]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
+  [./Lewis_number]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./solid_ratio]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[Kernels]
+  [./td_temp]
+    type = TimeDerivative
+    variable = temp
+  [../]
+  [./temp_diff]
+    type = Diffusion
+    variable = temp
+  [../]
+  [./temp_dissip]
+    type = RedbackMechDissip
+    variable = temp
+  [../]
+  [./temp_endo_chem]
+    type = RedbackChemEndo
+    variable = temp
+  [../]
+  [./td_press]
+    type = TimeDerivative
+    variable = pore_pressure
+  [../]
+  [./press_diff]
+    type = RedbackMassDiffusion
+    variable = pore_pressure
+  [../]
+  [./chem_press]
+    type = RedbackChemPressure
+    variable = pore_pressure
+    block = 0
+  [../]
 []
 
 [AuxKernels]
-  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation Gruntfest_Number'
+  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation porosity Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -262,10 +328,25 @@
     variable = volumetric_strain_rate
     property = volumetric_strain_rate
   [../]
+  [./porosity]
+    type = MaterialRealAux
+    variable = porosity
+    property = porosity
+    block = 0
+  [../]
+  [./Lewis_number]
+    type = MaterialRealAux
+    variable = Lewis_number
+    property = lewis_number
+  [../]
+  [./solid_ratio]
+    type = MaterialRealAux
+    variable = solid_ratio
+    property = solid_ratio
+  [../]
 []
 
 [Postprocessors]
-  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
@@ -301,6 +382,26 @@
     variable = volumetric_strain_rate
     point = '0 0 0'
   [../]
+  [./middle_press]
+    type = PointValue
+    variable = pore_pressure
+    point = '0 0 0'
+  [../]
+  [./porosity_middle]
+    type = PointValue
+    variable = porosity
+    point = '0 0 0'
+  [../]
+  [./Lewis_middle]
+    type = PointValue
+    variable = Lewis_number
+    point = '0 0 0'
+  [../]
+  [./solid_ratio_middle]
+    type = PointValue
+    variable = solid_ratio
+    point = '0 0 0'
+  [../]
 []
 
 [Preconditioning]
@@ -314,7 +415,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 0.002
+  end_time = 0.03
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -328,12 +429,12 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 1e-3
+    dt = 1e-2
   [../]
 []
 
 [Outputs]
-  file_base = J2plasticity_out
+  file_base = bench_THMC_CC_out
   output_initial = true
   exodus = true
   [./console]
@@ -348,6 +449,21 @@
     disp_z = disp_z
     disp_y = disp_y
     disp_x = disp_x
+    temp = temp
+    pore_pres = pore_pressure
+  [../]
+[]
+
+[ICs]
+  [./temp_IC]
+    variable = temp
+    type = ConstantIC
+    value = 0
+  [../]
+  [./press_ic]
+    variable = pore_pressure
+    type = ConstantIC
+    value = 0
   [../]
 []
 
