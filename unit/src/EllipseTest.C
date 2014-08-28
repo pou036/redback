@@ -366,7 +366,7 @@ EllipseTest::distanceCCTestMajorAxisHorizontal()
 {
   Real d, x2, y2;
 
-  // Case: circle, p_c < 0
+  // Case: ellipse, major axis horizontal, p_c < 0
   // top right quadrant
   d = Ellipse::distanceCC(/*m=*/0.5, /*p_c=*/-3.0, /*x1=*/1.5, /*y1=*/3.0, x2, y2);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(3.1210069, d, 1e-5);
@@ -418,6 +418,46 @@ EllipseTest::distanceCCTestMajorAxisVertical()
 {
   Real d, x2, y2;
 
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(3.1210069, 3, 1e-5);
-  // TODO
-}
+  // Case: ellipse, major axis vertical, p_c < 0
+  // top right quadrant
+  d = Ellipse::distanceCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-0.5, /*y1=*/2.0, x2, y2);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.2094051, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.650317, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.854209, y2, 1e-5);
+  //TODO
+  // top left quadrant
+  d = Ellipse::distanceCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-2.5, /*y1=*/2.0, x2, y2);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.2094051, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-2.349682, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.854209, y2, 1e-5);
+  // bottom right quadrant
+  d = Ellipse::distanceCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-0.5, /*y1=*/-2.0, x2, y2);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.2094051, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.650317, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.854209, y2, 1e-5);
+  // bottom left quadrant
+  d = Ellipse::distanceCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-2.5, /*y1=*/-2.0, x2, y2);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.2094051, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-2.349682, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.854209, y2, 1e-5);
+
+  // on horizontal axis, left hand side of ellipse
+  d = Ellipse::distanceCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-4.0, /*y1=*/0.0, x2, y2);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-3.0, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, y2, 1e-5);
+  // on horizontal axis, right hand side of ellipse
+  d = Ellipse::distanceCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/1.0, /*y1=*/0.0, x2, y2);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.0, y2, 1e-5);
+  // on vertical axis, below ellipse
+  d = Ellipse::distanceCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-1.5, /*y1=*/-2.5, x2, y2);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.25, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-2.25, y2, 1e-5);
+  // on vertical axis, above ellipse
+  d = Ellipse::distanceCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-1.5, /*y1=*/2.5, x2, y2);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.25, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(2.25, y2, 1e-5);}
