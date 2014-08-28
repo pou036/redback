@@ -61,7 +61,7 @@ RedbackStressDivergenceTensors::computeQpResidual()
 		return _poromech_stress_row * _grad_test[_i][_qp];
 	}
 
-	return _stress[_qp].row(_component) * _grad_test[_i][_qp];
+	return _stress[_qp].row(_component) * _grad_test[_i][_qp]; //TODO: Add the gravity kernel
 }
 
 Real

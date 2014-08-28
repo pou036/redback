@@ -151,6 +151,9 @@ protected:
   Real _exponential;
   YieldCriterion _yield_criterion;
   Real _slope_yield_surface;  // coefficient for yield surface
+  VariableValue & _dispx_dot;
+  VariableValue & _dispy_dot;
+  VariableValue & _dispz_dot;
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
 };
 

@@ -113,6 +113,7 @@
     Aphi = 0
     phi0 = 0.1
     da_endo = 1
+    is_chemistry_on = true
   [../]
 []
 

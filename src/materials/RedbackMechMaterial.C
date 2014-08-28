@@ -116,7 +116,10 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _mixture_compressibility_param(getParam<Real>("mixture_compressibility")),
   _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
   _yield_criterion((YieldCriterion)(int)getParam<MooseEnum>("yield_criterion")),
-  _slope_yield_surface(getParam<Real>("slope_yield_surface"))
+  _slope_yield_surface(getParam<Real>("slope_yield_surface")),
+  _dispx_dot(coupledDot("disp_x")),
+  _dispy_dot(coupledDot("disp_y")),
+  _dispz_dot(coupledDot("disp_z"))
 
   {
   _Cijkl.fillFromInputVector(_Cijkl_vector, _fill_method);
@@ -339,6 +342,9 @@ RedbackMechMaterial::macaulayBracket(Real val)
 void
 RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y)
 {
+  // update velocities
+  _solid_velocity[_qp] = RealVectorValue(_dispx_dot[_qp], _dispy_dot[_qp], _dispz_dot[_qp]);// TODO
+
   RedbackMaterial::computeRedbackTerms();
 
   // Compute stresses
