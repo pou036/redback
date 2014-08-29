@@ -60,7 +60,8 @@ protected:
   
   Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param, _m_param, _exponent, _peclet_number; //_ar_c_param, _da_param, _mu_param,
   Real  _ar_F_param, _ar_R_param, _da_endo_param, _da_exo_param, _mu_param, _Kc_param, _eta1_param, _eta2_param, _Aphi_param, _pressurization_coefficient_param;
-  bool _is_mechanics_on, _is_chemistry_on, _are_convective_terms_on;
+  Real _solid_compressibility_param, _fluid_compressibility_param, _solid_thermal_expansion_param, _fluid_thermal_expansion_param, _solid_density_param, _fluid_density_param;
+  bool _is_chemistry_on, _are_convective_terms_on;
 
   MaterialProperty<Real> & _useless_property_old; //TODO: this is a useless quantity, just to call initQpStatefulProperties without mechanics. find a better way to initialize
   MaterialProperty<Real> & _gr;
@@ -90,11 +91,11 @@ protected:
   MaterialProperty<Real> & _chemical_source_mass_jac;
 
   MaterialProperty<RealVectorValue> & _thermal_convective_mass;
-  MaterialProperty<Real> & _thermal_convective_mass_jac;
+  MaterialProperty<RealVectorValue> & _thermal_convective_mass_jac;
   MaterialProperty<RealVectorValue> & _pressure_convective_mass;
-  MaterialProperty<Real> & _pressure_convective_mass_jac;
+  MaterialProperty<RealVectorValue> & _pressure_convective_mass_jac;
   MaterialProperty<RealVectorValue> & _mixture_convective_energy;
-  MaterialProperty<Real> & _mixture_convective_energy_jac;
+  MaterialProperty<RealVectorValue> & _mixture_convective_energy_jac;
 
   MaterialProperty<RealVectorValue> & _solid_velocity;
   MaterialProperty<RealVectorValue> & _fluid_velocity;

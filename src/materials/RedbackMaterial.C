@@ -26,12 +26,11 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("ar", "Arrhenius number.");
   params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
   params.addParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna)");
-  params.addRequiredParam<bool>("is_mechanics_on", "is mechanics on?");
   params.addParam<bool>("is_chemistry_on", false, "is chemistry on?");
   params.addParam<bool>("are_convective_terms_on", false, "are convective terms on?");
   params.addCoupledVar("temperature", "Dimensionless temperature");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
-  params.addParam<MooseEnum>("density_method", RedbackMaterial::densityMethodEnum() = "linear", "The method to describe density evolution with temperature and pore pressure");
+  params.addParam<MooseEnum>("density_method", RedbackMaterial::densityMethodEnum() = "linear", "The method to describe density evolution with temperature and pore pressure"); // TODO: fluid, solid, mixture?...
   params.addParam<MooseEnum>("permeability_method", RedbackMaterial::permeabilityMethodEnum() = "KozenyCarman", "The method to describe permeability evolution");
 
   params.addParam<Real>("ar_F", "Arrhenius number for the forward reaction.");
@@ -45,6 +44,13 @@ InputParameters validParams<RedbackMaterial>()
   params.addRangeCheckedParam<Real>("Aphi","Aphi>=0 & Aphi<=1", "percentage of volume change from chemistry contributing to porosity (see documentation)");
   params.addParam<Real>("pressurization_coefficient", 0, "Pressurization coefficient (Lambda).");
   params.addParam<Real>("Peclet_number", 1, "Peclet number");
+
+  params.addParam<Real>("solid_compressibility", 1, "normalised solid compressibility (beta^{*(s)})"); // _solid_compressibility_param
+  params.addParam<Real>("fluid_compressibility", 1, "normalised fluid compressibility (beta^{*(f)})"); // _fluid_compressibility_param
+  params.addParam<Real>("solid_thermal_expansion", 1, "normalised solid expansion (lambda^{*(s)})"); // _solid_thermal_expansion_param
+  params.addParam<Real>("fluid_thermal_expansion", 1, "normalised fluid expansion (lambda^{*(f)})"); // _fluid_thermal_expansion_param
+  params.addParam<Real>("solid_density", 2.5, "normalised solid density"); // solid_density_param
+  params.addParam<Real>("fluid_density", 1, "normalised fluid density"); // fluid_density_param
 
   return params;
 }
@@ -74,7 +80,13 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _Aphi_param(getParam<Real>("Aphi")),
   _pressurization_coefficient_param(getParam<Real>("pressurization_coefficient")),
 
-  _is_mechanics_on(getParam<bool>("is_mechanics_on")),
+  _solid_compressibility_param(getParam<Real>("solid_compressibility")),
+  _fluid_compressibility_param(getParam<Real>("fluid_compressibility")),
+  _solid_thermal_expansion_param(getParam<Real>("solid_thermal_expansion")),
+  _fluid_thermal_expansion_param(getParam<Real>("fluid_thermal_expansion")),
+  _solid_density_param(getParam<Real>("solid_density")),
+  _fluid_density_param(getParam<Real>("fluid_density")),
+
   _is_chemistry_on(getParam<bool>("is_chemistry_on")),
   _are_convective_terms_on(getParam<bool>("are_convective_terms_on")),
 
@@ -107,11 +119,11 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _chemical_source_mass_jac(declareProperty<Real>("chemical_source_mass_jacobian")),
 
   _thermal_convective_mass(declareProperty<RealVectorValue>("thermal_convective_mass")),
-  _thermal_convective_mass_jac(declareProperty<Real>("thermal_convective_mass_jacobian")),
+  _thermal_convective_mass_jac(declareProperty<RealVectorValue>("thermal_convective_mass_jacobian")),
   _pressure_convective_mass(declareProperty<RealVectorValue>("pressure_convective_mass")),
-  _pressure_convective_mass_jac(declareProperty<Real>("pressure_convective_mass_jacobian")),
-  _mixture_convective_energy(declareProperty<RealVectorValue>("_mixture_convective_energy")),
-  _mixture_convective_energy_jac(declareProperty<Real>("_mixture_convective_energy_jacobian")),
+  _pressure_convective_mass_jac(declareProperty<RealVectorValue>("pressure_convective_mass_jacobian")),
+  _mixture_convective_energy(declareProperty<RealVectorValue>("mixture_convective_energy")),
+  _mixture_convective_energy_jac(declareProperty<RealVectorValue>("mixture_convective_energy_jacobian")),
 
   _solid_velocity(declareProperty<RealVectorValue>("solid_velocity")),
   _fluid_velocity(declareProperty<RealVectorValue>("fluid_velocity")),
@@ -129,7 +141,8 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _pressurization_coefficient(declareProperty<Real>("pressurization_coefficient")),
 
   _grad_pore_pressure(coupledGradient("pore_pres"))
-  //_grad_pore_pressure(_has_pore_pres ? coupledGradient("pore_pres") : _zero)
+  //_grad_pore_pressure(_has_pore_pres ? coupledGradient("pore_pres") : _zero) // TODO: what if H is not activated?
+
 {
 }
 
@@ -170,10 +183,10 @@ RedbackMaterial::initQpStatefulProperties()
   _pressurization_coefficient[_qp] = _pressurization_coefficient_param;
   _solid_velocity[_qp] = RealVectorValue();
   _fluid_velocity[_qp] = RealVectorValue();
-  _solid_compressibility[_qp] = 0;
-  _fluid_compressibility[_qp] = 0;
-  _solid_thermal_expansion[_qp] = 0;
-  _fluid_thermal_expansion[_qp] = 0;
+  _solid_compressibility[_qp] = _solid_compressibility_param;
+  _fluid_compressibility[_qp] = _fluid_compressibility_param;
+  _solid_thermal_expansion[_qp] = _solid_thermal_expansion_param;
+  _fluid_thermal_expansion[_qp] = _fluid_thermal_expansion_param;
 
 }
 
@@ -284,15 +297,13 @@ RedbackMaterial::computeRedbackTerms()
   // convective terms
   if (_are_convective_terms_on)
   {
-    Real mixture_density, solid_density, fluid_density;
+    Real mixture_density;
     Real beta_m_star, beta_solid, beta_fluid;
     Real lambda_m_star, lambda_solid, lambda_fluid;
     RealVectorValue mixture_velocity;
 
     //Step 1: forming the partial densities
-    solid_density = 2.5; // TODO: connect through interface (as field over mesh)
-    fluid_density = 1.0; // TODO: connect through interface (as field over mesh)
-    mixture_density = (1-_porosity[_qp])*solid_density+ _porosity[_qp]*fluid_density;
+    mixture_density = (1-_porosity[_qp])*_solid_density_param+ _porosity[_qp]*_fluid_density_param;
 
     //Step 2: forming the compressibilities of the phases
     beta_solid = (1-_porosity[_qp])*_solid_compressibility[_qp]; //normalized compressibility of the solid phase
@@ -306,17 +317,17 @@ RedbackMaterial::computeRedbackTerms()
 
     //Step 4: forming the velocities through mechanics and Darcy's flow law
     _fluid_velocity[_qp] = _solid_velocity[_qp] - beta_m_star*_grad_pore_pressure[_qp]/(_lewis_number[_qp]*_porosity[_qp]); //solving Darcy's flux for the fluid velocity
-    mixture_velocity = (solid_density/mixture_density)*_solid_velocity[_qp] + (fluid_density/mixture_density)*_fluid_velocity[_qp]; //barycentric velocity for the mixture
+    mixture_velocity = (_solid_density_param/mixture_density)*_solid_velocity[_qp] + (_fluid_density_param/mixture_density)*_fluid_velocity[_qp]; //barycentric velocity for the mixture
 
     //Step 5: forming the kernels and their jacobians
     _pressure_convective_mass[_qp] = _peclet_number*(beta_solid/beta_m_star)*_solid_velocity[_qp] + (beta_fluid/beta_m_star)*_fluid_velocity[_qp]; //convective term multiplying the pressure flux in the mass equation
-    _pressure_convective_mass_jac[_qp] = 0; //derivative with respect to pore pressure TODO: this is not equal to zero!!
+    _pressure_convective_mass_jac[_qp] = RealVectorValue(); //derivative with respect to pore pressure TODO: this is not equal to zero!!
 
     _thermal_convective_mass[_qp] = _peclet_number*(lambda_solid/beta_m_star)*_solid_velocity[_qp] + (lambda_fluid/beta_m_star)*_fluid_velocity[_qp]; //convective term multiplying the thermal flux in the mass equation
-    _thermal_convective_mass_jac[_qp] = 0;//derivative with respect to pore pressure TODO: this is not equal to zero!!
+    _thermal_convective_mass_jac[_qp] = RealVectorValue();//derivative with respect to pore pressure TODO: this is not equal to zero!!
 
     _mixture_convective_energy[_qp] = _peclet_number*mixture_velocity; //convective term multiplying the thermal flux in the energy equation
-    _mixture_convective_energy_jac[_qp] = 0; //derivative with respect to temperature
+    _mixture_convective_energy_jac[_qp] = RealVectorValue(); //derivative with respect to temperature
   }
   return;
 }

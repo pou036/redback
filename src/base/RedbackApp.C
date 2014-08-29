@@ -9,10 +9,12 @@
 #include "RedbackChemEndo.h"
 #include "RedbackChemExo.h"
 #include "RedbackChemPressure.h"
+#include "RedbackMassConvection.h"
 #include "RedbackMassDiffusion.h"
 #include "RedbackMechDissip.h"
 #include "RedbackPoromechanics.h"
 #include "RedbackStressDivergenceTensors.h"
+#include "RedbackThermalConvection.h"
 #include "RedbackThermalPressurization.h"
 
 // Materials
@@ -69,10 +71,12 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
+  registerKernel(RedbackMassConvection);
   registerKernel(RedbackMassDiffusion);
   registerKernel(RedbackMechDissip);
   registerKernel(RedbackPoromechanics);
   registerKernel(RedbackStressDivergenceTensors);
+  registerKernel(RedbackThermalConvection);
   registerKernel(RedbackThermalPressurization);
 
 
