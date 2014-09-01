@@ -56,6 +56,7 @@
     slope_yield_surface = -0.6
     temperature = temp
     is_chemistry_on = true
+    yield_criterion = Drucker_Prager
   [../]
 []
 
@@ -358,7 +359,7 @@
 []
 
 [Outputs]
-  file_base = bench_TM_J2_out
+  file_base = bench_TMC_DP_out
   output_initial = true
   exodus = true
   [./console]

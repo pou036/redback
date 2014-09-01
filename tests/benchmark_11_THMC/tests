@@ -1,15 +1,15 @@
 [Tests]
-  [./test_10_THMC_J2] # can't put a dot in that name!
+  [./test_11_THMC_J2] # can't put a dot in that name!
     type = 'Exodiff'
     input = 'bench_THMC_J2.i'
     exodiff = 'bench_THMC_J2_out.e'
   [../]
-  [./test_10_THMC_DP] # can't put a dot in that name!
+  [./test_11_THMC_DP] # can't put a dot in that name!
     type = 'Exodiff'
     input = 'bench_THMC_DP.i'
     exodiff = 'bench_THMC_DP_out.e'
   [../]
-  [./test_10_THMC_CC] # can't put a dot in that name!
+  [./test_11_THMC_CC] # can't put a dot in that name!
     type = 'Exodiff'
     input = 'bench_THMC_CC.i'
     exodiff = 'bench_THMC_CC_out.e'

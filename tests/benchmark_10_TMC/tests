@@ -1,0 +1,17 @@
+[Tests]
+  [./test_10_TMC_J2] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'bench_TMC_J2.i'
+    exodiff = 'bench_TMC_J2_out.e'
+  [../]
+  [./test_10_TMC_DP] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'bench_TMC_DP.i'
+    exodiff = 'bench_TMC_DP_out.e'
+  [../]
+  [./test_10_TMC_CC] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'bench_TMC_CC.i'
+    exodiff = 'bench_TMC_CC_out.e'
+  [../]
+[]
