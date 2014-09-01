@@ -24,7 +24,8 @@ InputParameters validParams<RedbackMassDiffusion>()
 
 RedbackMassDiffusion::RedbackMassDiffusion(const std::string & name, InputParameters parameters) :
   Kernel(name, parameters),
-  _Le(getMaterialProperty<Real>("lewis_number"))
+  _Le(getMaterialProperty<Real>("lewis_number")),
+  _gravity_term(getMaterialProperty<RealVectorValue>("fluid_gravity_term"))
 {
 }
 
@@ -35,7 +36,7 @@ RedbackMassDiffusion::~RedbackMassDiffusion()
 Real
 RedbackMassDiffusion::computeQpResidual()
 {
-  return ((1/_Le[_qp]) * _grad_u[_qp]) * _grad_test[_i][_qp];
+  return ((1/_Le[_qp]) * (_grad_u[_qp]) - _gravity_term[_qp]) * _grad_test[_i][_qp]; //TODO: find a way to define global parameters instead of material properties
 }
 
 Real

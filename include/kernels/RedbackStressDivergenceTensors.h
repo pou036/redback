@@ -49,6 +49,8 @@ private:
   const unsigned int _ydisp_var;
   const unsigned int _zdisp_var;
   const unsigned int _temp_var;
+
+  MaterialProperty<RealVectorValue> & _gravity_term;
 };
 
 #endif //REDBACKSTRESSDIVERGENCETENSORS_H

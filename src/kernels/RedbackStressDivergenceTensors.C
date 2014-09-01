@@ -40,7 +40,9 @@ RedbackStressDivergenceTensors::RedbackStressDivergenceTensors(const std::string
     _xdisp_var(_xdisp_coupled ? coupled("disp_x") : 0),
     _ydisp_var(_ydisp_coupled ? coupled("disp_y") : 0),
     _zdisp_var(_zdisp_coupled ? coupled("disp_z") : 0),
-    _temp_var(_temp_coupled ? coupled("temp") : 0)
+    _temp_var(_temp_coupled ? coupled("temp") : 0),
+
+    _gravity_term(getMaterialProperty<RealVectorValue>("mixture_gravity_term"))
 {
 }
 
@@ -50,18 +52,19 @@ RedbackStressDivergenceTensors::computeQpResidual()
 	/* Handling the case where pore pressure is active. In this case pore pressure
 	 * is not depending on displacements (incompressible case) and the stresses of
 	 * TensorMechanics are now effective stresses
-	 * The quantitity _poromech_stress is the total stress obeying to Terzaghi's
+	 * The quantity _poromech_stress is the total stress obeying to Terzaghi's
 	 * principle: poromech_stress(ij) = stress(ij) + pore_pressure * delta(ij).
 	 * Jacobians are the same, since pore pressure is not depending on displacements
 	 */
+
 	if ( _pore_pres_coupled)
 	{
 		_poromech_stress_row = _stress[_qp].row(_component);
 		_poromech_stress_row(_component) += _pore_pres[_qp];
-		return _poromech_stress_row * _grad_test[_i][_qp];
+		return (_poromech_stress_row + _gravity_term[_qp])* _grad_test[_i][_qp];
 	}
 
-	return _stress[_qp].row(_component) * _grad_test[_i][_qp]; //TODO: Add the gravity kernel
+	return (_stress[_qp].row(_component) + _gravity_term[_qp])* _grad_test[_i][_qp]; //TODO: Add the gravity kernel
 }
 
 Real

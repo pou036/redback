@@ -52,6 +52,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("solid_density", 2.5, "normalised solid density"); // solid_density_param
   params.addParam<Real>("fluid_density", 1, "normalised fluid density"); // fluid_density_param
 
+  params.addParam<RealVectorValue>("gravity", (0, 0, 0) ,"Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg (0,0,-9.81)");
   return params;
 }
 
@@ -89,6 +90,10 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
 
   _is_chemistry_on(getParam<bool>("is_chemistry_on")),
   _are_convective_terms_on(getParam<bool>("are_convective_terms_on")),
+
+  _gravity_param(getParam<RealVectorValue>("gravity")),
+  _mixture_gravity_term(declareProperty<RealVectorValue>("mixture_gravity_term")), //rho_mixture * g
+  _fluid_gravity_term(declareProperty<RealVectorValue>("fluid_gravity_term")), //rho_fluid * g
 
   _useless_property_old(declarePropertyOld<Real>("gr")), //TODO: find better way to initiate the values.
 
@@ -131,6 +136,8 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _fluid_compressibility(declareProperty<Real>("fluid_compressibility")),
   _solid_thermal_expansion(declareProperty<Real>("solid_thermal_expansion")),
   _fluid_thermal_expansion(declareProperty<Real>("fluid_thermal_expansion")),
+
+  _mixture_density(declareProperty<Real>("mixture_density")),
 
   _density_method((DensityMethod)(int)getParam<MooseEnum>("density_method")),
   _permeability_method((PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method")),
@@ -187,7 +194,9 @@ RedbackMaterial::initQpStatefulProperties()
   _fluid_compressibility[_qp] = _fluid_compressibility_param;
   _solid_thermal_expansion[_qp] = _solid_thermal_expansion_param;
   _fluid_thermal_expansion[_qp] = _fluid_thermal_expansion_param;
-
+  _mixture_density[_qp] = (1-_phi0_param)*_solid_density_param + _phi0_param*_fluid_density_param;
+  _mixture_gravity_term[_qp] = _mixture_density[_qp]*_gravity_param;
+  _fluid_gravity_term[_qp] = _fluid_density_param*_gravity_param;
 }
 
 void
@@ -297,13 +306,15 @@ RedbackMaterial::computeRedbackTerms()
   // convective terms
   if (_are_convective_terms_on)
   {
-    Real mixture_density;
     Real beta_m_star, beta_solid, beta_fluid;
     Real lambda_m_star, lambda_solid, lambda_fluid;
     RealVectorValue mixture_velocity;
 
-    //Step 1: forming the partial densities
-    mixture_density = (1-_porosity[_qp])*_solid_density_param+ _porosity[_qp]*_fluid_density_param;
+    //Step 1: forming the partial densities and gravity terms
+    _mixture_density[_qp] = (1-_porosity[_qp])*_solid_density_param+ _porosity[_qp]*_fluid_density_param;
+
+    _mixture_gravity_term[_qp] = _mixture_density[_qp]*_gravity_param;
+    _fluid_gravity_term[_qp] = _fluid_density_param*_gravity_param;
 
     //Step 2: forming the compressibilities of the phases
     beta_solid = (1-_porosity[_qp])*_solid_compressibility[_qp]; //normalized compressibility of the solid phase
@@ -316,8 +327,8 @@ RedbackMaterial::computeRedbackTerms()
     lambda_m_star = lambda_solid + lambda_fluid; // normalized compressibility of the mixture
 
     //Step 4: forming the velocities through mechanics and Darcy's flow law
-    _fluid_velocity[_qp] = _solid_velocity[_qp] - beta_m_star*_grad_pore_pressure[_qp]/(_lewis_number[_qp]*_porosity[_qp]); //solving Darcy's flux for the fluid velocity
-    mixture_velocity = (_solid_density_param/mixture_density)*_solid_velocity[_qp] + (_fluid_density_param/mixture_density)*_fluid_velocity[_qp]; //barycentric velocity for the mixture
+    _fluid_velocity[_qp] = _solid_velocity[_qp] - beta_m_star*(_grad_pore_pressure[_qp] - _fluid_density_param*_gravity_param)/(_lewis_number[_qp]*_porosity[_qp]); //solving Darcy's flux for the fluid velocity
+    mixture_velocity = (_solid_density_param/_mixture_density[_qp])*_solid_velocity[_qp] + (_fluid_density_param/_mixture_density[_qp])*_fluid_velocity[_qp]; //barycentric velocity for the mixture
 
     //Step 5: forming the kernels and their jacobians
     _pressure_convective_mass[_qp] = _peclet_number*(beta_solid/beta_m_star)*_solid_velocity[_qp] + (beta_fluid/beta_m_star)*_fluid_velocity[_qp]; //convective term multiplying the pressure flux in the mass equation

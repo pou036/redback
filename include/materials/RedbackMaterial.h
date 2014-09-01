@@ -63,6 +63,11 @@ protected:
   Real _solid_compressibility_param, _fluid_compressibility_param, _solid_thermal_expansion_param, _fluid_thermal_expansion_param, _solid_density_param, _fluid_density_param;
   bool _is_chemistry_on, _are_convective_terms_on;
 
+  RealVectorValue _gravity_param;
+
+  MaterialProperty<RealVectorValue> & _mixture_gravity_term;
+  MaterialProperty<RealVectorValue> & _fluid_gravity_term;
+
   MaterialProperty<Real> & _useless_property_old; //TODO: this is a useless quantity, just to call initQpStatefulProperties without mechanics. find a better way to initialize
   MaterialProperty<Real> & _gr;
   MaterialProperty<Real> & _ref_lewis_nb;
@@ -103,6 +108,8 @@ protected:
   MaterialProperty<Real> & _fluid_compressibility; // \bar(\beta_f)/\sigma_{ref}
   MaterialProperty<Real> & _solid_thermal_expansion; // \bar(\lambda_s)/ \delta T_ref
   MaterialProperty<Real> & _fluid_thermal_expansion; // \bar(\lambda_f)/delta T_ref
+
+  MaterialProperty<Real> & _mixture_density;
 
   RedbackMaterial::DensityMethod _density_method;
   RedbackMaterial::PermeabilityMethod _permeability_method; // TODO: remove RedbackMaterial???
