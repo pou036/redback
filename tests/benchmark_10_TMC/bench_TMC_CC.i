@@ -57,6 +57,7 @@
     temperature = temp
     is_chemistry_on = true
     yield_criterion = modified_Cam_Clay
+    da_endo = 1e-6
   [../]
 []
 

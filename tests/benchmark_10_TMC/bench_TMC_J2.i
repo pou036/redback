@@ -56,6 +56,7 @@
     slope_yield_surface = -0.6
     temperature = temp
     is_chemistry_on = true
+    da_endo = 1e-6
   [../]
 []
 

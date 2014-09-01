@@ -57,6 +57,7 @@
     temperature = temp
     is_chemistry_on = true
     yield_criterion = Drucker_Prager
+    da_endo = 1e-6
   [../]
 []
 
