@@ -20,7 +20,9 @@
 #include "ElasticityTensorR4.h"
 #include "RotationTensor.h"
 
+
 #include "RedbackMaterial.h"
+
 //#include "FiniteStrainPlasticMaterial.h"
 
 //Forward Declarations
@@ -38,6 +40,14 @@ class RedbackMechMaterial : public RedbackMaterial
 {
 public:
   RedbackMechMaterial(const std::string & name, InputParameters parameters);
+  // Redback
+  static MooseEnum yieldCriterionEnum();
+  enum YieldCriterion
+  {
+    J2_plasticity, // Von Mises
+    Drucker_Prager,
+    modified_Cam_Clay
+  };
 
 protected:
   // Copy-paste from TensorMechanicsMaterial.h
@@ -75,8 +85,7 @@ protected:
   /// Current deformation gradient
   //RankTwoTensor _dfgrd;
 
-  bool _has_T;
-  VariableValue * _T; //pointer rather than reference
+  //VariableValue & _T;
 
   /// determines the translation from C_ijkl to the Rank-4 tensor
   RankFourTensor::FillMethod _fill_method;
@@ -97,42 +106,55 @@ protected:
   MaterialProperty<Real> & _eqv_plastic_strain;
   MaterialProperty<Real> & _eqv_plastic_strain_old;
 
-  virtual Real yieldFunction(const RankTwoTensor & stress, const Real yield_stress);
+  //virtual Real yieldFunction(const RankTwoTensor & stress, const Real yield_stress);
   Real getSigEqv(const RankTwoTensor & stress);
   Real deltaFunc(unsigned int i, unsigned int j);
   Real getYieldStress(const Real equivalent_plastic_strain);
 
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
-  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
-  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
-  void getFlowTensor(const RankTwoTensor &, Real, RankTwoTensor &);
+  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
+  virtual void returnMapJ2(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
+  Real getPressureProjectionDP(Real, Real, Real);
+  void getStressProjectionsCC(Real, Real, Real, Real, Real &, Real &);
+  virtual void returnMapDP(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
+  virtual void returnMapCC(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
+
+  void getJacJ2(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
+  void getJacDP(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, RankFourTensor &);
+  void getJacCC(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, RankFourTensor &);
+
+  void getFlowTensorCC(const RankTwoTensor &, Real, Real, RankTwoTensor &);
+  void getFlowTensorJ2(const RankTwoTensor &, Real, RankTwoTensor &);
+  void getFlowTensorDP(const RankTwoTensor &, Real, RankTwoTensor &);
+
+  Real getFlowIncrementCC(Real, Real, Real, Real, Real);
+  Real getFlowIncrementDP(Real, Real, Real, Real);
+  Real getFlowIncrementJ2(const RankTwoTensor &, Real);
+
+  Real getDerivativeFlowIncrementDP(const RankTwoTensor &, Real, Real, Real, Real);
+  Real getDerivativeFlowIncrementCC(const RankTwoTensor &, Real, Real, Real, Real, Real);
+  Real getDerivativeFlowIncrementJ2(const RankTwoTensor &, Real);
 
   Real _ref_pe_rate;
   Real _exponent;
 
   Real macaulayBracket(Real);
 
-
-
-
-
-
-  //  virtual void initQpStatefulProperties();
-//  virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
-
-//  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
-//  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
-//  void getFlowTensor(const RankTwoTensor &, Real, RankTwoTensor &);
-
-//  MaterialProperty<Real> & _mises_stress;
-//  MaterialProperty<Real> & _mean_stress;
-
-//  MaterialProperty<Real> & _volumetric_strain;
-//  MaterialProperty<Real> & _volumetric_strain_rate;
-
-//  Real macaulayBracket(Real);
-
-  
+  // Redback specific
+  MaterialProperty<Real> & _mises_stress;
+  MaterialProperty<Real> & _mean_stress;
+  MaterialProperty<Real> & _mises_strain_rate;
+  MaterialProperty<Real> & _volumetric_strain;
+  MaterialProperty<Real> & _volumetric_strain_rate;
+  Real _mixture_compressibility_param;
+  MaterialProperty<Real> & _mixture_compressibility;
+  Real _exponential;
+  YieldCriterion _yield_criterion;
+  Real _slope_yield_surface;  // coefficient for yield surface
+  VariableValue & _dispx_dot;
+  VariableValue & _dispy_dot;
+  VariableValue & _dispz_dot;
+  virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
 };
 
 #endif //REDBACKMECHMATERIAL_H

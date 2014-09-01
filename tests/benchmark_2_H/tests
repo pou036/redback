@@ -1,0 +1,12 @@
+[Tests]
+  [./test_2_H_diffusion] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'bench_diffusion.i'
+    exodiff = 'bench_diffusion_out.e'
+  [../]
+  [./test_2_H_source_term] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'bench_source_term.i'
+    exodiff = 'bench_source_term_out.e'
+  [../]
+[]

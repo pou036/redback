@@ -1,0 +1,7 @@
+[Tests]
+  [./test_5_TC] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'bench_TC.i'
+    exodiff = 'bench_TC_out.e'
+  [../]
+[]

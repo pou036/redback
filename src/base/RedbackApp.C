@@ -3,20 +3,24 @@
 #include "AppFactory.h"
 #include "ModulesApp.h"
 
+#include "RedbackAction.h"
+
 // Kernels
 #include "RedbackChemEndo.h"
 #include "RedbackChemExo.h"
 #include "RedbackChemPressure.h"
+#include "RedbackMassConvection.h"
 #include "RedbackMassDiffusion.h"
 #include "RedbackMechDissip.h"
-//#include "MechHeat.h"
-//#include "MechHeatTensor.h"
+#include "RedbackPoromechanics.h"
+#include "RedbackStressDivergenceTensors.h"
+#include "RedbackThermalConvection.h"
+#include "RedbackThermalPressurization.h"
 
 // Materials
-//#include "DimensionlessRock.h"
-#include "FiniteStrainRatePlasticTemperatureMaterial.h"
 #include "RedbackMaterial.h"
-#include "RedbackChemMaterial.h"
+//#include "RedbackChemMaterial.h"
+#include "RedbackMechMaterial.h"
 
 // AuxKernels
 //#include "StrainRateAux.h"
@@ -67,15 +71,18 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
+  registerKernel(RedbackMassConvection);
   registerKernel(RedbackMassDiffusion);
   registerKernel(RedbackMechDissip);
-  //registerKernel(MechHeat);
-  //registerKernel(MechHeatTensor);
+  registerKernel(RedbackPoromechanics);
+  registerKernel(RedbackStressDivergenceTensors);
+  registerKernel(RedbackThermalConvection);
+  registerKernel(RedbackThermalPressurization);
 
-  //registerMaterial(DimensionlessRock);
-  registerMaterial(FiniteStrainRatePlasticTemperatureMaterial);
+
   registerMaterial(RedbackMaterial);
-  registerMaterial(RedbackChemMaterial);
+  //registerMaterial(RedbackChemMaterial);
+  registerMaterial(RedbackMechMaterial);
 
   //registerAux(StrainRateAux);
   //registerAux(MisesStrainAux);
@@ -90,4 +97,6 @@ RedbackApp::registerObjects(Factory & factory)
 void
 RedbackApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
+  syntax.registerActionSyntax("RedbackAction", "RedbackAction/*");
+  registerAction(RedbackAction, "add_kernel");
 }

@@ -1,7 +1,7 @@
 [Tests]
-  [./test]
-    type = 'Exodiff'
-    input = 'oscillation1D.i'
-    exodiff = 'oscillation1D_out.e'
-  [../]
+#  [./test]
+#    type = 'Exodiff'
+#    input = 'oscillation1D.i'
+#    exodiff = 'oscillation1D_out.e'
+#  [../]
 []

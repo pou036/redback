@@ -36,7 +36,7 @@ protected:
 //  VariableValue & _T;
 
   MaterialProperty<Real> & _Le;
- // MaterialProperty<Real> & _volumetric_strain_rate;
+  MaterialProperty<RealVectorValue> & _gravity_term;
 };
 
 

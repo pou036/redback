@@ -17,28 +17,51 @@
 template<>
 InputParameters validParams<RedbackMaterial>()
 {
-  InputParameters params = validParams<FiniteStrainPlasticMaterial>();
+  InputParameters params = validParams<Material>();
 
   //params.addParam<Real>("phi0", 0, "initial porosity value.");
-  params.addRangeCheckedParam<Real>("phi0","phi0>0 & phi0<1", "initial porosity value.");
-  params.addRequiredRangeCheckedParam<Real>("gr", "gr>=0", "Gruntfest number.");
-  params.addRequiredParam<Real>("ref_lewis_nb", "Reference Lewis number.");
-  params.addRequiredParam<Real>("ar", "Arrhenius number.");
+  params.addRangeCheckedParam<Real>("phi0", 0.0, "phi0>=0 & phi0<1", "initial porosity value.");
+  params.addRangeCheckedParam<Real>("gr", "gr>=0", "Gruntfest number.");
+  params.addParam<Real>("ref_lewis_nb", "Reference Lewis number.");
+  params.addParam<Real>("ar", "Arrhenius number.");
   params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
-  params.addRequiredParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna)");
-  params.addRequiredParam<bool>("is_mechanics_on", "is mechanics on?");
-  params.addRequiredCoupledVar("temperature", "Dimensionless temperature");
-  params.addRequiredCoupledVar("pore_pres", "Dimensionless pore pressure");
-  params.addParam<MooseEnum>("density_method", RedbackMaterial::densityMethodEnum() = "linear", "The method to describe density evolution with temperature and pore pressure");
+  params.addParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna)");
+  params.addParam<bool>("is_chemistry_on", false, "is chemistry on?");
+  params.addParam<bool>("are_convective_terms_on", false, "are convective terms on?");
+  params.addCoupledVar("temperature", "Dimensionless temperature");
+  params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
+  params.addParam<MooseEnum>("density_method", RedbackMaterial::densityMethodEnum() = "linear", "The method to describe density evolution with temperature and pore pressure"); // TODO: fluid, solid, mixture?...
   params.addParam<MooseEnum>("permeability_method", RedbackMaterial::permeabilityMethodEnum() = "KozenyCarman", "The method to describe permeability evolution");
 
+  params.addParam<Real>("ar_F", "Arrhenius number for the forward reaction.");
+  params.addParam<Real>("ar_R", "Arrhenius number for the reverse reaction.");
+  params.addParam<Real>("da_endo", 0, "Damkoehler number for the endothermic reaction.");
+  params.addParam<Real>("da_exo", 0, "Damkoehler number for the exothermic reaction.");
+  params.addParam<Real>("mu", 0, "Chemical pressurization coefficient.");
+  params.addParam<Real>("Kc", 0, "Equilibtium constant.");
+  params.addParam<Real>("eta1", 1, "ratio of concentrations (see documentation).");
+  params.addParam<Real>("eta2", 1, "ratio of concentrations (see documentation).");
+  params.addRangeCheckedParam<Real>("Aphi","Aphi>=0 & Aphi<=1", "percentage of volume change from chemistry contributing to porosity (see documentation)");
+  params.addParam<Real>("pressurization_coefficient", 0, "Pressurization coefficient (Lambda).");
+  params.addParam<Real>("Peclet_number", 1, "Peclet number");
+
+  params.addParam<Real>("solid_compressibility", 1, "normalised solid compressibility (beta^{*(s)})"); // _solid_compressibility_param
+  params.addParam<Real>("fluid_compressibility", 1, "normalised fluid compressibility (beta^{*(f)})"); // _fluid_compressibility_param
+  params.addParam<Real>("solid_thermal_expansion", 1, "normalised solid expansion (lambda^{*(s)})"); // _solid_thermal_expansion_param
+  params.addParam<Real>("fluid_thermal_expansion", 1, "normalised fluid expansion (lambda^{*(f)})"); // _fluid_thermal_expansion_param
+  params.addParam<Real>("solid_density", 2.5, "normalised solid density"); // solid_density_param
+  params.addParam<Real>("fluid_density", 1, "normalised fluid density"); // fluid_density_param
+
+  params.addParam<RealVectorValue>("gravity", (0, 0, 0) ,"Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg (0,0,-9.81)");
   return params;
 }
 
 RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters parameters) :
-  FiniteStrainPlasticMaterial(name, parameters),
-  _T(coupledValue("temperature")),
-  _pore_pres(coupledValue("pore_pres")),
+  Material(name, parameters),
+  _has_T(isCoupled("temperature")),
+  _T(_has_T ? coupledValue("temperature") : _zero), // TODO: should be NULL (but doesn't compile)
+  _has_pore_pres(isCoupled("pore_pres")),
+  _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero), // TODO: should be NULL (but doesn't compile)
 
   _phi0_param(getParam<Real>("phi0")),
   _gr_param(getParam<Real>("gr")),
@@ -46,31 +69,87 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _ar_param(getParam<Real>("ar")),
   _delta_param(getParam<Real>("delta")),
   _m_param(getParam<Real>("m")),
-  _is_mechanics_on(getParam<bool>("is_mechanics_on")),
+  _peclet_number(getParam<Real>("Peclet_number")),
+  _ar_F_param(getParam<Real>("ar_F")),
+  _ar_R_param(getParam<Real>("ar_R")),
+  _da_endo_param(getParam<Real>("da_endo")),
+  _da_exo_param(getParam<Real>("da_exo")),
+  _mu_param(getParam<Real>("mu")),
+  _Kc_param(getParam<Real>("Kc")),
+  _eta1_param(getParam<Real>("eta1")),
+  _eta2_param(getParam<Real>("eta2")),
+  _Aphi_param(getParam<Real>("Aphi")),
+  _pressurization_coefficient_param(getParam<Real>("pressurization_coefficient")),
+
+  _solid_compressibility_param(getParam<Real>("solid_compressibility")),
+  _fluid_compressibility_param(getParam<Real>("fluid_compressibility")),
+  _solid_thermal_expansion_param(getParam<Real>("solid_thermal_expansion")),
+  _fluid_thermal_expansion_param(getParam<Real>("fluid_thermal_expansion")),
+  _solid_density_param(getParam<Real>("solid_density")),
+  _fluid_density_param(getParam<Real>("fluid_density")),
+
+  _is_chemistry_on(getParam<bool>("is_chemistry_on")),
+  _are_convective_terms_on(getParam<bool>("are_convective_terms_on")),
+
+  _gravity_param(getParam<RealVectorValue>("gravity")),
+  _mixture_gravity_term(declareProperty<RealVectorValue>("mixture_gravity_term")), //rho_mixture * g
+  _fluid_gravity_term(declareProperty<RealVectorValue>("fluid_gravity_term")), //rho_fluid * g
+
+  _useless_property_old(declarePropertyOld<Real>("gr")), //TODO: find better way to initiate the values.
 
   _gr(declareProperty<Real>("gr")),
   _ref_lewis_nb(declareProperty<Real>("ref_lewis_nb")),
   _ar(declareProperty<Real>("ar")),
-
   _delta(declareProperty<Real>("delta")),
   _m(declareProperty<Real>("m")),
 
   _porosity(declareProperty<Real>("porosity")),
   _lewis_number(declareProperty<Real>("lewis_number")),
-  _mises_stress(declareProperty<Real>("mises_stress")),
-  _mean_stress(declareProperty<Real>("mean_stress")),
-
-  _mises_strain(declareProperty<Real>("mises_strain")),
-  _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
-  _volumetric_strain(declareProperty<Real>("volumetric_strain")),
-  _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
 
   _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
   _mechanical_dissipation(declareProperty<Real>("mechanical_dissipation")),
   _mechanical_dissipation_jac(declareProperty<Real>("mechanical_dissipation_jacobian")),
 
-  _density_method((RedbackMaterial::DensityMethod)(int)getParam<MooseEnum>("density_method")),
-  _permeability_method((RedbackMaterial::PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method"))
+  _ar_F(declareProperty<Real>("ar_F")),
+  _ar_R(declareProperty<Real>("ar_R")),
+  _mu(declareProperty<Real>("mu")),
+
+  _chemical_porosity(declareProperty<Real>("chemical_porosity")),
+  _solid_ratio(declareProperty<Real>("solid_ratio")),
+  _chemical_endothermic_energy(declareProperty<Real>("chemical_endothermic_energy")),
+  _chemical_endothermic_energy_jac(declareProperty<Real>("chemical_endothermic_energy_jacobian")),
+  _chemical_exothermic_energy(declareProperty<Real>("chemical_exothermic_energy")),
+  _chemical_exothermic_energy_jac(declareProperty<Real>("chemical_exothermic_energy_jacobian")),
+  _chemical_source_mass(declareProperty<Real>("chemical_source_mass")),
+  _chemical_source_mass_jac(declareProperty<Real>("chemical_source_mass_jacobian")),
+
+  _thermal_convective_mass(declareProperty<RealVectorValue>("thermal_convective_mass")),
+  _thermal_convective_mass_jac(declareProperty<RealVectorValue>("thermal_convective_mass_jacobian")),
+  _pressure_convective_mass(declareProperty<RealVectorValue>("pressure_convective_mass")),
+  _pressure_convective_mass_jac(declareProperty<RealVectorValue>("pressure_convective_mass_jacobian")),
+  _mixture_convective_energy(declareProperty<RealVectorValue>("mixture_convective_energy")),
+  _mixture_convective_energy_jac(declareProperty<RealVectorValue>("mixture_convective_energy_jacobian")),
+
+  _solid_velocity(declareProperty<RealVectorValue>("solid_velocity")),
+  _fluid_velocity(declareProperty<RealVectorValue>("fluid_velocity")),
+  _solid_compressibility(declareProperty<Real>("solid_compressibility")),
+  _fluid_compressibility(declareProperty<Real>("fluid_compressibility")),
+  _solid_thermal_expansion(declareProperty<Real>("solid_thermal_expansion")),
+  _fluid_thermal_expansion(declareProperty<Real>("fluid_thermal_expansion")),
+
+  _mixture_density(declareProperty<Real>("mixture_density")),
+
+  _density_method((DensityMethod)(int)getParam<MooseEnum>("density_method")),
+  _permeability_method((PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method")),
+
+  _mises_strain(declareProperty<Real>("mises_strain")),
+  _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
+
+  _pressurization_coefficient(declareProperty<Real>("pressurization_coefficient")),
+
+  _grad_pore_pressure(coupledGradient("pore_pres"))
+  //_grad_pore_pressure(_has_pore_pres ? coupledGradient("pore_pres") : _zero) // TODO: what if H is not activated?
+
 {
 }
 
@@ -91,282 +170,175 @@ RedbackMaterial::permeabilityMethodEnum()
 void
 RedbackMaterial::initQpStatefulProperties()
 {
-  _elastic_strain[_qp].zero();
-  _stress[_qp].zero();
-  _mises_stress[_qp] = 0;
-  _mises_strain[_qp] = 0;
-  _mean_stress[_qp] = 0;
-  _volumetric_strain[_qp] = 0;
-  _volumetric_strain_rate[_qp] = 0;
-  _plastic_strain[_qp].zero();
-  _plastic_strain_old[_qp].zero();
-  _eqv_plastic_strain[_qp] = 0.0;
-  _porosity[_qp] = _phi0_param;
-}
-
-void
-RedbackMaterial::computeQpStress()
-{
-  RankTwoTensor dp,sig;
-
-  _exponential = 1;
-  if (_has_T)
-  {
-    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
-  }
 
   // Initialise our made up variables...
+  _useless_property_old[_qp] = 0; // TODO: find a better way
   _gr[_qp] = _gr_param;
   _ref_lewis_nb[_qp] = _ref_lewis_nb_param;
   _ar[_qp] = _ar_param;
   _delta[_qp] = _delta_param;
   _m[_qp] = _m_param;
-  _exponent = _m[_qp];
+  _exponent = _m[_qp]; //TODO: get rid of m
   _lewis_number[_qp] = _ref_lewis_nb[_qp];
+  _porosity[_qp] = _phi0_param;
+  _chemical_porosity[_qp]= 0;
+   _solid_ratio[_qp] = 0;
+  _ar_F[_qp] = _ar_F_param;
+  _ar_R[_qp] = _ar_R_param;
+  _mu[_qp] = _mu_param;
+  _mises_strain[_qp] = 0;
+  _pressurization_coefficient[_qp] = _pressurization_coefficient_param;
+  _solid_velocity[_qp] = RealVectorValue();
+  _fluid_velocity[_qp] = RealVectorValue();
+  _solid_compressibility[_qp] = _solid_compressibility_param;
+  _fluid_compressibility[_qp] = _fluid_compressibility_param;
+  _solid_thermal_expansion[_qp] = _solid_thermal_expansion_param;
+  _fluid_thermal_expansion[_qp] = _fluid_thermal_expansion_param;
+  _mixture_density[_qp] = (1-_phi0_param)*_solid_density_param + _phi0_param*_fluid_density_param;
+  _mixture_gravity_term[_qp] = _mixture_density[_qp]*_gravity_param;
+  _fluid_gravity_term[_qp] = _fluid_density_param*_gravity_param;
+}
 
-  if (not _is_mechanics_on)
+void
+RedbackMaterial::computeQpProperties()
+{
+  Material::computeQpProperties();
+  //Compute the terms used in Redback Kernels
+  computeRedbackTerms();
+}
+
+void
+RedbackMaterial::computeRedbackTerms()
+{
+  Real omega_rel, temporary, phi_prime, s_prime;
+
+  //TODO: put flags for all properties depending on activated variables.
+
+  //TODO: do not compute these when mechanics is on (5 fields overwritten)
+  _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
+  // Compute modified Gruntfest number
+  _mod_gruntfest_number[_qp]=_gr[_qp];
+  // Compute Mises strain
+  _mises_strain[_qp] = _exponential * _dt;
+  // Compute Mises strain rate
+  _mises_strain_rate[_qp] = _exponential;
+
+  // Compute Mechanical Dissipation
+  _mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
+      std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
+
+  // Compute Mechanical Dissipation Jacobian
+  _mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
+    _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
+    (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+
+  if (_is_chemistry_on)
   {
-    computeEnergyTerms(sig, 0, 0);
-    return;
+    /*
+    * The following calculates the volume ratios of a generic reversible reaction of the form:
+    * AB_(solid) <-> A_(solid)  + B_(fluid)
+    * The chemical porosity is the volume ration of B over the total volume V=V_A + V_B + V_AB
+    * and the solid ratio is the volume of product A over the solid volume V_A+V_AB
+    */
+
+    // Step 1: calculate the relative rate of reactions
+    omega_rel = _eta2_param * _Kc_param * std::exp(- (_ar_F[_qp]-_ar_R[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
+
+    // Step 2: calculate the solid ratio
+    _solid_ratio[_qp] = omega_rel/(1 + omega_rel);
+
+    // Step 3: calculate the chemical porosity and update the total porosity
+    _chemical_porosity[_qp] = _Aphi_param*(1 - _phi0_param)/(1+_eta1_param/_solid_ratio[_qp]);
+    _porosity[_qp] =  _phi0_param + _chemical_porosity[_qp];
+
+    // Step 4: calculate the partial derivatives for the jacobian
+    temporary = _eta2_param * _Kc_param * (_ar_F[_qp] - _ar_R[_qp]) *_delta[_qp] *
+        std::exp( (_ar_F[_qp]-_ar_R[_qp]) / (1 + _delta[_qp]*_T[_qp]) ) / std::pow(1+_delta[_qp]*_T[_qp], 2) ;
+
+    phi_prime = - temporary*_Aphi_param*_eta1_param*(1-_phi0_param) /
+        std::pow(_eta1_param * std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp])) +
+            (1 + _eta1_param)*
+        std::exp( _ar_F[_qp] / (1 + _delta[_qp]*_T[_qp]) )* _eta2_param * _Kc_param, 2);
+
+    s_prime = - temporary/std::pow(
+         std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp])) +
+         std::exp( _ar_F[_qp] / (1 + _delta[_qp]*_T[_qp]) )* _eta2_param * _Kc_param, 2);
+
+    // Compute Endothermic Chemical Energy
+    _chemical_endothermic_energy[_qp] = _da_endo_param * (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp]) *
+        std::exp( (_ar_F[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
+
+    //std::cout<<"chemical endothermic="<<_chemical_endothermic_energy[_qp] <<std::endl;
+
+    // Compute Endothermic Chemical Energy Jacobian
+    _chemical_endothermic_energy_jac[_qp] = _da_endo_param * std::exp( (_ar_F[_qp]) / (1 + _delta[_qp]*_T[_qp]) ) *
+        (
+         _ar_F[_qp] * _delta[_qp] * (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp])
+            / std::pow(1+_delta[_qp]*_T[_qp], 2)
+        - (1 - _solid_ratio[_qp]) * phi_prime
+        - (1 - _porosity[_qp]) * s_prime
+        );
+
+    // Compute Exothermic Chemical Energy
+    _chemical_exothermic_energy[_qp] = _da_exo_param * (1 - _porosity[_qp]) * _solid_ratio[_qp] * _chemical_porosity[_qp] *
+        std::exp( (_ar_R[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
+
+    // Compute Exothermic Chemical Energy Jacobian
+    _chemical_exothermic_energy_jac[_qp] = _da_exo_param * std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp]) ) *
+        (
+          _solid_ratio[_qp]*(
+         _ar_R[_qp] * _delta[_qp] * _chemical_porosity[_qp] *(1 - _porosity[_qp])
+            / std::pow(1+_delta[_qp]*_T[_qp], 2)
+        + (1 - _porosity[_qp] - _chemical_porosity[_qp]) * phi_prime )
+        + _chemical_porosity[_qp]*(1 - _porosity[_qp]) * s_prime
+        );
+
+    // Compute Chemical Source/Sink Term for the mass (pore pressure) equation
+    _chemical_source_mass[_qp] =  _mu[_qp]* (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp]) *std::exp( (_ar_F[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
+
+    // Compute Jacobian of Chemical Source/Sink Term for the mass (pore pressure) equation. The corresponding variable is pore pressure
+    _chemical_source_mass_jac[_qp] = 0;
+
+    // Update Lewis number
+    _lewis_number[_qp] = _ref_lewis_nb[_qp]*std::pow((1-_porosity[_qp])/(1-_phi0_param), 2) * std::pow(_phi0_param/_porosity[_qp], 3);
   }
 
-  //In elastic problem, all the strain is elastic
-  _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
-
-  //Obtain previous plastic rate of deformation tensor
-  dp=_plastic_strain_old[_qp];
-
-  //Solve J2 plastic constitutive equations based on current strain increment
-  //Returns current  stress and plastic rate of deformation tensor
-
-  returnMap(_stress_old[_qp], _strain_increment[_qp], _elasticity_tensor[_qp], dp, sig);
-  _stress[_qp] = sig;
-
-  //Updates current plastic rate of deformation tensor
-  _plastic_strain[_qp] = dp;
-
-  //Evaluate and update current equivalent plastic strain
-  _eqv_plastic_strain[_qp] = std::pow(2.0/3.0,0.5) * dp.L2norm();
-
-
-  //Rotate the stress to the current configuration
-  _stress[_qp] = _rotation_increment[_qp] * _stress[_qp] * _rotation_increment[_qp].transpose();
-
-  //Rotate to plastic rate of deformation tensor the current configuration
-  _plastic_strain[_qp] = _rotation_increment[_qp] * _plastic_strain[_qp] * _rotation_increment[_qp].transpose();
-}
-
-/*
- *Solves for incremental plastic rate of deformation tensor and stress in unrotated frame.
- *Input: Strain incrment, 4th order elasticity tensor, stress tensor in previous incrmenent and
- *plastic rate of deformation tensor.
- */
-void
-RedbackMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig)
-{
-  RankTwoTensor sig_new, delta_dp, dpn;
-  RankTwoTensor flow_tensor, flow_dirn;
-  RankTwoTensor resid,ddsig;
-  RankFourTensor dr_dsig, dr_dsig_inv;
-  Real flow_incr, flow_incr_tmp;
-  Real err1, err3, tol1, tol3;
-  unsigned int iterisohard, iter, maxiterisohard = 20, maxiter = 50;
-  Real eqvpstrain;
-  Real yield_stress, yield_stress_prev;
-
-  tol1 = 1e-10;
-  tol3 = 1e-6;
-
-  iterisohard = 0;
-  eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
-  yield_stress = getYieldStress(eqvpstrain);
-
-  err3 = 1.1 * tol3;
-
-  while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
+  // convective terms
+  if (_are_convective_terms_on)
   {
-    iterisohard++;
-    iter = 0;
-    delta_dp.zero();
+    Real beta_m_star, beta_solid, beta_fluid;
+    Real lambda_m_star, lambda_solid, lambda_fluid;
+    RealVectorValue mixture_velocity;
 
-    sig_new = sig_old + E_ijkl * delta_d;
-    flow_incr=_dt * std::pow(macaulayBracket(getSigEqv(sig_new) / yield_stress - 1.0), _exponent)*_exponential;
+    //Step 1: forming the partial densities and gravity terms
+    _mixture_density[_qp] = (1-_porosity[_qp])*_solid_density_param+ _porosity[_qp]*_fluid_density_param;
 
-    getFlowTensor(sig_new, yield_stress, flow_tensor);
-    flow_dirn = flow_tensor;
+    _mixture_gravity_term[_qp] = _mixture_density[_qp]*_gravity_param;
+    _fluid_gravity_term[_qp] = _fluid_density_param*_gravity_param;
 
-    resid = flow_dirn * flow_incr - delta_dp;
-    err1 = resid.L2norm();
+    //Step 2: forming the compressibilities of the phases
+    beta_solid = (1-_porosity[_qp])*_solid_compressibility[_qp]; //normalized compressibility of the solid phase
+    beta_fluid = _porosity[_qp]*_fluid_compressibility[_qp]; //normalized compressibility of the fluid phase
+    beta_m_star = beta_solid+ beta_fluid; // normalized compressibility of the mixture
 
-    while (err1 > tol1  && iter < maxiter) //Stress update iteration (hardness fixed)
-    {
-      iter++;
+    //Step 4: forming the thermal expansions of the phases
+    lambda_solid = (1-_porosity[_qp])*_solid_thermal_expansion[_qp]; //normalized thermal expansion coefficient of the solid phase
+    lambda_fluid = _porosity[_qp]*_fluid_thermal_expansion[_qp]; //normalized thermal expansion coefficient of the fluid phase
+    lambda_m_star = lambda_solid + lambda_fluid; // normalized compressibility of the mixture
 
-      getJac(sig_new, E_ijkl, flow_incr, yield_stress, dr_dsig); //Jacobian
-      dr_dsig_inv = dr_dsig.invSymm();
+    //Step 4: forming the velocities through mechanics and Darcy's flow law
+    _fluid_velocity[_qp] = _solid_velocity[_qp] - beta_m_star*(_grad_pore_pressure[_qp] - _fluid_density_param*_gravity_param)/(_lewis_number[_qp]*_porosity[_qp]); //solving Darcy's flux for the fluid velocity
+    mixture_velocity = (_solid_density_param/_mixture_density[_qp])*_solid_velocity[_qp] + (_fluid_density_param/_mixture_density[_qp])*_fluid_velocity[_qp]; //barycentric velocity for the mixture
 
-      ddsig = -dr_dsig_inv * resid;
+    //Step 5: forming the kernels and their jacobians
+    _pressure_convective_mass[_qp] = _peclet_number*(beta_solid/beta_m_star)*_solid_velocity[_qp] + (beta_fluid/beta_m_star)*_fluid_velocity[_qp]; //convective term multiplying the pressure flux in the mass equation
+    _pressure_convective_mass_jac[_qp] = RealVectorValue(); //derivative with respect to pore pressure TODO: this is not equal to zero!!
 
-      sig_new += ddsig; //Update stress
-      delta_dp -= E_ijkl.invSymm() * ddsig; //Update plastic rate of deformation tensor
+    _thermal_convective_mass[_qp] = _peclet_number*(lambda_solid/beta_m_star)*_solid_velocity[_qp] + (lambda_fluid/beta_m_star)*_fluid_velocity[_qp]; //convective term multiplying the thermal flux in the mass equation
+    _thermal_convective_mass_jac[_qp] = RealVectorValue();//derivative with respect to pore pressure TODO: this is not equal to zero!!
 
-      flow_incr_tmp = _dt * _exponential *
-          std::pow(macaulayBracket(getSigEqv(sig_new) / yield_stress - 1.0), _exponent);
-
-      if (flow_incr_tmp < 0.0) //negative flow increment not allowed
-        mooseError("Constitutive Error-Negative flow increment: Reduce time increment.");
-
-      flow_incr = flow_incr_tmp;
-
-      getFlowTensor(sig_new, yield_stress, flow_tensor);
-      flow_dirn = flow_tensor;
-
-      resid = flow_dirn * flow_incr - delta_dp; //Residual
-
-      err1=resid.L2norm();
-    }
-
-    if (iter>=maxiter)//Convergence failure
-      mooseError("Constitutive Error-Too many iterations: Reduce time increment.\n"); //Convergence failure
-
-    dpn = dp + delta_dp;
-    eqvpstrain = std::pow(2.0/3.0, 0.5) * dpn.L2norm();
-
-    yield_stress_prev = yield_stress;
-    yield_stress = getYieldStress(eqvpstrain);
-
-    err3 = std::abs(yield_stress-yield_stress_prev);
+    _mixture_convective_energy[_qp] = _peclet_number*mixture_velocity; //convective term multiplying the thermal flux in the energy equation
+    _mixture_convective_energy_jac[_qp] = RealVectorValue(); //derivative with respect to temperature
   }
-
-  if (iterisohard>=maxiterisohard)
-    mooseError("Constitutive Error-Too many iterations in Hardness Update:Reduce time increment.\n"); //Convergence failure
-
-  dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
-  sig = sig_new;
-
-  //Compute the energy dissipation and the properties declared
-   computeEnergyTerms(sig, yield_stress, flow_incr);
-
-}
-
-void
-RedbackMaterial::computeEnergyTerms(RankTwoTensor & sig, Real yield_stress, Real flow_incr)
-{
-
-	 if (not _is_mechanics_on)
-	  {
-		// Compute modified Gruntfest number
-		_mod_gruntfest_number[_qp]=_gr[_qp];
-		// Compute Mises strain
-		_mises_strain[_qp] = _exponential * _dt;
-		// Compute Mises strain rate
-		_mises_strain_rate[_qp] = _exponential;
-
-		// Compute Mechanical Dissipation
-		_mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
-		 std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
-		// Compute Mechanical Dissipation Jacobian
-		_mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
-		 _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
-		 (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
-
-		//std::cout<<"Gr="<<_mod_gruntfest_number[_qp]<<std::endl;
-
-		return;
-	  }
-
-
-	// Compute equivalent stress
-	_mises_stress[_qp] = getSigEqv(sig);
-	// Compute Mises strain
-	_mises_strain[_qp] = flow_incr;
-	// Compute Mises strain rate
-	_mises_strain_rate[_qp] = flow_incr / _dt;
-
-	// Compute Mechanical Dissipation
-	_mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) * getSigEqv(sig) / yield_stress *
-		std::pow( macaulayBracket( getSigEqv(sig) / yield_stress - 1.0 ), _exponent) *
-		std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
-	// Compute Mechanical Dissipation Jacobian
-	_mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) * getSigEqv(sig) / yield_stress *
-		std::pow( macaulayBracket( getSigEqv(sig) / yield_stress - 1.0 ), _exponent) *
-		_ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
-		(1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
-	// Compute the equivalent Gruntfest number for comparison with SuCCoMBE
-	_mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig) / yield_stress * std::pow( macaulayBracket( getSigEqv(sig) / yield_stress - 1.0 ), _exponent);
-}
-
-
-//Obtain derivative of flow potential w.r.t. stress (plastic flow direction)
-void
-RedbackMaterial::getFlowTensor(const RankTwoTensor & sig, Real /*yield_stress*/, RankTwoTensor & flow_tensor)
-{
-  RankTwoTensor sig_dev;
-  Real sig_eqv, val;
-
-  sig_eqv = getSigEqv(sig);
-  sig_dev = sig.deviatoric();
-
-  val = 0.0;
-  if (sig_eqv > 1e-8)
-    val = 3.0 / (2.0 * sig_eqv);
-
-  flow_tensor = sig_dev * val;
-}
-
-//Jacobian for stress update algorithm
-void
-RedbackMaterial::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr, Real yield_stress, RankFourTensor & dresid_dsig)
-{
-  unsigned i, j, k ,l;
-  RankTwoTensor sig_dev, flow_tensor, flow_dirn,fij;
-  RankTwoTensor dfi_dft;
-  RankFourTensor dft_dsig, dfd_dft, dfd_dsig, dfi_dsig;
-  Real sig_eqv;
-  Real f1, f2, f3;
-  Real dfi_dseqv;
-
-  sig_dev = sig.deviatoric();
-  sig_eqv = getSigEqv(sig);
-
-  getFlowTensor(sig, yield_stress, flow_tensor);
-
-  flow_dirn = flow_tensor;
-  dfi_dseqv = _dt * _exponent * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
-
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (k = 0; k < 3; ++k)
-        for (l = 0; l < 3; ++l)
-          dfi_dsig(i,j,k,l) = flow_dirn(i,j) * flow_dirn(k,l) * dfi_dseqv; //d_flow_increment/d_sig
-
-  f1 = 0.0;
-  f2 = 0.0;
-  f3 = 0.0;
-
-  if (sig_eqv > 1e-8)
-  {
-    f1 = 3.0 / (2.0 * sig_eqv);
-    f2 = f1 / 3.0;
-    f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0));
-  }
-
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (k = 0; k < 3; ++k)
-        for (l = 0; l < 3; ++l)
-          dft_dsig(i,j,k,l) = f1 * deltaFunc(i,k) * deltaFunc(j,l) - f2 * deltaFunc(i,j) * deltaFunc(k,l) - f3 * sig_dev(i,j) * sig_dev(k,l); //d_flow_dirn/d_sig - 2nd part
-
-  dfd_dsig = dft_dsig; //d_flow_dirn/d_sig
-  dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr + dfi_dsig; //Jacobian
-}
-
-//Macaulay Bracket used in Perzyna Model
-Real
-RedbackMaterial::macaulayBracket(Real val)
-{
-  if (val > 0.0)
-    return val;
-  else
-    return 0.0;
+  return;
 }
