@@ -119,7 +119,8 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _slope_yield_surface(getParam<Real>("slope_yield_surface")),
   _dispx_dot(coupledDot("disp_x")),
   _dispy_dot(coupledDot("disp_y")),
-  _dispz_dot(coupledDot("disp_z"))
+  _dispz_dot(coupledDot("disp_z")),
+  _T_old(_has_T ? coupledValueOld("temperature") : _zero)
 
   {
   _Cijkl.fillFromInputVector(_Cijkl_vector, _fill_method);
@@ -128,7 +129,7 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
 MooseEnum
 RedbackMechMaterial::yieldCriterionEnum()
 {
-  return MooseEnum("J2_plasticity, Drucker_Prager, modified_Cam_Clay");
+  return MooseEnum("elasticity, J2_plasticity, Drucker_Prager, modified_Cam_Clay");
 }
 
 // TODO: break down this file for separate yield criteria
@@ -380,19 +381,22 @@ void
 RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)
 {
   switch (_yield_criterion)
-      {
-        case J2_plasticity:
-          returnMapJ2(sig_old, delta_d, E_ijkl, dp, sig, p_y, q_y);
-          return;
-        case Drucker_Prager:
-          returnMapDP(sig_old, delta_d, E_ijkl, dp, sig, p_y, q_y);
-          return;
-        case modified_Cam_Clay:
-          returnMapCC(sig_old, delta_d, E_ijkl, dp, sig, p_y, q_y);
-          return;
-        default:
-          mooseError("returnMap called with unknown yield_criterion of " << _yield_criterion);
-      }
+  {
+    case elasticity:
+      returnMapElasticity(sig_old, delta_d, E_ijkl, dp, sig);
+      return;
+    case J2_plasticity:
+      returnMapJ2(sig_old, delta_d, E_ijkl, dp, sig, p_y, q_y);
+      return;
+    case Drucker_Prager:
+      returnMapDP(sig_old, delta_d, E_ijkl, dp, sig, p_y, q_y);
+      return;
+    case modified_Cam_Clay:
+      returnMapCC(sig_old, delta_d, E_ijkl, dp, sig, p_y, q_y);
+      return;
+    default:
+      mooseError("returnMap called with unknown yield_criterion of " << _yield_criterion);
+  }
 }
 
 
@@ -408,6 +412,9 @@ RedbackMechMaterial::computeQpStrain(const RankTwoTensor & Fhat)
 
   //strain rate D from Taylor expansion, Chat = (-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
   _strain_increment[_qp] = -Cinv_I*0.5 + Cinv_I*Cinv_I*0.25;
+
+  // thermo-elasticity
+  _strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp]*(_T[_qp] - _T_old[_qp]));
 
   /*RankTwoTensor Chat = Fhat.transpose()*Fhat;
   RankTwoTensor A = Chat;
@@ -473,6 +480,12 @@ RedbackMechMaterial::getSigEqv(const RankTwoTensor & stress)
  * ***************Beginning of yield criterion specific code************************************************************************************************************************************************************************
  * *********************************************************************************************************************************************************************************************************************************
  * **********************************************************************************************************************************************************************************************************************************/
+void
+RedbackMechMaterial::returnMapElasticity(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig)
+{
+  sig = sig_old + E_ijkl * delta_d;
+  dp = RankTwoTensor(); //Plastic rate of deformation tensor in unrotated configuration
+}
 
 void
 RedbackMechMaterial::returnMapJ2(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)

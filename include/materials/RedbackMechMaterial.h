@@ -44,6 +44,7 @@ public:
   static MooseEnum yieldCriterionEnum();
   enum YieldCriterion
   {
+    elasticity,
     J2_plasticity, // Von Mises
     Drucker_Prager,
     modified_Cam_Clay
@@ -113,6 +114,7 @@ protected:
 
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
   virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
+  virtual void returnMapElasticity(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
   virtual void returnMapJ2(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
   Real getPressureProjectionDP(Real, Real, Real);
   void getStressProjectionsCC(Real, Real, Real, Real, Real &, Real &);
@@ -154,6 +156,7 @@ protected:
   VariableValue & _dispx_dot;
   VariableValue & _dispy_dot;
   VariableValue & _dispz_dot;
+  VariableValue & _T_old;
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
 };
 

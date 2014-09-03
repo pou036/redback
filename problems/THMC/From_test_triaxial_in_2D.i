@@ -1,20 +1,19 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 3
-  nx = 26
-  ny = 50
-  nz = 16
-  xmin = -1
-  ymin = -2
-  ymax = 2
-  zmin = -1
+  dim = 2
+  nx = 50
+  ny = 40
+  nz = 10
+  xmin = -1.5
+  xmax = 1.5
+  ymin = -1
 []
 
 [MeshModifiers]
-  [./single_point]
+  [./middle_left]
     type = AddExtraNodeset
-    boundary = 6
-    coord = '-1 -2 -1'
+    boundary = 4
+    coord = '-1.5 0'
   [../]
 []
 
@@ -47,9 +46,9 @@
     yield_stress = '0. 1 1. 1'
     disp_z = disp_z
     m = 3
-    mu = 1
+    mu = 1e-3
     ar = 10
-    gr = 20
+    gr = 0.2
     is_mechanics_on = false
     exponent = 3
     ref_lewis_nb = 1
@@ -60,12 +59,13 @@
     phi0 = 0.1
     ref_pe_rate = 1
     Aphi = 1
+    eta1 = 1e3
+    da_endo = 1e-6
     temperature = temp
-    eta2 = 1e4
-    da_exo = 1e-3
+    is_chemistry_on = true
     slope_yield_surface = -0.6
     yield_criterion = Drucker_Prager
-    is_chemistry_on = true
+    eta2 = 1e4
   [../]
 []
 
@@ -77,7 +77,7 @@
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -10*t
+    value = -1e-1*t
   [../]
   [./spline_IC]
     type = ConstantFunction
@@ -85,100 +85,66 @@
 []
 
 [BCs]
-  active = 'confinement_right bottom_fix_x bottom_fix_y bottom_fix_z top_fix_z corner_point_temp confinement_back confinement_left press_corner_point constant_y_velocity_top top_fix_x confinment_front'
-  [./temp_box]
+  active = 'const_velocity_right_disp_x press_bc temp_mid_pts left_disp rigth_disp_y left_disp_y'
+  [./left_disp]
+    type = DirichletBC
+    variable = disp_x
+    boundary = 3
+    value = 0
+  [../]
+  [./bottom_temp]
     type = NeumannBC
     variable = temp
-    boundary = '0 1 2 3 4 5'
-  [../]
-  [./constant_force_top]
-    type = NeumannBC
-    variable = disp_y
-    boundary = top
-    value = -1.5
-  [../]
-  [./back_fix_z]
-    type = NeumannBC
-    variable = disp_z
     boundary = 0
+    value = -1
   [../]
-  [./right_fix_x]
-    type = DirichletBC
-    variable = disp_z
-    boundary = right
-    value = 0
+  [./top_temp]
+    type = NeumannBC
+    variable = temp
+    boundary = 2
+    value = -1
   [../]
-  [./bottom_fix_y]
+  [./left_disp_y]
     type = DirichletBC
     variable = disp_y
-    boundary = bottom
+    boundary = 3
     value = 0
   [../]
-  [./corner_point_temp]
+  [./temp_mid_pts]
     type = DirichletBC
     variable = temp
-    boundary = 6
+    boundary = 4
     value = 0
   [../]
-  [./press_corner_point]
+  [./rigth_disp_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = 1
+    value = 0
+  [../]
+  [./temp_box]
+    type = DirichletBC
+    variable = temp
+    boundary = '0 1 2 3'
+    value = 0
+  [../]
+  [./constant_force_right]
+    type = NeumannBC
+    variable = disp_x
+    boundary = 1
+    value = -2
+  [../]
+  [./press_bc]
     type = DirichletBC
     variable = pore_pressure
-    boundary = 6
+    boundary = 'left right'
     value = 0
   [../]
-  [./constant_y_velocity_top]
+  [./const_velocity_right_disp_x]
     type = FunctionPresetBC
-    variable = disp_y
-    boundary = top
+    variable = disp_x
+    boundary = 1
     function = downfunc
-  [../]
-  [./bottom_fix_x]
-    type = DirichletBC
-    variable = disp_x
-    boundary = bottom
-    value = 0
-  [../]
-  [./bottom_fix_z]
-    type = DirichletBC
-    variable = disp_z
-    boundary = bottom
-    value = 0
-  [../]
-  [./top_fix_x]
-    type = DirichletBC
-    variable = disp_x
-    boundary = top
-    value = 0
-  [../]
-  [./top_fix_z]
-    type = DirichletBC
-    variable = disp_z
-    boundary = top
-    value = 0
-  [../]
-  [./confinement_left]
-    type = NeumannBC
-    variable = disp_x
-    boundary = left
-    value = 1
-  [../]
-  [./confinement_right]
-    type = NeumannBC
-    variable = disp_x
-    boundary = right
-    value = -1
-  [../]
-  [./confinement_back]
-    type = NeumannBC
-    variable = disp_z
-    boundary = back
-    value = 1
-  [../]
-  [./confinment_front]
-    type = NeumannBC
-    variable = disp_z
-    boundary = front
-    value = -1
   [../]
 []
 
@@ -465,12 +431,12 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 1e-4
+    dt = 1e-3
   [../]
 []
 
 [Outputs]
-  file_base = out
+  file_base = bench_THMC_DP_out
   output_initial = true
   exodus = true
   [./console]
