@@ -2,13 +2,13 @@
   type = GeneratedMesh
   dim = 2
   nx = 10
-  ny = 6
-  xmin = -1.5
-  xmax = 1.5
+  ny = 10
+  xmin = -1
   ymin = -1
 []
 
 [MeshModifiers]
+  active = ''
   [./middle_left]
     type = AddExtraNodeset
     boundary = 4
@@ -76,7 +76,7 @@
 []
 
 [BCs]
-  active = 'constant_force_right temp_mid_pts left_disp rigth_disp_y left_disp_y'
+  active = 'constant_force_right temp_box left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -129,7 +129,7 @@
     type = NeumannBC
     variable = disp_x
     boundary = 1
-    value = -2
+    value = 2
   [../]
 []
 
@@ -340,7 +340,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 1e-2
+  end_time = 1
   dtmax = 1
   dtmin = 1e-7
   type = Transient
