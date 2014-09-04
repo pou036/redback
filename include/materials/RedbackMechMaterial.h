@@ -156,7 +156,7 @@ protected:
   VariableValue & _dispx_dot;
   VariableValue & _dispy_dot;
   VariableValue & _dispz_dot;
-  VariableValue & _T_old;
+
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
 };
 

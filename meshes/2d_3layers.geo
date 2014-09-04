@@ -1,13 +1,13 @@
 /***********************************************/
 /* Parameters  */
-xmin = -4.0;
-xmax = 4.0;
+xmin = -0.5;
+xmax = 0.5;
 ymin = -1;
 y1 = -0.1; // bottom of middle layer
 y2 = 0.1; // top of middle layer
 ymax = 1;
 
-nb_cells_x = 100;
+nb_cells_x = 10;
 nb_cells_y_bottom = 10;
 nb_cells_y_middle = 10;
 nb_cells_y_top = 10;
