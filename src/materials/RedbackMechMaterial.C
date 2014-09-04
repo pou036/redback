@@ -119,8 +119,7 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _slope_yield_surface(getParam<Real>("slope_yield_surface")),
   _dispx_dot(coupledDot("disp_x")),
   _dispy_dot(coupledDot("disp_y")),
-  _dispz_dot(coupledDot("disp_z")),
-  _T_old(_has_T ? coupledValueOld("temperature") : _zero)
+  _dispz_dot(coupledDot("disp_z"))
 
   {
   _Cijkl.fillFromInputVector(_Cijkl_vector, _fill_method);
