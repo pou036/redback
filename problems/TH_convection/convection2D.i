@@ -3,8 +3,10 @@
   dim = 2
   nx = 20
   ny = 10
-  nz = 5
-  xmax = 2
+  xmin = -200
+  xmax = 200
+  ymin = -100
+  ymax = 100
 []
 
 [Variables]
@@ -26,7 +28,7 @@
 []
 
 [AuxVariables]
-  active = 'fluid_velocity_x fluid_velocity_y fluid_velocity_z'
+  active = 'density fluid_velocity_z fluid_velocity_y fluid_velocity_x'
   [./porosity]
     order = CONSTANT
     family = MONOMIAL
@@ -56,10 +58,14 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./density]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
-  active = 'td_press pres_conv thermal_pressurization diff_temp td_temp temp_conv press_diff'
+  active = 'diff_temp td_temp temp_conv press_diff'
   [./td_temp]
     type = TimeDerivative
     variable = temp
@@ -107,7 +113,7 @@
 []
 
 [AuxKernels]
-  active = 'fluid_velocity_z fluid_velocity_y fluid_velocity_x'
+  active = 'density fluid_velocity_z fluid_velocity_y fluid_velocity_x'
   [./porosity]
     type = MaterialRealAux
     variable = porosity
@@ -147,6 +153,11 @@
     index = 2
     vector = fluid_velocity
   [../]
+  [./density]
+    type = MaterialRealAux
+    variable = density
+    property = mixture_density
+  [../]
 []
 
 [BCs]
@@ -172,20 +183,20 @@
   [./press_bc]
     type = DirichletBC
     variable = pore_pressure
-    boundary = top
+    boundary = 2
     value = 0
   [../]
   [./top_temp]
     type = DirichletBC
     variable = temp
-    boundary = top
+    boundary = 2
     value = 0
   [../]
   [./bottom_temp]
     type = DirichletBC
     variable = temp
-    boundary = bottom
-    value = 1
+    boundary = 0
+    value = 4e6
   [../]
 []
 
@@ -196,12 +207,9 @@
     m = 3
     mu = 1e-3
     ar = 10
-    yield_stress = '0 1 1 1'
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     gr = 0.11
     pore_pres = pore_pressure
     temperature = temp
-    is_mechanics_on = false
     ref_lewis_nb = 1
     Kc = 1
     ar_F = 20
@@ -212,6 +220,11 @@
     da_endo = 1e-4
     pressurization_coefficient = 1
     are_convective_terms_on = true
+    fluid_thermal_expansion = 1e-6
+    solid_compressibility = 0
+    solid_density = 2500
+    gravity = '0 -10 0'
+    fluid_density = 1000
   [../]
 []
 
@@ -255,18 +268,18 @@
   [./temperature_middle]
     type = PointValue
     variable = temp
-    point = '1 0.5 0'
+    point = '0 0 0'
   [../]
 []
 
 [Executioner]
   type = Transient
-  num_steps = 10000
+  num_steps = 10000000
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   ss_check_tol = 1e-6
-  end_time = 10
-  dtmax = 0.1
+  end_time = 1000000
+  dtmax = 10000
   scheme = bdf2
   [./TimeStepper]
     type = ConstantDT
@@ -275,6 +288,7 @@
 []
 
 [Outputs]
+  output_initial = true
   exodus = true
   file_base = convection1_out
 []
@@ -282,9 +296,8 @@
 [ICs]
   [./temp_ic]
     variable = temp
-    value = 0
-    type = ConstantIC
-    block = 0
+    type = RandomIC
+    max = 10
   [../]
   [./press_ic]
     variable = pore_pressure

@@ -312,15 +312,28 @@ RedbackMaterial::computeRedbackTerms()
     Real solid_density, fluid_density;
     Real beta_m_star, beta_solid, beta_fluid;
     Real lambda_m_star, lambda_solid, lambda_fluid;
-    RealVectorValue mixture_velocity;
+    Real x_ref, sigma_ref; //TODO: derive them directly from mesh dimensions and problem at hand - user provided?
+    RealVectorValue mixture_velocity, normalized_gravity;
 
     //Step 1: forming the partial densities and gravity terms
-    solid_density = _solid_density_param*(1 + _solid_compressibility[_qp]*_pore_pres[_qp] - _solid_thermal_expansion[_qp]*_T[_qp]); // TODO: move to AuxKernel
-    fluid_density = _fluid_density_param*(1 + _fluid_compressibility[_qp]*_pore_pres[_qp] - _fluid_thermal_expansion[_qp]*_T[_qp]);
+    switch (_density_method)
+     {
+     case linear:
+       //Linear approximation of the EOS (Equation Of State)
+       solid_density = _solid_density_param*(1 + _solid_compressibility[_qp]*_pore_pres[_qp] - _solid_thermal_expansion[_qp]*_T[_qp]); // TODO: move to AuxKernel
+       fluid_density = _fluid_density_param*(1 + _fluid_compressibility[_qp]*_pore_pres[_qp] - _fluid_thermal_expansion[_qp]*_T[_qp]);
+       break;
+     default:
+       mooseError("density method not implemented yet, use linear");
+     }
     _mixture_density[_qp] = (1-_porosity[_qp])*solid_density+ _porosity[_qp]*fluid_density;
 
-    _mixture_gravity_term[_qp] = _mixture_density[_qp]*_gravity_param;
-    _fluid_gravity_term[_qp] = _fluid_density_param*_gravity_param;
+    //Terms feeding the stress equilibrium and Darcy flux
+    x_ref = 1; sigma_ref = 1e6;
+    normalized_gravity = _gravity_param*(x_ref/sigma_ref);
+
+    _mixture_gravity_term[_qp] = _mixture_density[_qp]*normalized_gravity; //for the stress equilibrium equation
+    _fluid_gravity_term[_qp] = fluid_density*normalized_gravity; //for Darcy's flux
 
     //Step 2: forming the compressibilities of the phases
     beta_solid = (1-_porosity[_qp])*_solid_compressibility[_qp]; //normalized compressibility of the solid phase
@@ -333,11 +346,13 @@ RedbackMaterial::computeRedbackTerms()
     lambda_m_star = lambda_solid + lambda_fluid; // normalized compressibility of the mixture
 
     //Step 4: forming the velocities through mechanics and Darcy's flow law
-    _fluid_velocity[_qp] = _solid_velocity[_qp] - beta_m_star*(_grad_pore_pressure[_qp] - _fluid_density_param*_gravity_param)/(_lewis_number[_qp]*_porosity[_qp]); //solving Darcy's flux for the fluid velocity
-    mixture_velocity = (_solid_density_param/_mixture_density[_qp])*_solid_velocity[_qp] + (_fluid_density_param/_mixture_density[_qp])*_fluid_velocity[_qp]; //barycentric velocity for the mixture
+    _fluid_velocity[_qp] = _solid_velocity[_qp] - (_grad_pore_pressure[_qp] - fluid_density*normalized_gravity)/(_lewis_number[_qp]*_porosity[_qp]); //solving Darcy's flux for the fluid velocity
+    mixture_velocity = (solid_density/_mixture_density[_qp])*_solid_velocity[_qp] + (fluid_density/_mixture_density[_qp])*_fluid_velocity[_qp]; //barycentric velocity for the mixture
+    //_fluid_velocity[_qp] = _solid_velocity[_qp] - beta_m_star*(_grad_pore_pressure[_qp] - _fluid_density_param*_gravity_param)/(_lewis_number[_qp]*_porosity[_qp]); //solving Darcy's flux for the fluid velocity
+    //mixture_velocity = (_solid_density_param/_mixture_density[_qp])*_solid_velocity[_qp] + (_fluid_density_param/_mixture_density[_qp])*_fluid_velocity[_qp]; //barycentric velocity for the mixture
 
     //Step 5: forming the kernels and their jacobians
-    _pressure_convective_mass[_qp] = (beta_solid/beta_m_star)*_solid_velocity[_qp] + (beta_fluid/beta_m_star)*_fluid_velocity[_qp]; //convective term multiplying the pressure flux in the mass equation
+    _pressure_convective_mass[_qp] = (beta_solid/beta_m_star)*_solid_velocity[_qp] + (beta_fluid/beta_m_star)*_fluid_velocity[_qp]; //convective term multiplying the pressure flux in the mass equation. TODO: disable for incompressible case
     _pressure_convective_mass_jac[_qp] = RealVectorValue(); //derivative with respect to pore pressure TODO: this is not equal to zero!!
 
     _thermal_convective_mass[_qp] = _peclet_number*(lambda_solid/beta_m_star)*_solid_velocity[_qp] + (lambda_fluid/beta_m_star)*_fluid_velocity[_qp]; //convective term multiplying the thermal flux in the mass equation
