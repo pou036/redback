@@ -43,20 +43,22 @@
     yield_stress = '0. 1 1. 1'
     disp_z = disp_z
     m = 3
-    ar = 10
+    ar = 15
     gr = 0.3
     is_mechanics_on = false
     exponent = 1
     ref_lewis_nb = 1
-    ar_F = 20
-    ar_R = 10
-    phi0 = 0.1
+    ar_F = 25
+    ar_R = 0
     ref_pe_rate = 1
     Aphi = 0
     slope_yield_surface = -0.6
     temperature = temp
     is_chemistry_on = true
     da_endo = 1e-6
+    fluid_thermal_expansion = 1e-5
+    solid_thermal_expansion = 0
+    delta = 1e-4
   [../]
 []
 
@@ -76,7 +78,7 @@
 []
 
 [BCs]
-  active = 'constant_force_right temp_mid_pts left_disp rigth_disp_y left_disp_y'
+  active = 'constant_force_right temp_box left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -292,6 +294,7 @@
 []
 
 [Postprocessors]
+  active = 'mod_gr mises_strain mises_strain_rate mises_stress mean_stress temp_middle'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
@@ -327,6 +330,11 @@
     variable = volumetric_strain_rate
     point = '0 0 0'
   [../]
+  [./mod_gr]
+    type = PointValue
+    variable = Mod_Gruntfest_number
+    point = '0 0 0'
+  [../]
 []
 
 [Preconditioning]
@@ -340,7 +348,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 1e-2
+  end_time = 5
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -381,7 +389,7 @@
   [./temp_IC]
     variable = temp
     type = ConstantIC
-    value = 0
+    value = -1e-6
   [../]
 []
 
