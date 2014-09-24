@@ -499,8 +499,8 @@ RedbackMechMaterial::returnMapJ2(const RankTwoTensor & sig_old, const RankTwoTen
   Real eqvpstrain;
   Real yield_stress, yield_stress_prev;
 
-  tol1 = 1e-10;
-  tol3 = 1e-6;
+  tol1 = 1e-15; // TODO: expose to user interface and/or make the tolerance relative
+  tol3 = 1e-10; // TODO: expose to user interface and/or make the tolerance relative
 
   iterisohard = 0;
   eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
