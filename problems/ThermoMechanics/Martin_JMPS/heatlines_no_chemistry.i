@@ -1,19 +1,18 @@
 [Mesh]
-  # created from meshes/2d_3layers.geo
-  type = FileMesh
-  file = ../../../../meshes/2d_3layers.msh
+  type = GeneratedMesh
+  dim = 2
+  nx = 10
+  ny = 10
+  xmin = -1
+  ymin = -1
 []
 
 [MeshModifiers]
-  [./right_middle]
+  active = ''
+  [./middle_left]
     type = AddExtraNodeset
     boundary = 4
-    coord = '4 0'
-  [../]
-  [./left_middle]
-    type = AddExtraNodeset
-    boundary = 5
-    coord = '-4 0'
+    coord = '-1.5 0'
   [../]
 []
 
@@ -37,7 +36,7 @@
 [Materials]
   [./mat0]
     type = RedbackMechMaterial
-    block = '0 2'
+    block = 0
     disp_y = disp_y
     disp_x = disp_x
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
@@ -45,7 +44,7 @@
     disp_z = disp_z
     m = 3
     ar = 10
-    gr = 0.3
+    gr = 1
     is_mechanics_on = false
     exponent = 1
     ref_lewis_nb = 1
@@ -56,46 +55,19 @@
     Aphi = 0
     slope_yield_surface = -0.6
     temperature = temp
-    is_chemistry_on = true
-    fluid_thermal_expansion = 1e-5
-    solid_thermal_expansion = 0
-  [../]
-  [./mat1]
-    type = RedbackMechMaterial
-    block = 1
-    disp_y = disp_y
-    disp_x = disp_x
-    C_ijkl = '1.346e+04 5.769e+03 5.769e+03 1.346e+04 5.769e+03 1.346e+04 3.846e+03 3.846e+03 3.846e+3'
-    yield_stress = '0. 1 1e-6 0.8 1 0.8'
-    disp_z = disp_z
-    m = 3
-    ar = 10
-    gr = 3
-    is_mechanics_on = false
-    exponent = 1
-    ref_lewis_nb = 1
-    ar_F = 20
-    ar_R = 10
-    phi0 = 0.1
-    ref_pe_rate = 1
-    Aphi = 0
-    slope_yield_surface = -0.6
-    temperature = temp
-    is_chemistry_on = true
-    fluid_thermal_expansion = 1e-5
-    solid_thermal_expansion = 0
+    da_endo = 1
   [../]
 []
 
 [Functions]
-  active = 'upfunc downfunc'
+  active = 'downfunc'
   [./upfunc]
     type = ParsedFunction
-    value = 0.01*t
+    value = t
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -1e-2*t
+    value = -3e-2*t
   [../]
   [./spline_IC]
     type = ConstantFunction
@@ -103,7 +75,19 @@
 []
 
 [BCs]
-  active = 'constant_velocity_left temp_box left_disp_y const_vel_right_disp_x rigth_disp_y'
+  active = 'constant_force_right temp_box left_disp rigth_disp_y left_disp_y'
+  [./left_disp]
+    type = DirichletBC
+    variable = disp_x
+    boundary = 3
+    value = 0
+  [../]
+  [./right_disp]
+    type = FunctionPresetBC
+    variable = disp_x
+    boundary = 1
+    function = downfunc
+  [../]
   [./bottom_temp]
     type = NeumannBC
     variable = temp
@@ -119,7 +103,7 @@
   [./left_disp_y]
     type = DirichletBC
     variable = disp_y
-    boundary = 5
+    boundary = 3
     value = 0
   [../]
   [./temp_mid_pts]
@@ -131,32 +115,20 @@
   [./rigth_disp_y]
     type = DirichletBC
     variable = disp_y
-    boundary = 4
+    boundary = 1
     value = 0
   [../]
   [./temp_box]
     type = DirichletBC
     variable = temp
-    boundary = '0 2'
+    boundary = '0 1 2 3'
     value = 0
   [../]
   [./constant_force_right]
     type = NeumannBC
     variable = disp_x
     boundary = 1
-    value = -2
-  [../]
-  [./const_vel_right_disp_x]
-    type = FunctionPresetBC
-    variable = disp_x
-    boundary = 1
-    function = downfunc
-  [../]
-  [./constant_velocity_left]
-    type = FunctionPresetBC
-    variable = disp_x
-    boundary = 3
-    function = upfunc
+    value = 2
   [../]
 []
 
@@ -193,14 +165,17 @@
   [./mises_strain_rate]
     order = CONSTANT
     family = MONOMIAL
+    block = 0
   [../]
   [./mech_diss]
     order = CONSTANT
     family = MONOMIAL
+    block = 0
   [../]
   [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
+    block = '0 1'
   [../]
   [./volumetric_strain]
     order = CONSTANT
@@ -213,11 +188,12 @@
   [./mean_stress]
     order = CONSTANT
     family = MONOMIAL
+    block = 0
   [../]
 []
 
 [Kernels]
-  active = 'temp_diff td_temp temp_dissip'
+  active = 'td_temp temp_dissip'
   [./td_temp]
     type = TimeDerivative
     variable = temp
@@ -283,6 +259,7 @@
   [./mises_strain_rate]
     type = MaterialRealAux
     variable = mises_strain_rate
+    block = 0
     property = mises_strain_rate
   [../]
   [./mech_dissipation]
@@ -294,11 +271,13 @@
     type = MaterialRealAux
     variable = Mod_Gruntfest_number
     property = mod_gruntfest_number
+    block = 0
   [../]
   [./mean_stress]
     type = MaterialRealAux
     variable = mean_stress
     property = mean_stress
+    block = 0
   [../]
   [./volumetric_strain]
     type = MaterialRealAux
@@ -363,10 +342,10 @@
   start_time = 0.0
   end_time = 1
   dtmax = 1
-  dtmin = 1e-7
+  dtmin = 1e-10
   type = Transient
   l_max_its = 200
-  nl_max_its = 10
+  nl_max_its = 20
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg cp 201'
@@ -375,18 +354,17 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 5e-4
+    dt = 1e-6
   [../]
 []
 
 [Outputs]
-  file_base = bench_TM_J2_out
+  file_base = bench_TMC_J2_out
   output_initial = true
   exodus = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
   [../]
 []
 
@@ -395,14 +373,14 @@
     disp_z = disp_z
     disp_y = disp_y
     disp_x = disp_x
-    temp = temp
   [../]
 []
 
 [ICs]
   [./temp_IC]
     variable = temp
-    type = RandomIC
+    type = ConstantIC
+    value = 0
   [../]
 []
 

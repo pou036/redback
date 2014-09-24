@@ -358,6 +358,10 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
   // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
   _mechanical_dissipation[_qp] = _gr[_qp]* std::pow(1 - _pore_pres[_qp], _exponent) *sig.doubleContraction(instantaneous_strain_rate);
+  //std::cout << "Gr = " << _gr[_qp] << std::endl;
+  //std::cout << "PP = " << _pore_pres[_qp] << std::endl;
+  //std::cout << "mech_diss = " << _mechanical_dissipation[_qp] << std::endl;
+  //std::cout << "eps.sig = " << sig.doubleContraction(instantaneous_strain_rate) << std::endl << std::endl;
 
   // Compute Mechanical Dissipation Jacobian
   //_mechanical_dissipation_jac[_qp] = _gr[_qp] *
