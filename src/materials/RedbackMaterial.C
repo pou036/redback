@@ -52,7 +52,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("solid_density", 2.5, "solid density in kg/m3"); // solid_density_param
   params.addParam<Real>("fluid_density", 1, "fluid density in kg/m3"); // fluid_density_param
 
-  params.addParam<RealVectorValue>("gravity", "Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg (0,0,-9.81)");
+  params.addParam<RealVectorValue>("gravity", (0,0,0), "Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg (0,0,-9.81)");
   return params;
 }
 

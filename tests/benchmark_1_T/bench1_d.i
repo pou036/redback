@@ -114,7 +114,7 @@
   petsc_options_value = 'hypre boomeramg'
   ss_check_tol = 1e-6
   end_time = 35
-  dtmax = 0.1
+  dtmax = 0.2
   scheme = bdf2
   [./TimeStepper]
     type = ConstantDT
