@@ -128,7 +128,7 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
 MooseEnum
 RedbackMechMaterial::yieldCriterionEnum()
 {
-  return MooseEnum("elasticity, J2_plasticity, Drucker_Prager, modified_Cam_Clay");
+  return MooseEnum("elasticity J2_plasticity Drucker_Prager modified_Cam_Clay");
 }
 
 // TODO: break down this file for separate yield criteria
