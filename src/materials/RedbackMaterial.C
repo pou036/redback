@@ -52,7 +52,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("solid_density", 2.5, "solid density in kg/m3"); // solid_density_param
   params.addParam<Real>("fluid_density", 1, "fluid density in kg/m3"); // fluid_density_param
 
-  params.addParam<RealVectorValue>("gravity", (0,0,0), "Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg (0,0,-9.81)");
+  params.addParam<RealVectorValue>("gravity", RealVectorValue(), "Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg (0,0,-9.81)");
   return params;
 }
 
@@ -64,7 +64,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
 
   _has_pore_pres(isCoupled("pore_pres")),
   _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero), // TODO: should be NULL (but doesn't compile)
-  _pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
+  //_pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
 
   _phi0_param(getParam<Real>("phi0")),
   _gr_param(getParam<Real>("gr")),
@@ -171,11 +171,29 @@ RedbackMaterial::permeabilityMethodEnum()
 }
 
 void
+RedbackMaterial::initStatefulProperties(unsigned int n_points)
+{
+  // default Material behaviour
+  Material::initStatefulProperties(n_points);
+}
+
+void
 RedbackMaterial::initQpStatefulProperties()
 {
 
   // Initialise our made up variables...
   _useless_property_old[_qp] = 0; // TODO: find a better way
+  _porosity[_qp] = _phi0_param;
+  _chemical_porosity[_qp]= 0;
+  _solid_ratio[_qp] = 0;
+  _mises_strain[_qp] = 0;
+  _solid_velocity[_qp] = RealVectorValue();
+  _fluid_velocity[_qp] = RealVectorValue();
+}
+
+void RedbackMaterial::initQpProperties()
+{
+  // Variable initialisation (called at each step)
   _gr[_qp] = _gr_param;
   _ref_lewis_nb[_qp] = _ref_lewis_nb_param;
   _ar[_qp] = _ar_param;
@@ -183,16 +201,10 @@ RedbackMaterial::initQpStatefulProperties()
   _m[_qp] = _m_param;
   _exponent = _m[_qp]; //TODO: get rid of m
   _lewis_number[_qp] = _ref_lewis_nb[_qp];
-  _porosity[_qp] = _phi0_param;
-  _chemical_porosity[_qp]= 0;
-   _solid_ratio[_qp] = 0;
   _ar_F[_qp] = _ar_F_param;
   _ar_R[_qp] = _ar_R_param;
   _mu[_qp] = _mu_param;
-  _mises_strain[_qp] = 0;
   _pressurization_coefficient[_qp] = _pressurization_coefficient_param;
-  _solid_velocity[_qp] = RealVectorValue();
-  _fluid_velocity[_qp] = RealVectorValue();
   _solid_compressibility[_qp] = _solid_compressibility_param;
   _fluid_compressibility[_qp] = _fluid_compressibility_param;
   _solid_thermal_expansion[_qp] = _solid_thermal_expansion_param;
@@ -205,7 +217,12 @@ RedbackMaterial::initQpStatefulProperties()
 void
 RedbackMaterial::computeQpProperties()
 {
+  // Set our variables
+  initQpProperties();
+
+  // Default Material method
   Material::computeQpProperties();
+
   //Compute the terms used in Redback Kernels
   computeRedbackTerms();
 }
