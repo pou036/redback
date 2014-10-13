@@ -172,15 +172,15 @@ RedbackMechMaterial::computeProperties()
   computeStrain();
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    initQpProperties();
+    stepInitQpProperties();
     computeQpElasticityTensor();
     computeQpStress();
   }
 }
 
-void RedbackMechMaterial::initQpProperties()
+void RedbackMechMaterial::stepInitQpProperties()
 {
-  RedbackMaterial::initQpProperties();
+  RedbackMaterial::stepInitQpProperties();
 }
 
 void RedbackMechMaterial::computeQpElasticityTensor()

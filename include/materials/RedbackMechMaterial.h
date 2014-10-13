@@ -53,7 +53,7 @@ public:
 protected:
   // Copy-paste from TensorMechanicsMaterial.h
   virtual void computeProperties();
-  virtual void initQpProperties();
+  virtual void stepInitQpProperties();
   virtual void computeQpElasticityTensor();
   virtual void computeStrain();
   virtual void computeQpStrain();
