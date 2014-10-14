@@ -49,11 +49,8 @@ public:
   };
 
 protected:
-  //virtual void initQpProperties();
-  virtual void initQpProperties();
   virtual void stepInitQpProperties();
   virtual void computeQpProperties();
-  virtual void initStatefulProperties(unsigned int n_points);
   virtual void initQpStatefulProperties();
   virtual void computeRedbackTerms();
 

@@ -171,26 +171,11 @@ RedbackMaterial::permeabilityMethodEnum()
 }
 
 void
-RedbackMaterial::initStatefulProperties(unsigned int n_points)
-{
-  // Initialise (even non stateful) variables
-  for (_qp = 0; _qp < n_points; ++_qp)
-    initQpProperties();
-
-  // default Material behaviour
-  Material::initStatefulProperties(n_points);
-}
-
-void
 RedbackMaterial::initQpStatefulProperties()
 {
-  // Initialise our made up variables...
-  _useless_property_old[_qp] = 0; // TODO: find a better way
-}
+  _useless_property_old[_qp] = 0; // TODO: find a better way to have a one off init
 
-void RedbackMaterial::initQpProperties()
-{
-  // Variable initialisation
+  // Variable initialisation (one off)
   _porosity[_qp] = _phi0_param;
   _chemical_porosity[_qp]= 0;
   _solid_ratio[_qp] = 0;
