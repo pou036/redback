@@ -1,0 +1,29 @@
+/*****************************************/
+/* AuxKernel to compute porosity         */
+/*****************************************/
+
+#include "RedbackPorosityAux.h"
+#include "Function.h"
+
+template<>
+InputParameters validParams<RedbackPorosityAux>()
+{
+  InputParameters params = validParams<AuxKernel>();
+  //params.addRequiredCoupledVar("t_variable", "Variable that will be substituted into the 't' slot of the function");
+  //params.addRequiredParam<FunctionName>("function", "The function to use.  The t_variable gets substituted in the 't' slot of this function");
+  //params.addClassDescription("AuxVariable = function(t_variable, current_point).  That is, define a function of t and this will substitute your variable for t and give you the result as an AuxVariable");
+  return params;
+}
+
+RedbackPorosityAux::RedbackPorosityAux(const std::string & name, InputParameters parameters) :
+  AuxKernel(name, parameters),
+  _phi0(getMaterialProperty<Real>("porosity0")) // initial porosity
+  //_t_variable(coupledValue("t_variable")),
+  //_func(getFunction("function"))
+{}
+
+Real
+RedbackPorosityAux::computeValue()
+{
+  return _phi0[_qp];
+}

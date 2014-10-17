@@ -30,6 +30,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<bool>("are_convective_terms_on", false, "are convective terms on?");
   params.addCoupledVar("temperature", "Dimensionless temperature");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
+  params.addCoupledVar("porosity_aux", "Porosity coming from AuxKernel (TODO:playing)");
   params.addParam<MooseEnum>("density_method", RedbackMaterial::densityMethodEnum() = "linear", "The method to describe density evolution with temperature and pore pressure"); // TODO: fluid, solid, mixture?...
   params.addParam<MooseEnum>("permeability_method", RedbackMaterial::permeabilityMethodEnum() = "KozenyCarman", "The method to describe permeability evolution");
 
@@ -65,6 +66,8 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _has_pore_pres(isCoupled("pore_pres")),
   _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero), // TODO: should be NULL (but doesn't compile)
   //_pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
+
+  _porosity_aux(_has_pore_pres ? coupledValue("porosity_aux") : _zero),
 
   _phi0_param(getParam<Real>("phi0")),
   _gr_param(getParam<Real>("gr")),
@@ -106,6 +109,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _delta(declareProperty<Real>("delta")),
   _m(declareProperty<Real>("m")),
 
+  _porosity0(declareProperty<Real>("porosity0")),
   _porosity(declareProperty<Real>("porosity")),
   _lewis_number(declareProperty<Real>("lewis_number")),
 
@@ -176,6 +180,7 @@ RedbackMaterial::initQpStatefulProperties()
   _useless_property_old[_qp] = 0; // TODO: find a better way to have a one off init
 
   // Variable initialisation (one off)
+  _porosity0[_qp] = _phi0_param;
   _porosity[_qp] = _phi0_param;
   _chemical_porosity[_qp]= 0;
   _solid_ratio[_qp] = 0;
@@ -224,6 +229,8 @@ void
 RedbackMaterial::computeRedbackTerms()
 {
   Real omega_rel, temporary, phi_prime, s_prime;
+
+  std::cout << "_porosity_aux[_qp]=" << _porosity_aux[_qp] << std::endl;
 
   //TODO: put flags for all properties depending on activated variables.
 
