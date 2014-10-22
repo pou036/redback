@@ -178,9 +178,11 @@ void
 RedbackMaterial::initQpStatefulProperties()
 {
   _useless_property_old[_qp] = 0; // TODO: find a better way to have a one off init
+  // TODO: why is this function called twice???
 
   // Variable initialisation (one off)
-  _porosity0[_qp] = _phi0_param;
+  _porosity0[_qp] = _phi0_param + _q_point[_qp](0)/100.;
+  std::cout << "At initialisation _porosity0[_qp]="<<_porosity0[_qp]<<" at _q_point[_qp](0)=" <<_q_point[_qp](0)<<" at _qp="<<_qp << std::endl;
   _porosity[_qp] = _phi0_param;
   _chemical_porosity[_qp]= 0;
   _solid_ratio[_qp] = 0;
@@ -230,7 +232,7 @@ RedbackMaterial::computeRedbackTerms()
 {
   Real omega_rel, temporary, phi_prime, s_prime;
 
-  std::cout << "_porosity_aux[_qp]=" << _porosity_aux[_qp] << std::endl;
+  std::cout<<"_porosity_aux[_qp]="<<_porosity_aux[_qp]<<" at _q_point[_qp](0)="<<_q_point[_qp](0)<<" at _qp="<<_qp<<std::endl;
 
   //TODO: put flags for all properties depending on activated variables.
 
