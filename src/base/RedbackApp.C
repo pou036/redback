@@ -23,7 +23,6 @@
 #include "RedbackMechMaterial.h"
 
 // AuxKernels
-#include "RedbackPorosityAux.h"
 //#include "StrainRateAux.h"
 //#include "MisesStrainAux.h"
 //#include "MisesStrainRateAux.h"
@@ -85,7 +84,6 @@ RedbackApp::registerObjects(Factory & factory)
   //registerMaterial(RedbackChemMaterial);
   registerMaterial(RedbackMechMaterial);
 
-  registerAux(RedbackPorosityAux);
   //registerAux(StrainRateAux);
   //registerAux(MisesStrainAux);
   //registerAux(MisesStrainRateAux);
