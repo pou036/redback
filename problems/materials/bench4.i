@@ -88,6 +88,7 @@
 []
 
 [AuxKernels]
+  active = 'Lewis_number solid_ratio porosity strain_rate myDummyAuxKernel2'
   [./porosity]
     type = MaterialRealAux
     variable = porosity
@@ -112,6 +113,11 @@
   [./myDummyAuxKernel]
     type = RedbackDummyAux
     variable = myDummyAuxVar
+  [../]
+  [./myDummyAuxKernel2]
+    type = MaterialRealAux
+    variable = myDummyAuxVar
+    property = dummy_prop
   [../]
 []
 
