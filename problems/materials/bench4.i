@@ -43,6 +43,9 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./myDummyAuxVar]
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -105,6 +108,10 @@
     type = MaterialRealAux
     variable = solid_ratio
     property = solid_ratio
+  [../]
+  [./myDummyAuxKernel]
+    type = RedbackDummyAux
+    variable = myDummyAuxVar
   [../]
 []
 
@@ -171,6 +178,7 @@
     da_endo = 1e-4
     pressurization_coefficient = 1
     porosity_aux = porosity_aux
+    dummy_aux = myDummyAuxVar
   [../]
   [./dummy_mat]
     type = RedbackDummyMaterial
