@@ -43,10 +43,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./porosity_aux]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [Kernels]
@@ -109,10 +105,6 @@
     type = MaterialRealAux
     variable = solid_ratio
     property = solid_ratio
-  [../]
-  [./porosity_aux]
-    type = RedbackPorosityAux
-    variable = porosity_aux
   [../]
 []
 
@@ -180,6 +172,10 @@
     pressurization_coefficient = 1
     porosity_aux = porosity_aux
   [../]
+  [./dummy_mat]
+    type = RedbackDummyMaterial
+    block = 0
+  [../]
 []
 
 [Postprocessors]
@@ -227,7 +223,7 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   ss_check_tol = 1e-6
-  end_time = 10
+  end_time = 0.4
   dtmax = 0.1
   scheme = bdf2
   [./TimeStepper]

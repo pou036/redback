@@ -19,7 +19,7 @@ InputParameters validParams<RedbackDummyMaterial>()
 {
   InputParameters params = validParams<Material>();
 
-  params.addParam<Real>("dummy_param", 1, "Something or other...");
+  params.addParam<Real>("dummy_param", 0.12, "Something or other...");
 
   return params;
 }
@@ -42,10 +42,14 @@ RedbackDummyMaterial::RedbackDummyMaterial(const std::string & name, InputParame
 void
 RedbackDummyMaterial::computeQpProperties()
 {
-  _dummy_prop[_qp] = _dummy_prop_param;
+  _dummy_prop[_qp] = _dummy_prop_param + _q_point[_qp](0)/100.;
   std::cout << "RedbackDummyMaterial::computeQpProperties()" <<std::endl;
-  std::cout << "_dummy_prop[_qp]=" << _dummy_prop[_qp] << " at coords " << _q_point[_qp](0) << std::endl;
-  std::cout << "_phi0[_qp]=" << _phi0[_qp] << " at coords " << _q_point[_qp](0) << std::endl << std::endl;
+  std::cout << "  _dummy_prop[_qp]=" << _dummy_prop[_qp] << "\tat coords " << _q_point[_qp](0) << std::endl;
+  std::cout << "  _phi0[_qp]=" << _phi0[_qp] << "\t\tat coords " << _q_point[_qp](0) << std::endl;
+  if (_qp == 1)
+  {
+    std::cout << std::endl << std::endl;
+  }
 }
 
 

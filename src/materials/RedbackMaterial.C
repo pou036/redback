@@ -30,6 +30,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<bool>("are_convective_terms_on", false, "are convective terms on?");
   params.addCoupledVar("temperature", "Dimensionless temperature");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
+  params.addCoupledVar("dummy_aux", "Dummy property coming another material through AuxKernel (TODO:playing)");
   params.addParam<MooseEnum>("density_method", RedbackMaterial::densityMethodEnum() = "linear", "The method to describe density evolution with temperature and pore pressure"); // TODO: fluid, solid, mixture?...
   params.addParam<MooseEnum>("permeability_method", RedbackMaterial::permeabilityMethodEnum() = "KozenyCarman", "The method to describe permeability evolution");
 
@@ -66,6 +67,8 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero), // TODO: should be NULL (but doesn't compile)
   //_pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
 
+  _dummy_aux(isCoupled("dummy_aux") ? coupledValue("dummy_aux") : _zero),
+
   _phi0_param(getParam<Real>("phi0")),
   _gr_param(getParam<Real>("gr")),
   _ref_lewis_nb_param(getParam<Real>("ref_lewis_nb")),
@@ -98,7 +101,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _mixture_gravity_term(declareProperty<RealVectorValue>("mixture_gravity_term")), //rho_mixture * g
   _fluid_gravity_term(declareProperty<RealVectorValue>("fluid_gravity_term")), //rho_fluid * g
 
-  _useless_property_old(declarePropertyOld<Real>("gr")), //TODO: find better way to initiate the values.
+  //_useless_property_old(declarePropertyOld<Real>("gr")), //TODO: find better way to initiate the values.
 
   _gr(declareProperty<Real>("gr")),
   _ref_lewis_nb(declareProperty<Real>("ref_lewis_nb")),
@@ -170,10 +173,11 @@ RedbackMaterial::permeabilityMethodEnum()
   return MooseEnum("KozenyCarman");
 }
 
-void
+/*void
 RedbackMaterial::initQpStatefulProperties()
 {
-  _useless_property_old[_qp] = 0; // TODO: find a better way to have a one off init
+  std::cout << "initQpStatefulProperties at coords " << _q_point[_qp](0) << std::endl;
+  //_useless_property_old[_qp] = 0; // TODO: find a better way to have a one off init
   // TODO: why is this function called twice???
   // TODO: apparently, _my_prop[_qp]=x here does not set properly for the element
   //      but overwrites every element with the same _qp. Why does it actually
@@ -188,12 +192,13 @@ RedbackMaterial::initQpStatefulProperties()
   //_mises_strain[_qp] = 0;
   //_solid_velocity[_qp] = RealVectorValue();
   //_fluid_velocity[_qp] = RealVectorValue();
-}
+}*/
 
 void RedbackMaterial::stepInitQpProperties()
 {
   // TODO: Variable initialisation we'd like done only once (one off)
   // but can't figure out how so doing it at every step...
+  std::cout << "RedbackMaterial::stepInitQpProperties \tat coords " << _q_point[_qp](0) << std::endl;
   _porosity[_qp] = _phi0_param + _q_point[_qp](0)/100.; // TODO: thomas playing
   _chemical_porosity[_qp]= 0;
   _solid_ratio[_qp] = 0;
@@ -201,7 +206,8 @@ void RedbackMaterial::stepInitQpProperties()
   _solid_velocity[_qp] = RealVectorValue();
   _fluid_velocity[_qp] = RealVectorValue();
 
-  std::cout << "init _porosity[_qp]=" << _porosity[_qp] << " at coords " << _q_point[_qp](0) << std::endl;
+  std::cout << "  _dummy_aux[_qp]=" << _dummy_aux[_qp] << "\t\tat coords " << _q_point[_qp](0) << std::endl;
+  std::cout << "  _porosity[_qp] =" << _porosity[_qp]  << "\t\tat coords " << _q_point[_qp](0) << std::endl;
 
   // Variable initialisation (called at each step)
   _gr[_qp] = _gr_param;
@@ -227,9 +233,6 @@ void RedbackMaterial::stepInitQpProperties()
 void
 RedbackMaterial::computeQpProperties()
 {
-  std::cout << "RedbackMaterial::computeQpProperties()" <<std::endl;
-  //std::cout << "_porosity[_qp]=" << _porosity[_qp] << " at coords " << _q_point[_qp](0) << std::endl << std::endl;
-
   // Set our variables
   stepInitQpProperties();
 
