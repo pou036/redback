@@ -175,18 +175,34 @@ RedbackMaterial::initQpStatefulProperties()
 {
   _useless_property_old[_qp] = 0; // TODO: find a better way to have a one off init
   // TODO: why is this function called twice???
+  // TODO: apparently, _my_prop[_qp]=x here does not set properly for the element
+  //      but overwrites every element with the same _qp. Why does it actually
+  //      work usually???
 
   // Variable initialisation (one off)
-  _porosity[_qp] = _phi0_param;
+  //_porosity[_qp] = _phi0_param + _q_point[_qp](0)/100.; // TODO: thomas playing
+  //std::cout << "init _porosity[_qp]=" << _porosity[_qp] << " at coords " << _q_point[_qp](0) << std::endl;
+
+  //_chemical_porosity[_qp]= 0;
+  //_solid_ratio[_qp] = 0;
+  //_mises_strain[_qp] = 0;
+  //_solid_velocity[_qp] = RealVectorValue();
+  //_fluid_velocity[_qp] = RealVectorValue();
+}
+
+void RedbackMaterial::stepInitQpProperties()
+{
+  // TODO: Variable initialisation we'd like done only once (one off)
+  // but can't figure out how so doing it at every step...
+  _porosity[_qp] = _phi0_param + _q_point[_qp](0)/100.; // TODO: thomas playing
   _chemical_porosity[_qp]= 0;
   _solid_ratio[_qp] = 0;
   _mises_strain[_qp] = 0;
   _solid_velocity[_qp] = RealVectorValue();
   _fluid_velocity[_qp] = RealVectorValue();
-}
 
-void RedbackMaterial::stepInitQpProperties()
-{
+  std::cout << "init _porosity[_qp]=" << _porosity[_qp] << " at coords " << _q_point[_qp](0) << std::endl;
+
   // Variable initialisation (called at each step)
   _gr[_qp] = _gr_param;
   _ref_lewis_nb[_qp] = _ref_lewis_nb_param;
@@ -211,6 +227,9 @@ void RedbackMaterial::stepInitQpProperties()
 void
 RedbackMaterial::computeQpProperties()
 {
+  std::cout << "RedbackMaterial::computeQpProperties()" <<std::endl;
+  //std::cout << "_porosity[_qp]=" << _porosity[_qp] << " at coords " << _q_point[_qp](0) << std::endl << std::endl;
+
   // Set our variables
   stepInitQpProperties();
 
