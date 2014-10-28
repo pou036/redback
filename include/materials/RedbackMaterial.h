@@ -55,10 +55,10 @@ protected:
   virtual void computeRedbackTerms();
 
   bool _has_T;
-  VariableValue & _T, & _T_old;;
+  VariableValue & _T, & _T_old;
   bool _has_pore_pres;
   VariableValue & _pore_pres;//, & _pore_pres_old;
-  VariableValue & _dummy_aux; // TODO: thomas playing
+  //VariableValue & _dummy_aux; // TODO: thomas playing
 
   Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param, _m_param, _exponent, _peclet_number; //_ar_c_param, _da_param, _mu_param,
   Real  _ar_F_param, _ar_R_param, _da_endo_param, _da_exo_param, _mu_param, _Kc_param, _eta1_param, _eta2_param, _Aphi_param, _pressurization_coefficient_param;
@@ -104,7 +104,7 @@ protected:
   MaterialProperty<RealVectorValue> & _mixture_convective_energy;
   MaterialProperty<RealVectorValue> & _mixture_convective_energy_jac;
 
-  MaterialProperty<RealVectorValue> & _solid_velocity;
+  //MaterialProperty<RealVectorValue> & _solid_velocity;
   MaterialProperty<RealVectorValue> & _fluid_velocity;
   MaterialProperty<Real> & _solid_compressibility; // \bar(\beta_s)/\sigma_{ref}
   MaterialProperty<Real> & _fluid_compressibility; // \bar(\beta_f)/\sigma_{ref}
@@ -124,6 +124,12 @@ protected:
   MaterialProperty<Real> & _pressurization_coefficient;
 
   VariableGradient& _grad_pore_pressure;
+  //VariableValue & _solid_velocity; // if to be read from AuxVariable
+
+  VariableValue & _dispx_dot;
+  VariableValue & _dispy_dot;
+  VariableValue & _dispz_dot;
+  MaterialProperty<RealVectorValue> & _solid_velocity;
 
 };
 

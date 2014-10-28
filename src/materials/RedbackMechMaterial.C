@@ -35,7 +35,7 @@ plastic strain has to be specified by the user.
 template<>
 InputParameters validParams<RedbackMechMaterial>()
 {
-  InputParameters params = validParams<RedbackMaterial>();
+  InputParameters params = validParams<Material>();
 
   // Copy-paste from TensorMechanicsMaterial.C
   params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
@@ -64,12 +64,13 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addParam<MooseEnum>("yield_criterion", RedbackMechMaterial::yieldCriterionEnum() = "J2_plasticity", "Yield criterion");
   params.addParam< Real >("slope_yield_surface", 0,"Slope of yield surface (positive, see documentation)");
   params.addParam< Real >("mixture_compressibility", 1,"Compressibility of the rock+fluid mixture");
+  params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
 
   return params;
 }
 
 RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParameters parameters) :
-  RedbackMaterial(name, parameters),
+  Material(name, parameters),
   // Copy-paste from TensorMechanicsMaterial.C
   _grad_disp_x(coupledGradient("disp_x")),
   _grad_disp_y(coupledGradient("disp_y")),
@@ -117,9 +118,27 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
   _yield_criterion((YieldCriterion)(int)getParam<MooseEnum>("yield_criterion")),
   _slope_yield_surface(getParam<Real>("slope_yield_surface")),
-  _dispx_dot(coupledDot("disp_x")),
-  _dispy_dot(coupledDot("disp_y")),
-  _dispz_dot(coupledDot("disp_z"))
+  //_dispx_dot(coupledDot("disp_x")),
+  //_dispy_dot(coupledDot("disp_y")),
+  //_dispz_dot(coupledDot("disp_z"))
+
+  //_solid_velocity(declareProperty<RealVectorValue>("solid_velocity")),
+
+  // Get coupled variables (T & P)
+  _has_T(isCoupled("temperature")),
+  _T(_has_T ? coupledValue("temperature") : _zero),
+  _T_old(_has_T ? coupledValueOld("temperature") : _zero),
+  _has_pore_pres(isCoupled("pore_pres")),
+  _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
+
+  // Get some material properties from RedbackMaterial
+  _mechanical_dissipation(getMaterialProperty<Real>("mechanical_dissipation")),
+  _gr(getMaterialProperty<Real>("gr")),
+  _ar(getMaterialProperty<Real>("ar")),
+  _mechanical_dissipation_jac(getMaterialProperty<Real>("mechanical_dissipation_jacobian")),
+  _delta(getMaterialProperty<Real>("delta")),
+  _mod_gruntfest_number(getMaterialProperty<Real>("mod_gruntfest_number")),
+  _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion"))
 
   {
   _Cijkl.fillFromInputVector(_Cijkl_vector, _fill_method);
@@ -135,7 +154,9 @@ RedbackMechMaterial::yieldCriterionEnum()
 void
 RedbackMechMaterial::initQpStatefulProperties()
 {
-  RedbackMaterial::initQpStatefulProperties();
+  // TODO: is this doing what we think it is???
+  //  (not sure _my_var[_qp] really sets var for all elements => check!)
+  Material::initQpStatefulProperties();
   _total_strain[_qp].zero();
   _elastic_strain[_qp].zero();
   _stress[_qp].zero();
@@ -180,7 +201,7 @@ RedbackMechMaterial::computeProperties()
 
 void RedbackMechMaterial::stepInitQpProperties()
 {
-  RedbackMaterial::stepInitQpProperties();
+  //RedbackMaterial::stepInitQpProperties();
 }
 
 void RedbackMechMaterial::computeQpElasticityTensor()
@@ -349,9 +370,9 @@ void
 RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y)
 {
   // update velocities
-  _solid_velocity[_qp] = RealVectorValue(_dispx_dot[_qp], _dispy_dot[_qp], _dispz_dot[_qp]);// TODO
+  //_solid_velocity[_qp] = RealVectorValue(_dispx_dot[_qp], _dispy_dot[_qp], _dispz_dot[_qp]);// TODO
 
-  RedbackMaterial::computeRedbackTerms();
+  //Material::computeRedbackTerms();
 
   // Compute stresses
   _mises_stress[_qp] = getSigEqv(sig);

@@ -21,7 +21,7 @@
 #include "RotationTensor.h"
 
 
-#include "RedbackMaterial.h"
+#include "Material.h"
 
 //#include "FiniteStrainPlasticMaterial.h"
 
@@ -36,7 +36,7 @@ InputParameters validParams<RedbackMechMaterial>();
  * know yet how to derive our class from 2 base clases... (multiple inheritance)
  * TODO: do that properly!
  */
-class RedbackMechMaterial : public RedbackMaterial
+class RedbackMechMaterial : public Material
 {
 public:
   RedbackMechMaterial(const std::string & name, InputParameters parameters);
@@ -154,9 +154,26 @@ protected:
   Real _exponential;
   YieldCriterion _yield_criterion;
   Real _slope_yield_surface;  // coefficient for yield surface
-  VariableValue & _dispx_dot;
-  VariableValue & _dispy_dot;
-  VariableValue & _dispz_dot;
+  //VariableValue & _dispx_dot;
+  //VariableValue & _dispy_dot;
+  //VariableValue & _dispz_dot;
+
+  //MaterialProperty<RealVectorValue> & _solid_velocity;
+
+  // Using variables
+  bool _has_T;
+  VariableValue & _T, & _T_old;
+  bool _has_pore_pres;
+  VariableValue & _pore_pres;
+  // Reading material properties from RedbackMaterial
+  MaterialProperty<Real> & _mechanical_dissipation;
+  MaterialProperty<Real> & _gr;
+  MaterialProperty<Real> & _ar;
+  MaterialProperty<Real> & _mechanical_dissipation_jac;
+  MaterialProperty<Real> & _delta;
+  MaterialProperty<Real> & _mod_gruntfest_number;
+  MaterialProperty<Real> & _solid_thermal_expansion;
+
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
 };

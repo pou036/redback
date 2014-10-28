@@ -30,7 +30,11 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<bool>("are_convective_terms_on", false, "are convective terms on?");
   params.addCoupledVar("temperature", "Dimensionless temperature");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
-  params.addCoupledVar("dummy_aux", "Dummy property coming another material through AuxKernel (TODO:playing)");
+  params.addCoupledVar("disp_x", "The x displacement");
+  params.addCoupledVar("disp_y", "The y displacement");
+  params.addCoupledVar("disp_z", "The z displacement");
+
+  //params.addCoupledVar("solid_velocity_aux", "Solid velocity (AuxKernel) from RedbackMechMaterial (if used)");
   params.addParam<MooseEnum>("density_method", RedbackMaterial::densityMethodEnum() = "linear", "The method to describe density evolution with temperature and pore pressure"); // TODO: fluid, solid, mixture?...
   params.addParam<MooseEnum>("permeability_method", RedbackMaterial::permeabilityMethodEnum() = "KozenyCarman", "The method to describe permeability evolution");
 
@@ -67,7 +71,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero), // TODO: should be NULL (but doesn't compile)
   //_pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
 
-  _dummy_aux(isCoupled("dummy_aux") ? coupledValue("dummy_aux") : _zero),
+  //_disp_x(isCoupled("disp_x") ? coupledValue("disp_x") : _zero),
 
   _phi0_param(getParam<Real>("phi0")),
   _gr_param(getParam<Real>("gr")),
@@ -136,7 +140,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _mixture_convective_energy(declareProperty<RealVectorValue>("mixture_convective_energy")),
   _mixture_convective_energy_jac(declareProperty<RealVectorValue>("mixture_convective_energy_jacobian")),
 
-  _solid_velocity(declareProperty<RealVectorValue>("solid_velocity")),
+  //_solid_velocity(declareProperty<RealVectorValue>("solid_velocity")),
   _fluid_velocity(declareProperty<RealVectorValue>("fluid_velocity")),
   _solid_compressibility(declareProperty<Real>("solid_compressibility")),
   _fluid_compressibility(declareProperty<Real>("fluid_compressibility")),
@@ -153,8 +157,13 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
 
   _pressurization_coefficient(declareProperty<Real>("pressurization_coefficient")),
 
-  _grad_pore_pressure(coupledGradient("pore_pres"))
+  _grad_pore_pressure(coupledGradient("pore_pres")),
   //_grad_pore_pressure(_has_pore_pres ? coupledGradient("pore_pres") : _zero) // TODO: what if H is not activated?
+
+  _dispx_dot(coupledDot("disp_x")), // TODO: what if no disp_x var?
+  _dispy_dot(coupledDot("disp_y")),
+  _dispz_dot(coupledDot("disp_z")),
+  _solid_velocity(declareProperty<RealVectorValue>("solid_velocity"))
 
 {
 }
@@ -198,16 +207,12 @@ void RedbackMaterial::stepInitQpProperties()
 {
   // TODO: Variable initialisation we'd like done only once (one off)
   // but can't figure out how so doing it at every step...
-  std::cout << "RedbackMaterial::stepInitQpProperties \tat coords " << _q_point[_qp](0) << std::endl;
   _porosity[_qp] = _phi0_param + _q_point[_qp](0)/100.; // TODO: thomas playing
   _chemical_porosity[_qp]= 0;
   _solid_ratio[_qp] = 0;
   _mises_strain[_qp] = 0;
-  _solid_velocity[_qp] = RealVectorValue();
+  _solid_velocity[_qp] = RealVectorValue(_dispx_dot[_qp], _dispy_dot[_qp], _dispz_dot[_qp]);// TODO, dimension dependent
   _fluid_velocity[_qp] = RealVectorValue();
-
-  std::cout << "  _dummy_aux[_qp]=" << _dummy_aux[_qp] << "\t\tat coords " << _q_point[_qp](0) << std::endl;
-  std::cout << "  _porosity[_qp] =" << _porosity[_qp]  << "\t\tat coords " << _q_point[_qp](0) << std::endl;
 
   // Variable initialisation (called at each step)
   _gr[_qp] = _gr_param;
