@@ -34,28 +34,36 @@
 []
 
 [Materials]
-  [./mat0]
+  [./mat_mech]
     type = RedbackMechMaterial
     block = 0
-    disp_y = disp_y
     disp_x = disp_x
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
-    yield_stress = '0. 1 1. 1'
+    disp_y = disp_y
     disp_z = disp_z
-    m = 3
-    ar = 10
-    gr = 0.3
-    is_mechanics_on = false
+    temperature = temp
     exponent = 1
-    ref_lewis_nb = 1
+    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
+    ref_pe_rate = 1
+    slope_yield_surface = -0.6
+    yield_stress = '0. 1 1. 1'
+  [../]
+  [./mat_nomech]
+    type = RedbackMaterial
+    block = 0
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    temperature = temp
+    Aphi = 0
+    ar = 10
     ar_F = 20
     ar_R = 10
-    phi0 = 0.1
-    ref_pe_rate = 1
-    Aphi = 0
-    slope_yield_surface = -0.6
     da_endo = 1e-7
-    temperature = temp
+    gr = 0.3
+    is_mechanics_on = false
+    m = 3
+    phi0 = 0.1
+    ref_lewis_nb = 1
   [../]
 []
 

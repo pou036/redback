@@ -85,23 +85,18 @@
   [./adim_rock]
     type = RedbackMaterial
     block = 0
-    m = 1
-    mu = 1e-3
+    Aphi = 0
     ar = 10
-    disp_y = disp_y
-    disp_x = disp_x
-    yield_stress = '0 1 1 1'
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
-    gr = 2
-    pore_pres = 0
-    temperature = temp
-    is_mechanics_on = false
     ar_F = 20
     ar_R = 10
-    Aphi = 0
     da_endo = 1
-    ref_lewis_nb = 1
+    gr = 2
+    is_mechanics_on = false
     is_chemistry_on = true
+    m = 1
+    mu = 1e-3
+    ref_lewis_nb = 1
+    temperature = temp
   [../]
 []
 
