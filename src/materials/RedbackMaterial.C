@@ -207,7 +207,7 @@ void RedbackMaterial::stepInitQpProperties()
 {
   // TODO: Variable initialisation we'd like done only once (one off)
   // but can't figure out how so doing it at every step...
-  _porosity[_qp] = _phi0_param + _q_point[_qp](0)/100.; // TODO: thomas playing
+  _porosity[_qp] = _phi0_param;
   _chemical_porosity[_qp]= 0;
   _solid_ratio[_qp] = 0;
   _mises_strain[_qp] = 0;
