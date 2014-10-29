@@ -64,11 +64,11 @@ InputParameters validParams<RedbackMaterial>()
 RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters parameters) :
   Material(name, parameters),
   _has_T(isCoupled("temperature")),
-  _T(_has_T ? coupledValue("temperature") : _zero), // TODO: should be NULL (but doesn't compile)
+  _T(_has_T ? coupledValue("temperature") : _zero),
   _T_old(_has_T ? coupledValueOld("temperature") : _zero),
 
   _has_pore_pres(isCoupled("pore_pres")),
-  _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero), // TODO: should be NULL (but doesn't compile)
+  _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
   //_pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
 
   //_disp_x(isCoupled("disp_x") ? coupledValue("disp_x") : _zero),
@@ -104,8 +104,6 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _gravity_param(getParam<RealVectorValue>("gravity")),
   _mixture_gravity_term(declareProperty<RealVectorValue>("mixture_gravity_term")), //rho_mixture * g
   _fluid_gravity_term(declareProperty<RealVectorValue>("fluid_gravity_term")), //rho_fluid * g
-
-  //_useless_property_old(declarePropertyOld<Real>("gr")), //TODO: find better way to initiate the values.
 
   _gr(declareProperty<Real>("gr")),
   _ref_lewis_nb(declareProperty<Real>("ref_lewis_nb")),
@@ -220,7 +218,6 @@ void RedbackMaterial::stepInitQpProperties()
   _ar[_qp] = _ar_param;
   _delta[_qp] = _delta_param;
   _m[_qp] = _m_param;
-  _exponent = _m[_qp]; //TODO: get rid of m
   _lewis_number[_qp] = _ref_lewis_nb[_qp];
   _ar_F[_qp] = _ar_F_param;
   _ar_R[_qp] = _ar_R_param;
@@ -265,11 +262,11 @@ RedbackMaterial::computeRedbackTerms()
   _mises_strain_rate[_qp] = _exponential;
 
   // Compute Mechanical Dissipation
-  _mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
+  _mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _m[_qp]) *
       std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
 
   // Compute Mechanical Dissipation Jacobian
-  _mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
+  _mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _m[_qp]) *
     _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
     (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
 

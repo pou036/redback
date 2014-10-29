@@ -424,7 +424,6 @@ EllipseTest::distanceCCTestMajorAxisVertical()
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.2094051, d, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.650317, x2, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.854209, y2, 1e-5);
-  //TODO
   // top left quadrant
   d = Ellipse::distanceCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-2.5, /*y1=*/2.0, x2, y2);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.2094051, d, 1e-5);

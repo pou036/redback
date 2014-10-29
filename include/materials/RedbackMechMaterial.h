@@ -32,9 +32,8 @@ template<>
 InputParameters validParams<RedbackMechMaterial>();
 
 /**
- * This class copy-pastes the stack from tensorMechanics module since we don't
- * know yet how to derive our class from 2 base clases... (multiple inheritance)
- * TODO: do that properly!
+ * This class copy-pastes the stack from tensorMechanics module
+ * TODO: add required features to moose and use proper tensorMechanics module
  */
 class RedbackMechMaterial : public Material
 {

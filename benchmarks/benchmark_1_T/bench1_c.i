@@ -10,16 +10,6 @@
 [Variables]
   [./temp]
   [../]
-  [./disp_x]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
-  [../]
-  [./disp_y]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
-  [../]
 []
 
 [Kernels]
@@ -32,7 +22,7 @@
     variable = temp
   [../]
   [./mh_temp]
-    type = MechDissip
+    type = RedbackMechDissip
     variable = temp
   [../]
 []
@@ -50,45 +40,26 @@
     boundary = right
     value = 0
   [../]
-  [./disp_y]
-    type = DirichletBC
-    variable = disp_y
-    boundary = 'left right'
-    value = 0
-  [../]
-  [./disp_x_left]
-    type = DirichletBC
-    variable = disp_x
-    boundary = left
-    value = 1
-  [../]
-  [./disp_x_rigth]
-    type = DirichletBC
-    variable = disp_x
-    boundary = right
-    value = 0
-  [../]
 []
 
 [Materials]
   [./adim_rock]
     type = RedbackMaterial
     block = 0
-    ar_c = 40
     m = 1
-    da = 1
-    mu = 1e-3
     ar = 10
-    delta = 1
-    disp_y = disp_y
-    disp_x = disp_x
     yield_stress = '0 1 1 1'
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
-    T = temp
     gr = 0.095
     pore_pres = 0
     temperature = temp
     is_mechanics_on = false
+    ref_lewis_nb = 1
+    ar_F = 40
+    ar_R = 1
+    Aphi = 0
+    phi0 = 0.1
+    da_endo = 1
   [../]
 []
 
@@ -122,15 +93,10 @@
 []
 
 [Outputs]
+  file_base = bench1_c_out
   exodus = true
+  csv = true
   console = true
-[]
-
-[TensorMechanics]
-  [./my_tensor_mech]
-    disp_y = disp_y
-    disp_x = disp_x
-  [../]
 []
 
 [ICs]
