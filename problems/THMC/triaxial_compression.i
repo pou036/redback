@@ -38,34 +38,43 @@
 []
 
 [Materials]
-  [./mat0]
+  [./mat_mech]
     type = RedbackMechMaterial
     block = 0
-    disp_y = disp_y
     disp_x = disp_x
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
-    yield_stress = '0. 1 1. 1'
+    disp_y = disp_y
     disp_z = disp_z
+    pore_pres = pore_pressure
+    temperature = temp
+    exponent = 3
+    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
+    ref_pe_rate = 1
+    slope_yield_surface = -0.6
+    yield_criterion = Drucker_Prager
+    yield_stress = '0. 1 1. 1'
+  [../]
+  [./mat_nomech]
+    type = RedbackMaterial
+    block = 0
+    is_chemistry_on = true
+    is_mechanics_on = false
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    pore_pres = pore_pressure
+    temperature = temp
     m = 3
     mu = 1
     ar = 10
     gr = 20
-    is_mechanics_on = false
-    exponent = 3
     ref_lewis_nb = 1
-    pore_pres = pore_pressure
     Kc = 1
     ar_F = 20
     ar_R = 10
     phi0 = 0.1
-    ref_pe_rate = 1
     Aphi = 1
-    temperature = temp
     eta2 = 1e4
     da_exo = 1e-3
-    slope_yield_surface = -0.6
-    yield_criterion = Drucker_Prager
-    is_chemistry_on = true
   [../]
 []
 
