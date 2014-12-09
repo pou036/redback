@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 26
-  ny = 50
-  nz = 16
+  nx = 10
+  ny = 20
+  nz = 10
   xmin = -1
   ymin = -2
   ymax = 2
@@ -86,7 +86,7 @@
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -10*t
+    value = -1*t
   [../]
   [./spline_IC]
     type = ConstantFunction
@@ -169,25 +169,25 @@
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 1
+    value = 0.5
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -1
+    value = -0.5
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 1
+    value = 0.5
   [../]
   [./confinment_front]
     type = NeumannBC
     variable = disp_z
     boundary = front
-    value = -1
+    value = -0.5
   [../]
 []
 
@@ -479,13 +479,15 @@
 []
 
 [Outputs]
-  file_base = out
+  file_base = triaxial_compression
   output_initial = true
   exodus = true
+  checkpoint = true
   [./console]
     type = Console
     perf_log = true
     linear_residuals = true
+    append_restart = true
   [../]
 []
 

@@ -479,7 +479,7 @@
 []
 
 [Outputs]
-  file_base = out
+  file_base = triaxial_compression_CC
   output_initial = true
   exodus = true
   checkpoint = true
