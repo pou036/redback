@@ -1,13 +1,13 @@
 [Mesh]
   type = FileMesh
-  file = ../../meshes/Cylinder_hollow_10.msh
+  file = ../../meshes/Cylinder_hollow_3reg.msh
 []
 
 [MeshModifiers]
   [./point1]
     type = AddExtraNodeset
     boundary = 6
-    coord = '0.3 0 -1'
+    coord = '0.3 0 1'
   [../]
 []
 
@@ -33,7 +33,7 @@
 [Materials]
   [./mat_mech]
     type = RedbackMechMaterial
-    block = 0
+    block = 1
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
@@ -48,6 +48,43 @@
   [../]
   [./mat_nomech]
     type = RedbackMaterial
+    block = 1
+    is_chemistry_on = true
+    is_mechanics_on = false
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    pore_pres = pore_pressure
+    temperature = temp
+    m = 3
+    mu = 1
+    ar = 12
+    gr = 50
+    ref_lewis_nb = 1
+    Kc = 1
+    ar_F = 24
+    ar_R = 12
+    phi0 = 0.1
+    Aphi = 1
+    eta2 = 1e4
+    da_exo = 1e-3
+  [../]
+  [./inner_ring_mech]
+    type = RedbackMechMaterial
+    block = 0
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    pore_pres = pore_pressure
+    temperature = temp
+    exponent = 3
+    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
+    ref_pe_rate = 1
+    yield_criterion = elasticity
+    yield_stress = '0. 100 1. 100'
+  [../]
+  [./inner_ring_nomech]
+    type = RedbackMaterial
     block = 0
     is_chemistry_on = true
     is_mechanics_on = false
@@ -58,24 +95,63 @@
     temperature = temp
     m = 3
     mu = 1
-    ar = 10
+    ar = 12
     gr = 50
     ref_lewis_nb = 1
     Kc = 1
-    ar_F = 20
-    ar_R = 10
+    ar_F = 24
+    ar_R = 12
     phi0 = 0.1
     Aphi = 1
     eta2 = 1e4
     da_exo = 1e-3
+    solid_thermal_expansion = 1e-2
+  [../]
+  [./outer_ring_mech]
+    type = RedbackMechMaterial
+    block = 2
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    pore_pres = pore_pressure
+    temperature = temp
+    exponent = 3
+    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
+    ref_pe_rate = 1
+    yield_criterion = elasticity
+    yield_stress = '0. 100 1. 100'
+  [../]
+  [./outer_ring_nomech]
+    type = RedbackMaterial
+    block = 2
+    is_chemistry_on = true
+    is_mechanics_on = false
+    disp_x = disp_x
+    disp_y = disp_y
+    disp_z = disp_z
+    pore_pres = pore_pressure
+    temperature = temp
+    m = 3
+    mu = 1
+    ar = 12
+    gr = 50
+    ref_lewis_nb = 1
+    Kc = 1
+    ar_F = 24
+    ar_R = 12
+    phi0 = 0.1
+    Aphi = 1
+    eta2 = 1e4
+    da_exo = 1e-3
+    solid_thermal_expansion = 1e-3
   [../]
 []
 
 [Functions]
-  active = 'downfunc'
+  active = 'upfunc downfunc'
   [./upfunc]
     type = ParsedFunction
-    value = t
+    value = 1+t
   [../]
   [./downfunc]
     type = ParsedFunction
@@ -87,7 +163,7 @@
 []
 
 [BCs]
-  active = 'inside_temp bottom_fix_x bottom_fix_y bottom_fix_z outer_y top_fix_z inner_pressure outer_pressure outer_x top_fix_x top_fix_y'
+  active = 'inside_outside_temp bottom_fix_x bottom_fix_y bottom_fix_z top_fix_x top_fix_z top_fix_y outer_pressure'
   [./temp_box]
     type = NeumannBC
     variable = temp
@@ -170,12 +246,6 @@
     boundary = 2
     value = 0
   [../]
-  [./inside_temp]
-    type = DirichletBC
-    variable = temp
-    boundary = 3
-    value = 3
-  [../]
   [./outer_y]
     type = DirichletBC
     variable = disp_y
@@ -193,6 +263,18 @@
     variable = disp_y
     boundary = 0
     value = 0
+  [../]
+  [./outside_temp]
+    type = DirichletBC
+    variable = temp
+    boundary = '2'
+    value = 1
+  [../]
+   [./inside_temp]
+    type = FunctionPresetBC
+    variable = temp
+    boundary = '3'
+    function = upfunc
   [../]
 []
 
@@ -273,31 +355,37 @@
   [./td_temp]
     type = TimeDerivative
     variable = temp
+    block = '0 1 2'
   [../]
   [./temp_diff]
     type = Diffusion
     variable = temp
+    block = '0 1 2'
   [../]
   [./temp_dissip]
     type = RedbackMechDissip
     variable = temp
+    block = '0 1 2'
   [../]
   [./temp_endo_chem]
     type = RedbackChemEndo
     variable = temp
+    block = '0 1 2'
   [../]
   [./td_press]
     type = TimeDerivative
     variable = pore_pressure
+    block = '0 1 2'
   [../]
   [./press_diff]
     type = RedbackMassDiffusion
     variable = pore_pressure
+    block = '0 1 2'
   [../]
   [./chem_press]
     type = RedbackChemPressure
     variable = pore_pressure
-    block = 0
+    block = '0 1 2'
   [../]
 []
 
@@ -400,57 +488,57 @@
   [./mises_stress]
     type = PointValue
     variable = mises_stress
-    point = '0.3 0 -1'
+    point = '0.3 0 1'
   [../]
   [./mises_strain]
     type = PointValue
     variable = mises_strain
-    point = '0.3 0 -1'
+    point = '0.3 0 1'
   [../]
   [./mises_strain_rate]
     type = PointValue
     variable = mises_strain_rate
-    point = '0.3 0 -1'
+    point = '0.3 0 1'
   [../]
   [./temp_middle]
     type = PointValue
     variable = temp
-    point = '0.3 0 -1'
+    point = '0.3 0 1'
   [../]
   [./mean_stress]
     type = PointValue
     variable = mean_stress
-    point = '0.3 0 -1'
+    point = '0.3 0 1'
   [../]
   [./volumetric_strain]
     type = PointValue
     variable = volumetric_strain
-    point = '0.3 0 -1'
+    point = '0.3 0 1'
   [../]
   [./volumetric_strain_rate]
     type = PointValue
     variable = volumetric_strain_rate
-    point = '0.3 0 -1'
+    point = '0.3 0 1'
   [../]
   [./middle_press]
     type = PointValue
     variable = pore_pressure
-    point = '0.3 0 -1'
+    point = '0.3 0 1'
   [../]
   [./porosity_middle]
     type = PointValue
     variable = porosity
-    point = '0.3 0 -1'
+    point = '0.3 0 1'
   [../]
   [./Lewis_middle]
     type = PointValue
     variable = Lewis_number
-    point = '0.3 0 -1'
+    point = '0.3 0 1'
   [../]
   [./solid_ratio_middle]
     type = PointValue
     variable = solid_ratio
-    point = '0.3 0 -1'
+    point = '0.3 0 1'
   [../]
 []
 
@@ -508,7 +596,6 @@
   [./temp_IC]
     variable = temp
     type = RandomIC
-    max = 3
   [../]
   [./press_IC]
     variable = pore_pressure
