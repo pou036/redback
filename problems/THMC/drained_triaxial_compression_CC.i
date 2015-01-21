@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 5
-  ny = 10
-  nz = 5
+  nx = 4
+  ny = 8
+  nz = 4
   xmin = -1
   ymin = -2
   ymax = 2
@@ -192,7 +192,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress Lewis_number porosity'
+  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress stress_zz Lewis_number porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -297,7 +297,7 @@
 []
 
 [AuxKernels]
-  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation porosity Gruntfest_Number'
+  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation stress_zz porosity Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -447,6 +447,11 @@
     variable = solid_ratio
     point = '0 0 0'
   [../]
+  [./top_stress_zz]
+    type = SideAverageValue
+    variable = stress_zz
+    boundary = top
+  [../]
 []
 
 [Preconditioning]
@@ -479,10 +484,9 @@
 []
 
 [Outputs]
-  file_base = problems/THMC/drained_triaxial_compression_CC
+  file_base = drained_triaxial_compression_CC
   output_initial = true
   exodus = true
-  checkpoint = true
   [./console]
     type = Console
     perf_log = true
