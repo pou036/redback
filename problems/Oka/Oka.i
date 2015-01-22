@@ -64,9 +64,9 @@
     exponent = 3
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     ref_pe_rate = 1
-    slope_yield_surface = -0.8
+    slope_yield_surface = -1.44
     yield_criterion = modified_Cam_Clay
-    yield_stress = '0. 3 1. 3'
+    yield_stress = '0. 1 1. 1'
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -109,7 +109,7 @@
 []
 
 [BCs]
-  active = 'bottom_fix_x_left drained_top_bottom bottom_fix_y bottom_fix_x_front confinement_back confinement_left confinement_right constant_y_velocity_top side_temp bottom_fix_x_back bottom_fix_x_right confinement_front'
+  active = 'drained_top_bottom bottom_fix_x bottom_fix_y bottom_fix_z top_fix_x top_fix_z confinement_back confinement_left confinement_right constant_y_velocity_top side_temp confinement_front'
   [./temp_box]
     type = NeumannBC
     variable = temp
@@ -231,7 +231,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress stress_zz Lewis_number porosity'
+  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress stress_zz Lewis_number porosity stress_xx'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -301,6 +301,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./stress_xx]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -336,7 +340,7 @@
 []
 
 [AuxKernels]
-  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation stress_zz porosity Gruntfest_Number'
+  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation stress_zz porosity Gruntfest_Number stress_xx'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -428,6 +432,13 @@
     variable = solid_ratio
     property = solid_ratio
   [../]
+  [./stress_xx]
+    type = RankTwoAux
+    variable = stress_xx
+    rank_two_tensor = stress
+    index_j = 0
+    index_i = 0
+  [../]
 []
 
 [Postprocessors]
@@ -490,6 +501,11 @@
     type = SideAverageValue
     variable = stress_zz
     boundary = top
+  [../]
+  [./right_avg_sigma_xx]
+    type = SideAverageValue
+    variable = stress_xx
+    boundary = right
   [../]
 []
 
