@@ -154,7 +154,7 @@ if __name__ == '__main__':
     # Plot stress vs strain curve
     if 1:
         createPicturesForData(data,
-            key1='mean_stress_top', key2='mises_stress_top', 
+            key1='mean_stress', key2='mises_stress', 
             output_dir=os.path.join(output_dir, 'P-Q'), name_root='P-Q_', 
             index_first=0, index_last=999999, title=None, label1='Mean Stress', label2='Deviatoric Stress',
             plot_ellipse=True, time_step=1.e-4, export_freq=10, block_height=4,

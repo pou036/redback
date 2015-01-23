@@ -64,7 +64,7 @@
     exponent = 3
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     ref_pe_rate = 1
-    slope_yield_surface = -1.44
+    slope_yield_surface = 1.44
     yield_criterion = modified_Cam_Clay
     yield_stress = '0. 1 1. 1'
   [../]
@@ -231,7 +231,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress stress_zz Lewis_number porosity stress_xx'
+  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate stress_xx mises_stress volumetric_strain mean_stress stress_zz Lewis_number porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -340,7 +340,7 @@
 []
 
 [AuxKernels]
-  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation stress_zz porosity Gruntfest_Number stress_xx'
+  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate stress_xx mises_stress mean_stress mech_dissipation stress_zz porosity Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -524,6 +524,7 @@
   dtmax = 1
   dtmin = 1e-7
   type = Transient
+  num_steps = 50
   l_max_its = 200
   nl_max_its = 10
   solve_type = PJFNK
