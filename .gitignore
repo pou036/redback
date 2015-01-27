@@ -165,3 +165,6 @@ peacock_*.e
 *.template
 tests/*/*.trace
 problems/Oka/pics_postprocess
+
+# Allod csv files in Oka folder
+!/problems/Oka/fig*/*.csv
