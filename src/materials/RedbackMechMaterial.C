@@ -405,6 +405,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _mechanical_dissipation_jac[_qp] = _mechanical_dissipation[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
+  //_mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig) / yield_stress * 
+  //    std::pow( macaulayBracket( getSigEqv(sig) / yield_stress - 1.0 ), _exponent);
   _mod_gruntfest_number[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
       (
       std::fabs(getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent)) +

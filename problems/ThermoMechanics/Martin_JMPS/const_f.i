@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 20
-  ny = 20
+  nx = 10
+  ny = 10
   xmin = -1
   ymin = -1
 []
@@ -57,6 +57,8 @@
     temperature = temp
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     yield_stress = '0. 1 1. 1'
+    exponent = 1
+    ref_pe_rate = 1
   [../]
   [./mat1]
     type = RedbackMaterial
@@ -73,6 +75,8 @@
     is_mechanics_on = true
     phi0 = 0.5
     ref_lewis_nb = 1
+    ar_F = 1
+    ar_R = 1
   [../]
 []
 
@@ -304,8 +308,8 @@
   dtmax = 1
   dtmin = 1e-7
   type = Transient
+  num_steps = 100
   l_max_its = 500
-  nl_max_its = 50
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg cp 201'
@@ -313,7 +317,7 @@
   reset_dt = true
   line_search = basic
   [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
+    type = ConstantDT
     dt = 1e-3
   [../]
 []
