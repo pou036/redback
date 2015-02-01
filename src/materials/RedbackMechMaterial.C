@@ -114,6 +114,7 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
   _volumetric_strain(declareProperty<Real>("volumetric_strain")),
   _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
+  _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
   _mixture_compressibility_param(getParam<Real>("mixture_compressibility")),
   _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
   _yield_criterion((YieldCriterion)(int)getParam<MooseEnum>("yield_criterion")),
@@ -170,6 +171,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mises_strain_rate[_qp] = 0;
   _volumetric_strain[_qp] = 0;
   _volumetric_strain_rate[_qp] = 0;
+  _total_volumetric_strain[_qp] = 0;
   _mixture_compressibility[_qp] = _mixture_compressibility_param;
 
   // TODO: deal with sign of _slope_yield_surface properly in DP case
@@ -306,6 +308,7 @@ void RedbackMechMaterial::computeQpStress()
 
   //Rotate strain to current configuration
   _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
+  _total_volumetric_strain[_qp] = _total_strain[_qp].trace()/3.0;
 
   //Compute the energy dissipation and the properties declared
   computeRedbackTerms(sig, q_y, p_y);
