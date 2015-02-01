@@ -231,7 +231,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate stress_xx mises_stress volumetric_strain mean_stress stress_zz Lewis_number porosity'
+  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate stress_xx mises_stress volumetric_strain mean_stress stress_zz Lewis_number porosity stress_yy'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -305,6 +305,10 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./stress_yy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -340,7 +344,7 @@
 []
 
 [AuxKernels]
-  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate stress_xx mises_stress mean_stress mech_dissipation stress_zz porosity Gruntfest_Number'
+  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate stress_xx mises_stress mean_stress mech_dissipation stress_zz porosity Gruntfest_Number stress_yy'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -439,9 +443,17 @@
     index_j = 0
     index_i = 0
   [../]
+  [./stress_yy]
+    type = RankTwoAux
+    variable = stress_yy
+    rank_two_tensor = stress
+    index_j = 1
+    index_i = 1
+  [../]
 []
 
 [Postprocessors]
+  active = 'volumetric_strain mises_strain mises_strain_rate middle_press solid_ratio_middle total_volume_strain volumetric_strain_rate mises_stress mean_stress Lewis_middle temp_middle porosity_middle right_avg_sigma_xx top_avg_mean_stress top_avg_mises_stress top_avg_stress_yy front_avg_sigma_xx sigma_xx_A'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
@@ -507,6 +519,56 @@
     variable = stress_xx
     boundary = right
   [../]
+  [./total_volume_strain]
+    type = ElementIntegralMaterialProperty
+    mat_prop = total_volumetric_strain
+    use_displaced_mesh = true
+  [../]
+  [./top_avg_mean_stress]
+    type = SideAverageValue
+    variable = mean_stress
+    boundary = top
+  [../]
+  [./top_avg_mises_stress]
+    type = SideAverageValue
+    variable = mises_stress
+    boundary = top
+  [../]
+  [./top_avg_stress_yy]
+    type = SideAverageValue
+    variable = stress_yy
+    boundary = top
+  [../]
+  [./front_avg_sigma_xx]
+    type = SideAverageValue
+    variable = stress_xx
+    boundary = front
+  [../]
+  [./sigma_xx_A]
+    type = PointValue
+    variable = stress_xx
+    point = '1 0 2'
+  [../]
+  [./sigma_xx_B]
+    type = PointValue
+    variable = stress_xx
+    point = '1 0 1.5'
+  [../]
+  [./sigma_xx_C]
+    type = PointValue
+    variable = stress_xx
+    point = '1 0 1'
+  [../]
+  [./sigma_xx_D]
+    type = PointValue
+    variable = stress_xx
+    point = '1 0 0.5'
+  [../]
+  [./sigma_xx_E]
+    type = PointValue
+    variable = stress_xx
+    point = '1 0 0'
+  [../]
 []
 
 [Preconditioning]
@@ -520,11 +582,11 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 1
+  end_time = 0.4
   dtmax = 1
   dtmin = 1e-7
   type = Transient
-  num_steps = 50
+  num_steps = 5000
   l_max_its = 200
   nl_max_its = 10
   solve_type = PJFNK

@@ -148,6 +148,7 @@ protected:
   MaterialProperty<Real> & _mises_strain_rate;
   MaterialProperty<Real> & _volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;
+  MaterialProperty<Real> & _total_volumetric_strain;
   Real _mixture_compressibility_param;
   MaterialProperty<Real> & _mixture_compressibility;
   Real _exponential;
