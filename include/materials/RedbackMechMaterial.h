@@ -115,31 +115,6 @@ protected:
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
   virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
   virtual void returnMapElasticity(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
-  virtual void returnMapJ2(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-  Real getPressureProjectionDP(Real, Real, Real);
-  void getStressProjectionsCC(Real, Real, Real, Real, Real &, Real &);
-  virtual void returnMapDP(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-  virtual void returnMapCC(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-
-  void getJacJ2(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
-  void getJacDP(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, RankFourTensor &);
-  void getJacCC(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, RankFourTensor &);
-
-  void getFlowTensorJ2(const RankTwoTensor &, Real, RankTwoTensor &);
-  void getFlowTensorDP(const RankTwoTensor &, Real, RankTwoTensor &);
-  void getFlowTensorCC(const RankTwoTensor &, Real, Real, RankTwoTensor &);
-
-  Real getFlowIncrementJ2(const RankTwoTensor &, Real);
-  Real getFlowIncrementDP(Real, Real, Real, Real);
-  Real getFlowIncrementCC(Real, Real, Real, Real, Real);
-
-  Real getDerivativeFlowIncrementJ2(const RankTwoTensor &, Real);
-  Real getDerivativeFlowIncrementDP(const RankTwoTensor &, Real, Real, Real, Real);
-  Real getDerivativeFlowIncrementCC(const RankTwoTensor &, Real, Real, Real, Real, Real);
-
-  void get_py_qy(Real, Real, Real &, Real &, Real);
-  void get_py_qy_DP(Real, Real, Real &, Real &, Real);
-  void get_py_qy_J2(Real, Real, Real &, Real &, Real);
 
   Real _ref_pe_rate;
   Real _exponent;

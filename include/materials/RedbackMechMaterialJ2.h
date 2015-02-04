@@ -1,0 +1,44 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*          Prepared by Battelle Energy Alliance, LLC           */
+/*            Under Contract No. DE-AC07-05ID14517              */
+/*            With the U. S. Department of Energy               */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#ifndef REDBACKMECHMATERIALJ2_H
+#define REDBACKMECHMATERIALJ2_H
+
+#include "RedbackMechMaterial.h"
+
+//Forward Declarations
+class RedbackMechMaterialJ2;
+
+template<>
+InputParameters validParams<RedbackMechMaterialJ2>();
+
+class RedbackMechMaterialJ2 : public RedbackMechMaterial
+{
+public:
+  RedbackMechMaterialJ2(const std::string & name, InputParameters parameters);
+  // Redback
+
+protected:
+  // Copy-paste from TensorMechanicsMaterial.h
+
+  // Copy-paste from FiniteStrainPlasticRateMaterial.h
+  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
+  void getJacJ2(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
+  void getFlowTensorJ2(const RankTwoTensor &, Real, RankTwoTensor &);
+  Real getFlowIncrementJ2(const RankTwoTensor &, Real);
+  Real getDerivativeFlowIncrementJ2(const RankTwoTensor &, Real);
+  void get_py_qy_J2(Real, Real, Real &, Real &, Real);
+};
+
+#endif //REDBACKMECHMATERIAL_H
