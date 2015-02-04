@@ -45,17 +45,6 @@ class Ellipse
    */
   static Real sqrDistance(Real const e[2], Real const y[2], Real x[2]);
 
-  /**
-   * Function to compute the distance from a query point to an ellipse
-   * defined by the two parameters M and p_c from the modified Cam-Clay model.
-   * It also computes the ellipse point (x0,x1) that is closest to (y0,y1).
-   * @param m: slope of the critical state line
-   * @param p_c: pre-consolidation pressure
-   * @param y: coordinates of point to project
-   * @param x: coordinates of projection point on the ellipse
-   * @return d: distance from y to ellipse
-   */
-  static Real distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1);
 
   /**
    * Function to check if given point (y0, y1) is outside of ellipse (plasticity
@@ -66,6 +55,18 @@ class Ellipse
    * @return result: boolean, true if strictly outside ellipse
    */
   static bool isPointOutsideOfEllipse(Real const m, Real const p_c, Real const y0, Real const y1);
+
+  /**
+   * Function to compute the distance from a query point to an ellipse
+   * defined by the two parameters M and p_c from the modified Cam-Clay model.
+   * It also computes the ellipse point (x0,x1) that is closest to (y0,y1).
+   * @param m: slope of the critical state line
+   * @param p_c: pre-consolidation pressure
+   * @param y: coordinates of point to project
+   * @param x: coordinates of projection point on the ellipse
+   * @return d: distance from y to ellipse
+   */
+  static void distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1);
 };
 
 #endif // ELLIPSE_H

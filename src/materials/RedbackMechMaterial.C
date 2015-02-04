@@ -655,24 +655,22 @@ RedbackMechMaterial::returnMapDP(const RankTwoTensor & sig_old, const RankTwoTen
 {
   RankTwoTensor sig_new, delta_dp, dpn;
   RankTwoTensor flow_tensor;
-  RankTwoTensor resid,ddsig;
+  RankTwoTensor resid, ddsig;
   RankFourTensor dr_dsig, dr_dsig_inv;
   Real flow_incr;
-  Real pressure, sig_eqv;
+  Real p, q;
   Real err1, err3, tol1, tol3;
   unsigned int iterisohard, iter, maxiterisohard = 20, maxiter = 50;
   Real eqvpstrain;
-  Real cohesion, cohesion_prev;
+  Real yield_stress, yield_stress_prev;
 
   tol1 = 1e-10;
   tol3 = 1e-6;
-
-  iterisohard = 0;
-  eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
-  // User defined yield stress is the cohesion only (evolving with plastic strain)
-  cohesion = getYieldStress(eqvpstrain);
-
   err3 = 1.1 * tol3;
+  iterisohard = 0;
+
+  eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
+  yield_stress = getYieldStress(eqvpstrain); // User defined yield stress is the cohesion only (evolving with plastic strain)
 
   _exponential = 1;
   if (_has_T)
@@ -686,59 +684,46 @@ RedbackMechMaterial::returnMapDP(const RankTwoTensor & sig_old, const RankTwoTen
     iter = 0;
     delta_dp.zero();
 
+    // Elastic guess
     sig_new = sig_old + E_ijkl * delta_d;
-
     // Compute distance to current yield surface (line), only valid for associative potential
-    pressure = sig_new.trace()/3.0;
-    sig_eqv = getSigEqv(sig_new);
-    p_y = getPressureProjectionDP(pressure, sig_eqv, cohesion);
-    q_y = cohesion + _slope_yield_surface * p_y; // yield deviatoric stress
+    p = sig_new.trace()/3.0; // p
+    q = getSigEqv(sig_new);   // q
+    get_py_qy_DP(p, q, p_y, q_y, yield_stress);
 
-    /*// TODO checking whether in plasticity
-    if (sig_eqv < q_y)
-    {
-      sig = sig_new;
-      return; // in this case we are in elasticity. dp is left unchanged
-    }*/
+    // TODO checking whether in plasticity
 
     // trying normalizing with the norm of the total vector
-    flow_incr = getFlowIncrementDP(sig_eqv, pressure, q_y, p_y);
-    getFlowTensorDP(sig_new, sig_eqv, flow_tensor);
-
+    flow_incr = getFlowIncrementDP(q, p, q_y, p_y);
+    getFlowTensorDP(sig_new, q, flow_tensor);
     flow_tensor = flow_incr*flow_tensor;
-
     resid = flow_tensor - delta_dp;
-
     err1 = resid.L2norm();
+
     //TODO: do not compute flow tensor if in elasticity
 
+    // Compute plastic strain increment
     while (err1 > tol1  && iter < maxiter) //Stress update iteration (hardness fixed)
     {
       iter++;
-
-      getJacDP(sig_new, E_ijkl, sig_eqv, pressure, p_y, q_y, dr_dsig); //Jacobian = d(residual)/d(sigma)
-
+      
+      //Jacobian = d(residual)/d(sigma)
+      getJacDP(sig_new, E_ijkl, q, p, p_y, q_y, dr_dsig); 
       dr_dsig_inv = dr_dsig.invSymm();
-
       ddsig = -dr_dsig_inv * resid; // Newton Raphson
-
-      sig_new += ddsig; //Update stress
-      pressure = sig_new.trace()/3.0;
-      sig_eqv = getSigEqv(sig_new);
-      p_y = getPressureProjectionDP(pressure, sig_eqv, cohesion);
-      q_y = cohesion + _slope_yield_surface * p_y; // yield deviatoric stress
-
       delta_dp -= E_ijkl.invSymm() * ddsig; //Update increment of plastic rate of deformation tensor
+      sig_new += ddsig; //Update stress
 
-      flow_incr = getFlowIncrementDP(sig_eqv, pressure, q_y, p_y);
+      // Update residual
+      p = sig_new.trace()/3.0;
+      q = getSigEqv(sig_new);
+      get_py_qy_DP(p, q, p_y, q_y, yield_stress);
+      flow_incr = getFlowIncrementDP(q, p, q_y, p_y);
       if (flow_incr < 0.0) //negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment Drucker-Prager: Reduce time increment.");
-      getFlowTensorDP(sig_new, sig_eqv, flow_tensor);
-
+      getFlowTensorDP(sig_new, q, flow_tensor);
       flow_tensor = flow_incr*flow_tensor;
-
       resid = flow_tensor - delta_dp; //Residual
-
       err1=resid.L2norm();
     }
 
@@ -747,132 +732,9 @@ RedbackMechMaterial::returnMapDP(const RankTwoTensor & sig_old, const RankTwoTen
 
     dpn = dp + delta_dp;
     eqvpstrain = std::pow(2.0/3.0, 0.5) * dpn.L2norm();
-
-    cohesion_prev = cohesion;
-    cohesion = getYieldStress(eqvpstrain);
-
-    err3 = std::abs(cohesion-cohesion_prev);
-  }
-
-  if (iterisohard>=maxiterisohard)
-    mooseError("Constitutive Error-Too many iterations in Hardness Update:Reduce time increment.\n"); //Convergence failure
-
-  dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
-  sig = sig_new;
-}
-
-void
-RedbackMechMaterial::returnMapCC(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)
-{
-  RankTwoTensor sig_new, delta_dp, dpn;
-  RankTwoTensor flow_tensor;
-  RankTwoTensor resid,ddsig;
-  RankFourTensor dr_dsig, dr_dsig_inv;
-  Real flow_incr;
-  Real pressure, sig_eqv;
-  Real err1, err3, tol1, tol3;
-  unsigned int iterisohard, iter, maxiterisohard = 20, maxiter = 50;
-  Real eqvpstrain;
-  Real pc, pc_prev, distance_pq;
-  //bool is_plastic;
-
-  tol1 = 1e-10;
-  tol3 = 1e-6;
-
-  iterisohard = 0;
-  eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
-  // User defined yield stress is the cohesion only (evolving with plastic strain)
-  pc = -getYieldStress(eqvpstrain); // pre-consolidation stress (warning: negative!)
-  // _slope_yield_surface is slope "M" of the critical state line
-
-  err3 = 1.1 * tol3;
-
-  _exponential = 1;
-  if (_has_T)
-  {
-    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
-  }
-
-  while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
-  {
-    iterisohard++;
-    iter = 0;
-    delta_dp.zero();
-
-    sig_new = sig_old + E_ijkl * delta_d;
-
-    // Compute distance to current yield surface (line), only valid for associative potential
-    pressure = sig_new.trace()/3.0;
-    sig_eqv = getSigEqv(sig_new);
-    //is_plastic = Ellipse::isPointOutsideOfEllipse(_slope_yield_surface, pc, pressure, sig_eqv);
-    distance_pq = Ellipse::distanceCC(_slope_yield_surface, pc, pressure, sig_eqv, p_y, q_y);
-
-    /*std::cout << "pressure = " << pressure << std::endl;
-    std::cout << "sig_eqv  = " << sig_eqv << std::endl;
-    std::cout << "M        = " << _slope_yield_surface << std::endl;
-    std::cout << "p_c      = " << pc << std::endl<< std::endl;
-    std::cout << "p_y      = " << p_y << std::endl;
-    std::cout << "q_y      = " << q_y << std::endl<< std::endl;*/
-
-    /*// TODO checking whether in plasticity
-    if (sig_eqv < q_y)
-    {
-      sig = sig_new;
-      return; // in this case we are in elasticity. dp is left unchanged
-    }*/
-
-    // trying normalizing with the norm of the total vector
-    flow_incr = getFlowIncrementCC(sig_eqv, pressure, pc, q_y, p_y);
-    getFlowTensorCC(sig_new, pc, pressure, flow_tensor);
-
-    flow_tensor = flow_incr*flow_tensor;
-
-    resid = flow_tensor - delta_dp;
-
-    err1 = resid.L2norm();
-    //std::cout << "first err1=" << err1 <<std::endl;
-    //TODO: do not compute flow tensor if in elasticity
-
-    while (err1 > tol1  && iter < maxiter) //Stress update iteration (hardness fixed)
-    {
-      iter++;
-
-      getJacCC(sig_new, E_ijkl, sig_eqv, pressure, pc, p_y, q_y, dr_dsig); //Jacobian = d(residual)/d(sigma)
-
-      dr_dsig_inv = dr_dsig.invSymm();
-
-      ddsig = -dr_dsig_inv * resid; // Newton Raphson
-
-      sig_new += ddsig; //Update stress
-      pressure = sig_new.trace()/3.0;
-      sig_eqv = getSigEqv(sig_new);
-      distance_pq = Ellipse::distanceCC(_slope_yield_surface, pc, pressure, sig_eqv, p_y, q_y);
-
-      delta_dp -= E_ijkl.invSymm() * ddsig; //Update increment of plastic rate of deformation tensor
-
-      flow_incr = getFlowIncrementCC(sig_eqv, pressure, pc, q_y, p_y);
-      if (flow_incr < 0.0) //negative flow increment not allowed
-        mooseError("Constitutive Error-Negative flow increment Drucker-Prager: Reduce time increment.");
-      getFlowTensorCC(sig_new, pc, pressure, flow_tensor);
-
-      flow_tensor = flow_incr*flow_tensor;
-
-      resid = flow_tensor - delta_dp; //Residual
-
-      err1=resid.L2norm();
-      //std::cout << "err1=" << err1<< " at iter=" << iter <<std::endl;
-    }
-    //std::cout << "err1=" << err1<< " at iter=" << iter <<std::endl;
-    if (iter>=maxiter)//Convergence failure
-      mooseError("Constitutive Error-Too many iterations: Reduce time increment.\n"); //Convergence failure
-
-    dpn = dp + delta_dp;
-    eqvpstrain = std::pow(2.0/3.0, 0.5) * dpn.L2norm();
-
-    pc_prev = pc;
-    pc = -getYieldStress(eqvpstrain); // pre-consolidation stress (warning: negative!)
-
-    err3 = std::abs(pc-pc_prev);
+    yield_stress_prev = yield_stress;
+    yield_stress = getYieldStress(eqvpstrain);
+    err3 = std::abs(yield_stress - yield_stress_prev);
   }
 
   if (iterisohard>=maxiterisohard)
@@ -931,7 +793,8 @@ RedbackMechMaterial::getFlowTensorCC(const RankTwoTensor & sig, Real pc, Real pr
 }
 
 /**
- * Compute the flow incrmement for modified Cam-Clay
+ * Compute the flow incrmement for modified Cam-clay
+ * pc ... pre-consolidation pressure (pc = -getYieldStress(eqvpstrain))
  */
 Real
 RedbackMechMaterial::getFlowIncrementCC(Real sig_eqv, Real pressure, Real pc, Real q_yield_stress, Real p_yield_stress)
@@ -952,9 +815,12 @@ RedbackMechMaterial::getFlowIncrementCC(Real sig_eqv, Real pressure, Real pc, Re
 Real
 RedbackMechMaterial::getFlowIncrementDP(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress)
 {
-  Real flow_incr_vol = _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
+  Real flow_incr_vol = _ref_pe_rate * _dt * 
+      std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
   // TODO: q_yield_stress can be 0, we should handle that case properly...
-  Real flow_incr_dev = _ref_pe_rate * _dt * std::pow(macaulayBracket((q_yield_stress > 0 ? 1:-1)*(sig_eqv / q_yield_stress - 1.0)), _exponent)* _exponential; //(q_yield_stress > 0 ? 1:-1) is the sign function
+  Real flow_incr_dev = _ref_pe_rate * _dt * std::pow(macaulayBracket((q_yield_stress > 0 ? 1:-1)*
+              (sig_eqv / q_yield_stress - 1.0)), _exponent)* _exponential; 
+              //(q_yield_stress > 0 ? 1:-1) is the sign function
   return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
   // TODO: change the formula to use dist_pq^m
 }
@@ -1166,4 +1032,110 @@ RedbackMechMaterial::getJacCC(const RankTwoTensor & sig, const RankFourTensor & 
   //TODO: check if the previous two lines (i.e normalizing the flow vector) should be activated or not. Currently we are using the non-unitary flow vector
 
   dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr + dfi_dsig; //Jacobian
+}
+
+void
+RedbackMechMaterial::returnMapCC(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)
+{
+  RankTwoTensor sig_new, delta_dp, dpn;
+  RankTwoTensor flow_tensor;
+  RankTwoTensor resid, ddsig;
+  RankFourTensor dr_dsig, dr_dsig_inv;
+  Real flow_incr;
+  Real p, q;
+  Real err1, err3, tol1, tol3;
+  unsigned int iterisohard, iter, maxiterisohard = 20, maxiter = 50;
+  Real eqvpstrain;
+  Real yield_stress, yield_stress_prev;
+  //bool is_plastic;
+
+  tol1 = 1e-10;
+  tol3 = 1e-6;
+  err3 = 1.1 * tol3;
+  iterisohard = 0;
+
+  eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
+  yield_stress = getYieldStress(eqvpstrain);
+
+  _exponential = 1;
+  if (_has_T)
+  {
+    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
+  }
+
+  while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
+  {
+    iterisohard++;
+    iter = 0;
+    delta_dp.zero();
+
+    // Elastic guess
+    sig_new = sig_old + E_ijkl * delta_d;
+// Compute distance to current yield surface (line), only valid for associative potential
+    p = sig_new.trace()/3.0;
+    q = getSigEqv(sig_new);
+    get_py_qy(p, q, p_y, q_y, -yield_stress);
+
+    // TODO checking whether in plasticity
+
+    // trying normalizing with the norm of the total vector
+    flow_incr = getFlowIncrementCC(q, p, -yield_stress, q_y, p_y);
+    getFlowTensorCC(sig_new, -yield_stress, p, flow_tensor);
+    flow_tensor = flow_incr*flow_tensor;
+    resid = flow_tensor - delta_dp;
+    err1 = resid.L2norm();
+    //TODO: do not compute flow tensor if in elasticity
+
+    // Compute plastic strain increment
+    while (err1 > tol1  && iter < maxiter) //Stress update iteration (hardness fixed)
+    {
+      iter++;
+
+      //Jacobian = d(residual)/d(sigma)
+      getJacCC(sig_new, E_ijkl, q, p, -yield_stress, p_y, q_y, dr_dsig); 
+      dr_dsig_inv = dr_dsig.invSymm();
+      ddsig = -dr_dsig_inv * resid; // Newton Raphson
+      delta_dp -= E_ijkl.invSymm() * ddsig; //Update increment of plastic rate of deformation tensor
+      sig_new += ddsig; //Update stress
+
+      // Update residual
+      p = sig_new.trace()/3.0;
+      q = getSigEqv(sig_new);
+      get_py_qy(p, q, p_y, q_y, -yield_stress);
+      flow_incr = getFlowIncrementCC(q, p, -yield_stress, q_y, p_y);
+      if (flow_incr < 0.0) //negative flow increment not allowed
+        mooseError("Constitutive Error-Negative flow increment Drucker-Prager: Reduce time increment.");
+      getFlowTensorCC(sig_new, -yield_stress, p, flow_tensor);
+      flow_tensor = flow_incr*flow_tensor;
+      resid = flow_tensor - delta_dp; //Residual
+      err1=resid.L2norm();
+    }
+    if (iter>=maxiter)//Convergence failure
+      mooseError("Constitutive Error-Too many iterations: Reduce time increment.\n"); //Convergence failure
+
+    dpn = dp + delta_dp;
+    eqvpstrain = std::pow(2.0/3.0, 0.5) * dpn.L2norm();
+    yield_stress_prev = yield_stress;
+    yield_stress = getYieldStress(eqvpstrain); // pre-consolidation stress (warning: negative!)
+    err3 = std::abs(yield_stress-yield_stress_prev);
+  }
+
+  if (iterisohard>=maxiterisohard)
+    mooseError("Constitutive Error-Too many iterations in Hardness Update:Reduce time increment.\n"); //Convergence failure
+
+  dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
+  sig = sig_new;
+}
+
+void
+RedbackMechMaterial::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real pc)
+{
+    Ellipse::distanceCC(_slope_yield_surface, pc, p, q, p_y, q_y);
+}
+
+void
+RedbackMechMaterial::get_py_qy_DP(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+{
+    p_y = getPressureProjectionDP(p /*p*/, q /*q*/, yield_stress/*yield stress*/);
+    q_y = yield_stress + _slope_yield_surface * p_y; // yield deviatoric stress
 }

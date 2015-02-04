@@ -149,7 +149,7 @@ Ellipse::sqrDistance(Real const e[2], Real const y[2], Real x[2])
   return sqr_distance;
 }
 
-Real
+void
 Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1)
 {
   Real e[2]; // ellipse axes
@@ -164,7 +164,6 @@ Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, 
   // Shift coordinates back to real space
   x0 = x[0] + p_c/2.0;
   x1 = x[1];
-  return sqrt(d);
 }
 
 bool
