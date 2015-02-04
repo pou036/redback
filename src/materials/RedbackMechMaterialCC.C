@@ -40,7 +40,7 @@ RedbackMechMaterialCC::RedbackMechMaterialCC(const std::string & name, InputPara
  * Get unitary flow tensor in deviatoric direction, modified Cam-Clay
  */
 void
-RedbackMechMaterialCC::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real pc, RankTwoTensor & flow_tensor)
+RedbackMechMaterialCC::getFlowTensorCC(const RankTwoTensor & sig, Real q, Real p, Real pc, RankTwoTensor & flow_tensor)
 {
   if (pc > 0) pc *= -1;
 
@@ -55,7 +55,7 @@ RedbackMechMaterialCC::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, 
  * pc ... pre-consolidation pressure (pc = -getYieldStress(eqvpstrain))
  */
 Real
-RedbackMechMaterialCC::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real pc)
+RedbackMechMaterialCC::getFlowIncrementCC(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real pc)
 {
   pc *= -1;
   if (Ellipse::isPointOutsideOfEllipse(/*m=*/_slope_yield_surface, /*p_c=*/pc, /*x=*/pressure, /*y=*/sig_eqv))
@@ -69,7 +69,7 @@ RedbackMechMaterialCC::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yiel
 }
 
 Real
-RedbackMechMaterialCC::getDerivativeFlowIncrement(const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
+RedbackMechMaterialCC::getDerivativeFlowIncrementCC(const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
 {
   if (Ellipse::isPointOutsideOfEllipse(/*m=*/_slope_yield_surface, /*p_c=*/pc, /*x=*/pressure, /*y=*/sig_eqv))
   {
@@ -85,7 +85,7 @@ RedbackMechMaterialCC::getDerivativeFlowIncrement(const RankTwoTensor & sig, Rea
 }
 
 void
-RedbackMechMaterialCC::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr,
+RedbackMechMaterialCC::getJacCC(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr,
     Real sig_eqv, Real pressure, Real p_yield_stress, Real q_yield_stress, Real pc,
     RankFourTensor & dresid_dsig)
 {
@@ -100,8 +100,8 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig, const RankFourTensor & 
 
   sig_dev = sig.deviatoric();
 
-  dfi_dseqv = getDerivativeFlowIncrement(sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress);
-  getFlowTensor(sig, sig_eqv, pressure, pc, flow_dirn); 
+  dfi_dseqv = getDerivativeFlowIncrementCC(sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress);
+  getFlowTensorCC(sig, sig_eqv, pressure, pc, flow_dirn); 
 
   /* The following calculates the tensorial derivative (Jacobian) of the residual with respect to stress, dr_dsig
    * It consists of two terms: The first is
@@ -181,13 +181,13 @@ RedbackMechMaterialCC::returnMap(const RankTwoTensor & sig_old, const RankTwoTen
 // Compute distance to current yield surface (line), only valid for associative potential
     p = sig_new.trace()/3.0;
     q = getSigEqv(sig_new);
-    get_py_qy(p, q, p_y, q_y, yield_stress);
+    get_py_qyCC(p, q, p_y, q_y, yield_stress);
 
     // TODO checking whether in plasticity
 
     // trying normalizing with the norm of the total vector
-    flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
-    getFlowTensor(sig_new, q, p, yield_stress, flow_tensor); 
+    flow_incr = getFlowIncrementCC(q, p, q_y, p_y, yield_stress);
+    getFlowTensorCC(sig_new, q, p, yield_stress, flow_tensor); 
     flow_tensor *= flow_incr;
     resid = flow_tensor - delta_dp;
     err1 = resid.L2norm();
@@ -199,7 +199,7 @@ RedbackMechMaterialCC::returnMap(const RankTwoTensor & sig_old, const RankTwoTen
       iter++;
 
       //Jacobian = d(residual)/d(sigma)
-      getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig); 
+      getJacCC(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig); 
       dr_dsig_inv = dr_dsig.invSymm();
       ddsig = -dr_dsig_inv * resid; // Newton Raphson
       delta_dp -= E_ijkl.invSymm() * ddsig; //Update increment of plastic rate of deformation tensor
@@ -208,11 +208,11 @@ RedbackMechMaterialCC::returnMap(const RankTwoTensor & sig_old, const RankTwoTen
       // Update residual
       p = sig_new.trace()/3.0;
       q = getSigEqv(sig_new);
-      get_py_qy(p, q, p_y, q_y, yield_stress);
-      flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
+      get_py_qyCC(p, q, p_y, q_y, yield_stress);
+      flow_incr = getFlowIncrementCC(q, p, q_y, p_y, yield_stress);
       if (flow_incr < 0.0) //negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment Drucker-Prager: Reduce time increment.");
-      getFlowTensor(sig_new, q, p, yield_stress, flow_tensor); 
+      getFlowTensorCC(sig_new, q, p, yield_stress, flow_tensor); 
       flow_tensor *= flow_incr;
       resid = flow_tensor - delta_dp; //Residual
       err1=resid.L2norm();
@@ -235,7 +235,7 @@ RedbackMechMaterialCC::returnMap(const RankTwoTensor & sig_old, const RankTwoTen
 }
 
 void
-RedbackMechMaterialCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterialCC::get_py_qyCC(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
 {
     Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y);
 }

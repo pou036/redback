@@ -32,12 +32,12 @@ protected:
   Real _slope_yield_surface;  // coefficient for yield surface
 
   virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-  void getJac(const RankTwoTensor &, const RankFourTensor &, 
+  void getJacCC(const RankTwoTensor &, const RankFourTensor &, 
           Real, Real, Real, Real, Real, Real, RankFourTensor &);
-  void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
-  Real getFlowIncrement(Real, Real, Real, Real, Real);
-  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real);
-  void get_py_qy(Real, Real, Real &, Real &, Real);
+  void getFlowTensorCC(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
+  Real getFlowIncrementCC(Real, Real, Real, Real, Real);
+  Real getDerivativeFlowIncrementCC(const RankTwoTensor &, Real, Real, Real, Real, Real);
+  void get_py_qyCC(Real, Real, Real &, Real &, Real);
 };
 
 #endif //REDBACKMECHMATERIALCC_H

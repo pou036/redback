@@ -33,12 +33,12 @@ protected:
 
   virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
   Real getPressureProjectionDP(Real, Real, Real);
-  void getJac(const RankTwoTensor &, const RankFourTensor &, 
+  void getJacDP(const RankTwoTensor &, const RankFourTensor &, 
           Real, Real, Real, Real, Real, Real, RankFourTensor &);
-  void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
-  Real getFlowIncrement(Real, Real, Real, Real, Real);
-  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real);
-  void get_py_qy(Real, Real, Real &, Real &, Real);
+  void getFlowTensorDP(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
+  Real getFlowIncrementDP(Real, Real, Real, Real, Real);
+  Real getDerivativeFlowIncrementDP(const RankTwoTensor &, Real, Real, Real, Real);
+  void get_py_qyDP(Real, Real, Real &, Real &, Real);
 
 };
 

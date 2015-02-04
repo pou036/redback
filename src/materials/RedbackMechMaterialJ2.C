@@ -66,12 +66,12 @@ RedbackMechMaterialJ2::returnMap(const RankTwoTensor & sig_old, const RankTwoTen
 // Compute distance to current yield surface (line), only valid for associative potential
     p = sig_new.trace()/3.0;
     q = getSigEqv(sig_new);
-    get_py_qy(p, q, p_y, q_y, yield_stress);
+    get_py_qyJ2(p, q, p_y, q_y, yield_stress);
 
     //TODO: checking whether in plasticity
 
-    flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
-    getFlowTensor(sig_new, q, p, yield_stress, flow_tensor); 
+    flow_incr = getFlowIncrementJ2(q, p, q_y, p_y, yield_stress);
+    getFlowTensorJ2(sig_new, q, p, yield_stress, flow_tensor); 
     flow_tensor *= flow_incr;
     resid = flow_tensor - delta_dp;
     err1 = resid.L2norm();
@@ -82,7 +82,7 @@ RedbackMechMaterialJ2::returnMap(const RankTwoTensor & sig_old, const RankTwoTen
       iter++;
       
       //Jacobian = d(residual)/d(sigma)
-      getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig); 
+      getJacJ2(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig); 
       dr_dsig_inv = dr_dsig.invSymm();
       ddsig = -dr_dsig_inv * resid; // Newton Raphson
       delta_dp -= E_ijkl.invSymm() * ddsig; //Update increment of plastic rate of deformation tensor
@@ -91,11 +91,11 @@ RedbackMechMaterialJ2::returnMap(const RankTwoTensor & sig_old, const RankTwoTen
       // Update residual
       p = sig_new.trace()/3.0;
       q = getSigEqv(sig_new);
-      get_py_qy(p, q, p_y, q_y, yield_stress);
-      flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
+      get_py_qyJ2(p, q, p_y, q_y, yield_stress);
+      flow_incr = getFlowIncrementJ2(q, p, q_y, p_y, yield_stress);
       if (flow_incr < 0.0) //negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment: Reduce time increment.");
-      getFlowTensor(sig_new, q, p, yield_stress, flow_tensor); 
+      getFlowTensorJ2(sig_new, q, p, yield_stress, flow_tensor); 
       flow_tensor *= flow_incr;
       resid = flow_tensor - delta_dp; //Residual
       err1=resid.L2norm();
@@ -121,7 +121,7 @@ RedbackMechMaterialJ2::returnMap(const RankTwoTensor & sig_old, const RankTwoTen
  * Get unitary flow tensor in deviatoric direction, J2 plasticity. It only has a deviatoric part
  */
 void
-RedbackMechMaterialJ2::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor_dev)
+RedbackMechMaterialJ2::getFlowTensorJ2(const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor_dev)
 {
   RankTwoTensor sig_dev;
   Real val;
@@ -137,7 +137,7 @@ RedbackMechMaterialJ2::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, 
 
 
 Real
-RedbackMechMaterialJ2::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real yield_stress)
+RedbackMechMaterialJ2::getFlowIncrementJ2(Real sig_eqv, Real p, Real q_y, Real p_y, Real yield_stress)
 {
   return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) * 
       _exponential;
@@ -147,7 +147,7 @@ RedbackMechMaterialJ2::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y
  * Derivative of getFlowIncrement with respect to equivalent stress, only has deviatoric component in J2 plasiticity
  */
 Real
-RedbackMechMaterialJ2::getDerivativeFlowIncrement(const RankTwoTensor & sig, Real yield_stress)
+RedbackMechMaterialJ2::getDerivativeFlowIncrementJ2(const RankTwoTensor & sig, Real yield_stress)
 {
   // Derivative of getFlowIncrement with respect to equivalent stress
   return _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
@@ -155,7 +155,7 @@ RedbackMechMaterialJ2::getDerivativeFlowIncrement(const RankTwoTensor & sig, Rea
 
 //Jacobian for stress update algorithm
 void
-RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr_dev,
+RedbackMechMaterialJ2::getJacJ2(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr_dev,
         Real q, Real p, Real p_y, Real q_y, Real yield_stress, RankFourTensor & dresid_dsig)
 {
   unsigned i, j, k ,l;
@@ -169,8 +169,8 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig, const RankFourTensor & 
   sig_dev = sig.deviatoric();
   sig_eqv = getSigEqv(sig);
 
-  getFlowTensor(sig, q, p, yield_stress, flow_dirn_dev); 
-  dfi_dseqv_dev = getDerivativeFlowIncrement(sig, yield_stress);
+  getFlowTensorJ2(sig, q, p, yield_stress, flow_dirn_dev); 
+  dfi_dseqv_dev = getDerivativeFlowIncrementJ2(sig, yield_stress);
 
   for (i = 0; i < 3; ++i)
     for (j = 0; j < 3; ++j)
@@ -200,7 +200,7 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig, const RankFourTensor & 
 }
 
 void
-RedbackMechMaterialJ2::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterialJ2::get_py_qyJ2(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
 {
   p_y = p;
   q_y = yield_stress;

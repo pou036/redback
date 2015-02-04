@@ -472,11 +472,12 @@ RedbackMechMaterial::returnMapElasticity(const RankTwoTensor & sig_old, const Ra
   dp = RankTwoTensor(); //Plastic rate of deformation tensor in unrotated configuration
 }
 
-//void
-//RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)
-//{
-//  if (_yield_criterion == elasticity)
-//    returnMapElasticity(sig_old, delta_d, E_ijkl, dp, sig);
+void
+RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)
+{
+  if (_yield_criterion == elasticity)
+    returnMapElasticity(sig_old, delta_d, E_ijkl, dp, sig);
+}
 //
 //  RankTwoTensor sig_new, delta_dp, dpn;
 //  RankTwoTensor flow_tensor;

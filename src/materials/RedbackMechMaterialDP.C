@@ -96,13 +96,13 @@ RedbackMechMaterialDP::returnMap(const RankTwoTensor & sig_old, const RankTwoTen
     // Compute distance to current yield surface (line), only valid for associative potential
     p = sig_new.trace()/3.0; // p
     q = getSigEqv(sig_new);  // q
-    get_py_qy(p, q, p_y, q_y, yield_stress);
+    get_py_qyDP(p, q, p_y, q_y, yield_stress);
 
     // TODO checking whether in plasticity
 
     // trying normalizing with the norm of the total vector
-    flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
-    getFlowTensor(sig_new, q, p, yield_stress, flow_tensor); 
+    flow_incr = getFlowIncrementDP(q, p, q_y, p_y, yield_stress);
+    getFlowTensorDP(sig_new, q, p, yield_stress, flow_tensor); 
     flow_tensor *= flow_incr;
     resid = flow_tensor - delta_dp;
     err1 = resid.L2norm();
@@ -115,7 +115,7 @@ RedbackMechMaterialDP::returnMap(const RankTwoTensor & sig_old, const RankTwoTen
       iter++;
       
       //Jacobian = d(residual)/d(sigma)
-      getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig); 
+      getJacDP(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig); 
       dr_dsig_inv = dr_dsig.invSymm();
       ddsig = -dr_dsig_inv * resid; // Newton Raphson
       delta_dp -= E_ijkl.invSymm() * ddsig; //Update increment of plastic rate of deformation tensor
@@ -124,11 +124,11 @@ RedbackMechMaterialDP::returnMap(const RankTwoTensor & sig_old, const RankTwoTen
       // Update residual
       p = sig_new.trace()/3.0;
       q = getSigEqv(sig_new);
-      get_py_qy(p, q, p_y, q_y, yield_stress);
-      flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
+      get_py_qyDP(p, q, p_y, q_y, yield_stress);
+      flow_incr = getFlowIncrementDP(q, p, q_y, p_y, yield_stress);
       if (flow_incr < 0.0) //negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment Drucker-Prager: Reduce time increment.");
-      getFlowTensor(sig_new, q, p, yield_stress, flow_tensor); 
+      getFlowTensorDP(sig_new, q, p, yield_stress, flow_tensor); 
       flow_tensor *= flow_incr;
       resid = flow_tensor - delta_dp; //Residual
       err1=resid.L2norm();
@@ -152,7 +152,7 @@ RedbackMechMaterialDP::returnMap(const RankTwoTensor & sig_old, const RankTwoTen
 }
 
 void
-RedbackMechMaterialDP::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor)
+RedbackMechMaterialDP::getFlowTensorDP(const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor)
 {
   RankTwoTensor sig_dev;
   Real val;
@@ -171,7 +171,7 @@ RedbackMechMaterialDP::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, 
  * Compute flow increment for Drucker-Prager case
  */
 Real
-RedbackMechMaterialDP::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real yield_stress)
+RedbackMechMaterialDP::getFlowIncrementDP(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real yield_stress)
 {
   Real flow_incr_vol = _ref_pe_rate * _dt * 
       std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
@@ -184,7 +184,7 @@ RedbackMechMaterialDP::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yiel
 }
 
 Real
-RedbackMechMaterialDP::getDerivativeFlowIncrement(const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real q_yield_stress, Real p_yield_stress)
+RedbackMechMaterialDP::getDerivativeFlowIncrementDP(const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real q_yield_stress, Real p_yield_stress)
 {
   Real delta_lambda_p = _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
   Real delta_lambda_q = _ref_pe_rate * _dt * std::pow(macaulayBracket((q_yield_stress > 0 ? 1:-1)*(sig_eqv / q_yield_stress - 1.0)), _exponent) * _exponential;
@@ -196,7 +196,7 @@ RedbackMechMaterialDP::getDerivativeFlowIncrement(const RankTwoTensor & sig, Rea
 
 
 void
-RedbackMechMaterialDP::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr,
+RedbackMechMaterialDP::getJacDP(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr,
     Real sig_eqv, Real pressure, Real p_yield_stress, Real q_yield_stress, Real yield_stress,
     RankFourTensor & dresid_dsig)
 {
@@ -209,8 +209,8 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig, const RankFourTensor & 
 
   sig_dev = sig.deviatoric();
 
-  dfi_dseqv = getDerivativeFlowIncrement(sig, pressure, sig_eqv, q_yield_stress, p_yield_stress);
-  getFlowTensor(sig, sig_eqv, pressure, yield_stress, flow_dirn); 
+  dfi_dseqv = getDerivativeFlowIncrementDP(sig, pressure, sig_eqv, q_yield_stress, p_yield_stress);
+  getFlowTensorDP(sig, sig_eqv, pressure, yield_stress, flow_dirn); 
 
   /* The following calculates the tensorial derivative (Jacobian) of the residual with respect to stress, dr_dsig
    * It consists of two terms: The first is
@@ -256,7 +256,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig, const RankFourTensor & 
 }
 
 void
-RedbackMechMaterialDP::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterialDP::get_py_qyDP(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
 {
     p_y = getPressureProjectionDP(p /*p*/, q /*q*/, yield_stress/*yield stress*/);
     q_y = yield_stress + _slope_yield_surface * p_y; // yield deviatoric stress

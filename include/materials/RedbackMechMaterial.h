@@ -112,11 +112,11 @@ protected:
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
   virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
   virtual void returnMapElasticity(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
-  virtual void getJac(const RankTwoTensor &, const RankFourTensor &, 
-          Real, Real, Real, Real, Real, Real, RankFourTensor &);
-  virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
-  virtual Real getFlowIncrement(Real, Real, Real, Real, Real);
-  virtual void get_py_qy(Real, Real, Real &, Real &, Real);
+  //virtual void getJac(const RankTwoTensor &, const RankFourTensor &, 
+  //        Real, Real, Real, Real, Real, Real, RankFourTensor &);
+  //virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
+  //virtual Real getFlowIncrement(Real, Real, Real, Real, Real);
+  //virtual void get_py_qy(Real, Real, Real &, Real &, Real);
 
   Real _ref_pe_rate;
   Real _exponent;
