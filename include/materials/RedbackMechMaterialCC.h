@@ -29,10 +29,10 @@ public:
   RedbackMechMaterialCC(const std::string & name, InputParameters parameters);
 
 protected:
+  Real _slope_yield_surface;  // coefficient for yield surface
 
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
   virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-  //void getStressProjectionsCC(Real, Real, Real, Real, Real &, Real &);
   void getJacCC(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, RankFourTensor &);
   void getFlowTensorCC(const RankTwoTensor &, Real, Real, RankTwoTensor &);
   Real getFlowIncrementCC(Real, Real, Real, Real, Real);

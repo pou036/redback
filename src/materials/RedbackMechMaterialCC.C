@@ -20,11 +20,18 @@ template<>
 InputParameters validParams<RedbackMechMaterialCC>()
 {
   InputParameters params = validParams<RedbackMechMaterial>();
+  //TODO: Check sign of slope_yield_surface
+  //  if (_slope_yield_surface == 0)
+  //    mooseError("modified Cam-Clay cannot deal with 0 CSL slope ('slope_yield_surface')");
+  //  if (getYieldStress(0) <= 0)
+  //    mooseError("modified Cam-Clay cannot deal with negative pre-consolidation stress ('yield_stress')");
+  params.addParam<Real>("slope_yield_surface", 0,"Slope of yield surface (positive, see documentation)");
   return params;
 }
 
 RedbackMechMaterialCC::RedbackMechMaterialCC(const std::string & name, InputParameters parameters) :
-  RedbackMechMaterial(name, parameters)
+  RedbackMechMaterial(name, parameters),
+  _slope_yield_surface(getParam<Real>("slope_yield_surface"))
 {
   _Cijkl.fillFromInputVector(_Cijkl_vector, _fill_method);
 }

@@ -29,6 +29,8 @@ public:
   RedbackMechMaterialDP(const std::string & name, InputParameters parameters);
 
 protected:
+  Real _slope_yield_surface;  // coefficient for yield surface
+
   virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
   Real getPressureProjectionDP(Real, Real, Real);
   void getJacDP(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, RankFourTensor &);

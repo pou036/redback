@@ -18,11 +18,14 @@ template<>
 InputParameters validParams<RedbackMechMaterialDP>()
 {
   InputParameters params = validParams<RedbackMechMaterial>();
+  // TODO: deal with sign of _slope_yield_surface properly in DP case
+  params.addParam< Real >("slope_yield_surface", 0,"Slope of yield surface (positive, see documentation)");
   return params;
 }
 
 RedbackMechMaterialDP::RedbackMechMaterialDP(const std::string & name, InputParameters parameters) :
-  RedbackMechMaterial(name, parameters)
+  RedbackMechMaterial(name, parameters),
+  _slope_yield_surface(getParam<Real>("slope_yield_surface"))
 {
   _Cijkl.fillFromInputVector(_Cijkl_vector, _fill_method);
 }

@@ -59,7 +59,7 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
   params.addParam<MooseEnum>("yield_criterion", RedbackMechMaterial::yieldCriterionEnum() = "J2_plasticity", "Yield criterion");
-  params.addParam< Real >("slope_yield_surface", 0,"Slope of yield surface (positive, see documentation)");
+  //params.addParam< Real >("slope_yield_surface", 0,"Slope of yield surface (positive, see documentation)");
   params.addParam< Real >("mixture_compressibility", 1,"Compressibility of the rock+fluid mixture");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
 
@@ -115,7 +115,7 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _mixture_compressibility_param(getParam<Real>("mixture_compressibility")),
   _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
   _yield_criterion((YieldCriterion)(int)getParam<MooseEnum>("yield_criterion")),
-  _slope_yield_surface(getParam<Real>("slope_yield_surface")),
+  //_slope_yield_surface(getParam<Real>("slope_yield_surface")),
   //_dispx_dot(coupledDot("disp_x")),
   //_dispy_dot(coupledDot("disp_y")),
   //_dispz_dot(coupledDot("disp_z"))
@@ -172,17 +172,17 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mixture_compressibility[_qp] = _mixture_compressibility_param;
 
   // TODO: deal with sign of _slope_yield_surface properly in DP case
-  switch (_yield_criterion)
-  {
-  case modified_Cam_Clay:
-    if (_slope_yield_surface == 0)
-      mooseError("modified Cam-Clay cannot deal with 0 CSL slope ('slope_yield_surface')");
-    if (getYieldStress(0) <= 0)
-      mooseError("modified Cam-Clay cannot deal with negative pre-consolidation stress ('yield_stress')");
-    break;
-  default:
-    ;
-  }
+  //switch (_yield_criterion)
+  //{
+  //case modified_Cam_Clay:
+  //  if (_slope_yield_surface == 0)
+  //    mooseError("modified Cam-Clay cannot deal with 0 CSL slope ('slope_yield_surface')");
+  //  if (getYieldStress(0) <= 0)
+  //    mooseError("modified Cam-Clay cannot deal with negative pre-consolidation stress ('yield_stress')");
+  //  break;
+  //default:
+  //  ;
+  //}
 }
 
 void
