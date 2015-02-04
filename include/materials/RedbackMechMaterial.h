@@ -139,6 +139,7 @@ protected:
 
   void get_py_qy(Real, Real, Real &, Real &, Real);
   void get_py_qy_DP(Real, Real, Real &, Real &, Real);
+  void get_py_qy_J2(Real, Real, Real &, Real &, Real);
 
   Real _ref_pe_rate;
   Real _exponent;

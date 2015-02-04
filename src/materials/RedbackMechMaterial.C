@@ -530,9 +530,10 @@ RedbackMechMaterial::returnMapJ2(const RankTwoTensor & sig_old, const RankTwoTen
 {
   RankTwoTensor sig_new, delta_dp, dpn;
   RankTwoTensor flow_tensor;
-  RankTwoTensor resid,ddsig;
+  RankTwoTensor resid, ddsig;
   RankFourTensor dr_dsig, dr_dsig_inv;
-  Real flow_incr_dev;
+  Real flow_incr;
+  Real p, q;
   Real err1, err3, tol1, tol3;
   unsigned int iterisohard, iter, maxiterisohard = 20, maxiter = 50;
   Real eqvpstrain;
@@ -540,21 +541,11 @@ RedbackMechMaterial::returnMapJ2(const RankTwoTensor & sig_old, const RankTwoTen
 
   tol1 = 1e-15; // TODO: expose to user interface and/or make the tolerance relative
   tol3 = 1e-10; // TODO: expose to user interface and/or make the tolerance relative
-
+  err3 = 1.1 * tol3;
   iterisohard = 0;
+
   eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
   yield_stress = getYieldStress(eqvpstrain);
-
-  //TODO: checking whether in plasticity
-  /*if (getSigEqv(sig_old) < yield_stress)
-  {
-    sig = sig_old;
-    p_y = 1e99; // irrelevant (no plasticity)
-    q_y = 1e99; // irrelevant (no plasticity)
-    return; // in this case we are in elasticity. dp is left unchanged
-  }*/
-
-  err3 = 1.1 * tol3;
 
   _exponential = 1;
   if (_has_T)
@@ -568,49 +559,52 @@ RedbackMechMaterial::returnMapJ2(const RankTwoTensor & sig_old, const RankTwoTen
     iter = 0;
     delta_dp.zero();
 
+    // Elastic guess
     sig_new = sig_old + E_ijkl * delta_d;
+// Compute distance to current yield surface (line), only valid for associative potential
+    p = sig_new.trace()/3.0;
+    q = getSigEqv(sig_new);
+    get_py_qy_J2(p, q, p_y, q_y, yield_stress);
 
-    flow_incr_dev = getFlowIncrementJ2(sig_new, yield_stress);
-    getFlowTensorJ2(sig_new, yield_stress, flow_tensor); // flow increment and flow direction combined
-    flow_tensor *= flow_incr_dev;
+    //TODO: checking whether in plasticity
 
+    flow_incr = getFlowIncrementJ2(sig_new, yield_stress);
+    getFlowTensorJ2(sig_new, yield_stress, flow_tensor); 
+    flow_tensor *= flow_incr;
     resid = flow_tensor - delta_dp;
-
     err1 = resid.L2norm();
+    //TODO: do not compute flow tensor if in elasticity
 
     while (err1 > tol1  && iter < maxiter) //Stress update iteration (hardness fixed)
     {
       iter++;
-
-      getJacJ2(sig_new, E_ijkl, flow_incr_dev, yield_stress, dr_dsig); //Jacobian = d(residual)/d(sigma)
-
+      
+      //Jacobian = d(residual)/d(sigma)
+      getJacJ2(sig_new, E_ijkl, flow_incr, yield_stress, dr_dsig); 
       dr_dsig_inv = dr_dsig.invSymm();
-
       ddsig = -dr_dsig_inv * resid; // Newton Raphson
-
-      sig_new += ddsig; //Update stress
       delta_dp -= E_ijkl.invSymm() * ddsig; //Update increment of plastic rate of deformation tensor
+      sig_new += ddsig; //Update stress
 
-      flow_incr_dev = getFlowIncrementJ2(sig_new, yield_stress);
-      if (flow_incr_dev < 0.0) //negative flow increment not allowed
+      // Update residual
+      p = sig_new.trace()/3.0;
+      q = getSigEqv(sig_new);
+      get_py_qy_J2(p, q, p_y, q_y, yield_stress);
+      flow_incr = getFlowIncrementJ2(sig_new, yield_stress);
+      if (flow_incr < 0.0) //negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment: Reduce time increment.");
-      //TODO: check if we need to update the flow tensor
       getFlowTensorJ2(sig_new, yield_stress, flow_tensor); // flow increment and flow direction combined
-      flow_tensor *= flow_incr_dev;
-
+      flow_tensor *= flow_incr;
       resid = flow_tensor - delta_dp; //Residual
       err1=resid.L2norm();
     }
-
     if (iter>=maxiter)//Convergence failure
       mooseError("Constitutive Error-Too many iterations: Reduce time increment.\n"); //Convergence failure //TODO: check the adaptive time stepping
 
     dpn = dp + delta_dp;
     eqvpstrain = std::pow(2.0/3.0, 0.5) * dpn.L2norm();
-
     yield_stress_prev = yield_stress;
     yield_stress = getYieldStress(eqvpstrain);
-
     err3 = std::abs(yield_stress-yield_stress_prev);
   }
 
@@ -619,8 +613,6 @@ RedbackMechMaterial::returnMapJ2(const RankTwoTensor & sig_old, const RankTwoTen
 
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
-  q_y = yield_stress;
-  p_y = sig.trace()/3.0;
 }
 
 /**
@@ -696,7 +688,7 @@ RedbackMechMaterial::returnMapDP(const RankTwoTensor & sig_old, const RankTwoTen
     // trying normalizing with the norm of the total vector
     flow_incr = getFlowIncrementDP(q, p, q_y, p_y);
     getFlowTensorDP(sig_new, q, flow_tensor);
-    flow_tensor = flow_incr*flow_tensor;
+    flow_tensor *= flow_incr;
     resid = flow_tensor - delta_dp;
     err1 = resid.L2norm();
 
@@ -722,7 +714,7 @@ RedbackMechMaterial::returnMapDP(const RankTwoTensor & sig_old, const RankTwoTen
       if (flow_incr < 0.0) //negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment Drucker-Prager: Reduce time increment.");
       getFlowTensorDP(sig_new, q, flow_tensor);
-      flow_tensor = flow_incr*flow_tensor;
+      flow_tensor *= flow_incr;
       resid = flow_tensor - delta_dp; //Residual
       err1=resid.L2norm();
     }
@@ -1047,7 +1039,6 @@ RedbackMechMaterial::returnMapCC(const RankTwoTensor & sig_old, const RankTwoTen
   unsigned int iterisohard, iter, maxiterisohard = 20, maxiter = 50;
   Real eqvpstrain;
   Real yield_stress, yield_stress_prev;
-  //bool is_plastic;
 
   tol1 = 1e-10;
   tol3 = 1e-6;
@@ -1081,7 +1072,7 @@ RedbackMechMaterial::returnMapCC(const RankTwoTensor & sig_old, const RankTwoTen
     // trying normalizing with the norm of the total vector
     flow_incr = getFlowIncrementCC(q, p, -yield_stress, q_y, p_y);
     getFlowTensorCC(sig_new, -yield_stress, p, flow_tensor);
-    flow_tensor = flow_incr*flow_tensor;
+    flow_tensor *= flow_incr;
     resid = flow_tensor - delta_dp;
     err1 = resid.L2norm();
     //TODO: do not compute flow tensor if in elasticity
@@ -1106,7 +1097,7 @@ RedbackMechMaterial::returnMapCC(const RankTwoTensor & sig_old, const RankTwoTen
       if (flow_incr < 0.0) //negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment Drucker-Prager: Reduce time increment.");
       getFlowTensorCC(sig_new, -yield_stress, p, flow_tensor);
-      flow_tensor = flow_incr*flow_tensor;
+      flow_tensor *= flow_incr;
       resid = flow_tensor - delta_dp; //Residual
       err1=resid.L2norm();
     }
@@ -1138,4 +1129,11 @@ RedbackMechMaterial::get_py_qy_DP(Real p, Real q, Real & p_y, Real & q_y, Real y
 {
     p_y = getPressureProjectionDP(p /*p*/, q /*q*/, yield_stress/*yield stress*/);
     q_y = yield_stress + _slope_yield_surface * p_y; // yield deviatoric stress
+}
+
+void
+RedbackMechMaterial::get_py_qy_J2(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+{
+  p_y = p;
+  q_y = yield_stress;
 }
