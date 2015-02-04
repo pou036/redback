@@ -59,7 +59,6 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
   params.addParam<MooseEnum>("yield_criterion", RedbackMechMaterial::yieldCriterionEnum() = "J2_plasticity", "Yield criterion");
-  //params.addParam< Real >("slope_yield_surface", 0,"Slope of yield surface (positive, see documentation)");
   params.addParam< Real >("mixture_compressibility", 1,"Compressibility of the rock+fluid mixture");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
 
@@ -115,7 +114,6 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _mixture_compressibility_param(getParam<Real>("mixture_compressibility")),
   _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
   _yield_criterion((YieldCriterion)(int)getParam<MooseEnum>("yield_criterion")),
-  //_slope_yield_surface(getParam<Real>("slope_yield_surface")),
   //_dispx_dot(coupledDot("disp_x")),
   //_dispy_dot(coupledDot("disp_y")),
   //_dispz_dot(coupledDot("disp_z"))
@@ -171,18 +169,6 @@ RedbackMechMaterial::initQpStatefulProperties()
   _total_volumetric_strain[_qp] = 0;
   _mixture_compressibility[_qp] = _mixture_compressibility_param;
 
-  // TODO: deal with sign of _slope_yield_surface properly in DP case
-  //switch (_yield_criterion)
-  //{
-  //case modified_Cam_Clay:
-  //  if (_slope_yield_surface == 0)
-  //    mooseError("modified Cam-Clay cannot deal with 0 CSL slope ('slope_yield_surface')");
-  //  if (getYieldStress(0) <= 0)
-  //    mooseError("modified Cam-Clay cannot deal with negative pre-consolidation stress ('yield_stress')");
-  //  break;
-  //default:
-  //  ;
-  //}
 }
 
 void
@@ -406,28 +392,6 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 }
 
 void
-RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)
-{
-  switch (_yield_criterion)
-  {
-    case elasticity:
-      returnMapElasticity(sig_old, delta_d, E_ijkl, dp, sig);
-      return;
-    case J2_plasticity:
-      //returnMapJ2(sig_old, delta_d, E_ijkl, dp, sig, p_y, q_y);
-      return;
-    case Drucker_Prager:
-      //returnMapDP(sig_old, delta_d, E_ijkl, dp, sig, p_y, q_y);
-      return;
-    case modified_Cam_Clay:
-      //returnMapCC(sig_old, delta_d, E_ijkl, dp, sig, p_y, q_y);
-      return;
-    default:
-      mooseError("returnMap called with unknown yield_criterion of " << _yield_criterion);
-  }
-}
-
-void
 RedbackMechMaterial::computeQpStrain(const RankTwoTensor & Fhat)
 {
   //Cinv - I = A A^T - A - A^T;
@@ -507,3 +471,96 @@ RedbackMechMaterial::returnMapElasticity(const RankTwoTensor & sig_old, const Ra
   sig = sig_old + E_ijkl * delta_d;
   dp = RankTwoTensor(); //Plastic rate of deformation tensor in unrotated configuration
 }
+
+//void
+//RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)
+//{
+//  if (_yield_criterion == elasticity)
+//    returnMapElasticity(sig_old, delta_d, E_ijkl, dp, sig);
+//
+//  RankTwoTensor sig_new, delta_dp, dpn;
+//  RankTwoTensor flow_tensor;
+//  RankTwoTensor resid, ddsig;
+//  RankFourTensor dr_dsig, dr_dsig_inv;
+//  Real flow_incr;
+//  Real p, q;
+//  Real err1, err3, tol1, tol3;
+//  unsigned int iterisohard, iter, maxiterisohard = 20, maxiter = 50;
+//  Real eqvpstrain;
+//  Real yield_stress, yield_stress_prev;
+//
+//  tol1 = 1e-15; // TODO: expose to user interface and/or make the tolerance relative
+//  tol3 = 1e-10; // TODO: expose to user interface and/or make the tolerance relative
+//  err3 = 1.1 * tol3;
+//  iterisohard = 0;
+//
+//  eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
+//  yield_stress = getYieldStress(eqvpstrain);
+//
+//  _exponential = 1;
+//  if (_has_T)
+//  {
+//    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
+//  }
+//
+//  while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
+//  {
+//    iterisohard++;
+//    iter = 0;
+//    delta_dp.zero();
+//
+//    // Elastic guess
+//    sig_new = sig_old + E_ijkl * delta_d;
+//// Compute distance to current yield surface (line), only valid for associative potential
+//    p = sig_new.trace()/3.0;
+//    q = getSigEqv(sig_new);
+//    get_py_qy(p, q, p_y, q_y, yield_stress);
+//
+//    //TODO: checking whether in plasticity
+//
+//    flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
+//    getFlowTensor(sig_new, q, p, yield_stress, flow_tensor); 
+//    flow_tensor *= flow_incr;
+//    resid = flow_tensor - delta_dp;
+//    err1 = resid.L2norm();
+//    //TODO: do not compute flow tensor if in elasticity
+//
+//    while (err1 > tol1  && iter < maxiter) //Stress update iteration (hardness fixed)
+//    {
+//      iter++;
+//      
+//      //Jacobian = d(residual)/d(sigma)
+//      getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig); 
+//      dr_dsig_inv = dr_dsig.invSymm();
+//      ddsig = -dr_dsig_inv * resid; // Newton Raphson
+//      delta_dp -= E_ijkl.invSymm() * ddsig; //Update increment of plastic rate of deformation tensor
+//      sig_new += ddsig; //Update stress
+//
+//      // Update residual
+//      p = sig_new.trace()/3.0;
+//      q = getSigEqv(sig_new);
+//      get_py_qy(p, q, p_y, q_y, yield_stress);
+//      flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
+//      if (flow_incr < 0.0) //negative flow increment not allowed
+//        mooseError("Constitutive Error-Negative flow increment: Reduce time increment.");
+//      getFlowTensor(sig_new, q, p, yield_stress, flow_tensor); 
+//      flow_tensor *= flow_incr;
+//      resid = flow_tensor - delta_dp; //Residual
+//      err1=resid.L2norm();
+//    }
+//    if (iter>=maxiter)//Convergence failure
+//      mooseError("Constitutive Error-Too many iterations: Reduce time increment.\n"); //Convergence failure //TODO: check the adaptive time stepping
+//
+//    dpn = dp + delta_dp;
+//    eqvpstrain = std::pow(2.0/3.0, 0.5) * dpn.L2norm();
+//    yield_stress_prev = yield_stress;
+//    yield_stress = getYieldStress(eqvpstrain);
+//    err3 = std::abs(yield_stress-yield_stress_prev);
+//  }
+//
+//  if (iterisohard>=maxiterisohard)
+//    mooseError("Constitutive Error-Too many iterations in Hardness Update:Reduce time increment.\n"); //Convergence failure
+//
+//  dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
+//  sig = sig_new;
+//}

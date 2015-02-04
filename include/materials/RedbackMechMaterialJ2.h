@@ -27,18 +27,14 @@ class RedbackMechMaterialJ2 : public RedbackMechMaterial
 {
 public:
   RedbackMechMaterialJ2(const std::string & name, InputParameters parameters);
-  // Redback
 
 protected:
-  // Copy-paste from TensorMechanicsMaterial.h
-
-  // Copy-paste from FiniteStrainPlasticRateMaterial.h
-  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-  void getJacJ2(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
-  void getFlowTensorJ2(const RankTwoTensor &, Real, RankTwoTensor &);
-  Real getFlowIncrementJ2(const RankTwoTensor &, Real);
-  Real getDerivativeFlowIncrementJ2(const RankTwoTensor &, Real);
-  void get_py_qy_J2(Real, Real, Real &, Real &, Real);
+  void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
+  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
+  void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
+  Real getFlowIncrement(Real, Real, Real, Real, Real);
+  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real);
+  void get_py_qy(Real, Real, Real &, Real &, Real);
 };
 
 #endif //REDBACKMECHMATERIAL_H

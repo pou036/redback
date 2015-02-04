@@ -17,12 +17,9 @@
 
 #include "Material.h"
 #include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 #include "ElasticityTensorR4.h"
 #include "RotationTensor.h"
-
-
-#include "Material.h"
-
 //#include "FiniteStrainPlasticMaterial.h"
 
 //Forward Declarations
@@ -115,6 +112,11 @@ protected:
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
   virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
   virtual void returnMapElasticity(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
+  virtual void getJac(const RankTwoTensor &, const RankFourTensor &, 
+          Real, Real, Real, Real, Real, Real, RankFourTensor &);
+  virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
+  virtual Real getFlowIncrement(Real, Real, Real, Real, Real);
+  virtual void get_py_qy(Real, Real, Real &, Real &, Real);
 
   Real _ref_pe_rate;
   Real _exponent;
@@ -132,7 +134,6 @@ protected:
   MaterialProperty<Real> & _mixture_compressibility;
   Real _exponential;
   YieldCriterion _yield_criterion;
-  //Real _slope_yield_surface;  // coefficient for yield surface
   //VariableValue & _dispx_dot;
   //VariableValue & _dispy_dot;
   //VariableValue & _dispz_dot;
@@ -152,7 +153,6 @@ protected:
   MaterialProperty<Real> & _delta;
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _solid_thermal_expansion;
-
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
 };
