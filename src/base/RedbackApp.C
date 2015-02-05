@@ -19,7 +19,6 @@
 
 // Materials
 #include "RedbackMaterial.h"
-#include "RedbackMechMaterial.h"
 #include "RedbackMechMaterialJ2.h"
 #include "RedbackMechMaterialDP.h"
 #include "RedbackMechMaterialCC.h"
@@ -82,7 +81,6 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalPressurization);
 
   registerMaterial(RedbackMaterial);
-  registerMaterial(RedbackMechMaterial);
   registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialDP);
   registerMaterial(RedbackMechMaterialCC);

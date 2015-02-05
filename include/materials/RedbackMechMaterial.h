@@ -110,13 +110,12 @@ protected:
   Real getYieldStress(const Real equivalent_plastic_strain);
 
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
-  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-  virtual void returnMapElasticity(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
-  //virtual void getJac(const RankTwoTensor &, const RankFourTensor &, 
-  //        Real, Real, Real, Real, Real, Real, RankFourTensor &);
-  //virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
-  //virtual Real getFlowIncrement(Real, Real, Real, Real, Real);
-  //virtual void get_py_qy(Real, Real, Real &, Real &, Real);
+  void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
+  void returnMapElasticity(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
+  virtual void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &)=0;
+  virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &)=0;
+  virtual Real getFlowIncrement(Real, Real, Real, Real, Real)=0;
+  virtual void get_py_qy(Real, Real, Real &, Real &, Real)=0;
 
   Real _ref_pe_rate;
   Real _exponent;

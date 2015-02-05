@@ -31,14 +31,12 @@ public:
 protected:
   Real _slope_yield_surface;  // coefficient for yield surface
 
-  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-  Real getPressureProjection(Real, Real, Real);
-  void getJac(const RankTwoTensor &, const RankFourTensor &, 
-          Real, Real, Real, Real, Real, Real, RankFourTensor &);
+  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
   void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
   Real getFlowIncrement(Real, Real, Real, Real, Real);
-  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real);
   void get_py_qy(Real, Real, Real &, Real &, Real);
+  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real);
+  Real getPressureProjection(Real, Real, Real);
 
 };
 
