@@ -8,12 +8,12 @@
   [./right_middle]
     type = AddExtraNodeset
     boundary = 4
-    coord = '4 0'
+    coord = '5 0'
   [../]
   [./left_middle]
     type = AddExtraNodeset
     boundary = 5
-    coord = '-4 0'
+    coord = '-5 0'
   [../]
 []
 
@@ -84,6 +84,21 @@
     is_chemistry_on = true
     fluid_thermal_expansion = 1e-5
     solid_thermal_expansion = 0
+  [../]
+  [./mat_noMech]
+    type = RedbackMaterial
+    block = '0 2 1'
+    ref_lewis_nb = 1
+    ar_F = 20
+    disp_x = disp_x
+    m = 3
+    disp_y = disp_y
+    ar_R = 10
+    ar = 10
+    Aphi = 0
+    temperature = temp
+    gr = 0.3
+    disp_z = disp_z
   [../]
 []
 
