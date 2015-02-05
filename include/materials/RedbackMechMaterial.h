@@ -112,6 +112,10 @@ protected:
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
   void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
   void returnMapElasticity(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
+  // The following functions are needed in the return map, but the definition
+  // is dependant on the yield criterion. Therefore we define them as abstract
+  // virtual functions here such that no implementation is needed in
+  // RedbackMechMaterial.C
   virtual void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &)=0;
   virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &)=0;
   virtual Real getFlowIncrement(Real, Real, Real, Real, Real)=0;
