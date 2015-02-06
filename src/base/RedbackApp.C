@@ -19,7 +19,9 @@
 
 // Materials
 #include "RedbackMaterial.h"
-#include "RedbackMechMaterial.h"
+#include "RedbackMechMaterialJ2.h"
+#include "RedbackMechMaterialDP.h"
+#include "RedbackMechMaterialCC.h"
 
 // AuxKernels
 //#include "StrainRateAux.h"
@@ -78,9 +80,10 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalConvection);
   registerKernel(RedbackThermalPressurization);
 
-
   registerMaterial(RedbackMaterial);
-  registerMaterial(RedbackMechMaterial);
+  registerMaterial(RedbackMechMaterialJ2);
+  registerMaterial(RedbackMechMaterialDP);
+  registerMaterial(RedbackMechMaterialCC);
 
   //registerAux(StrainRateAux);
   //registerAux(MisesStrainAux);

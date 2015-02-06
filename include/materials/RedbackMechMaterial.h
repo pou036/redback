@@ -17,12 +17,9 @@
 
 #include "Material.h"
 #include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 #include "ElasticityTensorR4.h"
 #include "RotationTensor.h"
-
-
-#include "Material.h"
-
 //#include "FiniteStrainPlasticMaterial.h"
 
 //Forward Declarations
@@ -113,29 +110,16 @@ protected:
   Real getYieldStress(const Real equivalent_plastic_strain);
 
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
-  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-  virtual void returnMapElasticity(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
-  virtual void returnMapJ2(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-  Real getPressureProjectionDP(Real, Real, Real);
-  void getStressProjectionsCC(Real, Real, Real, Real, Real &, Real &);
-  virtual void returnMapDP(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-  virtual void returnMapCC(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-
-  void getJacJ2(const RankTwoTensor &, const RankFourTensor &, Real, Real, RankFourTensor &);
-  void getJacDP(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, RankFourTensor &);
-  void getJacCC(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, RankFourTensor &);
-
-  void getFlowTensorCC(const RankTwoTensor &, Real, Real, RankTwoTensor &);
-  void getFlowTensorJ2(const RankTwoTensor &, Real, RankTwoTensor &);
-  void getFlowTensorDP(const RankTwoTensor &, Real, RankTwoTensor &);
-
-  Real getFlowIncrementCC(Real, Real, Real, Real, Real);
-  Real getFlowIncrementDP(Real, Real, Real, Real);
-  Real getFlowIncrementJ2(const RankTwoTensor &, Real);
-
-  Real getDerivativeFlowIncrementDP(const RankTwoTensor &, Real, Real, Real, Real);
-  Real getDerivativeFlowIncrementCC(const RankTwoTensor &, Real, Real, Real, Real, Real);
-  Real getDerivativeFlowIncrementJ2(const RankTwoTensor &, Real);
+  void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
+  void returnMapElasticity(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
+  // The following functions are needed in the return map, but the definition
+  // is dependant on the yield criterion. Therefore we define them as abstract
+  // virtual functions here such that no implementation is needed in
+  // RedbackMechMaterial.C
+  virtual void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) = 0;
+  virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &) = 0;
+  virtual Real getFlowIncrement(Real, Real, Real, Real, Real) = 0;
+  virtual void get_py_qy(Real, Real, Real &, Real &, Real) = 0;
 
   Real _ref_pe_rate;
   Real _exponent;
@@ -153,7 +137,6 @@ protected:
   MaterialProperty<Real> & _mixture_compressibility;
   Real _exponential;
   YieldCriterion _yield_criterion;
-  Real _slope_yield_surface;  // coefficient for yield surface
   //VariableValue & _dispx_dot;
   //VariableValue & _dispy_dot;
   //VariableValue & _dispz_dot;
@@ -173,7 +156,6 @@ protected:
   MaterialProperty<Real> & _delta;
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _solid_thermal_expansion;
-
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
 };
