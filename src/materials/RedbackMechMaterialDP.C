@@ -76,11 +76,11 @@ RedbackMechMaterialDP::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, 
 Real
 RedbackMechMaterialDP::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real yield_stress)
 {
-  Real flow_incr_vol = _ref_pe_rate * _dt * 
+  Real flow_incr_vol = _ref_pe_rate * _dt *
       std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
   // TODO: q_yield_stress can be 0, we should handle that case properly...
   Real flow_incr_dev = _ref_pe_rate * _dt * std::pow(macaulayBracket((q_yield_stress > 0 ? 1:-1)*
-              (sig_eqv / q_yield_stress - 1.0)), _exponent)* _exponential; 
+              (sig_eqv / q_yield_stress - 1.0)), _exponent)* _exponential;
               //(q_yield_stress > 0 ? 1:-1) is the sign function
   return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
   // TODO: change the formula to use dist_pq^m
@@ -112,7 +112,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig, const RankFourTensor & 
   sig_dev = sig.deviatoric();
 
   dfi_dseqv = getDerivativeFlowIncrement(sig, pressure, sig_eqv, q_yield_stress, p_yield_stress);
-  getFlowTensor(sig, sig_eqv, pressure, yield_stress, flow_dirn); 
+  getFlowTensor(sig, sig_eqv, pressure, yield_stress, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the residual with respect to stress, dr_dsig
    * It consists of two terms: The first is
