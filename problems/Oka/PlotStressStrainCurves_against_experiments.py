@@ -162,7 +162,8 @@ def createPicturesForData\
             P.title(title)
         #msg = r"$Time \hspace{0.5}=\hspace{0.5}%4.2f\times10^3 years$"%(time)
         msg = r"$Strain \hspace{0.5}=\hspace{0.5}%.3f$"%(i*time_step*export_freq/block_height)
-        msg = r"Strain = {:>8.3%}".format(i*time_step*export_freq/block_height)
+        msg = r"Strain = {:>8.3%}".format(i*time_step*export_freq/block_height/1000)
+        
         # see https://docs.python.org/3.3/library/string.html#formatspec
         P.figtext(0.5, 0.82, msg, horizontalalignment='center', color='black', 
                   fontsize=20)
@@ -172,6 +173,39 @@ def createPicturesForData\
                   format='png')
         P.show()
         P.clf()
+
+def computeDifferentialStress(data, confining_pressure):
+    ''' Compute differential stress from average top stress and confining pressure.
+       Since we don't have the equilibration step yet, shift the curve to start at 0.
+    '''
+    #data['avg_top(sig1) - sig3'] = data['mises_stress']
+    #return data
+    
+    diff_stress = [-confining_pressure - elt for elt in data['top_avg_stress_yy']]
+    data['avg_top(sig1) - sig3'] = diff_stress
+    # Potentially remove data points to make differential stress start at 0
+    index = 0
+    while index < len(diff_stress):
+        if diff_stress[index] >= 0:
+            break
+        index += 1
+    assert index < len(diff_stress)
+    if index == 0:
+        if diff_stress[index] > 0:
+            raise Exception, 'Case diff_stress[0]>0 not handled...'
+        elif diff_stress[index] == 0:
+            # nothing to do
+            return data
+    # We're now in the case where diff_stress starts negative
+    t_0 = data['time'][index-1] - diff_stress[index-1]*(data['time'][index] - data['time'][index-1])/(diff_stress[index] - diff_stress[index-1])
+    new_time = [0]
+    new_diff_stress = [0]
+    for i in range(index, len(diff_stress)):
+        new_time.append(data['time'][i] - t_0)
+        new_diff_stress.append(diff_stress[i])
+    data['time'] = new_time
+    data['avg_top(sig1) - sig3'] = new_diff_stress
+    return data
 
 if __name__ == '__main__':
     csv_filename = os.path.join('Oka.csv')
@@ -188,9 +222,8 @@ if __name__ == '__main__':
     # parse CSV file
     data = parseCsvFile(csv_filename) #, column_keys)
     # compute differential stress
-    data['avg_top(sig1) - sig3'] = [-confining_pressure - elt for elt in data['top_avg_stress_yy']]
-    #data['avg_top(sig1) - sig3'] = data['mises_stress']
-
+    data = computeDifferentialStress(data, confining_pressure)
+    
     # create output dir if it doesn't exist yet
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
