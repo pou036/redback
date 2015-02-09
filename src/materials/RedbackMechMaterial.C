@@ -485,7 +485,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   Real p, q;
   Real err1, err3, tol1, tol3;
   unsigned int iterisohard, iter, maxiterisohard = 20, maxiter = 50;
-  Real eqvpstrain, volumetric_plastic_strain, mean_stress_old;
+  Real eqvpstrain, mean_stress_old;
+  //Real volumetric_plastic_strain;
   Real yield_stress, yield_stress_prev;
 
   if (_yield_criterion == elasticity)
@@ -496,10 +497,11 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   err3 = 1.1 * tol3;
   iterisohard = 0;
 
-  volumetric_plastic_strain = dp.trace()/3.0;
+  //volumetric_plastic_strain = dp.trace()/3.0;
   mean_stress_old = sig_old.trace()/3.0;
   eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
   yield_stress = getYieldStress(eqvpstrain);
+
 
   _exponential = 1;
   if (_has_T)
@@ -507,7 +509,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
     _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
   }
   // Microstructural hardening
-  _exponential = _exponential*std::exp(-_mhc*mean_stress_old*volumetric_plastic_strain/(1 + _delta[_qp] *_T[_qp]));
+  //_exponential = _exponential*std::exp(-_mhc*mean_stress_old*volumetric_plastic_strain/(1 + _delta[_qp] *_T[_qp]));
+  _exponential = _exponential*std::exp(-_mhc*mean_stress_old*_total_volumetric_strain[_qp]/(1 + _delta[_qp] *_T[_qp]));
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
   {
