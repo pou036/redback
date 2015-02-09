@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 2
-  ny = 4
-  nz = 2
+  nx = 4
+  ny = 8
+  nz = 4
   xmin = -1
   ymin = -2
   ymax = 2
@@ -13,23 +13,23 @@
 [MeshModifiers]
   [./edge_centre_point_front]
     type = AddExtraNodeset
-    boundary = 6
     coord = '0 -2 -1'
+    new_boundary = 6
   [../]
   [./edge_centre_point_back]
     type = AddExtraNodeset
-    boundary = 7
     coord = '0 -2 1'
+    new_boundary = 7
   [../]
   [./edge_centre_point_left]
     type = AddExtraNodeset
-    boundary = 8
     coord = '-1 -2 0'
+    new_boundary = 8
   [../]
   [./edge_centre_point_right]
     type = AddExtraNodeset
-    boundary = 9
     coord = '1 -2 0'
+    new_boundary = 9
   [../]
 []
 
@@ -62,12 +62,12 @@
     pore_pres = pore_pressure
     temperature = temp
     exponent = 2
-    C_ijkl = '3.540e+02 8.850e+01 8.850e+01 3.540e+02 8.850e+01 3.540e+02 1.327e+02 1.327e+02 1.327e+02'
-    ref_pe_rate = 10
+    C_ijkl = '8.889e+01 2.222e+01 2.222e+01 8.889e+01 2.222e+01 8.889e+01 3.333e+01 3.333e+01 3.333e+01'
+    ref_pe_rate = 1e10
     slope_yield_surface = 1.44
     yield_criterion = modified_Cam_Clay
     yield_stress = '0. 1 1 1'
-    mhc = 50
+    mhc = 150
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -101,10 +101,14 @@
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -1e-3*t
+    value = -6.67e-4*t
   [../]
   [./spline_IC]
     type = ConstantFunction
+  [../]
+  [./geothermal_gradient]
+    type = ParsedFunction
+    value = 0.1+0.1*(2-y)
   [../]
 []
 
@@ -172,19 +176,19 @@
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 0.8
+    value = 0.885
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -0.8
+    value = -0.885
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 0.8
+    value = 0.885
   [../]
   [./side_temp]
     type = DirichletBC
@@ -226,7 +230,7 @@
     type = NeumannBC
     variable = disp_z
     boundary = front
-    value = -0.8
+    value = -0.885
   [../]
 []
 
@@ -538,7 +542,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 800
+  end_time = 1200
   dtmax = 1e4
   dtmin = 1e-7
   type = Transient
@@ -553,7 +557,7 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 1
+    dt = 2
   [../]
 []
 
@@ -579,6 +583,7 @@
 []
 
 [ICs]
+  active = 'press_ic temp_IC'
   [./temp_IC]
     variable = temp
     type = ConstantIC
@@ -588,6 +593,12 @@
     variable = pore_pressure
     type = ConstantIC
     value = 0
+  [../]
+  [./temp_random_IC]
+    function = geothermal_gradient
+    max = 0.01
+    type = FunctionWithRandomIC
+    variable = temp
   [../]
 []
 
