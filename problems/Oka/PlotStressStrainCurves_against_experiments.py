@@ -3,6 +3,7 @@
 import os, sys, csv
 import pylab as P
 import matplotlib.pyplot as pp
+from twisted.trial._synctest import Todo
 
 def readDigitisedCsv(input_dir, normalisation_stress=1.0):
     ''' Read all digitised data from Oka's experiments and return dictionary of data as strings '''
@@ -70,17 +71,19 @@ def parseCsvFile(filename, column_keys=None):
     return data
 
 def createPicturesForData\
-    (data, key1, key2, output_dir, name_root='pic', 
+    (data, # dict of data
+    key1, key2, output_dir, name_root='pic', 
     index_first=0, index_last=999999,
     title='graph title', label1='x_label', label2='y_label',
     plot_ellipse=False, # flag to plot P-Q space with ellipse or just time evolution
+    velocity=1e-3, # coefficient alpha where BC function is alpha*t
     time_step=1.e-4, # redback simulation time step
     export_freq=1, # frequency of redback exports
     block_height=4, # height of block (in Y direction)
     yield_stress = 3., # RedbackMechMaterial yield_stress value (>0)
     slope_yield = -0.8, # RedbackMechMaterial slope_yield_surface value (<0)
-    digitised_data = {} # dict of digitised data as returned by readDigitisedData
-    ):
+    digitised_data = {}, # dict of digitised data as returned by readDigitisedData
+    do_show=False): # show picture (pausing the script!) or not
     ''' Create pictures for plot of key1(x) vs key2(y) '''
     print 'Creating picture for {0}/{1}'.format(key1, key2)
     for key in [key1, key2]:
@@ -99,13 +102,8 @@ def createPicturesForData\
     y_max = max(data[key2])
     if key1== 'time':
         # change time to strain
-        x_min = x_min/(10.*time_step*block_height)
-        x_max = x_max/(10.*time_step*block_height)
-    if plot_ellipse:
-        x_min = min(-P.fabs(yield_stress), x_min)
-        x_max = max(0, x_max)
-        y_min = min(0, y_min) # only show top half of ellipse
-        y_max = max(P.fabs(slope_yield)*P.fabs(yield_stress)/2., y_max)
+        x_min = 100*velocity*x_min/block_height # x_min/(10.*time_step*block_height)
+        x_max = 100*velocity*x_max/block_height # x_max/(10.*time_step*block_height)
     # get number of points
     nb_pts = len(data[key1])
     assert nb_pts == len(data[key2])
@@ -122,36 +120,21 @@ def createPicturesForData\
         data_y = P.array(data[key2][0:i+1])
         if key1== 'time':
             # change time to strain (%)
-            data_x = data_x/(10.*time_step*block_height)
+            data_x = 100*velocity*data_x/block_height # data_x/(10.*time_step*block_height)
         print 'Doing frame {0}{1}/{2}'.format(name_root, i, nb_pts_plotted-1)
-        P.plot(data_x[1:], data_y[1:], 'bo-')
+        
+        # Plot simulation data
+        P.plot(data_x[1:], data_y[1:], 'bo-', label='simulation')
+        
         # Plot digitised data
+        styles = ['r-', 'b-', 'g-', 'c-', 'm-', 'y-']
         for experiment_index in sorted(digitised_data.keys()):
             dig_data_x = sorted(digitised_data[experiment_index].keys())
             dig_data_y = [digitised_data[experiment_index][key] for key in dig_data_x]
-            P.plot(dig_data_x[1:], dig_data_y[1:], 'r-')
-        
-        # Plot modified Cam-Clay ellipse if required
-        if plot_ellipse:
-            P.hold(True)
-            if 0:
-                # plot ellipse with regularly spaced points in x
-                step = float(P.fabs(yield_stress))/100.
-                data_p = P.arange(0, -P.fabs(yield_stress)-step, -step)
-                data_q = P.fabs(slope_yield)*P.sqrt(data_p*(-data_p-P.fabs(yield_stress)))
-                P.plot(data_p, data_q, 'r-')
-                P.plot(data_p, -data_q, 'r-')
-            else:
-                # plot ellipse parametrically
-                angle_step = P.pi/100.
-                angles = P.arange(0, 2*P.pi+angle_step, angle_step)
-                data_p = -P.fabs(yield_stress)/2 + P.fabs(yield_stress)/2.*P.cos(angles)
-                data_q = P.fabs(slope_yield)*P.fabs(yield_stress)/2.*P.sin(angles)
-                P.plot(data_p, data_q, 'r-')
-                P.plot(data_p, -data_q, 'r-')
-        else:
-            P.hold(False)
-            P.grid(True)
+            P.plot(dig_data_x[1:], dig_data_y[1:], styles[experiment_index%len(styles)], label='CD{0}'.format(experiment_index+1))
+
+        P.hold(False)
+        P.grid(True)
         # labels
         P.xlabel(label1)
         #r"$Time \hspace{1}(\times10^3 years)$")
@@ -165,14 +148,119 @@ def createPicturesForData\
         msg = r"Strain = {:>8.3%}".format(i*time_step*export_freq/block_height/1000)
         
         # see https://docs.python.org/3.3/library/string.html#formatspec
-        P.figtext(0.5, 0.82, msg, horizontalalignment='center', color='black', 
-                  fontsize=20)
+        #P.figtext(0.5, 0.82, msg, horizontalalignment='center', color='black', fontsize=20)
+        
+        legend = P.legend(bbox_to_anchor=(0,1.02,1.,0.102), loc=3, ncol=7, mode='expand', borderaxespad=0., fontsize='small')
         margin = 5*float(y_max-y_min)/100.
         P.axis([x_min, x_max, y_min-margin, y_max+margin])
         P.savefig(os.path.join(output_dir,'{0}{1:05d}.png'.format(name_root, i)),
                   format='png')
-        P.show()
+        if do_show:
+            P.show()
         P.clf()
+
+def createPicturesForBatchData\
+    (data, # list of dicts of data
+    key1, key2, output_dir, name_root='pic', 
+    title='graph title', label1='x_label', label2='y_label',
+    velocity=1e-3, # coefficient alpha where BC function is alpha*t
+    block_height=4, # height of block (in Y direction)
+    digitised_data = {}, # dict of digitised data as returned by readDigitisedData
+    do_show=False): # show picture (pausing the script!) or not
+    ''' Create pictures for plot of key1(x) vs key2(y) for batch result '''
+    print 'Mode batch, creating picture for {0}/{1}'.format(key1, key2)
+    # Ensure output_dir exists
+    if not os.path.isdir(output_dir):
+        print 'Creating the output directory "{0}"'.format(output_dir)
+        os.makedirs(output_dir)
+    
+    # create figure
+    fig = P.figure(figsize=(7, 3))
+    ax = fig.add_subplot(111)
+    pp.subplots_adjust(left=0.15, bottom=0.2, right=0.95, top=0.8,
+                wspace=None, hspace=None)
+    P.grid(True)
+    P.hold(True)
+
+    styles =     ['r-',  'b-',  'g-',  'c-',  'm-',  'y-']
+    styles_sim = ['ro-', 'bo-', 'go-', 'co-', 'mo-', 'yo-']
+    
+    data_to_plot = []
+    global_x_min = 1e99
+    global_x_max = -1e99
+    global_y_min = 1e99
+    global_y_max = -1e99
+    for i in range(6): # For each simulation
+        sim_index = i+1
+        if i >= len(data):
+            # Not all simulations were run. TODO
+            raise Exception, 'Not all simulations were run. TODO'
+            continue
+        # Check keys
+        for key in [key1, key2]:
+            if key1 not in data[i]:
+                error_msg = 'Key "{0}" not in data column_keys {1} for CD{2}'\
+                    .format(key1, data[i].keys(), sim_index)
+                raise Exception, error_msg
+        # get min and max values
+        x_min = min(data[i][key1])
+        x_max = max(data[i][key1])
+        y_min = min(data[i][key2])
+        y_max = max(data[i][key2])
+        if key1== 'time':
+            # change time to strain
+            x_min = 100*velocity*x_min/block_height
+            x_max = 100*velocity*x_max/block_height
+        global_x_min = min(global_x_min, x_min)
+        global_x_max = max(global_x_max, x_max)
+        global_y_min = min(global_y_min, y_min)
+        global_y_max = max(global_y_max, y_max)
+        # get number of points
+        assert len(data[i][key1]) == len(data[i][key2])
+    
+        data_x = P.array(data[i][key1][:])
+        data_y = P.array(data[i][key2][:])
+        if key1== 'time':
+            # change time to strain (%)
+            data_x = 100*velocity*data_x/block_height
+        
+        # Plot simulation data
+        P.plot(data_x[1:], data_y[1:], styles_sim[sim_index%len(styles_sim)], label='simulation {0}'.format(sim_index))
+
+    # Plot digitised data
+    for experiment_index in sorted(digitised_data.keys()):
+        dig_data_x = sorted(digitised_data[experiment_index].keys())
+        dig_data_y = [digitised_data[experiment_index][key] for key in dig_data_x]
+        P.plot(dig_data_x[1:], dig_data_y[1:], styles[experiment_index%len(styles)], label='CD{0}'.format(experiment_index))
+        global_x_min = min(global_x_min, min(dig_data_x[1:]))
+        global_x_max = max(global_x_max, max(dig_data_x[1:]))
+        global_y_min = min(global_y_min, min(dig_data_y[1:]))
+        global_y_max = max(global_y_max, max(dig_data_y[1:]))
+
+    P.hold(False)
+    P.grid(True)
+    # labels
+    P.xlabel(label1)
+    #r"$Time \hspace{1}(\times10^3 years)$")
+    #r"$\dot{\epsilon}_M  \hspace{0.5} (s^{-1})$"
+    P.ylabel(label2)
+    #r"$Nusselt\hspace{1}number$")
+    if title:
+        P.title(title)
+    #msg = r"Strain = {:>8.3%}".format(i*time_step*export_freq/block_height/1000)
+    
+    # see https://docs.python.org/3.3/library/string.html#formatspec
+    #P.figtext(0.5, 0.82, msg, horizontalalignment='center', color='black', fontsize=20)
+    
+    legend = P.legend(bbox_to_anchor=(0,1.02,1.,0.102), loc=3, ncol=6, mode='expand', borderaxespad=0., fontsize='small')
+    
+    margin = 5*float(y_max-y_min)/100.
+    P.axis([global_x_min, global_x_max, global_y_min-margin, global_y_max+margin])
+    P.savefig(os.path.join(output_dir,'{0}{1:05d}.png'.format(name_root, i)),
+              format='png')
+    if do_show:
+        P.show()
+    P.clf()
 
 def computeDifferentialStress(data, confining_pressure):
     ''' Compute differential stress from average top stress and confining pressure.
@@ -208,43 +296,56 @@ def computeDifferentialStress(data, confining_pressure):
     return data
 
 if __name__ == '__main__':
-    csv_filename = os.path.join('Oka.csv')
-    confining_pressure = 0.8
-    
+    velocity = (2e-3)/3. # boundary condition on top surface (coeff x t)
     oka_digitised_dir = os.path.join('fig2')
     output_dir = os.path.join('.', 'pics_postprocess') # where pics will be created
-    column_keys = ['time', 'mises_stress_top', 'mean_stress_top',
-                   'temp_middle'] # CSV columns we're interested in
-    
+     
     # Read digitised version of Oka's results
     oka_data = readDigitisedCsv(oka_digitised_dir, normalisation_stress=2.26)
-    
-    # parse CSV file
-    data = parseCsvFile(csv_filename) #, column_keys)
-    # compute differential stress
-    data = computeDifferentialStress(data, confining_pressure)
     
     # create output dir if it doesn't exist yet
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
+
+    if 0:
+        # Show curve for current simulation
+        csv_filename = os.path.join('Oka.csv')
+        confining_pressure = 0.8
     
-    '''
-    maps = {'mises_stress':     {'key':'mises_stress',      'label':'Mises Stress'},
-            'mises_strain_rate':{'key':'mises_strain_rate', 'label':'Mises Strain Rate'},
-            'volumetric_strain':{'key':'volumetric_strain', 'label':'Volumetric Strain'},
-            'volumetric_strain_rate':{'key':'volumetric_strain_rate', 'label':'Volumetric Strain Rate'},
-            'porosity':         {'key':'porosity_middle',   'label':'Porosity'},
-            'solid_ratio':      {'key':'solid_ratio_middle','label':'Solid Ratio'},
-            'mean_stress':      {'key':'mean_stress',       'label':'Mean Stress'},
-            'temp':             {'key':'temp_middle',       'label':'Normalised Temperature'}}
-    '''
+        # parse CSV file
+        data = parseCsvFile(csv_filename)
+        # compute differential stress
+        data = computeDifferentialStress(data, confining_pressure)
     
-    # Plot stress vs strain curve
-    if 1:
-        createPicturesForData(data,
+        # Plot stress vs strain curve
+        createPicturesForData(data=data,
             key1='time', key2='avg_top(sig1) - sig3', 
             output_dir=os.path.join(output_dir, 'StressStrainCurves'), name_root='{0}_'.format('StressStrain'), 
             index_first=0, index_last=999999, title=None, label1='Strain (%)', label2='Deviatoric stress', 
-            time_step=1.0, export_freq=1, block_height=4, digitised_data=oka_data)
+            velocity=velocity, block_height=4, digitised_data=oka_data, do_show=True)
+    
+    if 1:
+        # Show curves for batch of simulations
+        batch_directory = os.path.join('results', 'batch1')
+        data = [] # list of 6 dictionaries for each simulation data
+        normalising_stress = 2.26e6 # Pa
+        confining_pressures = {
+            1:0.25e6/normalising_stress,
+            2:0.5e6/normalising_stress,
+            3:0.75e6/normalising_stress,
+            4:1.0e6/normalising_stress,
+            5:1.5e6/normalising_stress,
+            6:2.0e6/normalising_stress,
+        }
+        for i in range(6):
+            csv_filename = os.path.join(batch_directory, 'oka_CD{0}.csv'.format(i+1))
+            data.append(parseCsvFile(csv_filename))
+            data[i] = computeDifferentialStress(data[i], confining_pressures[i+1])
+        # Plot stress vs strain curves
+        createPicturesForBatchData(data=data,
+            key1='time', key2='avg_top(sig1) - sig3', 
+            output_dir=os.path.join(output_dir, 'StressStrainCurves'), name_root='{0}_'.format('StressStrain'), 
+            title=None, label1='Strain (%)', label2='Deviatoric stress', 
+            velocity=velocity, block_height=4, digitised_data=oka_data, do_show=True)
     print 'Finished'
     

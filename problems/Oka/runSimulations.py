@@ -32,8 +32,9 @@ def getLogger(name, log_file='log.txt', level=logging.INFO):
     logger.setLevel(level)
     return logger
 
-def runSimulations(output_subdir='batch1', nb_procs=8):
+def runSimulations(output_subdir='batch_test', nb_procs=8):
     ''' Run 6 simulations (varying confining pressure) for given parameters '''
+    input_file = 'Oka.i'
     normalising_stress = 2.26e6 # Pa
     output_root_dir = 'results'
     output_dir = os.path.join(output_root_dir, output_subdir)
@@ -49,12 +50,14 @@ def runSimulations(output_subdir='batch1', nb_procs=8):
         os.makedirs(output_dir)
     logger = getLogger('sim', os.path.join(output_dir, 'log.txt'), logging.INFO)
     logger.info('='*20)
+    shutil.copy(input_file, os.path.join(output_dir, input_file))
     for i in sorted(confining_pressures.keys()):
         logger.info('Running simulation CD{0}...'.format(i))
         exec_loc = '~/projects/redback/redback-opt'
-        command = 'mpiexec -n {nb_procs} {exec_loc} -i Oka.i Outputs/csv=true BCs/confinement_left/value={confinement__value} '\
+        command = 'mpiexec -n {nb_procs} {exec_loc} -i {input_i} Outputs/csv=true BCs/confinement_left/value={confinement__value} '\
         'BCs/confinement_right/value=-{confinement__value} BCs/confinement_front/value=-{confinement__value} '\
-        'BCs/confinement_back/value={confinement__value}'.format(nb_procs=nb_procs, exec_loc=exec_loc, confinement__value=confining_pressures[i])
+        'BCs/confinement_back/value={confinement__value}'.\
+        format(nb_procs=nb_procs, input_i=input_file, exec_loc=exec_loc, confinement__value=confining_pressures[i])
         try:
             retcode = subprocess.call(command, shell=True)
             if retcode < 0:
@@ -69,4 +72,4 @@ def runSimulations(output_subdir='batch1', nb_procs=8):
     logger.info('Finished')
 
 if __name__ == '__main__':
-    runSimulations()
+    runSimulations(output_subdir='batch2')

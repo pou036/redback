@@ -63,7 +63,7 @@
     temperature = temp
     exponent = 2
     C_ijkl = '8.889e+01 2.222e+01 2.222e+01 8.889e+01 2.222e+01 8.889e+01 3.333e+01 3.333e+01 3.333e+01'
-    ref_pe_rate = 1e10
+    ref_pe_rate = 1e6
     slope_yield_surface = 1.44
     yield_criterion = modified_Cam_Clay
     yield_stress = '0. 1 1 1'
