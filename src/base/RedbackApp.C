@@ -5,6 +5,9 @@
 
 #include "RedbackAction.h"
 
+// Initial conditions
+#include "FunctionWithRandomIC.h"
+
 // Kernels
 #include "RedbackChemEndo.h"
 #include "RedbackChemExo.h"
@@ -69,6 +72,8 @@ RedbackApp::registerApps()
 void
 RedbackApp::registerObjects(Factory & factory)
 {
+  registerInitialCondition(FunctionWithRandomIC);
+
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
