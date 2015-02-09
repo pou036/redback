@@ -9,11 +9,13 @@
     type = AddExtraNodeset
     new_boundary = 4
     coord = '5 0'
+    new_boundary = 4
   [../]
   [./left_middle]
     type = AddExtraNodeset
     new_boundary = 5
     coord = '-5 0'
+    new_boundary = 5
   [../]
 []
 
@@ -40,7 +42,7 @@
     block = '0 2'
     disp_y = disp_y
     disp_x = disp_x
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
+    C_ijkl = '1.056e+00 1.863e-01 1.863e-01 1.056e+00 1.863e-01 1.056e+00 4.348e-01 4.348e-01 4.348e-01'
     yield_stress = '0. 1 1. 1'
     disp_z = disp_z
     m = 3
@@ -65,7 +67,7 @@
     block = 1
     disp_y = disp_y
     disp_x = disp_x
-    C_ijkl = '1.346e+04 5.769e+03 5.769e+03 1.346e+04 5.769e+03 1.346e+04 3.846e+03 3.846e+03 3.846e+3'
+    C_ijkl = '1.056e+02 1.863e+01 1.863e+01 1.056e+02 1.863e+01 1.056e+02 4.348e+01 4.348e+01 4.348e+01'
     yield_stress = '0. 1 1e-6 0.8 1 0.8'
     disp_z = disp_z
     m = 3
@@ -376,7 +378,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 1
+  end_time = 10
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -390,7 +392,7 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 5e-4
+    dt = 1e-3
   [../]
 []
 
