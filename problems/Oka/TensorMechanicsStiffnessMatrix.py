@@ -34,7 +34,11 @@ def printStiffnessTensor(E, nu):
 
 if __name__ == '__main__':
     #printElasticConstantsFromStiffness(1.346e+03,5.769e+02,3.846e+2)
-    E = 10000
+    E = 50
     nu = 0.2
     alpha, beta, gamma = printStiffnessTensor(E, nu)
-    E2, nu2 = printElasticConstantsFromStiffness(alpha, beta, gamma)
+    alpha2 = 3.540e+02
+    beta2 = 8.850e+01
+    gamma2 = 1.327e+02
+    E2, nu2 = printElasticConstantsFromStiffness(alpha2, beta2, gamma2)
+    print 'E2={0}, nu2={1}'.format(E2, nu2)

@@ -1,9 +1,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 4
-  ny = 8
-  nz = 4
+  nx = 2
+  ny = 4
+  nz = 2
   xmin = -1
   ymin = -2
   ymax = 2
@@ -54,24 +54,24 @@
 
 [Materials]
   [./mat_mech]
-    type = RedbackMechMaterial
+    type = RedbackMechMaterialCC
     block = 0
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
     pore_pres = pore_pressure
     temperature = temp
-    exponent = 3
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
-    ref_pe_rate = 1
+    exponent = 2
+    C_ijkl = '3.540e+02 8.850e+01 8.850e+01 3.540e+02 8.850e+01 3.540e+02 1.327e+02 1.327e+02 1.327e+02'
+    ref_pe_rate = 10
     slope_yield_surface = 1.44
     yield_criterion = modified_Cam_Clay
-    yield_stress = '0. 1 1. 1'
+    yield_stress = '0. 1 1 1'
+    mhc = 50
   [../]
   [./mat_nomech]
     type = RedbackMaterial
     block = 0
-    is_chemistry_on = true
     is_mechanics_on = false
     disp_x = disp_x
     disp_y = disp_y
@@ -81,7 +81,7 @@
     m = 3
     mu = 1
     ar = 10
-    gr = 20
+    gr = 2
     ref_lewis_nb = 1
     Kc = 1
     ar_F = 20
@@ -101,7 +101,7 @@
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -1*t
+    value = -1e-3*t
   [../]
   [./spline_IC]
     type = ConstantFunction
@@ -172,19 +172,19 @@
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 0.5
+    value = 0.8
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -0.5
+    value = -0.8
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 0.5
+    value = 0.8
   [../]
   [./side_temp]
     type = DirichletBC
@@ -226,7 +226,7 @@
     type = NeumannBC
     variable = disp_z
     boundary = front
-    value = -0.5
+    value = -0.8
   [../]
 []
 
@@ -312,6 +312,7 @@
 []
 
 [Kernels]
+  active = 'td_press temp_diff td_temp press_diff'
   [./td_temp]
     type = TimeDerivative
     variable = temp
@@ -537,11 +538,11 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 0.4
-  dtmax = 1
+  end_time = 800
+  dtmax = 1e4
   dtmin = 1e-7
   type = Transient
-  num_steps = 5000
+  num_steps = 10000
   l_max_its = 200
   nl_max_its = 10
   solve_type = PJFNK
@@ -552,7 +553,7 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 1e-4
+    dt = 1
   [../]
 []
 

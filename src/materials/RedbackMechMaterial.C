@@ -58,6 +58,7 @@ InputParameters validParams<RedbackMechMaterial>()
   //  Copy-paste from FiniteStrainPlasticRateMaterial.C
   params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
+  params.addParam< Real >("mhc", 0, "Microstructural hardening coefficient");
   params.addParam<MooseEnum>("yield_criterion", RedbackMechMaterial::yieldCriterionEnum() = "J2_plasticity", "Yield criterion");
   params.addParam< Real >("mixture_compressibility", 1,"Compressibility of the rock+fluid mixture");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
@@ -103,6 +104,7 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   // Copy-paste from FiniteStrainPlasticRateMaterial.C
   _ref_pe_rate(getParam<Real>("ref_pe_rate")),
   _exponent(getParam<Real>("exponent")),
+  _mhc(getParam<Real>("mhc")),
 
   // Redback
   _mises_stress(declareProperty<Real>("mises_stress")),
@@ -483,7 +485,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   Real p, q;
   Real err1, err3, tol1, tol3;
   unsigned int iterisohard, iter, maxiterisohard = 20, maxiter = 50;
-  Real eqvpstrain;
+  Real eqvpstrain, volumetric_plastic_strain, mean_stress_old;
   Real yield_stress, yield_stress_prev;
 
   if (_yield_criterion == elasticity)
@@ -494,6 +496,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   err3 = 1.1 * tol3;
   iterisohard = 0;
 
+  volumetric_plastic_strain = dp.trace()/3.0;
+  mean_stress_old = sig_old.trace()/3.0;
   eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
   yield_stress = getYieldStress(eqvpstrain);
 
@@ -502,6 +506,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   {
     _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
   }
+  // Microstructural hardening
+  _exponential = _exponential*std::exp(-_mhc*mean_stress_old*volumetric_plastic_strain/(1 + _delta[_qp] *_T[_qp]));
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
   {

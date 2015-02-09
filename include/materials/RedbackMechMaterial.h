@@ -123,6 +123,7 @@ protected:
 
   Real _ref_pe_rate;
   Real _exponent;
+  Real _mhc;
 
   Real macaulayBracket(Real);
 
