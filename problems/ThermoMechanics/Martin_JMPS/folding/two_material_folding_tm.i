@@ -7,12 +7,12 @@
 [MeshModifiers]
   [./right_middle]
     type = AddExtraNodeset
-    boundary = 4
+    new_boundary = 4
     coord = '5 0'
   [../]
   [./left_middle]
     type = AddExtraNodeset
-    boundary = 5
+    new_boundary = 5
     coord = '-5 0'
   [../]
 []
@@ -36,7 +36,7 @@
 
 [Materials]
   [./mat0]
-    type = RedbackMechMaterial
+    type = RedbackMechMaterialJ2
     block = '0 2'
     disp_y = disp_y
     disp_x = disp_x
@@ -61,7 +61,7 @@
     solid_thermal_expansion = 0
   [../]
   [./mat1]
-    type = RedbackMechMaterial
+    type = RedbackMechMaterialJ2
     block = 1
     disp_y = disp_y
     disp_x = disp_x
