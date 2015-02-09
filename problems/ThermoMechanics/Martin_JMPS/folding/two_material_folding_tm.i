@@ -7,13 +7,13 @@
 [MeshModifiers]
   [./right_middle]
     type = AddExtraNodeset
-    boundary = 4
+    new_boundary = 4
     coord = '5 0'
     new_boundary = 4
   [../]
   [./left_middle]
     type = AddExtraNodeset
-    boundary = 5
+    new_boundary = 5
     coord = '-5 0'
     new_boundary = 5
   [../]
