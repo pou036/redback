@@ -479,7 +479,7 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 1e-3
+    dt = 1e-4
   [../]
 []
 
