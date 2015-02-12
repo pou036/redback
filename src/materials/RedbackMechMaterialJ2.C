@@ -24,7 +24,17 @@ InputParameters validParams<RedbackMechMaterialJ2>()
 RedbackMechMaterialJ2::RedbackMechMaterialJ2(const std::string & name, InputParameters parameters) :
   RedbackMechMaterial(name, parameters)
 {
-  _Cijkl.fillFromInputVector(_Cijkl_vector, _fill_method);
+  Real E = _youngs_modulus;
+  Real nu = _poisson_ratio;
+  Real alpha, beta, gamma;
+  alpha =  E*(1-nu)/((1+nu)*(1-2*nu));
+  beta = E*nu/((1+nu)*(1-2*nu));
+  gamma = E/(2*(1+nu));
+
+  Real Cijkl_array[] = {alpha,beta,beta,alpha,beta,alpha,gamma,gamma,gamma};
+  std::vector<Real> Cijkl_vector(Cijkl_array, Cijkl_array+9);
+
+  _Cijkl.fillFromInputVector(Cijkl_vector, _fill_method);
 }
 
 
@@ -50,7 +60,7 @@ RedbackMechMaterialJ2::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, 
 Real
 RedbackMechMaterialJ2::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real yield_stress)
 {
-  return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) * 
+  return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) *
       _exponential;
 }
 
@@ -80,7 +90,7 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig, const RankFourTensor & 
   sig_dev = sig.deviatoric();
   sig_eqv = getSigEqv(sig);
 
-  getFlowTensor(sig, q, p, yield_stress, flow_dirn_dev); 
+  getFlowTensor(sig, q, p, yield_stress, flow_dirn_dev);
   dfi_dseqv_dev = getDerivativeFlowIncrement(sig, yield_stress);
 
   for (i = 0; i < 3; ++i)

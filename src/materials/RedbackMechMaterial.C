@@ -35,7 +35,6 @@ InputParameters validParams<RedbackMechMaterial>()
   InputParameters params = validParams<Material>();
 
   // Copy-paste from TensorMechanicsMaterial.C
-  params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
   params.addParam<MooseEnum>("fill_method", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
   params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1");
   params.addParam<Real>("euler_angle_2", 0.0, "Euler angle in direction 2");
@@ -62,8 +61,8 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addParam<MooseEnum>("yield_criterion", RedbackMechMaterial::yieldCriterionEnum() = "J2_plasticity", "Yield criterion");
   params.addParam< Real >("mixture_compressibility", 1,"Compressibility of the rock+fluid mixture");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
-  params.addParam<Real>("youngs_modulus", "Youngs modulus.");
-  params.addParam<Real>("poisson_ratio", "Poisson ratio.");
+  params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
+  params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
 
   return params;
 }
@@ -83,7 +82,6 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _elasticity_tensor(declareProperty<ElasticityTensorR4>("elasticity_tensor")),
   _Jacobian_mult(declareProperty<ElasticityTensorR4>("Jacobian_mult")),
   // _d_stress_dT(declareProperty<RankTwoTensor>("d_stress_dT")),
-  _Cijkl_vector(getParam<std::vector<Real> >("C_ijkl")),
   _Cijkl(),
   _fill_method((RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
 
@@ -143,17 +141,6 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion"))
 
   {
-    Real E = _youngs_modulus;
-    Real nu = _poisson_ratio;
-    Real alpha, beta, gamma;
-    alpha =  E*(1-nu)/((1+nu)*(1-2*nu));
-    beta = E*nu/((1+nu)*(1-2*nu));
-    gamma = E/(2*(1+nu));
-
-    Real Cijkl_array[] = {alpha,beta,beta,alpha,beta,alpha,gamma,gamma,gamma};
-    std::vector<Real> Cijkl_vector(Cijkl_array, Cijkl_array+9);
-
-    _Cijkl.fillFromInputVector(Cijkl_vector, _fill_method);
   }
 
 MooseEnum

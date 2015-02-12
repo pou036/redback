@@ -33,7 +33,17 @@ RedbackMechMaterialCC::RedbackMechMaterialCC(const std::string & name, InputPara
   RedbackMechMaterial(name, parameters),
   _slope_yield_surface(getParam<Real>("slope_yield_surface"))
 {
-  _Cijkl.fillFromInputVector(_Cijkl_vector, _fill_method);
+  Real E = _youngs_modulus;
+  Real nu = _poisson_ratio;
+  Real alpha, beta, gamma;
+  alpha =  E*(1-nu)/((1+nu)*(1-2*nu));
+  beta = E*nu/((1+nu)*(1-2*nu));
+  gamma = E/(2*(1+nu));
+
+  Real Cijkl_array[] = {alpha,beta,beta,alpha,beta,alpha,gamma,gamma,gamma};
+  std::vector<Real> Cijkl_vector(Cijkl_array, Cijkl_array+9);
+
+  _Cijkl.fillFromInputVector(Cijkl_vector, _fill_method);
 }
 
 /**
@@ -47,7 +57,7 @@ RedbackMechMaterialCC::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, 
   flow_tensor = 3.0*sig.deviatoric()/(_slope_yield_surface*_slope_yield_surface);
   flow_tensor.addIa((2.0*p - pc)/3.0); //(p > 0 ? 1:-1)
   // TODO: do we need to normalise? If so, do we need the sqrt(3/2) factor?
-  //flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm(); 
+  //flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm();
 }
 
 /**
@@ -101,7 +111,7 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig, const RankFourTensor & 
   sig_dev = sig.deviatoric();
 
   dfi_dseqv = getDerivativeFlowIncrement(sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress);
-  getFlowTensor(sig, sig_eqv, pressure, pc, flow_dirn); 
+  getFlowTensor(sig, sig_eqv, pressure, pc, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the residual with respect to stress, dr_dsig
    * It consists of two terms: The first is

@@ -71,9 +71,6 @@ protected:
   MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
 
-  // vectors to get the input values
-  std::vector<Real> _Cijkl_vector;
-
   /// Individual material information
   ElasticityTensorR4 _Cijkl;
 

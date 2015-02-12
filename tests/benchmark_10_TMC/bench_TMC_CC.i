@@ -42,7 +42,8 @@
     disp_z = disp_z
     temperature = temp
     exponent = 1
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
+    youngs_modulus = 1000
+    poisson_ratio = 0.3
     ref_pe_rate = 1
     slope_yield_surface = -0.6
     yield_criterion = modified_Cam_Clay
