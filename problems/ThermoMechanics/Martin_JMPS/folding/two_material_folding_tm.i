@@ -9,13 +9,11 @@
     type = AddExtraNodeset
     new_boundary = 4
     coord = '5 0'
-    new_boundary = 4
   [../]
   [./left_middle]
     type = AddExtraNodeset
     new_boundary = 5
     coord = '-5 0'
-    new_boundary = 5
   [../]
 []
 
@@ -42,7 +40,6 @@
     block = '0 2'
     disp_y = disp_y
     disp_x = disp_x
-    C_ijkl = '1.056e+00 1.863e-01 1.863e-01 1.056e+00 1.863e-01 1.056e+00 4.348e-01 4.348e-01 4.348e-01'
     yield_stress = '0. 1 1. 1'
     disp_z = disp_z
     m = 3
@@ -61,13 +58,14 @@
     is_chemistry_on = true
     fluid_thermal_expansion = 1e-5
     solid_thermal_expansion = 0
+    poisson_ratio = 0.3
+    youngs_modulus = 10
   [../]
   [./mat1]
     type = RedbackMechMaterialJ2
     block = 1
     disp_y = disp_y
     disp_x = disp_x
-    C_ijkl = '1.056e+02 1.863e+01 1.863e+01 1.056e+02 1.863e+01 1.056e+02 4.348e+01 4.348e+01 4.348e+01'
     yield_stress = '0. 1 1e-6 0.8 1 0.8'
     disp_z = disp_z
     m = 3
@@ -86,6 +84,8 @@
     is_chemistry_on = true
     fluid_thermal_expansion = 1e-5
     solid_thermal_expansion = 0
+    poisson_ratio = 0.3
+    youngs_modulus = 1000
   [../]
   [./mat_noMech]
     type = RedbackMaterial
@@ -378,7 +378,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 10
+  end_time = 1
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -392,7 +392,7 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 1e-3
+    dt = 5e-4
   [../]
 []
 
