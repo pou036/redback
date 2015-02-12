@@ -128,6 +128,8 @@ protected:
   Real macaulayBracket(Real);
 
   // Redback specific
+  Real _youngs_modulus;
+  Real _poisson_ratio;
   MaterialProperty<Real> & _mises_stress;
   MaterialProperty<Real> & _mean_stress;
   MaterialProperty<Real> & _mises_strain_rate;

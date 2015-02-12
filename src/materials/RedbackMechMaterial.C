@@ -62,6 +62,8 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addParam<MooseEnum>("yield_criterion", RedbackMechMaterial::yieldCriterionEnum() = "J2_plasticity", "Yield criterion");
   params.addParam< Real >("mixture_compressibility", 1,"Compressibility of the rock+fluid mixture");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
+  params.addParam<Real>("youngs_modulus", "Youngs modulus.");
+  params.addParam<Real>("poisson_ratio", "Poisson ratio.");
 
   return params;
 }
@@ -107,6 +109,8 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _mhc(getParam<Real>("mhc")),
 
   // Redback
+  _youngs_modulus(getParam<Real>("youngs_modulus")),
+  _poisson_ratio(getParam<Real>("poisson_ratio")),
   _mises_stress(declareProperty<Real>("mises_stress")),
   _mean_stress(declareProperty<Real>("mean_stress")),
   _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
@@ -139,7 +143,17 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion"))
 
   {
-  _Cijkl.fillFromInputVector(_Cijkl_vector, _fill_method);
+    Real E = _youngs_modulus;
+    Real nu = _poisson_ratio;
+    Real alpha, beta, gamma;
+    alpha =  E*(1-nu)/((1+nu)*(1-2*nu));
+    beta = E*nu/((1+nu)*(1-2*nu));
+    gamma = E/(2*(1+nu));
+
+    Real Cijkl_array[] = {alpha,beta,beta,alpha,beta,alpha,gamma,gamma,gamma};
+    std::vector<Real> Cijkl_vector(Cijkl_array, Cijkl_array+9);
+
+    _Cijkl.fillFromInputVector(Cijkl_vector, _fill_method);
   }
 
 MooseEnum
@@ -383,7 +397,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _mechanical_dissipation_jac[_qp] = _mechanical_dissipation[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
-  //_mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig) / yield_stress * 
+  //_mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig) / yield_stress *
   //    std::pow( macaulayBracket( getSigEqv(sig) / yield_stress - 1.0 ), _exponent);
   _mod_gruntfest_number[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
       (
@@ -528,7 +542,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
     //TODO: checking whether in plasticity
 
     flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
-    getFlowTensor(sig_new, q, p, yield_stress, flow_tensor); 
+    getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
     flow_tensor *= flow_incr;
     resid = flow_tensor - delta_dp;
     err1 = resid.L2norm();
@@ -537,9 +551,9 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
     while (err1 > tol1  && iter < maxiter) //Stress update iteration (hardness fixed)
     {
       iter++;
-      
+
       //Jacobian = d(residual)/d(sigma)
-      getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig); 
+      getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig);
       dr_dsig_inv = dr_dsig.invSymm();
       ddsig = -dr_dsig_inv * resid; // Newton Raphson
       delta_dp -= E_ijkl.invSymm() * ddsig; //Update increment of plastic rate of deformation tensor
@@ -552,7 +566,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
       flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
       if (flow_incr < 0.0) //negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment: Reduce time increment.");
-      getFlowTensor(sig_new, q, p, yield_stress, flow_tensor); 
+      getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
       flow_tensor *= flow_incr;
       resid = flow_tensor - delta_dp; //Residual
       err1=resid.L2norm();
