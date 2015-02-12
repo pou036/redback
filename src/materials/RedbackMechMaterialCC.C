@@ -30,20 +30,9 @@ InputParameters validParams<RedbackMechMaterialCC>()
 }
 
 RedbackMechMaterialCC::RedbackMechMaterialCC(const std::string & name, InputParameters parameters) :
-  RedbackMechMaterial(name, parameters),
-  _slope_yield_surface(getParam<Real>("slope_yield_surface"))
+    RedbackMechMaterial(name, parameters),
+    _slope_yield_surface(getParam<Real>("slope_yield_surface"))
 {
-  Real E = _youngs_modulus;
-  Real nu = _poisson_ratio;
-  Real alpha, beta, gamma;
-  alpha =  E*(1-nu)/((1+nu)*(1-2*nu));
-  beta = E*nu/((1+nu)*(1-2*nu));
-  gamma = E/(2*(1+nu));
-
-  Real Cijkl_array[] = {alpha,beta,beta,alpha,beta,alpha,gamma,gamma,gamma};
-  std::vector<Real> Cijkl_vector(Cijkl_array, Cijkl_array+9);
-
-  _Cijkl.fillFromInputVector(Cijkl_vector, _fill_method);
 }
 
 /**

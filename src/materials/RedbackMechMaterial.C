@@ -68,80 +68,90 @@ InputParameters validParams<RedbackMechMaterial>()
 }
 
 RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParameters parameters) :
-  Material(name, parameters),
-  // Copy-paste from TensorMechanicsMaterial.C
-  _grad_disp_x(coupledGradient("disp_x")),
-  _grad_disp_y(coupledGradient("disp_y")),
-  _grad_disp_z(_mesh.dimension() == 3 ? coupledGradient("disp_z") : _grad_zero),
-  _grad_disp_x_old(_fe_problem.isTransient() ? coupledGradientOld("disp_x") : _grad_zero),
-  _grad_disp_y_old(_fe_problem.isTransient() ? coupledGradientOld("disp_y") : _grad_zero),
-  _grad_disp_z_old(_fe_problem.isTransient() && _mesh.dimension() == 3 ? coupledGradientOld("disp_z") : _grad_zero),
-  _stress(declareProperty<RankTwoTensor>("stress")),
-  _total_strain(declareProperty<RankTwoTensor>("total_strain")),
-  _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
-  _elasticity_tensor(declareProperty<ElasticityTensorR4>("elasticity_tensor")),
-  _Jacobian_mult(declareProperty<ElasticityTensorR4>("Jacobian_mult")),
-  // _d_stress_dT(declareProperty<RankTwoTensor>("d_stress_dT")),
-  _Cijkl(),
-  _fill_method((RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
+    Material(name, parameters),
+    // Copy-paste from TensorMechanicsMaterial.C
+    _grad_disp_x(coupledGradient("disp_x")),
+    _grad_disp_y(coupledGradient("disp_y")),
+    _grad_disp_z(_mesh.dimension() == 3 ? coupledGradient("disp_z") : _grad_zero),
+    _grad_disp_x_old(_fe_problem.isTransient() ? coupledGradientOld("disp_x") : _grad_zero),
+    _grad_disp_y_old(_fe_problem.isTransient() ? coupledGradientOld("disp_y") : _grad_zero),
+    _grad_disp_z_old(_fe_problem.isTransient() && _mesh.dimension() == 3 ? coupledGradientOld("disp_z") : _grad_zero),
+    _stress(declareProperty<RankTwoTensor>("stress")),
+    _total_strain(declareProperty<RankTwoTensor>("total_strain")),
+    _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
+    _elasticity_tensor(declareProperty<ElasticityTensorR4>("elasticity_tensor")),
+    _Jacobian_mult(declareProperty<ElasticityTensorR4>("Jacobian_mult")),
+    // _d_stress_dT(declareProperty<RankTwoTensor>("d_stress_dT")),
+    _Cijkl(),
+    _fill_method((RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
 
-  // Copy-paste from FiniteStrainMaterial.C
-  _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),
-  _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
-  _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
-  _elastic_strain_old(declarePropertyOld<RankTwoTensor>("elastic_strain")),
-  _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
-  _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment")),
-  _dfgrd(declareProperty<RankTwoTensor>("deformation gradient")),
+    // Copy-paste from FiniteStrainMaterial.C
+    _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),
+    _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
+    _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
+    _elastic_strain_old(declarePropertyOld<RankTwoTensor>("elastic_strain")),
+    _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
+    _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment")),
+    _dfgrd(declareProperty<RankTwoTensor>("deformation gradient")),
 
-  // Copy-paste from FiniteStrainPlasticMaterial.C
-  _yield_stress_vector(getParam< std::vector<Real> >("yield_stress")),//Read from input file
-  _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
-  _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
-  _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
-  _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
+    // Copy-paste from FiniteStrainPlasticMaterial.C
+    _yield_stress_vector(getParam< std::vector<Real> >("yield_stress")),//Read from input file
+    _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
+    _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
+    _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
+    _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
 
-  // Copy-paste from FiniteStrainPlasticRateMaterial.C
-  _ref_pe_rate(getParam<Real>("ref_pe_rate")),
-  _exponent(getParam<Real>("exponent")),
-  _mhc(getParam<Real>("mhc")),
+    // Copy-paste from FiniteStrainPlasticRateMaterial.C
+    _ref_pe_rate(getParam<Real>("ref_pe_rate")),
+    _exponent(getParam<Real>("exponent")),
+    _mhc(getParam<Real>("mhc")),
 
-  // Redback
-  _youngs_modulus(getParam<Real>("youngs_modulus")),
-  _poisson_ratio(getParam<Real>("poisson_ratio")),
-  _mises_stress(declareProperty<Real>("mises_stress")),
-  _mean_stress(declareProperty<Real>("mean_stress")),
-  _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
-  _volumetric_strain(declareProperty<Real>("volumetric_strain")),
-  _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
-  _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
-  _mixture_compressibility_param(getParam<Real>("mixture_compressibility")),
-  _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
-  _yield_criterion((YieldCriterion)(int)getParam<MooseEnum>("yield_criterion")),
-  //_dispx_dot(coupledDot("disp_x")),
-  //_dispy_dot(coupledDot("disp_y")),
-  //_dispz_dot(coupledDot("disp_z"))
+    // Redback
+    _youngs_modulus(getParam<Real>("youngs_modulus")),
+    _poisson_ratio(getParam<Real>("poisson_ratio")),
+    _mises_stress(declareProperty<Real>("mises_stress")),
+    _mean_stress(declareProperty<Real>("mean_stress")),
+    _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
+    _volumetric_strain(declareProperty<Real>("volumetric_strain")),
+    _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
+    _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
+    _mixture_compressibility_param(getParam<Real>("mixture_compressibility")),
+    _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
+    _yield_criterion((YieldCriterion)(int)getParam<MooseEnum>("yield_criterion")),
+    //_dispx_dot(coupledDot("disp_x")),
+    //_dispy_dot(coupledDot("disp_y")),
+    //_dispz_dot(coupledDot("disp_z"))
 
-  //_solid_velocity(declareProperty<RealVectorValue>("solid_velocity")),
+    //_solid_velocity(declareProperty<RealVectorValue>("solid_velocity")),
 
-  // Get coupled variables (T & P)
-  _has_T(isCoupled("temperature")),
-  _T(_has_T ? coupledValue("temperature") : _zero),
-  _T_old(_has_T ? coupledValueOld("temperature") : _zero),
-  _has_pore_pres(isCoupled("pore_pres")),
-  _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
+    // Get coupled variables (T & P)
+    _has_T(isCoupled("temperature")),
+    _T(_has_T ? coupledValue("temperature") : _zero),
+    _T_old(_has_T ? coupledValueOld("temperature") : _zero),
+    _has_pore_pres(isCoupled("pore_pres")),
+    _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
 
-  // Get some material properties from RedbackMaterial
-  _mechanical_dissipation(getMaterialProperty<Real>("mechanical_dissipation")),
-  _gr(getMaterialProperty<Real>("gr")),
-  _ar(getMaterialProperty<Real>("ar")),
-  _mechanical_dissipation_jac(getMaterialProperty<Real>("mechanical_dissipation_jacobian")),
-  _delta(getMaterialProperty<Real>("delta")),
-  _mod_gruntfest_number(getMaterialProperty<Real>("mod_gruntfest_number")),
-  _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion"))
+    // Get some material properties from RedbackMaterial
+    _mechanical_dissipation(getMaterialProperty<Real>("mechanical_dissipation")),
+    _gr(getMaterialProperty<Real>("gr")),
+    _ar(getMaterialProperty<Real>("ar")),
+    _mechanical_dissipation_jac(getMaterialProperty<Real>("mechanical_dissipation_jacobian")),
+    _delta(getMaterialProperty<Real>("delta")),
+    _mod_gruntfest_number(getMaterialProperty<Real>("mod_gruntfest_number")),
+    _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion"))
+{
+  Real E = _youngs_modulus;
+  Real nu = _poisson_ratio;
+  Real alpha, beta, gamma;
+  alpha =  E*(1-nu)/((1+nu)*(1-2*nu));
+  beta = E*nu/((1+nu)*(1-2*nu));
+  gamma = E/(2*(1+nu));
 
-  {
-  }
+  Real Cijkl_array[] = {alpha,beta,beta,alpha,beta,alpha,gamma,gamma,gamma};
+  std::vector<Real> Cijkl_vector(Cijkl_array, Cijkl_array+9);
+
+  _Cijkl.fillFromInputVector(Cijkl_vector, _fill_method);
+}
 
 MooseEnum
 RedbackMechMaterial::yieldCriterionEnum()
