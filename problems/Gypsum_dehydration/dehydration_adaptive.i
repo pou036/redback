@@ -1,11 +1,7 @@
 [Mesh]
-  type = GeneratedMesh
+  type = FileMesh
+  file = ../../meshes/cylinder.msh
   dim = 2
-  nx = 10
-  ny = 10
-  nz = 5
-  xmin = -1
-  ymin = -1
 []
 
 [Variables]
@@ -104,7 +100,7 @@
 []
 
 [BCs]
-  active = 'press_bc high_temp'
+  active = 'low_temp press_bc'
   [./disp_y]
     type = DirichletBC
     variable = disp_y
@@ -126,19 +122,19 @@
   [./press_bc]
     type = DirichletBC
     variable = pore_pressure
-    boundary = 'left right top bottom'
+    boundary = '0 1 2'
     value = 0
   [../]
   [./low_temp]
     type = DirichletBC
     variable = temp
-    boundary = 'left right top bottom'
+    boundary = '0 1 2'
     value = 0
   [../]
   [./high_temp]
     type = DirichletBC
     variable = temp
-    boundary = 'left right top bottom'
+    boundary = '0 1 2'
     value = 0.1
   [../]
 []
@@ -152,7 +148,7 @@
     ar = 10
     yield_stress = '0 1 1 1'
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
-    gr = 0.25
+    gr = 1
     pore_pres = pore_pressure
     temperature = temp
     is_mechanics_on = false
