@@ -82,9 +82,6 @@ protected:
 
   //VariableValue & _T;
 
-  /// determines the translation from C_ijkl to the Rank-4 tensor
-  RankFourTensor::FillMethod _fill_method;
-
   // Copy-paste from FiniteStrainMaterial.h
   MaterialProperty<RankTwoTensor> & _strain_rate;
   MaterialProperty<RankTwoTensor> & _strain_increment;

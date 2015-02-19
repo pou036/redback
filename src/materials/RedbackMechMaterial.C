@@ -35,7 +35,6 @@ InputParameters validParams<RedbackMechMaterial>()
   InputParameters params = validParams<Material>();
 
   // Copy-paste from TensorMechanicsMaterial.C
-  params.addParam<MooseEnum>("fill_method", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
   params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1");
   params.addParam<Real>("euler_angle_2", 0.0, "Euler angle in direction 2");
   params.addParam<Real>("euler_angle_3", 0.0, "Euler angle in direction 3");
@@ -83,7 +82,6 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _Jacobian_mult(declareProperty<ElasticityTensorR4>("Jacobian_mult")),
     // _d_stress_dT(declareProperty<RankTwoTensor>("d_stress_dT")),
     _Cijkl(),
-    _fill_method((RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
 
     // Copy-paste from FiniteStrainMaterial.C
     _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),
@@ -150,7 +148,9 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   Real Cijkl_array[] = {alpha,beta,beta,alpha,beta,alpha,gamma,gamma,gamma};
   std::vector<Real> Cijkl_vector(Cijkl_array, Cijkl_array+9);
 
-  _Cijkl.fillFromInputVector(Cijkl_vector, _fill_method);
+  MooseEnum fill_method = RankFourTensor::fillMethodEnum();
+  fill_method = "symmetric9";
+  _Cijkl.fillFromInputVector(Cijkl_vector, (RankFourTensor::FillMethod)(int) fill_method);
 }
 
 MooseEnum
