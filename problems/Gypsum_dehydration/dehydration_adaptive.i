@@ -122,7 +122,7 @@
   [./press_bc]
     type = DirichletBC
     variable = pore_pressure
-    boundary = '0 1 2'
+    boundary = 0
     value = 0
   [../]
   [./low_temp]
@@ -147,13 +147,12 @@
     mu = 1e-3
     ar = 10
     yield_stress = '0 1 1 1'
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
-    gr = 1
+    gr = 0.7
     pore_pres = pore_pressure
     temperature = temp
     is_mechanics_on = false
     ref_lewis_nb = 1
-    Kc = 1
+    Kc = 10
     ar_F = 20
     ar_R = 10
     phi0 = 0.1
@@ -213,8 +212,8 @@
   dtmax = 0.1
   scheme = bdf2
   [./TimeStepper]
-    type = ConstantDT
-    dt = 0.05
+    type = SolutionTimeAdaptiveDT
+    dt = 0.005
   [../]
 []
 
