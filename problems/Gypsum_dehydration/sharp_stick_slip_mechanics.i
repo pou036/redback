@@ -1,11 +1,10 @@
 [Mesh]
   type = FileMesh
-  file = ../../meshes/cylinder.msh
+  file = ../../meshes/cylinder_slim.msh
   dim = 2
 []
 
 [Variables]
-  active = 'pore_pressure temp'
   [./temp]
   [../]
   [./disp_x]
@@ -19,6 +18,10 @@
     block = 0
   [../]
   [./pore_pressure]
+  [../]
+  [./disp_z]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
@@ -100,18 +103,18 @@
 []
 
 [BCs]
-  active = 'low_temp press_bc'
+  active = 'low_temp disp_y disp_x_left press_bc'
   [./disp_y]
     type = DirichletBC
     variable = disp_y
-    boundary = 'left right'
+    boundary = '1 2'
     value = 0
   [../]
   [./disp_x_left]
     type = DirichletBC
     variable = disp_x
-    boundary = left
-    value = 1
+    boundary = '1 2'
+    value = 0
   [../]
   [./disp_x_rigth]
     type = DirichletBC
@@ -147,7 +150,7 @@
     mu = 1e-3
     ar = 10
     yield_stress = '0 1 1 1'
-    gr = 0.7
+    gr = 11
     pore_pres = pore_pressure
     temperature = temp
     is_mechanics_on = false
@@ -160,6 +163,21 @@
     Aphi = 1
     da_endo = 1e-4
     is_chemistry_on = true
+  [../]
+  [./J2_mechanics]
+    type = RedbackMechMaterialCC
+    block = 0
+    slope_yield_surface = 0.8
+    youngs_modulus = 10
+    exponent = 3
+    disp_y = disp_y
+    disp_x = disp_x
+    pore_pres = pore_pressure
+    yield_stress = '0 1 1 1'
+    temperature = temp
+    poisson_ratio = 0.25
+    ref_pe_rate = 1
+    disp_z = disp_z
   [../]
 []
 
@@ -213,7 +231,7 @@
   scheme = bdf2
   [./TimeStepper]
     type = SolutionTimeAdaptiveDT
-    dt = 0.005
+    dt = 0.001
   [../]
 []
 
@@ -223,7 +241,7 @@
   [./Indicators]
     [./gradient_strain_rate]
       type = GradientJumpIndicator
-      variable = strain_rate
+      variable = temp
     [../]
   [../]
   [./Markers]
@@ -231,15 +249,16 @@
       type = ErrorFractionMarker
       coarsen = 0.05
       indicator = gradient_strain_rate
-      refine = 0.8
+      refine = 0.1
     [../]
   [../]
 []
 
 [Outputs]
   exodus = true
-  console = true
   base_file = bench_THC_poro_out
+  file_base = Output_Test_Oli
+  csv = true
 []
 
 [ICs]
@@ -253,6 +272,16 @@
     variable = pore_pressure
     type = ConstantIC
     value = 0
+  [../]
+[]
+
+[RedbackAction]
+  [./Redback_mech]
+    disp_z = disp_z
+    temp = temp
+    disp_x = disp_x
+    pore_pres = pore_pressure
+    disp_y = disp_y
   [../]
 []
 

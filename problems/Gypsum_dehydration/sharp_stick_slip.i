@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = ../../meshes/cylinder.msh
+  file = ../../meshes/cylinder_slim.msh
   dim = 2
 []
 
@@ -147,7 +147,7 @@
     mu = 1e-3
     ar = 10
     yield_stress = '0 1 1 1'
-    gr = 0.7
+    gr = 11
     pore_pres = pore_pressure
     temperature = temp
     is_mechanics_on = false
@@ -213,7 +213,7 @@
   scheme = bdf2
   [./TimeStepper]
     type = SolutionTimeAdaptiveDT
-    dt = 0.005
+    dt = 0.001
   [../]
 []
 
@@ -223,7 +223,7 @@
   [./Indicators]
     [./gradient_strain_rate]
       type = GradientJumpIndicator
-      variable = strain_rate
+      variable = temp
     [../]
   [../]
   [./Markers]
@@ -231,15 +231,16 @@
       type = ErrorFractionMarker
       coarsen = 0.05
       indicator = gradient_strain_rate
-      refine = 0.8
+      refine = 0.1
     [../]
   [../]
 []
 
 [Outputs]
   exodus = true
-  console = true
   base_file = bench_THC_poro_out
+  file_base = Output_Test_Oli
+  csv = true
 []
 
 [ICs]

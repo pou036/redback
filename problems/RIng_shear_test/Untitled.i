@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = ../../meshes/cylinder.msh
+  file = ../../meshes/Cylinder_hollow_reg.msh
   dim = 2
 []
 
@@ -122,13 +122,13 @@
   [./press_bc]
     type = DirichletBC
     variable = pore_pressure
-    boundary = 0
+    boundary = 2
     value = 0
   [../]
   [./low_temp]
     type = DirichletBC
     variable = temp
-    boundary = '0 1 2'
+    boundary = 2
     value = 0
   [../]
   [./high_temp]
@@ -147,7 +147,7 @@
     mu = 1e-3
     ar = 10
     yield_stress = '0 1 1 1'
-    gr = 0.7
+    gr = 11
     pore_pres = pore_pressure
     temperature = temp
     is_mechanics_on = false
@@ -168,7 +168,7 @@
   [./middle_temp]
     type = PointValue
     variable = temp
-    point = '0 0 0'
+    point = '0.51 0 0.25'
   [../]
   [./strain]
     type = StrainRatePoint
@@ -178,27 +178,27 @@
   [./middle_press]
     type = PointValue
     variable = pore_pressure
-    point = '0 0 0'
+    point = '0.51 0 0.25'
   [../]
   [./porosity_middle]
     type = PointValue
     variable = porosity
-    point = '0 0 0'
+    point = '0.51 0 0.25'
   [../]
   [./Lewis_middle]
     type = PointValue
     variable = Lewis_number
-    point = '0 0 0'
+    point = '0.51 0 0.25'
   [../]
   [./strain_rate_middle]
     type = PointValue
     variable = strain_rate
-    point = '0 0 0'
+    point = '0.51 0 0.25'
   [../]
   [./solid_ratio_middle]
     type = PointValue
     variable = solid_ratio
-    point = '0 0 0'
+    point = '0.51 0 0.25'
   [../]
 []
 
@@ -213,33 +213,15 @@
   scheme = bdf2
   [./TimeStepper]
     type = SolutionTimeAdaptiveDT
-    dt = 0.005
-  [../]
-[]
-
-[Adaptivity]
-  marker = strain_Rate_EFM
-  max_h_level = 3
-  [./Indicators]
-    [./gradient_strain_rate]
-      type = GradientJumpIndicator
-      variable = strain_rate
-    [../]
-  [../]
-  [./Markers]
-    [./strain_Rate_EFM]
-      type = ErrorFractionMarker
-      coarsen = 0.05
-      indicator = gradient_strain_rate
-      refine = 0.8
-    [../]
+    dt = 0.001
   [../]
 []
 
 [Outputs]
   exodus = true
-  console = true
   base_file = bench_THC_poro_out
+  file_base = Ring_shear
+  csv = true
 []
 
 [ICs]
