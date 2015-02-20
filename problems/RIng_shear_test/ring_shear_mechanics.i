@@ -43,7 +43,7 @@
     mu = 1e-3
     ar = 10
     yield_stress = '0 1 1 1'
-    gr = 1 # 11
+    gr = 10 # 11
     pore_pres = pore_pressure
     temperature = temp
     is_mechanics_on = false
