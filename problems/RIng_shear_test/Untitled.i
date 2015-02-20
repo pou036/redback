@@ -5,7 +5,6 @@
 []
 
 [Variables]
-  active = 'pore_pressure temp'
   [./temp]
   [../]
   [./disp_x]
@@ -19,6 +18,10 @@
     block = 0
   [../]
   [./pore_pressure]
+  [../]
+  [./disp_z]
+    order = CONSTANT
+    family = MONOMIAL
   [../]
 []
 
@@ -39,6 +42,13 @@
   [./solid_ratio]
     order = CONSTANT
     family = MONOMIAL
+  [../]
+[]
+
+[Functions]
+  [./Loading]
+    type = ParsedFunction
+    value = 0.00001*t
   [../]
 []
 
@@ -100,23 +110,11 @@
 []
 
 [BCs]
-  active = 'low_temp press_bc'
+  active = 'low_temp disp_y disp_z disp_x press_bc Inner_loading_x'
   [./disp_y]
     type = DirichletBC
     variable = disp_y
-    boundary = 'left right'
-    value = 0
-  [../]
-  [./disp_x_left]
-    type = DirichletBC
-    variable = disp_x
-    boundary = left
-    value = 1
-  [../]
-  [./disp_x_rigth]
-    type = DirichletBC
-    variable = disp_x
-    boundary = right
+    boundary = 2
     value = 0
   [../]
   [./press_bc]
@@ -136,6 +134,24 @@
     variable = temp
     boundary = '0 1 2'
     value = 0.1
+  [../]
+  [./disp_z]
+    type = DirichletBC
+    variable = disp_z
+    boundary = 2
+    value = 0
+  [../]
+  [./disp_x]
+    type = DirichletBC
+    variable = disp_x
+    boundary = 2
+    value = 0
+  [../]
+  [./Inner_loading_x]
+    type = NeumannBC
+    variable = disp_x
+    boundary = 3
+    value = 1
   [../]
 []
 
@@ -160,6 +176,20 @@
     Aphi = 1
     da_endo = 1e-4
     is_chemistry_on = true
+  [../]
+  [./Rock_mechanics]
+    type = RedbackMechMaterialJ2
+    block = 0
+    youngs_modulus = 10
+    exponent = 3
+    disp_y = disp_y
+    disp_x = disp_x
+    pore_pres = pore_pressure
+    yield_stress = '0 1 1 1'
+    temperature = temp
+    poisson_ratio = 0.25
+    ref_pe_rate = 1
+    disp_z = disp_z
   [../]
 []
 
@@ -212,15 +242,15 @@
   dtmax = 0.1
   scheme = bdf2
   [./TimeStepper]
-    type = SolutionTimeAdaptiveDT
-    dt = 0.001
+    type = ConstantDT
+    dt = 0.0001
   [../]
 []
 
 [Outputs]
   exodus = true
   base_file = bench_THC_poro_out
-  file_base = Ring_shear
+  file_base = Ring_shear_mechanics
   csv = true
 []
 
@@ -235,6 +265,15 @@
     variable = pore_pressure
     type = ConstantIC
     value = 0
+  [../]
+[]
+
+[RedbackAction]
+  [./Mechanics]
+    disp_z = disp_z
+    pore_pres = pore_pressure
+    disp_y = disp_y
+    disp_x = disp_x
   [../]
 []
 
