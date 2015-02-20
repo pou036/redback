@@ -85,7 +85,7 @@
     fluid_thermal_expansion = 1e-5
     solid_thermal_expansion = 0
     poisson_ratio = 0.3
-    youngs_modulus = 1000
+    youngs_modulus = 100
   [../]
   [./mat_noMech]
     type = RedbackMaterial
@@ -108,11 +108,11 @@
   active = 'upfunc downfunc'
   [./upfunc]
     type = ParsedFunction
-    value = 0.01*t
+    value = 0.1*t
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -1e-2*t
+    value = -0.1*t
   [../]
   [./spline_IC]
     type = ConstantFunction
@@ -378,9 +378,10 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 1
+  end_time = 10
   dtmax = 1
   dtmin = 1e-7
+  num_steps = 10000
   type = Transient
   l_max_its = 200
   nl_max_its = 10
@@ -397,13 +398,13 @@
 []
 
 [Outputs]
-  file_base = bench_TM_J2_out
   output_initial = true
   exodus = true
+  csv = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    output_linear = false
   [../]
 []
 

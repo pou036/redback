@@ -140,17 +140,15 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
 {
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
-  Real alpha, beta, gamma;
-  alpha =  E*(1-nu)/((1+nu)*(1-2*nu));
-  beta = E*nu/((1+nu)*(1-2*nu));
-  gamma = E/(2*(1+nu));
+  Real l1 = E*nu/(1+nu)/(1-2*nu); // First Lame modulus
+  Real l2 = 0.5*E/(1+nu); // Second Lame modulus (shear)
+  Real input_array[] = {l1, l2};
+  std::vector<Real> input_vector(input_array, input_array+2);
 
-  Real Cijkl_array[] = {alpha,beta,beta,alpha,beta,alpha,gamma,gamma,gamma};
-  std::vector<Real> Cijkl_vector(Cijkl_array, Cijkl_array+9);
-
+  // Choose fill method, hardcoded.
   MooseEnum fill_method = RankFourTensor::fillMethodEnum();
-  fill_method = "symmetric9";
-  _Cijkl.fillFromInputVector(Cijkl_vector, (RankFourTensor::FillMethod)(int) fill_method);
+  fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic elasticity tensor.
+  _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int) fill_method);
 }
 
 MooseEnum
@@ -159,7 +157,6 @@ RedbackMechMaterial::yieldCriterionEnum()
   return MooseEnum("elasticity J2_plasticity Drucker_Prager modified_Cam_Clay");
 }
 
-// TODO: break down this file for separate yield criteria
 void
 RedbackMechMaterial::initQpStatefulProperties()
 {
