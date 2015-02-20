@@ -35,6 +35,8 @@
     poisson_ratio = 0.3
     ref_pe_rate = 1
     yield_stress = '0. 1 1. 1'
+    pore_pres = pore_pressure
+    temperature = stress_zz
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -42,7 +44,6 @@
     m = 3
     mu = 1e-3
     ar = 10
-    yield_stress = '0 1 1 1'
     gr = 10 # 11
     pore_pres = pore_pressure
     temperature = temp
@@ -56,6 +57,9 @@
     Aphi = 1
     da_endo = 1e-4
     is_chemistry_on = true
+    disp_z = disp_z
+    disp_x = disp_x
+    disp_y = disp_y
   [../]
 []
 
@@ -133,7 +137,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress Lewis_number porosity'
+  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress stress_zz Lewis_number porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -243,7 +247,7 @@
 []
 
 [AuxKernels]
-  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation porosity Gruntfest_Number'
+  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation stress_zz porosity Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
