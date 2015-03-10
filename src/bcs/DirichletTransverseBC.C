@@ -41,7 +41,7 @@ DirichletTransverseBC::computeQpValue()
 	std::cout << "10) Hello Thomas, center.x = " << _center(1) << std::endl;
 	std::cout << "11) Hello Thomas, center.x = " << _center(2) << std::endl;
 
-	Point()
+	//Point()
 
 	return _func.value(_t, *_current_node);
 }
