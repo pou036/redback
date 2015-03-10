@@ -61,13 +61,13 @@
     disp_z = disp_z
     pore_pres = pore_pressure
     temperature = temp
-    exponent = 2
-    C_ijkl = '8.889e+01 2.222e+01 2.222e+01 8.889e+01 2.222e+01 8.889e+01 3.333e+01 3.333e+01 3.333e+01'
-    ref_pe_rate = 1e6
+    exponent = 1.5
+    ref_pe_rate = 1e4
     slope_yield_surface = 1.44
     yield_criterion = modified_Cam_Clay
     yield_stress = '0. 1 1 1'
-    mhc = 150
+    youngs_modulus = 80
+    poisson_ratio = 0.2
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -80,8 +80,8 @@
     temperature = temp
     m = 3
     mu = 1
-    ar = 10
-    gr = 2
+    ar = 8
+    gr = 1
     ref_lewis_nb = 1
     Kc = 1
     ar_F = 20
@@ -101,7 +101,7 @@
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -6.67e-4*t
+    value = -6.67e-0*t
   [../]
   [./spline_IC]
     type = ConstantFunction
@@ -176,19 +176,19 @@
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 0.885
+    value = 0.11
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -0.885
+    value = -0.11
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 0.885
+    value = 0.11
   [../]
   [./side_temp]
     type = DirichletBC
@@ -230,7 +230,7 @@
     type = NeumannBC
     variable = disp_z
     boundary = front
-    value = -0.885
+    value = -0.11
   [../]
 []
 
@@ -316,7 +316,7 @@
 []
 
 [Kernels]
-  active = 'td_press temp_diff td_temp press_diff'
+  active = 'td_press temp_diff temp_dissip td_temp press_diff'
   [./td_temp]
     type = TimeDerivative
     variable = temp
@@ -542,7 +542,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 1200
+  end_time = 0.12
   dtmax = 1e4
   dtmin = 1e-7
   type = Transient
@@ -557,7 +557,7 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 2
+    dt = 0.0002
   [../]
 []
 

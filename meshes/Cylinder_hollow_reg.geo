@@ -4,7 +4,7 @@ R_in = 0.3; // radius of inner circle
 H = 0.5; // height of cylinder
 nb_layers_third_circle = 10; //number of layers in one THIRD OF CIRCLE
 nb_rings = 9; // number of concentric cell rings
-nb_layers_z = 4; // number of vertical layers
+nb_layers_z = 10; // number of vertical layers
 
 Point(1) = {0,0,0,lc}; // Center
 

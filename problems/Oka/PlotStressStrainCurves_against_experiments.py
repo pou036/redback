@@ -131,7 +131,7 @@ def createPicturesForData\
         for experiment_index in sorted(digitised_data.keys()):
             dig_data_x = sorted(digitised_data[experiment_index].keys())
             dig_data_y = [digitised_data[experiment_index][key] for key in dig_data_x]
-            P.plot(dig_data_x[1:], dig_data_y[1:], styles[experiment_index%len(styles)], label='CD{0}'.format(experiment_index+1))
+            P.plot(dig_data_x[1:], dig_data_y[1:], styles[experiment_index%len(styles)], label='CD{0}'.format(experiment_index))
 
         P.hold(False)
         P.grid(True)
@@ -296,7 +296,7 @@ def computeDifferentialStress(data, confining_pressure):
     return data
 
 if __name__ == '__main__':
-    velocity = (2e-3)/3. # boundary condition on top surface (coeff x t)
+    velocity = (2e1)/3. # boundary condition on top surface (coeff x t)
     oka_digitised_dir = os.path.join('fig2')
     output_dir = os.path.join('.', 'pics_postprocess') # where pics will be created
      
@@ -307,16 +307,18 @@ if __name__ == '__main__':
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
 
-    if 0:
+    if 1:
         # Show curve for current simulation
         csv_filename = os.path.join('Oka.csv')
-        confining_pressure = 0.8
+        confining_pressure = 0.11
     
         # parse CSV file
         data = parseCsvFile(csv_filename)
         # compute differential stress
         data = computeDifferentialStress(data, confining_pressure)
-    
+        tmp = [0.55*elt for elt in data['avg_top(sig1) - sig3']]
+        data['avg_top(sig1) - sig3'] = tmp
+        
         # Plot stress vs strain curve
         createPicturesForData(data=data,
             key1='time', key2='avg_top(sig1) - sig3', 
@@ -324,21 +326,23 @@ if __name__ == '__main__':
             index_first=0, index_last=999999, title=None, label1='Strain (%)', label2='Deviatoric stress', 
             velocity=velocity, block_height=4, digitised_data=oka_data, do_show=True)
     
-    if 1:
+    if 0:
         # Show curves for batch of simulations
         batch_directory = os.path.join('results', 'batch1')
         data = [] # list of 6 dictionaries for each simulation data
         normalising_stress = 2.26e6 # Pa
         confining_pressures = {
-            1:0.25e6/normalising_stress,
-            2:0.5e6/normalising_stress,
-            3:0.75e6/normalising_stress,
-            4:1.0e6/normalising_stress,
-            5:1.5e6/normalising_stress,
-            6:2.0e6/normalising_stress,
+            1:0.25e6/normalising_stress, # 0.11
+            2:0.5e6/normalising_stress,  # 0.221
+            3:0.75e6/normalising_stress, # 0.332
+            4:1.0e6/normalising_stress,  # 0.442
+            5:1.5e6/normalising_stress,  # 0.664
+            6:2.0e6/normalising_stress,  # 0.885
         }
         for i in range(6):
             csv_filename = os.path.join(batch_directory, 'oka_CD{0}.csv'.format(i+1))
+            if not os.path.isfile(csv_filename):
+                continue
             data.append(parseCsvFile(csv_filename))
             data[i] = computeDifferentialStress(data[i], confining_pressures[i+1])
         # Plot stress vs strain curves

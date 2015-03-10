@@ -39,12 +39,12 @@ def runSimulations(output_subdir='batch_test', nb_procs=8):
     output_root_dir = 'results'
     output_dir = os.path.join(output_root_dir, output_subdir)
     confining_pressures = {
-        1:0.25e6/normalising_stress,
-        2:0.5e6/normalising_stress,
-        3:0.75e6/normalising_stress,
-        4:1.0e6/normalising_stress,
-        5:1.5e6/normalising_stress,
-        6:2.0e6/normalising_stress,
+        1:0.25e6/normalising_stress, # 0.11
+        2:0.5e6/normalising_stress,  # 0.221
+        3:0.75e6/normalising_stress, # 0.332
+        4:1.0e6/normalising_stress,  # 0.442
+        5:1.5e6/normalising_stress,  # 0.664
+        6:2.0e6/normalising_stress,  # 0.885
     }
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
@@ -72,4 +72,4 @@ def runSimulations(output_subdir='batch_test', nb_procs=8):
     logger.info('Finished')
 
 if __name__ == '__main__':
-    runSimulations(output_subdir='batch2')
+    runSimulations(output_subdir='batch_dummy')

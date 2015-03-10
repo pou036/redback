@@ -1,9 +1,11 @@
-alpha = 2.827e5
-beta = 1.21e5
-gamma = 0.808e5
+alpha = 8.889e+01
+beta = 2.222e+01
+gamma = 3.333e+01
 
 E = gamma*(3*alpha-4*gamma)/(alpha-gamma) # 210,000
 nu = (alpha-2*gamma)/(2*(alpha-gamma)) # 0.3
+print E
+print nu
 
 ''' In TensorMechanics, the stiffness matrix is entered as 
  [a b b a b a c c c] where
@@ -34,8 +36,8 @@ def printStiffnessTensor(E, nu):
 
 if __name__ == '__main__':
     #printElasticConstantsFromStiffness(1.346e+03,5.769e+02,3.846e+2)
-    E = 1000
-    nu = 0.3
+    E = 80
+    nu = 0.2
     alpha2, beta2, gamma2 = printStiffnessTensor(E, nu)
     #alpha2 = 1.346e+03
     #beta2 = 5.769e+02
