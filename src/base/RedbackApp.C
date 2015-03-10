@@ -5,6 +5,9 @@
 
 #include "RedbackAction.h"
 
+// Boundary conditions
+#include "DirichletTransverseBC.h"
+
 // Initial conditions
 #include "FunctionWithRandomIC.h"
 
@@ -72,6 +75,8 @@ RedbackApp::registerApps()
 void
 RedbackApp::registerObjects(Factory & factory)
 {
+  registerBoundaryCondition(DirichletTransverseBC);
+
   registerInitialCondition(FunctionWithRandomIC);
 
   registerKernel(RedbackChemEndo);
