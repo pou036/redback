@@ -44,7 +44,7 @@
     m = 3
     mu = 1e-3
     ar = 10
-    gr = 10 # 11
+    gr = 8 # 11
     pore_pres = pore_pressure
     temperature = temp
     is_mechanics_on = false
@@ -401,7 +401,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 1
+  end_time = 100
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -415,7 +415,7 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 1e-3
+    dt = 5e-3
   [../]
 []
 
