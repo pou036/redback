@@ -153,6 +153,7 @@ protected:
   MaterialProperty<Real> & _delta;
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _solid_thermal_expansion;
+  MaterialProperty<Real> & _returnmap_iter;
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
 };

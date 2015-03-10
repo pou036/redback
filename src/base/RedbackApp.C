@@ -26,6 +26,9 @@
 #include "RedbackMechMaterialDP.h"
 #include "RedbackMechMaterialCC.h"
 
+// Timesteppers
+#include "ReturnMapIterDT.h"
+
 // AuxKernels
 //#include "StrainRateAux.h"
 //#include "MisesStrainAux.h"
@@ -89,6 +92,8 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialDP);
   registerMaterial(RedbackMechMaterialCC);
+
+  registerExecutioner(ReturnMapIterDT);
 
   //registerAux(StrainRateAux);
   //registerAux(MisesStrainAux);

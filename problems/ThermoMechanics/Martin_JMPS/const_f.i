@@ -10,23 +10,23 @@
 [MeshModifiers]
   [./left_mid_point]
     type = AddExtraNodeset
-    boundary = 4
     coord = '-1 0'
+    new_boundary = 4
   [../]
   [./right_mid_point]
     type = AddExtraNodeset
-    boundary = 5
     coord = '1 0'
+    new_boundary = 5
   [../]
   [./top_mid_point]
     type = AddExtraNodeset
-    boundary = 6
     coord = '0 1'
+    new_boundary = 6
   [../]
   [./bottom_mid_point]
     type = AddExtraNodeset
-    boundary = 7
     coord = '0 -1'
+    new_boundary = 7
   [../]
 []
 
@@ -49,7 +49,7 @@
 
 [Materials]
   [./mat0]
-    type = RedbackMechMaterial
+    type = RedbackMechMaterialCC
     block = 0
     disp_y = disp_y
     disp_x = disp_x
@@ -59,6 +59,9 @@
     yield_stress = '0. 1 1. 1'
     exponent = 1
     ref_pe_rate = 1
+    youngs_modulus = 10
+    poisson_ratio = 0.3
+    slope_yield_surface = 0.3
   [../]
   [./mat1]
     type = RedbackMaterial
@@ -69,7 +72,7 @@
     temperature = temp
     Aphi = 0
     ar = 5
-    gr = 0.3
+    gr = 1
     m = 2
     pore_pres = 0
     is_mechanics_on = true
@@ -139,7 +142,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number mises_strain mech_diss mises_strain_rate mises_stress'
+  active = 'Mod_Gruntfest_number returnmap_iter mises_strain mech_diss mises_strain_rate mises_stress'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -183,6 +186,11 @@
     family = MONOMIAL
     block = '0 1'
   [../]
+  [./returnmap_iter]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
 []
 
 [Kernels]
@@ -202,7 +210,7 @@
 []
 
 [AuxKernels]
-  active = 'mises_strain mises_strain_rate mises_stress mech_dissipation Gruntfest_Number'
+  active = 'mises_strain mises_strain_rate mises_stress mech_dissipation returnmap_iter Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -262,10 +270,16 @@
     property = mod_gruntfest_number
     block = 0
   [../]
+  [./returnmap_iter]
+    type = MaterialRealAux
+    variable = returnmap_iter
+    property = returnmap_iter
+    block = 0
+  [../]
 []
 
 [Postprocessors]
-  active = 'Gruntfest_number temp_centre mises_stress strain_rate'
+  active = 'Gruntfest_number temp_centre mises_stress strain_rate max_returnmap_iter'
   [./test]
     type = StrainRatePoint
     variable = temp
@@ -291,6 +305,10 @@
     variable = Mod_Gruntfest_number
     point = '0 0 0'
   [../]
+  [./max_returnmap_iter]
+    type = ElementExtremeValue
+    variable = returnmap_iter
+  [../]
 []
 
 [Preconditioning]
@@ -308,7 +326,7 @@
   dtmax = 1
   dtmin = 1e-7
   type = Transient
-  num_steps = 100
+  num_steps = 1000000
   l_max_its = 500
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
@@ -317,8 +335,14 @@
   reset_dt = true
   line_search = basic
   [./TimeStepper]
-    type = ConstantDT
-    dt = 1e-3
+    type = ReturnMapIterDT
+    dt = 1e-4
+    min_iter = 10
+    ratio = 0.5
+    max_iter = 20
+    dt_max = 1e-1
+    postprocessor = max_returnmap_iter
+    dt_min = 1e-5
   [../]
 []
 
@@ -330,7 +354,7 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
+    linear_output = false
   [../]
 []
 
