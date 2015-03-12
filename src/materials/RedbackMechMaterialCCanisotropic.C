@@ -27,8 +27,8 @@ InputParameters validParams<RedbackMechMaterialCCanisotropic>()
 
 RedbackMechMaterialCCanisotropic::RedbackMechMaterialCCanisotropic(const std::string & name, InputParameters parameters) :
     RedbackMechMaterialCC(name, parameters),
-	_initial_anisotropy_param(getParam<Real>("initial_anisotropy_param")),
-	_anisotropy_coeff(declareProperty<Real>("anisotropy_coeff"))
+    _initial_anisotropy_param(getParam<Real>("initial_anisotropy_param")),
+    _anisotropy_coeff(declareProperty<Real>("anisotropy_coeff"))
 {
 }
 
@@ -64,7 +64,7 @@ Real
 RedbackMechMaterialCCanisotropic::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real pc)
 {
   pc *= -1;
-  if (Ellipse::isPointOutsideOfEllipse(/*m=*/_slope_yield_surface, /*p_c=*/pc, /*x=*/pressure, /*y=*/sig_eqv))
+  if (Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/_slope_yield_surface, /*p_0=*/pc, /*alpha=*/_anisotropy_coeff[_qp], /*x=*/pressure, /*y=*/sig_eqv))
   {
     Real flow_incr_vol = _ref_pe_rate * _dt * std::pow(std::fabs(pressure - p_yield_stress), _exponent) * _exponential;
     Real flow_incr_dev = _ref_pe_rate * _dt * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent) * _exponential;
@@ -77,7 +77,7 @@ RedbackMechMaterialCCanisotropic::getFlowIncrement(Real sig_eqv, Real pressure, 
 Real
 RedbackMechMaterialCCanisotropic::getDerivativeFlowIncrement(const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
 {
-  if (Ellipse::isPointOutsideOfEllipse(/*m=*/_slope_yield_surface, /*p_c=*/pc, /*x=*/pressure, /*y=*/sig_eqv))
+  if (Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/_slope_yield_surface, /*p_0=*/pc, /*alpha=*/_anisotropy_coeff[_qp], /*x=*/pressure, /*y=*/sig_eqv))
   {
     Real delta_lambda_p = _ref_pe_rate * _dt * std::pow(std::fabs(pressure - p_yield_stress), _exponent) * _exponential;
     Real delta_lambda_q = _ref_pe_rate * _dt * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent) * _exponential;
@@ -155,5 +155,5 @@ RedbackMechMaterialCCanisotropic::getJac(const RankTwoTensor & sig, const RankFo
 void
 RedbackMechMaterialCCanisotropic::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
 {
-    Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y);
+    Ellipse::distanceCCanisotropic(_slope_yield_surface, -yield_stress, _anisotropy_coeff[_qp], p, q, p_y, q_y);
 }
