@@ -149,7 +149,7 @@ Ellipse::sqrDistance(Real const e[2], Real const y[2], Real x[2])
   return sqr_distance;
 }
 
-void
+Real
 Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1)
 {
   Real e[2]; // ellipse axes
@@ -164,6 +164,48 @@ Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, 
   // Shift coordinates back to real space
   x0 = x[0] + p_c/2.0;
   x1 = x[1];
+  return sqrt(d);
+}
+
+Real
+Ellipse::distanceToCenteredEllipse(Real const horizontal_axis, Real const vertical_axis, Real const y0, Real const y1, Real & x0, Real & x1)
+{
+  Real e[2]; // ellipse axes
+  Real x[2]; // point coordinates as array
+  Real shifted_y[2]; // ellipse axes
+  e[0] = horizontal_axis;
+  e[1] = vertical_axis;
+  shifted_y[0] = y0;
+  shifted_y[1] = y1;
+  Real d = sqrDistance(e, shifted_y, x);
+  x0 = x[0];
+  x1 = x[1];
+  return sqrt(d);
+}
+
+Real
+Ellipse::distanceCCanisotropic(Real const m, Real const p_0, Real const alpha, Real const y0, Real const y1, Real & x0, Real & x1)
+{
+  Real d; // distance to ellipse
+
+  // 1) Get axes of rotated ellipse
+  Real horizontal_axis, vertical_axis, center_p, center_q;
+  getDafaliasEllipseAxesAndCentre(m, p_0, alpha, horizontal_axis, vertical_axis, center_p, center_q);
+
+  // 2) Rotate space to get ellipse horizontal
+  Real z0; // p-coordinate of rotated point (in space where ellipse is horizontal)
+  Real z1; // q-coordinate of rotated point (in space where ellipse is horizontal)
+  rotatePoint(m, p_0, alpha, true, y0, y1, z0, z1);
+
+  // 3) get distance and projection to (normal) ellipse
+  Real w0; // p-coordinate of projection point (in space where ellipse is horizontal)
+  Real w1; // q-coordinate of projection point (in space where ellipse is horizontal)
+  d = distanceToCenteredEllipse(horizontal_axis, vertical_axis, z0, z1, w0, w1);
+
+  // 4) Rotate space back to original space
+  rotatePoint(m, p_0, alpha, false, w0, w1, x0, x1);
+
+  return d;
 }
 
 bool
@@ -186,4 +228,78 @@ Ellipse::isPointOutsideOfEllipse(Real const m, Real const p_c, Real const y0, Re
     return (std::sqrt(std::pow(y0 - 0.5*p_c, 2) + (y1 + f)*(y1 + f))
       +     std::sqrt(std::pow(y0 - 0.5*p_c, 2) + (y1 - f)*(y1 - f)) > m*std::fabs(p_c));
   }
+}
+
+bool
+Ellipse::isPointOutsideOfEllipse2(Real const horizontal_axis, Real const vertical_axis, Real const y0, Real const y1)
+{
+  // Check sum of squared distances to ellipse's foci
+  Real f; // focal distance
+  if (horizontal_axis > vertical_axis)
+    {
+      f = std::sqrt(horizontal_axis*horizontal_axis - vertical_axis*vertical_axis);
+      return (std::sqrt((y0+f)*(y0+f) + y1*y1) + std::sqrt((y0-f)*(y0-f) + y1*y1) > 2*horizontal_axis);
+    }
+  else
+  {
+    f = std::sqrt(vertical_axis*vertical_axis - horizontal_axis*horizontal_axis);
+    return (std::sqrt((y1+f)*(y1+f) + y0*y0) + std::sqrt((y1-f)*(y1-f) + y0*y0) > 2*vertical_axis);
+   }
+}
+
+bool
+Ellipse::isPointOutsideOfRotatedEllipse(Real const m, Real const p_0, Real const alpha,
+    Real const y0, Real const y1)
+{
+  // 1) Get axes of rotated ellipse
+  Real horizontal_axis, vertical_axis, center_p, center_q;
+  getDafaliasEllipseAxesAndCentre(m, p_0, alpha, horizontal_axis, vertical_axis, center_p, center_q);
+
+  // 2) Rotate space to get ellipse horizontal
+  Real z0; // p-coordinate of rotated point (in space where ellipse is horizontal)
+  Real z1; // q-coordinate of rotated point (in space where ellipse is horizontal)
+  rotatePoint(m, p_0, alpha, true, y0, y1, z0, z1);
+
+  // 3) check if point is outside of (norma) ellipse
+  return isPointOutsideOfEllipse2(horizontal_axis, vertical_axis, z0, z1);
+}
+
+void
+Ellipse::rotatePoint(Real const m, Real const p_0, Real const alpha, bool forward, Real const y0, Real const y1,
+    Real & z0, Real & z1)
+{
+  Real beta; // angle of ~horizontal (when alpha=0) axis with X-axis
+  Real center_p = p_0/2.0;
+  Real center_q = alpha*p_0/2.0;
+  if (m < 1)
+  {
+    beta = 0.5*std::atan(2*alpha/(1 - m*m));
+  }
+  else // m >= 1
+  {
+    beta = 0.5*3.14159265358979323846 + 0.5*std::atan(2*alpha/(1 - m*m));
+  }
+  Real cos_beta = std::cos(beta);
+  Real sin_beta = std::sin(beta);
+  if (forward)
+  {
+    z0 = cos_beta*(y0 - center_p) + sin_beta*(y1 - center_q);
+    z1 = -sin_beta*(y0 - center_p) + cos_beta*(y1 - center_q);
+  }
+  else
+  {
+    z0 = center_p + cos_beta*y0 - sin_beta*y1;
+    z1 = center_q + sin_beta*y0 + cos_beta*y1;
+  }
+}
+
+void
+Ellipse::getDafaliasEllipseAxesAndCentre(Real const m, Real const p_0, Real const alpha,
+      Real & horizontal_axis, Real & vertical_axis, Real & center_p, Real & center_q)
+{
+  Real x = 1 + m*m + std::sqrt((m*m - 1)*(m*m - 1) + 4*alpha*alpha);
+  horizontal_axis = std::sqrt(((x*p_0*p_0)/8.0));
+  vertical_axis = std::sqrt(((m + alpha)*(m - alpha)*p_0*p_0)/(2*x));
+  center_p = p_0/2.0;
+  center_q = alpha*p_0/2.0;
 }

@@ -12,39 +12,46 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "RedbackMechMaterialCC.h"
+#include "RedbackMechMaterialCCanisotropic.h"
 #include "Ellipse.h"
 #include <cmath> //used for fabs
 
 template<>
-InputParameters validParams<RedbackMechMaterialCC>()
+InputParameters validParams<RedbackMechMaterialCCanisotropic>()
 {
-  InputParameters params = validParams<RedbackMechMaterial>();
-  //TODO: Check sign of slope_yield_surface
-  //  if (_slope_yield_surface == 0)
-  //    mooseError("modified Cam-Clay cannot deal with 0 CSL slope ('slope_yield_surface')");
-  //  if (getYieldStress(0) <= 0)
-  //    mooseError("modified Cam-Clay cannot deal with negative pre-consolidation stress ('yield_stress')");
-  params.addParam<Real>("slope_yield_surface", 0,"Slope of yield surface (positive, see documentation)");
+  InputParameters params = validParams<RedbackMechMaterialCC>();
+  params.addParam<Real>("initial_anisotropy_param", 0,"Initial anisotropy coefficient (from Dafalias 2013)");
+
   return params;
 }
 
-RedbackMechMaterialCC::RedbackMechMaterialCC(const std::string & name, InputParameters parameters) :
-    RedbackMechMaterial(name, parameters),
-    _slope_yield_surface(getParam<Real>("slope_yield_surface"))
+RedbackMechMaterialCCanisotropic::RedbackMechMaterialCCanisotropic(const std::string & name, InputParameters parameters) :
+    RedbackMechMaterialCC(name, parameters),
+	_initial_anisotropy_param(getParam<Real>("initial_anisotropy_param")),
+	_anisotropy_coeff(declareProperty<Real>("anisotropy_coeff"))
 {
+}
+
+void RedbackMechMaterialCCanisotropic::stepInitQpProperties()
+{
+  RedbackMechMaterialCC::stepInitQpProperties();
+
+  // Variable initialisation (called at each step)
+  _anisotropy_coeff[_qp] = _initial_anisotropy_param; //TODO: implement \dot{alpha}
 }
 
 /**
  * Get unitary flow tensor in deviatoric direction, modified Cam-Clay
  */
 void
-RedbackMechMaterialCC::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real pc, RankTwoTensor & flow_tensor)
+RedbackMechMaterialCCanisotropic::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real pc, RankTwoTensor & flow_tensor)
 {
   if (pc > 0) pc *= -1;
 
-  flow_tensor = 3.0*sig.deviatoric()/(_slope_yield_surface*_slope_yield_surface);
-  flow_tensor.addIa((2.0*p - pc)/3.0); //(p > 0 ? 1:-1)
+  Real M_squared = _slope_yield_surface*_slope_yield_surface;
+  Real alpha_squared = _anisotropy_coeff[_qp]*_anisotropy_coeff[_qp];
+  flow_tensor = 3.0*((q - _anisotropy_coeff[_qp]*p)/q)*sig.deviatoric()/(M_squared - alpha_squared);
+  flow_tensor.addIa(2.0*p - pc - 2.0*_anisotropy_coeff[_qp]*(q - _anisotropy_coeff[_qp]*p)/(M_squared - alpha_squared)/3.0); //(p > 0 ? 1:-1)
   // TODO: do we need to normalise? If so, do we need the sqrt(3/2) factor?
   //flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm();
 }
@@ -54,7 +61,7 @@ RedbackMechMaterialCC::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, 
  * pc ... pre-consolidation pressure (pc = -getYieldStress(eqvpstrain))
  */
 Real
-RedbackMechMaterialCC::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real pc)
+RedbackMechMaterialCCanisotropic::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real pc)
 {
   pc *= -1;
   if (Ellipse::isPointOutsideOfEllipse(/*m=*/_slope_yield_surface, /*p_c=*/pc, /*x=*/pressure, /*y=*/sig_eqv))
@@ -68,7 +75,7 @@ RedbackMechMaterialCC::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yiel
 }
 
 Real
-RedbackMechMaterialCC::getDerivativeFlowIncrement(const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
+RedbackMechMaterialCCanisotropic::getDerivativeFlowIncrement(const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
 {
   if (Ellipse::isPointOutsideOfEllipse(/*m=*/_slope_yield_surface, /*p_c=*/pc, /*x=*/pressure, /*y=*/sig_eqv))
   {
@@ -84,7 +91,7 @@ RedbackMechMaterialCC::getDerivativeFlowIncrement(const RankTwoTensor & sig, Rea
 }
 
 void
-RedbackMechMaterialCC::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr,
+RedbackMechMaterialCCanisotropic::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr,
     Real sig_eqv, Real pressure, Real p_yield_stress, Real q_yield_stress, Real pc,
     RankFourTensor & dresid_dsig)
 {
@@ -92,10 +99,10 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig, const RankFourTensor & 
   RankTwoTensor sig_dev, flow_dirn_vol, flow_dirn_dev, fij, flow_dirn, flow_tensor;
   RankTwoTensor dfi_dft;
   RankFourTensor dfd_dsig, dfi_dsig;
-  Real f1, f2;
+  Real f1, f2, f3, f4, f5;
   Real dfi_dseqv_dev, dfi_dseqv_vol, dfi_dseqv;
 
-  pc *= -1;
+  pc *= -1; // TODO: check sign at very beginning, only once, and stick to whatever convention!
 
   sig_dev = sig.deviatoric();
 
@@ -126,14 +133,18 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig, const RankFourTensor & 
   f2 = 0.0;
   if (sig_eqv > 1e-8)
   {
-    f1 = 3.0 / (_slope_yield_surface * _slope_yield_surface);
-    f2 = 2.0 /3.0 - 1.0 / (_slope_yield_surface * _slope_yield_surface); // TODO: bug? f2 = 2.0 /9.0 - ...!!!
+	f1 = 3.0 / (_slope_yield_surface*_slope_yield_surface - _anisotropy_coeff[_qp]*_anisotropy_coeff[_qp]);
+    f2 = f1*(1.0 - _anisotropy_coeff[_qp]*p_yield_stress/q_yield_stress);
+    f3 = -f1*(1.0 - _anisotropy_coeff[_qp]*p_yield_stress/q_yield_stress - 2*_slope_yield_surface*_slope_yield_surface/9.0)/3.0;
+    f4 = -f1*(_anisotropy_coeff[_qp]/(3.0*q_yield_stress));
+    f5 = f1*(3.0*_anisotropy_coeff[_qp]*p_yield_stress/(2.0*q_yield_stress*q_yield_stress));
   }
   for (i = 0; i < 3; ++i)
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dfd_dsig(i,j,k,l) = f1 * deltaFunc(i,k) * deltaFunc(j,l) - f2 * deltaFunc(i,j) * deltaFunc(k,l); //d_flow_dirn/d_sig - 2nd part (J2 plasticity)
+          dfd_dsig(i,j,k,l) = f2*deltaFunc(i,k)*deltaFunc(j,l) + f3*deltaFunc(i,j)*deltaFunc(k,l)
+              + f4*sig_dev(i,j)*deltaFunc(k,l) + f5*sig_dev(i,j)*sig_dev(k,l)+ f4*deltaFunc(i,j)*sig_dev(k,l); //d_flow_dirn/d_sig - 2nd part
 
   //dfd_dsig = dft_dsig1/flow_tensor_norm - 3.0 * dft_dsig2 / (2*sig_eqv*flow_tensor_norm*flow_tensor_norm*flow_tensor_norm); //d_flow_dirn/d_sig
   //TODO: check if the previous two lines (i.e normalizing the flow vector) should be activated or not. Currently we are using the non-unitary flow vector
@@ -142,7 +153,7 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig, const RankFourTensor & 
 }
 
 void
-RedbackMechMaterialCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterialCCanisotropic::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
 {
     Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y);
 }
