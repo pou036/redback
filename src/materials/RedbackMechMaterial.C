@@ -57,7 +57,6 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
   params.addParam< Real >("mhc", 0, "Microstructural hardening coefficient");
-  params.addParam<MooseEnum>("yield_criterion", RedbackMechMaterial::yieldCriterionEnum() = "J2_plasticity", "Yield criterion");
   params.addParam< Real >("mixture_compressibility", 1,"Compressibility of the rock+fluid mixture");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
   params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
@@ -115,7 +114,6 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
     _mixture_compressibility_param(getParam<Real>("mixture_compressibility")),
     _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
-    _yield_criterion((YieldCriterion)(int)getParam<MooseEnum>("yield_criterion")),
     //_dispx_dot(coupledDot("disp_x")),
     //_dispy_dot(coupledDot("disp_y")),
     //_dispz_dot(coupledDot("disp_z"))
@@ -150,12 +148,6 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   MooseEnum fill_method = RankFourTensor::fillMethodEnum();
   fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic elasticity tensor.
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int) fill_method);
-}
-
-MooseEnum
-RedbackMechMaterial::yieldCriterionEnum()
-{
-  return MooseEnum("elasticity J2_plasticity Drucker_Prager modified_Cam_Clay");
 }
 
 void

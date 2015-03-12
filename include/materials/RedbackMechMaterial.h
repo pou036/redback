@@ -36,15 +36,6 @@ class RedbackMechMaterial : public Material
 {
 public:
   RedbackMechMaterial(const std::string & name, InputParameters parameters);
-  // Redback
-  static MooseEnum yieldCriterionEnum();
-  enum YieldCriterion
-  {
-    elasticity,
-    J2_plasticity, // Von Mises
-    Drucker_Prager,
-    modified_Cam_Clay
-  };
 
 protected:
   // Copy-paste from TensorMechanicsMaterial.h
@@ -132,7 +123,6 @@ protected:
   Real _mixture_compressibility_param;
   MaterialProperty<Real> & _mixture_compressibility;
   Real _exponential;
-  YieldCriterion _yield_criterion;
   //VariableValue & _dispx_dot;
   //VariableValue & _dispy_dot;
   //VariableValue & _dispz_dot;
