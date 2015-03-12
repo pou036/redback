@@ -2,8 +2,8 @@ lc = 0.1;
 R_out = 1.; // radius of outer circle
 R_in = 0.3; // radius of inner circle 
 H = 0.5; // height of cylinder
-nb_layers_quarter_circle = 10; //number of layers in one QUARTER OF CIRCLE
-nb_layers_z = 4; // number of vertical layers
+nb_layers_quarter_circle = 4; //number of layers in one QUARTER OF CIRCLE
+nb_layers_z = 2; // number of vertical layers
 
 Point(1) = {0,0,0,lc}; //Center
 
