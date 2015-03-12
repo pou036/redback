@@ -1,0 +1,7 @@
+[Tests]
+  [./ring_shear] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'ring_shear.i'
+    exodiff = 'ring_shear_out.e'
+  [../]
+[]
