@@ -1,0 +1,7 @@
+[Tests]
+  [./test_timestep] # can't put a dot in that name!
+    type = CSVDiff
+    input = 'timestepper.i'
+    csvdiff = 'timestep_out.csv'
+  [../]
+[]

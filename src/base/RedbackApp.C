@@ -30,6 +30,9 @@
 #include "RedbackMechMaterialCC.h"
 //#include "RedbackMechMaterialCCanisotropic.h"
 
+// Timesteppers
+#include "ReturnMapIterDT.h"
+
 // AuxKernels
 //#include "StrainRateAux.h"
 //#include "MisesStrainAux.h"
@@ -96,6 +99,8 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialDP);
   registerMaterial(RedbackMechMaterialCC);
   //registerMaterial(RedbackMechMaterialCCanisotropic);
+
+  registerExecutioner(ReturnMapIterDT);
 
   //registerAux(StrainRateAux);
   //registerAux(MisesStrainAux);
