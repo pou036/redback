@@ -14,4 +14,9 @@
     input = 'bench_CC.i'
     exodiff = 'bench_CC_out.e'
   [../]
+#  [./test_3_M_CC_anisotropic] # can't put a dot in that name!
+#    type = 'Exodiff'
+#    input = 'bench_CC_anisotropic.i'
+#    exodiff = 'bench_CC_anisotropic_out.e'
+#  [../]
 []
