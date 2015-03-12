@@ -136,7 +136,8 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _mechanical_dissipation_jac(getMaterialProperty<Real>("mechanical_dissipation_jacobian")),
     _delta(getMaterialProperty<Real>("delta")),
     _mod_gruntfest_number(getMaterialProperty<Real>("mod_gruntfest_number")),
-    _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion"))
+    _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion")),
+    _returnmap_iter(declareProperty<Real>("returnmap_iter"))
 {
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
@@ -195,7 +196,6 @@ RedbackMechMaterial::computeProperties()
 
 void RedbackMechMaterial::stepInitQpProperties()
 {
-  //RedbackMaterial::stepInitQpProperties();
 }
 
 void RedbackMechMaterial::computeQpElasticityTensor()
@@ -270,6 +270,7 @@ void RedbackMechMaterial::computeQpStress()
   //Solve J2 plastic constitutive equations based on current strain increment
   //Returns current  stress and plastic rate of deformation tensor
 
+  _returnmap_iter[_qp] = 0;
   returnMap(_stress_old[_qp], _strain_increment[_qp], _elasticity_tensor[_qp], dp, sig, p_y, q_y);
   _stress[_qp] = sig;
 
@@ -567,6 +568,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
     }
     if (iter>=maxiter)//Convergence failure
       mooseError("Constitutive Error-Too many iterations: Reduce time increment.\n"); //Convergence failure //TODO: check the adaptive time stepping
+    _returnmap_iter[_qp] = iter;
 
     dpn = dp + delta_dp;
     eqvpstrain = std::pow(2.0/3.0, 0.5) * dpn.L2norm();

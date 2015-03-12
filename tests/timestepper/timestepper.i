@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 10
-  ny = 10
+  nx = 4
+  ny = 4
   xmin = -1
   ymin = -1
 []
@@ -279,7 +279,7 @@
 []
 
 [Postprocessors]
-  active = 'Gruntfest_number temp_centre mises_stress strain_rate max_returnmap_iter'
+  active = 'temp_centre max_returnmap_iter timestep'
   [./test]
     type = StrainRatePoint
     variable = temp
@@ -309,6 +309,9 @@
     type = ElementExtremeValue
     variable = returnmap_iter
   [../]
+  [./timestep]
+    type = TimestepSize
+  [../]
 []
 
 [Preconditioning]
@@ -322,7 +325,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 5
+  end_time = 3e-2
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -336,7 +339,7 @@
   line_search = basic
   [./TimeStepper]
     type = ReturnMapIterDT
-    dt = 1e-4
+    dt = 1e-2
     min_iter = 10
     ratio = 0.5
     max_iter = 20
@@ -347,7 +350,7 @@
 []
 
 [Outputs]
-  file_base = foo
+  file_base = timestep_out
   output_initial = true
   exodus = true
   csv = true

@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = ../../meshes/Cylinder_hollow_reg.msh
+  file = Cylinder_hollow_reg.msh
   dim = 2
 []
 
@@ -424,6 +424,7 @@
   # Preconditioned JFNK (default)
   start_time = 0.0
   end_time = 100
+  num_steps = 3
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -442,7 +443,7 @@
 []
 
 [Outputs]
-  file_base = bench_J2_out
+  file_base = ring_shear_out
   output_initial = true
   exodus = true
   [./console]
