@@ -44,7 +44,7 @@
     m = 3
     mu = 1e-3
     ar = 10
-    gr = 8 # 11
+    gr = 1 # 11
     pore_pres = pore_pressure
     temperature = temp
     is_mechanics_on = false
@@ -78,7 +78,7 @@
   [../]
   [./central_rotation]
     type = ParsedFunction
-    value = 1e-2*t
+    value = 1e-3*t
   [../]
 []
 
@@ -450,13 +450,13 @@
   line_search = basic
   [./TimeStepper]
     type = ReturnMapIterDT
-    dt = 5e-3
-    min_iter = 10
-    ratio = 0.1
-    max_iter = 20
-    dt_max = 1e-1
+    dt = 1e-4
+    min_iter = 5
+    ratio = 0.5
+    max_iter = 15
+    dt_max = 1e-3
     postprocessor = Return_map_postprocessor
-    dt_min = 1e-6
+    dt_min = 1e-5
   [../]
 []
 
