@@ -3,5 +3,6 @@
     type = 'Exodiff'
     input = 'ring_shear.i'
     exodiff = 'ring_shear_out.e'
+    rel_err = 1e-3
   [../]
 []
