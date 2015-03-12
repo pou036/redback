@@ -4,11 +4,11 @@
 /* vectorial product of the normal with a given vector          */
 /****************************************************************/
 
-#include "DirichletTransverseBC.h"
+#include "FunctionDirichletTransverseBC.h"
 #include "Function.h"
 
 template<>
-InputParameters validParams<DirichletTransverseBC>()
+InputParameters validParams<FunctionDirichletTransverseBC>()
 {
   InputParameters params = validParams<PresetNodalBC>();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
@@ -18,7 +18,7 @@ InputParameters validParams<DirichletTransverseBC>()
   return params;
 }
 
-DirichletTransverseBC::DirichletTransverseBC(const std::string & name, InputParameters parameters) :
+FunctionDirichletTransverseBC::FunctionDirichletTransverseBC(const std::string & name, InputParameters parameters) :
     PresetNodalBC(name, parameters),
     _func(getFunction("function")),
     _center(getParam<RealVectorValue>("center")),
@@ -28,7 +28,7 @@ DirichletTransverseBC::DirichletTransverseBC(const std::string & name, InputPara
 }
 
 Real
-DirichletTransverseBC::computeQpValue()
+FunctionDirichletTransverseBC::computeQpValue()
 {
   TypeVector<Real> vector1 = TypeVector<Real>(_axis);
   TypeVector<Real> vector2 = *static_cast<const TypeVector<Real>*>(_current_node) - TypeVector<Real>(_center);

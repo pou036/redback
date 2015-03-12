@@ -4,26 +4,26 @@
 /* vectorial product of the normal with a given vector          */
 /****************************************************************/
 
-#ifndef DIRICHLETTRANSVERSEBC
-#define DIRICHLETTRANSVERSEBC
+#ifndef FUNCTIONDIRICHLETTRANSVERSEBC
+#define FUNCTIONDIRICHLETTRANSVERSEBC
 
 #include "PresetNodalBC.h"
 
 //Forward Declarations
-class DirichletTransverseBC;
+class FunctionDirichletTransverseBC;
 class Function;
 
 template<>
-InputParameters validParams<DirichletTransverseBC>();
+InputParameters validParams<FunctionDirichletTransverseBC>();
 
 /**
  * Defines a boundary condition that forces the value to be a user specified
  * function at the boundary.
  */
-class DirichletTransverseBC : public PresetNodalBC
+class FunctionDirichletTransverseBC : public PresetNodalBC
 {
 public:
-  DirichletTransverseBC(const std::string & name, InputParameters parameters);
+  FunctionDirichletTransverseBC(const std::string & name, InputParameters parameters);
 
 protected:
   /**
@@ -44,4 +44,4 @@ protected:
   const unsigned int & _dir_index;
 };
 
-#endif /* DIRICHLETTRANSVERSEBC */
+#endif /* FUNCTIONDIRICHLETTRANSVERSEBC */

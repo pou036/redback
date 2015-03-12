@@ -6,7 +6,7 @@
 #include "RedbackAction.h"
 
 // Boundary conditions
-#include "DirichletTransverseBC.h"
+#include "FunctionDirichletTransverseBC.h"
 
 // Initial conditions
 #include "FunctionWithRandomIC.h"
@@ -28,6 +28,7 @@
 #include "RedbackMechMaterialJ2.h"
 #include "RedbackMechMaterialDP.h"
 #include "RedbackMechMaterialCC.h"
+#include "RedbackMechMaterialCCanisotropic.h"
 
 // AuxKernels
 //#include "StrainRateAux.h"
@@ -75,7 +76,7 @@ RedbackApp::registerApps()
 void
 RedbackApp::registerObjects(Factory & factory)
 {
-  registerBoundaryCondition(DirichletTransverseBC);
+  registerBoundaryCondition(FunctionDirichletTransverseBC);
 
   registerInitialCondition(FunctionWithRandomIC);
 
@@ -94,6 +95,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialDP);
   registerMaterial(RedbackMechMaterialCC);
+  registerMaterial(RedbackMechMaterialCCanisotropic);
 
   //registerAux(StrainRateAux);
   //registerAux(MisesStrainAux);
