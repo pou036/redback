@@ -28,7 +28,7 @@
 #include "RedbackMechMaterialJ2.h"
 #include "RedbackMechMaterialDP.h"
 #include "RedbackMechMaterialCC.h"
-//#include "RedbackMechMaterialCCanisotropic.h"
+#include "RedbackMechMaterialCCanisotropic.h"
 
 // Timesteppers
 #include "ReturnMapIterDT.h"
@@ -98,7 +98,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialDP);
   registerMaterial(RedbackMechMaterialCC);
-  //registerMaterial(RedbackMechMaterialCCanisotropic);
+  registerMaterial(RedbackMechMaterialCCanisotropic);
 
   registerExecutioner(ReturnMapIterDT);
 
