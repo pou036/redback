@@ -168,3 +168,4 @@ problems/Oka/pics_postprocess
 
 # Allod csv files in Oka folder
 !/problems/Oka/fig*/*.csv
+!/tests/transverseBC/*.msh
