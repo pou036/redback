@@ -57,7 +57,6 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
   params.addParam< Real >("mhc", 0, "Microstructural hardening coefficient");
-  params.addParam<MooseEnum>("yield_criterion", RedbackMechMaterial::yieldCriterionEnum() = "J2_plasticity", "Yield criterion");
   params.addParam< Real >("mixture_compressibility", 1,"Compressibility of the rock+fluid mixture");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
   params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
@@ -115,7 +114,6 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
     _mixture_compressibility_param(getParam<Real>("mixture_compressibility")),
     _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
-    _yield_criterion((YieldCriterion)(int)getParam<MooseEnum>("yield_criterion")),
     //_dispx_dot(coupledDot("disp_x")),
     //_dispy_dot(coupledDot("disp_y")),
     //_dispz_dot(coupledDot("disp_z"))
@@ -150,12 +148,6 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
   MooseEnum fill_method = RankFourTensor::fillMethodEnum();
   fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic elasticity tensor.
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int) fill_method);
-}
-
-MooseEnum
-RedbackMechMaterial::yieldCriterionEnum()
-{
-  return MooseEnum("elasticity J2_plasticity Drucker_Prager modified_Cam_Clay");
 }
 
 void
@@ -477,13 +469,6 @@ RedbackMechMaterial::getSigEqv(const RankTwoTensor & stress)
 }
 
 void
-RedbackMechMaterial::returnMapElasticity(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig)
-{
-  sig = sig_old + E_ijkl * delta_d;
-  dp = RankTwoTensor(); //Plastic rate of deformation tensor in unrotated configuration
-}
-
-void
 RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)
 {
   RankTwoTensor sig_new, delta_dp, dpn;
@@ -497,9 +482,6 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   Real eqvpstrain, mean_stress_old;
   //Real volumetric_plastic_strain;
   Real yield_stress, yield_stress_prev;
-
-  if (_yield_criterion == elasticity)
-    returnMapElasticity(sig_old, delta_d, E_ijkl, dp, sig);
 
   tol1 = 1e-10; // TODO: expose to user interface and/or make the tolerance relative
   tol3 = 1e-6; // TODO: expose to user interface and/or make the tolerance relative
