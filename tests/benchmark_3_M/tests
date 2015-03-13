@@ -10,13 +10,18 @@
     exodiff = 'bench_DP_out.e'
   [../]
   [./test_3_M_CC] # can't put a dot in that name!
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'bench_CC.i'
-    exodiff = 'bench_CC_out.e'
+    csvdiff = 'bench_CC_out.csv'
   [../]
-#  [./test_3_M_CC_anisotropic] # can't put a dot in that name!
-#    type = 'Exodiff'
-#    input = 'bench_CC_anisotropic.i'
-#    exodiff = 'bench_CC_anisotropic_out.e'
-#  [../]
+  [./test_3_M_CC_anisotropic0] # can't put a dot in that name!
+    type = 'CSVDiff'
+    input = 'bench_CC_anisotropic0.i' # with value of alpha=0 (to compare with CC)
+    csvdiff = 'bench_CC_out.csv'
+  [../]
+  [./test_3_M_CC_anisotropic1] # can't put a dot in that name!
+    type = 'CSVDiff'
+    input = 'bench_CC_anisotropic1.i' # with value of alpha=0.3
+    csvdiff = 'bench_CC_anisotropic1_out.csv'
+  [../]
 []

@@ -127,7 +127,7 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig, const RankFourTensor & 
   if (sig_eqv > 1e-8)
   {
     f1 = 3.0 / (_slope_yield_surface * _slope_yield_surface);
-    f2 = 2.0 /3.0 - 1.0 / (_slope_yield_surface * _slope_yield_surface); // TODO: bug? f2 = 2.0 /9.0 - ...!!!
+    f2 = 2.0 /9.0 - 1.0 / (_slope_yield_surface * _slope_yield_surface);
   }
   for (i = 0; i < 3; ++i)
     for (j = 0; j < 3; ++j)

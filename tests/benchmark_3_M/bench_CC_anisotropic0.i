@@ -133,7 +133,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
+  active = 'Mod_Gruntfest_number returnmap_iter mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -190,10 +190,15 @@
     family = MONOMIAL
     block = 0
   [../]
+  [./returnmap_iter]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
 []
 
 [AuxKernels]
-  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation Gruntfest_Number'
+  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation returnmap_iter Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -269,10 +274,16 @@
     variable = volumetric_strain_rate
     property = volumetric_strain_rate
   [../]
+  [./returnmap_iter]
+    type = MaterialRealAux
+    variable = returnmap_iter
+    property = returnmap_iter
+    block = 0
+  [../]
 []
 
 [Postprocessors]
-  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress'
+  active = 'volumetric_strain mises_strain mises_strain_rate max_returnmap_iter volumetric_strain_rate mises_stress mean_stress'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
@@ -308,6 +319,10 @@
     variable = volumetric_strain_rate
     point = '0 0 0'
   [../]
+  [./max_returnmap_iter]
+    type = ElementExtremeValue
+    variable = returnmap_iter
+  [../]
 []
 
 [Preconditioning]
@@ -321,7 +336,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 0.005
+  end_time = 0.006
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -334,15 +349,22 @@
   reset_dt = true
   line_search = basic
   [./TimeStepper]
-    type = ConstantDT
+    type = ReturnMapIterDT
     dt = 1e-3
+    min_iter = 10
+    ratio = 0.5
+    max_iter = 20
+    dt_max = 1e-3
+    postprocessor = max_returnmap_iter
+    dt_min = 1e-5
   [../]
 []
 
 [Outputs]
-  file_base = bench_CC_out
+  file_base = bench_CC_anisotropic0_out
   output_initial = true
   exodus = true
+  csv = true
   [./console]
     type = Console
     perf_log = true

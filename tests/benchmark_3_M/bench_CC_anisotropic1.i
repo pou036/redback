@@ -28,7 +28,7 @@
 
 [Materials]
   [./mat_mech]
-    type = RedbackMechMaterialCC
+    type = RedbackMechMaterialCCanisotropic
     block = 0
     disp_x = disp_x
     disp_y = disp_y
@@ -40,6 +40,7 @@
     slope_yield_surface = -0.6
     yield_criterion = modified_Cam_Clay
     yield_stress = '0. 1 1. 1'
+    initial_anisotropy_param = 0.3
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -336,7 +337,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 0.006
+  end_time = 0.003
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -361,7 +362,7 @@
 []
 
 [Outputs]
-  file_base = bench_CC_out
+  file_base = bench_CC_anisotropic1_out
   output_initial = true
   exodus = true
   csv = true
