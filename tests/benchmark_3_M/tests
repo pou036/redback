@@ -24,4 +24,19 @@
     input = 'bench_CC_anisotropic1.i' # with value of alpha=0.3
     csvdiff = 'bench_CC_anisotropic1_out.csv'
   [../]
+  [./test_3_M_elastic_1] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'bench_elastic_1.i'
+    exodiff = 'bench_elastic_1.e'
+  [../]
+  [./test_3_M_elastic_2] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'bench_elastic_2.i'
+    exodiff = 'bench_elastic_2.e'
+  [../]
+  [./test_3_M_elastic_3] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'bench_elastic_3.i'
+    exodiff = 'bench_elastic_3.e'
+  [../]
 []

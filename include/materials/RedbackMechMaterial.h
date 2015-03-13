@@ -36,15 +36,6 @@ class RedbackMechMaterial : public Material
 {
 public:
   RedbackMechMaterial(const std::string & name, InputParameters parameters);
-  // Redback
-  static MooseEnum yieldCriterionEnum();
-  enum YieldCriterion
-  {
-    elasticity,
-    J2_plasticity, // Von Mises
-    Drucker_Prager,
-    modified_Cam_Clay
-  };
 
 protected:
   // Copy-paste from TensorMechanicsMaterial.h
@@ -104,8 +95,7 @@ protected:
   Real getYieldStress(const Real equivalent_plastic_strain);
 
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
-  void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-  void returnMapElasticity(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &);
+  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
   // The following functions are needed in the return map, but the definition
   // is dependant on the yield criterion. Therefore we define them as abstract
   // virtual functions here such that no implementation is needed in
@@ -133,7 +123,6 @@ protected:
   Real _mixture_compressibility_param;
   MaterialProperty<Real> & _mixture_compressibility;
   Real _exponential;
-  YieldCriterion _yield_criterion;
   //VariableValue & _dispx_dot;
   //VariableValue & _dispy_dot;
   //VariableValue & _dispz_dot;
