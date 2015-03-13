@@ -35,9 +35,13 @@ RedbackMechMaterialCCanisotropic::RedbackMechMaterialCCanisotropic(const std::st
 void RedbackMechMaterialCCanisotropic::stepInitQpProperties()
 {
   RedbackMechMaterialCC::stepInitQpProperties();
-
   // Variable initialisation (called at each step)
-  _anisotropy_coeff[_qp] = _initial_anisotropy_param; //TODO: implement \dot{alpha}
+  if (_t == 0)
+   _anisotropy_coeff[_qp] = _initial_anisotropy_param; //TODO: implement \dot{alpha}
+  else
+   _anisotropy_coeff[_qp] = _anisotropy_coeff[_qp] + 0*(_slope_yield_surface -_anisotropy_coeff[_qp])*_dt; //TODO:check the sign of the anisotropy coefficient
+
+ // std::cout<<"anisotropy_coefficient ="<< _anisotropy_coeff[_qp]<<std::endl;
 }
 
 /**
