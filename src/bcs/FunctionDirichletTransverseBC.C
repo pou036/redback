@@ -23,16 +23,30 @@ FunctionDirichletTransverseBC::FunctionDirichletTransverseBC(const std::string &
     _func(getFunction("function")),
     _center(getParam<RealVectorValue>("center")),
     _axis(getParam<RealVectorValue>("axis")),
-    _dir_index(getParam<unsigned int>("dir_index"))
+    _dir_index(getParam<unsigned int>("dir_index")),
+    _feproblem(dynamic_cast<FEProblem &>(_subproblem))
 {
 }
 
 Real
 FunctionDirichletTransverseBC::computeQpValue()
 {
-  TypeVector<Real> vector1 = TypeVector<Real>(_axis);
-  TypeVector<Real> vector2 = *static_cast<const TypeVector<Real>*>(_current_node) - TypeVector<Real>(_center);
-  TypeVector<Real> vector3 = vector1.cross(vector2);
-  vector3 /= vector3.size();
-  return vector3(_dir_index)*_func.value(_t, *_current_node);
+  TypeVector<Real> node = *static_cast<const TypeVector<Real>*>(_current_node) - TypeVector<Real>(_center);
+  Real x = node(0);
+  Real y = node(1);
+  Real radius = std::sqrt(x*x + y*y);
+  Real theta = std::acos(x / radius); // 0 <= theta <= pi
+
+  if ((x < 0 && y < 0) || (x >= 0 && y < 0)) // third quadrant or fourth quadrant
+    theta *= -1;
+
+  if (_dir_index == 0)
+  {
+    //return radius * (std::cos(theta + _func.value(_t, *_current_node)) - std::cos(theta));
+    return radius * (std::cos(theta + _feproblem.dt()) - std::cos(theta));
+  }
+  else if (_dir_index == 1)
+    return radius * (std::sin(theta + _feproblem.dt()) - std::sin(theta));
+  else
+    mooseError("dir_index out of bounds.");
 }
