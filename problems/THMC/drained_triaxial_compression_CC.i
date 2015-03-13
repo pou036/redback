@@ -52,6 +52,8 @@
     slope_yield_surface = -0.8
     yield_criterion = modified_Cam_Clay
     yield_stress = '0. 3 1. 3'
+    youngs_modulus = 1000
+    poisson_ratio = 0.3
   [../]
   [./mat_nomech]
     type = RedbackMaterial
