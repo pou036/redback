@@ -18,11 +18,11 @@ ymax = 2.0; // (m)
 
 /****** MESH ***********/
 //
-nb_points_X1 = 20; // nb points in X direction on the left hand side of the fault
-nb_points_X2 = 8; // nb points in X direction within the fault
-nb_points_X3 = 20; // nb points in X direction on the right hand side of the fault
+nb_points_X1 = 30; // nb points in X direction on the left hand side of the fault
+nb_points_X2 = 10; // nb points in X direction within the fault
+nb_points_X3 = 30; // nb points in X direction on the right hand side of the fault
 
-nb_points_Y = 20; // nb points in Y direction
+nb_points_Y = 60; // nb points in Y direction
 
 /************************************************/
 
@@ -58,9 +58,9 @@ Line Loop(1) = {1,2,3,4};          // left block
 Line Loop(2) = {5,6,7,-2};         // fault block
 Line Loop(3) = {8,9,10,-6};        // right block
 
-Transfinite Line{1,-3} = nb_points_X1 Using Progression 0.8;
+Transfinite Line{1,-3} = nb_points_X1 Using Progression 0.9;
 Transfinite Line{5,7} = nb_points_X2;
-Transfinite Line{-8,10} = nb_points_X3 Using Progression 0.8;
+Transfinite Line{-8,10} = nb_points_X3 Using Progression 0.9;
 Transfinite Line{4,2,6,9} = nb_points_Y;
 
 Ruled Surface(100) = {1};
