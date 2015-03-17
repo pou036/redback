@@ -34,7 +34,7 @@
   [./redback_nomech]
     type = RedbackMaterial
     block = '0 1 2'
-    gr = 50 # 11
+    gr = 10 # 11
     ar = 10
     da_endo = 1e-4
     disp_z = disp_z
@@ -63,7 +63,7 @@
     disp_x = disp_x
     pore_pres = pore_pressure
     yield_stress = '0. 1 1. 1'
-    temperature = stress_zz
+    temperature = temp
     poisson_ratio = 0.3
     ref_pe_rate = 1e2
     disp_z = disp_z
@@ -382,7 +382,7 @@
 []
 
 [Postprocessors]
-  active = 'solid_ratio_middle mises_stress_centre max_returnmap_iter strain_rate_middle middle_press Lewis_middle porosity_middle middle_temp timestep'
+  active = 'solid_ratio_middle mises_stress_centre timestep max_returnmap_iter strain_rate_middle middle_press Lewis_middle porosity_middle middle_temp'
   [./middle_temp]
     type = PointValue
     variable = temp
@@ -439,7 +439,7 @@
   # dt = 1e-1
   # [../]
   start_time = 0.0
-  end_time = 100
+  end_time = 1e5
   dtmax = 1
   dtmin = 1e-9
   type = Transient
@@ -464,7 +464,7 @@
 []
 
 [Outputs]
-  file_base = fault
+  file_base = fault_Gr10
   output_initial = true
   exodus = true
   [./console]

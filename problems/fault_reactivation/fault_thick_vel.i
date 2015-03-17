@@ -55,7 +55,7 @@
     disp_x = disp_x
     pore_pres = pore_pressure
     yield_stress = '0. 1 1. 1'
-    temperature = stress_zz
+    temperature = temp
     poisson_ratio = 0.3
     ref_pe_rate = 1
     disp_z = disp_z
