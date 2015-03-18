@@ -230,6 +230,7 @@
   [./returnmap_iter]
     order = CONSTANT
     family = MONOMIAL
+    block = 1
   [../]
 []
 
@@ -369,7 +370,7 @@
     type = MaterialRealAux
     variable = returnmap_iter
     property = returnmap_iter
-    block = 0
+    block = 1
   [../]
 []
 
