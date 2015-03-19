@@ -33,7 +33,7 @@
   [./redback_nomech]
     type = RedbackMaterial
     block = '0 1 2'
-    gr = 1e-7 # 11
+    gr = 1 # 11
     ar = 10
     da_endo = 1e-4
     disp_z = disp_z
@@ -84,6 +84,7 @@
 []
 
 [Functions]
+  active = 'linear_pos'
   [./ramp_pos]
     type = ParsedFunction
     value = 2*tanh(t)
@@ -98,7 +99,7 @@
   [../]
   [./linear_pos]
     type = ParsedFunction
-    value = 1e-2*t
+    value = 1e-4*t
   [../]
 []
 
@@ -445,7 +446,7 @@
   # dt = 1e-1
   # [../]
   start_time = 0.0
-  end_time = 1000
+  end_time = 10000
   dtmax = 1
   dtmin = 1e-9
   type = Transient
