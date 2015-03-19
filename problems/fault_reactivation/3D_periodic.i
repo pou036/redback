@@ -33,7 +33,7 @@
   [./redback_nomech]
     type = RedbackMaterial
     block = '0 1 2'
-    gr = 10 # 11
+    gr = 1e-7 # 11
     ar = 10
     da_endo = 1e-4
     disp_z = disp_z
@@ -145,6 +145,18 @@
     variable = disp_z
     boundary = 1
     value = 0.0
+  [../]
+  [./temperature]
+    type = DirichletBC
+    variable = temp
+    boundary = '1 3'
+    value = 0
+  [../]
+  [./pore_pressure]
+    type = DirichletBC
+    variable = pore_pressure
+    boundary = '1 3'
+    value = 0
   [../]
 []
 

@@ -9,12 +9,12 @@ ymax = 5;
 zmin = 0;
 zmax = 1;
 /****** MESH ***********/
-nb_cells_x = 5; // nb cells in X dir along fault
+nb_cells_x = 1; // nb cells in X dir along fault
 
 nb_cells_y_top = 10;
 nb_cells_y_middle = 8;
 nb_cells_y_bottom = 10;
-progress_coeff = 1.0; // progression coefficient (for denser regular mesh towards fault)
+progress_coeff = 0.6; // progression coefficient (for denser regular mesh towards fault)
 
 nb_cells_z = 1;
 /***********************************************/
