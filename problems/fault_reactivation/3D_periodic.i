@@ -56,7 +56,7 @@
   [./fault_mech]
     type = RedbackMechMaterialJ2
     block = 1
-    youngs_modulus = 10
+    youngs_modulus = 10000
     exponent = 1
     disp_y = disp_y
     disp_x = disp_x
@@ -70,7 +70,7 @@
   [./rock_elastic]
     type = RedbackMechMaterialElastic
     block = '0 2'
-    youngs_modulus = 1000
+    youngs_modulus = 10000
     exponent = 1
     disp_y = disp_y
     disp_x = disp_x
@@ -99,7 +99,7 @@
   [../]
   [./linear_pos]
     type = ParsedFunction
-    value = 1e-4*t
+    value = 1e-5*t
   [../]
 []
 
