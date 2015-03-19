@@ -12,24 +12,6 @@
   wc_x = wc_x
 []
 
-[Postprocessors]
-  [./disp_y_top]
-    type = PointValue
-    point = '0.5 1 0.1'
-    variable = disp_y
-  [../]
-  [./disp_x_top]
-    type = PointValue
-    point = '0.5 1 0.1'
-    variable = disp_x
-  [../]
-  [./wc_z_top]
-    type = PointValue
-    point = '0.5 1 0.1'
-    variable = wc_z
-  [../]
-[]
-
 [Variables]
   [./disp_x]
   [../]
@@ -114,6 +96,7 @@
 
 [BCs]
   # following is natural BC
+  active = 'Periodic uy_bottom ux_bottom_vel wcx_equals_zero_on_top wcy_equals_zero_on_top top_cauchy_zero wcz_equals_zero_on_top ux_equals_zero_on_top wc_x_bottom uz_bottom wc_y_bottom wc_z_bottom'
   [./Periodic]
     active = 'zperiodic xperiodic'
     [./xperiodic]
@@ -213,7 +196,7 @@
 [Materials]
   [./cosserat]
     type = CosseratLinearElasticMaterial
-    block = 0
+    block = '0 1 2'
     B_ijkl = 40
     C_ijkl = '5 10 5'
     fill_method = general_isotropic
@@ -241,5 +224,6 @@
   output_initial = true
   exodus = true
   print_perf_log = true
+  file_base = cosserat_shear3
 []
 

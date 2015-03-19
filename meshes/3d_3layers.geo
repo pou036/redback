@@ -1,13 +1,13 @@
 /***********************************************/
 /* Parameters  */
-xmin = -0.5;
-xmax = 0.5;
+xmin = 0;
+xmax = 1;
 ymin = -5;
 y1 = -0.05; //-0.05; // bottom of middle layer
 y2 = 0.05;  //0.05; // top of middle layer
 ymax = 5;
-zmin = -0.5;
-zmax = 0.5;
+zmin = 0;
+zmax = 1;
 /****** MESH ***********/
 nb_cells_x = 5; // nb cells in X dir along fault
 
