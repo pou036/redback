@@ -1,19 +1,19 @@
 /***********************************************/
 /* Parameters  */
-xmin = 0;
-xmax = 1;
+xmin = -0.5;
+xmax = 0.5;
 ymin = -5;
-y1 = -2; //-0.05; // bottom of middle layer
-y2 = 2;  //0.05; // top of middle layer
+y1 = -0.05; //-0.05; // bottom of middle layer
+y2 = 0.05;  //0.05; // top of middle layer
 ymax = 5;
-zmin = 0;
-zmax = 1;
+zmin = -0.5;
+zmax = 0.5;
 /****** MESH ***********/
 nb_cells_x = 5; // nb cells in X dir along fault
 
-nb_cells_y_top = 2;
-nb_cells_y_middle = 2;
-nb_cells_y_bottom = 2;
+nb_cells_y_top = 10;
+nb_cells_y_middle = 8;
+nb_cells_y_bottom = 10;
 progress_coeff = 1.0; // progression coefficient (for denser regular mesh towards fault)
 
 nb_cells_z = 1;
