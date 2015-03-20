@@ -25,7 +25,7 @@
   [./redback_nomech]
     type = RedbackMaterial
     block = '0 1 2 3'
-    gr = 1 # 11
+    gr = 200 # 11
     ar = 10
     da_endo = 1e-4
     disp_z = disp_z
@@ -79,7 +79,7 @@
   active = 'linear_pos ramp_pos'
   [./ramp_pos]
     type = ParsedFunction
-    value = 2*tanh(t)
+    value = 0.7*tanh(0.1*t)
   [../]
   [./ramp_neg]
     type = ParsedFunction
@@ -96,12 +96,13 @@
 []
 
 [BCs]
+  active = 'Periodic uy_bottom temperature top_cauchy_zero ux_equals_zero_on_top uz_bottom pore_pressure ux_force_bottom_base'
   [./Periodic]
     [./xperiodic]
       variable = 'disp_x disp_y disp_z temp pore_pressure'
       translation = '1 0 0'
-      secondary = 2
-      primary = 4
+      secondary = '2 7'
+      primary = '4 6'
     [../]
     [./zperiodic]
       variable = 'disp_x disp_y disp_z temp pore_pressure'
@@ -150,6 +151,12 @@
     variable = pore_pressure
     boundary = '1 3'
     value = 0
+  [../]
+  [./ux_force_bottom_base]
+    type = FunctionNeumannBC
+    variable = disp_x
+    boundary = 6
+    function = ramp_pos
   [../]
 []
 
@@ -443,6 +450,7 @@
   dtmin = 1e-9
   type = Transient
   num_steps = 100000
+  dt = 0.1
   l_max_its = 200
   nl_max_its = 10
   solve_type = PJFNK
@@ -451,6 +459,10 @@
   nl_abs_tol = 1e-10 # 1e-10 to begin with
   reset_dt = true
   line_search = basic
+  [./TimeStepper]
+    type = SolutionTimeAdaptiveDT
+    dt = 1
+  [../]
 []
 
 [Outputs]

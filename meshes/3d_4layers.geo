@@ -112,11 +112,12 @@ Printf("tmp4[5]=%g",tmp4[5]);
 //Physical Line must start from 0
 Physical Surface(0) = {11,12,13,14};                     // back (in Z)
 Physical Surface(1) = {tmp4[3]};                         // bottom (in Y)
-Physical Surface(2) = {tmp1[3],tmp2[2],tmp3[2],tmp4[4]}; // right (in X)
+Physical Surface(2) = {tmp1[3],tmp2[2],tmp3[2]}; // right (in X)
 Physical Surface(3) = {tmp3[3]};                         // top (in Y)
 Physical Surface(4) = {tmp1[5],tmp2[4],tmp3[4]};         // left, 3 top layers (in X)
 Physical Surface(5) = {tmp1[0],tmp2[0],tmp3[0],tmp4[0]}; // front (in Z)
 Physical Surface(6) = {tmp4[2]};                         // left, base layer (in X)
+Physical Surface(7) = {tmp4[4]};                         // right, base layer (in X)
 
 Physical Volume(0) = {tmp3[1]}; // top block
 Physical Volume(1) = {tmp2[1]}; // middle block
