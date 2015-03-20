@@ -25,7 +25,7 @@
   [./redback_nomech]
     type = RedbackMaterial
     block = '0 1 2 3'
-    gr = 200 # 11
+    gr = 3000 # 11
     ar = 10
     da_endo = 1e-4
     disp_z = disp_z
@@ -34,7 +34,7 @@
     pore_pres = pore_pressure
     phi0 = 0.1
     Kc = 10
-    ref_lewis_nb = 1
+    ref_lewis_nb = 0.1
     ar_F = 20
     disp_x = disp_x
     ar_R = 10
@@ -56,7 +56,7 @@
     yield_stress = '0. 1 1. 1'
     temperature = temp
     poisson_ratio = 0.3
-    ref_pe_rate = 1e2
+    ref_pe_rate = 10
     disp_z = disp_z
   [../]
   [./rock_elastic]
@@ -388,7 +388,7 @@
 []
 
 [Postprocessors]
-  active = 'solid_ratio_middle mises_stress_centre timestep max_returnmap_iter strain_rate_middle middle_press Lewis_middle porosity_middle middle_temp'
+  active = 'solid_ratio_middle mises_stress_centre timestep max_returnmap_iter strain_rate_middle disp_fault middle_press Lewis_middle porosity_middle middle_temp'
   [./middle_temp]
     type = PointValue
     variable = temp
@@ -436,6 +436,11 @@
   [./timestep]
     type = TimestepSize
   [../]
+  [./disp_fault]
+    type = PointValue
+    variable = disp_x
+    point = '0 0 0'
+  [../]
 []
 
 [Executioner]
@@ -461,7 +466,8 @@
   line_search = basic
   [./TimeStepper]
     type = SolutionTimeAdaptiveDT
-    dt = 1
+    dt = 0.1
+    adapt_log = true
   [../]
 []
 
