@@ -102,7 +102,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
 
-  registerExecutioner(ReturnMapIterDT);
+  registerTimeStepper(ReturnMapIterDT);
 
   //registerAux(StrainRateAux);
   //registerAux(MisesStrainAux);
