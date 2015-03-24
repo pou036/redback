@@ -68,7 +68,7 @@ def getValue(time_array, value_array, t, previous_i=0):
             + (t - time_array[i-1])*(value_array[i] - value_array[i-1])\
             /(time_array[i] - time_array[i-1]), i-1
 
-def computeTimeStepForArray(time_array, value_arrays):
+def computeTimeStepForArray(time_array, value_arrays, coeff=1.05):
     ''' Time stepping algorithm '''
     # Parameters set by user
     percent_change = 0.1 # value between 0 and 1
@@ -115,7 +115,6 @@ def computeTimeStepForArray(time_array, value_arrays):
             new_value[k], time_index = getValue(time_array, value_arrays[k], current_t)
             observables[k].append(math.fabs((new_value[k]-old_value[k])/dts[-1]))
         old_value = copy.deepcopy(new_value)
-        coeff = 1.05
         direction = 1
         for k in range(nb_arrays):
             if (observables[k][-1] > coeff*observables[k][-2]) \
@@ -133,7 +132,7 @@ def computeTimeStepForArray(time_array, value_arrays):
 arrays = [temps, pps, epsdots]
 nb_arrays = len(arrays)
 new_timesteps, new_times, observables \
-    = computeTimeStepForArray(times, arrays)
+    = computeTimeStepForArray(times, arrays, coeff=1.03)
 #dts_pp, dummy = computeTimeStepForArray(pps)
 #dts_epsdot, dummy = computeTimeStepForArray(epsdots)
 
