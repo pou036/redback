@@ -235,8 +235,6 @@ RedbackMaterial::computeRedbackTerms()
 {
   Real omega_rel, temporary, phi_prime, s_prime;
 
-  Real test = _total_porosity[_qp] - 0.1;
-  Moose::out << "RedbackMaterial::computeRedbackTerms(), _total_porosity[" << _qp << "]=" << test << "\n";
   //TODO: put flags for all properties depending on activated variables.
 
   //TODO: do not compute these when mechanics is on (5 fields overwritten)

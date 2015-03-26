@@ -3,7 +3,9 @@
 #include "AppFactory.h"
 #include "ModulesApp.h"
 
-#include "RedbackAction.h"
+// Actions
+//#include "RedbackAction.h"
+#include "RedbackMechAction.h"
 
 // Boundary conditions
 #include "FunctionDirichletTransverseBC.h"
@@ -102,6 +104,6 @@ RedbackApp::registerObjects(Factory & factory)
 void
 RedbackApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  syntax.registerActionSyntax("RedbackAction", "RedbackAction/*");
-  registerAction(RedbackAction, "add_kernel");
+  syntax.registerActionSyntax("RedbackMechAction", "RedbackMechAction/*");
+  registerAction(RedbackMechAction, "add_kernel");
 }

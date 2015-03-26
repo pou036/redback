@@ -80,6 +80,7 @@
     ref_lewis_nb = 1
     ar_F = 1
     ar_R = 1
+    total_porosity = porosity
   [../]
 []
 
@@ -142,7 +143,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number returnmap_iter mises_strain mech_diss mises_strain_rate mises_stress'
+  active = 'Mod_Gruntfest_number returnmap_iter mises_strain mech_diss mises_strain_rate mises_stress porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -191,6 +192,11 @@
     family = MONOMIAL
     block = 0
   [../]
+  [./porosity]
+    order = FIRST
+    family = MONOMIAL
+    block = 0
+  [../]
 []
 
 [Kernels]
@@ -210,7 +216,7 @@
 []
 
 [AuxKernels]
-  active = 'mises_strain mises_strain_rate mises_stress mech_dissipation returnmap_iter Gruntfest_Number'
+  active = 'mises_strain mises_strain_rate porosity mises_stress mech_dissipation returnmap_iter Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -276,10 +282,14 @@
     property = returnmap_iter
     block = 0
   [../]
+  [./porosity]
+    type = RedbackTotalPorosityAux
+    variable = porosity
+  [../]
 []
 
 [Postprocessors]
-  active = 'temp_centre max_returnmap_iter timestep'
+  active = 'temp_centre timestep max_returnmap_iter'
   [./test]
     type = StrainRatePoint
     variable = temp
@@ -376,7 +386,7 @@
   [../]
 []
 
-[RedbackAction]
+[RedbackMechAction]
   [./solid]
     disp_z = disp_z
     disp_y = disp_y

@@ -23,6 +23,14 @@
   [../]
 []
 
+[AuxVariables]
+  [./porosity]
+    order = FIRST
+    family = MONOMIAL
+    block = 0
+  [../]
+[]
+
 [Kernels]
   [./td_temp]
     type = TimeDerivative
@@ -35,6 +43,13 @@
   [./mh_temp]
     type = RedbackMechDissip
     variable = temp
+  [../]
+[]
+
+[AuxKernels]
+  [./porosity]
+    type = RedbackTotalPorosityAux
+    variable = porosity
   [../]
 []
 
@@ -90,6 +105,7 @@
     Aphi = 0
     phi0 = 0.1
     da_endo = 1
+    total_porosity = porosity
   [../]
 []
 

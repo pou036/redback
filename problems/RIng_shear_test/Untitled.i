@@ -268,7 +268,7 @@
   [../]
 []
 
-[RedbackAction]
+[RedbackMechAction]
   [./Mechanics]
     disp_z = disp_z
     pore_pres = pore_pressure

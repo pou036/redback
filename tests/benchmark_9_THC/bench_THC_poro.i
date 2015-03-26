@@ -27,7 +27,7 @@
 
 [AuxVariables]
   [./porosity]
-    order = CONSTANT
+    order = FIRST
     family = MONOMIAL
     block = 0
   [../]

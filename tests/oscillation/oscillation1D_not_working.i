@@ -115,10 +115,9 @@
     disp_y = 0
     disp_x = 0
     pore_pres = pressure
-    yield_stress = '0 1 1 1'
-    C_ijkl = '1 1 1 1 1 1 1 1 1'
     temperature = temp
     disp_z = 0
+	total_porosity = porosity
   [../]
 []
 

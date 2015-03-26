@@ -300,7 +300,7 @@
   [../]
 []
 
-[RedbackAction]
+[RedbackMechAction]
   [./solid]
     disp_z = disp_z
     temp = temp

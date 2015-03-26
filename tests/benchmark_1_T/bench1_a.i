@@ -23,6 +23,14 @@
   [../]
 []
 
+[AuxVariables]
+  [./porosity]
+    order = FIRST
+    family = MONOMIAL
+    block = 0
+  [../]
+[]
+
 [Kernels]
   [./td_temp]
     type = TimeDerivative
@@ -35,6 +43,13 @@
   [./mh_temp]
     type = RedbackMechDissip
     variable = temp
+  [../]
+[]
+
+[AuxKernels]
+  [./porosity]
+    type = RedbackTotalPorosityAux
+    variable = porosity
   [../]
 []
 
@@ -78,18 +93,16 @@
     block = 0
     m = 1
     ar = 10
-    yield_stress = '0 1 1 1'
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     gr = 0.095
     pore_pres = 0
     temperature = temp
-    is_mechanics_on = false
     ref_lewis_nb = 1
     ar_F = 40
     ar_R = 1
     Aphi = 0
     phi0 = 0.1
     da_endo = 1
+    total_porosity = porosity
   [../]
 []
 

@@ -453,7 +453,7 @@
   [../]
 []
 
-[RedbackAction]
+[RedbackMechAction]
   [./solid]
     disp_z = disp_z
     disp_y = disp_y

@@ -275,7 +275,7 @@
   [../]
 []
 
-[RedbackAction]
+[RedbackMechAction]
   [./Redback_mech]
     disp_z = disp_z
     temp = temp
