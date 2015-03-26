@@ -19,7 +19,6 @@ InputParameters validParams<RedbackMaterial>()
 {
   InputParameters params = validParams<Material>();
 
-  //params.addParam<Real>("phi0", 0, "initial porosity value.");
   params.addRangeCheckedParam<Real>("phi0", 0.0, "phi0>=0 & phi0<1", "initial porosity value.");
   params.addRangeCheckedParam<Real>("gr", "gr>=0", "Gruntfest number.");
   params.addParam<Real>("ref_lewis_nb", "Reference Lewis number.");
@@ -33,6 +32,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addCoupledVar("disp_x", "The x displacement");
   params.addCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
+  params.addCoupledVar("total_porosity", "The total porosity (as AuxKernel)");
 
   //params.addCoupledVar("solid_velocity_aux", "Solid velocity (AuxKernel) from RedbackMechMaterial (if used)");
   params.addParam<MooseEnum>("density_method", RedbackMaterial::densityMethodEnum() = "linear", "The method to describe density evolution with temperature and pore pressure"); // TODO: fluid, solid, mixture?...
@@ -70,6 +70,10 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _has_pore_pres(isCoupled("pore_pres")),
   _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
   //_pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
+
+  //_has_total_porosity(isCoupled("total_porosity")),
+  //_total_porosity(_has_total_porosity ? coupledValue("total_porosity") : _zero),
+  _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled!
 
   //_disp_x(isCoupled("disp_x") ? coupledValue("disp_x") : _zero),
 
@@ -111,7 +115,8 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _delta(declareProperty<Real>("delta")),
   _m(declareProperty<Real>("m")),
 
-  _porosity(declareProperty<Real>("porosity")),
+  _initial_porosity(declareProperty<Real>("initial_porosity")),
+  //_porosity(declareProperty<Real>("porosity")),
   _lewis_number(declareProperty<Real>("lewis_number")),
 
   _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
@@ -180,32 +185,12 @@ RedbackMaterial::permeabilityMethodEnum()
   return MooseEnum("KozenyCarman");
 }
 
-/*void
-RedbackMaterial::initQpStatefulProperties()
-{
-  std::cout << "initQpStatefulProperties at coords " << _q_point[_qp](0) << std::endl;
-  //_useless_property_old[_qp] = 0; // TODO: find a better way to have a one off init
-  // TODO: why is this function called twice???
-  // TODO: apparently, _my_prop[_qp]=x here does not set properly for the element
-  //      but overwrites every element with the same _qp. Why does it actually
-  //      work usually???
-
-  // Variable initialisation (one off)
-  //_porosity[_qp] = _phi0_param + _q_point[_qp](0)/100.; // TODO: thomas playing
-  //std::cout << "init _porosity[_qp]=" << _porosity[_qp] << " at coords " << _q_point[_qp](0) << std::endl;
-
-  //_chemical_porosity[_qp]= 0;
-  //_solid_ratio[_qp] = 0;
-  //_mises_strain[_qp] = 0;
-  //_solid_velocity[_qp] = RealVectorValue();
-  //_fluid_velocity[_qp] = RealVectorValue();
-}*/
-
 void RedbackMaterial::stepInitQpProperties()
 {
   // TODO: Variable initialisation we'd like done only once (one off)
   // but can't figure out how so doing it at every step...
-  _porosity[_qp] = _phi0_param;
+  _initial_porosity[_qp] = _phi0_param;
+  //_porosity[_qp] = _phi0_param; // _total_porosity now coming from AuxKernel (coupled to this material in .i)
   _chemical_porosity[_qp]= 0;
   _solid_ratio[_qp] = 0;
   _mises_strain[_qp] = 0;
@@ -250,6 +235,8 @@ RedbackMaterial::computeRedbackTerms()
 {
   Real omega_rel, temporary, phi_prime, s_prime;
 
+  Real test = _total_porosity[_qp] - 0.1;
+  Moose::out << "RedbackMaterial::computeRedbackTerms(), _total_porosity[" << _qp << "]=" << test << "\n";
   //TODO: put flags for all properties depending on activated variables.
 
   //TODO: do not compute these when mechanics is on (5 fields overwritten)
@@ -287,7 +274,8 @@ RedbackMaterial::computeRedbackTerms()
 
     // Step 3: calculate the chemical porosity and update the total porosity
     _chemical_porosity[_qp] = _Aphi_param*(1 - _phi0_param)/(1+_eta1_param/_solid_ratio[_qp]);
-    _porosity[_qp] =  _phi0_param + _chemical_porosity[_qp];
+    //_porosity[_qp] =  _phi0_param + _chemical_porosity[_qp];
+    // _total_porosity will be updated through the AuxKernel (at next iteration)
 
     // Step 4: calculate the partial derivatives for the jacobian
     temporary = _eta2_param * _Kc_param * (_ar_F[_qp] - _ar_R[_qp]) *_delta[_qp] *
@@ -303,40 +291,40 @@ RedbackMaterial::computeRedbackTerms()
          std::exp( _ar_F[_qp] / (1 + _delta[_qp]*_T[_qp]) )* _eta2_param * _Kc_param, 2);
 
     // Compute Endothermic Chemical Energy
-    _chemical_endothermic_energy[_qp] = _da_endo_param * (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp]) *
+    _chemical_endothermic_energy[_qp] = _da_endo_param * (1 - _total_porosity[_qp]) * (1 - _solid_ratio[_qp]) *
         std::exp( (_ar_F[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
 
     // Compute Endothermic Chemical Energy Jacobian
     _chemical_endothermic_energy_jac[_qp] = _da_endo_param * std::exp( (_ar_F[_qp]) / (1 + _delta[_qp]*_T[_qp]) ) *
         (
-         _ar_F[_qp] * _delta[_qp] * (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp])
+         _ar_F[_qp] * _delta[_qp] * (1 - _total_porosity[_qp]) * (1 - _solid_ratio[_qp])
             / std::pow(1+_delta[_qp]*_T[_qp], 2)
         - (1 - _solid_ratio[_qp]) * phi_prime
-        - (1 - _porosity[_qp]) * s_prime
+        - (1 - _total_porosity[_qp]) * s_prime
         );
 
     // Compute Exothermic Chemical Energy
-    _chemical_exothermic_energy[_qp] = _da_exo_param * (1 - _porosity[_qp]) * _solid_ratio[_qp] * _chemical_porosity[_qp] *
+    _chemical_exothermic_energy[_qp] = _da_exo_param * (1 - _total_porosity[_qp]) * _solid_ratio[_qp] * _chemical_porosity[_qp] *
         std::exp( (_ar_R[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
 
     // Compute Exothermic Chemical Energy Jacobian
     _chemical_exothermic_energy_jac[_qp] = _da_exo_param * std::exp( _ar_R[_qp] / (1 + _delta[_qp]*_T[_qp]) ) *
         (
           _solid_ratio[_qp]*(
-         _ar_R[_qp] * _delta[_qp] * _chemical_porosity[_qp] *(1 - _porosity[_qp])
+         _ar_R[_qp] * _delta[_qp] * _chemical_porosity[_qp] *(1 - _total_porosity[_qp])
             / std::pow(1+_delta[_qp]*_T[_qp], 2)
-        + (1 - _porosity[_qp] - _chemical_porosity[_qp]) * phi_prime )
-        + _chemical_porosity[_qp]*(1 - _porosity[_qp]) * s_prime
+        + (1 - _total_porosity[_qp] - _chemical_porosity[_qp]) * phi_prime )
+        + _chemical_porosity[_qp]*(1 - _total_porosity[_qp]) * s_prime
         );
 
     // Compute Chemical Source/Sink Term for the mass (pore pressure) equation
-    _chemical_source_mass[_qp] =  _mu[_qp]* (1 - _porosity[_qp]) * (1 - _solid_ratio[_qp]) *std::exp( (_ar_F[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
+    _chemical_source_mass[_qp] =  _mu[_qp]* (1 - _total_porosity[_qp]) * (1 - _solid_ratio[_qp]) *std::exp( (_ar_F[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
 
     // Compute Jacobian of Chemical Source/Sink Term for the mass (pore pressure) equation. The corresponding variable is pore pressure
     _chemical_source_mass_jac[_qp] = 0;
 
     // Update Lewis number
-    _lewis_number[_qp] = _ref_lewis_nb[_qp]*std::pow((1-_porosity[_qp])/(1-_phi0_param), 2) * std::pow(_phi0_param/_porosity[_qp], 3);
+    _lewis_number[_qp] = _ref_lewis_nb[_qp]*std::pow((1-_total_porosity[_qp])/(1-_phi0_param), 2) * std::pow(_phi0_param/_total_porosity[_qp], 3);
   }
 
   // convective terms
@@ -359,7 +347,7 @@ RedbackMaterial::computeRedbackTerms()
      default:
        mooseError("density method not implemented yet, use linear");
      }
-    _mixture_density[_qp] = (1-_porosity[_qp])*solid_density+ _porosity[_qp]*fluid_density;
+    _mixture_density[_qp] = (1-_total_porosity[_qp])*solid_density+ _total_porosity[_qp]*fluid_density;
 
     //Terms feeding the stress equilibrium and Darcy flux
     x_ref = 1; sigma_ref = 1e6;
@@ -369,19 +357,19 @@ RedbackMaterial::computeRedbackTerms()
     _fluid_gravity_term[_qp] = fluid_density*normalized_gravity; //for Darcy's flux
 
     //Step 2: forming the compressibilities of the phases
-    beta_solid = (1-_porosity[_qp])*_solid_compressibility[_qp]; //normalized compressibility of the solid phase
-    beta_fluid = _porosity[_qp]*_fluid_compressibility[_qp]; //normalized compressibility of the fluid phase
+    beta_solid = (1-_total_porosity[_qp])*_solid_compressibility[_qp]; //normalized compressibility of the solid phase
+    beta_fluid = _total_porosity[_qp]*_fluid_compressibility[_qp]; //normalized compressibility of the fluid phase
     beta_m_star = beta_solid+ beta_fluid; // normalized compressibility of the mixture
 
     //Step 4: forming the thermal expansions of the phases
-    lambda_solid = (1-_porosity[_qp])*_solid_thermal_expansion[_qp]; //normalized thermal expansion coefficient of the solid phase
-    lambda_fluid = _porosity[_qp]*_fluid_thermal_expansion[_qp]; //normalized thermal expansion coefficient of the fluid phase
+    lambda_solid = (1-_total_porosity[_qp])*_solid_thermal_expansion[_qp]; //normalized thermal expansion coefficient of the solid phase
+    lambda_fluid = _total_porosity[_qp]*_fluid_thermal_expansion[_qp]; //normalized thermal expansion coefficient of the fluid phase
     lambda_m_star = lambda_solid + lambda_fluid; // normalized compressibility of the mixture
 
     //Step 4: forming the velocities through mechanics and Darcy's flow law
-    _fluid_velocity[_qp] = _solid_velocity[_qp] - (_grad_pore_pressure[_qp] - fluid_density*normalized_gravity)/(_lewis_number[_qp]*_porosity[_qp]); //solving Darcy's flux for the fluid velocity
+    _fluid_velocity[_qp] = _solid_velocity[_qp] - (_grad_pore_pressure[_qp] - fluid_density*normalized_gravity)/(_lewis_number[_qp]*_total_porosity[_qp]); //solving Darcy's flux for the fluid velocity
     mixture_velocity = (solid_density/_mixture_density[_qp])*_solid_velocity[_qp] + (fluid_density/_mixture_density[_qp])*_fluid_velocity[_qp]; //barycentric velocity for the mixture
-    //_fluid_velocity[_qp] = _solid_velocity[_qp] - beta_m_star*(_grad_pore_pressure[_qp] - _fluid_density_param*_gravity_param)/(_lewis_number[_qp]*_porosity[_qp]); //solving Darcy's flux for the fluid velocity
+    //_fluid_velocity[_qp] = _solid_velocity[_qp] - beta_m_star*(_grad_pore_pressure[_qp] - _fluid_density_param*_gravity_param)/(_lewis_number[_qp]*_total_porosity[_qp]); //solving Darcy's flux for the fluid velocity
     //mixture_velocity = (_solid_density_param/_mixture_density[_qp])*_solid_velocity[_qp] + (_fluid_density_param/_mixture_density[_qp])*_fluid_velocity[_qp]; //barycentric velocity for the mixture
 
     //Step 5: forming the kernels and their jacobians

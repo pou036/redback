@@ -35,15 +35,7 @@
 #include "ReturnMapIterDT.h"
 
 // AuxKernels
-//#include "StrainRateAux.h"
-//#include "MisesStrainAux.h"
-//#include "MisesStrainRateAux.h"
-//#include "MisesStressAux.h"
-//#include "MechDissipationAux.h"
-
-// Postprocessors
-//#include "StrainRatePoint.h"
-//#include "RedbackPost.h"
+#include "RedbackTotalPorosityAux.h"
 
 
 template<>
@@ -104,14 +96,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerExecutioner(ReturnMapIterDT);
 
-  //registerAux(StrainRateAux);
-  //registerAux(MisesStrainAux);
-  //registerAux(MisesStrainRateAux);
-  //registerAux(MisesStressAux);
-  //registerAux(MechDissipationAux);
-
-//  registerPostprocessor(StrainRatePoint);
-//  registerPostprocessor(RedbackPost);
+  registerAux(RedbackTotalPorosityAux);
 }
 
 void

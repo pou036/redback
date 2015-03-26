@@ -57,6 +57,8 @@ protected:
   VariableValue & _T, & _T_old;
   bool _has_pore_pres;
   VariableValue & _pore_pres;//, & _pore_pres_old;
+  //bool _has_total_porosity;
+  VariableValue & _total_porosity;
 
   Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param, _m_param, _peclet_number; //_ar_c_param, _da_param, _mu_param,
   Real  _ar_F_param, _ar_R_param, _da_endo_param, _da_exo_param, _mu_param, _Kc_param, _eta1_param, _eta2_param, _Aphi_param, _pressurization_coefficient_param;
@@ -74,7 +76,8 @@ protected:
   MaterialProperty<Real> & _delta;
   MaterialProperty<Real> & _m;
   
-  MaterialProperty<Real> & _porosity;
+  MaterialProperty<Real> & _initial_porosity;
+  //MaterialProperty<Real> & _porosity;
   MaterialProperty<Real> & _lewis_number;
 
   MaterialProperty<Real> & _mod_gruntfest_number;

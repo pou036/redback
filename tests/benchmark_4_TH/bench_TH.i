@@ -86,9 +86,8 @@
 
 [AuxKernels]
   [./porosity]
-    type = MaterialRealAux
+    type = RedbackTotalPorosityAux
     variable = porosity
-    property = porosity
     block = 0
   [../]
   [./Lewis_number]

@@ -337,9 +337,8 @@
     property = volumetric_strain_rate
   [../]
   [./porosity]
-    type = MaterialRealAux
+    type = RedbackTotalPorosityAux
     variable = porosity
-    property = porosity
     block = 0
   [../]
   [./Lewis_number]
