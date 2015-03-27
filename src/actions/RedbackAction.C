@@ -11,7 +11,6 @@ InputParameters validParams<RedbackAction>()
   params.addParam<NonlinearVariableName>("disp_x", "", "The x displacement");
   params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
-  params.addParam<NonlinearVariableName>("disp_r", "", "The r displacement");
   params.addParam<NonlinearVariableName>("temp", "", "The temperature");
   params.addParam<NonlinearVariableName>("pore_pres", "", "The pore fluid pressure");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
@@ -26,7 +25,6 @@ RedbackAction::RedbackAction(const std::string & name, InputParameters params) :
     _disp_x(getParam<NonlinearVariableName>("disp_x")),
     _disp_y(getParam<NonlinearVariableName>("disp_y")),
     _disp_z(getParam<NonlinearVariableName>("disp_z")),
-    _disp_r(getParam<NonlinearVariableName>("disp_r")),
     _temp(getParam<NonlinearVariableName>("temp")),
     _pore_pres(getParam<NonlinearVariableName>("pore_pres"))
 {
@@ -35,43 +33,26 @@ RedbackAction::RedbackAction(const std::string & name, InputParameters params) :
 void
 RedbackAction::act()
 {
-  // Determine whether RZ
-  bool rz = false;
   unsigned int dim = 1;
   std::vector<std::string> keys;
   std::vector<VariableName> vars;
   std::string type("RedbackStressDivergenceTensors");
 
-
-  /* if (_problem->coordSystem() == Moose::COORD_RZ)
-  {
-    rz = true;
-    dim = 2;
-    keys.push_back("disp_r");
-    keys.push_back("disp_z");
-    vars.push_back(_disp_r);
-    vars.push_back(_disp_z);
-    type = "StressDivergenceRZ";
-    }*/
-
-  if (!rz && _disp_x == "")
+  if (_disp_x == "")
     mooseError("disp_x must be specified");
 
-  if (!rz)
+  keys.push_back("disp_x");
+  vars.push_back(_disp_x);
+  if ( _disp_y != "" )
   {
-    keys.push_back("disp_x");
-    vars.push_back(_disp_x);
-    if ( _disp_y != "" )
+    ++dim;
+    keys.push_back("disp_y");
+    vars.push_back(_disp_y);
+    if ( _disp_z != "" )
     {
       ++dim;
-      keys.push_back("disp_y");
-      vars.push_back(_disp_y);
-      if ( _disp_z != "" )
-      {
-        ++dim;
-        keys.push_back("disp_z");
-        vars.push_back(_disp_z);
-      }
+      keys.push_back("disp_z");
+      vars.push_back(_disp_z);
     }
   }
 
@@ -89,6 +70,7 @@ RedbackAction::act()
       vars.push_back(_pore_pres);
     }
 
+  /*
   // Create divergence objects
   std::string short_name(_name);
   // Chop off "TensorMechanics/"
@@ -116,4 +98,5 @@ RedbackAction::act()
 
     _problem->addKernel(type, name.str(), params);
   }
+  */
 }

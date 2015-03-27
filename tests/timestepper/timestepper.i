@@ -62,6 +62,7 @@
     youngs_modulus = 10
     poisson_ratio = 0.3
     slope_yield_surface = 0.3
+    total_porosity = porosity
   [../]
   [./mat1]
     type = RedbackMaterial

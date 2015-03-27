@@ -57,10 +57,11 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
   params.addParam< Real >("mhc", 0, "Microstructural hardening coefficient");
-  params.addParam< Real >("mixture_compressibility", 1,"Compressibility of the rock+fluid mixture");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
   params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
   params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
+
+  params.addCoupledVar("total_porosity", "The total porosity (as AuxKernel)");
 
   return params;
 }
@@ -112,8 +113,7 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _volumetric_strain(declareProperty<Real>("volumetric_strain")),
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
-    _mixture_compressibility_param(getParam<Real>("mixture_compressibility")),
-    _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
+    _mechanical_porosity(declareProperty<Real>("mechanical_porosity")),
     //_dispx_dot(coupledDot("disp_x")),
     //_dispy_dot(coupledDot("disp_y")),
     //_dispz_dot(coupledDot("disp_z"))
@@ -126,6 +126,8 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _T_old(_has_T ? coupledValueOld("temperature") : _zero),
     _has_pore_pres(isCoupled("pore_pres")),
     _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
+    _pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
+    _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
 
     // Get some material properties from RedbackMaterial
     _mechanical_dissipation(getMaterialProperty<Real>("mechanical_dissipation")),
@@ -135,6 +137,7 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _delta(getMaterialProperty<Real>("delta")),
     _mod_gruntfest_number(getMaterialProperty<Real>("mod_gruntfest_number")),
     _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion")),
+    _solid_compressibility(getMaterialProperty<Real>("solid_compressibility")),
     _returnmap_iter(declareProperty<Real>("returnmap_iter"))
 {
   Real E = _youngs_modulus;
@@ -153,8 +156,7 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
 void
 RedbackMechMaterial::initQpStatefulProperties()
 {
-  // TODO: is this doing what we think it is???
-  //  (not sure _my_var[_qp] really sets var for all elements => check!)
+  // called only once at the very beginning of the simulation
   Material::initQpStatefulProperties();
   _total_strain[_qp].zero();
   _elastic_strain[_qp].zero();
@@ -170,7 +172,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _volumetric_strain[_qp] = 0;
   _volumetric_strain_rate[_qp] = 0;
   _total_volumetric_strain[_qp] = 0;
-  _mixture_compressibility[_qp] = _mixture_compressibility_param;
+  _mechanical_porosity[_qp] = 0;
 
 }
 
@@ -357,6 +359,7 @@ RedbackMechMaterial::macaulayBracket(Real val)
 void
 RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y)
 {
+  Real delta_phi_mech_el, delta_phi_mech_pl; // elastic and plastic delta_porosity components for that step
   // update velocities
   //_solid_velocity[_qp] = RealVectorValue(_dispx_dot[_qp], _dispy_dot[_qp], _dispz_dot[_qp]);// TODO
 
@@ -391,6 +394,12 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
       std::fabs(getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent)) +
       std::fabs(_mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp] - p_y), _exponent))
       );
+
+  // Update mechanical porosity (elastic and plastic components)
+  delta_phi_mech_el = (1.0 - 0.1)*(_solid_compressibility[_qp]*(_pore_pres[_qp] - _pore_pres_old[_qp]) -
+      _solid_thermal_expansion[_qp]*(_T[_qp] - _T_old[_qp]));
+  delta_phi_mech_pl = _plastic_strain[_qp].trace()/3.0;
+  _mechanical_porosity[_qp] = _mechanical_porosity[_qp] + delta_phi_mech_el + delta_phi_mech_pl;
   return;
 }
 

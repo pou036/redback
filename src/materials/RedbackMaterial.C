@@ -71,9 +71,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
   //_pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
 
-  //_has_total_porosity(isCoupled("total_porosity")),
-  //_total_porosity(_has_total_porosity ? coupledValue("total_porosity") : _zero),
-  _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled!
+  _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
 
   //_disp_x(isCoupled("disp_x") ? coupledValue("disp_x") : _zero),
 
@@ -118,6 +116,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _initial_porosity(declareProperty<Real>("initial_porosity")),
   //_porosity(declareProperty<Real>("porosity")),
   _lewis_number(declareProperty<Real>("lewis_number")),
+  _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
 
   _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
   _mechanical_dissipation(declareProperty<Real>("mechanical_dissipation")),
@@ -358,6 +357,7 @@ RedbackMaterial::computeRedbackTerms()
     beta_solid = (1-_total_porosity[_qp])*_solid_compressibility[_qp]; //normalized compressibility of the solid phase
     beta_fluid = _total_porosity[_qp]*_fluid_compressibility[_qp]; //normalized compressibility of the fluid phase
     beta_m_star = beta_solid+ beta_fluid; // normalized compressibility of the mixture
+    _mixture_compressibility[_qp] = beta_m_star;
 
     //Step 4: forming the thermal expansions of the phases
     lambda_solid = (1-_total_porosity[_qp])*_solid_thermal_expansion[_qp]; //normalized thermal expansion coefficient of the solid phase

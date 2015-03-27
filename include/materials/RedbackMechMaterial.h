@@ -120,8 +120,7 @@ protected:
   MaterialProperty<Real> & _volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;
   MaterialProperty<Real> & _total_volumetric_strain;
-  Real _mixture_compressibility_param;
-  MaterialProperty<Real> & _mixture_compressibility;
+  MaterialProperty<Real> & _mechanical_porosity;
   Real _exponential;
   //VariableValue & _dispx_dot;
   //VariableValue & _dispy_dot;
@@ -133,7 +132,9 @@ protected:
   bool _has_T;
   VariableValue & _T, & _T_old;
   bool _has_pore_pres;
-  VariableValue & _pore_pres;
+  VariableValue & _pore_pres, & _pore_pres_old;
+  VariableValue & _total_porosity;
+
   // Reading material properties from RedbackMaterial
   MaterialProperty<Real> & _mechanical_dissipation;
   MaterialProperty<Real> & _gr;
@@ -142,6 +143,7 @@ protected:
   MaterialProperty<Real> & _delta;
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _solid_thermal_expansion;
+  MaterialProperty<Real> & _solid_compressibility;
   MaterialProperty<Real> & _returnmap_iter;
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);

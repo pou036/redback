@@ -19,15 +19,11 @@ public:
 
 protected:
   virtual Real computeValue();
-
-  template<typename U>
-  MaterialProperty<U> &
-  getDefaultMaterialProperty(const std::string & name);
-
   bool _is_mechanics_on;//, _is_chemistry_on;
 
 private:
-  MaterialProperty<Real> & _delta_porosity_mech;
+  VariableValue & _delta_porosity_mech;
+  //MaterialProperty<Real> & _delta_porosity_mech;
   MaterialProperty<Real> & _delta_porosity_chem;
   MaterialProperty<Real> & _initial_porosity;
 };

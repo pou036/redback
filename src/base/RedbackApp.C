@@ -4,7 +4,7 @@
 #include "ModulesApp.h"
 
 // Actions
-//#include "RedbackAction.h"
+#include "RedbackAction.h"
 #include "RedbackMechAction.h"
 
 // Boundary conditions
@@ -106,4 +106,6 @@ RedbackApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
   syntax.registerActionSyntax("RedbackMechAction", "RedbackMechAction/*");
   registerAction(RedbackMechAction, "add_kernel");
+  //syntax.registerActionSyntax("RedbackAction", "RedbackAction/*");
+  //registerAction(RedbackMechAction, "add_aux_variable");
 }
