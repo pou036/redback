@@ -13,9 +13,7 @@ InputParameters validParams<RedbackTotalPorosityAux>()
 RedbackTotalPorosityAux::RedbackTotalPorosityAux(const std::string & name, InputParameters parameters) :
     AuxKernel( name, parameters ),
     _is_mechanics_on(getParam<bool>("is_mechanics_on")),
-    // TODO: would be nicer to initialise _delta_porosity_mech with NULL/_zero if not _is_mechanics_on. I just don't know how to do that...
-    //_delta_porosity_mech(_is_mechanics_on ? getMaterialProperty<Real>("mechanical_porosity"): getMaterialProperty<Real>("initial_porosity")),
-    _delta_porosity_mech(coupledValue("mechanical_porosity")),
+    _delta_porosity_mech(_is_mechanics_on ? coupledValue("mechanical_porosity") : _zero),
     _delta_porosity_chem(getMaterialProperty<Real>("chemical_porosity")),
     _initial_porosity(getMaterialProperty<Real>("initial_porosity"))
 {

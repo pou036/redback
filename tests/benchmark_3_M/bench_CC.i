@@ -40,6 +40,7 @@
     slope_yield_surface = -0.6
     yield_criterion = modified_Cam_Clay
     yield_stress = '0. 1 1. 1'
+    total_porosity = total_porosity
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -56,6 +57,7 @@
     m = 1
     phi0 = 0.1
     ref_lewis_nb = 1
+    total_porosity = total_porosity
   [../]
 []
 
@@ -133,7 +135,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number returnmap_iter mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
+  active = 'Mod_Gruntfest_number returnmap_iter mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress total_porosity mech_porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -195,10 +197,18 @@
     family = MONOMIAL
     block = 0
   [../]
+  [./total_porosity]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./mech_porosity]
+    order = FIRST
+    family = MONOMIAL
+  [../]
 []
 
 [AuxKernels]
-  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation returnmap_iter Gruntfest_Number'
+  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation returnmap_iter Gruntfest_Number total_porosity mech_porosity'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -279,6 +289,17 @@
     variable = returnmap_iter
     property = returnmap_iter
     block = 0
+  [../]
+  [./total_porosity]
+    type = RedbackTotalPorosityAux
+    variable = total_porosity
+    mechanical_porosity = mech_porosity
+  [../]
+  [./mech_porosity]
+    type = MaterialRealAux
+    variable = mech_porosity
+    execute_on = timestep_end
+    property = mechanical_porosity
   [../]
 []
 

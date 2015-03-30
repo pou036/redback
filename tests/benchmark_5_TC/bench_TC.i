@@ -23,6 +23,13 @@
   [../]
 []
 
+[AuxVariables]
+  [./total_porosity]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+[]
+
 [Kernels]
   active = 'td_temp diff_temp mh_temp chem_endo'
   [./td_temp]
@@ -44,6 +51,13 @@
   [./Chem_exo]
     type = RedbackChemExo
     variable = temp
+  [../]
+[]
+
+[AuxKernels]
+  [./total_porosity]
+    type = RedbackTotalPorosityAux
+    variable = total_porosity
   [../]
 []
 
@@ -97,6 +111,7 @@
     mu = 1e-3
     ref_lewis_nb = 1
     temperature = temp
+    total_porosity = total_porosity
   [../]
 []
 

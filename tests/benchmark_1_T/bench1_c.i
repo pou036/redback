@@ -24,17 +24,16 @@
 []
 
 [AuxVariables]
-  [./porosity]
+  [./total_porosity]
     order = FIRST
     family = MONOMIAL
-    block = 0
   [../]
 []
 
 [AuxKernels]
-  [./porosity]
+  [./total_porosity]
     type = RedbackTotalPorosityAux
-    variable = porosity
+    variable = total_porosity
   [../]
 []
 
@@ -105,7 +104,7 @@
     Aphi = 0
     phi0 = 0.1
     da_endo = 1
-    total_porosity = porosity
+    total_porosity = total_porosity
   [../]
 []
 

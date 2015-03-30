@@ -38,6 +38,7 @@
     ref_pe_rate = 1
     youngs_modulus = 1000
     poisson_ratio = 0.3
+    total_porosity = total_porosity
   [../]
   [./mat1]
     type = RedbackMaterial
@@ -56,6 +57,7 @@
     ref_lewis_nb = 1
     ar_F = 1
     ar_R = 1
+    total_porosity = total_porosity
   [../]
 []
 
@@ -92,6 +94,17 @@
   [../]
 []
 
+[AuxVariables]
+  [./total_porosity]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+  [./mech_porosity]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+[]
+
 [Kernels]
   [./temp_td]
     type = TimeDerivative
@@ -105,6 +118,20 @@
   [./temp_dissip]
     type = RedbackMechDissip
     variable = temp
+  [../]
+[]
+
+[AuxKernels]
+  [./total_porosity]
+    type = RedbackTotalPorosityAux
+    variable = total_porosity
+    mechanical_porosity = mech_porosity
+  [../]
+  [./mech_porosity]
+    type = MaterialRealAux
+    variable = mech_porosity
+    execute_on = timestep_end
+    property = mechanical_porosity
   [../]
 []
 

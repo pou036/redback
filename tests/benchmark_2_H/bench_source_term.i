@@ -25,6 +25,13 @@
   [../]
 []
 
+[AuxVariables]
+  [./total_porosity]
+    order = FIRST
+    family = MONOMIAL
+  [../]
+[]
+
 [Kernels]
   active = 'td_press chem_press press_diff'
   [./td_temp]
@@ -51,6 +58,13 @@
     type = RedbackChemPressure
     variable = pore_pressure
     block = 0
+  [../]
+[]
+
+[AuxKernels]
+  [./total_porosity]
+    type = RedbackTotalPorosityAux
+    variable = total_porosity
   [../]
 []
 
@@ -101,8 +115,6 @@
     m = 1
     mu = 0.5
     ar = 10
-    yield_stress = '0 1 1 1'
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     gr = 0.9
     pore_pres = pore_pressure
     temperature = 0
@@ -114,6 +126,7 @@
     phi0 = 0.1
     da_endo = 1
     is_chemistry_on = true
+    total_porosity = total_porosity
   [../]
 []
 

@@ -26,10 +26,9 @@
 []
 
 [AuxVariables]
-  [./porosity]
-    order = CONSTANT
+  [./total_porosity]
+    order = FIRST
     family = MONOMIAL
-    block = 0
   [../]
   [./Lewis_number]
     order = CONSTANT
@@ -87,8 +86,7 @@
 [AuxKernels]
   [./porosity]
     type = RedbackTotalPorosityAux
-    variable = porosity
-    block = 0
+    variable = total_porosity
   [../]
   [./Lewis_number]
     type = MaterialRealAux
@@ -154,8 +152,6 @@
     m = 3
     mu = 1e-3
     ar = 10
-    yield_stress = '0 1 1 1'
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     gr = 0.11
     pore_pres = pore_pressure
     temperature = temp
@@ -170,6 +166,7 @@
     da_endo = 1e-4
     pressurization_coefficient = 1
     is_chemistry_on = false
+    total_porosity = total_porosity
   [../]
 []
 
@@ -192,7 +189,7 @@
   [../]
   [./porosity_middle]
     type = PointValue
-    variable = porosity
+    variable = total_porosity
     point = '0 0 0'
   [../]
   [./Lewis_middle]
