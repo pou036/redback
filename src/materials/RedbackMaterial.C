@@ -233,6 +233,7 @@ void
 RedbackMaterial::computeRedbackTerms()
 {
   Real omega_rel, temporary, phi_prime, s_prime;
+  Real beta_m_star, beta_solid, beta_fluid;
 
   //TODO: put flags for all properties depending on activated variables.
 
@@ -324,20 +325,25 @@ RedbackMaterial::computeRedbackTerms()
     _lewis_number[_qp] = _ref_lewis_nb[_qp]*std::pow((1-_total_porosity[_qp])/(1-_phi0_param), 2) * std::pow(_phi0_param/_total_porosity[_qp], 3);
   }
 
+  // Forming the compressibilities of the phases
+  beta_solid = (1-_total_porosity[_qp])*_solid_compressibility[_qp]; //normalized compressibility of the solid phase
+  beta_fluid = _total_porosity[_qp]*_fluid_compressibility[_qp]; //normalized compressibility of the fluid phase
+  beta_m_star = beta_solid+ beta_fluid; // normalized compressibility of the mixture
+  _mixture_compressibility[_qp] = beta_m_star;
+
   // convective terms
   if (_are_convective_terms_on)
   {
     Real solid_density, fluid_density;
-    Real beta_m_star, beta_solid, beta_fluid;
     Real lambda_m_star, lambda_solid, lambda_fluid;
     Real x_ref, sigma_ref; //TODO: derive them directly from mesh dimensions and problem at hand - user provided?
     RealVectorValue mixture_velocity, normalized_gravity;
 
-    //Step 1: forming the partial densities and gravity terms
+    // Forming the partial densities and gravity terms
     switch (_density_method)
      {
      case linear:
-       //Linear approximation of the EOS (Equation Of State)
+       // Linear approximation of the EOS (Equation Of State)
        solid_density = _solid_density_param*(1 + _solid_compressibility[_qp]*_pore_pres[_qp] - _solid_thermal_expansion[_qp]*_T[_qp]); // TODO: move to AuxKernel
        fluid_density = _fluid_density_param*(1 + _fluid_compressibility[_qp]*_pore_pres[_qp] - _fluid_thermal_expansion[_qp]*_T[_qp]);
        break;
@@ -346,31 +352,25 @@ RedbackMaterial::computeRedbackTerms()
      }
     _mixture_density[_qp] = (1-_total_porosity[_qp])*solid_density+ _total_porosity[_qp]*fluid_density;
 
-    //Terms feeding the stress equilibrium and Darcy flux
+    // Terms feeding the stress equilibrium and Darcy flux
     x_ref = 1; sigma_ref = 1e6;
     normalized_gravity = _gravity_param*(x_ref/sigma_ref);
 
     _mixture_gravity_term[_qp] = _mixture_density[_qp]*normalized_gravity; //for the stress equilibrium equation
     _fluid_gravity_term[_qp] = fluid_density*normalized_gravity; //for Darcy's flux
 
-    //Step 2: forming the compressibilities of the phases
-    beta_solid = (1-_total_porosity[_qp])*_solid_compressibility[_qp]; //normalized compressibility of the solid phase
-    beta_fluid = _total_porosity[_qp]*_fluid_compressibility[_qp]; //normalized compressibility of the fluid phase
-    beta_m_star = beta_solid+ beta_fluid; // normalized compressibility of the mixture
-    _mixture_compressibility[_qp] = beta_m_star;
-
-    //Step 4: forming the thermal expansions of the phases
+    // Forming the thermal expansions of the phases
     lambda_solid = (1-_total_porosity[_qp])*_solid_thermal_expansion[_qp]; //normalized thermal expansion coefficient of the solid phase
     lambda_fluid = _total_porosity[_qp]*_fluid_thermal_expansion[_qp]; //normalized thermal expansion coefficient of the fluid phase
     lambda_m_star = lambda_solid + lambda_fluid; // normalized compressibility of the mixture
 
-    //Step 4: forming the velocities through mechanics and Darcy's flow law
+    // Forming the velocities through mechanics and Darcy's flow law
     _fluid_velocity[_qp] = _solid_velocity[_qp] - (_grad_pore_pressure[_qp] - fluid_density*normalized_gravity)/(_lewis_number[_qp]*_total_porosity[_qp]); //solving Darcy's flux for the fluid velocity
     mixture_velocity = (solid_density/_mixture_density[_qp])*_solid_velocity[_qp] + (fluid_density/_mixture_density[_qp])*_fluid_velocity[_qp]; //barycentric velocity for the mixture
     //_fluid_velocity[_qp] = _solid_velocity[_qp] - beta_m_star*(_grad_pore_pressure[_qp] - _fluid_density_param*_gravity_param)/(_lewis_number[_qp]*_total_porosity[_qp]); //solving Darcy's flux for the fluid velocity
     //mixture_velocity = (_solid_density_param/_mixture_density[_qp])*_solid_velocity[_qp] + (_fluid_density_param/_mixture_density[_qp])*_fluid_velocity[_qp]; //barycentric velocity for the mixture
 
-    //Step 5: forming the kernels and their jacobians
+    // Forming the kernels and their jacobians
     _pressure_convective_mass[_qp] = (beta_solid/beta_m_star)*_solid_velocity[_qp] + (beta_fluid/beta_m_star)*_fluid_velocity[_qp]; //convective term multiplying the pressure flux in the mass equation. TODO: disable for incompressible case
     _pressure_convective_mass_jac[_qp] = RealVectorValue(); //derivative with respect to pore pressure TODO: this is not equal to zero!!
 

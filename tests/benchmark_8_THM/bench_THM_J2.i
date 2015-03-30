@@ -50,6 +50,7 @@
     ref_pe_rate = 1
     slope_yield_surface = -0.6
     yield_stress = '0. 1 1. 1'
+    total_porosity = total_porosity
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -73,6 +74,7 @@
     phi0 = 0.1
     pressurization_coefficient = 0.5
     ref_lewis_nb = 1
+    total_porosity = total_porosity
   [../]
 []
 
@@ -156,7 +158,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress Lewis_number porosity'
+  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress Lewis_number total_porosity mech_porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -213,10 +215,13 @@
     family = MONOMIAL
     block = 0
   [../]
-  [./porosity]
-    order = CONSTANT
+  [./total_porosity]
+    order = FIRST
     family = MONOMIAL
-    block = 0
+  [../]
+  [./mech_porosity]
+    order = FIRST
+    family = MONOMIAL
   [../]
   [./Lewis_number]
     order = CONSTANT
@@ -271,7 +276,7 @@
 []
 
 [AuxKernels]
-  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation porosity Gruntfest_Number'
+  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation total_porosity mech_porosity Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -347,11 +352,16 @@
     variable = volumetric_strain_rate
     property = volumetric_strain_rate
   [../]
-  [./porosity]
+  [./total_porosity]
+    type = RedbackTotalPorosityAux
+    variable = total_porosity
+    mechanical_porosity = mech_porosity
+  [../]
+  [./mech_porosity]
     type = MaterialRealAux
-    variable = porosity
-    property = porosity
-    block = 0
+    variable = mech_porosity
+    execute_on = timestep_end
+    property = mechanical_porosity
   [../]
   [./Lewis_number]
     type = MaterialRealAux
@@ -408,7 +418,7 @@
   [../]
   [./porosity_middle]
     type = PointValue
-    variable = porosity
+    variable = total_porosity
     point = '0 0 0'
   [../]
   [./Lewis_middle]
