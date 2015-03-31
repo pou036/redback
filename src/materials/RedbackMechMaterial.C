@@ -396,9 +396,9 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
       );
 
   // Update mechanical porosity (elastic and plastic components)
-  delta_phi_mech_el = (1.0 - 0.1)*(_solid_compressibility[_qp]*(_pore_pres[_qp] - _pore_pres_old[_qp]) -
+  delta_phi_mech_el = (1.0 - _total_porosity[_qp])*(_solid_compressibility[_qp]*(_pore_pres[_qp] - _pore_pres_old[_qp]) -
       _solid_thermal_expansion[_qp]*(_T[_qp] - _T_old[_qp]));
-  delta_phi_mech_pl = _plastic_strain[_qp].trace()/3.0;
+  delta_phi_mech_pl = (1.0 - _total_porosity[_qp])*(_plastic_strain[_qp] - _plastic_strain_old[_qp]).trace()/3.0;
   _mechanical_porosity[_qp] = _mechanical_porosity[_qp] + delta_phi_mech_el + delta_phi_mech_pl;
   return;
 }
