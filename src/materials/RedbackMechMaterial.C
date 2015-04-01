@@ -35,9 +35,6 @@ InputParameters validParams<RedbackMechMaterial>()
   InputParameters params = validParams<Material>();
 
   // Copy-paste from TensorMechanicsMaterial.C
-  params.addParam<Real>("euler_angle_1", 0.0, "Euler angle in direction 1");
-  params.addParam<Real>("euler_angle_2", 0.0, "Euler angle in direction 2");
-  params.addParam<Real>("euler_angle_3", 0.0, "Euler angle in direction 3");
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addRequiredCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", "The z displacement");
@@ -56,6 +53,7 @@ InputParameters validParams<RedbackMechMaterial>()
   //  Copy-paste from FiniteStrainPlasticRateMaterial.C
   params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
+  params.addParam< Real >("exponent_p", 0, "Exponent for excess pore pressure sensitivity");
   params.addParam< Real >("mhc", 0, "Microstructural hardening coefficient");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
   params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
@@ -105,6 +103,7 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _mhc(getParam<Real>("mhc")),
 
     // Redback
+    _exponent_p(getParam<Real>("exponent_p")),
     _youngs_modulus(getParam<Real>("youngs_modulus")),
     _poisson_ratio(getParam<Real>("poisson_ratio")),
     _mises_stress(declareProperty<Real>("mises_stress")),
@@ -375,7 +374,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _volumetric_strain_rate[_qp] = instantaneous_strain_rate.trace()/3.0;
 
   // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
-  _mechanical_dissipation[_qp] = _gr[_qp]* std::pow(1 - _pore_pres[_qp], _exponent) *sig.doubleContraction(instantaneous_strain_rate);
+  _mechanical_dissipation[_qp] = _gr[_qp]*sig.doubleContraction(instantaneous_strain_rate);
   // TODO: remove pore pressure (sig is effective stress already), _mechanical_dissipation also defined in RedbackMaterial.C !!!
 
   // Compute Mechanical Dissipation Jacobian
@@ -506,7 +505,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   _exponential = 1;
   if (_has_T)
   {
-    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
+    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]))* std::pow(1 - _pore_pres[_qp], _exponent) ;
   }
   // Microstructural hardening
   //_exponential = _exponential*std::exp(-_mhc*mean_stress_old*volumetric_plastic_strain/(1 + _delta[_qp] *_T[_qp]));
