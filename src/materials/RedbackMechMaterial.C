@@ -369,13 +369,21 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _mean_stress[_qp] = sig.trace()/3.0;
 
   // Compute platic strains
-  RankTwoTensor instantaneous_strain_rate = (_plastic_strain[_qp] - _plastic_strain_old[_qp])/_dt;
+  RankTwoTensor instantaneous_strain_rate;
+
+  if (_dt == 0)
+  {
+    instantaneous_strain_rate.zero();
+  }
+  else
+  {
+    instantaneous_strain_rate = (_plastic_strain[_qp] - _plastic_strain_old[_qp])/_dt;
+  }
   _mises_strain_rate[_qp] = std::pow(2.0/3.0,0.5) * instantaneous_strain_rate.L2norm();
   _volumetric_strain_rate[_qp] = instantaneous_strain_rate.trace()/3.0;
 
   // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
   _mechanical_dissipation[_qp] = _gr[_qp]*sig.doubleContraction(instantaneous_strain_rate);
-  // TODO: remove pore pressure (sig is effective stress already), _mechanical_dissipation also defined in RedbackMaterial.C !!!
 
   // Compute Mechanical Dissipation Jacobian
   //_mechanical_dissipation_jac[_qp] = _gr[_qp] *
@@ -388,7 +396,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
   //_mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig) / yield_stress *
   //    std::pow( macaulayBracket( getSigEqv(sig) / yield_stress - 1.0 ), _exponent);
-  _mod_gruntfest_number[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent) *
+  _mod_gruntfest_number[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent_p) *
       (
       std::fabs(getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent)) +
       std::fabs(_mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp] - p_y), _exponent))
@@ -505,7 +513,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   _exponential = 1;
   if (_has_T)
   {
-    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]))* std::pow(1 - _pore_pres[_qp], _exponent) ;
+    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]))* std::pow(1 - _pore_pres[_qp], _exponent_p) ;
   }
   // Microstructural hardening
   //_exponential = _exponential*std::exp(-_mhc*mean_stress_old*volumetric_plastic_strain/(1 + _delta[_qp] *_T[_qp]));

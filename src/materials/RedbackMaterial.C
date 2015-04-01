@@ -25,6 +25,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("ar", "Arrhenius number.");
   params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
   params.addParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna)");
+  params.addParam<bool>("is_mechanics_on", false, "is mechanics on?");
   params.addParam<bool>("is_chemistry_on", false, "is chemistry on?");
   params.addParam<bool>("are_convective_terms_on", false, "are convective terms on?");
   params.addCoupledVar("temperature", "Dimensionless temperature");
@@ -100,6 +101,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _solid_density_param(getParam<Real>("solid_density")),
   _fluid_density_param(getParam<Real>("fluid_density")),
 
+  _is_mechanics_on(getParam<bool>("is_mechanics_on")),
   _is_chemistry_on(getParam<bool>("is_chemistry_on")),
   _are_convective_terms_on(getParam<bool>("are_convective_terms_on")),
 
@@ -246,14 +248,17 @@ RedbackMaterial::computeRedbackTerms()
   // Compute Mises strain rate
   _mises_strain_rate[_qp] = _exponential;
 
-  // Compute Mechanical Dissipation
-  _mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _m[_qp]) *
-      std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
+  if (!_is_mechanics_on)
+  {
+    // Compute Mechanical Dissipation
+    _mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _m[_qp]) *
+        std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
 
-  // Compute Mechanical Dissipation Jacobian
-  _mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _m[_qp]) *
-    _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
-    (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+    // Compute Mechanical Dissipation Jacobian
+    _mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _m[_qp]) *
+      _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
+      (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+  }
 
   if (_is_chemistry_on)
   {
