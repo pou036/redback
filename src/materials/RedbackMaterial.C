@@ -43,7 +43,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("da_endo", 0, "Damkoehler number for the endothermic reaction.");
   params.addParam<Real>("da_exo", 0, "Damkoehler number for the exothermic reaction.");
   params.addParam<Real>("mu", 0, "Chemical pressurization coefficient.");
-  params.addParam<Real>("Kc", 0, "Equilibtium constant.");
+  params.addParam<Real>("Kc", 0, "Equilibrium constant.");
   params.addParam<Real>("eta1", 1, "ratio of concentrations (see documentation).");
   params.addParam<Real>("eta2", 1, "ratio of concentrations (see documentation).");
   params.addRangeCheckedParam<Real>("Aphi","Aphi>=0 & Aphi<=1", "percentage of volume change from chemistry contributing to porosity (see documentation)");
@@ -271,7 +271,7 @@ RedbackMaterial::computeRedbackTerms()
     _solid_ratio[_qp] = omega_rel/(1 + omega_rel);
 
     // Step 3: calculate the chemical porosity and update the total porosity
-    _chemical_porosity[_qp] = _Aphi_param*(1 - _phi0_param)/(1+_eta1_param/_solid_ratio[_qp]);
+    _chemical_porosity[_qp] = _Aphi_param*(1 - _phi0_param)*_solid_ratio[_qp]/(1+_eta1_param);
     //_porosity[_qp] =  _phi0_param + _chemical_porosity[_qp];
     // _total_porosity will be updated through the AuxKernel (at next iteration)
 
