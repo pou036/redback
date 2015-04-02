@@ -276,7 +276,7 @@ RedbackMaterial::computeRedbackTerms()
     _solid_ratio[_qp] = omega_rel/(1 + omega_rel);
 
     // Step 3: calculate the chemical porosity and update the total porosity
-    _chemical_porosity[_qp] = _Aphi_param*(1 - _phi0_param)*_solid_ratio[_qp]/(1+_eta1_param);
+    _chemical_porosity[_qp] = _Aphi_param*(1 - _phi0_param)*_solid_ratio[_qp]/(_solid_ratio[_qp] +_eta1_param);
     //_porosity[_qp] =  _phi0_param + _chemical_porosity[_qp];
     // _total_porosity will be updated through the AuxKernel (at next iteration)
 
