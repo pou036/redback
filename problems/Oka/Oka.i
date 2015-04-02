@@ -69,11 +69,12 @@
     youngs_modulus = 80
     poisson_ratio = 0.2
     total_porosity = total_porosity
+    mhc = 20
+    exponent_p = -3
   [../]
   [./mat_nomech]
     type = RedbackMaterial
     block = 0
-    is_mechanics_on = false
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
@@ -92,11 +93,13 @@
     eta2 = 1e4
     da_exo = 1e-3
     total_porosity = total_porosity
+    solid_compressibility = 0.0125
+    pressurization_coefficient = 4
   [../]
 []
 
 [Functions]
-  active = 'downfunc'
+  active = 'downfunc timestep_function'
   [./upfunc]
     type = ParsedFunction
     value = t
@@ -111,6 +114,12 @@
   [./geothermal_gradient]
     type = ParsedFunction
     value = 0.1+0.1*(2-y)
+  [../]
+  [./timestep_function]
+    type = ParsedFunction
+    value = 'max(1e-5, min(5e-4, dt*min(1-0.04*(m-10), max(1-0.1*(n-4.1), 0.2))))'
+    vals = 'num_nli dt max_returnmap_iter'
+    vars = 'n dt m'
   [../]
 []
 
@@ -178,19 +187,19 @@
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 0.11
+    value = 0.221
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -0.11
+    value = -0.221
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 0.11
+    value = 0.221
   [../]
   [./side_temp]
     type = DirichletBC
@@ -232,12 +241,12 @@
     type = NeumannBC
     variable = disp_z
     boundary = front
-    value = -0.11
+    value = -0.221
   [../]
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate stress_yy stress_xx mises_stress volumetric_strain mean_stress stress_zz Lewis_number mech_porosity total_porosity'
+  active = 'mech_porosity Mod_Gruntfest_number solid_ratio total_porosity mises_strain mech_diss mises_strain_rate volumetric_strain_rate stress_yy stress_xx mises_stress volumetric_strain mean_stress stress_zz Lewis_number returnmap_iter'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -318,10 +327,14 @@
     order = FIRST
     family = MONOMIAL
   [../]
+  [./returnmap_iter]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
-  active = 'td_press temp_diff temp_dissip td_temp press_diff'
+  active = 'td_press temp_diff temp_dissip td_temp press_diff press_thermPress'
   [./td_temp]
     type = TimeDerivative
     variable = temp
@@ -351,10 +364,19 @@
     variable = pore_pressure
     block = 0
   [../]
+  [./press_poromech]
+    type = RedbackPoromechanics
+    variable = pore_pressure
+  [../]
+  [./press_thermPress]
+    type = RedbackThermalPressurization
+    variable = pore_pressure
+    temperature = temp
+  [../]
 []
 
 [AuxKernels]
-  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate stress_yy stress_xx mises_stress mean_stress mech_dissipation stress_zz mech_porosity total_porosity Gruntfest_Number'
+  active = 'mech_porosity volumetric_strain solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate stress_yy stress_xx mises_stress mean_stress mech_dissipation stress_zz Gruntfest_Number returnmap_iter'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -465,10 +487,15 @@
     index_j = 1
     index_i = 1
   [../]
+  [./returnmap_iter]
+    type = MaterialRealAux
+    variable = returnmap_iter
+    property = returnmap_iter
+  [../]
 []
 
 [Postprocessors]
-  active = 'volumetric_strain mises_strain mises_strain_rate middle_press solid_ratio_middle total_volume_strain volumetric_strain_rate mises_stress mean_stress Lewis_middle temp_middle porosity_middle top_avg_stress_yy'
+  active = 'volumetric_strain mises_strain mises_strain_rate middle_press solid_ratio_middle total_volume_strain volumetric_strain_rate mises_stress mean_stress Lewis_middle temp_middle porosity_middle top_avg_stress_yy max_returnmap_iter dt num_li num_nli new_timestep'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
@@ -539,6 +566,23 @@
     variable = stress_yy
     boundary = top
   [../]
+  [./max_returnmap_iter]
+    type = ElementExtremeValue
+    variable = returnmap_iter
+  [../]
+  [./dt]
+    type = TimestepSize
+  [../]
+  [./num_li]
+    type = NumLinearIterations
+  [../]
+  [./num_nli]
+    type = NumNonlinearIterations
+  [../]
+  [./new_timestep]
+    type = PlotFunction
+    function = timestep_function
+  [../]
 []
 
 [Preconditioning]
@@ -566,8 +610,9 @@
   reset_dt = true
   line_search = basic
   [./TimeStepper]
-    type = ConstantDT
+    type = PostprocessorDT
     dt = 0.0002
+    postprocessor = new_timestep
   [../]
 []
 
