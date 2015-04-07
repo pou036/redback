@@ -34,11 +34,13 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   VariableValue & _temp_dot;
   VariableValue & _dtemp_dot_dtemp;
 
   MaterialProperty<Real> & _pressurization_coefficient;
+  unsigned int _temp_var; // variable number of the temperature variable
 };
 
 

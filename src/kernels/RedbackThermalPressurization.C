@@ -26,7 +26,8 @@ RedbackThermalPressurization::RedbackThermalPressurization(const std::string & n
   Kernel(name, parameters),
   _temp_dot(coupledDot("temperature")),
   _dtemp_dot_dtemp(coupledDotDu("temperature")),
-  _pressurization_coefficient(getMaterialProperty<Real>("pressurization_coefficient"))
+  _pressurization_coefficient(getMaterialProperty<Real>("pressurization_coefficient")),
+  _temp_var(coupled("temperature"))
 {
 }
 
@@ -43,5 +44,15 @@ RedbackThermalPressurization::computeQpResidual()
 Real
 RedbackThermalPressurization::computeQpJacobian()
 {
-  return - _pressurization_coefficient[_qp] * _dtemp_dot_dtemp[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  return 0;//- _pressurization_coefficient[_qp] * _dtemp_dot_dtemp[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+}
+
+Real
+RedbackThermalPressurization::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (jvar == _temp_var)
+  {
+    return - _pressurization_coefficient[_qp] * _dtemp_dot_dtemp[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  }
+  return 0;
 }
