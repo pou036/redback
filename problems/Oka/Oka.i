@@ -61,7 +61,7 @@
     disp_z = disp_z
     pore_pres = pore_pressure
     temperature = temp
-    exponent = 1.5
+    exponent = 2
     ref_pe_rate = 1e4
     slope_yield_surface = 1.44
     yield_criterion = modified_Cam_Clay
@@ -69,8 +69,7 @@
     youngs_modulus = 80
     poisson_ratio = 0.2
     total_porosity = total_porosity
-    mhc = 20
-    exponent_p = -3
+    exponent_p = -30
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -82,7 +81,7 @@
     temperature = temp
     m = 3
     mu = 1
-    ar = 8
+    ar = 8.3
     gr = 1
     ref_lewis_nb = 1
     Kc = 1
@@ -94,12 +93,12 @@
     da_exo = 1e-3
     total_porosity = total_porosity
     solid_compressibility = 0.0125
-    pressurization_coefficient = 4
+    pressurization_coefficient = 1
   [../]
 []
 
 [Functions]
-  active = 'downfunc timestep_function'
+  active = 'timestep_function downfunc'
   [./upfunc]
     type = ParsedFunction
     value = t
@@ -117,7 +116,7 @@
   [../]
   [./timestep_function]
     type = ParsedFunction
-    value = 'max(1e-5, min(5e-4, dt*min(1-0.04*(m-10), max(1-0.1*(n-4.1), 0.2))))'
+    value = 'max(1e-5, min(1e-2, dt*min(1-0.04*(m-10), max(1-0.1*(n-4.1), 0.2))))'
     vals = 'num_nli dt max_returnmap_iter'
     vars = 'n dt m'
   [../]
@@ -187,19 +186,19 @@
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 0.221
+    value = 0.11
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -0.221
+    value = -0.11
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 0.221
+    value = 0.11
   [../]
   [./side_temp]
     type = DirichletBC
@@ -241,12 +240,12 @@
     type = NeumannBC
     variable = disp_z
     boundary = front
-    value = -0.221
+    value = -0.11
   [../]
 []
 
 [AuxVariables]
-  active = 'mech_porosity Mod_Gruntfest_number solid_ratio total_porosity mises_strain mech_diss mises_strain_rate volumetric_strain_rate stress_yy stress_xx mises_stress volumetric_strain mean_stress stress_zz Lewis_number returnmap_iter'
+  active = 'mech_porosity Mod_Gruntfest_number solid_ratio total_porosity returnmap_iter mises_strain mech_diss mises_strain_rate volumetric_strain_rate stress_yy stress_xx mises_stress volumetric_strain mean_stress stress_zz Lewis_number'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -334,7 +333,7 @@
 []
 
 [Kernels]
-  active = 'td_press temp_diff temp_dissip td_temp press_diff press_thermPress'
+  active = 'td_press temp_diff temp_dissip press_thermPress td_temp press_diff'
   [./td_temp]
     type = TimeDerivative
     variable = temp
@@ -376,7 +375,7 @@
 []
 
 [AuxKernels]
-  active = 'mech_porosity volumetric_strain solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate stress_yy stress_xx mises_stress mean_stress mech_dissipation stress_zz Gruntfest_Number returnmap_iter'
+  active = 'mech_porosity volumetric_strain solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate stress_yy stress_xx mises_stress mean_stress mech_dissipation stress_zz returnmap_iter Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -495,7 +494,7 @@
 []
 
 [Postprocessors]
-  active = 'volumetric_strain mises_strain mises_strain_rate middle_press solid_ratio_middle total_volume_strain volumetric_strain_rate mises_stress mean_stress Lewis_middle temp_middle porosity_middle top_avg_stress_yy max_returnmap_iter dt num_li num_nli new_timestep'
+  active = 'volumetric_strain new_timestep num_nli mises_strain mises_strain_rate max_returnmap_iter num_li middle_press solid_ratio_middle total_volume_strain volumetric_strain_rate mises_stress mean_stress Lewis_middle temp_middle porosity_middle dt top_avg_stress_yy'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
@@ -588,6 +587,9 @@
 [Preconditioning]
   # active = ''
   [./SMP]
+    # petsc_options = '-snes_monitor -snes_linesearch_monitor'
+    # petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol -ksp_max_it'
+    # petsc_options_value = 'bcgs bjacobi 1E-13 1E-13 100 1E-20 1E-50 20'
     type = SMP
     full = true
   [../]
@@ -606,7 +608,7 @@
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg cp 201'
-  nl_abs_tol = 1e-10 # 1e-10 to begin with
+  nl_abs_tol = 1e-8 # 1e-10 to begin with
   reset_dt = true
   line_search = basic
   [./TimeStepper]
