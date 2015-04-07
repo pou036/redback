@@ -69,6 +69,7 @@
     youngs_modulus = 80
     poisson_ratio = 0.2
     total_porosity = total_porosity
+    mhc = 200
     exponent_p = -30
   [../]
   [./mat_nomech]
@@ -186,19 +187,19 @@
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 0.11
+    value = 0.221
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -0.11
+    value = -0.221
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 0.11
+    value = 0.221
   [../]
   [./side_temp]
     type = DirichletBC
@@ -240,7 +241,7 @@
     type = NeumannBC
     variable = disp_z
     boundary = front
-    value = -0.11
+    value = -0.221
   [../]
 []
 
@@ -455,6 +456,8 @@
     type = RedbackTotalPorosityAux
     variable = total_porosity
     mechanical_porosity = mech_porosity
+    execute_on = linear
+    is_mechanics_on = true
   [../]
   [./mech_porosity]
     type = MaterialRealAux
