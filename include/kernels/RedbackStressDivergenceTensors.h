@@ -49,6 +49,7 @@ private:
   const unsigned int _ydisp_var;
   const unsigned int _zdisp_var;
   const unsigned int _temp_var;
+  const unsigned int _porepressure_var;
 
   MaterialProperty<RealVectorValue> & _gravity_term;
 };
