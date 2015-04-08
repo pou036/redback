@@ -3,6 +3,8 @@
 import os, sys, csv
 import pylab as P
 import matplotlib.pyplot as pp
+import matplotlib
+from matplotlib.widgets import Button
 from twisted.trial._synctest import Todo
 
 def readDigitisedCsv(input_dir, normalisation_stress=1.0):
@@ -71,7 +73,7 @@ def parseCsvFile(filename, column_keys=None):
     return data
 
 def createPicturesForData\
-    (data, # dict of data
+    (csv_filename, confining_pressure,
     key1, key2, output_dir, name_root='pic', 
     index_first=0, index_last=999999,
     title='graph title', label1='x_label', label2='y_label',
@@ -83,8 +85,16 @@ def createPicturesForData\
     yield_stress = 3., # RedbackMechMaterial yield_stress value (>0)
     slope_yield = -0.8, # RedbackMechMaterial slope_yield_surface value (<0)
     digitised_data = {}, # dict of digitised data as returned by readDigitisedData
+    rescaling_stress_factor = 1, # factor to rescale stress displayed
     do_show=False): # show picture (pausing the script!) or not
     ''' Create pictures for plot of key1(x) vs key2(y) '''
+    # parse CSV file
+    data = parseCsvFile(csv_filename)
+    # compute differential stress
+    data = computeDifferentialStress(data, confining_pressure)
+    tmp = [rescaling_stress_factor*elt for elt in data['avg_top(sig1) - sig3']]
+    data['avg_top(sig1) - sig3'] = tmp
+        
     print 'Creating picture for {0}/{1}'.format(key1, key2)
     for key in [key1, key2]:
         if key1 not in data:
@@ -109,6 +119,8 @@ def createPicturesForData\
     assert nb_pts == len(data[key2])
     # plot with matplotlib
     fig = P.figure(figsize=(7, 3))
+    ax_reload = pp.axes([0.02, 0.02, 0.1, 0.075])
+    reload_button = Button(ax_reload, 'Reload')
     ax = fig.add_subplot(111)
     pp.subplots_adjust(left=0.15, bottom=0.2, right=0.95, top=0.8,
                 wspace=None, hspace=None)
@@ -124,7 +136,10 @@ def createPicturesForData\
         print 'Doing frame {0}{1}/{2}'.format(name_root, i, nb_pts_plotted-1)
         
         # Plot simulation data
-        P.plot(data_x[1:], data_y[1:], 'bo-', label='simulation')
+        line, = P.plot(data_x[1:], data_y[1:], 'bo-', label='simulation')
+        axes_stack = matplotlib.figure.AxesStack()
+        #import pdb;pdb.set_trace()
+        (key, axes) = matplotlib.figure.AxesStack.current_key_axes(axes_stack)
         
         # Plot digitised data
         styles = ['r-', 'b-', 'g-', 'c-', 'm-', 'y-']
@@ -155,6 +170,40 @@ def createPicturesForData\
         P.axis([x_min, x_max, y_min-margin, y_max+margin])
         P.savefig(os.path.join(output_dir,'{0}{1:05d}.png'.format(name_root, i)),
                   format='png')
+        def reload(event):
+            ''' Function to reload curves '''
+            data2 = parseCsvFile(csv_filename)
+            # compute differential stress
+            data2 = computeDifferentialStress(data2, confining_pressure)
+            tmp2 = [rescaling_stress_factor*elt for elt in data2['avg_top(sig1) - sig3']]
+            data2['avg_top(sig1) - sig3'] = tmp2
+            nb_pts = len(data2[key1])
+            nb_pts_plotted = min(index_last, nb_pts)
+            assert nb_pts == len(data2[key2])
+            i = nb_pts_plotted -1
+            data2_x = P.array(data2[key1][0:i+1])
+            data2_y = P.array(data2[key2][0:i+1])
+            if key1== 'time':
+                # change time to strain (%)
+                data2_x = 100*velocity*data2_x/block_height # data_x/(10.*time_step*block_height)
+            # Redraw
+            if 0:
+                print line
+                line.set_xdata(data2_x[1:])
+                line.set_ydata(data2_y[1:])
+                pp.draw()
+            else:
+                P.hold(True)
+                [xmin, xmax, ymin, ymax] = pp.axis()
+                P.plot(data2_x[1:], data2_y[1:], 'bo-', label='simulation')
+                P.axis([xmin, xmax, ymin, ymax])
+                P.hold(False)
+                pp.draw()
+            print 'Replotted with {0} data points'.format(len(data2_x[1:]))
+            
+            
+        
+        reload_button.on_clicked(reload)
         if do_show:
             P.show()
         P.clf()
@@ -296,7 +345,7 @@ def computeDifferentialStress(data, confining_pressure):
     return data
 
 if __name__ == '__main__':
-    velocity = (2e1)/3. # boundary condition on top surface (coeff x t)
+    velocity = (2./3.)*1e1 # boundary condition on top surface (coeff x t)
     oka_digitised_dir = os.path.join('fig2')
     output_dir = os.path.join('.', 'pics_postprocess') # where pics will be created
      
@@ -311,20 +360,14 @@ if __name__ == '__main__':
         # Show curve for current simulation
         csv_filename = os.path.join('Oka.csv')
         confining_pressure = 0.11
-    
-        # parse CSV file
-        data = parseCsvFile(csv_filename)
-        # compute differential stress
-        data = computeDifferentialStress(data, confining_pressure)
-        tmp = [0.55*elt for elt in data['avg_top(sig1) - sig3']]
-        data['avg_top(sig1) - sig3'] = tmp
+        rescaling_stress_factor = 0.6
         
         # Plot stress vs strain curve
-        createPicturesForData(data=data,
+        createPicturesForData(csv_filename, confining_pressure,
             key1='time', key2='avg_top(sig1) - sig3', 
             output_dir=os.path.join(output_dir, 'StressStrainCurves'), name_root='{0}_'.format('StressStrain'), 
             index_first=0, index_last=999999, title=None, label1='Strain (%)', label2='Deviatoric stress', 
-            velocity=velocity, block_height=4, digitised_data=oka_data, do_show=True)
+            velocity=velocity, block_height=4, digitised_data=oka_data, do_show=True, rescaling_stress_factor=rescaling_stress_factor)
     
     if 0:
         # Show curves for batch of simulations
