@@ -64,12 +64,11 @@
     exponent = 2
     ref_pe_rate = 1e4
     slope_yield_surface = 1.44
-    yield_criterion = modified_Cam_Clay
     yield_stress = '0. 1 1 1'
     youngs_modulus = 80
     poisson_ratio = 0.2
     total_porosity = total_porosity
-    mhc = 200
+    mhc = 5e4
     exponent_p = -30
   [../]
   [./mat_nomech]
@@ -82,7 +81,7 @@
     temperature = temp
     m = 3
     mu = 1
-    ar = 8.3
+    ar = 9
     gr = 1
     ref_lewis_nb = 1
     Kc = 1
@@ -117,7 +116,7 @@
   [../]
   [./timestep_function]
     type = ParsedFunction
-    value = 'max(1e-5, min(1e-2, dt*min(1-0.04*(m-10), max(1-0.1*(n-4.1), 0.2))))'
+    value = 'max(1e-5, min(4e-4, dt*min(1-0.04*(m-10), max(1-0.1*(n-4.1), 0.2))))'
     vals = 'num_nli dt max_returnmap_iter'
     vars = 'n dt m'
   [../]
@@ -628,7 +627,6 @@
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
   [../]
 []
 
