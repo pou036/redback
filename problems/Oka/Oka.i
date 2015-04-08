@@ -68,7 +68,7 @@
     youngs_modulus = 80
     poisson_ratio = 0.2
     total_porosity = total_porosity
-    mhc = 5e4
+    mhc = 1e3
     exponent_p = -30
   [../]
   [./mat_nomech]
@@ -81,7 +81,7 @@
     temperature = temp
     m = 3
     mu = 1
-    ar = 9
+    ar = 10
     gr = 1
     ref_lewis_nb = 1
     Kc = 1
@@ -186,19 +186,19 @@
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 0.221
+    value = 0.11
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -0.221
+    value = -0.11
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 0.221
+    value = 0.11
   [../]
   [./side_temp]
     type = DirichletBC
@@ -240,7 +240,7 @@
     type = NeumannBC
     variable = disp_z
     boundary = front
-    value = -0.221
+    value = -0.11
   [../]
 []
 
