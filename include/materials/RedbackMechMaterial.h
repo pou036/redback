@@ -141,6 +141,8 @@ protected:
   MaterialProperty<Real> & _gr;
   MaterialProperty<Real> & _ar;
   MaterialProperty<Real> & _mechanical_dissipation_jac;
+  MaterialProperty<Real> & _poromech_jac;
+
   MaterialProperty<Real> & _delta;
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _solid_thermal_expansion;

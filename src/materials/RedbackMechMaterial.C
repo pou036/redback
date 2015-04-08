@@ -133,6 +133,7 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _gr(getMaterialProperty<Real>("gr")),
     _ar(getMaterialProperty<Real>("ar")),
     _mechanical_dissipation_jac(getMaterialProperty<Real>("mechanical_dissipation_jacobian")),
+    _poromech_jac(getMaterialProperty<Real>("poromechanics_jacobian")),
     _delta(getMaterialProperty<Real>("delta")),
     _mod_gruntfest_number(getMaterialProperty<Real>("mod_gruntfest_number")),
     _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion")),
@@ -392,6 +393,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
   _mechanical_dissipation_jac[_qp] = _mechanical_dissipation[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
 
+  _poromech_jac[_qp] = (1 / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]));
+
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
   //_mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig) / yield_stress *
   //    std::pow( macaulayBracket( getSigEqv(sig) / yield_stress - 1.0 ), _exponent);
@@ -516,7 +519,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   }
   // Microstructural hardening
   //_exponential = _exponential*std::exp(-_mhc*mean_stress_old*volumetric_plastic_strain/(1 + _delta[_qp] *_T[_qp]));
-  _exponential = _exponential*std::exp(-_mhc*mean_stress_old*_total_volumetric_strain[_qp]/(1 + _delta[_qp] *_T[_qp]));
+  //_exponential = _exponential*std::exp(-_mhc*mean_stress_old*_total_volumetric_strain[_qp]/(1 + _delta[_qp] *_T[_qp]));
+  _exponential = _exponential*(1-_mhc*mean_stress_old*_total_volumetric_strain[_qp]/(1 + _delta[_qp] *_T[_qp]));
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
   {

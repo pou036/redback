@@ -24,7 +24,9 @@ InputParameters validParams<RedbackPoromechanics>()
 RedbackPoromechanics::RedbackPoromechanics(const std::string & name, InputParameters parameters) :
     Kernel(name, parameters),
     _volumetric_strain_rate(getMaterialProperty<Real>("volumetric_strain_rate")),
-    _mixture_compressibility(getMaterialProperty<Real>("mixture_compressibility"))
+    _mixture_compressibility(getMaterialProperty<Real>("mixture_compressibility")),
+    _poromech_jac(getMaterialProperty<Real>("poromechanics_jacobian")),
+    _temp_var(coupled("temperature"))
 {
 }
 
@@ -44,5 +46,15 @@ RedbackPoromechanics::computeQpResidual()
 Real
 RedbackPoromechanics::computeQpJacobian()
 {
+  return 0;
+}
+
+Real
+RedbackPoromechanics::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (jvar == _temp_var)
+  {
+    return (_volumetric_strain_rate[_qp] / _mixture_compressibility[_qp]) * _poromech_jac[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+  }
   return 0;
 }

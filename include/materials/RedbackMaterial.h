@@ -83,7 +83,8 @@ protected:
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _mechanical_dissipation;
   MaterialProperty<Real> & _mechanical_dissipation_jac;
-  
+  MaterialProperty<Real> & _poromech_jac;
+
   MaterialProperty<Real> & _ar_F;
   MaterialProperty<Real> & _ar_R;
   MaterialProperty<Real> & _mu;

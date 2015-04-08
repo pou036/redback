@@ -123,6 +123,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
   _mechanical_dissipation(declareProperty<Real>("mechanical_dissipation")),
   _mechanical_dissipation_jac(declareProperty<Real>("mechanical_dissipation_jacobian")),
+  _poromech_jac(declareProperty<Real>("poromechanics_jacobian")),
 
   _ar_F(declareProperty<Real>("ar_F")),
   _ar_R(declareProperty<Real>("ar_R")),
@@ -258,6 +259,9 @@ RedbackMaterial::computeRedbackTerms()
     _mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _m[_qp]) *
       _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
       (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+
+    // Initialise Poromechanics Jacobian
+    _poromech_jac[_qp] = 0;
   }
 
   if (_is_chemistry_on)
