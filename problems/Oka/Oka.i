@@ -68,7 +68,6 @@
     youngs_modulus = 80
     poisson_ratio = 0.2
     total_porosity = total_porosity
-    mhc = 1e3
     exponent_p = -30
   [../]
   [./mat_nomech]
@@ -81,7 +80,7 @@
     temperature = temp
     m = 3
     mu = 1
-    ar = 10
+    ar = 8
     gr = 1
     ref_lewis_nb = 1
     Kc = 1
