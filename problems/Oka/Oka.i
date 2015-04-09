@@ -68,8 +68,7 @@
     youngs_modulus = 80
     poisson_ratio = 0.2
     total_porosity = total_porosity
-    mhc = 5e4
-    exponent_p = -30
+    exponent_p = 30
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -93,7 +92,7 @@
     da_exo = 1e-3
     total_porosity = total_porosity
     solid_compressibility = 0.0125
-    pressurization_coefficient = 1
+    pressurization_coefficient = 0.5
   [../]
 []
 
@@ -116,7 +115,7 @@
   [../]
   [./timestep_function]
     type = ParsedFunction
-    value = 'max(1e-5, min(4e-4, dt*min(1-0.04*(m-10), max(1-0.1*(n-4.1), 0.2))))'
+    value = 'min(if(t<0.01, 1e-4, 999) ,    max(1e-5, min(1e-3, dt*min(1-0.04*(m-10), max(1-0.1*(n-4.1), 0.2)))))'
     vals = 'num_nli dt max_returnmap_iter'
     vars = 'n dt m'
   [../]
@@ -186,19 +185,19 @@
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 0.221
+    value = 0.442
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -0.221
+    value = -0.442
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 0.221
+    value = 0.442
   [../]
   [./side_temp]
     type = DirichletBC
@@ -240,7 +239,7 @@
     type = NeumannBC
     variable = disp_z
     boundary = front
-    value = -0.221
+    value = -0.442
   [../]
 []
 

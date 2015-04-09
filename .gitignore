@@ -166,7 +166,8 @@ peacock_*.e
 tests/*/*.trace
 problems/Oka/pics_postprocess
 
-# Allod csv files in Oka folder
+# Allow csv files in Oka folder
 !/problems/Oka/fig*/*.csv
 !/problems/Oka/results
+problems/Oka/best_matches
 !/tests/transverseBC/*.msh
