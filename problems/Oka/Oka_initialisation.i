@@ -1,8 +1,13 @@
 [Mesh]
-  type = FileMesh
-  file = Oka_initialised_cp/0010_mesh.cpr
-  displacements = 'disp_x disp_y disp_z'
-  distribution = SERIAL
+  type = GeneratedMesh
+  dim = 3
+  nx = 4
+  ny = 8
+  nz = 4
+  xmin = -1
+  ymin = -2
+  ymax = 2
+  zmin = -1
 []
 
 [MeshModifiers]
@@ -99,7 +104,7 @@
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -2.646365e-2-6.67e-0*t
+    value = -6.67e-0*t
   [../]
   [./spline_IC]
     type = ConstantFunction
@@ -117,7 +122,7 @@
 []
 
 [BCs]
-  active = 'bottom_fix_x bottom_fix_y bottom_fix_z top_fix_x drained_top_bottom top_fix_z confinement_back confinement_left confinement_right constant_y_velocity_top side_temp confinement_front'
+  active = 'confinement_top bottom_fix_x bottom_fix_y bottom_fix_z top_fix_x drained_top_bottom top_fix_z confinement_back confinement_left confinement_right side_temp confinement_front'
   [./temp_box]
     type = NeumannBC
     variable = temp
@@ -604,15 +609,14 @@
 
 [Executioner]
   # Preconditioned JFNK (default)
-  start_time = 0.0
-  end_time = 0.12
+  start_time = -0.01
+  end_time = 0
   dtmax = 1e4
   dtmin = 1e-7
   type = Transient
-  num_steps = 10000
+  num_steps = 10
   l_max_its = 200
   nl_max_its = 10
-  restart_file_base = Oka_initialised_cp/0010
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg cp 201'
@@ -620,19 +624,21 @@
   reset_dt = true
   line_search = basic
   [./TimeStepper]
-    type = PostprocessorDT
-    dt = 0.0002
-    postprocessor = new_timestep
+    type = ConstantDT
+    dt = 0.001
   [../]
 []
 
 [Outputs]
-  file_base = Oka
+  file_base = Oka_initialised
   output_initial = true
   exodus = true
   [./console]
     type = Console
     perf_log = true
+  [../]
+  [./my_checkpoint]
+    type = Checkpoint
   [../]
 []
 
@@ -643,6 +649,26 @@
     disp_x = disp_x
     temp = temp
     pore_pres = pore_pressure
+  [../]
+[]
+
+[ICs]
+  active = 'press_ic temp_IC'
+  [./temp_IC]
+    variable = temp
+    type = ConstantIC
+    value = 0
+  [../]
+  [./press_ic]
+    variable = pore_pressure
+    type = ConstantIC
+    value = 0
+  [../]
+  [./temp_random_IC]
+    function = geothermal_gradient
+    max = 0.01
+    type = FunctionWithRandomIC
+    variable = temp
   [../]
 []
 
