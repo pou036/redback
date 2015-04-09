@@ -56,9 +56,13 @@ def runSimulations(output_subdir='batch_test', nb_procs=8):
         exec_loc = '~/projects/redback/redback-opt'
         command = 'mpiexec -n {nb_procs} {exec_loc} -i {input_i} Outputs/csv=true BCs/confinement_left/value={confinement__value} '\
         'BCs/confinement_right/value=-{confinement__value} BCs/confinement_front/value=-{confinement__value} '\
-        'BCs/confinement_back/value={confinement__value}'.\
+        'BCs/confinement_back/value={confinement__value} Executioner/num_steps=5'.\
         format(nb_procs=nb_procs, input_i=input_file, exec_loc=exec_loc, confinement__value=confining_pressures[i])
+        logger.info(command)
         try:
+            # copy input file (unaltered!)
+            shutil.copy(input_file, os.path.join(output_dir, input_file))
+            # Run simulation
             retcode = subprocess.call(command, shell=True)
             if retcode < 0:
                 error_msg = 'Child process was terminated by signal {0}'.format(retcode)
