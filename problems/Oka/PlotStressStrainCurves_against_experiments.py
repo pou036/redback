@@ -91,7 +91,7 @@ def createPicturesForData\
     # parse CSV file
     data = parseCsvFile(csv_filename)
     # compute differential stress
-    data = computeDifferentialStress(data, confining_pressure)
+    data = computeRestartedDifferentialStress(data, confining_pressure)
     tmp = [rescaling_stress_factor*elt for elt in data['avg_top(sig1) - sig3']]
     data['avg_top(sig1) - sig3'] = tmp
         
@@ -174,7 +174,7 @@ def createPicturesForData\
             ''' Function to reload curves '''
             data2 = parseCsvFile(csv_filename)
             # compute differential stress
-            data2 = computeDifferentialStress(data2, confining_pressure)
+            data2 = computeRestartedDifferentialStress(data2, confining_pressure)
             tmp2 = [rescaling_stress_factor*elt for elt in data2['avg_top(sig1) - sig3']]
             data2['avg_top(sig1) - sig3'] = tmp2
             nb_pts = len(data2[key1])
@@ -344,6 +344,17 @@ def computeDifferentialStress(data, confining_pressure):
     data['avg_top(sig1) - sig3'] = new_diff_stress
     return data
 
+def computeRestartedDifferentialStress(data, confining_pressure):
+    ''' Compute differential stress from average top stress and confining pressure.
+       Now that we have a restart file with proper initialisation, no need to change anything...
+    '''
+    #data['avg_top(sig1) - sig3'] = data['mises_stress']
+    #return data
+    
+    diff_stress = [-confining_pressure - elt for elt in data['top_avg_stress_yy']]
+    data['avg_top(sig1) - sig3'] = diff_stress
+    return data
+
 if __name__ == '__main__':
     velocity = (2./3.)*1e1 # boundary condition on top surface (coeff x t)
     oka_digitised_dir = os.path.join('fig2')
@@ -359,8 +370,8 @@ if __name__ == '__main__':
     if 1:
         # Show curve for current simulation
         csv_filename = os.path.join('Oka.csv')
-        confining_pressure = 0.221
-        rescaling_stress_factor = 0.92
+        confining_pressure = 0.885
+        rescaling_stress_factor = 1
         
         # Plot stress vs strain curve
         createPicturesForData(csv_filename, confining_pressure,
@@ -387,7 +398,7 @@ if __name__ == '__main__':
             if not os.path.isfile(csv_filename):
                 continue
             data.append(parseCsvFile(csv_filename))
-            data[i] = computeDifferentialStress(data[i], confining_pressures[i+1])
+            data[i] = computeRestartedDifferentialStress(data[i], confining_pressures[i+1])
         # Plot stress vs strain curves
         createPicturesForBatchData(data=data,
             key1='time', key2='avg_top(sig1) - sig3', 
