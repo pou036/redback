@@ -155,25 +155,25 @@
   [./bottom_fix_x]
     type = DirichletBC
     variable = disp_x
-    boundary = '6 7'
+    boundary = bottom
     value = 0
   [../]
   [./bottom_fix_z]
     type = DirichletBC
     variable = disp_z
-    boundary = '8 9'
+    boundary = bottom
     value = 0
   [../]
   [./top_fix_x]
     type = DirichletBC
     variable = disp_x
-    boundary = '6 7'
+    boundary = top
     value = 0
   [../]
   [./top_fix_z]
     type = DirichletBC
     variable = disp_z
-    boundary = '8 9'
+    boundary = top
     value = 0
   [../]
   [./confinement_top]
