@@ -609,12 +609,12 @@
 
 [Executioner]
   # Preconditioned JFNK (default)
-  start_time = -0.01
+  start_time = -0.0002
   end_time = 0
   dtmax = 1e4
   dtmin = 1e-7
   type = Transient
-  num_steps = 10
+  num_steps = 1
   l_max_its = 200
   nl_max_its = 10
   solve_type = PJFNK
@@ -625,7 +625,7 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 0.001
+    dt = 0.0002
   [../]
 []
 
@@ -633,6 +633,7 @@
   file_base = Oka_initialised
   output_initial = true
   exodus = true
+  xda = true
   [./console]
     type = Console
     perf_log = true
