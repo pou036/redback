@@ -56,14 +56,18 @@
     disp_z = disp_z
     pore_pres = pore_pressure
     temperature = temp
-    exponent = 0.7
+    exponent = 1.5
     ref_pe_rate = 5e4
     slope_yield_surface = 1.44
     yield_stress = '0. 1 1 1'
     youngs_modulus = 80
     poisson_ratio = 0.2
     total_porosity = total_porosity
-    exponent_p = 100
+    param_1 = 53
+    mhc = 0.01
+    param_3 = 0.05
+    param_2 = 68
+    confining_pressure = 0.664
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -98,7 +102,7 @@
   [../]
   [./timestep_function]
     type = ParsedFunction
-    value = 'min(if(t<0.004,2e-4 ,999 ) , max(1e-5, min(1e-3, dt*min(1-0.04*(m-10), max(1-0.1*(n-4.1), 0.2)))))'
+    value = 'min(if(t<0.0000,2e-4 ,999 ) , max(1e-5, min(1e-3, dt*min(1-0.04*(m-10), max(1-0.1*(n-4.1), 0.2)))))'
     vals = 'num_nli dt max_returnmap_iter'
     vars = 'n dt m'
   [../]
