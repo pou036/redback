@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = Oka_initialised_cp/0010_mesh.cpr
+  file = Oka_initialised_cp/0001_mesh.cpr
   displacements = 'disp_x disp_y disp_z'
   distribution = SERIAL
 []
@@ -92,27 +92,33 @@
 []
 
 [Functions]
-  active = 'timestep_function downfunc'
-  [./upfunc]
-    type = ParsedFunction
-    value = t
-  [../]
-  [./downfunc]
-    type = ParsedFunction
-    value = -2.646365e-2-6.67e-0*t
-  [../]
+  active = 'equilibrated_disp_x_func equilibrated_disp_z_func timestep_function downfunc equilibrated_disp_y_func'
   [./spline_IC]
     type = ConstantFunction
-  [../]
-  [./geothermal_gradient]
-    type = ParsedFunction
-    value = 0.1+0.1*(2-y)
   [../]
   [./timestep_function]
     type = ParsedFunction
     value = 'max(1e-5, min(1e-3, dt*min(1-0.04*(m-10), max(1-0.1*(n-4.1), 0.2))))'
     vals = 'num_nli dt max_returnmap_iter'
     vars = 'n dt m'
+  [../]
+  [./equilibrated_disp_x_func]
+    type = SolutionFunction
+    solution = ex_disp_x_soln
+  [../]
+  [./equilibrated_disp_y_func]
+    type = SolutionFunction
+    solution = ex_disp_y_soln
+  [../]
+  [./equilibrated_disp_z_func]
+    type = SolutionFunction
+    solution = ex_disp_z_soln
+  [../]
+  [./downfunc]
+    type = ParsedFunction
+    value = y0-6.67e-0*t
+    vals = ex_top_disp
+    vars = y0
   [../]
 []
 
@@ -153,28 +159,28 @@
     function = downfunc
   [../]
   [./bottom_fix_x]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = bottom
-    value = 0
+    function = equilibrated_disp_x_func
   [../]
   [./bottom_fix_z]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = bottom
-    value = 0
+    function = equilibrated_disp_z_func
   [../]
   [./top_fix_x]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = top
-    value = 0
+    function = equilibrated_disp_x_func
   [../]
   [./top_fix_z]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = disp_z
     boundary = top
-    value = 0
+    function = equilibrated_disp_z_func
   [../]
   [./confinement_top]
     type = NeumannBC
@@ -496,7 +502,7 @@
 []
 
 [Postprocessors]
-  active = 'volumetric_strain new_timestep num_nli mises_strain mises_strain_rate max_returnmap_iter num_li middle_press solid_ratio_middle top_disp total_volume_strain volumetric_strain_rate mises_stress mean_stress Lewis_middle temp_middle porosity_middle dt top_avg_stress_yy'
+  active = 'volumetric_strain new_timestep num_nli mises_strain mises_strain_rate max_returnmap_iter num_li middle_press ex_top_disp solid_ratio_middle top_disp total_volume_strain volumetric_strain_rate mises_stress mean_stress Lewis_middle temp_middle porosity_middle dt top_avg_stress_yy'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
@@ -589,6 +595,11 @@
     variable = disp_y
     point = '0 2 0'
   [../]
+  [./ex_top_disp]
+    type = PlotFunction
+    function = equilibrated_disp_y_func
+    point = '0 2 0'
+  [../]
 []
 
 [Preconditioning]
@@ -602,6 +613,27 @@
   [../]
 []
 
+[UserObjects]
+  [./ex_disp_x_soln]
+    type = SolutionUserObject
+    system_variables = disp_x
+    mesh = Oka_initialised_0001_mesh.xda
+    es = Oka_initialised_0001.xda
+  [../]
+  [./ex_disp_y_soln]
+    type = SolutionUserObject
+    system_variables = disp_y
+    mesh = Oka_initialised_0001_mesh.xda
+    es = Oka_initialised_0001.xda
+  [../]
+  [./ex_disp_z_soln]
+    type = SolutionUserObject
+    system_variables = disp_z
+    mesh = Oka_initialised_0001_mesh.xda
+    es = Oka_initialised_0001.xda
+  [../]
+[]
+
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
@@ -612,7 +644,7 @@
   num_steps = 10000
   l_max_its = 200
   nl_max_its = 10
-  restart_file_base = Oka_initialised_cp/0010
+  restart_file_base = Oka_initialised_cp/0001
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg cp 201'
@@ -643,6 +675,26 @@
     disp_x = disp_x
     temp = temp
     pore_pres = pore_pressure
+  [../]
+[]
+
+[ICs]
+  active = 'press_ic temp_IC'
+  [./temp_IC]
+    variable = temp
+    type = ConstantIC
+    value = 0
+  [../]
+  [./press_ic]
+    variable = pore_pressure
+    type = ConstantIC
+    value = 0
+  [../]
+  [./temp_random_IC]
+    function = geothermal_gradient
+    max = 0.01
+    type = FunctionWithRandomIC
+    variable = temp
   [../]
 []
 
