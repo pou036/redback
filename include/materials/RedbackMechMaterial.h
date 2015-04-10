@@ -108,7 +108,8 @@ protected:
   Real _ref_pe_rate;
   Real _exponent;
   Real _mhc;
-  Real _exponent_p;
+  Real _confining_pressure;
+  Real _param_1, _param_2, _param_3;
 
   Real macaulayBracket(Real);
 

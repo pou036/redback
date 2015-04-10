@@ -53,8 +53,11 @@ InputParameters validParams<RedbackMechMaterial>()
   //  Copy-paste from FiniteStrainPlasticRateMaterial.C
   params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
-  params.addParam< Real >("exponent_p", 0, "Exponent for excess pore pressure sensitivity");
   params.addParam< Real >("mhc", 0, "Microstructural hardening coefficient");
+  params.addParam< Real >("param_1", 0, "First parameter for activation volume");
+  params.addParam< Real >("param_2", 0, "Second parameter for activation volume");
+  params.addParam< Real >("param_3", 0, "Third parameter for activation volume");
+  params.addParam< Real >("confining_pressure", 1, "Normalised confining pressure");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
   params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
   params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
@@ -103,7 +106,10 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _mhc(getParam<Real>("mhc")),
 
     // Redback
-    _exponent_p(getParam<Real>("exponent_p")),
+    _confining_pressure(getParam<Real>("confining_pressure")),
+    _param_1(getParam<Real>("param_1")),
+    _param_2(getParam<Real>("param_2")),
+    _param_3(getParam<Real>("param_3")),
     _youngs_modulus(getParam<Real>("youngs_modulus")),
     _poisson_ratio(getParam<Real>("poisson_ratio")),
     _mises_stress(declareProperty<Real>("mises_stress")),
@@ -113,11 +119,6 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
     _mechanical_porosity(declareProperty<Real>("mechanical_porosity")),
-    //_dispx_dot(coupledDot("disp_x")),
-    //_dispy_dot(coupledDot("disp_y")),
-    //_dispz_dot(coupledDot("disp_z"))
-
-    //_solid_velocity(declareProperty<RealVectorValue>("solid_velocity")),
 
     // Get coupled variables (T & P)
     _has_T(isCoupled("temperature")),
@@ -398,7 +399,9 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
   //_mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig) / yield_stress *
   //    std::pow( macaulayBracket( getSigEqv(sig) / yield_stress - 1.0 ), _exponent);
-  _mod_gruntfest_number[_qp] = _gr[_qp] * std::exp(-_pore_pres[_qp]*_exponent_p/(1 + _delta[_qp] *_T[_qp])) *
+  //_mod_gruntfest_number[_qp] = _gr[_qp] * std::exp(-_pore_pres[_qp]*_exponent_p/(1 + _delta[_qp] *_T[_qp])) *
+  Real activation_volume = _param_1*std::log(_confining_pressure) + _param_2;
+  _mod_gruntfest_number[_qp] = _gr[_qp] * std::exp(-(_param_3*_confining_pressure+_pore_pres[_qp])*activation_volume/(1 + _delta[_qp] *_T[_qp])) *
       (
       std::fabs(getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent)) +
       std::fabs(_mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp] - p_y), _exponent))
@@ -511,16 +514,18 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
   yield_stress = getYieldStress(eqvpstrain);
 
-
   _exponential = 1;
   if (_has_T)
   {
-    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp])) * std::exp(-_pore_pres[_qp]*_exponent_p/(1 + _delta[_qp] *_T[_qp]));
+    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
   }
+
   // Microstructural hardening
   //_exponential = _exponential*std::exp(-_mhc*mean_stress_old*volumetric_plastic_strain/(1 + _delta[_qp] *_T[_qp]));
   //_exponential = _exponential*std::exp(-_mhc*mean_stress_old*_total_volumetric_strain[_qp]/(1 + _delta[_qp] *_T[_qp]));
-  _exponential = _exponential*(1-_mhc*mean_stress_old*_total_volumetric_strain[_qp]/(1 + _delta[_qp] *_T[_qp]));
+  //_exponential = _exponential*(1-_mhc*mean_stress_old*_total_volumetric_strain[_qp]/(1 + _delta[_qp] *_T[_qp]));
+  Real activation_volume = _param_1*std::log(_confining_pressure) + _param_2;
+  _exponential = _exponential* std::exp(-(_param_3*_confining_pressure+_pore_pres[_qp])*activation_volume/(1 + _delta[_qp] *_T[_qp]));
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
   {
