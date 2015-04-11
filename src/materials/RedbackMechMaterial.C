@@ -396,9 +396,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _poromech_jac[_qp] = (1 / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]));
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
-  //_mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig) / yield_stress *
-  //    std::pow( macaulayBracket( getSigEqv(sig) / yield_stress - 1.0 ), _exponent);
-  _mod_gruntfest_number[_qp] = _gr[_qp] * std::exp(-_pore_pres[_qp]*_exponent_p/(1 + _delta[_qp] *_T[_qp])) *
+  _mod_gruntfest_number[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _exponent_p) *
       (
       std::fabs(getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent)) +
       std::fabs(_mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp] - p_y), _exponent))
@@ -515,7 +513,11 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   _exponential = 1;
   if (_has_T)
   {
-    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp])) * std::exp(-_pore_pres[_qp]*_exponent_p/(1 + _delta[_qp] *_T[_qp]));
+    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
+  }
+  if (_has_pore_pres)
+  {
+    _exponential = _exponential * std::pow(1 - _pore_pres[_qp], _exponent_p);
   }
   // Microstructural hardening
   //_exponential = _exponential*std::exp(-_mhc*mean_stress_old*volumetric_plastic_strain/(1 + _delta[_qp] *_T[_qp]));
