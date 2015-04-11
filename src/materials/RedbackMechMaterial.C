@@ -528,7 +528,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   Real activation_volume = _param_1*std::log(_confining_pressure) + _param_2;
   //The following expression should be further pursued for a forward physics-based model
   //_exponential = _exponential* std::exp(-(_param_3*_confining_pressure+_pore_pres[_qp])*activation_volume/(1 + _delta[_qp] *_T[_qp]));
-  _exponential = _exponential* std::exp(_param_3*_confining_pressure - (_pore_pres[_qp]*activation_volume)/(1 + _delta[_qp] *_T[_qp]));
+  _exponential = _exponential* std::exp(_param_3*_confining_pressure - (_pore_pres[_qp]*activation_volume)/(1 + 0*_delta[_qp] *_T[_qp]));
 
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
