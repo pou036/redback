@@ -56,14 +56,18 @@
     disp_z = disp_z
     pore_pres = pore_pressure
     temperature = temp
-    exponent = 0.7
-    ref_pe_rate = 5e4
+    exponent = 2
+    ref_pe_rate = 2.2e3
     slope_yield_surface = 1.44
     yield_stress = '0. 1 1 1'
     youngs_modulus = 80
     poisson_ratio = 0.2
     total_porosity = total_porosity
     exponent_p = 100
+    param_1 = 48
+    param_3 = 3.3
+    param_2 = 67.5
+    confining_pressure = 0.11
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -98,7 +102,7 @@
   [../]
   [./timestep_function]
     type = ParsedFunction
-    value = 'min(if(t<0.004,2e-4 ,999 ) , max(1e-5, min(1e-3, dt*min(1-0.04*(m-10), max(1-0.1*(n-4.1), 0.2)))))'
+    value = 'min(if(t<0.0015,2e-4 ,999 ) , max(1e-5, min(1e-3, dt*min(1-0.04*(m-10), max(1-0.1*(n-4.1), 0.2)))))'
     vals = 'num_nli dt max_returnmap_iter'
     vars = 'n dt m'
   [../]
@@ -186,25 +190,25 @@
     type = NeumannBC
     variable = disp_y
     boundary = top
-    value = -0.885
+    value = -0.11
   [../]
   [./confinement_left]
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 0.664
+    value = 0.11
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -0.664
+    value = -0.11
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 0.664
+    value = 0.11
   [../]
   [./side_temp]
     type = DirichletBC

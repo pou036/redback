@@ -185,25 +185,25 @@
     type = NeumannBC
     variable = disp_y
     boundary = top
-    value = -0.885
+    value = -0.11
   [../]
   [./confinement_left]
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 0.885
+    value = 0.11
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -0.885
+    value = -0.11
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 0.885
+    value = 0.11
   [../]
   [./side_temp]
     type = DirichletBC
@@ -245,7 +245,7 @@
     type = NeumannBC
     variable = disp_z
     boundary = front
-    value = -0.885
+    value = -0.11
   [../]
 []
 
