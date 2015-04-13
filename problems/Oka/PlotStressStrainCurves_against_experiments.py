@@ -370,7 +370,7 @@ if __name__ == '__main__':
     if 1:
         # Show curve for current simulation
         csv_filename = os.path.join('Oka.csv')
-        confining_pressure = 0.11
+        confining_pressure = 0.221
         rescaling_stress_factor = 0.5
         
         # Plot stress vs strain curve

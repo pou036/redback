@@ -57,17 +57,16 @@
     pore_pres = pore_pressure
     temperature = temp
     exponent = 2
-    ref_pe_rate = 2.2e3
+    ref_pe_rate = 2.4e3
     slope_yield_surface = 1.44
     yield_stress = '0. 1 1 1'
     youngs_modulus = 80
     poisson_ratio = 0.2
     total_porosity = total_porosity
-    exponent_p = 100
-    param_1 = 48
+    param_1 = 40
     param_3 = 3.3
     param_2 = 67.5
-    confining_pressure = 0.11
+    confining_pressure = 0.221
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -91,7 +90,7 @@
     da_exo = 1e-3
     total_porosity = total_porosity
     solid_compressibility = 0.0125
-    pressurization_coefficient = 0.5
+    pressurization_coefficient = 0.45
   [../]
 []
 
@@ -190,25 +189,25 @@
     type = NeumannBC
     variable = disp_y
     boundary = top
-    value = -0.11
+    value = -0.221
   [../]
   [./confinement_left]
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 0.11
+    value = 0.221
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -0.11
+    value = -0.221
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 0.11
+    value = 0.221
   [../]
   [./side_temp]
     type = DirichletBC

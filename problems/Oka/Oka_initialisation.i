@@ -80,7 +80,7 @@
     temperature = temp
     m = 3
     mu = 1
-    ar = 8
+    ar = 7.8
     gr = 1
     ref_lewis_nb = 1
     Kc = 1
@@ -185,25 +185,25 @@
     type = NeumannBC
     variable = disp_y
     boundary = top
-    value = -0.11
+    value = -0.221
   [../]
   [./confinement_left]
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 0.11
+    value = 0.221
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -0.11
+    value = -0.221
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 0.11
+    value = 0.221
   [../]
   [./side_temp]
     type = DirichletBC
@@ -245,7 +245,7 @@
     type = NeumannBC
     variable = disp_z
     boundary = front
-    value = -0.11
+    value = -0.221
   [../]
 []
 
