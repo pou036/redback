@@ -243,13 +243,15 @@ def createPicturesForBatchData\
         sim_index = i+1
         if i >= len(data):
             # Not all simulations were run. TODO
-            raise Exception, 'Not all simulations were run. TODO'
+            error_msg = 'Not all simulations were run: results for CD{0} not found...'.format(i+1)
+            print error_msg
+            #raise Exception, 'Not all simulations were run. TODO'
             continue
         # Check keys
         for key in [key1, key2]:
-            if key1 not in data[i]:
+            if key not in data[i]:
                 error_msg = 'Key "{0}" not in data column_keys {1} for CD{2}'\
-                    .format(key1, data[i].keys(), sim_index)
+                    .format(key, data[i].keys(), sim_index)
                 raise Exception, error_msg
         # get min and max values
         x_min = min(data[i][key1])
@@ -382,7 +384,7 @@ if __name__ == '__main__':
     
     if 0:
         # Show curves for batch of simulations
-        batch_directory = os.path.join('results', 'batch1')
+        batch_directory = os.path.join('results', 'batch_1')
         data = [] # list of 6 dictionaries for each simulation data
         normalising_stress = 2.26e6 # Pa
         confining_pressures = {
@@ -393,15 +395,29 @@ if __name__ == '__main__':
             5:1.5e6/normalising_stress,  # 0.664
             6:2.0e6/normalising_stress,  # 0.885
         }
+        rescaling_stress_factors = {
+            1:0.5,
+            2:0.5,
+            3:0.5,
+            4:0.5,
+            5:0.5,
+            6:0.5,
+        }
+        
+        key1='time'
+        key2='avg_top(sig1) - sig3'
         for i in range(6):
+            confining_pressure = confining_pressures[i+1]
             csv_filename = os.path.join(batch_directory, 'oka_CD{0}.csv'.format(i+1))
             if not os.path.isfile(csv_filename):
                 continue
-            data.append(parseCsvFile(csv_filename))
-            data[i] = computeRestartedDifferentialStress(data[i], confining_pressures[i+1])
+            data_i = parseCsvFile(csv_filename)
+            data_i = computeRestartedDifferentialStress(data_i, confining_pressure)
+            tmp = [rescaling_stress_factors[i+1]*elt for elt in data_i['avg_top(sig1) - sig3']]
+            data_i['avg_top(sig1) - sig3'] = tmp
+            data.append(data_i)
         # Plot stress vs strain curves
-        createPicturesForBatchData(data=data,
-            key1='time', key2='avg_top(sig1) - sig3', 
+        createPicturesForBatchData(data=data, key1=key1, key2=key2, 
             output_dir=os.path.join(output_dir, 'StressStrainCurves'), name_root='{0}_'.format('StressStrain'), 
             title=None, label1='Strain (%)', label2='Deviatoric stress', 
             velocity=velocity, block_height=4, digitised_data=oka_data, do_show=True)

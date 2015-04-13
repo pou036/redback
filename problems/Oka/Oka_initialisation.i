@@ -68,7 +68,6 @@
     youngs_modulus = 80
     poisson_ratio = 0.2
     total_porosity = total_porosity
-    exponent_p = 53
   [../]
   [./mat_nomech]
     type = RedbackMaterial

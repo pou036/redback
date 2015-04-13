@@ -34,7 +34,12 @@ def getLogger(name, log_file='log.txt', level=logging.INFO):
 
 def runSimulations(output_subdir='batch_test', nb_procs=8):
     ''' Run 6 simulations (varying confining pressure) for given parameters '''
+    equil_input_file = 'Oka_initialisation.i'
     input_file = 'Oka.i'
+    cp_folder = 'Oka_initialised_cp'
+    xda_root_filename0 = 'Oka_initialised_0000'
+    xda_root_filename1 = 'Oka_initialised_0001'
+    
     normalising_stress = 2.26e6 # Pa
     output_root_dir = 'results'
     output_dir = os.path.join(output_root_dir, output_subdir)
@@ -54,16 +59,36 @@ def runSimulations(output_subdir='batch_test', nb_procs=8):
     for i in sorted(confining_pressures.keys()):
         logger.info('Running simulation CD{0}...'.format(i))
         exec_loc = '~/projects/redback/redback-opt'
-        command = 'mpiexec -n {nb_procs} {exec_loc} -i {input_i} Outputs/csv=true BCs/confinement_left/value={confinement__value} '\
+        command1 = 'mpiexec -n {nb_procs} {exec_loc} -i {input_i} Outputs/csv=true BCs/confinement_left/value={confinement__value} '\
         'BCs/confinement_right/value=-{confinement__value} BCs/confinement_front/value=-{confinement__value} '\
-        'BCs/confinement_back/value={confinement__value} Executioner/num_steps=5'.\
+        'BCs/confinement_back/value={confinement__value} BCs/confinement_top/value=-{confinement__value}'.\
+        format(nb_procs=nb_procs, input_i=equil_input_file, exec_loc=exec_loc, confinement__value=confining_pressures[i])
+        command2 = 'mpiexec -n {nb_procs} {exec_loc} -i {input_i} Outputs/csv=true BCs/confinement_left/value={confinement__value} '\
+        'BCs/confinement_right/value=-{confinement__value} BCs/confinement_front/value=-{confinement__value} '\
+        'BCs/confinement_back/value={confinement__value} Materials/mat_mech/confining_pressure={confinement__value}'.\
         format(nb_procs=nb_procs, input_i=input_file, exec_loc=exec_loc, confinement__value=confining_pressures[i])
-        logger.info(command)
+        # Executioner/num_steps=50
         try:
+            # clean previous files
+            if os.path.isdir(cp_folder):
+                logger.debug('Deleting cp_folder "{0}"'.format(cp_folder))
+                shutil.rmtree(cp_folder)
+            for xda_filename in [xda_root_filename0, xda_root_filename1]:
+                for tmp_xda_filename in [xda_filename + '_mesh.xda', xda_filename + '.xda']:
+                    if os.path.isfile(tmp_xda_filename):
+                        logger.debug('Deleting file "{0}"'.format(tmp_xda_filename))
+                        os.remove(tmp_xda_filename)
             # copy input file (unaltered!)
             shutil.copy(input_file, os.path.join(output_dir, input_file))
+            # Run equilibration step
+            logger.info(command1)
+            retcode = subprocess.call(command1, shell=True)
+            if retcode < 0:
+                error_msg = 'Child process was terminated by signal {0}'.format(retcode)
+                logger.error(error_msg)
             # Run simulation
-            retcode = subprocess.call(command, shell=True)
+            logger.info(command2)
+            retcode = subprocess.call(command2, shell=True)
             if retcode < 0:
                 error_msg = 'Child process was terminated by signal {0}'.format(retcode)
                 logger.error(error_msg)
@@ -76,4 +101,4 @@ def runSimulations(output_subdir='batch_test', nb_procs=8):
     logger.info('Finished')
 
 if __name__ == '__main__':
-    runSimulations(output_subdir='batch_dummy')
+    runSimulations(output_subdir='batch_1')
