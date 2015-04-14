@@ -249,7 +249,7 @@
     type = NeumannBC
     variable = disp_z
     boundary = front
-    value = -0.664
+    value = 0.221
   [../]
 []
 

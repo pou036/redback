@@ -62,12 +62,16 @@
     pore_pres = pore_pressure
     temperature = temp
     exponent = 2
-    ref_pe_rate = 5e4
+    ref_pe_rate = 2.4e3
     slope_yield_surface = 1.44
     yield_stress = '0. 1 1 1'
     youngs_modulus = 80
     poisson_ratio = 0.2
     total_porosity = total_porosity
+    param_1 = 40
+    param_3 = 3.3
+    param_2 = 67.5
+    confining_pressure = 0.221
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -79,7 +83,7 @@
     temperature = temp
     m = 3
     mu = 1
-    ar = 7.8
+    ar = 8
     gr = 1
     ref_lewis_nb = 1
     Kc = 1
@@ -91,7 +95,7 @@
     da_exo = 1e-3
     total_porosity = total_porosity
     solid_compressibility = 0.0125
-    pressurization_coefficient = 0.5
+    pressurization_coefficient = 0.45
   [../]
 []
 
@@ -107,10 +111,6 @@
   [../]
   [./spline_IC]
     type = ConstantFunction
-  [../]
-  [./geothermal_gradient]
-    type = ParsedFunction
-    value = 0.1+0.1*(2-y)
   [../]
   [./timestep_function]
     type = ParsedFunction
