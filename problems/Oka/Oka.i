@@ -66,7 +66,7 @@
     param_1 = 40
     param_3 = 3.3
     param_2 = 67.5
-    confining_pressure = 0.221
+    confining_pressure = 0.885
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -189,25 +189,25 @@
     type = NeumannBC
     variable = disp_y
     boundary = top
-    value = -0.221
+    value = -0.885
   [../]
   [./confinement_left]
     type = NeumannBC
     variable = disp_x
     boundary = left
-    value = 0.221
+    value = 0.885
   [../]
   [./confinement_right]
     type = NeumannBC
     variable = disp_x
     boundary = right
-    value = -0.221
+    value = -0.885
   [../]
   [./confinement_back]
     type = NeumannBC
     variable = disp_z
     boundary = back
-    value = 0.221
+    value = 0.885
   [../]
   [./side_temp]
     type = DirichletBC
@@ -249,7 +249,7 @@
     type = NeumannBC
     variable = disp_z
     boundary = front
-    value = 0.221
+    value = -0.885
   [../]
 []
 
