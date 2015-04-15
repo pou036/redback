@@ -164,10 +164,8 @@ peacock_*.e
 
 *.template
 tests/*/*.trace
-problems/Oka/pics_postprocess
 
-# Allow csv files in Oka folder
-!/problems/Oka/fig*/*.csv
-!/problems/Oka/results
-problems/Oka/best_matches
+# Some redback applications
+problems/Oka
+
 !/tests/transverseBC/*.msh
