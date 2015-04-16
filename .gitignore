@@ -167,5 +167,7 @@ tests/*/*.trace
 
 # Some redback applications
 problems/Oka
+problems/fault_reactivation
+problems/Gypsum_dehydration
 
 !/tests/transverseBC/*.msh
