@@ -18,6 +18,7 @@ template<>
 InputParameters validParams<RedbackPoromechanics>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addCoupledVar("temperature", "Temperature variable.");
   return params;
 }
 
