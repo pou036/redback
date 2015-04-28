@@ -75,8 +75,8 @@ protected:
   MaterialProperty<Real> & _delta;
   MaterialProperty<Real> & _m;
   
+  MaterialProperty<Real> & _delta_T;
   MaterialProperty<Real> & _initial_porosity;
-  //MaterialProperty<Real> & _porosity;
   MaterialProperty<Real> & _lewis_number;
   MaterialProperty<Real> & _mixture_compressibility;
 

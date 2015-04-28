@@ -115,6 +115,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _delta(declareProperty<Real>("delta")),
   _m(declareProperty<Real>("m")),
 
+  _delta_T(declareProperty<Real>("delta_T")),
   _initial_porosity(declareProperty<Real>("initial_porosity")),
   //_porosity(declareProperty<Real>("porosity")),
   _lewis_number(declareProperty<Real>("lewis_number")),
@@ -191,6 +192,7 @@ void RedbackMaterial::stepInitQpProperties()
 {
   // TODO: Variable initialisation we'd like done only once (one off)
   // but can't figure out how so doing it at every step...
+  _delta_T[_qp] = _T[_qp] - _T_old[_qp];
   _initial_porosity[_qp] = _phi0_param;
   //_porosity[_qp] = _phi0_param; // _total_porosity now coming from AuxKernel (coupled to this material in .i)
   _chemical_porosity[_qp]= 0;
