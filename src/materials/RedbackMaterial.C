@@ -330,7 +330,13 @@ RedbackMaterial::computeRedbackTerms()
     _chemical_source_mass[_qp] =  _mu[_qp]* (1 - _total_porosity[_qp]) * (1 - _solid_ratio[_qp]) *std::exp( (_ar_F[_qp]*_delta[_qp]*_T[_qp]) / (1 + _delta[_qp]*_T[_qp]) );
 
     // Compute Jacobian of Chemical Source/Sink Term for the mass (pore pressure) equation. The corresponding variable is pore pressure
-    _chemical_source_mass_jac[_qp] = 0;
+    _chemical_source_mass_jac[_qp] = 0;/*_mu[_qp]* std::exp( (_ar_F[_qp]) / (1 + _delta[_qp]*_T[_qp]) ) *
+            (
+             _ar_F[_qp] * _delta[_qp] * (1 - _total_porosity[_qp]) * (1 - _solid_ratio[_qp])
+                / std::pow(1+_delta[_qp]*_T[_qp], 2)
+            - (1 - _solid_ratio[_qp]) * phi_prime
+            - (1 - _total_porosity[_qp]) * s_prime
+            );*/
 
     // Update Lewis number
     _lewis_number[_qp] = _ref_lewis_nb[_qp]*std::pow((1-_total_porosity[_qp])/(1-_phi0_param), 2) * std::pow(_phi0_param/_total_porosity[_qp], 3);

@@ -19,6 +19,7 @@ template<>
 InputParameters validParams<RedbackChemPressure>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addCoupledVar("temperature", "Temperature variable.");
   return params;
 }
 
@@ -26,8 +27,8 @@ InputParameters validParams<RedbackChemPressure>()
 RedbackChemPressure::RedbackChemPressure(const std::string & name, InputParameters parameters) :
   Kernel(name, parameters),
   _chemical_source_mass(getMaterialProperty<Real>("chemical_source_mass")),
-  _chemical_source_mass_jac(getMaterialProperty<Real>("chemical_source_mass_jacobian"))
-
+  _chemical_source_mass_jac(getMaterialProperty<Real>("chemical_source_mass_jacobian")),
+  _temp_var(coupled("temperature"))
 {
 
 }
@@ -46,5 +47,15 @@ RedbackChemPressure::computeQpResidual()
 Real
 RedbackChemPressure::computeQpJacobian()
 {
-  return -_test[_i][_qp] * _chemical_source_mass_jac[_qp] * _phi[_j][_qp];
+  return 0;
+}
+
+Real
+RedbackChemPressure::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  if (jvar == _temp_var)
+  {
+    return -_test[_i][_qp] * _chemical_source_mass_jac[_qp] * _phi[_j][_qp];
+  }
+  return 0;
 }
