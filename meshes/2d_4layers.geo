@@ -1,20 +1,21 @@
 /***********************************************/
 /* Parameters  */
 xmin = 0;
-xmax = 1;
+xmax = 10;
 ymin = -6;
 ybase = -5;
 y1 = -0.05; //-0.05; // bottom of middle layer
 y2 = 0.05;  //0.05; // top of middle layer
-ymax = 5;
+ymax = 3;
 /****** MESH ***********/
-nb_cells_x = 1; // nb cells in X dir along fault
+nb_cells_x = 5; // nb cells in X dir along fault
 
 nb_cells_y_top = 10;
 nb_cells_y_middle = 8;
-nb_cells_y_bottom = 10;
+nb_cells_y_bottom = 7;
 nb_cells_y_base = 1;
-progress_coeff = 0.6; // progression coefficient (for denser regular mesh towards fault)
+progress_coeff_top = 0.7; // progression coefficient (for denser regular mesh towards fault)
+progress_coeff_bottom = 0.5; // progression coefficient (for denser regular mesh towards fault)
 
 /***********************************************/
 
@@ -51,9 +52,9 @@ Line Loop(3) = {8,9,10,-6};
 Line Loop(4) = {11,12,13,-1};
 
 Printf("Buidling fully regular mesh (with hex)");
-Transfinite Line{2,-4} = nb_cells_y_bottom + 1 Using Progression progress_coeff;
+Transfinite Line{2,-4} = nb_cells_y_bottom + 1 Using Progression progress_coeff_bottom;
 Transfinite Line{5,7} = nb_cells_y_middle + 1;
-Transfinite Line{-8,10} = nb_cells_y_top + 1 Using Progression progress_coeff;
+Transfinite Line{-8,10} = nb_cells_y_top + 1 Using Progression progress_coeff_top;
 Transfinite Line{1,3,6,9,12} = nb_cells_x + 1;
 Transfinite Line{11,13} = nb_cells_y_base + 1;
 
