@@ -384,7 +384,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _volumetric_strain_rate[_qp] = instantaneous_strain_rate.trace()/3.0;
 
   // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
-  _mechanical_dissipation[_qp] = _gr[_qp]*sig.doubleContraction(instantaneous_strain_rate);
+  _mechanical_dissipation[_qp] = _gr[_qp]*std::exp(_ar[_qp])*sig.doubleContraction(instantaneous_strain_rate);
 
   // Compute Mechanical Dissipation Jacobian
   //_mechanical_dissipation_jac[_qp] = _gr[_qp] *
@@ -518,6 +518,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   if (_has_T)
   {
     _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
+    //_exponential = std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
   }
 
   // Microstructural hardening
