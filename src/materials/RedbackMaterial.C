@@ -24,7 +24,11 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("ref_lewis_nb", "Reference Lewis number.");
   params.addParam<Real>("ar", "Arrhenius number.");
   params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
-  params.addParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna)");
+  params.addParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna), only used when mechanics is not on");
+  params.addParam< Real >("alpha_1", 0, "First parameter for activation volume, alpha_1 V_{ref} / (R T_{ref}) in the redback paper");
+  params.addParam< Real >("alpha_2", 0, "Second parameter for activation volume, alpha_2 V_{ref} / (R T_{ref}) in the redback paper");
+  params.addParam< Real >("alpha_3", 0, "Third parameter for activation volume, alpha_3 in the redback paper");
+  params.addParam< Real >("confining_pressure", 1, "Normalised confining pressure");
   params.addParam<bool>("is_mechanics_on", false, "is mechanics on?");
   params.addParam<bool>("is_chemistry_on", false, "is chemistry on?");
   params.addParam<bool>("are_convective_terms_on", false, "are convective terms on?");
@@ -82,6 +86,10 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _ar_param(getParam<Real>("ar")),
   _delta_param(getParam<Real>("delta")),
   _m_param(getParam<Real>("m")),
+  _confining_pressure_param(getParam<Real>("confining_pressure")),
+  _alpha_1_param(getParam<Real>("alpha_1")),
+  _alpha_2_param(getParam<Real>("alpha_2")),
+  _alpha_3_param(getParam<Real>("alpha_3")),
   _peclet_number(getParam<Real>("Peclet_number")),
   _ar_F_param(getParam<Real>("ar_F")),
   _ar_R_param(getParam<Real>("ar_R")),
@@ -112,6 +120,10 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _gr(declareProperty<Real>("gr")),
   _ref_lewis_nb(declareProperty<Real>("ref_lewis_nb")),
   _ar(declareProperty<Real>("ar")),
+  _confining_pressure(declareProperty<Real>("confining_pressure")),
+  _alpha_1(declareProperty<Real>("alpha_1")),
+  _alpha_2(declareProperty<Real>("alpha_2")),
+  _alpha_3(declareProperty<Real>("alpha_3")),
   _delta(declareProperty<Real>("delta")),
   _m(declareProperty<Real>("m")),
 
@@ -205,6 +217,10 @@ void RedbackMaterial::stepInitQpProperties()
   _gr[_qp] = _gr_param;
   _ref_lewis_nb[_qp] = _ref_lewis_nb_param;
   _ar[_qp] = _ar_param;
+  _confining_pressure[_qp] = _confining_pressure_param;
+  _alpha_1[_qp] = _alpha_1_param;
+  _alpha_2[_qp] = _alpha_2_param;
+  _alpha_3[_qp] = _alpha_3_param;
   _delta[_qp] = _delta_param;
   _m[_qp] = _m_param;
   _lewis_number[_qp] = _ref_lewis_nb[_qp];

@@ -107,9 +107,6 @@ protected:
 
   Real _ref_pe_rate;
   Real _exponent;
-  Real _mhc;
-  Real _confining_pressure;
-  Real _param_1, _param_2, _param_3;
 
   Real macaulayBracket(Real);
 
@@ -141,6 +138,10 @@ protected:
   MaterialProperty<Real> & _mechanical_dissipation;
   MaterialProperty<Real> & _gr;
   MaterialProperty<Real> & _ar;
+  MaterialProperty<Real> & _confining_pressure;
+  MaterialProperty<Real> & _alpha_1;
+  MaterialProperty<Real> & _alpha_2;
+  MaterialProperty<Real> & _alpha_3;
   MaterialProperty<Real> & _mechanical_dissipation_jac;
   MaterialProperty<Real> & _poromech_jac;
 

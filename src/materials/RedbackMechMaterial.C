@@ -53,11 +53,10 @@ InputParameters validParams<RedbackMechMaterial>()
   //  Copy-paste from FiniteStrainPlasticRateMaterial.C
   params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
-  params.addParam< Real >("mhc", 0, "Microstructural hardening coefficient");
-  params.addParam< Real >("param_1", 0, "First parameter for activation volume");
-  params.addParam< Real >("param_2", 0, "Second parameter for activation volume");
-  params.addParam< Real >("param_3", 0, "Third parameter for activation volume");
-  params.addParam< Real >("confining_pressure", 1, "Normalised confining pressure");
+  //params.addParam< Real >("alpha_1", 0, "First parameter for activation volume, alpha_1 V_{ref} / (R T_{ref}) in the redback paper");
+  //params.addParam< Real >("alpha_2", 0, "Second parameter for activation volume, alpha_2 V_{ref} / (R T_{ref}) in the redback paper");
+  //params.addParam< Real >("alpha_3", 0, "Third parameter for activation volume, alpha_3 in the redback paper");
+  //params.addParam< Real >("confining_pressure", 1, "Normalised confining pressure");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
   params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
   params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
@@ -103,13 +102,12 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
     _ref_pe_rate(getParam<Real>("ref_pe_rate")),
     _exponent(getParam<Real>("exponent")),
-    _mhc(getParam<Real>("mhc")),
 
     // Redback
-    _confining_pressure(getParam<Real>("confining_pressure")),
-    _param_1(getParam<Real>("param_1")),
-    _param_2(getParam<Real>("param_2")),
-    _param_3(getParam<Real>("param_3")),
+    //_confining_pressure(getParam<Real>("confining_pressure")),
+    //_alpha_1(getParam<Real>("alpha_1")),
+    //_alpha_2(getParam<Real>("alpha_2")),
+    //_alpha_3(getParam<Real>("alpha_3")),
     _youngs_modulus(getParam<Real>("youngs_modulus")),
     _poisson_ratio(getParam<Real>("poisson_ratio")),
     _mises_stress(declareProperty<Real>("mises_stress")),
@@ -133,6 +131,10 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _mechanical_dissipation(getMaterialProperty<Real>("mechanical_dissipation")),
     _gr(getMaterialProperty<Real>("gr")),
     _ar(getMaterialProperty<Real>("ar")),
+    _confining_pressure(getMaterialProperty<Real>("confining_pressure")),
+    _alpha_1(getMaterialProperty<Real>("alpha_1")),
+    _alpha_2(getMaterialProperty<Real>("alpha_2")),
+    _alpha_3(getMaterialProperty<Real>("alpha_3")),
     _mechanical_dissipation_jac(getMaterialProperty<Real>("mechanical_dissipation_jacobian")),
     _poromech_jac(getMaterialProperty<Real>("poromechanics_jacobian")),
     _delta(getMaterialProperty<Real>("delta")),
@@ -384,6 +386,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _volumetric_strain_rate[_qp] = instantaneous_strain_rate.trace()/3.0;
 
   // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
+  //_mechanical_dissipation[_qp] = _gr[_qp]*std::exp(_ar[_qp])*sig.doubleContraction(instantaneous_strain_rate);
   _mechanical_dissipation[_qp] = _gr[_qp]*sig.doubleContraction(instantaneous_strain_rate);
 
   // Compute Mechanical Dissipation Jacobian
@@ -397,11 +400,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _poromech_jac[_qp] = (1 / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]));
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
-  //_mod_gruntfest_number[_qp] = _gr[_qp] * getSigEqv(sig) / yield_stress *
-  //    std::pow( macaulayBracket( getSigEqv(sig) / yield_stress - 1.0 ), _exponent);
-  //_mod_gruntfest_number[_qp] = _gr[_qp] * std::exp(-_pore_pres[_qp]*_exponent_p/(1 + _delta[_qp] *_T[_qp])) *
-  Real activation_volume = _param_1*std::log(_confining_pressure) + _param_2;
-  _mod_gruntfest_number[_qp] = _gr[_qp] * std::exp(-(_param_3*_confining_pressure+_pore_pres[_qp])*activation_volume/(1 + _delta[_qp] *_T[_qp])) *
+  _mod_gruntfest_number[_qp] = _gr[_qp] *
       (
       std::fabs(getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent)) +
       std::fabs(_mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp] - p_y), _exponent))
@@ -514,22 +513,16 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
   yield_stress = getYieldStress(eqvpstrain);
 
+  // calculate the term _exponential = -Q_{mech}/(RT) with Q_{mech} = E_0 + p'c V_{ref} + p_f V_{act}
   _exponential = 1;
   if (_has_T)
   {
+    // E_0/(RT) = Ar/(1+delta T*)
     _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
   }
 
-  // Microstructural hardening
-  //_exponential = _exponential*std::exp(-_mhc*mean_stress_old*volumetric_plastic_strain/(1 + _delta[_qp] *_T[_qp]));
-  //_exponential = _exponential*std::exp(-_mhc*mean_stress_old*_total_volumetric_strain[_qp]/(1 + _delta[_qp] *_T[_qp]));
-  //_exponential = _exponential*(1-_mhc*mean_stress_old*_total_volumetric_strain[_qp]/(1 + _delta[_qp] *_T[_qp]));
-
-  Real activation_volume = _param_1*std::log(_confining_pressure) + _param_2;
   //The following expression should be further pursued for a forward physics-based model
-  //_exponential = _exponential* std::exp(-(_param_3*_confining_pressure+_pore_pres[_qp])*activation_volume/(1 + _delta[_qp] *_T[_qp]));
-  _exponential = _exponential* std::exp(_param_3*_confining_pressure - (_pore_pres[_qp]*activation_volume)/(1 + 0*_delta[_qp] *_T[_qp]));
-
+  _exponential = _exponential* std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp])));
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
   {
@@ -539,7 +532,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
 
     // Elastic guess
     sig_new = sig_old + E_ijkl * delta_d;
-// Compute distance to current yield surface (line), only valid for associative potential
+    // Compute distance to current yield surface (line), only valid for associative potential
     p = sig_new.trace()/3.0;
     q = getSigEqv(sig_new);
     get_py_qy(p, q, p_y, q_y, yield_stress);
