@@ -41,7 +41,7 @@
   [./mat_nomech]
     type = RedbackMaterial
     block = '0 1 2'
-    m = 3
+    alpha_2 = 3
     mu = 1e-3
     ar = 10
     gr = 1 # 11

@@ -49,7 +49,7 @@
     variable = temp
     ar_c = 40
     gr = 1.2e-7
-    m = 3
+    alpha_2 = 3
     pressure = pressure
     ar = 20
     delta = 1e-3
@@ -112,7 +112,7 @@
     type = DimensionlessRock
     block = 0
     ar_c = 40
-    m = 3
+    alpha_2 = 3
     da = 1
     mu = 1e-3
     ar = 20

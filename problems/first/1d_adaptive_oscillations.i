@@ -94,7 +94,7 @@
     type = DimensionlessRock
     block = 0
     ar_c = 40
-    m = 3
+    alpha_2 = 3
     da = 1
     mu = 1e-3
     ar = 20

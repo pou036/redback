@@ -50,7 +50,7 @@
     Aphi = 0
     ar = 5
     gr = 1
-    m = 2
+    alpha_2 = 2
     pore_pres = 0
     is_mechanics_on = true
     phi0 = 0.5

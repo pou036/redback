@@ -56,7 +56,7 @@
     disp_z = disp_z
     pore_pres = pore_pressure
     temperature = temp
-    m = 3
+    alpha_2 = 3
     mu = 1
     ar = 12
     gr = 50
@@ -93,7 +93,7 @@
     disp_z = disp_z
     pore_pres = pore_pressure
     temperature = temp
-    m = 3
+    alpha_2 = 3
     mu = 1
     ar = 12
     gr = 50
@@ -131,7 +131,7 @@
     disp_z = disp_z
     pore_pres = pore_pressure
     temperature = temp
-    m = 3
+    alpha_2 = 3
     mu = 1
     ar = 12
     gr = 50

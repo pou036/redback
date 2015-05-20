@@ -35,7 +35,7 @@
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     yield_stress = '0. 1 1. 1'
     disp_z = disp_z
-    m = 1
+    alpha_2 = 1
     ar = 1
     gr = 0.1
     is_mechanics_on = false

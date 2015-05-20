@@ -266,7 +266,7 @@ RedbackMaterial::computeRedbackTerms()
   if (!_is_mechanics_on)
   {
     // Compute Mechanical Dissipation
-    _mechanical_dissipation[_qp] = _gr[_qp] *
+    _mechanical_dissipation[_qp] = _gr[_qp] * std::exp(_ar[_qp]) *
       std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp]))) *
       std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
 

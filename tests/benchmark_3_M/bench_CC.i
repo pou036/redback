@@ -54,7 +54,7 @@
     ar_F = 1
     ar_R = 1
     gr = 0.1
-    m = 1
+    alpha_2 = 1
     phi0 = 0.1
     ref_lewis_nb = 1
     total_porosity = total_porosity

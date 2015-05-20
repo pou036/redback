@@ -204,7 +204,7 @@
   [./adim_rock]
     type = RedbackMaterial
     block = 0
-    m = 3
+    alpha_2 = 3
     mu = 1e-3
     ar = 10
     gr = 0.11

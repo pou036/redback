@@ -149,10 +149,10 @@
   [./adim_rock]
     type = RedbackMaterial
     block = 0
-    m = 3
+    alpha_2 = 3
     mu = 1e-3
     ar = 10
-    gr = 0.11
+    gr = 5e-6 # 0.11*exp(-Ar), Ar=10
     pore_pres = pore_pressure
     temperature = temp
     is_mechanics_on = false

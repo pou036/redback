@@ -90,11 +90,10 @@
   [./adim_rock]
     type = RedbackMaterial
     block = 0
-    m = 1
+    alpha_2 = 1
     ar = 10
     yield_stress = '0 1 1 1'
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
-    gr = 0.1
+    gr = 4.534e-6 # 0.1*exp(-Ar), Ar=10
     pore_pres = 0
     temperature = temp
     is_mechanics_on = false
@@ -128,8 +127,8 @@
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   ss_check_tol = 1e-6
-  end_time = 35
-  dtmax = 0.2
+  end_time = 45
+  dtmax = 0.5
   scheme = bdf2
   [./TimeStepper]
     type = ConstantDT
@@ -140,7 +139,7 @@
 [Outputs]
   file_base = bench1_d_out
   exodus = true
-  csv = false
+  csv = true
   console = true
 []
 

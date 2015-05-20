@@ -60,8 +60,8 @@
     ar_F = 20
     ar_R = 10
     da_endo = 1e-6
-    gr = 0.3
-    m = 3
+    gr = 1.362e-5 # 0.3*exp(-Ar), Ar=10
+    alpha_2 = 3
     phi0 = 0.1
     ref_lewis_nb = 1
     temperature = temp

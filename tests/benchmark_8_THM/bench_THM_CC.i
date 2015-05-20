@@ -68,9 +68,9 @@
     ar_R = 10
     da_endo = 1e-4
     eta1 = 1e3
-    gr = 1
+    gr = 4.54e-5 # exp(-Ar), Ar=10
     is_mechanics_on = false
-    m = 3
+    alpha_2 = 3
     mu = 1e-3
     phi0 = 0.1
     pressurization_coefficient = 0.5

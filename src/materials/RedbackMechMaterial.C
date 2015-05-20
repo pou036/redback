@@ -53,10 +53,6 @@ InputParameters validParams<RedbackMechMaterial>()
   //  Copy-paste from FiniteStrainPlasticRateMaterial.C
   params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
-  //params.addParam< Real >("alpha_1", 0, "First parameter for activation volume, alpha_1 V_{ref} / (R T_{ref}) in the redback paper");
-  //params.addParam< Real >("alpha_2", 0, "Second parameter for activation volume, alpha_2 V_{ref} / (R T_{ref}) in the redback paper");
-  //params.addParam< Real >("alpha_3", 0, "Third parameter for activation volume, alpha_3 in the redback paper");
-  //params.addParam< Real >("confining_pressure", 1, "Normalised confining pressure");
   params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
   params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
   params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
@@ -104,10 +100,6 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _exponent(getParam<Real>("exponent")),
 
     // Redback
-    //_confining_pressure(getParam<Real>("confining_pressure")),
-    //_alpha_1(getParam<Real>("alpha_1")),
-    //_alpha_2(getParam<Real>("alpha_2")),
-    //_alpha_3(getParam<Real>("alpha_3")),
     _youngs_modulus(getParam<Real>("youngs_modulus")),
     _poisson_ratio(getParam<Real>("poisson_ratio")),
     _mises_stress(declareProperty<Real>("mises_stress")),
@@ -389,11 +381,6 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _mechanical_dissipation[_qp] = _gr[_qp]*std::exp(_ar[_qp])*sig.doubleContraction(instantaneous_strain_rate);
 
   // Compute Mechanical Dissipation Jacobian
-  //_mechanical_dissipation_jac[_qp] = _gr[_qp] *
-   //   (getSigEqv(sig) * std::pow(1 - _pore_pres[_qp], _exponent) *std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent) +  _mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp]- p_y), _exponent))*
-   //   _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
-   //   (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
-
   _mechanical_dissipation_jac[_qp] = _mechanical_dissipation[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
 
   _poromech_jac[_qp] = (1 / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]));

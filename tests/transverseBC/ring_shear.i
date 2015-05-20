@@ -42,10 +42,10 @@
   [./mat_nomech]
     type = RedbackMaterial
     block = 0
-    m = 3
+    alpha_2 = 3
     mu = 1e-3
     ar = 10
-    gr = 8 # 11
+    gr = 3.632e-4 # 8*exp(-Ar), Ar=10
     pore_pres = pore_pressure
     temperature = temp
     is_mechanics_on = false

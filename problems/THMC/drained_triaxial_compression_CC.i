@@ -65,7 +65,7 @@
     disp_z = disp_z
     pore_pres = pore_pressure
     temperature = temp
-    m = 3
+    alpha_2 = 3
     mu = 1
     ar = 10
     gr = 20

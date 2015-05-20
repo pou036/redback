@@ -41,7 +41,7 @@
     ar = 20
     block = subduction_zone
     gr = 1e-6
-    m = 4
+    alpha_2 = 4
     pressure = pressure
   [../]
   [./diff_pres]

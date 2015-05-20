@@ -71,7 +71,7 @@
     da_exo = 1e-3
     eta2 = 1e-3
     gr = 20
-    m = 3
+    alpha_2 = 3
     mu = 1
     phi0 = 0.1
     ref_lewis_nb = 1

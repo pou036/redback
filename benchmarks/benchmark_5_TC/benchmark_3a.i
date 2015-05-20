@@ -85,7 +85,7 @@
   [./adim_rock]
     type = RedbackMaterial
     block = 0
-    m = 1
+    alpha_2 = 1
     mu = 1e-3
     ar = 10
     disp_y = disp_y

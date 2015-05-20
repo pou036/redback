@@ -68,8 +68,8 @@
     ar_R = 10
     da_endo = 1e-5
     eta1 = 1e3
-    gr = 0.2
-    m = 3
+    gr = 9.08e-6 # 0.2*exp(-Ar), Ar=10
+    alpha_2 = 3
     mu = 1e-3
     phi0 = 0.1
     ref_lewis_nb = 1
