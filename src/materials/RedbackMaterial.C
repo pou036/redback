@@ -24,7 +24,6 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("ref_lewis_nb", "Reference Lewis number.");
   params.addParam<Real>("ar", "Arrhenius number.");
   params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
-  params.addParam<Real>("m", "Exponent for rate dependent plasticity (Perzyna), only used when mechanics is not on");
   params.addParam< Real >("alpha_1", 0, "First parameter for activation volume, alpha_1 V_{ref} / (R T_{ref}) in the redback paper");
   params.addParam< Real >("alpha_2", 0, "Second parameter for activation volume, alpha_2 V_{ref} / (R T_{ref}) in the redback paper");
   params.addParam< Real >("alpha_3", 0, "Third parameter for activation volume, alpha_3 in the redback paper");
@@ -85,7 +84,6 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _ref_lewis_nb_param(getParam<Real>("ref_lewis_nb")),
   _ar_param(getParam<Real>("ar")),
   _delta_param(getParam<Real>("delta")),
-  _m_param(getParam<Real>("m")),
   _confining_pressure_param(getParam<Real>("confining_pressure")),
   _alpha_1_param(getParam<Real>("alpha_1")),
   _alpha_2_param(getParam<Real>("alpha_2")),
@@ -125,7 +123,6 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _alpha_2(declareProperty<Real>("alpha_2")),
   _alpha_3(declareProperty<Real>("alpha_3")),
   _delta(declareProperty<Real>("delta")),
-  _m(declareProperty<Real>("m")),
 
   _delta_T(declareProperty<Real>("delta_T")),
   _initial_porosity(declareProperty<Real>("initial_porosity")),
@@ -222,7 +219,6 @@ void RedbackMaterial::stepInitQpProperties()
   _alpha_2[_qp] = _alpha_2_param;
   _alpha_3[_qp] = _alpha_3_param;
   _delta[_qp] = _delta_param;
-  _m[_qp] = _m_param;
   _lewis_number[_qp] = _ref_lewis_nb[_qp];
   _ar_F[_qp] = _ar_F_param;
   _ar_R[_qp] = _ar_R_param;
@@ -270,13 +266,13 @@ RedbackMaterial::computeRedbackTerms()
   if (!_is_mechanics_on)
   {
     // Compute Mechanical Dissipation
-    _mechanical_dissipation[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _m[_qp]) *
-        std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
+    _mechanical_dissipation[_qp] = _gr[_qp] *
+      std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp]))) *
+      std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
 
     // Compute Mechanical Dissipation Jacobian
-    _mechanical_dissipation_jac[_qp] = _gr[_qp] * std::pow(1 - _pore_pres[_qp], _m[_qp]) *
-      _ar[_qp]*_delta[_qp] * std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) ) /
-      (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+    _mechanical_dissipation_jac[_qp] = _mechanical_dissipation[_qp] *
+      _ar[_qp]*_delta[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
 
     // Initialise Poromechanics Jacobian
     _poromech_jac[_qp] = 0;
