@@ -21,6 +21,11 @@ InputParameters validParams<RedbackMaterial>()
 
   params.addRangeCheckedParam<Real>("phi0", 0.0, "phi0>=0 & phi0<1", "initial porosity value.");
   params.addRangeCheckedParam<Real>("gr", "gr>=0", "Gruntfest number.");
+  params.addParam<FunctionName>("gr_func", "Function name for Gruntfest number.");
+  //params.addParam<std::vector<std::string> >("parameters_as_fct_names", std::vector<std::string>(), "Vector of parameter names to be defined as functions (overwriting cst behaviour)");
+  //params.addParam<std::vector<std::string> >("parameters_as_ftc_functions", std::vector<std::string>(), "Vector of corresponding function names");
+  //params.addRequiredParam<std::vector<FunctionName>>("parameters_as_ftc_functions", "Vector of corresponding function names.");
+
   params.addParam<Real>("ref_lewis_nb", "Reference Lewis number.");
   params.addParam<Real>("ar", "Arrhenius number.");
   params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
@@ -75,10 +80,19 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
   //_pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
 
+  // get list of parameters to be taken as functions (overwriting default cst)
+  /*_parameters_as_fct_names = parameters.get<std::vector<std::string> >("parameters_as_fct_names");
+  _parameters_as_ftc_functions = parameters.get<std::vector<std::string> >("parameters_as_ftc_functions");
+  //_parameter_as_function(isParamValid("parameter_as_function") ? getParam<std::string>("parameter_as_function") : "" ),
+  if (_parameters_as_fct_names.size() != _parameters_as_ftc_functions.size())
+    mooseError("The lists parameters_as_fct_names and parameters_as_ftc_functions are not the same length");
+  TODO: check fct_names exist
+  */
   _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
 
   //_disp_x(isCoupled("disp_x") ? coupledValue("disp_x") : _zero),
 
+  _gr_func(getFunction("gr_func")),
   _phi0_param(getParam<Real>("phi0")),
   _gr_param(getParam<Real>("gr")),
   _ref_lewis_nb_param(getParam<Real>("ref_lewis_nb")),
@@ -211,7 +225,19 @@ void RedbackMaterial::stepInitQpProperties()
   _fluid_velocity[_qp] = RealVectorValue();
 
   // Variable initialisation (called at each step)
-  _gr[_qp] = _gr_param;
+  /*for (unsigned int i = 0; i < _parameters_as_fct_names.size(); i++)
+  {
+    if (_parameters_as_fct_names[i] == "gr")
+    {
+      TODO Thomas
+      _func(getFunction("function"))
+      _parameters_as_ftc_functions[i]
+      //_parameters_as_fct_names _parameters_as_ftc_functions
+    }
+  }*/
+  //_gr[_qp] = _gr_param;
+  _gr[_qp] = _gr_func.value(_t, _q_point[_qp]);
+
   _ref_lewis_nb[_qp] = _ref_lewis_nb_param;
   _ar[_qp] = _ar_param;
   _confining_pressure[_qp] = _confining_pressure_param;
