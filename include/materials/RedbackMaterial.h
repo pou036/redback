@@ -61,7 +61,8 @@ protected:
 
   //std::vector<std::string> _parameters_as_fct_names;
   //std::vector<std::string> _parameters_as_ftc_functions;
-  Function & _gr_func;
+  //Function & _gr_func;
+  Function * const _gr_func;
 
   Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param;
   Real _confining_pressure_param, _alpha_1_param, _alpha_2_param, _alpha_3_param, _peclet_number; //_ar_c_param, _da_param, _mu_param,

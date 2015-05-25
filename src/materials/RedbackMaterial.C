@@ -22,6 +22,8 @@ InputParameters validParams<RedbackMaterial>()
   params.addRangeCheckedParam<Real>("phi0", 0.0, "phi0>=0 & phi0<1", "initial porosity value.");
   params.addRangeCheckedParam<Real>("gr", "gr>=0", "Gruntfest number.");
   params.addParam<FunctionName>("gr_func", "Function name for Gruntfest number.");
+  // TODO: see functions/CompositeFunction to use std::vector<FunctionName>
+  //       or materials/GenericFunctionMaterial (even better!)
   //params.addParam<std::vector<std::string> >("parameters_as_fct_names", std::vector<std::string>(), "Vector of parameter names to be defined as functions (overwriting cst behaviour)");
   //params.addParam<std::vector<std::string> >("parameters_as_ftc_functions", std::vector<std::string>(), "Vector of corresponding function names");
   //params.addRequiredParam<std::vector<FunctionName>>("parameters_as_ftc_functions", "Vector of corresponding function names.");
@@ -92,7 +94,7 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
 
   //_disp_x(isCoupled("disp_x") ? coupledValue("disp_x") : _zero),
 
-  _gr_func(getFunction("gr_func")),
+  _gr_func(isParamValid("gr_func") ? &getFunction("gr_func") : NULL),
   _phi0_param(getParam<Real>("phi0")),
   _gr_param(getParam<Real>("gr")),
   _ref_lewis_nb_param(getParam<Real>("ref_lewis_nb")),
@@ -235,8 +237,14 @@ void RedbackMaterial::stepInitQpProperties()
       //_parameters_as_fct_names _parameters_as_ftc_functions
     }
   }*/
-  //_gr[_qp] = _gr_param;
-  _gr[_qp] = _gr_func.value(_t, _q_point[_qp]);
+  if (NULL == _gr_func)
+  {
+    _gr[_qp] = _gr_param;
+  }
+  else
+  {
+    _gr[_qp] = _gr_func->value(_t, _q_point[_qp]);
+  }
 
   _ref_lewis_nb[_qp] = _ref_lewis_nb_param;
   _ar[_qp] = _ar_param;
