@@ -19,15 +19,10 @@ InputParameters validParams<RedbackMaterial>()
 {
   InputParameters params = validParams<Material>();
 
+  params.addParam<std::vector<std::string> >("init_from_functions__params", "The names of the parameters to be initialised as functions.");
+  params.addParam<std::vector<FunctionName> >("init_from_functions__function_names", "The corresponding names of the functions to be used for the parameters to be initialised as functions.");
   params.addRangeCheckedParam<Real>("phi0", 0.0, "phi0>=0 & phi0<1", "initial porosity value.");
   params.addRangeCheckedParam<Real>("gr", "gr>=0", "Gruntfest number.");
-  params.addParam<FunctionName>("gr_func", "Function name for Gruntfest number.");
-  // TODO: see functions/CompositeFunction to use std::vector<FunctionName>
-  //       or materials/GenericFunctionMaterial (even better!)
-  //params.addParam<std::vector<std::string> >("parameters_as_fct_names", std::vector<std::string>(), "Vector of parameter names to be defined as functions (overwriting cst behaviour)");
-  //params.addParam<std::vector<std::string> >("parameters_as_ftc_functions", std::vector<std::string>(), "Vector of corresponding function names");
-  //params.addRequiredParam<std::vector<FunctionName>>("parameters_as_ftc_functions", "Vector of corresponding function names.");
-
   params.addParam<Real>("ref_lewis_nb", "Reference Lewis number.");
   params.addParam<Real>("ar", "Arrhenius number.");
   params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
@@ -82,19 +77,12 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
   //_pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
 
-  // get list of parameters to be taken as functions (overwriting default cst)
-  /*_parameters_as_fct_names = parameters.get<std::vector<std::string> >("parameters_as_fct_names");
-  _parameters_as_ftc_functions = parameters.get<std::vector<std::string> >("parameters_as_ftc_functions");
-  //_parameter_as_function(isParamValid("parameter_as_function") ? getParam<std::string>("parameter_as_function") : "" ),
-  if (_parameters_as_fct_names.size() != _parameters_as_ftc_functions.size())
-    mooseError("The lists parameters_as_fct_names and parameters_as_ftc_functions are not the same length");
-  TODO: check fct_names exist
-  */
   _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
 
   //_disp_x(isCoupled("disp_x") ? coupledValue("disp_x") : _zero),
 
-  _gr_func(isParamValid("gr_func") ? &getFunction("gr_func") : NULL),
+  _init_from_functions__params(getParam<std::vector<std::string> >("init_from_functions__params")),
+  _init_from_functions__function_names(getParam<std::vector<FunctionName> >("init_from_functions__function_names")),
   _phi0_param(getParam<Real>("phi0")),
   _gr_param(getParam<Real>("gr")),
   _ref_lewis_nb_param(getParam<Real>("ref_lewis_nb")),
@@ -197,6 +185,40 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _solid_velocity(declareProperty<RealVectorValue>("solid_velocity"))
 
 {
+  // Find functions to initialise parameters from
+  unsigned int num_param_names = _init_from_functions__params.size();
+  unsigned int num_fct_names = _init_from_functions__function_names.size();
+
+  if (num_param_names != num_fct_names)
+    mooseError("Number of init_from_functions__params much match the number of _init_from_functions__function_names!");
+
+  _num_init_functions = num_param_names;
+  _init_functions.resize(_num_init_functions);
+
+  std::vector<std::string> valid_params;
+  valid_params.push_back("gr");
+  valid_params.push_back("ref_lewis_nb");
+  valid_params.push_back("ar");
+  unsigned int pos;
+  for (unsigned int i=0; i<_num_init_functions; i++)
+  {
+    pos = find(valid_params.begin(), valid_params.end(), _init_from_functions__params[i]) - valid_params.begin();
+    if (pos>=valid_params.size())
+    {
+      std::string error_msg = std::string("Invalid parameter name '")
+        + _init_from_functions__params[i]
+        + std::string("' to initialise from function. The list of supported names is [");
+      for (unsigned int j=0; j<valid_params.size(); j++)
+      {
+        error_msg = error_msg + valid_params[j];
+        if (j<valid_params.size()-1)
+          error_msg = error_msg + std::string(", ");
+      }
+      error_msg = error_msg + std::string("]");
+      mooseError(error_msg);
+    }
+    _init_functions[i] = &getFunctionByName(_init_from_functions__function_names[i]);
+  }
 }
 
 //=================================================================
@@ -227,27 +249,38 @@ void RedbackMaterial::stepInitQpProperties()
   _fluid_velocity[_qp] = RealVectorValue();
 
   // Variable initialisation (called at each step)
-  /*for (unsigned int i = 0; i < _parameters_as_fct_names.size(); i++)
+  unsigned int pos; // position index (to find a string in vector of strings)
+  pos = find(_init_from_functions__params.begin(), _init_from_functions__params.end(), "gr")
+      - _init_from_functions__params.begin();
+  if (pos<_num_init_functions)
   {
-    if (_parameters_as_fct_names[i] == "gr")
-    {
-      TODO Thomas
-      _func(getFunction("function"))
-      _parameters_as_ftc_functions[i]
-      //_parameters_as_fct_names _parameters_as_ftc_functions
-    }
-  }*/
-  if (NULL == _gr_func)
-  {
-    _gr[_qp] = _gr_param;
+    _gr[_qp] = _init_functions[pos]->value(_t, _q_point[_qp]);
   }
   else
   {
-    _gr[_qp] = _gr_func->value(_t, _q_point[_qp]);
+    _gr[_qp] = _gr_param;
+  }
+  pos = find(_init_from_functions__params.begin(), _init_from_functions__params.end(), "ref_lewis_nb")
+      - _init_from_functions__params.begin();
+  if (pos<_num_init_functions)
+  {
+    _ref_lewis_nb[_qp] = _init_functions[pos]->value(_t, _q_point[_qp]);
+  }
+  else
+  {
+    _ref_lewis_nb[_qp] = _ref_lewis_nb_param;
+  }
+  pos = find(_init_from_functions__params.begin(), _init_from_functions__params.end(), "ar")
+      - _init_from_functions__params.begin();
+  if (pos<_num_init_functions)
+  {
+    _ar[_qp] = _init_functions[pos]->value(_t, _q_point[_qp]);
+  }
+  else
+  {
+    _ar[_qp] = _ar_param;
   }
 
-  _ref_lewis_nb[_qp] = _ref_lewis_nb_param;
-  _ar[_qp] = _ar_param;
   _confining_pressure[_qp] = _confining_pressure_param;
   _alpha_1[_qp] = _alpha_1_param;
   _alpha_2[_qp] = _alpha_2_param;

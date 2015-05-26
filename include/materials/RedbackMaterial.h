@@ -59,10 +59,11 @@ protected:
   VariableValue & _pore_pres;//, & _pore_pres_old;
   VariableValue & _total_porosity;
 
-  //std::vector<std::string> _parameters_as_fct_names;
-  //std::vector<std::string> _parameters_as_ftc_functions;
-  //Function & _gr_func;
-  Function * const _gr_func;
+  // functionality to initialise some parameters from function (overwrites initialisation as float)
+  std::vector<std::string> _init_from_functions__params;
+  std::vector<FunctionName> _init_from_functions__function_names;
+  std::vector<Function *> _init_functions;
+  int _num_init_functions;
 
   Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param;
   Real _confining_pressure_param, _alpha_1_param, _alpha_2_param, _alpha_3_param, _peclet_number; //_ar_c_param, _da_param, _mu_param,
