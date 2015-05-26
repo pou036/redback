@@ -6,10 +6,10 @@ xmin = 0;
 xmax = 1;
 
 ymax = 5;
-y4 = 4.05;  //0.05; // top of first middle layer
-y3 = 3.95; //-0.05; // bottom of first middle layer
-y2 = 0.05;  //0.05; // top of first middle layer
-y1 = -0.05; //-0.05; // bottom of first middle layer
+y4 = 4.01;  // 4.05; // top of first middle layer
+y3 = 3.99;  // 3.95; // bottom of first middle layer
+y2 = 0.01;  // 0.05; // top of first middle layer
+y1 = -0.01; //-0.05; // bottom of first middle layer
 ybase = -5;
 ymin = -6;
 /****** MESH ***********/
