@@ -5,24 +5,24 @@
 xmin = 0;
 xmax = 1;
 
-ymax = 5;
-y4 = 4.01;  // 4.05; // top of first middle layer
-y3 = 3.99;  // 3.95; // bottom of first middle layer
-y2 = 0.01;  // 0.05; // top of first middle layer
+ymax = 100;
+y4 = 80.005;  //0.05; // top of first middle layer
+y3 = 79.995; //-0.05; // bottom of first middle layer
+y2 = 0.01;  //0.05; // top of first middle layer
 y1 = -0.01; //-0.05; // bottom of first middle layer
 ybase = -5;
 ymin = -6;
 /****** MESH ***********/
 nb_cells_x = 1; // nb cells in X dir along fault
 
-nb_cells_y_top = 8;
+nb_cells_y_top = 12;
 nb_cells_y_middle3 = 8;
-nb_cells_y_middle2 = 20;
+nb_cells_y_middle2 = 25;
 nb_cells_y_middle1 = 8;
 nb_cells_y_bottom = 7;
 nb_cells_y_base = 1;
 progress_coeff_top = 0.7; // progression coefficient (for denser regular mesh towards fault)
-progress_coeff_middle2 = 0.05; // progression coefficient (for denser regular mesh in between faults)
+progress_coeff_middle2 = 0.02; // progression coefficient (for denser regular mesh in between faults)
 progress_coeff_bottom = 0.5; // progression coefficient (for denser regular mesh towards fault)
 
 /***********************************************/
