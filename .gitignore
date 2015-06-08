@@ -171,3 +171,4 @@ problems/fault_reactivation
 problems/Gypsum_dehydration
 
 !/tests/transverseBC/*.msh
+theory.synctex.gz

@@ -1,0 +1,244 @@
+\documentclass[]{scrreprt}
+%\usepackage{amsmath,amsfonts,graphicx}
+%\usepackage{multirow}
+%\usepackage{pslatex}
+%\usepackage{tabularx}
+%\usepackage{comment}
+%\usepackage{xspace}
+%\usepackage{array}
+%\usepackage{hyperref}
+\usepackage{caption}
+
+\RequirePackage{fix-cm}
+\usepackage{graphicx}
+\usepackage{color,soul}
+\usepackage{todonotes}
+\usepackage{subfigure}
+\usepackage{amsmath}
+\usepackage{natbib}
+
+
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+
+\graphicspath{
+{figures/}
+}
+
+\newcommand{\uo}{\mbox{UO\textsubscript{2}}\xspace}
+
+\setcounter{secnumdepth}{3}
+
+\newcommand{\moose}{{MOOSE}}
+\newcommand{\redback}{{REDBACK}}
+\newcommand{\pd}{\ensuremath{\partial}}
+\newcommand{\pdiff}[2]{\ensuremath{\pd_{#2} #1}}
+
+\begin{document}
+
+
+\title{Redback Theory Manual}
+\author{Thomas Poulet \\ CSIRO 
+	\and Manolis Veveakis \\ UNSW}
+\maketitle
+
+\tableofcontents
+
+%%%
+\chapter{Introduction}
+
+Blah blah \redback{}, to model multi-physics \textit{Rock mEchanics with
+Dissipative feedBACKs} in a tightly coupled manner.
+
+\chapter{Governing equations}
+
+
+
+
+The system in its final form is
+\begin{subequations}
+\label{eq:final_system_of_equations_dimensionless}
+\begin{align}
+  0 &= \pdiff{\sigma^{\prime}_{ij}}{j} + \pdiff{\Delta p_f}{i} + b_i, \\   
+  0 &= \pdiff{\Delta p_f}{t} + Pe_p\: v^p_i \pdiff{\Delta p_f}{i} -
+  Pe_T\:v^T_i \pdiff{T}{i} - \pdiff{\left[\frac{1}{Le} \pdiff{\Delta
+  p_f}{i} \right]}{i} \\ \nonumber
+  ~ & \qquad\qquad - \Lambda \pdiff{T}{t} +
+  \frac{\dot{\epsilon_V}}{\bar{\beta}\:\sigma_{ref}} -\frac{1}{Le_{chem}}
+  \omega_F, \\
+  0 &= \pdiff{T}{t} + Pe\:\bar{v_i}\pdiff{T}{i} - \pd_{ii}^2 T - Gr
+  \: \sigma_{ij}^{pl}\dot{\epsilon}_{ij}^{\,pl}  + Da_{endo}\: \omega_F -
+  Da_{exo}\: \omega_R.
+\end{align}
+\end{subequations}
+All dimensionless groups are defined in Tab.~\ref{tab:dimensionless_nbs} and
+\begin{align*}
+  \bar{\beta} &= (1-\phi)\beta_s + \phi\beta_f, \\
+  v_i^p &= (1-\phi)\frac{\beta_s}{\bar{\beta}} v_i^s + 
+    \phi\frac{\beta_f}{\bar{\beta}}v_i^f, \\
+  v^T_i &= (1-\phi)\frac{\bar{\lambda}_s}{\bar{\beta}} v_i^s + 
+    \phi\frac{\bar{\lambda}_f}{\bar{\beta}} v_i^f,\\
+  \bar{v_i} &= (1-\phi) v_i^s + \phi v_i^f, \\
+  \omega_F &= (1-\phi)(1-s)\exp\left(\frac{Ar_F \: \delta T}{1 + \delta T}
+  \right), \\
+  \omega_R &= (1-\phi)\:s\:\Delta \phi_{chem}\exp\left(\frac{Ar_R \: \delta
+  T}{1 + \delta T} \right), \\
+  \dot{\vec{\epsilon}}^{pl} &= \dot \epsilon_0 \: \exp\left( \frac{Ar \: \delta
+  T}{1 + \delta T}\right) \sqrt{ \left\langle\frac{q -
+  q_Y}{\sigma_{ref}}\right\rangle^{2m} + \left\langle\frac{p
+  - p_Y}{\sigma_{ref}}\right\rangle^{2m}}.
+\end{align*}
+
+
+
+The total porosity $\phi$ is expressed as the sum of its initial value, $\phi_0$,
+and the newly created interconnected pore volume. Pore volume can be created
+by mechanical ($\Delta\phi_{mech}$) and chemical ($\Delta \phi_{chem}$)
+processes such that the total porosity reads
+\begin{eqnarray}
+    \label{eq:porosity}
+    \phi = \phi_0 + \Delta\phi_{mech} + \Delta\phi_{chem} = \frac{V_{B}}{V},
+\end{eqnarray}
+where $V_B$ is the volume occupied by fluid $B$.  The evolution of mechanical
+porosity contains two components, a plastic part $\Delta
+\phi^{pl}_{mech}=\epsilon^{pl}_V$, with $\epsilon^{pl}_V$ the volumetric plastic strain, and an
+elastic one $\Delta \phi^{e}_{mech}=(1-\phi)\left( \beta_s \Delta p_f -
+\lambda_s \Delta T \right)$
+where $\beta_s$ and $\lambda_s$ are compressibility and
+thermal expansion coefficients of the solid phase, respectively.
+
+
+
+\section{Chemical damage}
+\label{subsec:chem_damage}
+
+Thermally activated chemical reactions are allowed to take place and
+in this work we concentrate on (de-)hydration reactions of the form
+\begin{equation}
+  \label{eq:reaction}
+  \nu_1 AB_{s} 
+  \overset{\omega_F}{\underset{\omega_R}{\rightleftharpoons}} \nu_2 A_{s} + \nu_3 B_{f},
+\end{equation} 
+where the subscripts $s$ and $f$ refer to solid and fluid phases and $\nu_i$
+$(i=1,2,3)$ are stoichiometric coefficients.  The reaction
+equation~\eqref{eq:reaction} states that the solid $A$ can release/bind the
+component $B$ into/from the fluid phase which increases/reduces the pore pressure.
+
+The kinetics of the decomposition reaction~\eqref{eq:reaction} are assumed
+to follow a standard Arrhenius dependency on temperature 
+\citep{Poulet2014}. As a result, the rates of the forward, $\omega_F$, and
+reverse reaction, $\omega_R$ (let $\nu_1=\nu_2=\nu_3=1$) can
+be expressed as \citep{Alevizos2014}
+\begin{subequations}
+\label{eq:reaction_rates_txt}
+\begin{align}
+  \omega_F &=  \frac{\rho_{AB}}{M_{AB}} (1 - \phi)(1 - s)  k_F e^{-Q_F/RT}, \\
+  \omega_R &=  \frac{\rho_{A} \rho_{B}}{M_A M_B} (1 - \phi) s \Delta\phi_{chem}
+  k_R e^{-Q_R/RT},
+\end{align}
+\end{subequations}
+where $\rho_i$ and $M_i$ $(i = A, B, AB)$ are the densities and molar masses of
+the respective constituent,
+$k_F,k_R$, $Q_F,Q_R$ are the pre-exponential factors and activation enthalpies
+of the forward and reverse reaction,
+$\phi$ is porosity and $\Delta\phi_{chem}$ denotes change in porosity due to 
+chemical processes. We define the solid ratio
+\begin{eqnarray}
+    \label{eq:s}
+    s = \frac{V_{A}}{V_s} = \frac{V_{A}}{(1-\phi) V},
+\end{eqnarray}
+where $V$ is a representative volume, $V_A$ and $V_s$ is the volume of solid
+phase $A$ and all solid within $V$, respectively. The solid ratio is a measure
+of the extend of reaction~\eqref{eq:reaction}. Subsequently, the total
+reaction rate is
+\begin{equation}
+ \label{eq:reaction_rate_total}
+\omega = \left[(1 - s) - s  \Delta \phi_{chem} \frac{\rho_{A}
+\rho_{B}}{\rho^2_{AB}} \frac{M^2_{AB}}{M_A M_B} K^{-1}_c e^{\Delta h/RT}
+\right] (1 - \phi) \frac{\rho_{AB}}{M_{AB}} k_F e^{-Q_F/RT}
+\end{equation}
+where $K_c = k_F/k_R$ and $\Delta h = Q_R - Q_F$.  The expressions for the
+dependency of the porosity $\phi$ and solid ratio $s$ on the reaction kinetics
+are described in detail in \cite{Alevizos2014} and briefly summarized here.
+
+We assume the following relations for the partial molar reaction rates of the
+species involved
+\begin{subequations}
+\label{eq:js}
+\begin{align}
+  \omega_{AB} &= - \left[ \frac{\rho_{AB}}{M_{AB}} (1 - \phi)(1 - s)
+  \right]^{\nu_1} k_F \exp(-Q_F/RT), \\
+  \omega_A &= \left[ \frac{\rho_{A}}{M_A} (1 - \phi) s \right]^{\nu_2} k_A \exp(-Q_R/RT), \\
+  \omega_B &= \left[ \Delta\phi_{chem} \frac{\rho_{B}}{M_B} \right]^{\nu_3} k_B
+  \exp(-Q_R/RT),
+\end{align}
+\end{subequations}
+and those rates are linked by the stoichiometry of the considered reaction~\eqref{eq:reaction} as
+\begin{equation}
+  \label{eq:j_equal}
+	-\frac{\omega_{AB}}{\nu_1} = \frac{\omega_A}{\nu_2} = \frac{\omega_B}{\nu_3}.
+\end{equation}
+From Eqs.~(\ref{eq:js}-\ref{eq:j_equal}) and for $\nu_1=\nu_2=\nu_3=1$ we
+derive the poro-chemical model
+\begin{subequations}
+\label{eq:s_phi_chem}
+\begin{align}
+  \Delta \phi_{chem} &= A_{\phi} \frac{1-\phi_0}{1 + \frac{\rho_{B}}{\rho_{A}} \frac{M_{A}}{M_{B}} \frac{1}{s}}, \\
+  s &= \frac {\omega_{rel}} {1+\omega_{rel}},\\
+  \omega_{rel} &= \frac{\rho_{AB}}{\rho_{A}} \frac{M_{A}}{M_{AB}} K_c \exp
+  \left( \frac{\Delta h}{RT} \right),
+\end{align}
+\end{subequations}
+where
+$A_{\phi}$ is a coefficient that determines the amount of the
+interconnected pore-volume (porosity) created due to the reaction. We assume
+that all the fluid generated contributes to the interconnected pore volume, and
+thus set $A_{\phi} = 1$.
+
+
+
+
+\begin{table}
+  \caption{Dimensionless parameters used in \redback{}. The coefficient $\delta$ is defined
+such that $T^{\star} = (T-T_{ref})/(\delta T_{ref})$}
+\label{tab:dimensionless_nbs}
+\begin{tabular}{@{} l p{0.18\textwidth} l p{0.52\textwidth} @{}}
+\hline\noalign{\smallskip}
+Group & Name & Definition & Interpretation \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+$Gr$ & Gruntfest number & $\frac{\chi\sigma_{ref}\dot{\epsilon}_{ref} L^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of mechanical rate converted into heat over rate of diffusive processes \\
+$Da_{endo}$ & Endothermic Damk\"{o}hler number & $\frac{A_{endo} h_{endo} \rho_{AB} L^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of endothermic reaction rate over rate of diffusive processes \\
+$Da_{exo}$ & Exothermic Damk\"{o}hler number & $\frac{A_{exo} h_{exo} \rho_{AB} L^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of exothermic reaction rate over rate of diffusive processes \\
+$Ar$ & Arrhenius number & $Q_{mech}/(R T_{ref})$ & Ratio of activation energy over thermal energy \\
+$Ar_F$ & Forward Arrhenius number & $Q_F/(R T_{ref})$ & Ratio of activation energy of forward reaction over thermal energy \\
+$Ar_R$ & Reverse Arrhenius number & $Q_R/(R T_{ref})$ & Ratio of activation energy of reverse activation energy over thermal energy \\
+$Le$ & Lewis number & $c_{th}/c_{hy}$ & Ratio of thermal over mass diffusivities \\
+$Le_{chem}$ & Chemical Lewis number & $\frac{c_{th}\sigma_{ref}\beta_m }{L^2_{ref} A_{endo}}\left(\frac{\rho_{B}}{\rho_m} \right)\left(\frac{M_{AB}}{M_{B}} \right)$ & Ratio of thermal over chemical diffusivity of forward reaction \\
+$\bar{\Lambda}$ & Thermal pressurisation coefficient & $\frac{\lambda_m}{\beta_m}\frac{\delta \:T_{ref}}{\sigma_{ref}}$ & Normalised thermal pressurisation coefficient, with $\lambda_m$ and $\beta_m$ the mixture thermal expansion and compressibility \\
+$Pe$ & P\'{e}clet number & $L_{ref}\textbf{v}_m/c_{th}$ & Ratio of temperature advection rate over diffusion rate \\
+$Pe_p$ & Pressure P\'{e}clet number & $L_{ref}\textbf{v}_p/c_{th}$ & Peclet number for the pressure effect in the pressure equation \\
+$Pe_T$ & Temperature P\'{e}clet number & $L_{ref}\textbf{v}_T/c_{th}$ & Peclet number for the temperature effect in the pressure equation \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
+\bibliographystyle{aps-nameyear}      % American Physical Society (APS) style, author-year citations
+\bibliography{redback}                % name your BibTeX data base
+\nocite{*}
+
+\chapter{Kernels}
+
+
+%\addcontentsline{toc}{chapter}{\numberline{}Bibliography}
+%\bibliographystyle{unsrt}
+%\begin{thebibliography}{99}
+%\bibitem{richards1931}LA Richards ``Capillary conduction of
+%  liquids through porous mediums''   Physics 1 (1931) pp 318--333
+%\end{thebibliography}
+
+
+
+
+
+\end{document}
+
