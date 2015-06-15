@@ -55,7 +55,7 @@ Please cite...
 
 
 \chapter{Governing equations}
-
+\label{chapter:gov_eqs}
 
 
 
@@ -230,7 +230,15 @@ $Pe_T$ & Temperature P\'{e}clet number & $L_{ref}\textbf{v}_T/c_{th}$ & Peclet n
 \bibliography{redback}                % name your BibTeX data base
 \nocite{*}
 
-\chapter{Kernels}
+\chapter{Code architecture}
+\section{Kernels}
+\section{Porosity}
+Porosity plays a particular role as its evolution depends on the mechanical, thermal, and hydraulic process models. As such, the total porosity evolution can not be handled within a material class unfortunately since it has components updated in more than one material. With the RedbackMechMaterial class already derived from the RedbackMaterial class, we can not create a dependency the other way around as it would create a circular dependency problem. There are at least two ways of working around that problem:
+\begin{enumerate}
+\item Porosity can be treated as an extra variable to solve for. 
+\item Porosity can be treated as an AuxKernel, which allows us to update it with various components calculated in separate material, and yet have all materials use the total porosity (updated with delay obviously).
+\end{enumerate}
+In the first case the porosity evolution (and dependency on all process models) will be solved rigorously, but this will come at a greater computational cost. This is probably the neatest solution to handle the most generic case when porosity might be strongly dependent on all process models, but this is not the principal scenario we are aiming with the current development of Redback. We are indeed focusing on the case described in Sec.~\ref{chapter:gov_eqs}, where the porosity is much more strongly dependent on chemistry (which produces fluid and can therefore raise $\phi$ to $1$) than it is on temperature and pore pressure (inducing minor variations of $\phi$). As a result, we decided to implement the second option and handle the total porosity as an AuxVariable updated by an AuxKernel. This option provides more flexibility to compute the total porosity more or less accurately by updating the AuxKernel more or less frequently. At the moment we're treating the porosity in an explicit manner and only update it at the end of each step. This is equivalent to say that we neglect the mechanical update of the porosity during a single step and only consider its chemical variation (since it is the main evolution for the cases we consider).
 
 
 %\addcontentsline{toc}{chapter}{\numberline{}Bibliography}
