@@ -1,6 +1,6 @@
 Redback
 =====
 
-"Fork Redback" to create a new MOOSE-based application.
+Redback is a MOOSE-based application. See the [http://github.com/pou036/redback/wiki](Redback wiki) for more information
 
-For more information see: [http://mooseframework.com/create-an-app/](http://mooseframework.com/create-an-app/)
+(To learn more on how to create your MOOSE application see: [http://mooseframework.com/create-an-app/](http://mooseframework.com/create-an-app/))
