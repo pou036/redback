@@ -3,82 +3,106 @@
   dim = 2
   nx = 20
   ny = 10
-  xmin = -200
-  xmax = 200
-  ymin = -100
-  ymax = 100
+  xmin = -500
+  xmax = 500
+  ymin = -500
+  ymax = 0
 []
 
 [Variables]
-  active = 'pore_pressure temp'
   [./temp]
-  [../]
-  [./disp_x]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
-  [../]
-  [./disp_y]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
   [../]
   [./pore_pressure]
   [../]
 []
 
+[Materials]
+  [./redback_nomech]
+    type = RedbackMaterial
+    Aphi = 1
+    are_convective_terms_on = true
+    block = 0
+    temperature = temp
+    pore_pres = pore_pressure
+    ar = 10
+    ar_F = 1
+    ar_R = 1
+    eta1 = 1e3
+    fluid_density = 1000
+    fluid_thermal_expansion = 1e-6
+    gr = 1
+    gravity = '0 -9.81 0'
+    mu = 1e-4
+    phi0 = 0.1
+    ref_lewis_nb = 1
+    pressurization_coefficient = 1
+    solid_compressibility = 0
+    solid_density = 2500
+    total_porosity = total_porosity
+  [../]
+[]
+
+[Functions]
+  [./init_gradient_T]
+    type = ParsedFunction
+    value = 293-y*(350-291)/(500-0)
+  [../]
+  [./init_gradient_P]
+    # P_top-rho*g*y
+    type = ParsedFunction
+    value = 1e5-1000*9.81*y
+  [../]
+[]
+
+[BCs]
+  [./temperature_top]
+    type = DirichletBC
+    variable = temp
+    boundary = top
+    value = 0
+  [../]
+  [./temperature_bottom]
+    type = DirichletBC
+    variable = temp
+    boundary = bottom
+    value = 1
+  [../]
+  [./pore_pressure_top]
+    type = DirichletBC
+    variable = pore_pressure
+    boundary = top
+    value = 1
+  [../]
+[]
+
 [AuxVariables]
-  active = 'density fluid_velocity_z fluid_velocity_y fluid_velocity_x'
-  [./porosity]
+  [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
+  [../]
+  [./total_porosity]
+    family = MONOMIAL
   [../]
   [./Lewis_number]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_rate]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./solid_ratio]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./fluid_velocity_x]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./fluid_velocity_y]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./fluid_velocity_z]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./density]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
-  active = 'diff_temp td_temp temp_conv press_diff'
-  [./td_temp]
+  [./temp_td]
     type = TimeDerivative
     variable = temp
   [../]
-  [./diff_temp]
+  [./temp_diff]
     type = Diffusion
     variable = temp
   [../]
-  [./mh_temp]
-    type = RedbackMechDissip
+  [./temp_conv]
+    type = RedbackThermalConvection
     variable = temp
   [../]
-  [./td_press]
+  [./press_td]
     type = TimeDerivative
     variable = pore_pressure
   [../]
@@ -86,223 +110,124 @@
     type = RedbackMassDiffusion
     variable = pore_pressure
   [../]
-  [./chem_press]
-    type = RedbackChemPressure
-    variable = pore_pressure
-    block = 0
-  [../]
-  [./Chem_endo_temp]
-    type = RedbackChemEndo
-    variable = temp
-    block = 0
-  [../]
-  [./thermal_pressurization]
-    type = RedbackThermalPressurization
+  [./pres_conv]
+    type = RedbackMassConvection
     variable = pore_pressure
     temperature = temp
   [../]
-  [./temp_conv]
-    type = RedbackThermalConvection
-    variable = temp
-  [../]
-  [./pres_conv]
-    type = RedbackMassConvection
+  [./press_thermPress]
+    type = RedbackThermalPressurization
     variable = pore_pressure
     temperature = temp
   [../]
 []
 
 [AuxKernels]
-  active = 'density fluid_velocity_z fluid_velocity_y fluid_velocity_x'
-  [./porosity]
+  [./Gruntfest_Number]
     type = MaterialRealAux
-    variable = porosity
-    property = porosity
-    block = 0
+    variable = Mod_Gruntfest_number
+    property = mod_gruntfest_number
+  [../]
+  [./total_porosity]
+    type = RedbackTotalPorosityAux
+    variable = total_porosity
+    mechanical_porosity = 0
+    execute_on = linear
   [../]
   [./Lewis_number]
     type = MaterialRealAux
     variable = Lewis_number
     property = lewis_number
   [../]
-  [./strain_rate]
-    type = MaterialRealAux
-    variable = strain_rate
-    property = mises_strain_rate
-  [../]
-  [./solid_ratio]
-    type = MaterialRealAux
-    variable = solid_ratio
-    property = solid_ratio
-  [../]
-  [./fluid_velocity_x]
-    type = MaterialVectorAux
-    variable = fluid_velocity_x
-    index = 0
-    vector = fluid_velocity
-  [../]
-  [./fluid_velocity_y]
-    type = MaterialVectorAux
-    variable = fluid_velocity_y
-    index = 1
-    vector = fluid_velocity
-  [../]
-  [./fluid_velocity_z]
-    type = MaterialVectorAux
-    variable = fluid_velocity_z
-    index = 2
-    vector = fluid_velocity
-  [../]
-  [./density]
-    type = MaterialRealAux
-    variable = density
-    property = mixture_density
-  [../]
 []
 
-[BCs]
-  active = 'top_temp bottom_temp press_bc'
-  [./disp_y]
-    type = DirichletBC
-    variable = disp_y
-    boundary = 'left right'
-    value = 0
-  [../]
-  [./disp_x_left]
-    type = DirichletBC
-    variable = disp_x
-    boundary = left
-    value = 1
-  [../]
-  [./disp_x_rigth]
-    type = DirichletBC
-    variable = disp_x
-    boundary = right
-    value = 0
-  [../]
-  [./press_bc]
-    type = DirichletBC
-    variable = pore_pressure
-    boundary = 2
-    value = 0
-  [../]
-  [./top_temp]
-    type = DirichletBC
-    variable = temp
-    boundary = 2
-    value = 0
-  [../]
-  [./bottom_temp]
-    type = DirichletBC
-    variable = temp
-    boundary = 0
-    value = 4e6
-  [../]
-[]
-
-[Materials]
-  [./adim_rock]
-    type = RedbackMaterial
-    block = 0
-    alpha_2 = 3
-    mu = 1e-3
-    ar = 10
-    gr = 0.11
-    pore_pres = pore_pressure
-    temperature = temp
-    ref_lewis_nb = 1
-    Kc = 1
-    ar_F = 20
-    ar_R = 10
-    phi0 = 0.1
-    eta1 = 1e3
-    Aphi = 1
-    da_endo = 1e-4
-    pressurization_coefficient = 1
-    are_convective_terms_on = true
-    fluid_thermal_expansion = 1e-6
-    solid_compressibility = 0
-    solid_density = 2500
-    gravity = '0 -10 0'
-    fluid_density = 1000
+[Preconditioning]
+  # active = ''
+  [./SMP]
+    type = SMP
+    full = true
   [../]
 []
 
 [Postprocessors]
-  active = 'temperature_middle'
   [./middle_temp]
     type = PointValue
     variable = temp
-    point = '0 0 0'
-  [../]
-  [./strain]
-    type = StrainRatePoint
-    variable = temp
-    point = '0 0 0'
+    point = '0 -250 0'
   [../]
   [./middle_press]
     type = PointValue
     variable = pore_pressure
-    point = '0 0 0'
+    point = '0 -250 0'
   [../]
-  [./porosity_middle]
+  [./middle_porosity]
     type = PointValue
-    variable = porosity
-    point = '0 0 0'
+    variable = total_porosity
+    point = '0 -250 0'
   [../]
-  [./Lewis_middle]
-    type = PointValue
-    variable = Lewis_number
-    point = '0 0 0'
+  [./dt]
+    type = TimestepSize
   [../]
-  [./strain_rate_middle]
-    type = PointValue
-    variable = strain_rate
-    point = '0 0 0'
+  [./num_li]
+    type = NumLinearIterations
   [../]
-  [./solid_ratio_middle]
-    type = PointValue
-    variable = solid_ratio
-    point = '0 0 0'
-  [../]
-  [./temperature_middle]
-    type = PointValue
-    variable = temp
-    point = '0 0 0'
+  [./num_nli]
+    type = NumNonlinearIterations
   [../]
 []
 
 [Executioner]
+  # [./TimeStepper]
+  # type = ConstantDT
+  # dt = 1e-1
+  # [../]
+  # [./TimeStepper]
+  # type = PostprocessorDT
+  # dt = 0.123
+  # postprocessor = new_timestep
+  # [../]
+  start_time = 0.0
+  end_time = 10000
+  dtmax = 1
+  dtmin = 1e-9
   type = Transient
-  num_steps = 10000000
-  petsc_options_iname = '-pc_type -pc_hypre_type'
-  petsc_options_value = 'hypre boomeramg'
-  ss_check_tol = 1e-6
-  end_time = 1000000
-  dtmax = 10000
-  scheme = bdf2
+  num_steps = 100000
+  dt = 0.1
+  l_max_its = 200
+  nl_max_its = 10
+  solve_type = PJFNK
+  petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart -snes_converged_reason'
+  petsc_options_value = 'hypre boomeramg cp 201 1'
+  nl_abs_tol = 1e-10 # 1e-10 to begin with
+  reset_dt = true
+  line_search = basic
   [./TimeStepper]
-    type = ConstantDT
-    dt = 1
+    # adapt_log = true
+    type = SolutionTimeAdaptiveDT
+    dt = 0.1
   [../]
 []
 
 [Outputs]
+  file_base = convection2D
   output_initial = true
   exodus = true
-  file_base = convection1_out
+  [./console]
+    type = Console
+    perf_log = true
+    linear_residuals = true
+  [../]
 []
 
 [ICs]
-  [./temp_ic]
+  [./temp_IC]
     variable = temp
-    type = RandomIC
-    max = 10
+    type = FunctionIC
+    function = init_gradient_T
   [../]
-  [./press_ic]
+  [./press_IC]
     variable = pore_pressure
-    type = ConstantIC
-    value = 0
+    type = FunctionIC
+    function = init_gradient_P
   [../]
 []
-
