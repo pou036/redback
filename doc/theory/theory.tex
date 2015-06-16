@@ -64,8 +64,8 @@ The system in its final form is
 \label{eq:final_system_of_equations_dimensionless}
 \begin{align}
   0 &= \pdiff{\sigma^{\prime}_{ij}}{j} + \pdiff{\Delta p_f}{i} + b_i, \\   
-  0 &= \pdiff{\Delta p_f}{t} + Pe_p\: v^p_i \pdiff{\Delta p_f}{i} -
-  Pe_T\:v^T_i \pdiff{T}{i} - \pdiff{\left[\frac{1}{Le} \pdiff{\Delta
+  0 &= \pdiff{\Delta p_f}{t} + Pe\: v^p_i \pdiff{\Delta p_f}{i} -
+  Pe\:v^T_i \pdiff{T}{i} - \pdiff{\left[\frac{1}{Le} \pdiff{\Delta
   p_f}{i} \right]}{i} \\ \nonumber
   ~ & \qquad\qquad - \Lambda \pdiff{T}{t} +
   \frac{\dot{\epsilon_V}}{\bar{\beta}\:\sigma_{ref}} -\frac{1}{Le_{chem}}
@@ -230,6 +230,7 @@ $Pe_T$ & Temperature P\'{e}clet number & $L_{ref}\textbf{v}_T/c_{th}$ & Peclet n
 \bibliography{redback}                % name your BibTeX data base
 \nocite{*}
 
+
 \chapter{Code architecture}
 \section{Kernels}
 \section{Porosity}
@@ -240,6 +241,87 @@ Porosity plays a particular role as its evolution depends on the mechanical, the
 \end{enumerate}
 In the first case the porosity evolution (and dependency on all process models) will be solved rigorously, but this will come at a greater computational cost. This is probably the neatest solution to handle the most generic case when porosity might be strongly dependent on all process models, but this is not the principal scenario we are aiming with the current development of Redback. We are indeed focusing on the case described in Sec.~\ref{chapter:gov_eqs}, where the porosity is much more strongly dependent on chemistry (which produces fluid and can therefore raise $\phi$ to $1$) than it is on temperature and pore pressure (inducing minor variations of $\phi$). As a result, we decided to implement the second option and handle the total porosity as an AuxVariable updated by an AuxKernel. This option provides more flexibility to compute the total porosity more or less accurately by updating the AuxKernel more or less frequently. At the moment we're treating the porosity in an explicit manner and only update it at the end of each step. This is equivalent to say that we neglect the mechanical update of the porosity during a single step and only consider its chemical variation (since it is the main evolution for the cases we consider).
 
+
+\appendix
+
+\chapter{Derivations}
+This chapter documents some of the derivations used to obtain the equations presented in Sec.\ref{chapter:gov_eqs}.
+
+\section{Mass balance}
+We define the following densities
+\begin{subequations}
+  \label{eq:rho_1_rho_2}
+  \begin{align}
+    \rho_1 &= (1-\phi)\rho_s \\
+    \rho_2 &= \phi \: \rho_f  
+  \end{align}
+\end{subequations}
+
+and we use the usual material derivative definition
+\begin{equation}
+  \label{eq:material_derivative}
+  \frac{D^{(i)}.}{D t} = \frac{\partial.}{\partial t} + v^{(i)}_k \frac{\partial.}{\partial x_k}
+\end{equation}
+
+
+\underline{Mass balance for the fluid phase}
+\begin{equation}
+  \label{eq:fluid_mass_balance_1}
+  \frac{\partial \rho_2}{\partial t} + \frac{\partial( \rho_2 V^{(2)}_k)}{\partial x_k}= j_1
+\end{equation}
+
+Using Eq.~\ref{eq:rho_1_rho_2}b in Eq.~\ref{eq:fluid_mass_balance_1} we get
+\begin{equation}
+  \label{eq:fluid_mass_balance_2}
+  \phi \frac{\partial \rho_f }{\partial t} + \rho_f\frac{\partial \phi }{\partial t} + \rho_f\frac{\partial( \phi V^{(2)}_k)}{\partial x_k}+ \phi V^{(2)}_k\frac{\partial\rho_f}{\partial x_k} = j_1
+\end{equation}
+Dividing by $\rho_f$ we obtain
+\begin{equation}
+  \label{eq:fluid_mass_balance}
+  \frac{\phi}{\rho_f} \frac{D^{(2)} \rho_f }{D t} + \frac{\partial \phi }{\partial t} + \frac{\partial( \phi V^{(2)}_k)}{\partial x_k} = \frac{j_1}{\rho_f}
+\end{equation}
+
+
+\underline{Mass balance for the solid phase}
+\begin{equation}
+  \label{eq:solid_mass_balance_1}
+  \frac{\partial \rho_1}{\partial t} + \frac{\partial( \rho_1 V^{(1)}_k)}{\partial x_k}= -j_1
+\end{equation}
+Using Eq.~\ref{eq:rho_1_rho_2}a in Eq.~\ref{eq:solid_mass_balance_1} we get
+\begin{equation}
+  \label{eq:solid_mass_balance_2}
+  (1-\phi) \frac{\partial \rho_s }{\partial t} - \rho_s\frac{\partial \phi }{\partial t} + \rho_s\frac{\partial( (1-\phi) V^{(1)}_k)}{\partial x_k}+ (1-\phi) V^{(1)}_k\frac{\partial\rho_s}{\partial x_k} = -j_1
+\end{equation}
+Dividing by $\rho_s$ we obtain
+\begin{equation}
+  \label{eq:solid_mass_balance}
+  \frac{(1-\phi)}{\rho_s} \frac{D^{(1)} \rho_s }{D t} - \frac{\partial \phi }{\partial t} + \frac{\partial(V^{(1)}_k)}{\partial x_k} - \frac{\partial( \phi V^{(1)}_k)}{\partial x_k} = -\frac{j_1}{\rho_s}
+\end{equation}
+
+\underline{Mass balance for the mixture (solid + fluid)}
+
+Adding Eq.~\ref{eq:fluid_mass_balance} and Eq.~\ref{eq:solid_mass_balance} gives the mixture mass balance:
+\begin{equation}
+  \label{eq:mixture_mass_balance}
+  \frac{(1-\phi)}{\rho_s} \frac{D^{(1)} \rho_s }{D t} +\frac{\phi}{\rho_f} \frac{D^{(2)} \rho_f }{D t} + \frac{\partial( \phi (V^{(2)}_k -V^{(1)}_k))}{\partial x_k}+ \frac{\partial(V^{(1)}_k)}{\partial x_k}  = \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
+\end{equation}
+
+\underline{Equation of state (EOS)}
+
+\begin{equation}
+  \label{eq:density_derivative}
+  \frac{d\rho_{(i)}}{\rho_{(i)}} = \left( \frac{d\rho_{(i)}}{dp_f} \right)_T \frac{dp_f}{\rho_{(i)}} +\left( \frac{d\rho_{(i)}}{dT} \right)_p \frac{dT}{\rho_{(i)}}, \:\:\:i\in \{s,f\} 
+\end{equation}
+
+Using the definition for compressibility $\beta_{(i)}=\frac{1}{\rho_{(i)}}\left( \frac{d\rho_{(i)}}{dp_f} \right)_T$ and thermal expansion $\lambda_{(i)}=-\frac{1}{\rho_{(i)}}\left( \frac{d\rho_{(i)}}{dT} \right)_{p_f}$ we get the Equation of State (EOS)
+
+\begin{equation}
+  \label{eq:eos_def}
+  \frac{d\rho_{(i)}}{\rho_{(i)}} = \beta_{(i)} dp_f - \lambda_{(i)} dT, \:\:\:i\in \{s,f\} 
+\end{equation}
+
+Using Eq.~\ref{eq:eos_def} in Eq.~\ref{eq:mixture_mass_balance} leads to
+...
 
 %\addcontentsline{toc}{chapter}{\numberline{}Bibliography}
 %\bibliographystyle{unsrt}
