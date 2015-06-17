@@ -331,9 +331,50 @@ Rearranging the terms we get
   \label{eq:mixture_mass_balance3}
   \overbrace{\left[(1-\phi)\beta_s + \phi\beta_f\right]}^{\beta_m}  \frac{\partial p_f}{\partial t} 
   - \overbrace{\left[(1-\phi)\lambda_s + \phi\lambda_f\right]}^{\lambda_m} \frac{\partial T}{\partial t} \\
-  + \left[(1-\phi)\beta_s v^{(1)}_k + \phi\beta_f v^{(2)}_k \right] \frac{\partial p_f}{\partial x_k} 
-  - \left[(1-\phi)\lambda_s v^{(1)}_k + \phi\lambda_f v^{(2)}_k \right] \frac{\partial T}{\partial x_k} \\
+  + \left[(1-\phi)\beta_s V^{(1)}_k + \phi\beta_f V^{(2)}_k \right] \frac{\partial p_f}{\partial x_k} 
+  - \left[(1-\phi)\lambda_s V^{(1)}_k + \phi\lambda_f V^{(2)}_k \right] \frac{\partial T}{\partial x_k} \\
   + \frac{\partial( \phi (V^{(2)}_k -V^{(1)}_k))}{\partial x_k}+ \frac{\partial(V^{(1)}_k)}{\partial x_k}  = \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
+\end{multline}
+
+\underline{Normalisation}
+
+In order to deal with dimensionless parameters we introduce the following normalised variables
+\begin{subequations}
+  \label{eq:def_normalisations}
+  \begin{align}
+  p^* &= \frac{p_f}{p_{ref}}, \\   
+  T^* &= \frac{T-T_{ref}}{\delta T_{ref}}, \\   
+  x^* &= \frac{x}{x_{ref}}, \\   
+  t^* &= \frac{c_{th}}{x^2_{ref}}t, \\   
+  V^* &= \frac{V}{V_{ref}}.
+  \end{align}
+\end{subequations}
+
+Dividing Eq.~\ref{eq:mixture_mass_balance3} by $\beta_m$ and switching to the normalised variables we get
+
+\begin{multline}
+  \label{eq:mixture_mass_balance4}
+  \frac{p_{ref} \: c_{th}}{x^2_{ref}} \frac{\partial p^*}{\partial t^*} 
+  - \frac{\lambda_m \: \delta \: T_{ref} \: c_{th}}{\beta_m\:x^2_{ref}} \frac{\partial T^*}{\partial t^*} \\
+  + \frac{V_{ref} \: p_{ref}}{x_{ref}}\left[\frac{(1-\phi)\beta_s V^{*(1)}_k + \phi\beta_f V^{*(2)}_k}{\beta_m} \right] \frac{\partial p^*}{\partial x^*_k} \\
+  - \frac{V_{ref}\:\lambda\:T_{ref}}{x_{ref}}\left[\frac{(1-\phi)\lambda_s V^{*(1)}_k + \phi\lambda_f V^{*(2)}_k}{\beta_m} \right] \frac{\partial T*}{\partial x^*_k} \\
+  + \frac{V_{ref}}{\beta_m} \frac{\partial( \phi (V^{*(2)}_k -V^{*(1)}_k))}{\partial x_k}
+  + \frac{V_{ref}}{\beta_m} \frac{\partial(V^{*(1)}_k)}{\partial x_k}  
+  = \frac{1}{\beta_m} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
+\end{multline}
+
+We then get the final mass balance formulation
+
+TODO
+\begin{multline}
+  \label{eq:mixture_mass_balance5}
+  \frac{p_{ref} \: c_{th}}{x^2_{ref}} \frac{\partial p^*}{\partial t^*} 
+  - \frac{\lambda_m \: \delta \: T_{ref} \: c_{th}}{\beta_m\:x^2_{ref}} \frac{\partial T^*}{\partial t^*} \\
+  + \frac{V_{ref} \: p_{ref}}{x_{ref}}\left[\frac{(1-\phi)\beta_s V^{*(1)}_k + \phi\beta_f V^{*(2)}_k}{\beta_m} \right] \frac{\partial p^*}{\partial x^*_k} \\
+  - \frac{V_{ref}\:\lambda\:T_{ref}}{x_{ref}}\left[\frac{(1-\phi)\lambda_s V^{*(1)}_k + \phi\lambda_f V^{*(2)}_k}{\beta_m} \right] \frac{\partial T*}{\partial x^*_k} \\
+  + \frac{V_{ref}}{\beta_m} \frac{\partial( \phi (V^{*(2)}_k -V^{*(1)}_k))}{\partial x_k}
+  + \frac{V_{ref}}{\beta_m} \frac{\partial(V^{*(1)}_k)}{\partial x_k}  
+  = \frac{1}{\beta_m} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
 \end{multline}
 
 
