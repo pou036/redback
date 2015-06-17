@@ -321,7 +321,22 @@ Using the definition for compressibility $\beta_{(i)}=\frac{1}{\rho_{(i)}}\left(
 \end{equation}
 
 Using Eq.~\ref{eq:eos_def} in Eq.~\ref{eq:mixture_mass_balance} leads to
-...
+\begin{multline}
+  \label{eq:mixture_mass_balance2}
+  (1-\phi) \left[ \beta_s \frac{D^{(1)}p_f}{Dt} - \lambda_s\frac{D^{(1)}T}{Dt}  \right] + \phi \left[ \beta_f \frac{D^{(2)}p_f}{Dt} - \lambda_f\frac{D^{(2)}T}{Dt}  \right] \\
+  + \frac{\partial( \phi (V^{(2)}_k -V^{(1)}_k))}{\partial x_k}+ \frac{\partial(V^{(1)}_k)}{\partial x_k}  = \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
+\end{multline}
+Rearranging the terms we get
+\begin{multline}
+  \label{eq:mixture_mass_balance3}
+  \overbrace{\left[(1-\phi)\beta_s + \phi\beta_f\right]}^{\beta_m}  \frac{\partial p_f}{\partial t} 
+  - \overbrace{\left[(1-\phi)\lambda_s + \phi\lambda_f\right]}^{\lambda_m} \frac{\partial T}{\partial t} \\
+  + \left[(1-\phi)\beta_s v^{(1)}_k + \phi\beta_f v^{(2)}_k \right] \frac{\partial p_f}{\partial x_k} 
+  - \left[(1-\phi)\lambda_s v^{(1)}_k + \phi\lambda_f v^{(2)}_k \right] \frac{\partial T}{\partial x_k} \\
+  + \frac{\partial( \phi (V^{(2)}_k -V^{(1)}_k))}{\partial x_k}+ \frac{\partial(V^{(1)}_k)}{\partial x_k}  = \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
+\end{multline}
+
+
 
 %\addcontentsline{toc}{chapter}{\numberline{}Bibliography}
 %\bibliographystyle{unsrt}
