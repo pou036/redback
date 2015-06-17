@@ -8,8 +8,6 @@
 []
 
 [Variables]
-  [./temp]
-  [../]
   [./pore_pressure]
   [../]
 []
@@ -21,7 +19,6 @@
     Aphi = 1
     are_convective_terms_on = true
     block = 0
-    temperature = temp
     pore_pres = pore_pressure
     ar = 10
     ar_F = 1
@@ -29,7 +26,7 @@
     eta1 = 1e3
     fluid_thermal_expansion = 7e-05
     gr = 1
-    gravity = '0 -1.96 0'
+    gravity = '1.96 0 0'
     phi0 = 0.3
     ref_lewis_nb = 2.72175308814e-07
     pressurization_coefficient = 0.951461538462
@@ -43,10 +40,6 @@
 []
 
 [Functions]
-  [./init_gradient_T]
-    type = ParsedFunction
-    value = 0.0-y*(1.0-0.0)*1000/500
-  [../]
   [./init_gradient_P]
     # P_top-rho*g*y
     type = ParsedFunction
@@ -54,36 +47,11 @@
   [../]
 []
 
-[ICs]
-  [./temp_IC]
-    variable = temp
-    type = FunctionIC
-    function = init_gradient_T
-  [../]
-  [./press_IC]
-    variable = pore_pressure
-    type = FunctionIC
-    function = init_gradient_P
-  [../]
-[]
-
 [BCs]
-  [./temperature_top]
-    type = DirichletBC
-    variable = temp
-    boundary = top
-    value = 0.0
-  [../]
-  [./temperature_bottom]
-    type = DirichletBC
-    variable = temp
-    boundary = bottom
-    value = 1.0
-  [../]
-  [./pore_pressure_top]
+  [./pore_pressure_left]
     type = DirichletBC
     variable = pore_pressure
-    boundary = top
+    boundary = left
     value = 0.02
   [../]
 []
@@ -95,19 +63,6 @@
 []
 
 [Kernels]
-  active = 'press_td temp_diff press_thermPress temp_td press_diff'
-  [./temp_td]
-    type = TimeDerivative
-    variable = temp
-  [../]
-  [./temp_diff]
-    type = Diffusion
-    variable = temp
-  [../]
-  [./temp_conv]
-    type = RedbackThermalConvection
-    variable = temp
-  [../]
   [./press_td]
     type = TimeDerivative
     variable = pore_pressure
@@ -115,16 +70,6 @@
   [./press_diff]
     type = RedbackMassDiffusion
     variable = pore_pressure
-  [../]
-  [./pres_conv]
-    type = RedbackMassConvection
-    variable = pore_pressure
-    temperature = temp
-  [../]
-  [./press_thermPress]
-    type = RedbackThermalPressurization
-    variable = pore_pressure
-    temperature = temp
   [../]
 []
 
@@ -146,11 +91,6 @@
 []
 
 [Postprocessors]
-  [./middle_temp]
-    type = PointValue
-    variable = temp
-    point = '0.5 -0.25 0'
-  [../]
   [./middle_press]
     type = PointValue
     variable = pore_pressure
@@ -173,21 +113,12 @@
 []
 
 [Executioner]
-  # [./TimeStepper]
-  # type = ConstantDT
-  # dt = 1e-1
-  # [../]
-  # [./TimeStepper]
-  # type = PostprocessorDT
-  # dt = 0.123
-  # postprocessor = new_timestep
-  # [../]
   start_time = 0.0
   end_time = 1e-3
   dtmax = 1
   dtmin = 1e-15
   type = Transient
-  num_steps = 10
+  num_steps = 20
   dt = 0.1
   l_max_its = 200
   nl_max_its = 10
@@ -198,14 +129,13 @@
   reset_dt = true
   line_search = basic
   [./TimeStepper]
-    # adapt_log = true
-    type = SolutionTimeAdaptiveDT
+    type = ConstantDT
     dt = 1e-7
   [../]
 []
 
 [Outputs]
-  file_base = gravity
+  file_base = gravity_horizontal
   output_initial = true
   exodus = true
   [./console]

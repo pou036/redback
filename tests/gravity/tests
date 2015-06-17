@@ -1,7 +1,12 @@
 [Tests]
-  [./test_gravity] # can't put a dot in that name!
+  [./test_gravity_horizontal] # can't put a dot in that name!
     type = 'Exodiff'
-    input = 'gravity.i'
-    exodiff = 'gravity.e'
+    input = 'gravity_horizontal.i'
+    exodiff = 'gravity_horizontal.e'
+  [../]
+  [./test_gravity_vertical] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'gravity_vertical.i'
+    exodiff = 'gravity_vertical.e'
   [../]
 []
