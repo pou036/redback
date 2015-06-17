@@ -60,8 +60,8 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("fluid_compressibility", 0, "fluid compressibility (beta^{(f)} in 1/Pa)"); // _fluid_compressibility_param
   params.addParam<Real>("solid_thermal_expansion", 0, "solid expansion (lambda^{(s)} in 1/K)"); // _solid_thermal_expansion_param
   params.addParam<Real>("fluid_thermal_expansion", 0, "fluid expansion (lambda^{(f)} in 1/K)"); // _fluid_thermal_expansion_param
-  params.addParam<Real>("solid_density", 2.5, "solid density in kg/m3"); // solid_density_param
-  params.addParam<Real>("fluid_density", 1, "fluid density in kg/m3"); // fluid_density_param
+  params.addParam<Real>("solid_density", 2.5, "normalised solid density (-)"); // solid_density_param
+  params.addParam<Real>("fluid_density", 1, "normalised fluid density (-)"); // fluid_density_param
 
   params.addParam<RealVectorValue>("gravity", RealVectorValue(), "Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg (0,0,-9.81)");
   return params;
@@ -449,7 +449,8 @@ RedbackMaterial::computeRedbackTerms()
     _mixture_density[_qp] = (1-_total_porosity[_qp])*solid_density+ _total_porosity[_qp]*fluid_density;
 
     // Terms feeding the stress equilibrium and Darcy flux
-    x_ref = 1; sigma_ref = 1e6;
+    // TODO: rename gravity as "normalised gravity" when asking the user
+    x_ref = 1; sigma_ref = 1;
     normalized_gravity = _gravity_param*(x_ref/sigma_ref);
 
     _mixture_gravity_term[_qp] = _mixture_density[_qp]*normalized_gravity; //for the stress equilibrium equation
