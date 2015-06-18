@@ -72,32 +72,32 @@ def generateInputFile(input_file_name):
 [Materials]
   [./redback_nomech]
     type = RedbackMaterial
-    Aphi = 1
-    are_convective_terms_on = true
     block = 0
     temperature = temp
     pore_pres = pore_pressure
+    Aphi = 1
     ar = 10
     ar_F = 1
     ar_R = 1
+    are_convective_terms_on = true
+    delta = {delta}
     eta1 = 1e3
+    fluid_compressibility = {fluid_compressibility}
     fluid_density = {fluid_density}
     fluid_thermal_expansion = {fluid_themal_expansion}
     gr = 1
     gravity = '0 -{normalized_gravity} 0'
     mu = 0
-    phi0 = {porosity}
-    ref_lewis_nb = {Lewis_number}
-    pressurization_coefficient = {pressurization_coefficient}
-    solid_compressibility = {solid_compressibility}
-    solid_density = {solid_density}
-    total_porosity = total_porosity
-    Peclet_number = {Peclet_number}
-    solid_thermal_expansion = {solid_thermal_expansion}
-    delta = {delta}
-    fluid_compressibility = {fluid_compressibility}
     # output_properties = mixture_density
     outputs = all
+    Peclet_number = {Peclet_number}
+    phi0 = {porosity}
+    pressurization_coefficient = {pressurization_coefficient}
+    ref_lewis_nb = {Lewis_number}
+    solid_compressibility = {solid_compressibility}
+    solid_density = {solid_density}
+    solid_thermal_expansion = {solid_thermal_expansion}
+    total_porosity = total_porosity
   [../]
 []
 
@@ -250,15 +250,6 @@ def generateInputFile(input_file_name):
 []
 
 [Executioner]
-  # [./TimeStepper]
-  # type = ConstantDT
-  # dt = 1e-1
-  # [../]
-  # [./TimeStepper]
-  # type = PostprocessorDT
-  # dt = 0.123
-  # postprocessor = new_timestep
-  # [../]
   start_time = 0.0
   end_time = 1e-3
   dtmax = 1
