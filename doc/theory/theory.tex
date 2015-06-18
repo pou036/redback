@@ -357,27 +357,36 @@ Dividing Eq.~\ref{eq:mixture_mass_balance3} by $\beta_m$ and switching to the no
   \frac{p_{ref} \: c_{th}}{x^2_{ref}} \frac{\partial p^*}{\partial t^*} 
   - \frac{\lambda_m \: \delta \: T_{ref} \: c_{th}}{\beta_m\:x^2_{ref}} \frac{\partial T^*}{\partial t^*} \\
   + \frac{V_{ref} \: p_{ref}}{x_{ref}}\left[\frac{(1-\phi)\beta_s V^{*(1)}_k + \phi\beta_f V^{*(2)}_k}{\beta_m} \right] \frac{\partial p^*}{\partial x^*_k} \\
-  - \frac{V_{ref}\:\lambda\:T_{ref}}{x_{ref}}\left[\frac{(1-\phi)\lambda_s V^{*(1)}_k + \phi\lambda_f V^{*(2)}_k}{\beta_m} \right] \frac{\partial T*}{\partial x^*_k} \\
+  - \frac{V_{ref}\:\delta\:T_{ref}}{x_{ref}}\left[\frac{(1-\phi)\lambda_s V^{*(1)}_k + \phi\lambda_f V^{*(2)}_k}{\beta_m} \right] \frac{\partial T*}{\partial x^*_k} \\
   + \frac{V_{ref}}{\beta_m} \frac{\partial( \phi (V^{*(2)}_k -V^{*(1)}_k))}{\partial x_k}
   + \frac{V_{ref}}{\beta_m} \frac{\partial(V^{*(1)}_k)}{\partial x_k}  
   = \frac{1}{\beta_m} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
 \end{multline}
 
-We then get the final mass balance formulation
+This can be rewritten as
 
-TODO
 \begin{multline}
   \label{eq:mixture_mass_balance5}
-  \frac{p_{ref} \: c_{th}}{x^2_{ref}} \frac{\partial p^*}{\partial t^*} 
-  - \frac{\lambda_m \: \delta \: T_{ref} \: c_{th}}{\beta_m\:x^2_{ref}} \frac{\partial T^*}{\partial t^*} \\
-  + \frac{V_{ref} \: p_{ref}}{x_{ref}}\left[\frac{(1-\phi)\beta_s V^{*(1)}_k + \phi\beta_f V^{*(2)}_k}{\beta_m} \right] \frac{\partial p^*}{\partial x^*_k} \\
-  - \frac{V_{ref}\:\lambda\:T_{ref}}{x_{ref}}\left[\frac{(1-\phi)\lambda_s V^{*(1)}_k + \phi\lambda_f V^{*(2)}_k}{\beta_m} \right] \frac{\partial T*}{\partial x^*_k} \\
-  + \frac{V_{ref}}{\beta_m} \frac{\partial( \phi (V^{*(2)}_k -V^{*(1)}_k))}{\partial x_k}
-  + \frac{V_{ref}}{\beta_m} \frac{\partial(V^{*(1)}_k)}{\partial x_k}  
-  = \frac{1}{\beta_m} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
+  \frac{\partial p^*}{\partial t^*} 
+  - \overbrace{\frac{\lambda_m \: \delta \: T_{ref}}{\beta_m\:p_{ref}}}^{\Lambda} \frac{\partial T^*}{\partial t^*} 
+  + \overbrace{\frac{x_{ref}\:V_{ref}}{c_{th}}}^{Pe}  \overbrace{\left[\frac{(1-\phi)\beta_s V^{*(1)}_k + \phi\beta_f V^{*(2)}_k}{\beta_m} \right]}^{\vec{v}^p} \frac{\partial p^*}{\partial x^*_k} \\
+  - \overbrace{\frac{x_{ref}\:V_{ref}}{c_{th}}}^{Pe}  \frac{\delta\:T_{ref}}{p_{ref}}\overbrace{\left[\frac{(1-\phi)\lambda_s V^{*(1)}_k + \phi\lambda_f V^{*(2)}_k}{\beta_m} \right]}^{\vec{v}^T} \frac{\partial T*}{\partial x^*_k} \\
+  + \underbrace{\frac{x_{ref}\:V_{ref}}{c_{th}}}_{Pe} \frac{x_{ref}}{\beta_m\:p_{ref}} \frac{\partial( \phi (V^{*(2)}_k -V^{*(1)}_k))}{\partial x_k}
+  + \underbrace{\frac{x_{ref}\:V_{ref}}{c_{th}}}_{Pe} \frac{x_{ref}}{\beta_m\:p_{ref}} \frac{\partial(V^{*(1)}_k)}{\partial x_k}  \\
+  = \frac{x^2_{ref}}{\beta_m\:p_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
 \end{multline}
 
+with
 
+\begin{subequations}
+  \label{eq:def_parameters}
+  \begin{align}
+  \Lambda &= \frac{\lambda_m \: \delta \: T_{ref}}{\beta_m\:p_{ref}}, \\   
+  Pe &= \frac{x_{ref}\:V_{ref}}{c_{th}}, \\   
+  v^p &= \frac{(1-\phi)\beta_s V^{*(1)}_k + \phi\beta_f V^{*(2)}_k}{\beta_m}, \\   
+  v^T &= \frac{(1-\phi)\lambda_s V^{*(1)}_k + \phi\lambda_f V^{*(2)}_k}{\beta_m}.
+  \end{align}
+\end{subequations}
 
 %\addcontentsline{toc}{chapter}{\numberline{}Bibliography}
 %\bibliographystyle{unsrt}
