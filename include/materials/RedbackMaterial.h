@@ -112,7 +112,8 @@ protected:
   MaterialProperty<RealVectorValue> & _pressure_convective_mass;
   MaterialProperty<RealVectorValue> & _pressure_convective_mass_jac;
   MaterialProperty<RealVectorValue> & _mixture_convective_energy;
-  MaterialProperty<RealVectorValue> & _mixture_convective_energy_jac;
+  MaterialProperty<Real> & _mixture_convective_energy_jac;
+  MaterialProperty<Real> & _mixture_convective_energy_off_jac;
 
   MaterialProperty<RealVectorValue> & _fluid_velocity;
   MaterialProperty<Real> & _solid_compressibility; // \bar(\beta_s)/\sigma_{ref}
@@ -132,7 +133,9 @@ protected:
 
   MaterialProperty<Real> & _pressurization_coefficient;
 
+  VariableGradient& _grad_temp;
   VariableGradient& _grad_pore_pressure;
+  //VariableSecond& _grad_grad_pore_pressure;
 
   VariableValue & _dispx_dot;
   VariableValue & _dispy_dot;

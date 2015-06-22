@@ -31,6 +31,6 @@ RedbackMassConvection::computeQpResidual()
 Real
 RedbackMassConvection::computeQpJacobian()
 {
-  return _test[_i][_qp] * (_pressure_convective_mass[_qp] * _grad_phi[_j][_qp]);
-    //+ (_pressure_convective_mass_jac[_qp] - _thermal_convective_mass_jac[_qp]) * _phi[_j][_qp]); / TODO: add those terms (fix them)
+  return _test[_i][_qp] * (_pressure_convective_mass[_qp]
+    + _pressure_convective_mass_jac[_qp] - _thermal_convective_mass_jac[_qp]) * _grad_phi[_j][_qp] ;
 }
