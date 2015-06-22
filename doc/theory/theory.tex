@@ -417,8 +417,19 @@ The mass balance equation then becomes
 
 with the Lewis number defined as $Le = \frac{\mu_f\:c_{th}\:\beta^*_m}{k \: p_{ref}}$ and the normalised gravity term $(\rho_f\:g)^*=\rho_f \frac{x_{ref}}{p_{ref}}g$.
 
-Following \citep[][appendix A, eq.~A2]{Alevizos2014}
-$j_1 = \omega_F.M_B$
+Following \citep[][appendix A]{Alevizos2014}
+$j_1 = \omega_F.M_B$, $\omega_F=\frac{\rho_1}{M_{AB}}k_F exp{-Q_F/RT}$ and $\rho_1=(1-\phi)(1-s)\rho_{AB}$, so the volumetric source term $j1$ can be written as
+\begin{equation}
+  \label{eq:j1_a}
+  j_1 =\rho_{AB}\frac{M_B}{M_{AB}}(1-\phi)(1-s) k_F exp{(-Q_F/RT)}
+\end{equation}
+The RHS term of Eq.~\ref{eq:mixture_mass_balance6} can then be written as
+\begin{multline}
+  \label{eq:mixture_mass_balance_rhs}
+  \frac{x^2_{ref}}{\beta_m\:p_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1 = \frac{x^2_{ref}}{\beta_m\:p_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)\rho_{AB}\frac{M_B}{M_{AB}}(1-\phi)(1-s) k_F exp{(-Q_F/RT)} \\
+  = \underbrace{\frac{x^2_{ref}k_F }{\beta_m\:p_{ref}\:c_{th}} \frac{\rho_{AB}}{\rho_B}\frac{M_B}{M_{AB}}\left(\frac{\rho_B}{\rho_f} - \frac{\rho_B}{\rho_s}\right)e^{-Ar_F}}_{1/Le_{chem}} \underbrace{(1-\phi)(1-s) \exp{\left( \frac{Ar_F \:\delta T^*}{1+\delta T^*} \right)}}_{\omega^*_F }
+\end{multline}
+
 
 
 %\addcontentsline{toc}{chapter}{\numberline{}Bibliography}
