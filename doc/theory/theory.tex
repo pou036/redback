@@ -6,7 +6,6 @@
 %\usepackage{comment}
 %\usepackage{xspace}
 %\usepackage{array}
-%\usepackage{hyperref}
 \usepackage{caption}
 
 \RequirePackage{fix-cm}
@@ -16,6 +15,7 @@
 \usepackage{subfigure}
 \usepackage{amsmath}
 \usepackage{natbib}
+\usepackage{hyperref}
 
 
 \DeclareCaptionFont{white}{\color{white}}
@@ -249,6 +249,7 @@ In the first case the porosity evolution (and dependency on all process models) 
 This chapter documents some of the derivations used to obtain the equations presented in Sec.\ref{chapter:gov_eqs}.
 
 \section{Mass balance}
+\label{sec:mass_balance}
 We define the following densities
 \begin{subequations}
   \label{eq:rho_1_rho_2}
@@ -431,6 +432,23 @@ The RHS term of Eq.~\ref{eq:mixture_mass_balance6} can then be written as
   = \underbrace{\frac{x^2_{ref}k_F }{\beta_m\:p_{ref}\:c_{th}} \frac{\rho_{AB}}{\rho_B}\frac{M_B}{M_{AB}}\left(\frac{\rho_B}{\rho_f} - \frac{\rho_B}{\rho_s}\right)e^{-Ar_F}}_{1/Le_{chem}} \underbrace{(1-\phi)(1-s) \exp{\left( \frac{Ar_F \:\delta T^*}{1+\delta T^*} \right)}}_{\omega^*_F }
 \end{multline}
 
+We then arrive to the full mass balance equation Eq.~\ref{eq:final_system_of_equations_dimensionless}b
+
+\section{Energy balance}
+\label{sec:energy_balance}
+The local form of the energy balance equation reads as follows:
+\begin{equation}
+  \label{eq:energy_balance}
+  (\rho C_p)_m \frac{D^{(m)}}{Dt} = k_m \nabla^2 T + \chi \sigma_{ij}.\dot{\epsilon}^{p}_{ij} + \Delta H.r
+\end{equation}
+with $\chi$ the Taylor-Quinney coefficient and $\Delta H=\Delta E=E_F-E_R$ the reaction's specific enthalpy.
+
+\section{Jacobians}
+Numerical convergence can be helped by providing the jacobians and off-diagonal terms for the kernel residuals, even though \moose{} does not explicitly require them. It is a trial-and-error process to check if the improvement in convergence justifies the cost of computing those terms.
+
+See the \moose{} workshop manual on \url{http://mooseframework.org/documentation/}
+
+
 
 
 %\addcontentsline{toc}{chapter}{\numberline{}Bibliography}
@@ -439,10 +457,6 @@ The RHS term of Eq.~\ref{eq:mixture_mass_balance6} can then be written as
 %\bibitem{richards1931}LA Richards ``Capillary conduction of
 %  liquids through porous mediums''   Physics 1 (1931) pp 318--333
 %\end{thebibliography}
-
-
-
-
 
 \end{document}
 
