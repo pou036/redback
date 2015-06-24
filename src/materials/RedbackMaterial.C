@@ -153,12 +153,15 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _chemical_source_mass_jac(declareProperty<Real>("chemical_source_mass_jacobian")),
 
   _thermal_convective_mass(declareProperty<RealVectorValue>("thermal_convective_mass")),
-  _thermal_convective_mass_jac(declareProperty<RealVectorValue>("thermal_convective_mass_jacobian")),
   _pressure_convective_mass(declareProperty<RealVectorValue>("pressure_convective_mass")),
-  _pressure_convective_mass_jac(declareProperty<RealVectorValue>("pressure_convective_mass_jacobian")),
+  //_convective_mass_jac_vec(declareProperty<RealVectorValue>("convective_mass_jacobian_vector")),
+  //_convective_mass_jac_real(declareProperty<Real>("convective_mass_jacobian_real")),
+  //_convective_mass_off_diag_vec(declareProperty<RealVectorValue>("convective_mass_off_diagonal_vector")),
+  //_convective_mass_off_diag_real(declareProperty<Real>("convective_mass_off_diagonal_real")),
+
   _mixture_convective_energy(declareProperty<RealVectorValue>("mixture_convective_energy")),
-  _mixture_convective_energy_jac(declareProperty<Real>("mixture_convective_energy_jacobian")),
-  _mixture_convective_energy_off_jac(declareProperty<Real>("mixture_convective_energy_off_jacobian")),
+  //_mixture_convective_energy_jac(declareProperty<Real>("mixture_convective_energy_jacobian")),
+  //_mixture_convective_energy_off_jac(declareProperty<Real>("mixture_convective_energy_off_jacobian")),
 
   //_solid_velocity(declareProperty<RealVectorValue>("solid_velocity")),
   _fluid_velocity(declareProperty<RealVectorValue>("fluid_velocity")),
@@ -471,15 +474,18 @@ RedbackMaterial::computeRedbackTerms()
     //mixture_velocity = (_solid_density_param/_mixture_density[_qp])*_solid_velocity[_qp] + (_fluid_density_param/_mixture_density[_qp])*_fluid_velocity[_qp]; //barycentric velocity for the mixture
 
     // Forming the kernels and their jacobians
-    _pressure_convective_mass[_qp] = _peclet_number*(beta_solid/beta_m_star)*_solid_velocity[_qp] + (beta_fluid/beta_m_star)*_fluid_velocity[_qp]; //convective term multiplying the pressure flux in the mass equation. TODO: disable for incompressible case
-    _pressure_convective_mass_jac[_qp] = -_peclet_number*(beta_fluid/beta_m_star)*_grad_pore_pressure[_qp]/_lewis_number[_qp]; //RealVectorValue(); //derivative with respect to pore pressure TODO: this is not equal to zero!!
+    _pressure_convective_mass[_qp] = _peclet_number*((beta_solid/beta_m_star)*_solid_velocity[_qp] + (beta_fluid/beta_m_star)*_fluid_velocity[_qp]); //convective term multiplying the pressure flux in the mass equation. TODO: disable for incompressible case
+    _thermal_convective_mass[_qp] = _peclet_number*((lambda_solid/beta_m_star)*_solid_velocity[_qp] + (lambda_fluid/beta_m_star)*_fluid_velocity[_qp]); //convective term multiplying the thermal flux in the mass equation
 
-    _thermal_convective_mass[_qp] = _peclet_number*(lambda_solid/beta_m_star)*_solid_velocity[_qp] + (lambda_fluid/beta_m_star)*_fluid_velocity[_qp]; //convective term multiplying the thermal flux in the mass equation
-    _thermal_convective_mass_jac[_qp] = -_peclet_number*(lambda_fluid/beta_m_star)*_grad_temp[_qp]/_lewis_number[_qp];//RealVectorValue();//derivative with respect to pore pressure TODO: this is not equal to zero!!
+    //_convective_mass_jac_vec[_qp] = (_peclet_number/beta_m_star)*(-beta_fluid*_grad_pore_pressure[_qp]+(lambda_fluid/_lewis_number[_qp])*_grad_temp[_qp]+beta_m_star*_pressure_convective_mass[_qp]/_peclet_number);
+    //_convective_mass_jac_real[_qp] = (_peclet_number*beta_fluid*fluid_density*normalized_gravity/beta_m_star)*(-beta_fluid*_grad_pore_pressure[_qp]+(lambda_fluid/_lewis_number[_qp])*_grad_temp[_qp]);
+
+    //_convective_mass_off_diag_vec[_qp] = -_thermal_convective_mass[_qp];
+    //_convective_mass_off_diag_real[_qp] = (_peclet_number*lambda_fluid*fluid_density*normalized_gravity/beta_m_star)*(beta_fluid*_grad_pore_pressure[_qp]-lambda_fluid*_grad_temp[_qp]);
 
     _mixture_convective_energy[_qp] = _peclet_number*mixture_velocity; //convective term multiplying the thermal flux in the energy equation
-    _mixture_convective_energy_jac[_qp] = -(_peclet_number/_lewis_number[_qp])*lambda_fluid*_fluid_gravity_term[_qp]*_grad_temp[_qp]; //RealVectorValue(); //derivative with respect to temperature
-    _mixture_convective_energy_off_jac[_qp] = (_peclet_number/_lewis_number[_qp])*(beta_fluid*_fluid_gravity_term[_qp]*_grad_temp[_qp] - 0); // 2nd term is for del_square_P; //derivative with respect to temperature
+    //_mixture_convective_energy_jac[_qp] = -(_peclet_number/_lewis_number[_qp])*lambda_fluid*_fluid_gravity_term[_qp]*_grad_temp[_qp]; //RealVectorValue(); //derivative with respect to temperature
+    //_mixture_convective_energy_off_jac[_qp] = (_peclet_number/_lewis_number[_qp])*(beta_fluid*_fluid_gravity_term[_qp]*_grad_temp[_qp] - 0); // 2nd term is for del_square_P; //derivative with respect to temperature
   }
   return;
 }

@@ -15,9 +15,12 @@ RedbackMassConvection::RedbackMassConvection(const std::string & name, InputPara
   //_dtemp_dot_dtemp(coupledDotDu("temperature")),
 
   _pressure_convective_mass(getMaterialProperty<RealVectorValue>("pressure_convective_mass")),
-  _pressure_convective_mass_jac(getMaterialProperty<RealVectorValue>("pressure_convective_mass_jacobian")),
   _thermal_convective_mass(getMaterialProperty<RealVectorValue>("thermal_convective_mass")),
-  _thermal_convective_mass_jac(getMaterialProperty<RealVectorValue>("thermal_convective_mass_jacobian"))
+  //_convective_mass_jac_vec(getMaterialProperty<RealVectorValue>("convective_mass_jacobian_vector")),
+  //_convective_mass_jac_real(getMaterialProperty<Real>("convective_mass_jacobian_real")),
+  //_convective_mass_off_diag_vec(getMaterialProperty<RealVectorValue>("convective_mass_off_diagonal_vector")),
+  //_convective_mass_off_diag_real(getMaterialProperty<Real>("convective_mass_off_diagonal_real")),
+  _temp_var(coupled("temperature"))
 {}
 
 
@@ -31,6 +34,17 @@ RedbackMassConvection::computeQpResidual()
 Real
 RedbackMassConvection::computeQpJacobian()
 {
-  return _test[_i][_qp] * (_pressure_convective_mass[_qp]
-    + _pressure_convective_mass_jac[_qp] - _thermal_convective_mass_jac[_qp]) * _grad_phi[_j][_qp] ;
+  return 0;
+  //return _test[_i][_qp] * (_convective_mass_jac_vec[_qp] * _grad_phi[_j][_qp]
+  //  + _convective_mass_jac_real[_qp]* _phi[_j][_qp]);// * _phi[_j][_qp];
+}
+
+Real
+RedbackMassConvection::computeQpOffDiagJacobian(unsigned int jvar)
+{
+  /*if (jvar == _temp_var)
+  {
+    return -_test[_i][_qp] * (_convective_mass_off_diag_vec[_qp] * _grad_phi[_j][_qp] + _convective_mass_off_diag_real[_qp]* _phi[_j][_qp]);// * _phi[_j][_qp]);
+  }*/
+  return 0;
 }

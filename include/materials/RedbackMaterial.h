@@ -108,12 +108,14 @@ protected:
   MaterialProperty<Real> & _chemical_source_mass_jac;
 
   MaterialProperty<RealVectorValue> & _thermal_convective_mass;
-  MaterialProperty<RealVectorValue> & _thermal_convective_mass_jac;
   MaterialProperty<RealVectorValue> & _pressure_convective_mass;
-  MaterialProperty<RealVectorValue> & _pressure_convective_mass_jac;
+  //MaterialProperty<RealVectorValue> & _convective_mass_jac_vec;
+  //MaterialProperty<Real> & _convective_mass_jac_real;
+  //MaterialProperty<RealVectorValue> & _convective_mass_off_diag_vec;
+  //MaterialProperty<Real> & _convective_mass_off_diag_real;
   MaterialProperty<RealVectorValue> & _mixture_convective_energy;
-  MaterialProperty<Real> & _mixture_convective_energy_jac;
-  MaterialProperty<Real> & _mixture_convective_energy_off_jac;
+  //MaterialProperty<Real> & _mixture_convective_energy_jac;
+  //MaterialProperty<Real> & _mixture_convective_energy_off_jac;
 
   MaterialProperty<RealVectorValue> & _fluid_velocity;
   MaterialProperty<Real> & _solid_compressibility; // \bar(\beta_s)/\sigma_{ref}
