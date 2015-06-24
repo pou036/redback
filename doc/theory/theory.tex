@@ -82,15 +82,16 @@ All dimensionless groups are defined in Tab.~\ref{tab:dimensionless_nbs} and
     \phi\frac{\beta_f}{\bar{\beta}}v_i^f, \\
   v^T_i &= (1-\phi)\frac{\bar{\lambda}_s}{\bar{\beta}} v_i^s + 
     \phi\frac{\bar{\lambda}_f}{\bar{\beta}} v_i^f,\\
-  \bar{v_i} &= (1-\phi) v_i^s + \phi v_i^f, \\
+  \bar{v_i} &= \frac{\rho_s}{\bar{\rho}} v_i^s + \frac{\rho_f}{\bar{\rho}} v_i^f, \\
   \omega_F &= (1-\phi)(1-s)\exp\left(\frac{Ar_F \: \delta T}{1 + \delta T}
   \right), \\
   \omega_R &= (1-\phi)\:s\:\Delta \phi_{chem}\exp\left(\frac{Ar_R \: \delta
   T}{1 + \delta T} \right), \\
-  \dot{\vec{\epsilon}}^{pl} &= \dot \epsilon_0 \: \exp\left( \frac{Ar \: \delta
+  \dot{\epsilon}^{pl}_{ij} &= \dot \epsilon_0 \: \exp\left( \frac{Ar \: \delta
   T}{1 + \delta T}\right) \sqrt{ \left\langle\frac{q -
   q_Y}{\sigma_{ref}}\right\rangle^{2m} + \left\langle\frac{p
-  - p_Y}{\sigma_{ref}}\right\rangle^{2m}}.
+  - p_Y}{\sigma_{ref}}\right\rangle^{2m}} \frac{\partial f}{\partial
+    \sigma_{ij}}.
 \end{align*}
 
 
