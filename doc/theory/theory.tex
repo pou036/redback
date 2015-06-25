@@ -14,6 +14,7 @@
 \usepackage{todonotes}
 \usepackage{subfigure}
 \usepackage{amsmath}
+\usepackage{mathrsfs}
 \usepackage{natbib}
 \usepackage{hyperref}
 
@@ -63,9 +64,9 @@ The system in its final form is
 \begin{subequations}
 \label{eq:final_system_of_equations_dimensionless}
 \begin{align}
-  0 &= \pdiff{\sigma^{\prime}_{ij}}{j} + \pdiff{\Delta p_f}{i} + b_i, \\   
-  0 &= \pdiff{\Delta p_f}{t} + Pe\: v^p_i \pdiff{\Delta p_f}{i} -
-  Pe\:v^T_i \pdiff{T}{i} - \pdiff{\left[\frac{1}{Le} \pdiff{\Delta
+  0 &= \pdiff{\sigma^{\prime}_{ij}}{j} + \pdiff{p_f}{i} + b_i, \\   
+  0 &= \pdiff{p_f}{t} + Pe\: v^p_i \pdiff{p_f}{i} -
+  Pe\:v^T_i \pdiff{T}{i} - \pdiff{\left[\frac{1}{Le} \pdiff{
   p_f}{i} \right]}{i} \\ \nonumber
   ~ & \qquad\qquad - \Lambda \pdiff{T}{t} +
   \frac{Pe\:\dot{\epsilon_V}}{\bar{\beta}\:\sigma_{ref}} -\frac{1}{Le_{chem}}
@@ -220,9 +221,7 @@ $Ar_R$ & Reverse Arrhenius number & $Q_R/(R T_{ref})$ & Ratio of activation ener
 $Le$ & Lewis number & $c_{th}/c_{hy}$ & Ratio of thermal over mass diffusivities \\
 $Le_{chem}$ & Chemical Lewis number & $\frac{c_{th}\sigma_{ref}\beta_m }{L^2_{ref} A_{endo}}\frac{\rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_{B}} \left( \frac{\rho_B}{\rho_f} - \frac{\rho_B}{\rho_s}\right)e^{-Ar_F}$ & Ratio of thermal over chemical diffusivity of forward reaction \\
 $\bar{\Lambda}$ & Thermal pressurisation coefficient & $\frac{\lambda_m}{\beta_m}\frac{\delta \:T_{ref}}{\sigma_{ref}}$ & Normalised thermal pressurisation coefficient, with $\lambda_m$ and $\beta_m$ the mixture thermal expansion and compressibility \\
-$Pe$ & P\'{e}clet number & $L_{ref}\textbf{v}_m/c_{th}$ & Ratio of temperature advection rate over diffusion rate \\
-$Pe_p$ & Pressure P\'{e}clet number & $L_{ref}\textbf{v}_p/c_{th}$ & Peclet number for the pressure effect in the pressure equation \\
-$Pe_T$ & Temperature P\'{e}clet number & $L_{ref}\textbf{v}_T/c_{th}$ & Peclet number for the temperature effect in the pressure equation \\
+$Pe$ & P\'{e}clet number & $L_{ref}V_{ref}/c_{th}$ & Ratio of temperature advection rate over diffusion rate \\
 \noalign{\smallskip}\hline
 \end{tabular}
 \end{table}
@@ -233,6 +232,7 @@ $Pe_T$ & Temperature P\'{e}clet number & $L_{ref}\textbf{v}_T/c_{th}$ & Peclet n
 
 
 \chapter{Code architecture}
+\label{chapter:code}
 \section{Kernels}
 \section{Porosity}
 Porosity plays a particular role as its evolution depends on the mechanical, thermal, and hydraulic process models. As such, the total porosity evolution can not be handled within a material class unfortunately since it has components updated in more than one material. With the RedbackMechMaterial class already derived from the RedbackMaterial class, we can not create a dependency the other way around as it would create a circular dependency problem. There are at least two ways of working around that problem:
@@ -242,10 +242,13 @@ Porosity plays a particular role as its evolution depends on the mechanical, the
 \end{enumerate}
 In the first case the porosity evolution (and dependency on all process models) will be solved rigorously, but this will come at a greater computational cost. This is probably the neatest solution to handle the most generic case when porosity might be strongly dependent on all process models, but this is not the principal scenario we are aiming with the current development of Redback. We are indeed focusing on the case described in Sec.~\ref{chapter:gov_eqs}, where the porosity is much more strongly dependent on chemistry (which produces fluid and can therefore raise $\phi$ to $1$) than it is on temperature and pore pressure (inducing minor variations of $\phi$). As a result, we decided to implement the second option and handle the total porosity as an AuxVariable updated by an AuxKernel. This option provides more flexibility to compute the total porosity more or less accurately by updating the AuxKernel more or less frequently. At the moment we're treating the porosity in an explicit manner and only update it at the end of each step. This is equivalent to say that we neglect the mechanical update of the porosity during a single step and only consider its chemical variation (since it is the main evolution for the cases we consider).
 
+\chapter{Tests}
+\label{chapter:tests}
 
 \appendix
 
 \chapter{Derivations}
+\label{chapter:derivations}
 This chapter documents some of the derivations used to obtain the equations presented in Sec.\ref{chapter:gov_eqs}.
 
 \section{Mass balance}
@@ -444,12 +447,92 @@ The local form of the energy balance equation reads as follows:
 with $\chi$ the Taylor-Quinney coefficient and $\Delta H=\Delta E=E_F-E_R$ the reaction's specific enthalpy.
 
 \section{Jacobians}
-Numerical convergence can be helped by providing the jacobians and off-diagonal terms for the kernel residuals, even though \moose{} does not explicitly require them. It is a trial-and-error process to check if the improvement in convergence justifies the cost of computing those terms.
-
-See the \moose{} workshop manual on \url{http://mooseframework.org/documentation/}
+Numerical convergence can be helped by providing the jacobians and off-diagonal terms for the kernel residuals, even though \moose{} does not explicitly require them. It is a trial-and-error process to check if the improvement in convergence justifies the cost of computing those terms. See the \moose{} workshop manual on \url{http://mooseframework.org/documentation/} for more details.
 
 
+%\mathscr{R}
+If $R(u)$ is the residual for the variable $u$, the jacobian matrix $J$ is defined as
+\begin{equation}
+  \label{eq:def_jacobian}
+  J_{ij}(u) = \frac{\partial R_i(u)}{\partial u_j}
+\end{equation}
+and the off-diagonal jacobian term for another coupled variable $v$ as
+\begin{equation}
+  \label{eq:def_off_diag_jacobian}
+  J^{(\text{off diag})}_{ij}(u) = \frac{\partial R_i(u)}{\partial v_j}
+\end{equation}
 
+\subsection{RedbackMassConvection}
+The residual is defined as
+\begin{equation}
+  R = Pe\: v^p.\nabla p^* - Pe\:v^T.\nabla T^*
+\end{equation}
+with (see Eq.\ref{eq:final_system_of_equations_dimensionless})
+\begin{align*}
+  v_i^p &= (1-\phi)\frac{\beta^*_s}{\beta^*_m} v_i^{*(s)} + 
+    \phi\frac{\beta^*_f}{\beta^*_m}v_i^{*(f)}, \\
+  v^T_i &= (1-\phi)\frac{\lambda^*_s}{\beta^*_m} v_i^{*(s)} + 
+    \phi\frac{\lambda^*_f}{\beta^*_m} v_i^{*(f)}.
+\end{align*}
+Noting that $\frac{\partial \nabla u}{\partial u_j}=\nabla \phi_j$ for any variable $u$ (see \moose{} documentation),
+\begin{equation}
+  \label{eq:def_jac_mass_conv}
+  J = \frac{\partial R}{\partial p^*} = Pe \frac{\partial v^p}{\partial p^*}.\nabla p^* + Pe\:v^p\:\nabla \phi_j - Pe\frac{\partial v^T}{\partial p^*}.\nabla T^*
+\end{equation}
+The normalised filtration vector (Eq.~\ref{eq:darcy_normalised}) can be rewritten as
+\begin{equation}
+ \label{eq:darcy_normalised2}
+  \phi (v^{*(f)} - v^{*(s)}) = -\frac{\beta^*_m}{Le\:Pe} \left(\nabla p^* - \rho_f\:g^* \right)
+\end{equation}
+
+Deriving that equation and adding the equation of state (Eq.~\ref{eq:eos_def}) we get
+\begin{equation}
+  \frac{\partial (\phi v^{*(f)})}{\partial p^*} = -\frac{\beta^*_m}{Le\:Pe} \left(\nabla \phi_j - \beta^*_f\rho_f\:g^* \right)
+\end{equation}
+under the following simplifying assumptions:
+\begin{itemize}
+ \item $\frac{\partial v^{(s)}}{\partial p^*}=0$
+ \item $\frac{\partial \mu_f}{\partial p^*}=0$
+ \item $\frac{\partial \phi}{\partial p^*}=0$
+\end{itemize}
+Using $\frac{\partial \rho_f}{\partial p^*} = \beta^*_f \: \rho_f$ we get
+\begin{subequations}
+  \begin{align}
+     \frac{\partial v^p}{\partial p^*} &= -\frac{\beta^*_f}{Le\:Pe} \left(\nabla \phi_j - \beta^*_f\rho_f\:g^* \right) \\
+  \frac{\partial v^T}{\partial p^*} &= -\frac{\lambda^*_f}{Le\:Pe} \left(\nabla \phi_j - \beta^*_f\rho_f\:g^* \right)
+  \end{align}
+\end{subequations}
+
+
+Eq.~\ref{eq:def_jac_mass_conv} then becomes
+\begin{subequations}
+  \label{eq:jac_mass_conv1}
+  \begin{align}
+  J &= Pe \frac{\partial v^p}{\partial p^*}.\nabla p^*
+  	+ Pe\:v^p\:\nabla \phi_j - Pe\frac{\partial v^T}{\partial p^*}.\nabla T^* \\ \nonumber
+  	&= -\frac{1}{Le} \left(\nabla \phi_j - \beta^*_f\rho_f\:g^* \right) (\beta^*_f\nabla p^* - \lambda^*_f\nabla T^*) + Pe\:v^p\:\nabla \phi_j \\ \nonumber
+  	&= \left( Pe\:v^p -\frac{1}{Le}(\beta^*_f\nabla p^* - \lambda^*_f\nabla T^*) \right)\nabla \phi_j + \frac{1}{Le} \beta^*_f\rho_f\:g^*(\beta^*_f\nabla p^* - \lambda^*_f\nabla T^*) \\ \nonumber
+  \end{align}
+\end{subequations}
+
+Using $\frac{\partial \rho_f}{\partial T^*} = -\lambda^*_f \: \rho_f$ we get
+\begin{subequations}
+  \begin{align}
+  \frac{\partial v^p}{\partial T^*} &= -\frac{\beta^*_f \lambda^*_f}{Le\:Pe} \rho_f\:g^* \\
+  \frac{\partial v^T}{\partial T^*} &= -\frac{\lambda^{*2}_f}{Le\:Pe} \rho_f\:g^* \\
+  \end{align}
+\end{subequations}
+
+The off-diagonal jacobian with respect to temperature is defined as
+\begin{subequations}
+  \label{eq:off_diag_jac_mass_conv1}
+  \begin{align}
+  J^T &= \frac{\partial R}{\partial T^*} = Pe \frac{\partial v^p}{\partial T^*}.\nabla p^* - Pe\:\frac{\partial v^T}{\partial T^*}\nabla T* - Pe\:v^T\:\nabla \phi_j \\ \nonumber
+    &=  -\frac{\lambda^*_f}{Le} \rho_f\:g^* (\beta^*_f \nabla p^* - \lambda^*_f \nabla T*) - Pe\:v^T\:\nabla \phi_j \\ \nonumber
+  \end{align}
+\end{subequations}
+
+\subsection{RedbackThermalConvection}
 
 %\addcontentsline{toc}{chapter}{\numberline{}Bibliography}
 %\bibliographystyle{unsrt}
