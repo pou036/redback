@@ -468,10 +468,8 @@ RedbackMaterial::computeRedbackTerms()
     lambda_m_star = one_minus_phi_lambda_s + phi_lambda_f; // normalized compressibility of the mixture
 
     // Forming the velocities through mechanics and Darcy's flow law
-    _fluid_velocity[_qp] = _solid_velocity[_qp] - (_grad_pore_pressure[_qp] - fluid_density*normalized_gravity)/(_lewis_number[_qp]*_total_porosity[_qp]); //solving Darcy's flux for the fluid velocity
+    _fluid_velocity[_qp] = _solid_velocity[_qp] - beta_star_m*(_grad_pore_pressure[_qp] - fluid_density*normalized_gravity)/(_peclet_number*_lewis_number[_qp]*_total_porosity[_qp]); //solving Darcy's flux for the fluid velocity
     mixture_velocity = (solid_density/_mixture_density[_qp])*_solid_velocity[_qp] + (fluid_density/_mixture_density[_qp])*_fluid_velocity[_qp]; //barycentric velocity for the mixture
-    //_fluid_velocity[_qp] = _solid_velocity[_qp] - beta_star_m*(_grad_pore_pressure[_qp] - _fluid_density_param*_gravity_param)/(_lewis_number[_qp]*_total_porosity[_qp]); //solving Darcy's flux for the fluid velocity
-    //mixture_velocity = (_solid_density_param/_mixture_density[_qp])*_solid_velocity[_qp] + (_fluid_density_param/_mixture_density[_qp])*_fluid_velocity[_qp]; //barycentric velocity for the mixture
 
     // Forming the kernels and their jacobians
     _pressure_convective_mass[_qp] = _peclet_number*((one_minus_phi_beta_star_s/beta_star_m)*_solid_velocity[_qp] + (phi_beta_star_f/beta_star_m)*_fluid_velocity[_qp]); //convective term multiplying the pressure flux in the mass equation. TODO: disable for incompressible case
