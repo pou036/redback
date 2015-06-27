@@ -442,7 +442,7 @@ We then arrive to the full mass balance equation Eq.~\ref{eq:final_system_of_equ
 The local form of the energy balance equation reads as follows:
 \begin{equation}
   \label{eq:energy_balance}
-  (\rho C_p)_m \frac{D^{(m)}}{Dt} = k_m \nabla^2 T + \chi \sigma_{ij}.\dot{\epsilon}^{p}_{ij} + \Delta H.r
+  (\rho C_p)_m \frac{D^{(m)}T}{Dt} = k_m \nabla^2 T + \chi \sigma_{ij}.\dot{\epsilon}^{p}_{ij} + \Delta H.r
 \end{equation}
 with $\chi$ the Taylor-Quinney coefficient and $\Delta H=\Delta E=E_F-E_R$ the reaction's specific enthalpy.
 
@@ -497,6 +497,7 @@ under the following simplifying assumptions:
 \end{itemize}
 Using $\frac{\partial \rho_f}{\partial p^*} = \beta^*_f \: \rho_f$ we get
 \begin{subequations}
+  \label{eq:derivatives_vT_vp}
   \begin{align}
      \frac{\partial v^p}{\partial p^*} &= -\frac{\beta^*_f}{Le\:Pe} \left(\nabla \phi_j - \beta^*_f\rho_f\:g^* \right) \\
   \frac{\partial v^T}{\partial p^*} &= -\frac{\lambda^*_f}{Le\:Pe} \left(\nabla \phi_j - \beta^*_f\rho_f\:g^* \right)
@@ -533,6 +534,45 @@ The off-diagonal jacobian with respect to temperature is defined as
 \end{subequations}
 
 \subsection{RedbackThermalConvection}
+The residual is defined as
+\begin{equation}
+  R = Pe\: \bar{v}.\nabla T^*
+\end{equation}
+and the corresponding jacobian as
+\begin{equation}
+  \label{eq:def_jac_heat_conv}
+  J = \frac{\partial R}{\partial T^*} = Pe \frac{\partial \bar{v}}{\partial T^*}.\nabla T^* + Pe\:\bar{v}\:\nabla \phi_j.
+\end{equation}
+
+From the definition of the normalised filtration velocity (Eq.~\ref{eq:darcy_normalised2}) we get
+\begin{equation}
+  \frac{\partial v^{*(f)}}{\partial T^*} = -\frac{\beta^*_m \lambda^*_f}{Le\:Pe\:\phi}\rho_f\:g^*
+\end{equation}
+
+From the definition of the mixture barycentric velocity $\bar{v} = \frac{\rho_s}{\bar{\rho}} v^{*(s)} + \frac{\rho_f}{\bar{\rho}} v^{*(f)}$ and following the same assumptions that led to Eq.~\ref{eq:derivatives_vT_vp} we write
+\begin{subequations}
+  \begin{align}
+  \frac{\partial \bar{v}}{\partial T^*} &= -\frac{1}{\bar{\rho}^2}\frac{\partial \bar{\rho}}{\partial T^*} (\rho_s v^{*(s)} + \rho_f v^{*(f)}) + \frac{1}{\bar{\rho}} \left[ \frac{\partial \rho_s}{\partial T^*}v^{*(s)} +\frac{\partial \rho_f}{\partial T^*}v^{*(f)} +\rho_f\frac{\partial v^{*(f)}}{\partial T^*}  \right]\\ \nonumber
+  &= -\frac{1}{\bar{\rho}}\frac{\partial \bar{\rho}}{\partial T^*}\bar{v} + \frac{1}{\bar{\rho}} \left[ \frac{\partial \rho_s}{\partial T^*}v^{*(s)} +\frac{\partial \rho_f}{\partial T^*}v^{*(f)} +\rho_f\frac{\partial v^{*(f)}}{\partial T^*}  \right]\\ \nonumber
+  &= \frac{1}{\bar{\rho}}\left[(1-\phi)\lambda^{*(s)}\rho_s + \phi\lambda^{*(f)}\rho_s \right]\bar{v} - \frac{1}{\bar{\rho}} \left[ \lambda^{*(s)}\rho_s v^{*(s)} + \lambda^{*(f)}\rho_f v^{*(f)} \right] - \frac{\rho_f}{\bar{\rho}}\frac{\beta^*_m \lambda^*_f}{Le\:Pe\:\phi}\rho_f\:g^*  \\ \nonumber
+  &= ... \\ \nonumber
+  &= \frac{1}{\bar{\rho}}\left[ \lambda^*_m \rho_s \bar{v} - \lambda^*_s \rho_s v^{*(s)} - \lambda^*_f \rho_f v^{*(f)}    \right] - \frac{\rho_f}{\bar{\rho}}\frac{\beta^*_m \lambda^*_f}{Le\:Pe\:\phi}\rho_f\:g^*  \\ \nonumber
+  \end{align}
+\end{subequations}
+
+For the off-diagonal term with respect to pore pressure we get
+\begin{subequations}
+  \begin{align}
+  \frac{\partial \bar{v}}{\partial p^*} =& -\frac{1}{\bar{\rho}^2}\frac{\partial \bar{\rho}}{\partial p^*} (\rho_s v^{*(s)} + \rho_f v^{*(f)}) + \frac{1}{\bar{\rho}} \left[ \frac{\partial \rho_s}{\partial p^*}v^{*(s)} +\frac{\partial \rho_f}{\partial p^*}v^{*(f)} +\rho_f\frac{\partial v^{*(f)}}{\partial p^*}  \right]\\ \nonumber
+  =& -\frac{1}{\bar{\rho}}\frac{\partial \bar{\rho}}{\partial p^*}\bar{v} + \frac{1}{\bar{\rho}} \left[ \frac{\partial \rho_s}{\partial p^*}v^{*(s)} +\frac{\partial \rho_f}{\partial p^*}v^{*(f)} +\rho_f\frac{\partial v^{*(f)}}{\partial p^*}  \right]\\ \nonumber
+  =& -\frac{1}{\bar{\rho}}\left[(1-\phi)\beta^{*(s)}\rho_s + \phi\beta^{*(f)}\rho_s \right]\bar{v} + \frac{1}{\bar{\rho}} \left[ \beta^{*(s)}\rho_s v^{*(s)} + \beta^{*(f)}\rho_f v^{*(f)} \right] \\ \nonumber
+  &- \frac{\rho_f}{\bar{\rho}}\frac{\beta^*_m}{Le\:Pe\:\phi} \left(\nabla \phi_j - \beta^*_f\rho_f\:g^* \right)  \\ \nonumber
+  =& ... \\ \nonumber
+  =& \frac{1}{\bar{\rho}}\left[ -\beta^*_m \rho_s \bar{v} + \beta^*_s \rho_s v^{*(s)} + \beta^*_f \rho_f v^{*(f)}    \right] - \frac{\rho_f}{\bar{\rho}}\frac{\beta^*_m}{Le\:Pe\:\phi} \left(\nabla \phi_j - \beta^*_f\rho_f\:g^* \right)  \\ \nonumber
+  \end{align}
+\end{subequations}
+
+
 
 %\addcontentsline{toc}{chapter}{\numberline{}Bibliography}
 %\bibliographystyle{unsrt}
