@@ -5,6 +5,7 @@ InputParameters validParams<RedbackThermalConvection>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("pore_pres", "Pore pressure variable.");
+  params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
   return params;
 }
 
@@ -13,22 +14,23 @@ RedbackThermalConvection::RedbackThermalConvection(const std::string & name, Inp
   _mixture_convective_energy(getMaterialProperty<RealVectorValue>("mixture_convective_energy")),
   //_mixture_convective_energy_jac(getMaterialProperty<Real>("mixture_convective_energy_jacobian")),
   //_mixture_convective_energy_off_jac(getMaterialProperty<Real>("mixture_convective_energy_off_jacobian")),
-  _pore_pres_var(coupled("pore_pres"))
+  _pore_pres_var(coupled("pore_pres")),
+  _time_factor(getParam<Real>("time_factor"))
 {}
 
 
 Real
 RedbackThermalConvection::computeQpResidual()
 {
-  return _test[_i][_qp] * (_mixture_convective_energy[_qp] * _grad_u[_qp]);
+  return _test[_i][_qp] * (_time_factor*_mixture_convective_energy[_qp] * _grad_u[_qp]);
 }
 
 Real
 RedbackThermalConvection::computeQpJacobian()
 {
   return 0;
-  //return _test[_i][_qp] * _mixture_convective_energy[_qp] * _grad_phi[_j][_qp]
-  //  + _test[_i][_qp] * _mixture_convective_energy_jac[_qp] * _phi[_j][_qp];
+  //return _test[_i][_qp] * _time_factor * _mixture_convective_energy[_qp] * _grad_phi[_j][_qp]
+  //  + _test[_i][_qp] * _time_factor * _mixture_convective_energy_jac[_qp] * _phi[_j][_qp];
 }
 
 Real
@@ -36,7 +38,7 @@ RedbackThermalConvection::computeQpOffDiagJacobian(unsigned int jvar)
 {
   /*if (jvar == _pore_pres_var)
   {
-    return _test[_i][_qp] * _mixture_convective_energy_off_jac[_qp] * _phi[_j][_qp];
+    return _test[_i][_qp] * _time_factor * _mixture_convective_energy_off_jac[_qp] * _phi[_j][_qp];
   }*/
   return 0;
 }

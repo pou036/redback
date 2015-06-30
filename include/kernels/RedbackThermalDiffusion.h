@@ -12,33 +12,30 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REDBACKCHEMEXO_H
-#define REDBACKCHEMEXO_H
+#ifndef REDBACKTHERMALDIFFUSION_H
+#define REDBACKTHERMALDIFFUSION_H
 
 #include "Kernel.h"
 
-class RedbackChemExo;
+class RedbackThermalDiffusion;
 
 template<>
-InputParameters validParams<RedbackChemExo>();
+InputParameters validParams<RedbackThermalDiffusion>();
 
 
-class RedbackChemExo : public Kernel
+class RedbackThermalDiffusion : public Kernel
 {
 public:
-  RedbackChemExo(const std::string & name, InputParameters parameters);
-  virtual ~RedbackChemExo();
+  RedbackThermalDiffusion(const std::string & name, InputParameters parameters);
+  virtual ~RedbackThermalDiffusion();
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-
-  MaterialProperty<Real> & _chemical_exothermic_energy;
-  MaterialProperty<Real> & _chemical_exothermic_energy_jac;
 
 private:
   Real _time_factor;
 };
 
 
-#endif /* REDBACKCHEMEXO_H */
+#endif /* REDBACKTHERMALDIFFUSION_H */

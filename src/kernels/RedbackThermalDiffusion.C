@@ -12,33 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REDBACKCHEMEXO_H
-#define REDBACKCHEMEXO_H
+#include "RedbackThermalDiffusion.h"
 
-#include "Kernel.h"
-
-class RedbackChemExo;
 
 template<>
-InputParameters validParams<RedbackChemExo>();
-
-
-class RedbackChemExo : public Kernel
+InputParameters validParams<RedbackThermalDiffusion>()
 {
-public:
-  RedbackChemExo(const std::string & name, InputParameters parameters);
-  virtual ~RedbackChemExo();
+  InputParameters params = validParams<Kernel>();
+  params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
+  return params;
+}
 
-protected:
-  virtual Real computeQpResidual();
-  virtual Real computeQpJacobian();
+RedbackThermalDiffusion::RedbackThermalDiffusion(const std::string & name, InputParameters parameters) :
+  Kernel(name, parameters),
+  _time_factor(getParam<Real>("time_factor"))
+{
+}
 
-  MaterialProperty<Real> & _chemical_exothermic_energy;
-  MaterialProperty<Real> & _chemical_exothermic_energy_jac;
+RedbackThermalDiffusion::~RedbackThermalDiffusion()
+{
+}
 
-private:
-  Real _time_factor;
-};
+Real
+RedbackThermalDiffusion::computeQpResidual()
+{
+  return _time_factor * _grad_u[_qp] * _grad_test[_i][_qp];
+}
 
-
-#endif /* REDBACKCHEMEXO_H */
+Real
+RedbackThermalDiffusion::computeQpJacobian()
+{
+  return _time_factor*_grad_phi[_j][_qp] * _grad_test[_i][_qp];
+}

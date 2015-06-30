@@ -438,7 +438,6 @@ RedbackMaterial::computeRedbackTerms()
   {
     Real solid_density, fluid_density;
     Real lambda_m_star, one_minus_phi_lambda_s, phi_lambda_f;
-    Real x_ref, sigma_ref; //TODO: derive them directly from mesh dimensions and problem at hand - user provided?
     RealVectorValue mixture_velocity, normalized_gravity;
 
     // Forming the partial densities and gravity terms
@@ -455,9 +454,7 @@ RedbackMaterial::computeRedbackTerms()
     _mixture_density[_qp] = (1-_total_porosity[_qp])*solid_density+ _total_porosity[_qp]*fluid_density;
 
     // Terms feeding the stress equilibrium and Darcy flux
-    // TODO: rename gravity as "normalised gravity" when asking the user
-    x_ref = 1; sigma_ref = 1;
-    normalized_gravity = _gravity_param*(x_ref/sigma_ref);
+    normalized_gravity = _gravity_param;
 
     _mixture_gravity_term[_qp] = _mixture_density[_qp]*normalized_gravity; //for the stress equilibrium equation
     _fluid_gravity_term[_qp] = fluid_density*normalized_gravity; //for Darcy's flux

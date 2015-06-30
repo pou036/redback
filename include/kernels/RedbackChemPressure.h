@@ -39,6 +39,9 @@ protected:
   MaterialProperty<Real> & _chemical_source_mass_jac;
 
   unsigned int _temp_var; // variable number of the temperature variable
+
+private:
+  Real _time_factor;
 };
 
 

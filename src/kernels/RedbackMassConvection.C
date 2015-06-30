@@ -6,6 +6,7 @@ InputParameters validParams<RedbackMassConvection>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("temperature", "Temperature variable.");
+  params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
   return params;
 }
 
@@ -20,14 +21,15 @@ RedbackMassConvection::RedbackMassConvection(const std::string & name, InputPara
   //_convective_mass_jac_real(getMaterialProperty<Real>("convective_mass_jacobian_real")),
   //_convective_mass_off_diag_vec(getMaterialProperty<RealVectorValue>("convective_mass_off_diagonal_vector")),
   //_convective_mass_off_diag_real(getMaterialProperty<Real>("convective_mass_off_diagonal_real")),
-  _temp_var(coupled("temperature"))
+  _temp_var(coupled("temperature")),
+  _time_factor(getParam<Real>("time_factor"))
 {}
 
 
 Real
 RedbackMassConvection::computeQpResidual()
 {
-  return _test[_i][_qp] * (_pressure_convective_mass[_qp] * _grad_u[_qp]
+  return _time_factor*_test[_i][_qp] * (_pressure_convective_mass[_qp] * _grad_u[_qp]
     - _thermal_convective_mass[_qp] * _grad_temp[_qp]); // scalar product done by "*"
 }
 
@@ -35,7 +37,7 @@ Real
 RedbackMassConvection::computeQpJacobian()
 {
   return 0;
-  //return _test[_i][_qp] * (_convective_mass_jac_vec[_qp] * _grad_phi[_j][_qp]
+  //return _time_factor*_test[_i][_qp] * (_convective_mass_jac_vec[_qp] * _grad_phi[_j][_qp]
   //  + _convective_mass_jac_real[_qp]* _phi[_j][_qp]);// * _phi[_j][_qp];
 }
 
@@ -44,7 +46,7 @@ RedbackMassConvection::computeQpOffDiagJacobian(unsigned int jvar)
 {
   /*if (jvar == _temp_var)
   {
-    return -_test[_i][_qp] * (_convective_mass_off_diag_vec[_qp] * _grad_phi[_j][_qp] + _convective_mass_off_diag_real[_qp]* _phi[_j][_qp]);// * _phi[_j][_qp]);
+    return -_time_factor*_test[_i][_qp] * (_convective_mass_off_diag_vec[_qp] * _grad_phi[_j][_qp] + _convective_mass_off_diag_real[_qp]* _phi[_j][_qp]);// * _phi[_j][_qp]);
   }*/
   return 0;
 }

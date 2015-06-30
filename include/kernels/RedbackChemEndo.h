@@ -35,6 +35,9 @@ protected:
 
   MaterialProperty<Real> & _chemical_endothermic_energy;
   MaterialProperty<Real> & _chemical_endothermic_energy_jac;
+
+private:
+  Real _time_factor;
 };
 
 

@@ -23,6 +23,7 @@
 #include "RedbackPoromechanics.h"
 #include "RedbackStressDivergenceTensors.h"
 #include "RedbackThermalConvection.h"
+#include "RedbackThermalDiffusion.h"
 #include "RedbackThermalPressurization.h"
 
 // Materials
@@ -87,6 +88,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackPoromechanics);
   registerKernel(RedbackStressDivergenceTensors);
   registerKernel(RedbackThermalConvection);
+  registerKernel(RedbackThermalDiffusion);
   registerKernel(RedbackThermalPressurization);
 
   registerMaterial(RedbackMaterial);

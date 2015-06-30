@@ -25,6 +25,9 @@ protected:
   //MaterialProperty<Real> & _convective_mass_off_diag_real;
 
   unsigned int _temp_var; // variable number of the temperature variable
+
+private:
+  Real _time_factor;
 };
 
 template<>

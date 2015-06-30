@@ -37,6 +37,9 @@ protected:
   //VariableValue & _pressure;
   MaterialProperty<Real> & _mechanical_dissipation;
   MaterialProperty<Real> & _mechanical_dissipation_jac;
+
+private:
+  Real _time_factor;
 };
 
 

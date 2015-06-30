@@ -41,6 +41,9 @@ protected:
 
   MaterialProperty<Real> & _pressurization_coefficient;
   unsigned int _temp_var; // variable number of the temperature variable
+
+private:
+  Real _time_factor;
 };
 
 

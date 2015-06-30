@@ -37,6 +37,9 @@ protected:
 
   MaterialProperty<Real> & _Le;
   MaterialProperty<RealVectorValue> & _gravity_term;
+
+private:
+  Real _time_factor;
 };
 
 

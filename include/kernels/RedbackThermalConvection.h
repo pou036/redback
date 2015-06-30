@@ -21,6 +21,8 @@ protected:
 
   unsigned int _pore_pres_var; // variable number of the pore pressure variable
 
+private:
+  Real _time_factor;
 };
 
 template<>

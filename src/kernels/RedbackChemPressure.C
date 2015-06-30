@@ -20,6 +20,7 @@ InputParameters validParams<RedbackChemPressure>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("temperature", "Temperature variable.");
+  params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
   return params;
 }
 
@@ -28,7 +29,8 @@ RedbackChemPressure::RedbackChemPressure(const std::string & name, InputParamete
   Kernel(name, parameters),
   _chemical_source_mass(getMaterialProperty<Real>("chemical_source_mass")),
   _chemical_source_mass_jac(getMaterialProperty<Real>("chemical_source_mass_jacobian")),
-  _temp_var(coupled("temperature"))
+  _temp_var(coupled("temperature")),
+  _time_factor(getParam<Real>("time_factor"))
 {
 
 }
@@ -41,7 +43,7 @@ RedbackChemPressure::~RedbackChemPressure()
 Real
 RedbackChemPressure::computeQpResidual()
 {
-  return -_test[_i][_qp]*_chemical_source_mass[_qp];
+  return -_time_factor*_test[_i][_qp]*_chemical_source_mass[_qp];
 }
 
 Real
@@ -55,7 +57,7 @@ RedbackChemPressure::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _temp_var)
   {
-    return -_test[_i][_qp] * _chemical_source_mass_jac[_qp] * _phi[_j][_qp];
+    return -_time_factor*_test[_i][_qp] * _chemical_source_mass_jac[_qp] * _phi[_j][_qp];
   }
   return 0;
 }

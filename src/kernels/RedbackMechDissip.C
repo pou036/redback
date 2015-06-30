@@ -19,6 +19,7 @@ template<>
 InputParameters validParams<RedbackMechDissip>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
   return params;
 }
 
@@ -26,7 +27,8 @@ InputParameters validParams<RedbackMechDissip>()
 RedbackMechDissip::RedbackMechDissip(const std::string & name, InputParameters parameters) :
   Kernel(name, parameters),
   _mechanical_dissipation(getMaterialProperty<Real>("mechanical_dissipation")),
-  _mechanical_dissipation_jac(getMaterialProperty<Real>("mechanical_dissipation_jacobian"))
+  _mechanical_dissipation_jac(getMaterialProperty<Real>("mechanical_dissipation_jacobian")),
+  _time_factor(getParam<Real>("time_factor"))
 {
 
 }
@@ -39,11 +41,11 @@ RedbackMechDissip::~RedbackMechDissip()
 Real
 RedbackMechDissip::computeQpResidual()
 {
-  return -_test[_i][_qp]*_mechanical_dissipation[_qp];
+  return -_time_factor*_test[_i][_qp]*_mechanical_dissipation[_qp];
 }
 
 Real
 RedbackMechDissip::computeQpJacobian()
 {
-	return -_test[_i][_qp] *_mechanical_dissipation_jac[_qp] * _phi[_j][_qp];
+  return -_time_factor*_test[_i][_qp] *_mechanical_dissipation_jac[_qp] * _phi[_j][_qp];
 }
