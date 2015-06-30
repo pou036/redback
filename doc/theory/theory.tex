@@ -16,6 +16,7 @@
 \usepackage{amsmath}
 \usepackage{mathrsfs}
 \usepackage{natbib}
+\usepackage{listings}
 \usepackage{hyperref}
 
 
@@ -113,10 +114,26 @@ elastic one $\Delta \phi^{e}_{mech}=(1-\phi)\left( \beta_s \Delta p_f -
 where $\beta_s$ and $\lambda_s$ are compressibility and
 thermal expansion coefficients of the solid phase, respectively.
 
+\section{Rescaling}
+\label{sec:rescaling}
+A particularity of \redback{} is to work with dimensionless parameters, in line with the purpose of studying system stabilities. As such, the variables used in the final system of equation (Eq.~\ref{eq:final_system_of_equations_dimensionless}) are all dimensionless and defined as such:
+\begin{subequations}
+  \label{eq:dimensionless_defs}
+  \begin{align}
+  p^* &= \frac{p_f}{p_{ref}}, \\   
+  T^* &= \frac{T-T_{ref}}{\delta T_{ref}}, \\   
+  x^* &= \frac{x}{x_{ref}}, \\   
+  t^* &= \frac{c_{th}}{x^2_{ref}}t, \\   
+  V^* &= \frac{V}{V_{ref}}.
+  \end{align}
+\end{subequations}
+The derivations of those dimensionless variables is detailed in Sec.~\ref{chapter:derivations}.
+
+Note that the time can in turn be rescaled a second time for numerical reasons (see Sec.~\ref{subsec:time_rescaling}).
 
 
 \section{Chemical damage}
-\label{subsec:chem_damage}
+\label{sec:chem_damage}
 
 Thermally activated chemical reactions are allowed to take place and
 in this work we concentrate on (de-)hydration reactions of the form
@@ -218,7 +235,7 @@ $Da_{exo}$ & Exothermic Damk\"{o}hler number & $\frac{A_{exo} h_{exo} \rho_{AB} 
 $Ar$ & Arrhenius number & $Q_{mech}/(R T_{ref})$ & Ratio of activation energy over thermal energy \\
 $Ar_F$ & Forward Arrhenius number & $Q_F/(R T_{ref})$ & Ratio of activation energy of forward reaction over thermal energy \\
 $Ar_R$ & Reverse Arrhenius number & $Q_R/(R T_{ref})$ & Ratio of activation energy of reverse activation energy over thermal energy \\
-$Le$ & Lewis number & $c_{th}/c_{hy}$ & Ratio of thermal over mass diffusivities \\
+$Le$ & Lewis number & $c_{th}/c_{hy}=\frac{\mu_f\:c_{th}\:\beta^*_m}{k \: p_{ref}}$ & Ratio of thermal over mass diffusivities \\
 $Le_{chem}$ & Chemical Lewis number & $\frac{c_{th}\sigma_{ref}\beta_m }{L^2_{ref} A_{endo}}\frac{\rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_{B}} \left( \frac{\rho_B}{\rho_f} - \frac{\rho_B}{\rho_s}\right)e^{-Ar_F}$ & Ratio of thermal over chemical diffusivity of forward reaction \\
 $\bar{\Lambda}$ & Thermal pressurisation coefficient & $\frac{\lambda_m}{\beta_m}\frac{\delta \:T_{ref}}{\sigma_{ref}}$ & Normalised thermal pressurisation coefficient, with $\lambda_m$ and $\beta_m$ the mixture thermal expansion and compressibility \\
 $Pe$ & P\'{e}clet number & $L_{ref}V_{ref}/c_{th}$ & Ratio of temperature advection rate over diffusion rate \\
@@ -226,14 +243,33 @@ $Pe$ & P\'{e}clet number & $L_{ref}V_{ref}/c_{th}$ & Ratio of temperature advect
 \end{tabular}
 \end{table}
 
-\bibliographystyle{aps-nameyear}      % American Physical Society (APS) style, author-year citations
-\bibliography{redback}                % name your BibTeX data base
-\nocite{*}
-
 
 \chapter{Code architecture}
 \label{chapter:code}
 \section{Kernels}
+\todo[inline]{List all kernels.}
+
+\subsection{Time rescaling}
+\label{subsec:time_rescaling}
+The time used in \redback{} is dimensionless and defined in Eq.~\ref{eq:dimensionless_defs}. For numerical reasons however, it can sometimes be useful to rescale time again by introducing $t'$ such that
+\begin{equation}
+  t^* = t' \times \text{time\_factor}.
+\end{equation}
+Using the newly defined time $t'$ is equivalent to multiplying all the kernels, other than the time derivatives, of Eq.~\ref{eq:final_system_of_equations_dimensionless}b and Eq.~\ref{eq:final_system_of_equations_dimensionless}c by \textit{time\_factor}. This functionality is required for cases when the initial residual computation is too low and prevents \moose{} from converging to an accurate solution. It is convenient in those cases (e.g. for convection simulations) to use a large factor \textit{time\_factor} to increase the initial value of the residual and therefore allow \moose{} to improve that residual down to a low value which will ensure enough numerical precision. 
+
+The \textit{time\_factor} is defined for each kernel concerned but should only be input as a global variable in your input file.
+%\lstset{language=Python}
+\begin{lstlisting}
+[GlobalParams]
+  time_factor = 1.e-3
+[]
+\end{lstlisting}
+
+Note that the real time $t$ is then related to the time $t'$ used in the \redback{} simulations by 
+\begin{equation}
+  t = \text{time\_factor}\times\frac{x^2_{ref}}{c_{th}}t'
+\end{equation}
+
 \section{Porosity}
 Porosity plays a particular role as its evolution depends on the mechanical, thermal, and hydraulic process models. As such, the total porosity evolution can not be handled within a material class unfortunately since it has components updated in more than one material. With the RedbackMechMaterial class already derived from the RedbackMaterial class, we can not create a dependency the other way around as it would create a circular dependency problem. There are at least two ways of working around that problem:
 \begin{enumerate}
@@ -580,6 +616,10 @@ For the off-diagonal term with respect to pore pressure we get
 %\bibitem{richards1931}LA Richards ``Capillary conduction of
 %  liquids through porous mediums''   Physics 1 (1931) pp 318--333
 %\end{thebibliography}
+
+\bibliographystyle{aps-nameyear}      % American Physical Society (APS) style, author-year citations
+\bibliography{redback}                % name your BibTeX data base
+\nocite{*}
 
 \end{document}
 
