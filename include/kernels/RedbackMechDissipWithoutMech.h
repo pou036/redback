@@ -12,35 +12,35 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REDBACKMECHDISSIP_H
-#define REDBACKMECHDISSIP_H
+#ifndef REDBACKMECHDISSIPWITHOUTMECH_H
+#define REDBACKMECHDISSIPWITHOUTMECH_H
 
 #include "RankTwoTensor.h"
 #include "Kernel.h"
 
-class RedbackMechDissip;
+class RedbackMechDissipWithoutMech;
 
 template<>
-InputParameters validParams<RedbackMechDissip>();
+InputParameters validParams<RedbackMechDissipWithoutMech>();
 
 
-class RedbackMechDissip : public Kernel
+class RedbackMechDissipWithoutMech : public Kernel
 {
 public:
-  RedbackMechDissip(const std::string & name, InputParameters parameters);
-  virtual ~RedbackMechDissip();
+  RedbackMechDissipWithoutMech(const std::string & name, InputParameters parameters);
+  virtual ~RedbackMechDissipWithoutMech();
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
   //VariableValue & _pressure;
-  const MaterialProperty<Real> & _mechanical_dissipation_mech;
-  const MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
+  const MaterialProperty<Real> & _mechanical_dissipation_no_mech;
+  const MaterialProperty<Real> & _mechanical_dissipation_jac_no_mech;
 
 private:
   Real _time_factor;
 };
 
 
-#endif /* REDBACKMECHDISSIP_H */
+#endif /* REDBACKMECHDISSIPWITHOUTMECH_H */

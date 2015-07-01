@@ -47,7 +47,7 @@
     variable = temp
   [../]
   [./mh_temp]
-    type = RedbackMechDissip
+    type = RedbackMechDissipWithoutMech
     variable = temp
   [../]
 []

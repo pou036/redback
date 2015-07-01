@@ -12,11 +12,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "RedbackMechDissip.h"
+#include "RedbackMechDissipWithoutMech.h"
 
 
 template<>
-InputParameters validParams<RedbackMechDissip>()
+InputParameters validParams<RedbackMechDissipWithoutMech>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
@@ -24,28 +24,28 @@ InputParameters validParams<RedbackMechDissip>()
 }
 
 
-RedbackMechDissip::RedbackMechDissip(const std::string & name, InputParameters parameters) :
+RedbackMechDissipWithoutMech::RedbackMechDissipWithoutMech(const std::string & name, InputParameters parameters) :
   Kernel(name, parameters),
-  _mechanical_dissipation_mech(getMaterialProperty<Real>("mechanical_dissipation_mech")),
-  _mechanical_dissipation_jac_mech(getMaterialProperty<Real>("mechanical_dissipation_jacobian_mech")),
+  _mechanical_dissipation_no_mech(getMaterialProperty<Real>("mechanical_dissipation_no_mech")),
+  _mechanical_dissipation_jac_no_mech(getMaterialProperty<Real>("mechanical_dissipation_jacobian_no_mech")),
   _time_factor(getParam<Real>("time_factor"))
 {
 
 }
 
-RedbackMechDissip::~RedbackMechDissip()
+RedbackMechDissipWithoutMech::~RedbackMechDissipWithoutMech()
 {
 
 }
 
 Real
-RedbackMechDissip::computeQpResidual()
+RedbackMechDissipWithoutMech::computeQpResidual()
 {
-    return -_time_factor*_test[_i][_qp]*_mechanical_dissipation_mech[_qp];
+  return -_time_factor*_test[_i][_qp]*_mechanical_dissipation_no_mech[_qp];
 }
 
 Real
-RedbackMechDissip::computeQpJacobian()
+RedbackMechDissipWithoutMech::computeQpJacobian()
 {
-    return -_time_factor*_test[_i][_qp] *_mechanical_dissipation_jac_mech[_qp] * _phi[_j][_qp];
+  return -_time_factor*_test[_i][_qp] *_mechanical_dissipation_jac_no_mech[_qp] * _phi[_j][_qp];
 }

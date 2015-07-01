@@ -113,10 +113,6 @@
 []
 
 [AuxVariables]
-  [./Mod_Gruntfest_number]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./total_porosity]
     family = MONOMIAL
   [../]
@@ -169,11 +165,6 @@
 []
 
 [AuxKernels]
-  [./Gruntfest_Number]
-    type = MaterialRealAux
-    variable = Mod_Gruntfest_number
-    property = mod_gruntfest_number
-  [../]
   [./total_porosity]
     type = RedbackTotalPorosityAux
     variable = total_porosity
@@ -271,10 +262,10 @@
   file_base = bench_darcy_flow
   output_initial = true
   exodus = true
+  print_linear_residuals = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
   [../]
 []
 

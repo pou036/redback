@@ -136,7 +136,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number returnmap_iter mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress total_porosity mech_porosity'
+  active = 'mech_porosity Mod_Gruntfest_number total_porosity returnmap_iter mises_strain mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -166,11 +166,6 @@
     family = MONOMIAL
   [../]
   [./mises_strain_rate]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
-  [../]
-  [./mech_diss]
     order = CONSTANT
     family = MONOMIAL
     block = 0
@@ -209,7 +204,7 @@
 []
 
 [AuxKernels]
-  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation returnmap_iter Gruntfest_Number total_porosity mech_porosity'
+  active = 'mech_porosity volumetric_strain total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress returnmap_iter Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -257,11 +252,6 @@
     variable = mises_strain_rate
     block = 0
     property = mises_strain_rate
-  [../]
-  [./mech_dissipation]
-    type = MaterialRealAux
-    variable = mech_diss
-    property = mechanical_dissipation
   [../]
   [./Gruntfest_Number]
     type = MaterialRealAux
@@ -387,10 +377,10 @@
   output_initial = true
   exodus = true
   csv = true
+  print_linear_residuals = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
   [../]
 []
 

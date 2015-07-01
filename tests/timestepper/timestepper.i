@@ -143,7 +143,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number returnmap_iter mises_strain mech_diss mises_strain_rate mises_stress total_porosity'
+  active = 'Mod_Gruntfest_number returnmap_iter mises_strain mises_strain_rate mises_stress total_porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -173,11 +173,6 @@
     family = MONOMIAL
   [../]
   [./mises_strain_rate]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
-  [../]
-  [./mech_diss]
     order = CONSTANT
     family = MONOMIAL
     block = 0
@@ -215,7 +210,7 @@
 []
 
 [AuxKernels]
-  active = 'mises_strain mises_strain_rate total_porosity mises_stress mech_dissipation returnmap_iter Gruntfest_Number'
+  active = 'total_porosity mises_strain mises_strain_rate mises_stress returnmap_iter Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -263,11 +258,6 @@
     variable = mises_strain_rate
     block = 0
     property = mises_strain_rate
-  [../]
-  [./mech_dissipation]
-    type = MaterialRealAux
-    variable = mech_diss
-    property = mechanical_dissipation
   [../]
   [./Gruntfest_Number]
     type = MaterialRealAux
