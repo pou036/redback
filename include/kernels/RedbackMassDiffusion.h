@@ -35,8 +35,8 @@ protected:
 
 //  VariableValue & _T;
 
-  MaterialProperty<Real> & _Le;
-  MaterialProperty<RealVectorValue> & _gravity_term;
+  const MaterialProperty<Real> & _Le;
+  const MaterialProperty<RealVectorValue> & _gravity_term;
 
 private:
   Real _time_factor;

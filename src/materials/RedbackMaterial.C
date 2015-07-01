@@ -134,10 +134,8 @@ RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters param
   _lewis_number(declareProperty<Real>("lewis_number")),
   _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
 
-  _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
-  _mechanical_dissipation(declareProperty<Real>("mechanical_dissipation")),
-  _mechanical_dissipation_jac(declareProperty<Real>("mechanical_dissipation_jacobian")),
-  _poromech_jac(declareProperty<Real>("poromechanics_jacobian")),
+  _mechanical_dissipation_no_mech(declareProperty<Real>("mechanical_dissipation_no_mech")),
+  _mechanical_dissipation_jac_no_mech(declareProperty<Real>("mechanical_dissipation_jacobian_no_mech")),
 
   _ar_F(declareProperty<Real>("ar_F")),
   _ar_R(declareProperty<Real>("ar_R")),
@@ -329,8 +327,6 @@ RedbackMaterial::computeRedbackTerms()
 
   //TODO: do not compute these when mechanics is on (5 fields overwritten)
   _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
-  // Compute modified Gruntfest number
-  _mod_gruntfest_number[_qp]=_gr[_qp];
   // Compute Mises strain
   _mises_strain[_qp] = _exponential * _dt;
   // Compute Mises strain rate
@@ -339,16 +335,13 @@ RedbackMaterial::computeRedbackTerms()
   if (!_is_mechanics_on)
   {
     // Compute Mechanical Dissipation
-    _mechanical_dissipation[_qp] = _gr[_qp] * std::exp(_ar[_qp]) *
+    _mechanical_dissipation_no_mech[_qp] = _gr[_qp] * std::exp(_ar[_qp]) *
       std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp]))) *
       std::exp( _ar[_qp]*_delta[_qp] *_T[_qp] / (1 + _delta[_qp] *_T[_qp]) );
 
     // Compute Mechanical Dissipation Jacobian
-    _mechanical_dissipation_jac[_qp] = _mechanical_dissipation[_qp] *
+    _mechanical_dissipation_jac_no_mech[_qp] = _mechanical_dissipation_no_mech[_qp] *
       _ar[_qp]*_delta[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
-
-    // Initialise Poromechanics Jacobian
-    _poromech_jac[_qp] = 0;
   }
 
   if (_is_chemistry_on)

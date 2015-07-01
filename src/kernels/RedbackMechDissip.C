@@ -20,14 +20,18 @@ InputParameters validParams<RedbackMechDissip>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
+  params.addParam<bool>("is_mechanics_on", false, "is mechanics on?");
   return params;
 }
 
 
 RedbackMechDissip::RedbackMechDissip(const std::string & name, InputParameters parameters) :
   Kernel(name, parameters),
-  _mechanical_dissipation(getMaterialProperty<Real>("mechanical_dissipation")),
-  _mechanical_dissipation_jac(getMaterialProperty<Real>("mechanical_dissipation_jacobian")),
+  _is_mechanics_on(getParam<bool>("is_mechanics_on")),
+  _mechanical_dissipation_mech(getMaterialProperty<Real>("mechanical_dissipation_mech")),
+  _mechanical_dissipation_no_mech(getMaterialProperty<Real>("mechanical_dissipation_no_mech")),
+  _mechanical_dissipation_jac_mech(getMaterialProperty<Real>("mechanical_dissipation_jacobian_mech")),
+  _mechanical_dissipation_jac_no_mech(getMaterialProperty<Real>("mechanical_dissipation_jacobian_no_mech")),
   _time_factor(getParam<Real>("time_factor"))
 {
 
@@ -41,11 +45,20 @@ RedbackMechDissip::~RedbackMechDissip()
 Real
 RedbackMechDissip::computeQpResidual()
 {
-  return -_time_factor*_test[_i][_qp]*_mechanical_dissipation[_qp];
+  if (_is_mechanics_on)
+  {
+    return -_time_factor*_test[_i][_qp]*_mechanical_dissipation_mech[_qp];
+  }
+  return -_time_factor*_test[_i][_qp]*_mechanical_dissipation_no_mech[_qp];
 }
 
 Real
 RedbackMechDissip::computeQpJacobian()
 {
-  return -_time_factor*_test[_i][_qp] *_mechanical_dissipation_jac[_qp] * _phi[_j][_qp];
+
+  if (_is_mechanics_on)
+  {
+    return -_time_factor*_test[_i][_qp] *_mechanical_dissipation_jac_mech[_qp] * _phi[_j][_qp];
+  }
+  return -_time_factor*_test[_i][_qp] *_mechanical_dissipation_jac_no_mech[_qp] * _phi[_j][_qp];
 }

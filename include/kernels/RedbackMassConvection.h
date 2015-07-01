@@ -17,8 +17,8 @@ protected:
 
   VariableGradient & _grad_temp;
 
-  MaterialProperty<RealVectorValue> & _pressure_convective_mass;
-  MaterialProperty<RealVectorValue> & _thermal_convective_mass;
+  const MaterialProperty<RealVectorValue> & _pressure_convective_mass;
+  const MaterialProperty<RealVectorValue> & _thermal_convective_mass;
   //MaterialProperty<RealVectorValue> & _convective_mass_jac_vec;
   //MaterialProperty<Real> & _convective_mass_jac_real;
   //MaterialProperty<RealVectorValue> & _convective_mass_off_diag_vec;

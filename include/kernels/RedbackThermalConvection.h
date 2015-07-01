@@ -15,7 +15,7 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  MaterialProperty<RealVectorValue> & _mixture_convective_energy;
+  const MaterialProperty<RealVectorValue> & _mixture_convective_energy;
   //MaterialProperty<Real> & _mixture_convective_energy_jac;
   //MaterialProperty<Real> & _mixture_convective_energy_off_jac;
 

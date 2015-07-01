@@ -109,6 +109,10 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
     _mechanical_porosity(declareProperty<Real>("mechanical_porosity")),
+    _poromech_jac(declareProperty<Real>("poromechanics_jacobian")),
+    _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
+    _mechanical_dissipation_mech(declareProperty<Real>("mechanical_dissipation_mech")),
+    _mechanical_dissipation_jac_mech(declareProperty<Real>("mechanical_dissipation_jacobian_mech")),
 
     // Get coupled variables (T & P)
     _has_T(isCoupled("temperature")),
@@ -120,17 +124,13 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
 
     // Get some material properties from RedbackMaterial
-    _mechanical_dissipation(getMaterialProperty<Real>("mechanical_dissipation")),
     _gr(getMaterialProperty<Real>("gr")),
     _ar(getMaterialProperty<Real>("ar")),
     _confining_pressure(getMaterialProperty<Real>("confining_pressure")),
     _alpha_1(getMaterialProperty<Real>("alpha_1")),
     _alpha_2(getMaterialProperty<Real>("alpha_2")),
     _alpha_3(getMaterialProperty<Real>("alpha_3")),
-    _mechanical_dissipation_jac(getMaterialProperty<Real>("mechanical_dissipation_jacobian")),
-    _poromech_jac(getMaterialProperty<Real>("poromechanics_jacobian")),
     _delta(getMaterialProperty<Real>("delta")),
-    _mod_gruntfest_number(getMaterialProperty<Real>("mod_gruntfest_number")),
     _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion")),
     _solid_compressibility(getMaterialProperty<Real>("solid_compressibility")),
     _returnmap_iter(declareProperty<Real>("returnmap_iter"))
@@ -378,10 +378,10 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _volumetric_strain_rate[_qp] = instantaneous_strain_rate.trace()/3.0;
 
   // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
-  _mechanical_dissipation[_qp] = _gr[_qp]*std::exp(_ar[_qp])*sig.doubleContraction(instantaneous_strain_rate);
+  _mechanical_dissipation_mech[_qp] = _gr[_qp]*std::exp(_ar[_qp])*sig.doubleContraction(instantaneous_strain_rate);
 
   // Compute Mechanical Dissipation Jacobian
-  _mechanical_dissipation_jac[_qp] = _mechanical_dissipation[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+  _mechanical_dissipation_jac_mech[_qp] = _mechanical_dissipation_mech[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
 
   _poromech_jac[_qp] = (1 / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]));
 

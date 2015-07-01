@@ -24,8 +24,8 @@ protected:
 private:
   VariableValue & _delta_porosity_mech;
   //MaterialProperty<Real> & _delta_porosity_mech;
-  MaterialProperty<Real> & _delta_porosity_chem;
-  MaterialProperty<Real> & _initial_porosity;
+  const MaterialProperty<Real> & _delta_porosity_chem;
+  const MaterialProperty<Real> & _initial_porosity;
 };
 
 #endif // REDBACKTOTALPOROSITYAUX_H

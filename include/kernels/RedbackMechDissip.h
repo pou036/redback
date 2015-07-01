@@ -33,10 +33,13 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+  bool _is_mechanics_on;
 
   //VariableValue & _pressure;
-  MaterialProperty<Real> & _mechanical_dissipation;
-  MaterialProperty<Real> & _mechanical_dissipation_jac;
+  const MaterialProperty<Real> & _mechanical_dissipation_mech;
+  const MaterialProperty<Real> & _mechanical_dissipation_no_mech;
+  const MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
+  const MaterialProperty<Real> & _mechanical_dissipation_jac_no_mech;
 
 private:
   Real _time_factor;

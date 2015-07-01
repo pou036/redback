@@ -35,8 +35,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
  // VariableValue &_temp;
-  MaterialProperty<Real> & _chemical_source_mass;
-  MaterialProperty<Real> & _chemical_source_mass_jac;
+  const MaterialProperty<Real> & _chemical_source_mass;
+  const MaterialProperty<Real> & _chemical_source_mass_jac;
 
   unsigned int _temp_var; // variable number of the temperature variable
 

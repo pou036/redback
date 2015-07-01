@@ -89,10 +89,8 @@ protected:
   MaterialProperty<Real> & _lewis_number;
   MaterialProperty<Real> & _mixture_compressibility;
 
-  MaterialProperty<Real> & _mod_gruntfest_number;
-  MaterialProperty<Real> & _mechanical_dissipation;
-  MaterialProperty<Real> & _mechanical_dissipation_jac;
-  MaterialProperty<Real> & _poromech_jac;
+  MaterialProperty<Real> & _mechanical_dissipation_no_mech;
+  MaterialProperty<Real> & _mechanical_dissipation_jac_no_mech;
 
   MaterialProperty<Real> & _ar_F;
   MaterialProperty<Real> & _ar_R;

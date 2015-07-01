@@ -120,6 +120,10 @@ protected:
   MaterialProperty<Real> & _volumetric_strain_rate;
   MaterialProperty<Real> & _total_volumetric_strain;
   MaterialProperty<Real> & _mechanical_porosity;
+  MaterialProperty<Real> & _poromech_jac;
+  MaterialProperty<Real> & _mod_gruntfest_number;
+  MaterialProperty<Real> & _mechanical_dissipation_mech;
+  MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
   Real _exponential;
   //VariableValue & _dispx_dot;
   //VariableValue & _dispy_dot;
@@ -135,20 +139,16 @@ protected:
   VariableValue & _total_porosity;
 
   // Reading material properties from RedbackMaterial
-  MaterialProperty<Real> & _mechanical_dissipation;
-  MaterialProperty<Real> & _gr;
-  MaterialProperty<Real> & _ar;
-  MaterialProperty<Real> & _confining_pressure;
-  MaterialProperty<Real> & _alpha_1;
-  MaterialProperty<Real> & _alpha_2;
-  MaterialProperty<Real> & _alpha_3;
-  MaterialProperty<Real> & _mechanical_dissipation_jac;
-  MaterialProperty<Real> & _poromech_jac;
+  const MaterialProperty<Real> & _gr;
+  const MaterialProperty<Real> & _ar;
+  const MaterialProperty<Real> & _confining_pressure;
+  const MaterialProperty<Real> & _alpha_1;
+  const MaterialProperty<Real> & _alpha_2;
+  const MaterialProperty<Real> & _alpha_3;
 
-  MaterialProperty<Real> & _delta;
-  MaterialProperty<Real> & _mod_gruntfest_number;
-  MaterialProperty<Real> & _solid_thermal_expansion;
-  MaterialProperty<Real> & _solid_compressibility;
+  const MaterialProperty<Real> & _delta;
+  const MaterialProperty<Real> & _solid_thermal_expansion;
+  const MaterialProperty<Real> & _solid_compressibility;
   MaterialProperty<Real> & _returnmap_iter;
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
