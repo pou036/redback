@@ -35,8 +35,8 @@ protected:
   virtual Real computeQpJacobian();
 
   //VariableValue & _pressure;
-  const MaterialProperty<Real> & _mechanical_dissipation_mech;
-  const MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
+  const MaterialProperty<Real> & _mechanical_dissipation;
+  const MaterialProperty<Real> & _mechanical_dissipation_jac;
 
 private:
   Real _time_factor;
