@@ -5,7 +5,7 @@ template<>
 InputParameters validParams<RedbackMassConvection>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addCoupledVar("temperature", "Temperature variable.");
+  params.addCoupledVar("temperature", 0.0, "Temperature variable.");
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
   return params;
 }

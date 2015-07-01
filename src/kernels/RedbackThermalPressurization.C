@@ -18,7 +18,7 @@ template<>
 InputParameters validParams<RedbackThermalPressurization>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addCoupledVar("temperature", "Temperature variable."); // TODO: check "required" fields across redback
+  params.addCoupledVar("temperature", 0.0, "Temperature variable."); // TODO: check "required" fields across redback
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
   return params;
 }

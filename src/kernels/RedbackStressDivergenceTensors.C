@@ -7,11 +7,11 @@ InputParameters validParams<RedbackStressDivergenceTensors>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
-  params.addCoupledVar("disp_x", "The x displacement");
-  params.addCoupledVar("disp_y", "The y displacement");
-  params.addCoupledVar("disp_z", "The z displacement");
-  params.addCoupledVar("temp", "The temperature");
-  params.addCoupledVar("pore_pres", 0, "The pore fluid pressure");
+  params.addCoupledVar("disp_x", 0.0, "The x displacement");
+  params.addCoupledVar("disp_y", 0.0, "The y displacement");
+  params.addCoupledVar("disp_z", 0.0, "The z displacement");
+  params.addCoupledVar("temp", 0.0, "The temperature");
+  params.addCoupledVar("pore_pres", 0.0, "The pore fluid pressure");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
 //  params.set<bool>("use_displaced_mesh") = true;

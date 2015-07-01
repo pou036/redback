@@ -33,12 +33,12 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<bool>("is_mechanics_on", false, "is mechanics on?");
   params.addParam<bool>("is_chemistry_on", false, "is chemistry on?");
   params.addParam<bool>("are_convective_terms_on", false, "are convective terms on?");
-  params.addCoupledVar("temperature", "Dimensionless temperature");
-  params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
-  params.addCoupledVar("disp_x", "The x displacement");
-  params.addCoupledVar("disp_y", "The y displacement");
-  params.addCoupledVar("disp_z", "The z displacement");
-  params.addCoupledVar("total_porosity", "The total porosity (as AuxKernel)");
+  params.addCoupledVar("temperature", 0.0, "Dimensionless temperature");
+  params.addCoupledVar("pore_pres", 0.0, "Dimensionless pore pressure");
+  params.addCoupledVar("disp_x", 0.0, "The x displacement");
+  params.addCoupledVar("disp_y", 0.0, "The y displacement");
+  params.addCoupledVar("disp_z", 0.0, "The z displacement");
+  params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
 
   //params.addCoupledVar("solid_velocity_aux", "Solid velocity (AuxKernel) from RedbackMechMaterial (if used)");
   params.addParam<MooseEnum>("density_method", RedbackMaterial::densityMethodEnum() = "linear", "The method to describe density evolution with temperature and pore pressure"); // TODO: fluid, solid, mixture?...

@@ -6,7 +6,7 @@ InputParameters validParams<RedbackTotalPorosityAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addParam<bool>("is_mechanics_on", false, "is mechanics on?");
   //params.addParam<bool>("is_chemistry_on", false, "is chemistry on?");
-  params.addCoupledVar("mechanical_porosity", "Mechanical porosity (as AuxKernel)");
+  params.addCoupledVar("mechanical_porosity", 0.0, "Mechanical porosity (as AuxKernel)");
   return params;
 }
 

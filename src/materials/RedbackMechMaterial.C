@@ -37,8 +37,8 @@ InputParameters validParams<RedbackMechMaterial>()
   // Copy-paste from TensorMechanicsMaterial.C
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addRequiredCoupledVar("disp_y", "The y displacement");
-  params.addCoupledVar("disp_z", "The z displacement");
-  params.addCoupledVar("temperature", "temperature variable");
+  params.addCoupledVar("disp_z", 0.0, "The z displacement");
+  params.addCoupledVar("temperature", 0.0, "temperature variable");
 
   // Copy-paste from FiniteStrainMaterial.C
   // nothing
@@ -53,11 +53,11 @@ InputParameters validParams<RedbackMechMaterial>()
   //  Copy-paste from FiniteStrainPlasticRateMaterial.C
   params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
-  params.addCoupledVar("pore_pres", "Dimensionless pore pressure");
+  params.addCoupledVar("pore_pres", 0.0, "Dimensionless pore pressure");
   params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
   params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
 
-  params.addCoupledVar("total_porosity", "The total porosity (as AuxKernel)");
+  params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
 
   return params;
 }
