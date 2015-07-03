@@ -13,5 +13,6 @@
     type = 'Exodiff'
     input = 'bench_HM_CC.i'
     exodiff = 'bench_HM_CC_out.e'
+    rel_err = 1e-5
   [../]
 []
