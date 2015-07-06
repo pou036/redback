@@ -77,8 +77,9 @@ The system in its final form is
   \frac{Pe\:\dot{\epsilon_V}}{\bar{\beta}\:\sigma_{ref}} -\frac{1}{Le_{chem}}
   \omega_F, \\
   0 &= \pdiff{T}{t} + Pe\:\bar{v_i}\pdiff{T}{i} - \pd_{ii}^2 T - Gr
-  \: \sigma_{ij}^{pl}\dot{\epsilon}_{ij}^{\,pl}  + Da_{endo}\: \omega_F -
-  Da_{exo}\: \omega_R.
+  \: \sigma_{ij}^{pl}\dot{\epsilon}_{ij}^{\,pl}  \\ \nonumber
+  ~ & \qquad\qquad + Da_{endo}\: (1 - s)(1 - \phi)e^{\frac{Ar_F\:\delta T}{1+\delta T}} \\ \nonumber
+  ~ & \qquad\qquad - Da_{exo}\:\: s  (1 - \phi)\Delta \phi_{chem} e^{\frac{Ar_R\:\delta T}{1+\delta T}}.
 \end{empheq}
 \end{subequations}
 
@@ -506,15 +507,40 @@ We then arrive to the full mass balance equation Eq.~\ref{eq:final_system_of_equ
 The local form of the energy balance equation reads as follows:
 \begin{equation}
   \label{eq:energy_balance}
-  (\rho C_p)_m \frac{D^{(m)}T}{Dt} = k_m \nabla^2 T + \chi \sigma_{ij}.\dot{\epsilon}^{p}_{ij} + \Delta H.r
+  (\rho C_p)_m \frac{D^{(m)}T}{Dt} = \kappa \nabla^2 T + \chi \sigma_{ij}.\dot{\epsilon}^{p}_{ij} - \Delta H (\omega_F - \omega_R)
 \end{equation}
 with $\chi$ the Taylor-Quinney coefficient and $\Delta H=\Delta E=E_F-E_R$ the reaction's specific enthalpy.
+The definitions of the reaction rates $\omega_F$ and $\omega_R$ are (from Eq.~\ref{eq:reaction_rate_total})
+\begin{subequations}
+ \label{eq:reaction_rates}
+ \begin{align}
+ \omega_F &= k_F (1 - s)(1 - \phi)\frac{\rho_{AB}}{M_{AB}}  e^{-Q_F/RT} \\
+ \omega_R &= k_R \:s  (1 - \phi)  \Delta \phi_{chem} \frac{\rho_{A} \rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_A M_B}  e^{-Q_R/RT}
+  \end{align}
+\end{subequations}
 
 Using the normalised variable we get
-\begin{equation}
+\begin{multline}
   \label{eq:energy_balance1}
-  \frac{\delta T_{ref}\:c_{th}}{x^2_{ref}}(\rho C_p)_m \frac{\partial T^*}{\partial t^*} + \frac{\delta T_{ref}\:v_{ref}}{x_{ref}}(\rho C_p)_m \frac{\partial T^*}{\partial t^*} = k_m \nabla^2 T + \chi \sigma_{ij}.\dot{\epsilon}^{p}_{ij} + \Delta H.r
+  \frac{\delta T_{ref}\:c_{th}}{x^2_{ref}}(\rho C_p)_m \frac{\partial T^*}{\partial t^*} + \frac{\delta T_{ref}\:v_{ref}}{x_{ref}}(\rho C_p)_m \:\bar{v}.\frac{\partial T^*}{\partial x^*} \\ 
+  - \frac{\kappa\:\delta T_{ref}}{x^2_{ref}} \nabla^2 T - \frac{P_{ref}\:c_{th}}{x^2_{ref}} \chi \sigma^*_{ij}.\dot{\epsilon}^{*(p)}_{ij} \\
+  - \Delta H.k_F (1 - s)(1 - \phi)\frac{\rho_{AB}}{M_{AB}}  e^{-Q_F/RT} \\
+  + \Delta H. k_R \:s  (1 - \phi)  \Delta \phi_{chem} \frac{\rho_{A} \rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_A M_B}  e^{-Q_R/RT} = 0
+\end{multline}
+
+Note that the reference strain rate is also rescaled so 
+\begin{equation}
+  \dot{\epsilon}^*_0 = \dot{\epsilon}_0 \frac{x^2_{ref}}{c_{th}}
 \end{equation}
+
+This leads to 
+\begin{multline}
+  \label{eq:energy_balance2}
+  \frac{\partial T^*}{\partial t^*} + \overbrace{\frac{x_{ref}\:v_{ref}}{c_{th}}}^{Pe}\:\bar{v}.\frac{\partial T^*}{\partial x^*} - \overbrace{\frac{\kappa}{(\rho C_p)_m}}^{c_{th}}\frac{1}{c_{th}} \nabla^2 T - \overbrace{\frac{P_{ref}}{\delta T_{ref}(\rho C_p)_m} \chi}^{Gr} \sigma^*_{ij}.\dot{\epsilon}^{*(p)}_{ij} \\
+  - \underbrace{\frac{\Delta H\:x^2_{ref} k_F }{\delta T_{ref}\:\kappa}\frac{\rho_{AB}}{M_{AB}}e^{-Ar_F}}_{Da_{endo}} (1 - s)(1 - \phi)e^{\frac{Ar_F\:\delta T^*}{1+\delta T^*}} \\
+   + \underbrace{\frac{\Delta H x^2_{ref} k_R}{\delta T_{ref}\kappa} \frac{\rho_{A} \rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_A M_B} e^{-Ar_R}}_{Da_{exo}}\:s  (1 - \phi)\Delta \phi_{chem} e^{\frac{Ar_R\:\delta T^*}{1+\delta T^*}}= 0
+\end{multline}
+and finally to Eq.~\ref{eq:final_system_of_equations_dimensionless}c
 
 \section{Jacobians}
 Numerical convergence can be helped by providing the jacobians and off-diagonal terms for the kernel residuals, even though \moose{} does not explicitly require them. It is a trial-and-error process to check if the improvement in convergence justifies the cost of computing those terms. See the \moose{} workshop manual on \url{http://mooseframework.org/documentation/} for more details.
