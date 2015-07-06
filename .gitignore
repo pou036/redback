@@ -175,4 +175,5 @@ theory.synctex.gz
 
 # Allow files in documentation directories
 !/doc/theory/figures/*.eps
+!/doc/theory/data/succombe_files/*.xml
 
