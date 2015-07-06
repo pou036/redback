@@ -228,6 +228,7 @@ thus set $A_{\phi} = 1$.
 
 
 \begin{table}
+  \todo[inline]{Damkohler numbers to check}
   \caption{Dimensionless parameters used in \redback{}. The coefficient $\delta$ is defined
 such that $T^{\star} = (T-T_{ref})/(\delta T_{ref})$}
 \label{tab:dimensionless_nbs}
@@ -309,6 +310,46 @@ In the first case the porosity evolution (and dependency on all process models) 
 
 \chapter{Tests}
 \label{chapter:tests}
+
+\redback{} is tested through a series of tests based on various benchmarks for all physical processes involved: thermal (\textbf{T}), hydraulic (\textbf{H}), mechanical (\textbf{M}), and chemical (\textbf{C}). All tests are found in the \texttt{redback/tests} directory
+\section{Benchmark 1 - T}
+
+This benchmark (\texttt{redback/tests/benchmark\_1\_T}) looks at the temperature equation 
+\begin{equation}
+\frac{\partial T}{\partial t} = \frac{\partial^2 T}{\partial x^2} + Gr . e^{\frac{Ar. \delta.T}{1+\delta.T}}.
+\end{equation}
+
+The steady state solution is a generalisation of the classical Bratu problem \citep{Bratu1914} and is controlled by the Gruntfest number $Gr$. Using a bifurcation method \citep{Succombe2015} we can find the critical value of the Gruntfest number as shown on Fig.~\ref{fig:benchmark_1_T_succombe}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.32\textwidth]{benchmark_1_T_succombe_0}
+  \includegraphics[width=0.32\textwidth]{benchmark_1_T_succombe_1}
+  \includegraphics[width=0.32\textwidth]{benchmark_1_T_succombe_2}
+  \caption{"S-curve" of the steady state analysis for \texttt{benchmark\_1\_T} with a) zoom on low values of temperatures, showing the four starting conditions and their expected time evolution, b) zoomed out view of the unsteady branch of the "S-curve" in dashed line, and c) even more zoomed out view for larger values of temperatures, showing the higher steady branch where benchmarks C and D converge.}
+  \label{fig:benchmark_1_T_succombe}
+\end{figure}
+
+This problem is then solved using \moose{} on a generated 1D mesh from -1 to 1 for different values of $Gr$ and the initial solution of the temperature $T_0$ in the center:
+\begin{itemize}
+\item $Gr=0.095$ and $T_0=0$. In this case, the system should converge increasingly to a centre temperature $T_a\approx0.109$. This case is treated with the input file \texttt{bench1\_a.i} 
+\item $Gr=0.095$ and $T_0=0.15$. In this case, the system should converge decreasingly to the same centre temperature $T_b=T_a\approx0.109$. This case is treated with the input file \texttt{bench1\_b.i} 
+\item $Gr=0.095$ and $T_0=0.25$. In this case, the system should converge increasingly to a large temperature $T_c>1000$. This case is treated with the input file \texttt{bench1\_c.i} 
+\item $Gr=0.1$ and $T_0=0$. In this case, the system should converge increasingly to an even larger temperature $T_d>T_c>1000$. This case is treated with the input file \texttt{bench1\_d.i} 
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.48\textwidth]{benchmark_1_T_results_A_B.eps}
+  \includegraphics[width=0.48\textwidth]{benchmark_1_T_results_C_D.eps}
+  \caption{Time evolution of the numerical results for the four benchmarks: a) cases A and B converge to the lower stable branch (see Fig.~\ref{fig:benchmark_1_T_succombe}), while b) cases C and D converge to the upper stable branch.}
+  \label{fig:benchmark_1_T_results}
+\end{figure}
+
+The numerical results match the theory with the time evolutions shown on Fig.~\ref{fig:benchmark_1_T_results}.
+
+
+
 
 \appendix
 

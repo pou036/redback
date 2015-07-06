@@ -172,3 +172,7 @@ problems/Gypsum_dehydration
 
 !/tests/transverseBC/*.msh
 theory.synctex.gz
+
+# Allow files in documentation directories
+!/doc/theory/figures/*.eps
+
