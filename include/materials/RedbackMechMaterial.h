@@ -119,6 +119,7 @@ protected:
   MaterialProperty<Real> & _volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;
   MaterialProperty<Real> & _total_volumetric_strain;
+  MaterialProperty<Real> & _total_deviatoric_strain;
   MaterialProperty<Real> & _mechanical_porosity;
   MaterialProperty<Real> & _poromech_jac;
   MaterialProperty<Real> & _mod_gruntfest_number;

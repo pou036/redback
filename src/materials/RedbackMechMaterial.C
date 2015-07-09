@@ -108,6 +108,7 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _volumetric_strain(declareProperty<Real>("volumetric_strain")),
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
+    _total_deviatoric_strain(declareProperty<Real>("total_deviatoric_strain")),
     _mechanical_porosity(declareProperty<Real>("mechanical_porosity")),
     _poromech_jac(declareProperty<Real>("poromechanics_jacobian")),
     _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
@@ -167,6 +168,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _volumetric_strain[_qp] = 0;
   _volumetric_strain_rate[_qp] = 0;
   _total_volumetric_strain[_qp] = 0;
+  _total_deviatoric_strain[_qp] = 0;
   _mechanical_porosity[_qp] = 0;
 }
 
@@ -290,6 +292,7 @@ void RedbackMechMaterial::computeQpStress()
   //Rotate strain to current configuration
   _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
   _total_volumetric_strain[_qp] = _total_strain[_qp].trace()/3.0;
+  _total_deviatoric_strain[_qp] = std::pow(2.0/3.0,0.5) * _total_strain[_qp].L2norm();
 
   //Compute the energy dissipation and the properties declared
   computeRedbackTerms(sig, q_y, p_y);
