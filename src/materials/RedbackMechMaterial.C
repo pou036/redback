@@ -523,8 +523,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   Real tau_act = P_act; //deviatoric activation stress
 
   //_exponential = _exponential* std::exp(-P_act*V_act);
-  _exponential_vol = _exponential* std::exp(-_fudge_vol*P_act*V_act);
-  _exponential_dev = _exponential* std::exp(-_fudge_dev*tau_act*Omega_act);
+  _exponential_vol = _fudge_vol*_exponential* std::exp(-1.0*P_act*V_act);
+  _exponential_dev = _fudge_dev*_exponential* std::exp(-1.0*tau_act*Omega_act);
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
   {
