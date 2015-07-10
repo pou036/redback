@@ -125,7 +125,8 @@ protected:
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _mechanical_dissipation_mech;
   MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
-  Real _exponential;
+  Real _exponential, _exponential_vol, _exponential_dev;
+  Real _fudge_vol, _fudge_dev;
   //VariableValue & _dispx_dot;
   //VariableValue & _dispy_dot;
   //VariableValue & _dispz_dot;

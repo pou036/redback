@@ -59,6 +59,9 @@ InputParameters validParams<RedbackMechMaterial>()
 
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
 
+  params.addParam<Real>("fudge_vol",1.0,"Fudge factor for volumetric activation component");
+  params.addParam<Real>("fudge_dev",1.0,"Fudge factor for deviatoric activation component");
+
   return params;
 }
 
@@ -114,6 +117,8 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
     _mechanical_dissipation_mech(declareProperty<Real>("mechanical_dissipation_mech")),
     _mechanical_dissipation_jac_mech(declareProperty<Real>("mechanical_dissipation_jacobian_mech")),
+    _fudge_vol(getParam<Real>("fudge_vol")),
+    _fudge_dev(getParam<Real>("fudge_dev")),
 
     // Get coupled variables (T & P)
     _has_T(isCoupled("temperature")),
@@ -512,9 +517,14 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
 
   //The following expression should be further pursued for a forward physics-based model
   //_exponential = _exponential* std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp])));
-  Real V_act = 1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp]);
-  Real P_act = -_alpha_1[_qp]*_confining_pressure[_qp] + _alpha_2[_qp]*_pore_pres[_qp];
-  _exponential = _exponential* std::exp(-P_act*V_act);
+  Real V_act = 1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp]); // activation volume for volumetric processes
+  Real P_act = -_alpha_1[_qp]*_confining_pressure[_qp] + _alpha_2[_qp]*_pore_pres[_qp]; //volumetric activation pressure
+  Real Omega_act = V_act; //activation volume for deviatoric processes
+  Real tau_act = P_act; //deviatoric activation stress
+
+  //_exponential = _exponential* std::exp(-P_act*V_act);
+  _exponential_vol = _exponential* std::exp(-_fudge_vol*P_act*V_act);
+  _exponential_dev = _exponential* std::exp(-_fudge_dev*tau_act*Omega_act);
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
   {
