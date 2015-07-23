@@ -25,8 +25,8 @@ InputParameters validParams<RedbackChemPressure>()
 }
 
 
-RedbackChemPressure::RedbackChemPressure(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters),
+RedbackChemPressure::RedbackChemPressure(const InputParameters & parameters) :
+  Kernel(parameters),
   _chemical_source_mass(getMaterialProperty<Real>("chemical_source_mass")),
   _chemical_source_mass_jac(getMaterialProperty<Real>("chemical_source_mass_jacobian")),
   _temp_var(coupled("temperature")),

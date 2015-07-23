@@ -24,8 +24,8 @@ InputParameters validParams<RedbackChemExo>()
 }
 
 
-RedbackChemExo::RedbackChemExo(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters),
+RedbackChemExo::RedbackChemExo(const InputParameters & parameters) :
+  Kernel(parameters),
   _chemical_exothermic_energy(getMaterialProperty<Real>("chemical_exothermic_energy")),
   _chemical_exothermic_energy_jac(getMaterialProperty<Real>("chemical_exothermic_energy_jacobian")),
   _time_factor(getParam<Real>("time_factor"))

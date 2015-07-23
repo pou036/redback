@@ -28,7 +28,7 @@ InputParameters validParams<RedbackThermalPressurization>();
 class RedbackThermalPressurization : public Kernel
 {
 public:
-  RedbackThermalPressurization(const std::string & name, InputParameters parameters);
+  RedbackThermalPressurization(const InputParameters & parameters);
   virtual ~RedbackThermalPressurization();
 
 protected:

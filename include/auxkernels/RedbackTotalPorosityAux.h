@@ -14,7 +14,7 @@ InputParameters validParams<RedbackTotalPorosityAux>();
 class RedbackTotalPorosityAux : public AuxKernel
 {
 public:
-  RedbackTotalPorosityAux(const std::string & name, InputParameters parameters);
+  RedbackTotalPorosityAux(const InputParameters & parameters);
   virtual ~RedbackTotalPorosityAux() {}
 
 protected:

@@ -10,8 +10,8 @@ InputParameters validParams<RedbackMassConvection>()
   return params;
 }
 
-RedbackMassConvection::RedbackMassConvection(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters),
+RedbackMassConvection::RedbackMassConvection(const InputParameters & parameters) :
+  Kernel(parameters),
   _grad_temp(coupledGradient("temperature")),
   //_dtemp_dot_dtemp(coupledDotDu("temperature")),
 

@@ -26,7 +26,7 @@ InputParameters validParams<RedbackMechMaterial>();
 class RedbackMechMaterialElastic : public RedbackMechMaterial
 {
 public:
-  RedbackMechMaterialElastic(const std::string & name, InputParameters parameters);
+  RedbackMechMaterialElastic(const InputParameters & parameters);
 
 protected:
   void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);

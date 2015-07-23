@@ -26,7 +26,7 @@ InputParameters validParams<RedbackChemPressure>();
 class RedbackChemPressure : public Kernel
 {
 public:
-  RedbackChemPressure(const std::string & name, InputParameters parameters);
+  RedbackChemPressure(const InputParameters & parameters);
   virtual ~RedbackChemPressure();
 
 protected:

@@ -18,8 +18,8 @@ InputParameters validParams<FunctionDirichletTransverseBC>()
   return params;
 }
 
-FunctionDirichletTransverseBC::FunctionDirichletTransverseBC(const std::string & name, InputParameters parameters) :
-    PresetNodalBC(name, parameters),
+FunctionDirichletTransverseBC::FunctionDirichletTransverseBC(const InputParameters & parameters) :
+    PresetNodalBC(parameters),
     _func(getFunction("function")),
     _center(getParam<RealVectorValue>("center")),
     _axis(getParam<RealVectorValue>("axis")),

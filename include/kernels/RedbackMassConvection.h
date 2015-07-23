@@ -7,7 +7,7 @@ class RedbackMassConvection : public Kernel
 {
 public:
 
-  RedbackMassConvection(const std::string & name, InputParameters parameters);
+  RedbackMassConvection(const InputParameters & parameters);
   virtual ~RedbackMassConvection() {}
 
 protected:

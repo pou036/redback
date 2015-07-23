@@ -26,7 +26,7 @@ InputParameters validParams<RedbackChemExo>();
 class RedbackChemExo : public Kernel
 {
 public:
-  RedbackChemExo(const std::string & name, InputParameters parameters);
+  RedbackChemExo(const InputParameters & parameters);
   virtual ~RedbackChemExo();
 
 protected:

@@ -26,7 +26,7 @@ InputParameters validParams<RedbackMechMaterialCC>();
 class RedbackMechMaterialCC : public RedbackMechMaterial
 {
 public:
-  RedbackMechMaterialCC(const std::string & name, InputParameters parameters);
+  RedbackMechMaterialCC(const InputParameters & parameters);
 
 protected:
   Real _slope_yield_surface;  // coefficient for yield surface

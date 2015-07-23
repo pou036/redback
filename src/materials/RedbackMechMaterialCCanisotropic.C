@@ -25,8 +25,8 @@ InputParameters validParams<RedbackMechMaterialCCanisotropic>()
   return params;
 }
 
-RedbackMechMaterialCCanisotropic::RedbackMechMaterialCCanisotropic(const std::string & name, InputParameters parameters) :
-    RedbackMechMaterialCC(name, parameters),
+RedbackMechMaterialCCanisotropic::RedbackMechMaterialCCanisotropic(const InputParameters & parameters) :
+    RedbackMechMaterialCC(parameters),
     _initial_anisotropy_param(getParam<Real>("initial_anisotropy_param")),
     _anisotropy_coeff(declareProperty<Real>("anisotropy_coeff"))
 {

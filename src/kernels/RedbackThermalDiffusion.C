@@ -23,8 +23,8 @@ InputParameters validParams<RedbackThermalDiffusion>()
   return params;
 }
 
-RedbackThermalDiffusion::RedbackThermalDiffusion(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters),
+RedbackThermalDiffusion::RedbackThermalDiffusion(const InputParameters & parameters) :
+  Kernel(parameters),
   _time_factor(getParam<Real>("time_factor"))
 {
 }

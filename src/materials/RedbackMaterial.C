@@ -67,8 +67,8 @@ InputParameters validParams<RedbackMaterial>()
   return params;
 }
 
-RedbackMaterial::RedbackMaterial(const std::string & name, InputParameters parameters) :
-  Material(name, parameters),
+RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
+  Material(parameters),
   _has_T(isCoupled("temperature")),
   _T(_has_T ? coupledValue("temperature") : _zero),
   _T_old(_has_T ? coupledValueOld("temperature") : _zero),

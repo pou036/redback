@@ -26,7 +26,7 @@ InputParameters validParams<RedbackMassDiffusion>();
 class RedbackMassDiffusion : public Kernel
 {
 public:
-  RedbackMassDiffusion(const std::string & name, InputParameters parameters);
+  RedbackMassDiffusion(const InputParameters & parameters);
   virtual ~RedbackMassDiffusion();
 
 protected:

@@ -34,7 +34,7 @@ class ReturnMapIterDT :
     public PostprocessorInterface
 {
 public:
-  ReturnMapIterDT(const std::string & name, InputParameters parameters);
+  ReturnMapIterDT(const InputParameters & parameters);
 
 protected:
   virtual Real computeInitialDT();
