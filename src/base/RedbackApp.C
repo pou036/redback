@@ -37,6 +37,11 @@
 // Timesteppers
 #include "ReturnMapIterDT.h"
 
+// UserObjects
+#include "RedbackFlowLawGSI.h"
+#include "RedbackFlowLawGSS.h"
+#include "RedbackFlowLawPeierls.h"
+
 // AuxKernels
 #include "RedbackTotalPorosityAux.h"
 
@@ -81,6 +86,11 @@ RedbackApp::registerObjects(Factory & factory)
 {
   #undef registerObject
   #define registerObject(name) factory.reg<name>(stringifyName(name))
+
+  registerUserObject(RedbackFlowLawGSI);
+  registerUserObject(RedbackFlowLawGSS);
+  registerUserObject(RedbackFlowLawPeierls);
+
   registerBoundaryCondition(FunctionDirichletTransverseBC);
 
   registerInitialCondition(FunctionWithRandomIC);
