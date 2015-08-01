@@ -19,9 +19,10 @@ public:
   RedbackFlowLawGSI(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**
-   * Strain rate as a function of stress and temperature.
+   * Strain rate (and derivative w.r.t stress) as functions of stress and temperature.
    */
   Real strainRate(Real /*sigma*/, Real /*T*/, Real /*delta*/, Real /*d*/) const;
+  Real dStrainRate_dSigma(Real /*sigma*/, Real /*T*/, Real /*delta*/, Real /*d*/) const;
 
 protected:
 

@@ -21,6 +21,7 @@
 #include "ElasticityTensorR4.h"
 #include "RotationTensor.h"
 //#include "FiniteStrainPlasticMaterial.h"
+#include "RedbackFlowLaw.h"
 
 //Forward Declarations
 class RedbackMechMaterial;
@@ -107,6 +108,8 @@ protected:
 
   Real _ref_pe_rate;
   Real _exponent;
+  //std::vector<const RedbackFlowLaw *> _flow_laws_UO;
+  //unsigned int _num_flow_laws;
 
   Real macaulayBracket(Real);
 

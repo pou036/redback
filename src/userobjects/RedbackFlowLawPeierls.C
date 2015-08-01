@@ -35,6 +35,13 @@ RedbackFlowLawPeierls::strainRate(Real sigma, Real T, Real delta, Real d) const
   return _A*std::pow(sigma, _n)*std::exp(sigma/sigma_p)*std::exp(-_Ar / (1 + delta*T));
 }
 
+Real
+RedbackFlowLawPeierls::dStrainRate_dSigma(Real sigma, Real T, Real delta, Real d) const
+{
+  Real sigma_p = (_Sigma_po + _K_p*std::pow(d, -_m))*(_T_m - T);
+  return _A*_n*std::pow(sigma, _n-1)*std::exp(sigma/sigma_p)*std::exp(-_Ar / (1 + delta*T));
+}
+
 // DEPRECATED CONSTRUCTOR
 RedbackFlowLawPeierls::RedbackFlowLawPeierls(const std::string & deprecated_name, InputParameters parameters) :
     RedbackFlowLaw(parameters),

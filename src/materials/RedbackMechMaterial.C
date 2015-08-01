@@ -53,6 +53,7 @@ InputParameters validParams<RedbackMechMaterial>()
   //  Copy-paste from FiniteStrainPlasticRateMaterial.C
   params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
+  //params.addRequiredParam<std::vector<UserObjectName> >("flow_laws_UO", "List of names of user objects that define the flow laws to use (in series)");
   params.addCoupledVar("pore_pres", 0.0, "Dimensionless pore pressure");
   params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
   params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
@@ -98,6 +99,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
     _ref_pe_rate(getParam<Real>("ref_pe_rate")),
     _exponent(getParam<Real>("exponent")),
+    //_flow_laws_UO(getParam<std::vector<RedbackFlowLaw> >("flow_laws_UO")), // INCORRECT
+    //_num_flow_laws(_flow_laws_UO.size()),
 
     // Redback
     _youngs_modulus(getParam<Real>("youngs_modulus")),
@@ -146,6 +149,10 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   MooseEnum fill_method = RankFourTensor::fillMethodEnum();
   fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic elasticity tensor.
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int) fill_method);
+
+  // UserObject flow laws
+  // TODO: check there's at least one
+
 }
 
 void
