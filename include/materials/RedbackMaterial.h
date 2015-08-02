@@ -126,7 +126,7 @@ protected:
   DensityMethod _density_method;
   PermeabilityMethod _permeability_method;
 
-  Real _exponential;
+  Real _exp_microstructure;
 
   MaterialProperty<Real> & _mises_strain;
   MaterialProperty<Real> & _mises_strain_rate;

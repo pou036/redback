@@ -49,8 +49,15 @@ RedbackMechMaterialJ2::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, 
 Real
 RedbackMechMaterialJ2::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real yield_stress)
 {
-  return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) *
-      _exponential;
+  Real eps_dot = 0;
+  // Add flow laws in series
+  for (unsigned int i = 0; i < _num_flow_law_uos; ++i)
+  {
+    eps_dot += _flow_laws_uo[i]->strainRate(macaulayBracket(sig_eqv / yield_stress - 1.0), _T[_qp], _delta[_qp], _grain_size[_qp]);
+  }
+  return eps_dot*_dt*_exp_microstructure;
+  // Perzyna:
+  // return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) * _exp_microstructure;
 }
 
 /**
@@ -59,8 +66,15 @@ RedbackMechMaterialJ2::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y
 Real
 RedbackMechMaterialJ2::getDerivativeFlowIncrement(const RankTwoTensor & sig, Real yield_stress)
 {
-  // Derivative of getFlowIncrement with respect to equivalent stress
-  return _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
+  Real result = 0;
+  // Add Derivative of getFlowIncrement with respect to equivalent stress in series
+  for (unsigned int i = 0; i < _num_flow_law_uos; ++i)
+  {
+    result += _flow_laws_uo[i]->dStrainRatedSigma(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _T[_qp], _delta[_qp], _grain_size[_qp]);
+  }
+  return result*_dt*_exp_microstructure / yield_stress;
+  // Perzyna:
+  // return _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) * _exp_microstructure / yield_stress;
 }
 
 //Jacobian for stress update algorithm

@@ -53,12 +53,13 @@ InputParameters validParams<RedbackMechMaterial>()
   //  Copy-paste from FiniteStrainPlasticRateMaterial.C
   params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
   params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
-  //params.addRequiredParam<std::vector<UserObjectName> >("flow_laws_UO", "List of names of user objects that define the flow laws to use (in series)");
+  params.addRequiredParam<std::vector<UserObjectName> >("flow_law_user_objects", "List of names of user objects that define the flow laws to use (in series)");
   params.addCoupledVar("pore_pres", 0.0, "Dimensionless pore pressure");
   params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
   params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
 
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
+  params.addCoupledVar("grain_size", 0.0, "Grain size variable");
 
   return params;
 }
@@ -99,8 +100,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
     _ref_pe_rate(getParam<Real>("ref_pe_rate")),
     _exponent(getParam<Real>("exponent")),
-    //_flow_laws_UO(getParam<std::vector<RedbackFlowLaw> >("flow_laws_UO")), // INCORRECT
-    //_num_flow_laws(_flow_laws_UO.size()),
+    _num_flow_law_uos(getParam<std::vector<UserObjectName> >("flow_law_user_objects").size()),
 
     // Redback
     _youngs_modulus(getParam<Real>("youngs_modulus")),
@@ -125,6 +125,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
     _pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
     _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
+    _grain_size(coupledValue("grain_size")),
 
     // Get some material properties from RedbackMaterial
     _gr(getMaterialProperty<Real>("gr")),
@@ -138,6 +139,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _solid_compressibility(getMaterialProperty<Real>("solid_compressibility")),
     _returnmap_iter(declareProperty<Real>("returnmap_iter"))
 {
+  std::cout << "THOMAS, TEST1" <<std::endl;
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
   Real l1 = E*nu/(1+nu)/(1-2*nu); // First Lame modulus
@@ -151,7 +153,17 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int) fill_method);
 
   // UserObject flow laws
-  // TODO: check there's at least one
+  if (_num_flow_law_uos == 0)
+    mooseError("Specify at least one flow law user object");
+
+  _flow_laws_uo.resize(_num_flow_law_uos);
+  for (unsigned int i = 0; i < _num_flow_law_uos; ++i)
+  {
+    std::cout << "THOMAS, can you see that?" <<std::endl;
+    _flow_laws_uo[i] = &getUserObjectByName<RedbackFlowLaw>(parameters.get< std::vector<UserObjectName> >("flow_law_user_objects")[i]);
+    // How to get the proper Type?        here     ^
+    std::cout << "IT PASSED FLOW LAW i="<<i <<std::endl;
+  }
 
 }
 
@@ -506,16 +518,15 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
   yield_stress = getYieldStress(eqvpstrain);
 
-  // calculate the term _exponential = -Q_{mech}/(RT) with Q_{mech} = E_0 + p'c V_{ref} + p_f V_{act}
-  _exponential = 1;
-  if (_has_T)
+  // calculate the term _exp_microstructure = -Q_{mech}/(RT) with Q_{mech} = E_0 + p'c V_{ref} + p_f V_{act}
+  //The following expression should be further pursued for a forward physics-based model
+  _exp_microstructure = std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp])));
+  /*if (_has_T)
   {
     // E_0/(RT) = Ar/(1+delta T*)
-    _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
-  }
+    _exp_microstructure = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
+  }*/
 
-  //The following expression should be further pursued for a forward physics-based model
-  _exponential = _exponential* std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp])));
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
   {

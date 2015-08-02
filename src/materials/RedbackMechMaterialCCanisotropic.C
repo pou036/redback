@@ -70,8 +70,8 @@ RedbackMechMaterialCCanisotropic::getFlowIncrement(Real sig_eqv, Real pressure, 
   pc *= -1;
   if (Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/_slope_yield_surface, /*p_0=*/pc, /*alpha=*/_anisotropy_coeff[_qp], /*x=*/pressure, /*y=*/sig_eqv))
   {
-    Real flow_incr_vol = _ref_pe_rate * _dt * std::pow(std::fabs(pressure - p_yield_stress), _exponent) * _exponential;
-    Real flow_incr_dev = _ref_pe_rate * _dt * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent) * _exponential;
+    Real flow_incr_vol = _ref_pe_rate * _dt * std::pow(std::fabs(pressure - p_yield_stress), _exponent) * _exp_microstructure;
+    Real flow_incr_dev = _ref_pe_rate * _dt * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent) * _exp_microstructure;
     return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
   }
   else
@@ -83,11 +83,11 @@ RedbackMechMaterialCCanisotropic::getDerivativeFlowIncrement(const RankTwoTensor
 {
   if (Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/_slope_yield_surface, /*p_0=*/pc, /*alpha=*/_anisotropy_coeff[_qp], /*x=*/pressure, /*y=*/sig_eqv))
   {
-    Real delta_lambda_p = _ref_pe_rate * _dt * std::pow(std::fabs(pressure - p_yield_stress), _exponent) * _exponential;
-    Real delta_lambda_q = _ref_pe_rate * _dt * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent) * _exponential;
+    Real delta_lambda_p = _ref_pe_rate * _dt * std::pow(std::fabs(pressure - p_yield_stress), _exponent) * _exp_microstructure;
+    Real delta_lambda_q = _ref_pe_rate * _dt * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent) * _exp_microstructure;
     Real delta_lambda = (std::pow(delta_lambda_p * delta_lambda_p + delta_lambda_q * delta_lambda_q, 0.5));
-    Real der_flow_incr_dev = _ref_pe_rate * _dt * _exponent * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent - 1.0) * _exponential;
-    Real der_flow_incr_vol = _ref_pe_rate * _dt * _exponent * std::pow(std::fabs(pressure - p_yield_stress), _exponent - 1.0) * _exponential;
+    Real der_flow_incr_dev = _ref_pe_rate * _dt * _exponent * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent - 1.0) * _exp_microstructure;
+    Real der_flow_incr_vol = _ref_pe_rate * _dt * _exponent * std::pow(std::fabs(pressure - p_yield_stress), _exponent - 1.0) * _exp_microstructure;
     return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
   }
   else

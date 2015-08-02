@@ -108,8 +108,8 @@ protected:
 
   Real _ref_pe_rate;
   Real _exponent;
-  //std::vector<const RedbackFlowLaw *> _flow_laws_UO;
-  //unsigned int _num_flow_laws;
+  std::vector<const RedbackFlowLaw *> _flow_laws_uo;
+  unsigned int _num_flow_law_uos;
 
   Real macaulayBracket(Real);
 
@@ -127,7 +127,7 @@ protected:
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _mechanical_dissipation_mech;
   MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
-  Real _exponential;
+  Real _exp_microstructure;
   //VariableValue & _dispx_dot;
   //VariableValue & _dispy_dot;
   //VariableValue & _dispz_dot;
@@ -140,6 +140,7 @@ protected:
   bool _has_pore_pres;
   VariableValue & _pore_pres, & _pore_pres_old;
   VariableValue & _total_porosity;
+  VariableValue & _grain_size;
 
   // Reading material properties from RedbackMaterial
   const MaterialProperty<Real> & _gr;

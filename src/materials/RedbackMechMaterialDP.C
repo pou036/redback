@@ -76,10 +76,10 @@ Real
 RedbackMechMaterialDP::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real yield_stress)
 {
   Real flow_incr_vol = _ref_pe_rate * _dt *
-      std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
+      std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exp_microstructure;
   // TODO: q_yield_stress can be 0, we should handle that case properly...
   Real flow_incr_dev = _ref_pe_rate * _dt * std::pow(macaulayBracket((q_yield_stress > 0 ? 1:-1)*
-              (sig_eqv / q_yield_stress - 1.0)), _exponent)* _exponential;
+              (sig_eqv / q_yield_stress - 1.0)), _exponent)* _exp_microstructure;
               //(q_yield_stress > 0 ? 1:-1) is the sign function
   return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
   // TODO: change the formula to use dist_pq^m
@@ -88,11 +88,11 @@ RedbackMechMaterialDP::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yiel
 Real
 RedbackMechMaterialDP::getDerivativeFlowIncrement(const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real q_yield_stress, Real p_yield_stress)
 {
-  Real delta_lambda_p = _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
-  Real delta_lambda_q = _ref_pe_rate * _dt * std::pow(macaulayBracket((q_yield_stress > 0 ? 1:-1)*(sig_eqv / q_yield_stress - 1.0)), _exponent) * _exponential;
+  Real delta_lambda_p = _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exp_microstructure;
+  Real delta_lambda_q = _ref_pe_rate * _dt * std::pow(macaulayBracket((q_yield_stress > 0 ? 1:-1)*(sig_eqv / q_yield_stress - 1.0)), _exponent) * _exp_microstructure;
   Real delta_lambda = (std::pow(delta_lambda_p * delta_lambda_p + delta_lambda_q * delta_lambda_q, 0.5));
-  Real der_flow_incr_dev = _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket((q_yield_stress > 0 ? 1:-1)*(sig_eqv / q_yield_stress - 1.0)), _exponent - 1.0) * _exponential / q_yield_stress;
-  Real der_flow_incr_vol = _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent - 1.0) * _exponential;
+  Real der_flow_incr_dev = _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket((q_yield_stress > 0 ? 1:-1)*(sig_eqv / q_yield_stress - 1.0)), _exponent - 1.0) * _exp_microstructure / q_yield_stress;
+  Real der_flow_incr_vol = _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent - 1.0) * _exp_microstructure;
   return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
 }
 

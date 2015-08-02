@@ -326,11 +326,11 @@ RedbackMaterial::computeRedbackTerms()
   //TODO: put flags for all properties depending on activated variables.
 
   //TODO: do not compute these when mechanics is on (5 fields overwritten)
-  _exponential = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
+  _exp_microstructure = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
   // Compute Mises strain
-  _mises_strain[_qp] = _exponential * _dt;
+  _mises_strain[_qp] = _exp_microstructure * _dt;
   // Compute Mises strain rate
-  _mises_strain_rate[_qp] = _exponential;
+  _mises_strain_rate[_qp] = _exp_microstructure;
 
   if (!_is_mechanics_on)
   {

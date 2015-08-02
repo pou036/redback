@@ -22,7 +22,7 @@ public:
    * Strain rate (and derivative w.r.t stress) as functions of stress, temperature, and grain size.
    */
   Real strainRate(Real /*sigma*/, Real /*T*/, Real /*delta*/, Real /*d*/) const;
-  Real dStrainRate_dSigma(Real /*sigma*/, Real /*T*/, Real /*delta*/, Real /*d*/) const;
+  Real dStrainRatedSigma(Real /*sigma*/, Real /*T*/, Real /*delta*/, Real /*d*/) const;
 
 protected:
 

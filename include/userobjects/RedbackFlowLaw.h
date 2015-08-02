@@ -12,7 +12,7 @@ InputParameters validParams<RedbackFlowLaw>();
 /**
  * Base class for material flow laws as functions of
  * stress, temperature, and grain size.
- * The functions strainRate and dStrainRate_dSigma must be
+ * The functions strainRate and dStrainRatedSigma must be
  * over-ridden in derived classes to provide actual values
  */
 class RedbackFlowLaw : public GeneralUserObject
@@ -44,7 +44,7 @@ public:
    * @param delta normalisation parameter for temperature T* = (T-T_ref)/(delta*T_ref)
    * @param d grain size
    */
-  virtual Real dStrainRate_dSigma(Real sigma, Real T, Real delta, Real d) const = 0;
+  virtual Real dStrainRatedSigma(Real sigma, Real T, Real delta, Real d) const = 0;
 
 };
 

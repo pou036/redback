@@ -29,7 +29,7 @@ RedbackFlowLawGSS::strainRate(Real sigma, Real T, Real delta, Real d) const
 }
 
 Real
-RedbackFlowLawGSS::dStrainRate_dSigma(Real sigma, Real T, Real delta, Real d) const
+RedbackFlowLawGSS::dStrainRatedSigma(Real sigma, Real T, Real delta, Real d) const
 {
   return _A*_n*std::pow(sigma, _n-1)*std::pow(d, _m)*std::exp(-_Ar / (1 + delta*T));
 }
