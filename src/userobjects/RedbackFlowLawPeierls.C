@@ -16,7 +16,7 @@ InputParameters validParams<RedbackFlowLawPeierls>()
   return params;
 }
 
-RedbackFlowLawPeierls::RedbackFlowLawPeierls(const InputParameters parameters) :
+RedbackFlowLawPeierls::RedbackFlowLawPeierls(const InputParameters & parameters) :
     RedbackFlowLaw(parameters),
     _A(getParam<Real>("A")),
     _Ar(getParam<Real>("Ar")),

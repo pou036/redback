@@ -18,7 +18,7 @@ InputParameters validParams<RedbackFlowLaw>();
 class RedbackFlowLaw : public GeneralUserObject
 {
 public:
-  RedbackFlowLaw(const InputParameters parameters);
+  RedbackFlowLaw(const InputParameters & parameters);
   RedbackFlowLaw(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   void initialize();

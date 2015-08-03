@@ -15,7 +15,7 @@ InputParameters validParams<RedbackFlowLawGSS>();
 class RedbackFlowLawGSS : public RedbackFlowLaw
 {
 public:
-  RedbackFlowLawGSS(const InputParameters parameters);
+  RedbackFlowLawGSS(const InputParameters & parameters);
   RedbackFlowLawGSS(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**

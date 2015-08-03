@@ -15,7 +15,7 @@ InputParameters validParams<RedbackFlowLawPeierls>();
 class RedbackFlowLawPeierls : public RedbackFlowLaw
 {
 public:
-  RedbackFlowLawPeierls(const InputParameters parameters);
+  RedbackFlowLawPeierls(const InputParameters & parameters);
   RedbackFlowLawPeierls(const std::string & deprecated_name, InputParameters parameters); // DEPRECATED CONSTRUCTOR
 
   /**

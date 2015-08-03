@@ -12,7 +12,7 @@ InputParameters validParams<RedbackFlowLawGSI>()
   return params;
 }
 
-RedbackFlowLawGSI::RedbackFlowLawGSI(const InputParameters parameters) :
+RedbackFlowLawGSI::RedbackFlowLawGSI(const InputParameters & parameters) :
     RedbackFlowLaw(parameters),
     _A(getParam<Real>("A")),
     _Ar(getParam<Real>("Ar")),

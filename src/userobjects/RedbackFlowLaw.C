@@ -8,7 +8,7 @@ InputParameters validParams<RedbackFlowLaw>()
   return params;
 }
 
-RedbackFlowLaw::RedbackFlowLaw(const InputParameters parameters) :
+RedbackFlowLaw::RedbackFlowLaw(const InputParameters & parameters) :
     GeneralUserObject(parameters)
 {}
 

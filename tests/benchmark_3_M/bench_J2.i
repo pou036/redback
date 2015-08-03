@@ -40,13 +40,13 @@
     slope_yield_surface = -0.6
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
+    flow_law_user_objects = Perzyna
   [../]
   [./mat_nomech]
     type = RedbackMaterial
     block = 0
     is_mechanics_on = false
     Aphi = 0
-    ar = 1
     ar_F = 1
     ar_R = 1
     exponent = 1
@@ -315,6 +315,15 @@
     type = PointValue
     variable = volumetric_strain_rate
     point = '0 0 0'
+  [../]
+[]
+
+[UserObjects]
+  [./Perzyna]
+    type = RedbackFlowLawGSI
+    A = 1
+    Ar = 0
+    n = 1
   [../]
 []
 

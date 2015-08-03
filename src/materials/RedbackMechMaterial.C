@@ -139,7 +139,6 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _solid_compressibility(getMaterialProperty<Real>("solid_compressibility")),
     _returnmap_iter(declareProperty<Real>("returnmap_iter"))
 {
-  std::cout << "THOMAS, TEST1" <<std::endl;
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
   Real l1 = E*nu/(1+nu)/(1-2*nu); // First Lame modulus
@@ -159,10 +158,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   _flow_laws_uo.resize(_num_flow_law_uos);
   for (unsigned int i = 0; i < _num_flow_law_uos; ++i)
   {
-    std::cout << "THOMAS, can you see that?" <<std::endl;
     _flow_laws_uo[i] = &getUserObjectByName<RedbackFlowLaw>(parameters.get< std::vector<UserObjectName> >("flow_law_user_objects")[i]);
-    // How to get the proper Type?        here     ^
-    std::cout << "IT PASSED FLOW LAW i="<<i <<std::endl;
   }
 
 }
@@ -521,12 +517,6 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   // calculate the term _exp_microstructure = -Q_{mech}/(RT) with Q_{mech} = E_0 + p'c V_{ref} + p_f V_{act}
   //The following expression should be further pursued for a forward physics-based model
   _exp_microstructure = std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp])));
-  /*if (_has_T)
-  {
-    // E_0/(RT) = Ar/(1+delta T*)
-    _exp_microstructure = std::exp(-_ar[_qp])* std::exp(_ar[_qp]*_delta[_qp] *_T[_qp]/(1 + _delta[_qp] *_T[_qp]));
-  }*/
-
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
   {
