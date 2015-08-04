@@ -12,6 +12,7 @@
 
 // Initial conditions
 #include "FunctionWithRandomIC.h"
+#include "FunctionTimesRandomIC.h"
 
 // Kernels
 #include "RedbackChemEndo.h"
@@ -84,6 +85,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerBoundaryCondition(FunctionDirichletTransverseBC);
 
   registerInitialCondition(FunctionWithRandomIC);
+  registerInitialCondition(FunctionTimesRandomIC);
 
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
