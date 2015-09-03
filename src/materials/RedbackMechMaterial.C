@@ -112,7 +112,9 @@ RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParamete
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
     _total_deviatoric_strain(declareProperty<Real>("total_deviatoric_strain")),
+    //_delta_volumetric_strain_elastic(declareProperty<Real>("delta_volumetric_strain_elastic")),
     _mechanical_porosity(declareProperty<Real>("mechanical_porosity")),
+    _mechanical_porosity_old(declarePropertyOld<Real>("mechanical_porosity")),
     _poromech_jac(declareProperty<Real>("poromechanics_jacobian")),
     _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
     _mechanical_dissipation_mech(declareProperty<Real>("mechanical_dissipation_mech")),
@@ -175,6 +177,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _total_volumetric_strain[_qp] = 0;
   _total_deviatoric_strain[_qp] = 0;
   _mechanical_porosity[_qp] = 0;
+  //_delta_volumetric_strain_elastic[_qp] = 0;
 }
 
 void
@@ -298,6 +301,7 @@ void RedbackMechMaterial::computeQpStress()
   _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
   _total_volumetric_strain[_qp] = _total_strain[_qp].trace()/3.0;
   _total_deviatoric_strain[_qp] = std::pow(2.0/3.0,0.5) * _total_strain[_qp].L2norm();
+  //_delta_volumetric_strain_elastic[_qp] = delta_ee.trace()/3.0;
 
   //Compute the energy dissipation and the properties declared
   computeRedbackTerms(sig, q_y, p_y);
@@ -402,9 +406,9 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
   // Update mechanical porosity (elastic and plastic components)
   delta_phi_mech_el = (1.0 - _total_porosity[_qp])*(_solid_compressibility[_qp]*(_pore_pres[_qp] - _pore_pres_old[_qp]) -
-      _solid_thermal_expansion[_qp]*(_T[_qp] - _T_old[_qp]));
+      _solid_thermal_expansion[_qp]*(_T[_qp] - _T_old[_qp])); // + b*_delta_volumetric_strain_elastic[_qp] with b=1
   delta_phi_mech_pl = (1.0 - _total_porosity[_qp])*(_plastic_strain[_qp] - _plastic_strain_old[_qp]).trace()/3.0;
-  _mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
+  _mechanical_porosity[_qp] = _mechanical_porosity_old[_qp] + delta_phi_mech_el + delta_phi_mech_pl;
   return;
 }
 

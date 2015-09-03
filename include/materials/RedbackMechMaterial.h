@@ -120,7 +120,9 @@ protected:
   MaterialProperty<Real> & _volumetric_strain_rate;
   MaterialProperty<Real> & _total_volumetric_strain;
   MaterialProperty<Real> & _total_deviatoric_strain;
+  //MaterialProperty<Real> & _delta_volumetric_strain_elastic;
   MaterialProperty<Real> & _mechanical_porosity;
+  MaterialProperty<Real> & _mechanical_porosity_old;
   MaterialProperty<Real> & _poromech_jac;
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _mechanical_dissipation_mech;
