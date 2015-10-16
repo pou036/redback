@@ -126,14 +126,14 @@ A particularity of \redback{} is to work with dimensionless parameters, in line 
 \begin{subequations}
   \label{eq:dimensionless_defs}
   \begin{align}
-  p^* &= \frac{p_f}{p_{ref}}, \\   
+  p^* &= \frac{p_f}{\sigma_{ref}}, \\   
   T^* &= \frac{T-T_{ref}}{\delta T_{ref}}, \\   
   x^* &= \frac{x}{x_{ref}}, \\   
   t^* &= \frac{c_{th}}{x^2_{ref}}t, \\   
   V^* &= \frac{V}{V_{ref}}.
   \end{align}
 \end{subequations}
-The derivations of those dimensionless variables is detailed in Sec.~\ref{chapter:derivations}.
+with $c_{th} = \alpha / (\rho C_p)_m$. The derivations of those dimensionless variables is detailed in Sec.~\ref{chapter:derivations}.
 
 Note that the time can in turn be rescaled a second time for numerical reasons (see Sec.~\ref{subsec:time_rescaling}).
 
@@ -236,16 +236,16 @@ such that $T^{\star} = (T-T_{ref})/(\delta T_{ref})$}
 \hline\noalign{\smallskip}
 Group & Name & Definition & Interpretation \\
 \noalign{\smallskip}\hline\noalign{\smallskip}
-$Gr$ & Gruntfest number & $\frac{\chi\sigma_{ref}\dot{\epsilon}_{ref} L^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of mechanical rate converted into heat over rate of diffusive processes \\
-$Da_{endo}$ & Endothermic Damk\"{o}hler number & $\frac{A_{endo} h_{endo} \rho_{AB} L^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of endothermic reaction rate over rate of diffusive processes \\
-$Da_{exo}$ & Exothermic Damk\"{o}hler number & $\frac{A_{exo} h_{exo} \rho_{AB} L^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of exothermic reaction rate over rate of diffusive processes \\
+$Gr$ & Gruntfest number & $\frac{\chi\sigma_{ref}\dot{\epsilon}_{ref} x^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of mechanical rate converted into heat over rate of diffusive processes \\
+$Da_{endo}$ & Endothermic Damk\"{o}hler number & $\frac{A_{endo} h_{endo} \rho_{AB} x^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of endothermic reaction rate over rate of diffusive processes \\
+$Da_{exo}$ & Exothermic Damk\"{o}hler number & $\frac{A_{exo} h_{exo} \rho_{AB} x^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of exothermic reaction rate over rate of diffusive processes \\
 $Ar$ & Arrhenius number & $Q_{mech}/(R T_{ref})$ & Ratio of activation energy over thermal energy \\
 $Ar_F$ & Forward Arrhenius number & $Q_F/(R T_{ref})$ & Ratio of activation energy of forward reaction over thermal energy \\
 $Ar_R$ & Reverse Arrhenius number & $Q_R/(R T_{ref})$ & Ratio of activation energy of reverse activation energy over thermal energy \\
-$Le$ & Lewis number & $c_{th}/c_{hy}=\frac{\mu_f\:c_{th}\:\beta^*_m}{k \: p_{ref}}$ & Ratio of thermal over mass diffusivities \\
-$Le_{chem}$ & Chemical Lewis number & $\frac{c_{th}\sigma_{ref}\beta_m }{L^2_{ref} A_{endo}}\frac{\rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_{B}} \left( \frac{\rho_B}{\rho_f} - \frac{\rho_B}{\rho_s}\right)e^{-Ar_F}$ & Ratio of thermal over chemical diffusivity of forward reaction \\
+$Le$ & Lewis number & $c_{th}/c_{hy}=\frac{\mu_f\:c_{th}\:\beta^*_m}{k \: \sigma_{ref}}$ & Ratio of thermal over mass diffusivities \\
+$Le_{chem}$ & Chemical Lewis number & $\frac{c_{th}\sigma_{ref}\beta_m }{x^2_{ref} A_{endo}}\frac{\rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_{B}} \left( \frac{\rho_B}{\rho_f} - \frac{\rho_B}{\rho_s}\right)e^{-Ar_F}$ & Ratio of thermal over chemical diffusivity of forward reaction \\
 $\bar{\Lambda}$ & Thermal pressurisation coefficient & $\frac{\lambda_m}{\beta_m}\frac{\delta \:T_{ref}}{\sigma_{ref}}$ & Normalised thermal pressurisation coefficient, with $\lambda_m$ and $\beta_m$ the mixture thermal expansion and compressibility \\
-$Pe$ & P\'{e}clet number & $L_{ref}V_{ref}/c_{th}$ & Ratio of temperature advection rate over diffusion rate \\
+$Pe$ & P\'{e}clet number & $x_{ref}V_{ref}/c_{th}$ & Ratio of temperature advection rate over diffusion rate \\
 \noalign{\smallskip}\hline
 \end{tabular}
 \end{table}
@@ -453,7 +453,7 @@ In order to deal with dimensionless parameters we introduce the following normal
 \begin{subequations}
   \label{eq:def_normalisations}
   \begin{align}
-  p^* &= \frac{p_f}{p_{ref}}, \\   
+  p^* &= \frac{p_f}{\sigma_{ref}}, \\   
   T^* &= \frac{T-T_{ref}}{\delta T_{ref}}, \\   
   x^* &= \frac{x}{x_{ref}}, \\   
   t^* &= \frac{c_{th}}{x^2_{ref}}t, \\   
@@ -465,9 +465,9 @@ Dividing Eq.~\ref{eq:mixture_mass_balance3} by $\beta_m$ and switching to the no
 
 \begin{multline}
   \label{eq:mixture_mass_balance4}
-  \frac{p_{ref} \: c_{th}}{x^2_{ref}} \frac{\partial p^*}{\partial t^*} 
+  \frac{\sigma_{ref} \: c_{th}}{x^2_{ref}} \frac{\partial p^*}{\partial t^*} 
   - \frac{\lambda_m \: \delta \: T_{ref} \: c_{th}}{\beta_m\:x^2_{ref}} \frac{\partial T^*}{\partial t^*} \\
-  + \frac{V_{ref} \: p_{ref}}{x_{ref}}\left[\frac{(1-\phi)\beta_s V^{*(1)}_k + \phi\beta_f V^{*(2)}_k}{\beta_m} \right] \frac{\partial p^*}{\partial x^*_k} \\
+  + \frac{V_{ref} \: \sigma_{ref}}{x_{ref}}\left[\frac{(1-\phi)\beta_s V^{*(1)}_k + \phi\beta_f V^{*(2)}_k}{\beta_m} \right] \frac{\partial p^*}{\partial x^*_k} \\
   - \frac{V_{ref}\:\delta\:T_{ref}}{x_{ref}}\left[\frac{(1-\phi)\lambda_s V^{*(1)}_k + \phi\lambda_f V^{*(2)}_k}{\beta_m} \right] \frac{\partial T*}{\partial x^*_k} \\
   + \frac{V_{ref}}{\beta_m\:x_{ref}} \frac{\partial( \phi (V^{*(2)}_k -V^{*(1)}_k))}{\partial x^*_k}
   + \frac{V_{ref}}{\beta_m\:x_{ref}} \frac{\partial(V^{*(1)}_k)}{\partial x^*_k}  
@@ -479,12 +479,12 @@ This can be rewritten as
 \begin{multline}
   \label{eq:mixture_mass_balance5}
   \frac{\partial p^*}{\partial t^*} 
-  - \overbrace{\frac{\lambda_m \: \delta \: T_{ref}}{\beta_m\:p_{ref}}}^{\Lambda} \frac{\partial T^*}{\partial t^*} 
-  + \overbrace{\frac{x_{ref}\:V_{ref}}{c_{th}}}^{Pe}  \overbrace{\left[\frac{(1-\phi)(p_{ref}\beta_s) V^{*(1)}_k + \phi(p_{ref}\beta_f) V^{*(2)}_k}{p_{ref}\beta_m} \right]}^{\vec{v}^p} \frac{\partial p^*}{\partial x^*_k} \\
-  - \overbrace{\frac{x_{ref}\:V_{ref}}{c_{th}}}^{Pe} \overbrace{\left[\frac{(1-\phi)(\delta\:T_{ref}\lambda_s) V^{*(1)}_k + \phi(\delta\:T_{ref}\lambda_f) V^{*(2)}_k}{p_{ref}\beta_m} \right]}^{\vec{v}^T} \frac{\partial T*}{\partial x^*_k} \\
-  + \frac{x_{ref}\:V_{ref}}{c_{th}\:\beta_m\:p_{ref}}  \frac{\partial}{\partial x^*_k} \underbrace{\left[ \phi (V^{*(2)}_k -V^{*(1)}_k)\right]}_{\text{norm. filtration vec.}} 
-  + \underbrace{\frac{x_{ref}\:V_{ref}}{c_{th}}}_{Pe} \frac{1}{\beta_m\:p_{ref}} \underbrace{\frac{\partial(V^{*(1)}_k)}{\partial x^*_k}}_{\dot{\epsilon}^*_V}  \\
-  = \frac{x^2_{ref}}{\beta_m\:p_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
+  - \overbrace{\frac{\lambda_m \: \delta \: T_{ref}}{\beta_m\:\sigma_{ref}}}^{\Lambda} \frac{\partial T^*}{\partial t^*} 
+  + \overbrace{\frac{x_{ref}\:V_{ref}}{c_{th}}}^{Pe}  \overbrace{\left[\frac{(1-\phi)(\sigma_{ref}\beta_s) V^{*(1)}_k + \phi(\sigma_{ref}\beta_f) V^{*(2)}_k}{\sigma_{ref}\beta_m} \right]}^{\vec{v}^p} \frac{\partial p^*}{\partial x^*_k} \\
+  - \overbrace{\frac{x_{ref}\:V_{ref}}{c_{th}}}^{Pe} \overbrace{\left[\frac{(1-\phi)(\delta\:T_{ref}\lambda_s) V^{*(1)}_k + \phi(\delta\:T_{ref}\lambda_f) V^{*(2)}_k}{\sigma_{ref}\beta_m} \right]}^{\vec{v}^T} \frac{\partial T*}{\partial x^*_k} \\
+  + \frac{x_{ref}\:V_{ref}}{c_{th}\:\beta_m\:\sigma_{ref}}  \frac{\partial}{\partial x^*_k} \underbrace{\left[ \phi (V^{*(2)}_k -V^{*(1)}_k)\right]}_{\text{norm. filtration vec.}} 
+  + \underbrace{\frac{x_{ref}\:V_{ref}}{c_{th}}}_{Pe} \frac{1}{\beta_m\:\sigma_{ref}} \underbrace{\frac{\partial(V^{*(1)}_k)}{\partial x^*_k}}_{\dot{\epsilon}^*_V}  \\
+  = \frac{x^2_{ref}}{\beta_m\:\sigma_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
 \end{multline}
 
 with
@@ -492,9 +492,9 @@ with
 \begin{subequations}
   \label{eq:def_parameters}
   \begin{align}
-  \Lambda &= \frac{\lambda_m \: \delta \: T_{ref}}{\beta_m\:p_{ref}}=\frac{\lambda^*_m}{\beta^*_m}, \\   
+  \Lambda &= \frac{\lambda_m \: \delta \: T_{ref}}{\beta_m\:\sigma_{ref}}=\frac{\lambda^*_m}{\beta^*_m}, \\   
   \lambda^*_i &= \delta \: T_{ref} \:\lambda_i, \:\:\: i\in\{s,f,m\}\\
-  \beta^*_i &= \beta \: p_{ref}, \:\:\: i\in\{s,f,m\}\\
+  \beta^*_i &= \beta \: \sigma_{ref}, \:\:\: i\in\{s,f,m\}\\
   Pe &= \frac{x_{ref}\:V_{ref}}{c_{th}}, \\   
   v^p &= \frac{(1-\phi)\beta^*_s V^{*(1)}_k + \phi\beta^*_f V^{*(2)}_k}{\beta^*_m}, \\   
   v^T &= \frac{(1-\phi)\lambda^*_s V^{*(1)}_k + \phi\lambda^*_f V^{*(2)}_k}{\beta^*_m}.
@@ -511,7 +511,7 @@ In its normalised form it becomes
 \begin{equation}
   \label{eq:darcy_normalised}
   \phi(V^{*(2)}_k -V^{*(1)}_k)
-  = -\frac{k}{\mu_f} \frac{p_{ref}}{x_{ref}\:V_{ref}}\left(\frac{\partial p^*}{\partial x^*_k} - \frac{x_{ref}}{p_{ref}}\rho_f\:g\:\vec{e}_z \right)
+  = -\frac{k}{\mu_f} \frac{\sigma_{ref}}{x_{ref}\:V_{ref}}\left(\frac{\partial p^*}{\partial x^*_k} - \frac{x_{ref}}{\sigma_{ref}}\rho_f\:g\:\vec{e}_z \right)
 \end{equation}
 
 The mass balance equation then becomes
@@ -521,12 +521,12 @@ The mass balance equation then becomes
   - \Lambda \frac{\partial T^*}{\partial t^*} 
   + Pe \:\vec{v}^p \frac{\partial p^*}{\partial x^*_k} 
   - Pe \:\vec{v}^T \frac{\partial T*}{\partial x^*_k} \\
-  + \frac{\partial}{\partial x^*_k} \left[ \underbrace{\frac{k \: p_{ref}}{\mu_f\:c_{th}\:\beta^*_m}}_{1/Le} \left( \frac{\partial p^*}{\partial x^*_k} - \underbrace{\rho_f \frac{x_{ref}}{p_{ref}}g}_{(\rho_f\:g)^*}\: \vec{e}_z  \right) \right]
-  + \frac{Pe}{\beta_m\:p_{ref}} \dot{\epsilon}^*_V  
-  = \frac{x^2_{ref}}{\beta_m\:p_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
+  + \frac{\partial}{\partial x^*_k} \left[ \underbrace{\frac{k \: \sigma_{ref}}{\mu_f\:c_{th}\:\beta^*_m}}_{1/Le} \left( \frac{\partial p^*}{\partial x^*_k} - \underbrace{\rho_f \frac{x_{ref}}{\sigma_{ref}}g}_{(\rho_f\:g)^*}\: \vec{e}_z  \right) \right]
+  + \frac{Pe}{\beta_m\:\sigma_{ref}} \dot{\epsilon}^*_V  
+  = \frac{x^2_{ref}}{\beta_m\:\sigma_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
 \end{multline}
 
-with the Lewis number defined as $Le = \frac{\mu_f\:c_{th}\:\beta^*_m}{k \: p_{ref}}$ and the normalised gravity term $(\rho_f\:g)^*=\rho_f \frac{x_{ref}}{p_{ref}}g$.
+with the Lewis number defined as $Le = \frac{\mu_f\:c_{th}\:\beta^*_m}{k \: \sigma_{ref}}$ and the normalised gravity term $(\rho_f\:g)^*=\rho_f \frac{x_{ref}}{\sigma_{ref}}g$.
 
 Following \citep[][appendix A]{Alevizos2014}
 $j_1 = \omega_F.M_B$, $\omega_F=\frac{\rho_1}{M_{AB}}k_F exp{-Q_F/RT}$ and $\rho_1=(1-\phi)(1-s)\rho_{AB}$, so the volumetric source term $j1$ can be written as
@@ -537,8 +537,8 @@ $j_1 = \omega_F.M_B$, $\omega_F=\frac{\rho_1}{M_{AB}}k_F exp{-Q_F/RT}$ and $\rho
 The RHS term of Eq.~\ref{eq:mixture_mass_balance6} can then be written as
 \begin{multline}
   \label{eq:mixture_mass_balance_rhs}
-  \frac{x^2_{ref}}{\beta_m\:p_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1 = \frac{x^2_{ref}}{\beta_m\:p_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)\rho_{AB}\frac{M_B}{M_{AB}}(1-\phi)(1-s) k_F exp{(-Q_F/RT)} \\
-  = \underbrace{\frac{x^2_{ref}k_F }{\beta_m\:p_{ref}\:c_{th}} \frac{\rho_{AB}}{\rho_B}\frac{M_B}{M_{AB}}\left(\frac{\rho_B}{\rho_f} - \frac{\rho_B}{\rho_s}\right)e^{-Ar_F}}_{1/Le_{chem}} \underbrace{(1-\phi)(1-s) \exp{\left( \frac{Ar_F \:\delta T^*}{1+\delta T^*} \right)}}_{\omega^*_F }
+  \frac{x^2_{ref}}{\beta_m\:\sigma_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1 = \frac{x^2_{ref}}{\beta_m\:\sigma_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)\rho_{AB}\frac{M_B}{M_{AB}}(1-\phi)(1-s) k_F exp{(-Q_F/RT)} \\
+  = \underbrace{\frac{x^2_{ref}k_F }{\beta_m\:\sigma_{ref}\:c_{th}} \frac{\rho_{AB}}{\rho_B}\frac{M_B}{M_{AB}}\left(\frac{\rho_B}{\rho_f} - \frac{\rho_B}{\rho_s}\right)e^{-Ar_F}}_{1/Le_{chem}} \underbrace{(1-\phi)(1-s) \exp{\left( \frac{Ar_F \:\delta T^*}{1+\delta T^*} \right)}}_{\omega^*_F }
 \end{multline}
 
 We then arrive to the full mass balance equation Eq.~\ref{eq:final_system_of_equations_dimensionless}b
@@ -564,7 +564,7 @@ Using the normalised variable we get
 \begin{multline}
   \label{eq:energy_balance1}
   \frac{\delta T_{ref}\:c_{th}}{x^2_{ref}}(\rho C_p)_m \frac{\partial T^*}{\partial t^*} + \frac{\delta T_{ref}\:v_{ref}}{x_{ref}}(\rho C_p)_m \:\bar{v}.\frac{\partial T^*}{\partial x^*} \\ 
-  - \frac{\kappa\:\delta T_{ref}}{x^2_{ref}} \nabla^2 T - \frac{P_{ref}\:c_{th}}{x^2_{ref}} \chi \sigma^*_{ij}.\dot{\epsilon}^{*(p)}_{ij} \\
+  - \frac{\kappa\:\delta T_{ref}}{x^2_{ref}} \nabla^2 T - \frac{\sigma_{ref}\:c_{th}}{x^2_{ref}} \chi \sigma^*_{ij}.\dot{\epsilon}^{*(p)}_{ij} \\
   - \Delta H.k_F (1 - s)(1 - \phi)\frac{\rho_{AB}}{M_{AB}}  e^{-Q_F/RT} \\
   + \Delta H. k_R \:s  (1 - \phi)  \Delta \phi_{chem} \frac{\rho_{A} \rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_A M_B}  e^{-Q_R/RT} = 0
 \end{multline}
@@ -577,7 +577,7 @@ Note that the reference strain rate is also rescaled so
 This leads to 
 \begin{multline}
   \label{eq:energy_balance2}
-  \frac{\partial T^*}{\partial t^*} + \overbrace{\frac{x_{ref}\:v_{ref}}{c_{th}}}^{Pe}\:\bar{v}.\frac{\partial T^*}{\partial x^*} - \overbrace{\frac{\kappa}{(\rho C_p)_m}}^{c_{th}}\frac{1}{c_{th}} \nabla^2 T - \overbrace{\frac{P_{ref}}{\delta T_{ref}(\rho C_p)_m} \chi}^{Gr} \sigma^*_{ij}.\dot{\epsilon}^{*(p)}_{ij} \\
+  \frac{\partial T^*}{\partial t^*} + \overbrace{\frac{x_{ref}\:v_{ref}}{c_{th}}}^{Pe}\:\bar{v}.\frac{\partial T^*}{\partial x^*} - \overbrace{\frac{\kappa}{(\rho C_p)_m}}^{c_{th}}\frac{1}{c_{th}} \nabla^2 T - \overbrace{\frac{\sigma_{ref}}{\delta T_{ref}(\rho C_p)_m} \chi}^{Gr} \sigma^*_{ij}.\dot{\epsilon}^{*(p)}_{ij} \\
   - \underbrace{\frac{\Delta H\:x^2_{ref} k_F }{\delta T_{ref}\:\kappa}\frac{\rho_{AB}}{M_{AB}}e^{-Ar_F}}_{Da_{endo}} (1 - s)(1 - \phi)e^{\frac{Ar_F\:\delta T^*}{1+\delta T^*}} \\
    + \underbrace{\frac{\Delta H x^2_{ref} k_R}{\delta T_{ref}\kappa} \frac{\rho_{A} \rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_A M_B} e^{-Ar_R}}_{Da_{exo}}\:s  (1 - \phi)\Delta \phi_{chem} e^{\frac{Ar_R\:\delta T^*}{1+\delta T^*}}= 0
 \end{multline}
