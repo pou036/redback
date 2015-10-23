@@ -177,3 +177,4 @@ theory.synctex.gz
 !/doc/theory/figures/*.eps
 !/doc/theory/data/succombe_files/*.xml
 
+RedbackRevision.h
