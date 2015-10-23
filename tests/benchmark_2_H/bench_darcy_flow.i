@@ -3,8 +3,6 @@
   dim = 2
   nx = 20
   ny = 10
-  xmin = 0
-  xmax = 1
   ymin = -0.5
   ymax = 0
 []
@@ -223,7 +221,7 @@
     type = NumNonlinearIterations
   [../]
   [./new_timestep]
-    type = PlotFunction
+    type = FunctionValuePostprocessor
     function = timestep_function
   [../]
   [./max_fluid_vel_y]
@@ -260,7 +258,6 @@
 
 [Outputs]
   file_base = bench_darcy_flow
-  output_initial = true
   exodus = true
   print_linear_residuals = true
   [./console]

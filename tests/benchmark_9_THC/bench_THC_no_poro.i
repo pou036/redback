@@ -220,6 +220,7 @@
 [Outputs]
   exodus = true
   console = true
+  execute_on = TIMESTEP_END
   base_file = bench_THC_no_poro_out
 []
 

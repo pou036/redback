@@ -167,6 +167,7 @@
 [Outputs]
   exodus = true
   console = true
+  execute_on = TIMESTEP_END
   file_base = bench_source_term_out
 []
 
