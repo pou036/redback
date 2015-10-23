@@ -27,7 +27,7 @@ InputParameters validParams<RedbackMechDissip>();
 class RedbackMechDissip : public Kernel
 {
 public:
-  RedbackMechDissip(const std::string & name, InputParameters parameters);
+  RedbackMechDissip(const InputParameters & parameters);
   virtual ~RedbackMechDissip();
 
 protected:

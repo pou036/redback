@@ -21,8 +21,8 @@ InputParameters validParams<RedbackMechMaterialJ2>()
   return params;
 }
 
-RedbackMechMaterialJ2::RedbackMechMaterialJ2(const std::string & name, InputParameters parameters) :
-    RedbackMechMaterial(name, parameters)
+RedbackMechMaterialJ2::RedbackMechMaterialJ2(const InputParameters & parameters) :
+    RedbackMechMaterial(parameters)
 {
 }
 

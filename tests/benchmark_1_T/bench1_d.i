@@ -140,6 +140,7 @@
   file_base = bench1_d_out
   exodus = true
   csv = true
+  execute_on = TIMESTEP_END
   console = true
 []
 

@@ -29,8 +29,8 @@ InputParameters validParams<RedbackMechMaterialCC>()
   return params;
 }
 
-RedbackMechMaterialCC::RedbackMechMaterialCC(const std::string & name, InputParameters parameters) :
-    RedbackMechMaterial(name, parameters),
+RedbackMechMaterialCC::RedbackMechMaterialCC(const InputParameters & parameters) :
+    RedbackMechMaterial(parameters),
     _slope_yield_surface(getParam<Real>("slope_yield_surface"))
 {
 }

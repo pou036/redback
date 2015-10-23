@@ -26,7 +26,7 @@ InputParameters validParams<RedbackChemEndo>();
 class RedbackChemEndo : public Kernel
 {
 public:
-  RedbackChemEndo(const std::string & name, InputParameters parameters);
+  RedbackChemEndo(const InputParameters & parameters);
   virtual ~RedbackChemEndo();
 
 protected:

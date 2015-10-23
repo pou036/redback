@@ -1,20 +1,20 @@
 /***********************************************/
 /* Parameters  */
-xmin = -1;
-xmax = 1;
-ymin = -3;
-y1 = -0.04; // bottom of middle layer
-y2 = 0.04; // top of middle layer
-ymax = 3;
+xmin = -5;
+xmax = 5;
+ymin = -3.5;
+y1 = -0.5; // bottom of middle layer
+y2 = 0.5; // top of middle layer
+ymax = 3.5;
 
 /****** MESH ***********/
-nb_cells_x = 200; // nb cells in X dir along fault
+nb_cells_x = 20; // nb cells in X dir along fault
 
-nb_cells_y_top = 20;
+nb_cells_y_top = 10;
 nb_cells_y_middle = 10;
-nb_cells_y_bottom = 20;
+nb_cells_y_bottom = 10;
 
-mesh_type = 1; // 2=quads (fully regular), 1=quads (non-regular), 0=triangles
+mesh_type = 2; // 2=quads (fully regular), 1=quads (non-regular), 0=triangles
 // if mesh_type == 0
 lc1 = 0.4; // mesh characteristic length outside the fault (for triangular mesh)
 lc2 = 0.02; // mesh characteristic length in fault (for triangular mesh)
@@ -101,3 +101,6 @@ Physical Line(3) = {10,7,4}; // left hand side
 Physical Surface(0) = {11}; // bottom block
 Physical Surface(1) = {12}; // middle block
 Physical Surface(2) = {13}; // top block
+
+Physical Point(4) = {1,2}; // bottom
+

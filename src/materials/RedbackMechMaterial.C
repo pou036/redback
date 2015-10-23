@@ -65,8 +65,8 @@ InputParameters validParams<RedbackMechMaterial>()
   return params;
 }
 
-RedbackMechMaterial::RedbackMechMaterial(const std::string & name, InputParameters parameters) :
-    Material(name, parameters),
+RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
+    Material(parameters),
     // Copy-paste from TensorMechanicsMaterial.C
     _grad_disp_x(coupledGradient("disp_x")),
     _grad_disp_y(coupledGradient("disp_y")),

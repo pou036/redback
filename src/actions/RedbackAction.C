@@ -20,8 +20,8 @@ InputParameters validParams<RedbackAction>()
   return params;
 }
 
-RedbackAction::RedbackAction(const std::string & name, InputParameters params) :
-    Action(name, params),
+RedbackAction::RedbackAction(InputParameters params) :
+    Action(params),
     _disp_x(getParam<NonlinearVariableName>("disp_x")),
     _disp_y(getParam<NonlinearVariableName>("disp_y")),
     _disp_z(getParam<NonlinearVariableName>("disp_z")),

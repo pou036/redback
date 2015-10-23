@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef FUNCTIONWITHRANDOMIC_H
-#define FUNCTIONWITHRANDOMIC_H
+#ifndef FUNCTIONTIMESRANDOMIC_H
+#define FUNCTIONTIMESRANDOMIC_H
 
 #include "InitialCondition.h"
 #include "InputParameters.h"
@@ -22,17 +22,17 @@
 #include <string>
 
 // Forward Declarations
-class FunctionWithRandomIC;
+class FunctionTimesRandomIC;
 class Function;
 namespace libMesh { class Point; }
 
 template<>
-InputParameters validParams<FunctionWithRandomIC>();
+InputParameters validParams<FunctionTimesRandomIC>();
 
 /**
- * FunctionWithRandomIC just returns a Random value.
+ * FunctionTimesRandomIC just returns a Random value.
  */
-class FunctionWithRandomIC : public InitialCondition
+class FunctionTimesRandomIC : public InitialCondition
 {
 public:
 
@@ -42,7 +42,7 @@ public:
    * @param name The name given to the initial condition in the input file.
    * @param parameters The parameters object holding data for the class to use.
    */
-  FunctionWithRandomIC(const InputParameters & parameters);
+  FunctionTimesRandomIC(const InputParameters & parameters);
 
 
 protected:
@@ -63,4 +63,4 @@ protected:
   Function & _func;
 };
 
-#endif //FUNCTIONWITHRANDOMIC_H
+#endif //FUNCTIONTIMESRANDOMIC_H

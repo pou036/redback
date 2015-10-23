@@ -28,7 +28,7 @@ InputParameters validParams<RedbackMaterial>();
 class RedbackMaterial : public Material
 {
 public:
-  RedbackMaterial(const std::string & name, InputParameters parameters);
+  RedbackMaterial(const InputParameters & parameters);
 
   /// Static method for use in validParams for getting the density method
   static MooseEnum densityMethodEnum();

@@ -23,8 +23,8 @@ InputParameters validParams<RedbackPoromechanics>()
   return params;
 }
 
-RedbackPoromechanics::RedbackPoromechanics(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+RedbackPoromechanics::RedbackPoromechanics(const InputParameters & parameters) :
+    Kernel(parameters),
     _volumetric_strain_rate(getMaterialProperty<Real>("volumetric_strain_rate")),
     _mixture_compressibility(getMaterialProperty<Real>("mixture_compressibility")),
     _poromech_jac(getMaterialProperty<Real>("poromechanics_jacobian")),

@@ -21,7 +21,7 @@ InputParameters validParams<RedbackStressDivergenceTensors>();
 class RedbackStressDivergenceTensors : public Kernel
 {
 public:
-  RedbackStressDivergenceTensors(const std::string & name, InputParameters parameters);
+  RedbackStressDivergenceTensors(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();

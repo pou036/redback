@@ -11,7 +11,7 @@ InputParameters validParams<RedbackAction>();
 class RedbackAction : public Action
 {
 public:
-  RedbackAction(const std::string & name, InputParameters params);
+  RedbackAction(InputParameters params);
 
   virtual void act();
 

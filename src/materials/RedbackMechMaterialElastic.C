@@ -21,8 +21,8 @@ InputParameters validParams<RedbackMechMaterialElastic>()
   return params;
 }
 
-RedbackMechMaterialElastic::RedbackMechMaterialElastic(const std::string & name, InputParameters parameters) :
-    RedbackMechMaterial(name, parameters)
+RedbackMechMaterialElastic::RedbackMechMaterialElastic(const InputParameters & parameters) :
+    RedbackMechMaterial(parameters)
 {
 }
 

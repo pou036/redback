@@ -28,7 +28,7 @@ InputParameters validParams<RedbackPoromechanics>();
 class RedbackPoromechanics : public Kernel
 {
 public:
-  RedbackPoromechanics(const std::string & name, InputParameters parameters);
+  RedbackPoromechanics(const InputParameters & parameters);
   virtual ~RedbackPoromechanics();
 
 protected:

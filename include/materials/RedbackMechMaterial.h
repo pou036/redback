@@ -35,7 +35,7 @@ InputParameters validParams<RedbackMechMaterial>();
 class RedbackMechMaterial : public Material
 {
 public:
-  RedbackMechMaterial(const std::string & name, InputParameters parameters);
+  RedbackMechMaterial(const InputParameters & parameters);
 
 protected:
   // Copy-paste from TensorMechanicsMaterial.h

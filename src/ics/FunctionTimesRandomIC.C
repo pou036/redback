@@ -12,14 +12,14 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "FunctionWithRandomIC.h"
+#include "FunctionTimesRandomIC.h"
 #include "Function.h"
 #include "MooseRandom.h"
 
 #include "libmesh/point.h"
 
 template<>
-InputParameters validParams<FunctionWithRandomIC>()
+InputParameters validParams<FunctionTimesRandomIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addParam<Real>("min", 0.0, "Lower bound of the randomly generated values");
@@ -29,19 +29,19 @@ InputParameters validParams<FunctionWithRandomIC>()
   return params;
 }
 
-FunctionWithRandomIC::FunctionWithRandomIC(const InputParameters & parameters) :
+FunctionTimesRandomIC::FunctionTimesRandomIC(const InputParameters & parameters) :
     InitialCondition(parameters),
     _min(getParam<Real>("min")),
     _max(getParam<Real>("max")),
     _range(_max - _min),
 	_func(getFunction("function"))
 {
-  mooseAssert(_range > 0.0, "Min > Max for FunctionWithRandomIC!");
+  mooseAssert(_range > 0.0, "Min > Max for FunctionTimesRandomIC!");
   MooseRandom::seed(getParam<unsigned int>("seed"));
 }
 
 Real
-FunctionWithRandomIC::value(const Point & p)
+FunctionTimesRandomIC::value(const Point & p)
 {
   //Random number between 0 and 1
   Real rand_num = MooseRandom::rand();
@@ -52,5 +52,5 @@ FunctionWithRandomIC::value(const Point & p)
   //Between min and max
   rand_num += _min;
 
-  return rand_num + _func.value(_t, p);
+  return rand_num * _func.value(_t, p);
 }

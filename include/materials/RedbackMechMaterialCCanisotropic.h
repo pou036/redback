@@ -26,7 +26,7 @@ InputParameters validParams<RedbackMechMaterialCCanisotropic>();
 class RedbackMechMaterialCCanisotropic : public RedbackMechMaterialCC
 {
 public:
-  RedbackMechMaterialCCanisotropic(const std::string & name, InputParameters parameters);
+  RedbackMechMaterialCCanisotropic(const InputParameters & parameters);
 
 protected:
   Real _initial_anisotropy_param; // Initial coefficient alpha of anisotropy (Dafalias 2013)

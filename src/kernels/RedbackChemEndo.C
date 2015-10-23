@@ -24,8 +24,8 @@ InputParameters validParams<RedbackChemEndo>()
 }
 
 
-RedbackChemEndo::RedbackChemEndo(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters),
+RedbackChemEndo::RedbackChemEndo(const InputParameters & parameters) :
+  Kernel(parameters),
   _chemical_endothermic_energy(getMaterialProperty<Real>("chemical_endothermic_energy")),
   _chemical_endothermic_energy_jac(getMaterialProperty<Real>("chemical_endothermic_energy_jacobian")),
   _time_factor(getParam<Real>("time_factor"))

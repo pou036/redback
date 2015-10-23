@@ -26,7 +26,7 @@ InputParameters validParams<RedbackThermalDiffusion>();
 class RedbackThermalDiffusion : public Kernel
 {
 public:
-  RedbackThermalDiffusion(const std::string & name, InputParameters parameters);
+  RedbackThermalDiffusion(const InputParameters & parameters);
   virtual ~RedbackThermalDiffusion();
 
 protected:
