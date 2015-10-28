@@ -1,18 +1,25 @@
 [Tests]
-  [./test_7_HM_J2] # can't put a dot in that name!
-    type = 'Exodiff'
-    input = 'bench_HM_J2.i'
-    exodiff = 'bench_HM_J2_out.e'
-  [../]
-  [./test_7_HM_DP] # can't put a dot in that name!
-    type = 'Exodiff'
-    input = 'bench_HM_DP.i'
-    exodiff = 'bench_HM_DP_out.e'
-  [../]
-  [./test_7_HM_CC] # can't put a dot in that name!
-    type = 'Exodiff'
-    input = 'bench_HM_CC.i'
-    exodiff = 'bench_HM_CC_out.e'
-    rel_err = 1e-5
+#  [./test_7_HM_J2] # can't put a dot in that name!
+#    type = 'Exodiff'
+#    input = 'bench_HM_J2.i'
+#    exodiff = 'bench_HM_J2_out.e'
+#  [../]
+#  [./test_7_HM_DP] # can't put a dot in that name!
+#    type = 'Exodiff'
+#    input = 'bench_HM_DP.i'
+#    exodiff = 'bench_HM_DP_out.e'
+#  [../]
+#  [./test_7_HM_CC] # can't put a dot in that name!
+#    type = 'Exodiff'
+#    input = 'bench_HM_CC.i'
+#    exodiff = 'bench_HM_CC_out.e'
+#    rel_err = 1e-5
+#  [../]
+  [./test_7_HM_elastic] # can't put a dot in that name!
+    # Undrained odometer test (in finite strain)
+    type = 'CSVDiff'
+    input = 'bench_HM_elastic.i'
+    csvdiff = 'bench_HM_elastic.csv'
+    rel_err = 5e-3
   [../]
 []

@@ -30,6 +30,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam< Real >("alpha_2", 0, "Second parameter for activation volume, alpha_2 V_{ref} / (R T_{ref}) in the redback paper");
   params.addParam< Real >("alpha_3", 0, "Third parameter for activation volume, alpha_3 in the redback paper");
   params.addParam< Real >("confining_pressure", 1, "Normalised confining pressure");
+  params.addParam< Real >("biot_coefficient", 1.0, "Biot coefficient");
   params.addParam<bool>("is_mechanics_on", false, "is mechanics on?");
   params.addParam<bool>("is_chemistry_on", false, "is chemistry on?");
   params.addParam<bool>("are_convective_terms_on", false, "are convective terms on?");
@@ -89,6 +90,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
   _ar_param(getParam<Real>("ar")),
   _delta_param(getParam<Real>("delta")),
   _confining_pressure_param(getParam<Real>("confining_pressure")),
+  _biot_coeff_param(getParam<Real>("biot_coefficient")),
   _alpha_1_param(getParam<Real>("alpha_1")),
   _alpha_2_param(getParam<Real>("alpha_2")),
   _alpha_3_param(getParam<Real>("alpha_3")),
@@ -123,6 +125,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
   _ref_lewis_nb(declareProperty<Real>("ref_lewis_nb")),
   _ar(declareProperty<Real>("ar")),
   _confining_pressure(declareProperty<Real>("confining_pressure")),
+  _biot_coeff(declareProperty<Real>("biot_coefficient")),
   _alpha_1(declareProperty<Real>("alpha_1")),
   _alpha_2(declareProperty<Real>("alpha_2")),
   _alpha_3(declareProperty<Real>("alpha_3")),
@@ -286,6 +289,7 @@ void RedbackMaterial::stepInitQpProperties()
   }
 
   _confining_pressure[_qp] = _confining_pressure_param;
+  _biot_coeff[_qp] = _biot_coeff_param;
   _alpha_1[_qp] = _alpha_1_param;
   _alpha_2[_qp] = _alpha_2_param;
   _alpha_3[_qp] = _alpha_3_param;

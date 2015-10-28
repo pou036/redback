@@ -118,6 +118,7 @@ protected:
   MaterialProperty<Real> & _mises_strain_rate;
   MaterialProperty<Real> & _volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;
+  MaterialProperty<Real> & _def_grad_rate;
   MaterialProperty<Real> & _total_volumetric_strain;
   MaterialProperty<Real> & _mechanical_porosity;
   MaterialProperty<Real> & _poromech_jac;

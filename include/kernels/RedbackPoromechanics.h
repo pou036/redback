@@ -37,6 +37,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   const MaterialProperty<Real> & _volumetric_strain_rate;
+  const MaterialProperty<Real> & _def_grad_rate;
   const MaterialProperty<Real> & _mixture_compressibility;
   const MaterialProperty<Real> & _poromech_jac;
 

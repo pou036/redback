@@ -30,6 +30,7 @@ RedbackStressDivergenceTensors::RedbackStressDivergenceTensors(const InputParame
     _Jacobian_mult(getMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
     // _d_stress_dT(getMaterialProperty<RankTwoTensor>("d_stress_dT"+ getParam<std::string>("appended_property_name"))),
     _component(getParam<unsigned int>("component")),
+    _biot_coeff(getMaterialProperty<Real>("biot_coefficient")),
 
     _xdisp_coupled(isCoupled("disp_x")),
     _ydisp_coupled(isCoupled("disp_y")),
@@ -61,7 +62,7 @@ RedbackStressDivergenceTensors::computeQpResidual()
   if ( _pore_pres_coupled )
   {
     _poromech_stress_row = _stress[_qp].row(_component);
-    _poromech_stress_row(_component) += _pore_pres[_qp];
+    _poromech_stress_row(_component) += _biot_coeff[_qp]*_pore_pres[_qp];
     return (_poromech_stress_row + _gravity_term[_qp])* _grad_test[_i][_qp];
   }
 

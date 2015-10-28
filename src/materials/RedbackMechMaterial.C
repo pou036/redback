@@ -107,6 +107,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
     _volumetric_strain(declareProperty<Real>("volumetric_strain")),
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
+    _def_grad_rate(declareProperty<Real>("deformation_gradient")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
     _mechanical_porosity(declareProperty<Real>("mechanical_porosity")),
     _poromech_jac(declareProperty<Real>("poromechanics_jacobian")),
@@ -166,6 +167,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mises_strain_rate[_qp] = 0;
   _volumetric_strain[_qp] = 0;
   _volumetric_strain_rate[_qp] = 0;
+  _def_grad_rate[_qp] = 0;
   _total_volumetric_strain[_qp] = 0;
   _mechanical_porosity[_qp] = 0;
 }
@@ -286,10 +288,12 @@ void RedbackMechMaterial::computeQpStress()
 
   //Update strain in intermediate configuration
   _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
+  /*RankTwoTensor grad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
+  RankTwoTensor total_strain_small_deformation = ( grad_tensor + grad_tensor.transpose() )/2.0;*/
 
   //Rotate strain to current configuration
   _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
-  _total_volumetric_strain[_qp] = _total_strain[_qp].trace()/3.0;
+  _total_volumetric_strain[_qp] = _total_strain[_qp].trace();
 
   //Compute the energy dissipation and the properties declared
   computeRedbackTerms(sig, q_y, p_y);
@@ -354,6 +358,7 @@ void
 RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y)
 {
   Real delta_phi_mech_el, delta_phi_mech_pl; // elastic and plastic delta_porosity components for that step
+  Real def_grad, def_grad_old;
   // update velocities
   //_solid_velocity[_qp] = RealVectorValue(_dispx_dot[_qp], _dispy_dot[_qp], _dispz_dot[_qp]);// TODO
 
@@ -364,7 +369,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _mean_stress[_qp] = sig.trace()/3.0;
 
   // Compute platic strains
-  RankTwoTensor instantaneous_strain_rate;
+  RankTwoTensor instantaneous_strain_rate, total_volumetric_strain_rate;
 
   if (_dt == 0)
   {
@@ -374,8 +379,12 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   {
     instantaneous_strain_rate = (_plastic_strain[_qp] - _plastic_strain_old[_qp])/_dt;
   }
+  total_volumetric_strain_rate = (_total_strain[_qp] - _total_strain_old[_qp])/_dt;
   _mises_strain_rate[_qp] = std::pow(2.0/3.0,0.5) * instantaneous_strain_rate.L2norm();
-  _volumetric_strain_rate[_qp] = instantaneous_strain_rate.trace()/3.0;
+  _volumetric_strain_rate[_qp] = total_volumetric_strain_rate.trace()/3.0;
+  def_grad = _grad_disp_x[_qp](0) +_grad_disp_y[_qp](1) + _grad_disp_z[_qp](2);
+  def_grad_old = _grad_disp_x_old[_qp](0) +_grad_disp_y_old[_qp](1) + _grad_disp_z_old[_qp](2);
+  _def_grad_rate[_qp] = (def_grad - def_grad_old)/_dt;
 
   // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
   _mechanical_dissipation_mech[_qp] = _gr[_qp]*std::exp(_ar[_qp])*sig.doubleContraction(instantaneous_strain_rate);

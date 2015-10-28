@@ -26,6 +26,7 @@ InputParameters validParams<RedbackPoromechanics>()
 RedbackPoromechanics::RedbackPoromechanics(const InputParameters & parameters) :
     Kernel(parameters),
     _volumetric_strain_rate(getMaterialProperty<Real>("volumetric_strain_rate")),
+    _def_grad_rate(getMaterialProperty<Real>("deformation_gradient")),
     _mixture_compressibility(getMaterialProperty<Real>("mixture_compressibility")),
     _poromech_jac(getMaterialProperty<Real>("poromechanics_jacobian")),
     _temp_var(coupled("temperature")),
@@ -40,10 +41,13 @@ RedbackPoromechanics::~RedbackPoromechanics()
 Real
 RedbackPoromechanics::computeQpResidual()
 {
-  return (_time_factor * _volumetric_strain_rate[_qp] / _mixture_compressibility[_qp]) * _test[_i][_qp];
+  /*std::cout << "_volumetric_strain_rate[_qp]="<<_volumetric_strain_rate[_qp]<<std::endl;
+  std::cout << "_def_grad_rate[_qp]="<<_def_grad_rate[_qp]<<std::endl;
+  std::cout << "_time_factor="<<_time_factor<<std::endl;
+  std::cout << "_mixture_compressibility[_qp]="<<_mixture_compressibility[_qp]<<std::endl<<std::endl;*/
+  return (_time_factor * _def_grad_rate[_qp] / _mixture_compressibility[_qp]) * _test[_i][_qp];
   // TODO: add note in doco to tell users not to turn on term if compress=0
   // TODO: add check compress > 0
-  // TODO: this is the small strain formulation. Write it in finite strain... (add second order term)
 }
 
 Real
@@ -57,7 +61,7 @@ RedbackPoromechanics::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _temp_var)
   {
-    return (_time_factor * _volumetric_strain_rate[_qp] / _mixture_compressibility[_qp]) * _poromech_jac[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    return (_time_factor * _def_grad_rate[_qp] / _mixture_compressibility[_qp]) * _poromech_jac[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   return 0;
 }

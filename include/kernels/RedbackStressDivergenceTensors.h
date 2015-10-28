@@ -38,6 +38,8 @@ protected:
 
   const unsigned int _component;
 
+  const MaterialProperty<Real> & _biot_coeff;
+
 private:
   const bool _xdisp_coupled;
   const bool _ydisp_coupled;
