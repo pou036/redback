@@ -36,9 +36,7 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  const MaterialProperty<Real> & _volumetric_strain_rate;
-  const MaterialProperty<Real> & _def_grad_rate;
-  const MaterialProperty<Real> & _mixture_compressibility;
+  const MaterialProperty<Real> & _poromech_kernel;
   const MaterialProperty<Real> & _poromech_jac;
 
   unsigned int _temp_var; // variable number of the temperature variable

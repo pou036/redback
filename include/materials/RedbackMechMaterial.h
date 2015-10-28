@@ -118,9 +118,9 @@ protected:
   MaterialProperty<Real> & _mises_strain_rate;
   MaterialProperty<Real> & _volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;
-  MaterialProperty<Real> & _def_grad_rate;
   MaterialProperty<Real> & _total_volumetric_strain;
   MaterialProperty<Real> & _mechanical_porosity;
+  MaterialProperty<Real> & _poromech_kernel;
   MaterialProperty<Real> & _poromech_jac;
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _mechanical_dissipation_mech;
@@ -150,6 +150,8 @@ protected:
   const MaterialProperty<Real> & _delta;
   const MaterialProperty<Real> & _solid_thermal_expansion;
   const MaterialProperty<Real> & _solid_compressibility;
+  const MaterialProperty<Real> & _mixture_compressibility;
+  const MaterialProperty<Real> & _peclet_number;
   MaterialProperty<Real> & _returnmap_iter;
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);

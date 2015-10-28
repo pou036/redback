@@ -55,7 +55,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("eta2", 1, "ratio of concentrations (see documentation).");
   params.addRangeCheckedParam<Real>("Aphi","Aphi>=0 & Aphi<=1", "percentage of volume change from chemistry contributing to porosity (see documentation)");
   params.addParam<Real>("pressurization_coefficient", 0, "Pressurization coefficient (Lambda).");
-  params.addParam<Real>("Peclet_number", 1, "Reference K/Pa quantity for Peclet number (delta*T_ref/sigma_ref)");
+  params.addParam<Real>("Peclet_number", 1, "Peclet number");
 
   params.addParam<Real>("solid_compressibility", 1, "solid compressibility (beta^{(s)} in 1/Pa)"); // _solid_compressibility_param
   params.addParam<Real>("fluid_compressibility", 0, "fluid compressibility (beta^{(f)} in 1/Pa)"); // _fluid_compressibility_param
@@ -94,7 +94,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
   _alpha_1_param(getParam<Real>("alpha_1")),
   _alpha_2_param(getParam<Real>("alpha_2")),
   _alpha_3_param(getParam<Real>("alpha_3")),
-  _peclet_number(getParam<Real>("Peclet_number")),
+  _peclet_number_param(getParam<Real>("Peclet_number")),
   _ar_F_param(getParam<Real>("ar_F")),
   _ar_R_param(getParam<Real>("ar_R")),
   _da_endo_param(getParam<Real>("da_endo")),
@@ -129,6 +129,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
   _alpha_1(declareProperty<Real>("alpha_1")),
   _alpha_2(declareProperty<Real>("alpha_2")),
   _alpha_3(declareProperty<Real>("alpha_3")),
+  _peclet_number(declareProperty<Real>("Peclet_number")),
   _delta(declareProperty<Real>("delta")),
 
   _delta_T(declareProperty<Real>("delta_T")),
@@ -293,6 +294,7 @@ void RedbackMaterial::stepInitQpProperties()
   _alpha_1[_qp] = _alpha_1_param;
   _alpha_2[_qp] = _alpha_2_param;
   _alpha_3[_qp] = _alpha_3_param;
+  _peclet_number[_qp] = _peclet_number_param;
   _delta[_qp] = _delta_param;
   _lewis_number[_qp] = _ref_lewis_nb[_qp];
   _ar_F[_qp] = _ar_F_param;
@@ -462,12 +464,12 @@ RedbackMaterial::computeRedbackTerms()
     lambda_m_star = one_minus_phi_lambda_s + phi_lambda_f; // normalized compressibility of the mixture
 
     // Forming the velocities through mechanics and Darcy's flow law
-    _fluid_velocity[_qp] = _solid_velocity[_qp] - beta_star_m*(_grad_pore_pressure[_qp] - fluid_density*normalized_gravity)/(_peclet_number*_lewis_number[_qp]*_total_porosity[_qp]); //solving Darcy's flux for the fluid velocity
+    _fluid_velocity[_qp] = _solid_velocity[_qp] - beta_star_m*(_grad_pore_pressure[_qp] - fluid_density*normalized_gravity)/(_peclet_number[_qp]*_lewis_number[_qp]*_total_porosity[_qp]); //solving Darcy's flux for the fluid velocity
     mixture_velocity = (solid_density/_mixture_density[_qp])*_solid_velocity[_qp] + (fluid_density/_mixture_density[_qp])*_fluid_velocity[_qp]; //barycentric velocity for the mixture
 
     // Forming the kernels and their jacobians
-    _pressure_convective_mass[_qp] = _peclet_number*((one_minus_phi_beta_star_s/beta_star_m)*_solid_velocity[_qp] + (phi_beta_star_f/beta_star_m)*_fluid_velocity[_qp]); //convective term multiplying the pressure flux in the mass equation. TODO: disable for incompressible case
-    _thermal_convective_mass[_qp] = _peclet_number*((one_minus_phi_lambda_s/beta_star_m)*_solid_velocity[_qp] + (phi_lambda_f/beta_star_m)*_fluid_velocity[_qp]); //convective term multiplying the thermal flux in the mass equation
+    _pressure_convective_mass[_qp] = _peclet_number[_qp]*((one_minus_phi_beta_star_s/beta_star_m)*_solid_velocity[_qp] + (phi_beta_star_f/beta_star_m)*_fluid_velocity[_qp]); //convective term multiplying the pressure flux in the mass equation. TODO: disable for incompressible case
+    _thermal_convective_mass[_qp] = _peclet_number[_qp]*((one_minus_phi_lambda_s/beta_star_m)*_solid_velocity[_qp] + (phi_lambda_f/beta_star_m)*_fluid_velocity[_qp]); //convective term multiplying the thermal flux in the mass equation
 
     //_convective_mass_jac_vec[_qp] = _pressure_convective_mass[_qp] - (_fluid_compressibility[_qp]*_grad_pore_pressure[_qp] - _fluid_thermal_expansion[_qp]*_grad_temp[_qp])/_lewis_number[_qp];
     //_convective_mass_jac_real[_qp] = (_fluid_compressibility[_qp]*fluid_density*normalized_gravity/_lewis_number[_qp])*(_fluid_compressibility[_qp]*_grad_pore_pressure[_qp] - _fluid_thermal_expansion[_qp]*_grad_temp[_qp]);
@@ -475,9 +477,9 @@ RedbackMaterial::computeRedbackTerms()
     //_convective_mass_off_diag_vec[_qp] = -_thermal_convective_mass[_qp];
     //_convective_mass_off_diag_real[_qp] = -(_fluid_thermal_expansion[_qp]*fluid_density*normalized_gravity/_lewis_number[_qp])*(_fluid_compressibility[_qp]*_grad_pore_pressure[_qp] - _fluid_thermal_expansion[_qp]*_grad_temp[_qp]);
 
-    _mixture_convective_energy[_qp] = _peclet_number*mixture_velocity; //convective term multiplying the thermal flux in the energy equation
-    //_mixture_convective_energy_jac[_qp] = -(_peclet_number/_lewis_number[_qp])*lambda_fluid*_fluid_gravity_term[_qp]*_grad_temp[_qp]; //RealVectorValue(); //derivative with respect to temperature
-    //_mixture_convective_energy_off_jac[_qp] = (_peclet_number/_lewis_number[_qp])*(phi_beta_star_f*_fluid_gravity_term[_qp]*_grad_temp[_qp] - 0); // 2nd term is for del_square_P; //derivative with respect to temperature
+    _mixture_convective_energy[_qp] = _peclet_number[_qp]*mixture_velocity; //convective term multiplying the thermal flux in the energy equation
+    //_mixture_convective_energy_jac[_qp] = -(_peclet_number[_qp]/_lewis_number[_qp])*lambda_fluid*_fluid_gravity_term[_qp]*_grad_temp[_qp]; //RealVectorValue(); //derivative with respect to temperature
+    //_mixture_convective_energy_off_jac[_qp] = (_peclet_number[_qp]/_lewis_number[_qp])*(phi_beta_star_f*_fluid_gravity_term[_qp]*_grad_temp[_qp] - 0); // 2nd term is for del_square_P; //derivative with respect to temperature
   }
   return;
 }

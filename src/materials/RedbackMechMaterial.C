@@ -107,9 +107,9 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
     _volumetric_strain(declareProperty<Real>("volumetric_strain")),
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
-    _def_grad_rate(declareProperty<Real>("deformation_gradient")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
     _mechanical_porosity(declareProperty<Real>("mechanical_porosity")),
+    _poromech_kernel(declareProperty<Real>("poromechanics_kernel")),
     _poromech_jac(declareProperty<Real>("poromechanics_jacobian")),
     _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
     _mechanical_dissipation_mech(declareProperty<Real>("mechanical_dissipation_mech")),
@@ -134,6 +134,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _delta(getMaterialProperty<Real>("delta")),
     _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion")),
     _solid_compressibility(getMaterialProperty<Real>("solid_compressibility")),
+    _mixture_compressibility(getMaterialProperty<Real>("mixture_compressibility")),
+    _peclet_number(getMaterialProperty<Real>("Peclet_number")),
     _returnmap_iter(declareProperty<Real>("returnmap_iter"))
 {
   Real E = _youngs_modulus;
@@ -167,7 +169,6 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mises_strain_rate[_qp] = 0;
   _volumetric_strain[_qp] = 0;
   _volumetric_strain_rate[_qp] = 0;
-  _def_grad_rate[_qp] = 0;
   _total_volumetric_strain[_qp] = 0;
   _mechanical_porosity[_qp] = 0;
 }
@@ -358,7 +359,7 @@ void
 RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y)
 {
   Real delta_phi_mech_el, delta_phi_mech_pl; // elastic and plastic delta_porosity components for that step
-  Real def_grad, def_grad_old;
+  Real def_grad, def_grad_old, def_grad_rate;
   // update velocities
   //_solid_velocity[_qp] = RealVectorValue(_dispx_dot[_qp], _dispy_dot[_qp], _dispz_dot[_qp]);// TODO
 
@@ -384,7 +385,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _volumetric_strain_rate[_qp] = total_volumetric_strain_rate.trace()/3.0;
   def_grad = _grad_disp_x[_qp](0) +_grad_disp_y[_qp](1) + _grad_disp_z[_qp](2);
   def_grad_old = _grad_disp_x_old[_qp](0) +_grad_disp_y_old[_qp](1) + _grad_disp_z_old[_qp](2);
-  _def_grad_rate[_qp] = (def_grad - def_grad_old)/_dt;
+  def_grad_rate = (def_grad - def_grad_old)/_dt;
 
   // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
   _mechanical_dissipation_mech[_qp] = _gr[_qp]*std::exp(_ar[_qp])*sig.doubleContraction(instantaneous_strain_rate);
@@ -392,6 +393,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   // Compute Mechanical Dissipation Jacobian
   _mechanical_dissipation_jac_mech[_qp] = _mechanical_dissipation_mech[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
 
+  _poromech_kernel[_qp] = def_grad_rate * _peclet_number[_qp] / _mixture_compressibility[_qp];
   _poromech_jac[_qp] = (1 / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]));
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE

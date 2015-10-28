@@ -93,7 +93,7 @@
     phi0 = 0.1
     ref_lewis_nb = 1
     total_porosity = 0.1
-    Peclet_number = 0
+    Peclet_number = 1
     solid_density = 0
     disp_z = disp_z
     confining_pressure = 0

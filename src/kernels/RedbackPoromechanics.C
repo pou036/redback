@@ -25,9 +25,7 @@ InputParameters validParams<RedbackPoromechanics>()
 
 RedbackPoromechanics::RedbackPoromechanics(const InputParameters & parameters) :
     Kernel(parameters),
-    _volumetric_strain_rate(getMaterialProperty<Real>("volumetric_strain_rate")),
-    _def_grad_rate(getMaterialProperty<Real>("deformation_gradient")),
-    _mixture_compressibility(getMaterialProperty<Real>("mixture_compressibility")),
+    _poromech_kernel(getMaterialProperty<Real>("poromechanics_kernel")),
     _poromech_jac(getMaterialProperty<Real>("poromechanics_jacobian")),
     _temp_var(coupled("temperature")),
     _time_factor(getParam<Real>("time_factor"))
@@ -41,11 +39,7 @@ RedbackPoromechanics::~RedbackPoromechanics()
 Real
 RedbackPoromechanics::computeQpResidual()
 {
-  /*std::cout << "_volumetric_strain_rate[_qp]="<<_volumetric_strain_rate[_qp]<<std::endl;
-  std::cout << "_def_grad_rate[_qp]="<<_def_grad_rate[_qp]<<std::endl;
-  std::cout << "_time_factor="<<_time_factor<<std::endl;
-  std::cout << "_mixture_compressibility[_qp]="<<_mixture_compressibility[_qp]<<std::endl<<std::endl;*/
-  return (_time_factor * _def_grad_rate[_qp] / _mixture_compressibility[_qp]) * _test[_i][_qp];
+  return _time_factor * _poromech_kernel[_qp] * _test[_i][_qp];
   // TODO: add note in doco to tell users not to turn on term if compress=0
   // TODO: add check compress > 0
 }
@@ -61,7 +55,7 @@ RedbackPoromechanics::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _temp_var)
   {
-    return (_time_factor * _def_grad_rate[_qp] / _mixture_compressibility[_qp]) * _poromech_jac[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    return _time_factor * _poromech_kernel[_qp] * _poromech_jac[_qp] * _phi[_j][_qp] * _test[_i][_qp];
   }
   return 0;
 }

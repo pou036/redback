@@ -74,7 +74,7 @@ The system in its final form is
   Pe\:v^T_i \pdiff{T}{i} - \pdiff{\left[\frac{1}{Le} \pdiff{
   p_f}{i} \right]}{i} \\ \nonumber
   ~ & \qquad\qquad - \Lambda \pdiff{T}{t} +
-  \frac{Pe\:\dot{\epsilon_V}}{\bar{\beta}\:\sigma_{ref}} -\frac{1}{Le_{chem}}
+  \frac{Pe\:\dot{\epsilon_V}}{\bar{\beta}^*} -\frac{1}{Le_{chem}}
   \omega_F, \\
   0 &= \pdiff{T}{t} + Pe\:\bar{v_i}\pdiff{T}{i} - \pd_{ii}^2 T - Gr
   \: \sigma_{ij}^{pl}\dot{\epsilon}_{ij}^{\,pl}  \\ \nonumber
@@ -86,6 +86,7 @@ The system in its final form is
 All dimensionless groups are defined in Tab.~\ref{tab:dimensionless_nbs} and
 \begin{align*}
   \bar{\beta} &= (1-\phi)\beta_s + \phi\beta_f, \\
+  \bar{\beta}^* &= \bar{\beta}\:\sigma_{ref}, \\
   v_i^p &= (1-\phi)\frac{\beta_s}{\bar{\beta}} v_i^s + 
     \phi\frac{\beta_f}{\bar{\beta}}v_i^f, \\
   v^T_i &= (1-\phi)\frac{\bar{\lambda}_s}{\bar{\beta}} v_i^s + 
@@ -522,7 +523,7 @@ The mass balance equation then becomes
   + Pe \:\vec{v}^p \frac{\partial p^*}{\partial x^*_k} 
   - Pe \:\vec{v}^T \frac{\partial T*}{\partial x^*_k} \\
   + \frac{\partial}{\partial x^*_k} \left[ \underbrace{\frac{k \: \sigma_{ref}}{\mu_f\:c_{th}\:\beta^*_m}}_{1/Le} \left( \frac{\partial p^*}{\partial x^*_k} - \underbrace{\rho_f \frac{x_{ref}}{\sigma_{ref}}g}_{(\rho_f\:g)^*}\: \vec{e}_z  \right) \right]
-  + \frac{Pe}{\beta_m\:\sigma_{ref}} \dot{\epsilon}^*_V  
+  + \frac{Pe}{\beta^*_m} \dot{\epsilon}^*_V  
   = \frac{x^2_{ref}}{\beta_m\:\sigma_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
 \end{multline}
 
