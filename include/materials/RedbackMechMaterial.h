@@ -134,9 +134,9 @@ protected:
 
   // Using variables
   bool _has_T;
-  VariableValue & _T, & _T_old;
+  VariableValue & _T;
   bool _has_pore_pres;
-  VariableValue & _pore_pres, & _pore_pres_old;
+  VariableValue & _pore_pres;
   VariableValue & _total_porosity;
 
   // Reading material properties from RedbackMaterial
@@ -153,6 +153,8 @@ protected:
   const MaterialProperty<Real> & _mixture_compressibility;
   const MaterialProperty<Real> & _peclet_number;
   MaterialProperty<Real> & _returnmap_iter;
+
+  Real _T0_param, _P0_param;
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
 };

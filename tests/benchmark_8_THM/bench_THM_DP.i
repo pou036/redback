@@ -159,7 +159,7 @@
 []
 
 [AuxVariables]
-  active = 'mech_porosity Mod_Gruntfest_number solid_ratio total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress Lewis_number'
+  active = 'mech_porosity solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -272,7 +272,7 @@
 []
 
 [AuxKernels]
-  active = 'mech_porosity volumetric_strain solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress Gruntfest_Number'
+  active = 'mech_porosity volumetric_strain solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress

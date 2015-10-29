@@ -58,6 +58,8 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
 
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
+  params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
+  params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
 
   return params;
 }
@@ -118,10 +120,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     // Get coupled variables (T & P)
     _has_T(isCoupled("temperature")),
     _T(_has_T ? coupledValue("temperature") : _zero),
-    _T_old(_has_T ? coupledValueOld("temperature") : _zero),
     _has_pore_pres(isCoupled("pore_pres")),
     _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
-    _pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
     _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
 
     // Get some material properties from RedbackMaterial
@@ -136,7 +136,9 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _solid_compressibility(getMaterialProperty<Real>("solid_compressibility")),
     _mixture_compressibility(getMaterialProperty<Real>("mixture_compressibility")),
     _peclet_number(getMaterialProperty<Real>("Peclet_number")),
-    _returnmap_iter(declareProperty<Real>("returnmap_iter"))
+    _returnmap_iter(declareProperty<Real>("returnmap_iter")),
+    _T0_param(getParam<Real>("temperature_reference")),
+    _P0_param(getParam<Real>("pressure_reference"))
 {
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
@@ -273,7 +275,7 @@ void RedbackMechMaterial::computeQpStress()
 
   //Evaluate and update current equivalent and volumetric plastic strain
   _eqv_plastic_strain[_qp] = std::pow(2.0/3.0,0.5) * dp.L2norm();
-  _volumetric_strain[_qp] = dp.trace()/3.0;
+  _volumetric_strain[_qp] = dp.trace();
 
   //Calculate elastic strain increment
   RankTwoTensor delta_ee = _strain_increment[_qp]-(_plastic_strain[_qp]-_plastic_strain_old[_qp]);
@@ -382,7 +384,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   }
   total_volumetric_strain_rate = (_total_strain[_qp] - _total_strain_old[_qp])/_dt;
   _mises_strain_rate[_qp] = std::pow(2.0/3.0,0.5) * instantaneous_strain_rate.L2norm();
-  _volumetric_strain_rate[_qp] = total_volumetric_strain_rate.trace()/3.0;
+  _volumetric_strain_rate[_qp] = total_volumetric_strain_rate.trace();
   def_grad = _grad_disp_x[_qp](0) +_grad_disp_y[_qp](1) + _grad_disp_z[_qp](2);
   def_grad_old = _grad_disp_x_old[_qp](0) +_grad_disp_y_old[_qp](1) + _grad_disp_z_old[_qp](2);
   def_grad_rate = (def_grad - def_grad_old)/_dt;
@@ -404,9 +406,12 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
       );
 
   // Update mechanical porosity (elastic and plastic components)
-  delta_phi_mech_el = (1.0 - _total_porosity[_qp])*(_solid_compressibility[_qp]*(_pore_pres[_qp] - _pore_pres_old[_qp]) -
-      _solid_thermal_expansion[_qp]*(_T[_qp] - _T_old[_qp]));
-  delta_phi_mech_pl = (1.0 - _total_porosity[_qp])*(_plastic_strain[_qp] - _plastic_strain_old[_qp]).trace()/3.0;
+  // TODO: set T0 properly (once only, at the very beginning). Until then, T = T - T0, P = P - P0
+  delta_phi_mech_el = (1.0 - _total_porosity[_qp])*(_solid_compressibility[_qp]*(_pore_pres[_qp] - _P0_param)
+      - _solid_thermal_expansion[_qp]*(_T[_qp] - _T0_param)
+      + (_elastic_strain[_qp] - _elastic_strain_old[_qp]).trace());
+  delta_phi_mech_pl = (1.0 - _total_porosity[_qp])*(_plastic_strain[_qp] - _plastic_strain_old[_qp]).trace();
+
   _mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
   return;
 }
@@ -424,7 +429,7 @@ RedbackMechMaterial::computeQpStrain(const RankTwoTensor & Fhat)
   _strain_increment[_qp] = -Cinv_I*0.5 + Cinv_I*Cinv_I*0.25;
 
   // thermo-elasticity
-  _strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp]*(_T[_qp] - _T_old[_qp]));
+  _strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp]*(_T[_qp] - _T0_param));
 
   /*RankTwoTensor Chat = Fhat.transpose()*Fhat;
   RankTwoTensor A = Chat;

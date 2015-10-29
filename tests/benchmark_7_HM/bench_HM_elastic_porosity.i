@@ -10,7 +10,7 @@
 # stress_xx = (bulk - 2*shear/3)*strain_zz (remember this is effective stress)
 # stress_zz = (bulk + 4*shear/3)*strain_zz (remember this is effective stress)
 # where L is the height of the sample (L=1 in this test),
-#  strain_zz = v_z * t /L + 0.5*[v_z * t /L]^2   (in finite strain)
+# strain_zz = v_z * t /L + 0.5*[v_z * t /L]^2   (in finite strain)
 # 
 # Parameters:
 # Biot coefficient = 0.3
@@ -61,7 +61,7 @@
 []
 
 [GlobalParams]
-  time_factor = 10
+  time_factor = 1
 []
 
 [Materials]
@@ -72,12 +72,13 @@
     disp_y = disp_y
     pore_pres = pore_pressure
     exponent = 0
-    youngs_modulus = 3.6
-    poisson_ratio = 0.2
+    youngs_modulus = 3e5
+    poisson_ratio = 0.25
     ref_pe_rate = 0
     yield_stress = '0. 1 1. 1'
-    total_porosity = 0.1
+    total_porosity = total_porosity
     disp_z = disp_z
+    #outputs = all
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -93,8 +94,8 @@
     gr = 0 # exp(-Ar), Ar=10
     phi0 = 0.1
     ref_lewis_nb = 1
-    total_porosity = 0.1
-    Peclet_number = 1
+    total_porosity = total_porosity
+    Peclet_number = 9e-6 # biot*peclet
     solid_density = 0
     disp_z = disp_z
     confining_pressure = 0
@@ -102,7 +103,8 @@
     is_mechanics_on = true
     fluid_density = 0
     eta2 = 0
-    solid_compressibility = 3.7037 # 1/(0.9*0.3)
+    solid_compressibility = 1e-6 # 1/(0.9*0.3)  3.7037
+    biot_coefficient = 0.9
   [../]
 []
 
@@ -128,13 +130,12 @@
   [./top_velocity]
     type = FunctionPresetBC
     variable = disp_z
-    function = -0.01*t
+    function = -0.001*t
     boundary = front
   [../]
 []
 
 [AuxVariables]
-  active = 'stress_yy stress_xz stress_xx stress_xy stress_zz stress_yz'
   [./total_porosity]
     order = FIRST
     family = MONOMIAL
@@ -160,6 +161,10 @@
     family = MONOMIAL
   [../]
   [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./mech_porosity]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -208,11 +213,11 @@
 []
 
 [AuxKernels]
-  active = 'stress_yy stress_xz stress_xx stress_xy stress_zz stress_yz'
   [./total_porosity]
     type = RedbackTotalPorosityAux
     variable = total_porosity
     mechanical_porosity = mech_porosity
+    is_mechanics_on = true
   [../]
   [./stress_xx]
     type = RankTwoAux
@@ -256,6 +261,12 @@
     index_i = 2
     index_j = 2
   [../]
+  [./mech_porosity]
+    type = MaterialRealAux
+    variable = mech_porosity
+    execute_on = timestep_end
+    property = mechanical_porosity
+  [../]
 []
 
 [Postprocessors]
@@ -284,6 +295,11 @@
     point = '0 0 0'
     variable = stress_zz
   [../]
+  [./total_porosity]
+    type = PointValue
+    variable = total_porosity
+    point = '0 0 0'
+  [../]
 []
 
 [Preconditioning]
@@ -306,7 +322,7 @@
 [Outputs]
   exodus = false
   execute_on = timestep_end
-  file_base = bench_HM_elastic
+  file_base = bench_HM_elastic_porosity
   csv = true
 []
 

@@ -54,7 +54,7 @@ protected:
   virtual void computeRedbackTerms();
 
   bool _has_T;
-  VariableValue & _T, & _T_old;
+  VariableValue & _T;
   bool _has_pore_pres;
   VariableValue & _pore_pres;//, & _pore_pres_old;
   VariableValue & _total_porosity;
@@ -86,7 +86,6 @@ protected:
   MaterialProperty<Real> & _alpha_3;
   MaterialProperty<Real> & _peclet_number;
   MaterialProperty<Real> & _delta;
-  MaterialProperty<Real> & _delta_T;
   MaterialProperty<Real> & _initial_porosity;
   MaterialProperty<Real> & _lewis_number;
   MaterialProperty<Real> & _mixture_compressibility;
@@ -143,6 +142,8 @@ protected:
   VariableValue & _dispy_dot;
   VariableValue & _dispz_dot;
   MaterialProperty<RealVectorValue> & _solid_velocity;
+
+  Real _T0_param, _P0_param;
 
 };
 

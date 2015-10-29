@@ -65,6 +65,10 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("fluid_density", 1, "normalised fluid density (-)"); // fluid_density_param
 
   params.addParam<RealVectorValue>("gravity", RealVectorValue(), "Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg (0,0,-9.81)");
+
+  params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
+  params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
+
   return params;
 }
 
@@ -72,7 +76,6 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
   Material(parameters),
   _has_T(isCoupled("temperature")),
   _T(_has_T ? coupledValue("temperature") : _zero),
-  _T_old(_has_T ? coupledValueOld("temperature") : _zero),
 
   _has_pore_pres(isCoupled("pore_pres")),
   _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
@@ -132,7 +135,6 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
   _peclet_number(declareProperty<Real>("Peclet_number")),
   _delta(declareProperty<Real>("delta")),
 
-  _delta_T(declareProperty<Real>("delta_T")),
   _initial_porosity(declareProperty<Real>("initial_porosity")),
   //_porosity(declareProperty<Real>("porosity")),
   _lewis_number(declareProperty<Real>("lewis_number")),
@@ -190,7 +192,10 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
   _dispx_dot(isCoupled("disp_x") ? coupledDot("disp_x") : _zero),
   _dispy_dot(isCoupled("disp_y") ? coupledDot("disp_y") : _zero),
   _dispz_dot(isCoupled("disp_z") ? coupledDot("disp_z") : _zero),
-  _solid_velocity(declareProperty<RealVectorValue>("solid_velocity"))
+  _solid_velocity(declareProperty<RealVectorValue>("solid_velocity")),
+
+  _T0_param(getParam<Real>("temperature_reference")),
+  _P0_param(getParam<Real>("pressure_reference"))
 
 {
   // Find functions to initialise parameters from
@@ -247,7 +252,6 @@ void RedbackMaterial::stepInitQpProperties()
 {
   // TODO: Variable initialisation we'd like done only once (one off)
   // but can't figure out how so doing it at every step...
-  _delta_T[_qp] = _T[_qp] - _T_old[_qp];
   _initial_porosity[_qp] = _phi0_param;
   //_porosity[_qp] = _phi0_param; // _total_porosity now coming from AuxKernel (coupled to this material in .i)
   _chemical_porosity[_qp]= 0;
@@ -444,8 +448,8 @@ RedbackMaterial::computeRedbackTerms()
      {
      case linear:
        // Linear approximation of the EOS (Equation Of State)
-       solid_density = _solid_density_param*(1 + _solid_compressibility[_qp]*_pore_pres[_qp] - _solid_thermal_expansion[_qp]*_T[_qp]); // TODO: move to AuxKernel
-       fluid_density = _fluid_density_param*(1 + _fluid_compressibility[_qp]*_pore_pres[_qp] - _fluid_thermal_expansion[_qp]*_T[_qp]);
+       solid_density = _solid_density_param*(1 + _solid_compressibility[_qp]*(_pore_pres[_qp] - _P0_param) - _solid_thermal_expansion[_qp]*(_T[_qp] - _T0_param));
+       fluid_density = _fluid_density_param*(1 + _fluid_compressibility[_qp]*(_pore_pres[_qp] - _P0_param) - _fluid_thermal_expansion[_qp]*(_T[_qp] - _T0_param));
        break;
      default:
        mooseError("density method not implemented yet, use linear");

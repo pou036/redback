@@ -1,17 +1,21 @@
 # An undrained oedometer test on a saturated poroelastic sample
-# to compare with MOOSE poromechanics test.
-# 
+# with thermal strain/stress (under constant temperature)
+
+# The results are similar to those from bench_HM_elastic.i in benchmark_7_HM
+# and the stresses need to be augmented by a factor of
+#   sigma_thermal = alpha * Delta_T * E / (1 - 2*nu)
+
 # The sample is a single unit element, with roller BCs on the sides
 # and bottom.  A constant displacement is applied to the top: disp_z = -0.01*t.
 # There is no fluid flow.
-# 
+#
 # Under these conditions
 # porepressure = -(Biot coefficient)*(Biot modulus)*disp_z/L
-# stress_xx = (bulk - 2*shear/3)*strain_zz (remember this is effective stress)
-# stress_zz = (bulk + 4*shear/3)*strain_zz (remember this is effective stress)
+# stress_xx = (bulk - 2*shear/3)*strain_zz + sigma_thermal (remember this is effective stress)
+# stress_zz = (bulk + 4*shear/3)*strain_zz + sigma_thermal (remember this is effective stress)
 # where L is the height of the sample (L=1 in this test),
 #  strain_zz = v_z * t /L + 0.5*[v_z * t /L]^2   (in finite strain)
-# 
+#
 # Parameters:
 # Biot coefficient = 0.3
 # Porosity = 0.1
@@ -19,12 +23,12 @@
 # Shear modulus = 1.5
 # fluid bulk modulus = 1/0.3 = 3.333333
 # 1/Biot modulus = (1 - 0.3)*(0.3 - 0.1)/2 + 0.1*0.3 = 0.1. BiotModulus = 10
-# 
+#
 # Desired output:
 # zdisp = -0.01*t
 # p0 = 0.03*t
-# stress_xx = stress_yy = -0.01*t - 5e-5*t^2
-# stress_zz = -0.04*t - 2e-4*t^2
+# stress_xx = stress_yy = -0.01*t - 5e-5*t^2 - 0.3
+# stress_zz = -0.04*t - 2e-4*t^2 - 0.3
 
 [Mesh]
   type = GeneratedMesh
@@ -41,7 +45,6 @@
 []
 
 [Variables]
-  active = 'pore_pressure disp_z disp_y disp_x'
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -61,7 +64,7 @@
 []
 
 [GlobalParams]
-  time_factor = 10
+  time_factor = 1
 []
 
 [Materials]
@@ -78,6 +81,7 @@
     yield_stress = '0. 1 1. 1'
     total_porosity = 0.1
     disp_z = disp_z
+    temperature = temp
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -94,7 +98,7 @@
     phi0 = 0.1
     ref_lewis_nb = 1
     total_porosity = 0.1
-    Peclet_number = 1
+    Peclet_number = 10
     solid_density = 0
     disp_z = disp_z
     confining_pressure = 0
@@ -103,6 +107,8 @@
     fluid_density = 0
     eta2 = 0
     solid_compressibility = 3.7037 # 1/(0.9*0.3)
+    solid_thermal_expansion = 0.005
+    temperature = temp
   [../]
 []
 
@@ -130,6 +136,12 @@
     variable = disp_z
     function = -0.01*t
     boundary = front
+  [../]
+  [./temperature]
+    type = FunctionDirichletBC
+    variable = temp
+    boundary = ' top bottom'
+    function = 1
   [../]
 []
 
@@ -166,7 +178,7 @@
 []
 
 [Kernels]
-  active = 'td_press poromech'
+  active = 'td_press poromech temp_diff td_temp press_diff'
   [./td_temp]
     type = TimeDerivative
     variable = temp
@@ -284,6 +296,11 @@
     point = '0 0 0'
     variable = stress_zz
   [../]
+  [./temperature]
+    type = PointValue
+    variable = temp
+    point = '0 0 0'
+  [../]
 []
 
 [Preconditioning]
@@ -304,9 +321,9 @@
 []
 
 [Outputs]
-  exodus = false
+  exodus = true
   execute_on = timestep_end
-  file_base = bench_HM_elastic
+  file_base = bench_THM_elastic
   csv = true
 []
 
@@ -318,4 +335,3 @@
     pore_pres = pore_pressure
   [../]
 []
-

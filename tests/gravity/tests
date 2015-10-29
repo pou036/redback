@@ -9,4 +9,10 @@
     input = 'gravity_vertical.i'
     exodiff = 'gravity_vertical.e'
   [../]
+  [./test_gravity_poromechanics] # can't put a dot in that name!
+    type = 'CSVDiff'
+    input = 'gravity_poro_stress.i'
+    csvdiff = 'gravity_poro_stress.csv'
+    rel_err = 1e-5
+  [../]
 []

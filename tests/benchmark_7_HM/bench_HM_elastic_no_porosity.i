@@ -1,30 +1,31 @@
 # An undrained oedometer test on a saturated poroelastic sample
-# to compare with MOOSE poromechanics test.
-# 
+# to compare with analytical solution,
+# where the porosity is kept constant to 0.1
+#
 # The sample is a single unit element, with roller BCs on the sides
-# and bottom.  A constant displacement is applied to the top: disp_z = -0.01*t.
+# and bottom.  A constant displacement is applied to the top: disp_z = -0.001*t.
 # There is no fluid flow.
-# 
+#
 # Under these conditions
-# porepressure = -(Biot coefficient)*(Biot modulus)*disp_z/L
+# porepressure = -(Biot coefficient)*(Peclet)/solid_compressibility * disp_z/L
 # stress_xx = (bulk - 2*shear/3)*strain_zz (remember this is effective stress)
 # stress_zz = (bulk + 4*shear/3)*strain_zz (remember this is effective stress)
 # where L is the height of the sample (L=1 in this test),
-#  strain_zz = v_z * t /L + 0.5*[v_z * t /L]^2   (in finite strain)
-# 
+# strain_zz = v_z * t /L + 0.5*[v_z * t /L]^2   (in finite strain)
+#
 # Parameters:
-# Biot coefficient = 0.3
+# Biot coefficient = 0.9
 # Porosity = 0.1
-# Bulk modulus = 2
-# Shear modulus = 1.5
-# fluid bulk modulus = 1/0.3 = 3.333333
-# 1/Biot modulus = (1 - 0.3)*(0.3 - 0.1)/2 + 0.1*0.3 = 0.1. BiotModulus = 10
-# 
+# Bulk modulus = 2e5
+# Shear modulus = 1.2e5
+# Peclet number = 1e-5
+# solid compressibility = 1e-6
+#
 # Desired output:
-# zdisp = -0.01*t
-# p0 = 0.03*t
-# stress_xx = stress_yy = -0.01*t - 5e-5*t^2
-# stress_zz = -0.04*t - 2e-4*t^2
+# zdisp = -0.001*t
+# p0 = 0.01*t
+# stress_xx = stress_yy = -120*t - 0.06*t^2
+# stress_zz = 3 * stress_xx
 
 [Mesh]
   type = GeneratedMesh
@@ -61,7 +62,7 @@
 []
 
 [GlobalParams]
-  time_factor = 10
+  time_factor = 1
 []
 
 [Materials]
@@ -72,12 +73,13 @@
     disp_y = disp_y
     pore_pres = pore_pressure
     exponent = 0
-    youngs_modulus = 3.6
-    poisson_ratio = 0.2
+    youngs_modulus = 3e5
+    poisson_ratio = 0.25
     ref_pe_rate = 0
     yield_stress = '0. 1 1. 1'
     total_porosity = 0.1
     disp_z = disp_z
+    outputs = all
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -94,7 +96,7 @@
     phi0 = 0.1
     ref_lewis_nb = 1
     total_porosity = 0.1
-    Peclet_number = 1
+    Peclet_number = 9e-6 # biot*peclet
     solid_density = 0
     disp_z = disp_z
     confining_pressure = 0
@@ -102,7 +104,8 @@
     is_mechanics_on = true
     fluid_density = 0
     eta2 = 0
-    solid_compressibility = 3.7037 # 1/(0.9*0.3)
+    solid_compressibility = 1e-6 # 1/(0.9*0.3)  3.7037
+    biot_coefficient = 0.9
   [../]
 []
 
@@ -128,13 +131,12 @@
   [./top_velocity]
     type = FunctionPresetBC
     variable = disp_z
-    function = -0.01*t
+    function = -0.001*t
     boundary = front
   [../]
 []
 
 [AuxVariables]
-  active = 'stress_yy stress_xz stress_xx stress_xy stress_zz stress_yz'
   [./total_porosity]
     order = FIRST
     family = MONOMIAL
@@ -160,6 +162,10 @@
     family = MONOMIAL
   [../]
   [./stress_zz]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./mech_porosity]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -208,11 +214,10 @@
 []
 
 [AuxKernels]
-  active = 'stress_yy stress_xz stress_xx stress_xy stress_zz stress_yz'
   [./total_porosity]
     type = RedbackTotalPorosityAux
     variable = total_porosity
-    mechanical_porosity = mech_porosity
+    is_mechanics_on = true
   [../]
   [./stress_xx]
     type = RankTwoAux
@@ -256,6 +261,12 @@
     index_i = 2
     index_j = 2
   [../]
+  [./mech_porosity]
+    type = MaterialRealAux
+    variable = mech_porosity
+    execute_on = timestep_end
+    property = mechanical_porosity
+  [../]
 []
 
 [Postprocessors]
@@ -284,6 +295,11 @@
     point = '0 0 0'
     variable = stress_zz
   [../]
+  [./total_porosity]
+    type = PointValue
+    variable = total_porosity
+    point = '0 0 0'
+  [../]
 []
 
 [Preconditioning]
@@ -306,7 +322,7 @@
 [Outputs]
   exodus = false
   execute_on = timestep_end
-  file_base = bench_HM_elastic
+  file_base = bench_HM_elastic_no_porosity
   csv = true
 []
 
@@ -318,4 +334,3 @@
     pore_pres = pore_pressure
   [../]
 []
-

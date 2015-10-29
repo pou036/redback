@@ -1,37 +1,20 @@
-# An undrained oedometer test on a saturated poroelastic sample
-# to compare with MOOSE poromechanics test.
+# Testing that gravity changes the stress (with depth for example) in the stress divergence kernel
+# Based on "K0 test" (http://ascelibrary.org/doi/pdf/10.1061/40785%28164%2924)
+# Input:
+# L = 1
+# rho = 1
+# g = -9.81
+# E = 5e4
+# nu = 0.2
 # 
-# The sample is a single unit element, with roller BCs on the sides
-# and bottom.  A constant displacement is applied to the top: disp_z = -0.01*t.
-# There is no fluid flow.
-# 
-# Under these conditions
-# porepressure = -(Biot coefficient)*(Biot modulus)*disp_z/L
-# stress_xx = (bulk - 2*shear/3)*strain_zz (remember this is effective stress)
-# stress_zz = (bulk + 4*shear/3)*strain_zz (remember this is effective stress)
-# where L is the height of the sample (L=1 in this test),
-#  strain_zz = v_z * t /L + 0.5*[v_z * t /L]^2   (in finite strain)
-# 
-# Parameters:
-# Biot coefficient = 0.3
-# Porosity = 0.1
-# Bulk modulus = 2
-# Shear modulus = 1.5
-# fluid bulk modulus = 1/0.3 = 3.333333
-# 1/Biot modulus = (1 - 0.3)*(0.3 - 0.1)/2 + 0.1*0.3 = 0.1. BiotModulus = 10
-# 
-# Desired output:
-# zdisp = -0.01*t
-# p0 = 0.03*t
-# stress_xx = stress_yy = -0.01*t - 5e-5*t^2
-# stress_zz = -0.04*t - 2e-4*t^2
+# expected output:
+# K0 = E*nu/(E*(1-nu)) = 0.25
+# sigma_zz = rho * g * L = -9.81
+# sigma_xx = sigma_yy = K0 * sigma_zz = -2.4525
 
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 1
-  ny = 1
-  nz = 1
   xmin = -0.5
   xmax = 0.5
   ymin = -0.5
@@ -41,7 +24,7 @@
 []
 
 [Variables]
-  active = 'pore_pressure disp_z disp_y disp_x'
+  active = 'disp_z disp_y disp_x'
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -60,19 +43,14 @@
   [../]
 []
 
-[GlobalParams]
-  time_factor = 10
-[]
-
 [Materials]
   [./mat_mech]
     type = RedbackMechMaterialElastic
     block = 0
     disp_x = disp_x
     disp_y = disp_y
-    pore_pres = pore_pressure
     exponent = 0
-    youngs_modulus = 3.6
+    youngs_modulus = 5e4
     poisson_ratio = 0.2
     ref_pe_rate = 0
     yield_stress = '0. 1 1. 1'
@@ -84,7 +62,6 @@
     block = 0
     disp_x = disp_x
     disp_y = disp_y
-    pore_pres = pore_pressure
     Aphi = 0
     ar = 0
     ar_F = 0
@@ -94,19 +71,19 @@
     phi0 = 0.1
     ref_lewis_nb = 1
     total_porosity = 0.1
-    Peclet_number = 1
-    solid_density = 0
     disp_z = disp_z
     confining_pressure = 0
     delta = 0
     is_mechanics_on = true
-    fluid_density = 0
     eta2 = 0
     solid_compressibility = 3.7037 # 1/(0.9*0.3)
+    gravity = '0 0 -9.81'
+    solid_density = 1
   [../]
 []
 
 [BCs]
+  active = 'confinex confiney basefixed_z'
   [./confinex]
     type = PresetBC
     variable = disp_x
@@ -119,17 +96,29 @@
     value = 0
     boundary = 'bottom top'
   [../]
-  [./basefixed]
-    type = PresetBC
-    variable = disp_z
-    value = 0
-    boundary = back
-  [../]
   [./top_velocity]
     type = FunctionPresetBC
     variable = disp_z
-    function = -0.01*t
+    function = 0
     boundary = front
+  [../]
+  [./basefixed_z]
+    type = PresetBC
+    variable = disp_z
+    boundary = back
+    value = 0
+  [../]
+  [./basefixed_x]
+    type = DirichletBC
+    variable = disp_x
+    boundary = back
+    value = 0
+  [../]
+  [./basefixed_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = back
+    value = 0
   [../]
 []
 
@@ -166,45 +155,7 @@
 []
 
 [Kernels]
-  active = 'td_press poromech'
-  [./td_temp]
-    type = TimeDerivative
-    variable = temp
-  [../]
-  [./temp_diff]
-    type = Diffusion
-    variable = temp
-  [../]
-  [./temp_dissip]
-    type = RedbackMechDissip
-    variable = temp
-  [../]
-  [./temp_endo_chem]
-    type = RedbackChemEndo
-    variable = temp
-  [../]
-  [./td_press]
-    type = TimeDerivative
-    variable = pore_pressure
-  [../]
-  [./press_diff]
-    type = RedbackMassDiffusion
-    variable = pore_pressure
-  [../]
-  [./chem_press]
-    type = RedbackChemPressure
-    variable = pore_pressure
-    block = 0
-  [../]
-  [./thermal_pressurization]
-    type = RedbackThermalPressurization
-    variable = pore_pressure
-    temperature = temp
-  [../]
-  [./poromech]
-    type = RedbackPoromechanics
-    variable = pore_pressure
-  [../]
+  active = ''
 []
 
 [AuxKernels]
@@ -259,6 +210,7 @@
 []
 
 [Postprocessors]
+  active = 'stress_yy stress_zz stress_xx zdisp'
   [./p0]
     type = PointValue
     point = '0 0 0'
@@ -298,15 +250,16 @@
 [Executioner]
   type = Transient
   solve_type = Newton
-  start_time = 0
   end_time = 10
-  dt = 1
+  nl_abs_tol = 1e-10
+  nl_rel_step_tol = 1e-10
+  nl_abs_step_tol = 1e-10
 []
 
 [Outputs]
-  exodus = false
-  execute_on = timestep_end
-  file_base = bench_HM_elastic
+  exodus = true
+  execute_on = 'timestep_end initial'
+  file_base = gravity_rho_g_h
   csv = true
 []
 
@@ -315,7 +268,6 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    pore_pres = pore_pressure
   [../]
 []
 
