@@ -3,17 +3,18 @@
     type = 'Exodiff'
     input = 'bench_THM_J2.i'
     exodiff = 'bench_THM_J2_out.e'
-    rel_err = 1e-5
+    rel_err = 1e-4
   [../]
   [./test_8_THM_DP] # can't put a dot in that name!
     type = 'Exodiff'
     input = 'bench_THM_DP.i'
     exodiff = 'bench_THM_DP_out.e'
-    rel_err = 1e-5
+    rel_err = 1e-2
   [../]
   [./test_8_THM_CC] # can't put a dot in that name!
     type = 'Exodiff'
     input = 'bench_THM_CC.i'
     exodiff = 'bench_THM_CC_out.e'
+    rel_err = 1e-4
   [../]
 []
