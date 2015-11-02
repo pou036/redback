@@ -165,17 +165,12 @@ peacock_*.e
 *.template
 tests/*/*.trace
 
-# Some redback applications
-problems/Oka
-problems/fault_reactivation
-problems/Gypsum_dehydration
-
 !/tests/transverseBC/*.msh
 theory.synctex.gz
 
 # Allow files in documentation directories
 !/doc/theory/theory.pdf
-!/doc/theory/figures/*.eps
+!/doc/theory/figures/*/*.eps
 !/doc/theory/data/succombe_files/*.xml
 
 RedbackRevision.h
