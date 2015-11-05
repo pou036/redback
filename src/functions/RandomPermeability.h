@@ -12,24 +12,29 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ConstantFunction.h"
+#ifndef RANDOMPERMEABILITY_H
+#define RANDOMPERMEABILITY_H
 
-template<> InputParameters validParams<ConstantFunction>()
-{
-   InputParameters params = validParams<Function>();
-   params.addParam<Real>("value", 0.0, "The constant value");
-   return params;
-}
+#include "Function.h"
 
-ConstantFunction::ConstantFunction(const std::string & name, InputParameters parameters) :
-    Function(name, parameters),
-    _value(getParam<Real>("value"))
-{
-}
+class RandomPermeability;
 
-Real
-ConstantFunction::value(Real, const Point &)
+template<> InputParameters validParams<RandomPermeability>();
+
+/**
+ * Class that represents constant function
+ */
+class RandomPermeability : public Function
 {
-  return _value;
-}
+public:
+  RandomPermeability(const std::string & name, InputParameters parameters);
+
+  virtual Real value(Real t, const Point & p);
+
+protected:
+  const Real & _value;
+};
+
+#endif
+
 
