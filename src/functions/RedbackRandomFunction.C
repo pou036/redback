@@ -12,29 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef RANDOMPERMEABILITY_H
-#define RANDOMPERMEABILITY_H
+#include "RedbackRandomFunction.h"
 
-#include "Function.h"
-
-class RandomPermeability;
-
-template<> InputParameters validParams<RandomPermeability>();
-
-/**
- * Class that represents constant function
- */
-class RandomPermeability : public Function
+template<> InputParameters validParams<RedbackRandomFunction>()
 {
-public:
-  RandomPermeability(const std::string & name, InputParameters parameters);
+   InputParameters params = validParams<Function>();
+   params.addParam<Real>("value", 0.0, "The random(?) value");
+   return params;
+}
 
-  virtual Real value(Real t, const Point & p);
+RedbackRandomFunction::RedbackRandomFunction(const std::string & name, InputParameters parameters) :
+    Function(name, parameters),
+    _value(getParam<Real>("value"))
+{
+}
 
-protected:
-  const Real & _value;
-};
-
-#endif
-
+Real
+RedbackRandomFunction::value(Real, const Point &)
+{
+  return _value;
+}
 
