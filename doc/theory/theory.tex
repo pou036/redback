@@ -43,6 +43,9 @@
 
 \begin{document}
 
+\newif\ifshowallderivations % flag=False to get published doco, True to see more derivations
+\showallderivationstrue
+%\showallderivationsfalse
 
 \begin{titlepage}
 	\centering
@@ -400,6 +403,22 @@ To calculate the change in the pore pressure we used this equation
 \begin{equation}
 P_{\mathrm{f}} = -\frac{Time Factor}{(1-\phi)}\left( v_{z}t/L\right)
 \end{equation}
+and for the time factor just read \ref{subsec:time_rescaling} for more details 
+\ifshowallderivations
+Lets explain this in details: 
+\begin{itemize}
+\item To calculate the mass balance to mixture(solid and liquid)we  add Eq:~\ref{eq:fluid_mass_balance} and Eq:~\ref{eq:solid_mass_balance} together so we end up with equation (2.1 b)and we solve for isothermal and no convection and no chemical affection and that's lead to the equation bellow:
+\item 
+
+$ \pdiff{p_f}{t}=- \frac{Pe\:\dot{\epsilon_V}}{ \bar{\beta}\:\sigma_{ref}}$  
+and from Tab.~\ref{tab:dimensionless_nbs} for dimensionless the equation become 
+
+$ \pdiff{p_f}{t}=- \frac{Pe\:\dot{\epsilon_V}}{ \beta_s(1-\phi)}$
+
+ 
+\end{itemize} 
+%\else
+\fi
 Also we used the infinite strain theory (O,Coussy.Poromechanics,p6-7) to calculate the strain in x,y directions,)whereas Moose Poromechanics use infinitesimal transformation theory.
 \begin{equation}
 \sigma_{xx}^{\mathrm{eff}} = (K - \mbox{$\frac{2}{3}$}G)\left[\left( v_{z}t/L\right)+\left(\frac{1}{2}\left( v_{z}t/L\right)^2\right) \right] \ . 
@@ -466,7 +485,69 @@ A comparison of the numerical results against the analytical solution are shown 
  \end{figure}
  
 \subsection{Elastic Porosity}
-In this problem there is a small changinging in the porosity which can be neglected .A comparison of the numerical results against the analytical solution are shown in Fig.~\ref{fig:benchmark7_with_porosity}
+In this problem The porosity evolves according to Eq.~\ref{eq:solid_mass_balance_2} and that  equation may be solved in closed form calculate  to  small changing in the porosity \label{eq:material_derivative}
+\begin{equation}
+\label{eq:Evolution_of_Porosity}
+\phi = \phi_o+(1-\phi) \left[ \phi_0+\beta_s (p-p_o) - \epsilon_v \right] \ .
+\end{equation}
+ 
+
+\ifshowallderivations
+	Let's explain this step in details...
+	\begin{itemize}
+	\item by ignoring  the convection from Eq.~\ref{eq:solid_mass_balance_2} we end up with 
+	\begin{equation}
+  (1-\phi) \frac{\partial \rho_s }{\partial t} - \rho_s\frac{\partial \phi }{\partial t} + \rho_s\frac{\partial( (1-\phi) V^{(1)}_k)}{\partial x_k} = 0 
+\end{equation}
+by simplifying the above equation we end up with 
+	\item
+	\begin{equation}
+  (1-\phi) \frac{\partial \rho_s }{\partial t} + \rho_s\frac{\partial(1-\phi) }{\partial t} + \rho_s(1-\phi)\frac{ \partial  V^{(1)}_k}{\partial x_k}+\rho_s  V^{(1)}_k \frac{\partial(1-\phi)}{\partial x_k} = 0  
+\end{equation}
+The last term the equation above is zero since we assume that we have one cell and the porosity is constant with space. so we will end up with 	
+	
+	\item  
+	\begin{equation}
+	(1-\phi) \frac{\partial \rho_s }{\partial t} + \rho_s\frac{\partial(1-\phi) }{\partial t} + \rho_s(1-\phi)\frac{ \partial  V^{(1)}_k}{\partial x_k}=0
+	\end{equation}
+	by divide the above equation by $\frac{1}{\rho_s(1-\phi)}$ we will gain
+	\item 
+	\begin{equation}
+	\frac{1}{\rho_s}\frac{\partial \rho_s }{\partial t} + \frac{1}{(1-\phi)}\frac{\partial(1-\phi) }{\partial t} + \frac{ \partial  V^{(1)}_k}{\partial x_k}=0
+	\end{equation}
+	
+	from the Equation of the state (EOS)
+	
+	
+	\item \begin{equation}
+	\frac{1}{\rho_s}\frac{\partial \rho_s }{\partial t}= \beta_s\frac{\partial P_f}{\partial t}
+	\end{equation}
+	also $ \frac{ \partial  V^{(1)}_k}{\partial x_k}$ is the volumetric strain $\varepsilon_v$ so the equation become 
+	\item 
+	\begin{equation}
+	\frac{1}{(1-\phi)}\frac{\partial(1-\phi) }{\partial t} +\beta_s\frac{\partial P_f}{\partial t}+\frac{ \partial  V^{(1)}_k}{\partial x_k} =0
+	\end{equation}
+	by simplifying the above Eq
+	\begin{equation}
+	-\frac{1}{(1-\phi)}\frac{\partial\phi }{\partial t} +\beta_s\frac{\partial P_f}{\partial t}+\frac{ \partial  V^{(1)}_k}{\partial x_k} 
+	\end{equation}
+	
+	also 
+	\begin{equation}
+	d\phi=(1-\phi)\left[\beta_s dp_f+\epsilon_v\right]
+	\end{equation}
+	by integrating the above equation :
+	\begin{equation}
+\phi = \phi_o+(1-\phi) \left[ \phi_0+\beta_s (p-p_o) + \epsilon_v \right] \ .
+\end{equation}
+	and because we have a compression so the volumetric strain will be negative.
+	\begin{equation}
+\phi = \phi_o+(1-\phi) \left[ \phi_0+\beta_s (p-p_o) - \epsilon_v \right] \ .
+\end{equation}
+	\end{itemize}
+%\else
+\fi
+.A comparison of the numerical results against the analytical solution are shown in Fig.~\ref{fig:benchmark7_with_porosity}.
 \begin{figure}
 \label{fig:benchmark7_with_porosity}
   \centering
