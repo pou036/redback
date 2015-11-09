@@ -282,6 +282,9 @@ void RedbackMechMaterial::computeQpStress()
 
   //Update elastic strain tensor in intermediate configuration
   _elastic_strain[_qp] = _elastic_strain_old[_qp] + delta_ee;
+  _elastic_strain[_qp].addIa(-_solid_thermal_expansion[_qp]*(_T[_qp] - _T0_param));
+  // thermo-elasticity in incremental form
+  //_strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp]*(_T[_qp] - _T0_param));
 
   //Rotate elastic strain tensor to the current configuration
   _elastic_strain[_qp] = _rotation_increment[_qp] * _elastic_strain[_qp] * _rotation_increment[_qp].transpose();
@@ -428,8 +431,8 @@ RedbackMechMaterial::computeQpStrain(const RankTwoTensor & Fhat)
   //strain rate D from Taylor expansion, Chat = (-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
   _strain_increment[_qp] = -Cinv_I*0.5 + Cinv_I*Cinv_I*0.25;
 
-  // thermo-elasticity
-  _strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp]*(_T[_qp] - _T0_param));
+  // thermo-elasticity in incremental form
+  //_strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp]*(_T[_qp] - _T0_param));
 
   /*RankTwoTensor Chat = Fhat.transpose()*Fhat;
   RankTwoTensor A = Chat;
