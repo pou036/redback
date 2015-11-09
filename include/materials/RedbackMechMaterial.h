@@ -134,7 +134,7 @@ protected:
 
   // Using variables
   bool _has_T;
-  VariableValue & _T;
+  VariableValue & _T, & _T_old;
   bool _has_pore_pres;
   VariableValue & _pore_pres;
   VariableValue & _total_porosity;

@@ -120,6 +120,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     // Get coupled variables (T & P)
     _has_T(isCoupled("temperature")),
     _T(_has_T ? coupledValue("temperature") : _zero),
+    _T_old(_has_T ? coupledValueOld("temperature") : _zero),
     _has_pore_pres(isCoupled("pore_pres")),
     _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
     _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
@@ -282,9 +283,8 @@ void RedbackMechMaterial::computeQpStress()
 
   //Update elastic strain tensor in intermediate configuration
   _elastic_strain[_qp] = _elastic_strain_old[_qp] + delta_ee;
-  _elastic_strain[_qp].addIa(-_solid_thermal_expansion[_qp]*(_T[_qp] - _T0_param));
-  // thermo-elasticity in incremental form
-  //_strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp]*(_T[_qp] - _T0_param));
+  //thermoelasticity
+  //_elastic_strain[_qp].addIa(_solid_thermal_expansion[_qp]*(_T[_qp] - _T0_param));
 
   //Rotate elastic strain tensor to the current configuration
   _elastic_strain[_qp] = _rotation_increment[_qp] * _elastic_strain[_qp] * _rotation_increment[_qp].transpose();
@@ -431,8 +431,15 @@ RedbackMechMaterial::computeQpStrain(const RankTwoTensor & Fhat)
   //strain rate D from Taylor expansion, Chat = (-1/2(Chat^-1 - I) + 1/4*(Chat^-1 - I)^2 + ...
   _strain_increment[_qp] = -Cinv_I*0.5 + Cinv_I*Cinv_I*0.25;
 
-  // thermo-elasticity in incremental form
-  //_strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp]*(_T[_qp] - _T0_param));
+  /* This line calculates the thermo-elastic strain in incremental form, as follows :
+   * thermal_strain = _solid_thermal_expansion * (T - T0)
+   * thermal_strain_increment = thermal_strain - thermal_strain_old
+   *                          = _solid_thermal_expansion * (T - T0) - _solid_thermal_expansion * (T_old - T0)
+   *                          = _solid_thermal_expansion * (T - T_old)
+   * The negative sign is to satisfy the sign convention Redback has adopted (positive fields in extension)
+   */
+  _strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp]*(_T[_qp] - _T_old[_qp]));
+
 
   /*RankTwoTensor Chat = Fhat.transpose()*Fhat;
   RankTwoTensor A = Chat;
