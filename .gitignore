@@ -171,6 +171,8 @@ theory.synctex.gz
 # Allow files in documentation directories
 !/doc/theory/theory.pdf
 !/doc/theory/figures/*/*.eps
+/doc/**/*-eps-converted-to.pdf
+!/doc/theory/figures/*/*.pdf
 !/doc/theory/data/succombe_files/*.xml
 
 RedbackRevision.h
