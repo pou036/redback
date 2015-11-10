@@ -14,6 +14,7 @@
 \usepackage{todonotes}
 \usepackage{subfigure}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{empheq}
 \usepackage{mathrsfs}
 \usepackage{natbib}
@@ -967,34 +968,80 @@ For the off-diagonal term with respect to pore pressure we get
 \end{subequations}
 
 \chapter{Symbols}
-Here is a list of (some of the) symbols used in this document.
+Tab.~\ref{tab:symbols} lists some of the main symbols used in this document.
 
 \begin{table}
+\caption{List of main symbols}
 \label{tab:symbols}
-\begin{tabular}{@{} l p{0.5\textwidth} l p{0.2\textwidth} @{}}
+\begin{tabular}{lll}
 \hline\noalign{\smallskip}
-Symbol & Name & Units of Measure \\
+Symbol & Name & Unit of Measure \\
 \noalign{\smallskip}\hline\noalign{\smallskip}
-$Gr$ & Gruntfest number & ??? \\
-$Da_{endo}$ & Endothermic Damk\"{o}hler number & ???  \\
-$Da_{exo}$ & Exothermic Damk\"{o}hler number & ???  \\
-$Ar$ & Arrhenius number & ???  \\
-$Ar_F$ & Forward Arrhenius number & ???  \\
-$Ar_R$ & Reverse Arrhenius number & ???  \\
-$Le$ & Lewis number & ???  \\
-$Le_{chem}$ & Chemical Lewis number & ???  \\
-$\bar{\Lambda}$ & Thermal pressurisation coefficient & ???  \\
-$Pe$ & P\'{e}clet number & ???  \\
-$\alpha$ &Solid Thermal Expansion &$\frac{10^-6}{K}$ \\
-$\beta_s$ & Solid Compressibility &  $Pa^{-1}$ \\
-$\phi$&Porosity& \\
-$G$ & Bulk Modulus&Pa\\
-$K$ & Shear Modulus& GPa\\
-$E$ &Young's Modulus& Pa\\ 
+% Dimensionless groups
+$Ar$ & Arrhenius number & - \\
+$Ar_F$ & Forward Arrhenius number & - \\
+$Ar_R$ & Reverse Arrhenius number & - \\
+$Da_{endo}$ & Endothermic Damk\"{o}hler number & - \\
+$Da_{exo}$ & Exothermic Damk\"{o}hler number & - \\
+$Gr$ & Gruntfest number & - \\
+$\bar{\Lambda}$ & Thermal pressurization coefficient & - \\
+$Le$ & Lewis number &  - \\
+$Le_{chem}$ & Chemical Lewis number &  - \\
+$Pe$ & P\'{e}clet number & - \\
+\hline
+
+% stars
+$.^{\star}$, [$t^{\star}$, $x^{\star}$, $T^{\star}$, $\Delta p^{\star}$, $\sigma^{\star}_{ij}$] & Normalized variables [time, space, temperature, \\ & pore pressure increase, stress]& - \\
+
+\hline
+% Greek symbols
+$\beta$, [$\beta_s$, $\beta_f$] & Compressibility [solid, fluid phase] & $Pa^{-1}$ \\
+$\Delta h$ & Enthalpy of the reaction & $J.mol^{-1}$ \\
+$\epsilon_{ij}$ & Strain tensor & - \\
+$\dot \epsilon_0$ & Reference strain rate & $s^{-1}$ \\
+$\dot \epsilon^{p}_{d}$ & Deviatoric plastic strain rate & $s^{-1}$ \\
+$\dot \epsilon^{p}_{v}$ & Volumetric plastic strain rate & $s^{-1}$ \\
+$\lambda$, [$\lambda_s$, $\lambda_f$] & Thermal expansion coefficient [solid, fluid phase] & $K^{-1}$ \\
+$\mu_f$ & Fluid viscosity & $Pa.s$ \\
+$\nu$, [$\nu_{1}$, $\nu_{2}$, $\nu_{3}$] & Stochiometric coefficients \\ & [of species AB, A, B] from Eq.~\ref{eq:reaction}& - \\
+$\dot\Pi$ & Plastic multiplier (scalar) & $s^{-1}$ \\
+$\rho$, [$\rho_{AB}$, $\rho_{A}$, $\rho_{B}$, $\rho_{s}$, $\rho_{f}$] & Density [of species AB, A, B, solid, fluid] & $kg.m^{-3}$ \\
+$\sigma_{ij}$, [$\sigma'_{ij}$] & Stress tensor [effective stress] & $Pa$ \\
+$\phi$, [$\phi_0$, $\Delta\phi_{chem}$, $\Delta\phi_{mech}$] & Porosity [initial, chemical component, \\ & mechanical component] & - \\
+$\chi$ & Taylor-Quinney coefficient & - \\
+$\omega$, [$\omega_{AB}$, $\omega_{A}$, $\omega_{B}$, $\omega_{F}$, $\omega_{R}$] & Molar reaction rates [of species AB, A, B, \\ & forward, reverse] & $mol.m^{-3}.s^{-1}$ \\
+
+\hline
+% Latin symbols - Upper case
+$A_{\phi}$ & Interconnected porosity coefficient & - \\
+$C^e_{ijkl}$ & Elasticity tensor & $Pa$ \\
+$C_p$ & Specific heat capacity & $m^2.K^{-1}.s^{-2}$ \\
+$E$ & Activation energy & $J.mol^{-1}$ \\
+$K_c$ & Ratio of forward over reverse pre-exponential constants & - \\
+$M$, [$M_{AB}$, $M_{A}$, $M_{B}$] & Molar mass [of species AB, A, B] & $kg.mol^{-1}$ \\
+$Q$, [$Q_{F}$, $Q_{R}$, $Q_{mech}$] & Activation enthalpy [forward chemical reaction, \\ 
+     & reverse, of micro-mechanical processes] & $J.mol^{-1}$ \\
+$R$ & Universal gas constant & $J.K^{-1}.mol^{-1}$ \\
+$T$ & Temperature & $K$ \\
+$V$, [$V_{s}$, $V_{f}$, $V_{A}$, $V_{B}$, $V_{AB}$, $V_{act}$] & Volume [of solid phase, fluid phase, \\ & component A, B, AB, activation volume] & $m^3$ \\
+
+\hline
+% Latin symbols - Lower case
+$c_{th}$ & Thermal diffusivity & $m^{2}.s^{-1}$ \\
+$k$, [$k_{F}$, $k_{A}$, $k_{B}$] & Pre-exponential factor [of forward chemical  \\ & reaction, for species A, B] & $s^{-1}$\\
+$k_{\pi}$ & Permeability & $m^2$ \\
+$s^{-1}$ \\
+$p$, [$p_Y$] & Volumetric mean stress [value at yield] & $Pa$ \\
+$p_f$ & Pore fluid pressure & $Pa$ \\
+$q$, [$q_Y$] & Equivalent stress [value at yield] & $Pa$ \\
+$f$ & Yield function & $\mathbb{R}^9 \longrightarrow \mathbb{R}$ \\
+$s$ & solid ratio & - \\
+$v$, [$v^s$, $v^f$] & Velocity [solid, fluid phase] & $m.s^{-1}$ \\
 
 \noalign{\smallskip}\hline
 \end{tabular}
 \end{table}
+
 
 %\addcontentsline{toc}{chapter}{\numberline{}Bibliography}
 %\bibliographystyle{unsrt}
