@@ -133,7 +133,7 @@ All dimensionless groups are defined in Tab.~\ref{tab:dimensionless_nbs} and
     \sigma_{ij}}.
 \end{align*}
 
-
+All symbols are defined in Tab.~\ref{tab:symbols}.
 
 The total porosity $\phi$ is expressed as the sum of its initial value, $\phi_0$,
 and the newly created interconnected pore volume. Pore volume can be created
@@ -419,7 +419,8 @@ $ \pdiff{p_f}{t}=- \frac{Pe\:\dot{\epsilon_V}}{ \beta_s(1-\phi)}$
 \end{itemize} 
 %\else
 \fi
-Also we used the infinite strain theory (O,Coussy.Poromechanics,p6-7) to calculate the strain in x,y directions,)whereas Moose Poromechanics use infinitesimal transformation theory.
+Also we used the finite strain theory \citep[][p.6-7]{Coussy2004}
+to calculate the strain in x,y directions,)whereas Moose Poromechanics use infinitesimal transformation theory.
 \begin{equation}
 \sigma_{xx}^{\mathrm{eff}} = (K - \mbox{$\frac{2}{3}$}G)\left[\left( v_{z}t/L\right)+\left(\frac{1}{2}\left( v_{z}t/L\right)^2\right) \right] \ . 
 \end{equation}
@@ -559,6 +560,53 @@ The last term the equation above is zero since we assume that we have one cell a
   
  \end{figure}
 
+\section{Benchmark 8 - THM}
+Those benchmarks look at thermal-hydro-mechanical simulations.
+\subsection{Analytical solution}
+The results are similar to those from Bench-HM elastic in Benchmark-7-HM
+ and the stresses need to be augmented by a factor of thermal stress
+ thermal stress is represented by this equation:
+ \begin{equation}
+ \sigma_th=\beta\Delta{T}
+ \end{equation}
+ where $\beta=\alpha\frac{E}{1-2\nu}$
+ 
+ so the stresses equation will become :
+ \begin{equation}
+ \label{eq:thermal_stress}
+\sigma_{xx}^{\mathrm{eff}} =\left[ (K - \mbox{$\frac{2}{3}$}G)\left[\left( v_{z}t/L\right)+\left(\frac{1}{2}\left( v_{z}t/L\right)^2\right) \right]\right]+\sigma_{th} \ . 
+\end{equation}
+\begin{equation}
+\sigma_{zz}^{\mathrm{eff}} =\left[ (K + \mbox{$\frac{4}{3}$}G)\left[\left( v_{z}t/L\right)+\left(\frac{1}{2}\left( v_{z}t/L\right)^2\right) \right]\right]+\sigma_{th} \ .
+\end{equation}
+and the pore pressure equation will not change 
+\begin{equation}
+P_{\mathrm{f}} = -\frac{Time Factor}{(1-\phi)}\left( v_{z}t/L\right)
+\end{equation}
+ 
+\subsection{Numerical solution}
+This problem is then solved using moose on a generated 3D mesh for the values bellow:
+\begin{itemize}
+\item Young's modulus $(E)=3.6$\
+\item Poisson's ratio $(\nu) =0.2$\
+\item $\Phi=0.1$\
+\item $L=1$\
+\item Biot Coefficient $(\alpha)=0.3$\
+\item P\'{e}clet number $(Pe)=10$\
+\item solid compressibility $(\beta_s)=3.7037$\
+\item top velocity $(V_z) =0.01$\
+\item Thermal Coefficient Expansion $\alpha=0.005$\
+
+\end{itemize}
+A comparison of the numerical results against the analytical solution are shown in
+\begin{figure}
+\label{fig:benchmark8_THM_elastic}
+  \centering
+  \includegraphics[width=0.33\textwidth]{benchmark_8_THM/benchmark_8_THM_bench_THM_elastic_stress_xx}
+  \includegraphics[width=0.33\textwidth]{benchmark_8_THM/benchmark_8_THM_bench_THM_elastic_stress_zz}\\
+  \includegraphics[width=0.33\textwidth]{benchmark_8_THM/benchmark_8_THM_bench_THM_elastic_p0}
+  \caption{elastic with the effect of thermal stress }
+ \end{figure}
 
 \appendix
 
@@ -914,11 +962,39 @@ For the off-diagonal term with respect to pore pressure we get
   =& -\frac{1}{\bar{\rho}}\left[(1-\phi)\beta^{*(s)}\rho_s + \phi\beta^{*(f)}\rho_s \right]\bar{v} + \frac{1}{\bar{\rho}} \left[ \beta^{*(s)}\rho_s v^{*(s)} + \beta^{*(f)}\rho_f v^{*(f)} \right] \\ \nonumber
   &- \frac{\rho_f}{\bar{\rho}}\frac{\beta^*_m}{Le\:Pe\:\phi} \left(\nabla \phi_j - \beta^*_f\rho_f\:g^* \right)  \\ \nonumber
   =& ... \\ \nonumber
-  =& \frac{1}{\bar{\rho}}\left[ -\beta^*_m \rho_s \bar{v} + \beta^*_s \rho_s v^{*(s)} + \beta^*_f \rho_f v^{*(f)}    \right] - \frac{\rho_f}{\bar{\rho}}\frac{\beta^*_m}{Le\:Pe\:\phi} \left(\nabla \phi_j - \beta^*_f\rho_f\:g^* \right)  \\ \nonumber
+  =& \frac{1}{\bar{\rho}}\left[ -\beta^*_m \rho_s \bar{v} + \beta^*_s \rho_s v^{*(s)} + \beta^*_f \rho_f v^{*(f)}    \right] - \frac{\rho_f}{\bar{\rho}}\frac{\beta^*_m}{Le\:Pe\:\phi} \left(\nabla \phi_j - \beta^*_f\rho_f\:g^* \right)  \\ \nonumber  
   \end{align}
 \end{subequations}
 
+\chapter{Symbols}
+Here is a list of (some of the) symbols used in this document.
 
+\begin{table}
+\label{tab:symbols}
+\begin{tabular}{@{} l p{0.5\textwidth} l p{0.2\textwidth} @{}}
+\hline\noalign{\smallskip}
+Symbol & Name & Units of Measure \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+$Gr$ & Gruntfest number & ??? \\
+$Da_{endo}$ & Endothermic Damk\"{o}hler number & ???  \\
+$Da_{exo}$ & Exothermic Damk\"{o}hler number & ???  \\
+$Ar$ & Arrhenius number & ???  \\
+$Ar_F$ & Forward Arrhenius number & ???  \\
+$Ar_R$ & Reverse Arrhenius number & ???  \\
+$Le$ & Lewis number & ???  \\
+$Le_{chem}$ & Chemical Lewis number & ???  \\
+$\bar{\Lambda}$ & Thermal pressurisation coefficient & ???  \\
+$Pe$ & P\'{e}clet number & ???  \\
+$\alpha$ &Solid Thermal Expansion &$\frac{10^-6}{K}$ \\
+$\beta_s$ & Solid Compressibility &  $Pa^{-1}$ \\
+$\phi$&Porosity& \\
+$G$ & Bulk Modulus&Pa\\
+$K$ & Shear Modulus& GPa\\
+$E$ &Young's Modulus& Pa\\ 
+
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
 
 %\addcontentsline{toc}{chapter}{\numberline{}Bibliography}
 %\bibliographystyle{unsrt}
