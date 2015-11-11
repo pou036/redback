@@ -58,6 +58,7 @@ protected:
   bool _has_pore_pres;
   VariableValue & _pore_pres;//, & _pore_pres_old;
   VariableValue & _total_porosity;
+  VariableValue & _inverse_lewis_number_tilde;
 
   // functionality to initialise some parameters from function (overwrites initialisation as float)
   std::vector<std::string> _init_from_functions__params;

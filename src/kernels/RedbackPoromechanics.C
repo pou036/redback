@@ -20,6 +20,8 @@ InputParameters validParams<RedbackPoromechanics>()
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("temperature", 0.0, "Temperature variable.");
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
+
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 

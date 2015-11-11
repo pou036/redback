@@ -16,7 +16,8 @@ InputParameters validParams<RedbackAction>()
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
   // changed this from true to false
-  params.set<bool>("use_displaced_mesh") = false;
+  params.set<bool>("use_displaced_mesh") = true;
+  //params.set<bool>("use_displaced_mesh") = false;
   return params;
 }
 

@@ -20,6 +20,8 @@ InputParameters validParams<RedbackThermalPressurization>()
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("temperature", 0.0, "Temperature variable."); // TODO: check "required" fields across redback
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
+
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 

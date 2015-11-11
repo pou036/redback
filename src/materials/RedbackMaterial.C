@@ -40,6 +40,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addCoupledVar("disp_y", 0.0, "The y displacement");
   params.addCoupledVar("disp_z", 0.0, "The z displacement");
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
+  params.addCoupledVar("inverse_lewis_number_tilde", 0.0, "Varying component of (inverse of) Lewis number, coming from mutli-app for example");
 
   //params.addCoupledVar("solid_velocity_aux", "Solid velocity (AuxKernel) from RedbackMechMaterial (if used)");
   params.addParam<MooseEnum>("density_method", RedbackMaterial::densityMethodEnum() = "linear", "The method to describe density evolution with temperature and pore pressure"); // TODO: fluid, solid, mixture?...
@@ -82,6 +83,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
   //_pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
 
   _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
+  _inverse_lewis_number_tilde(coupledValue("inverse_lewis_number_tilde")),
 
   //_disp_x(isCoupled("disp_x") ? coupledValue("disp_x") : _zero),
 
@@ -428,6 +430,8 @@ RedbackMaterial::computeRedbackTerms()
 
     // Update Lewis number
     _lewis_number[_qp] = _ref_lewis_nb[_qp]*std::pow((1-_total_porosity[_qp])/(1-_phi0_param), 2) * std::pow(_phi0_param/_total_porosity[_qp], 3);
+    Real inverse_lewis_number = 1 / _lewis_number[_qp] + _inverse_lewis_number_tilde[_qp]; // to include modification from multi-app for example
+    _lewis_number[_qp] = 1 / inverse_lewis_number;
   }
 
   // Forming the compressibilities of the phases
