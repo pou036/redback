@@ -18,6 +18,7 @@
 #include "RedbackChemEndo.h"
 #include "RedbackChemExo.h"
 #include "RedbackChemPressure.h"
+#include "RedbackFluidDivergence.h"
 #include "RedbackMassConvection.h"
 #include "RedbackMassDiffusion.h"
 #include "RedbackMechDissip.h"
@@ -28,6 +29,7 @@
 #include "RedbackThermalPressurization.h"
 
 // Materials
+#include "RedbackFluidMaterial.h"
 #include "RedbackMaterial.h"
 #include "RedbackMechMaterialJ2.h"
 #include "RedbackMechMaterialDP.h"
@@ -90,6 +92,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
+  registerKernel(RedbackFluidDivergence);
   registerKernel(RedbackMassConvection);
   registerKernel(RedbackMassDiffusion);
   registerKernel(RedbackMechDissip);
@@ -99,6 +102,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalDiffusion);
   registerKernel(RedbackThermalPressurization);
 
+  registerMaterial(RedbackFluidMaterial);
   registerMaterial(RedbackMaterial);
   registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialDP);
