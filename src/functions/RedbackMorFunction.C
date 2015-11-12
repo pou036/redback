@@ -44,7 +44,7 @@ RedbackMorFunction::value(Real, const Point &p)
       x = p(0),
       y = p(1);
   //    z = p(2);
-  Real argument = -y/sqrt(4*_diffusivity*(x + 1e-10)/_velocity);
+  Real argument = -y/sqrt(4*_diffusivity*(fabs(x) + 1e-1)/_velocity);
   Real temperature = _mantle_temperature + (_surface_temperature - _mantle_temperature)*erfc(argument);
 
   return temperature;
