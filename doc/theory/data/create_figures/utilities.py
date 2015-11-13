@@ -7,6 +7,7 @@ import pylab as P
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 import matplotlib
+import subprocess
 
 def parseCsv(filename, column_keys = None):
   ''' Parse csv file created by moose and return dictionary of data '''
@@ -115,6 +116,18 @@ def plotFigure(analytical_x_data, analytical_y_data,
       os.makedirs(this_fig_dir)
       print 'Created subdirectory "{0}"'.format(this_fig_dir)
     plt.savefig(figure_filename, format='eps', dpi=1000)
+    # Convert eps to pdf
+    try:
+      command = "epstopdf {0}".format(figure_filename)
+      print command
+      retcode = subprocess.call(command, shell=True)
+      if retcode < 0:
+        print >>sys.stderr, "Child was terminated by signal", -retcode
+      else:
+        print >>sys.stderr, "Child returned", retcode
+    except OSError as e:
+      print >>sys.stderr, "Execution failed:", e
+    
     print 'Figure saved as {0}'.format(figure_filename)
 
 def createFigsBenchmark(redback_dir,# redback directory
