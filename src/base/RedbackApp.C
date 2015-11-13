@@ -29,6 +29,7 @@
 #include "RedbackThermalConvection.h"
 #include "RedbackThermalDiffusion.h"
 #include "RedbackThermalPressurization.h"
+#include "RedbackVariableEqualsFunction.h"
 
 // Materials
 #include "RedbackMaterial.h"
@@ -103,6 +104,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalConvection);
   registerKernel(RedbackThermalDiffusion);
   registerKernel(RedbackThermalPressurization);
+  registerKernel(RedbackVariableEqualsFunction);
 
   registerMaterial(RedbackMaterial);
   registerMaterial(RedbackMechMaterialJ2);
