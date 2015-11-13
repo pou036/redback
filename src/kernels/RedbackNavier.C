@@ -19,6 +19,8 @@ template<>
 InputParameters validParams<RedbackNavier>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
+
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addRequiredCoupledVar("fluid_vel_x", "The x component of fluid velocity");
   params.addRequiredCoupledVar("fluid_vel_y", "The y component of fluid velocity");

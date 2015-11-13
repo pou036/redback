@@ -18,6 +18,7 @@
 //#include "FiniteStrainPlasticMaterial.h"
 #include "Material.h"
 #include "RankTwoTensor.h"
+#include "ElasticityTensorR4.h"
 
 //Forward Declarations
 class RedbackFluidMaterial;
@@ -58,6 +59,8 @@ protected:
   MaterialProperty<RealVectorValue> & _thermal_convective_mass;
   MaterialProperty<RealVectorValue> & _pressure_convective_mass;
   MaterialProperty<RankTwoTensor> & _stress;
+  MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+  MaterialProperty<Real> & _biot_coeff;
 
   Real _bulk_viscosity_param, _dynamic_viscosity_param;//, _Re_param;
   Real _fluid_density_param, _fluid_compressibility_param, _fluid_thermal_expansion_param;

@@ -31,6 +31,7 @@ InputParameters validParams<RedbackFluidMaterial>()
   params.addParam<Real>("fluid_thermal_expansion", 0, "Fluid expansion (lambda^{(f)} in 1/K)"); // _fluid_thermal_expansion_param
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
+  //params.addParam< Real >("biot_coefficient", 1.0, "Biot coefficient");
 
   params.addParam<RealVectorValue>("gravity", RealVectorValue(), "Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg '0 0 -9.81'");
   return params;
@@ -62,6 +63,9 @@ RedbackFluidMaterial::RedbackFluidMaterial(const InputParameters & parameters) :
   _pressure_convective_mass(declareProperty<RealVectorValue>("pressure_convective_mass")),
   _stress(declareProperty<RankTwoTensor>("stress")),
 
+  _Jacobian_mult(declareProperty<ElasticityTensorR4>("Jacobian_mult")),
+  _biot_coeff(declareProperty<Real>("biot_coefficient")),
+
   _bulk_viscosity_param(getParam<Real>("bulk_viscosity")),
   _dynamic_viscosity_param(getParam<Real>("dynamic_viscosity")),
   _fluid_density_param(getParam<Real>("fluid_density")),
@@ -71,6 +75,7 @@ RedbackFluidMaterial::RedbackFluidMaterial(const InputParameters & parameters) :
   _grad_pore_pressure(coupledGradient("pore_pres")),
   _T0_param(getParam<Real>("temperature_reference")),
   _P0_param(getParam<Real>("pressure_reference"))
+  //_biot_coeff_param(getParam<Real>("biot_coefficient"))
   //_Re_param(getParam<Real>("Reynolds_number")),
   //_Re(declareProperty<Real>("Re"))
 
@@ -115,6 +120,8 @@ RedbackFluidMaterial::computeRedbackTerms()
   _stress[_qp].zero();
   _stress[_qp].addIa(_bulk_viscosity_param*_div_fluid_vel[_qp]);
   _stress[_qp] += _dynamic_viscosity_param*(grad_v + grad_v.transpose());
+  _biot_coeff[_qp] = 1/_fluid_density_param; //_biot_coeff_param;
+  _Jacobian_mult[_qp].zero();
 
   // Fluid divergence
   _div_fluid_kernel[_qp] = _div_fluid_vel[_qp]/_fluid_compressibility_param;
