@@ -380,6 +380,37 @@ This problem is then solved using \moose{} on a generated 1D mesh from -1 to 1 f
 
 The numerical results match the theory with the time evolutions shown on Fig.~\ref{fig:benchmark_1_T_results}.
 
+\section{Benchmark 6 - TM}
+Those benchmarks look at thermal-mechanical simulations.
+\subsection{Problem Description}
+by heating of an elastic rod from the back and the front ,this the rod  confined in all sides except  the top . 
+\subsection{Analytical solution}
+The stress in x-axis will be similar to the stress in y-axis whereas the stress in z-axis will be zero since its not confined. because the temperature is increased the rod will expand in z-axis( strain in zz) and that strain calculated  by this equation:
+\begin{equation}
+\varepsilon_{zz}=\frac{\alpha}{2}\Delta T
+\end{equation}
+we divided $\alpha$ by $2$ because in this problem we have two dimension (area thermal expansion coefficient) for more information see this website $ (https://en.wikipedia.org/wiki/Thermal_expansion)$
+
+from that strain we can caculate the stress in x-axis which is as shown in the equation bellow:
+\label{eq:thermal_stress}
+\begin{equation}
+\sigma_{xx}=\frac{3}{2} \frac{E}{(1-2\nu)} \frac{\alpha}{2}\Delta T
+\end{equation}
+
+\ifshowallderivations
+	Let's explain this step in details...\\
+	$\frac{3}{2}$ is the geometric factor
+	%\else
+\fi
+\subsection{Numerical solution}
+This problem is then solved using moose on a generated 3D mesh and a comparison of the numerical results against the analytical solution are shown in the figure bellow.
+\begin{figure}
+\label{fig:benchmark6_TM_elastic}
+  \centering
+  \includegraphics[width=0.48\textwidth]{benchmark_6_TM/benchmark_6_TM_bench_TM_elastic_stress_xx}
+  \includegraphics[width=0.48\textwidth]{benchmark_6_TM/benchmark_6_TM_bench_TM_elastic_stress_zz}\\
+  \caption{the effect of thermal stress }
+ \end{figure}
 
 \section{Benchmark 7 - HM}
 Those benchmarks look at hydro-mechanical simulations.
@@ -608,6 +639,10 @@ A comparison of the numerical results against the analytical solution are shown 
   \includegraphics[width=0.33\textwidth]{benchmark_8_THM/benchmark_8_THM_bench_THM_elastic_p0}
   \caption{elastic with the effect of thermal stress }
  \end{figure}
+
+
+
+
 
 \appendix
 

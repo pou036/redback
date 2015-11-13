@@ -62,13 +62,17 @@ RedbackStressDivergenceTensors::computeQpResidual()
   {
     _poromech_stress_row = _stress[_qp].row(_component);
     _poromech_stress_row(_component) -= _biot_coeff[_qp]*_pore_pres[_qp];
-    return (_poromech_stress_row - _gravity_term[_qp])* _grad_test[_i][_qp];
+    //return (_poromech_stress_row - _gravity_term[_qp])* _grad_test[_i][_qp];
+    return (_poromech_stress_row )* _grad_test[_i][_qp]- _gravity_term[_qp](_component)*_test[_i][_qp];
+
+
     // Note: 30th of October 2015: Negative signs in gravity and pore pressure are being currently tested for the correct sign convention.
     // In this configuration negative gravity_term because we consider positive stresses in extension!
     // Thus, the gravity vector needs to be given with a negative component in Z (e.g. 0 0 -9.81)
   }
 
-  return (_stress[_qp].row(_component) - _gravity_term[_qp])* _grad_test[_i][_qp]; //TODO: Add the gravity kernel
+//  return (_stress[_qp].row(_component) - _gravity_term[_qp])* _grad_test[_i][_qp]; //TODO: Add the gravity kernel
+  return (_stress[_qp].row(_component))* _grad_test[_i][_qp] - _gravity_term[_qp](_component)*_test[_i][_qp]; //TODO: Add the gravity kernel
 }
 
 Real

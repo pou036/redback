@@ -12,6 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "Function.h"
+#include "libmesh/quadrature.h"
 #include "RedbackMechMaterial.h"
 
 /**
