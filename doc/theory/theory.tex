@@ -22,7 +22,8 @@
 \usepackage{rotating}
 \usepackage{hyperref}
 \usepackage{epstopdf}
-
+\usepackage{hyperref} 
+\usepackage{url}
 
 \DeclareCaptionFont{white}{\color{white}}
 \DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
@@ -383,14 +384,20 @@ The numerical results match the theory with the time evolutions shown on Fig.~\r
 \section{Benchmark 6 - TM}
 Those benchmarks look at thermal-mechanical simulations.
 \subsection{Problem Description}
-by heating of an elastic rod from the back and the front ,this the rod  confined in all sides except  the top . 
+by heating of an elastic rod from the back and the front ,this the rod  confined in all sides except  the top As shown in fig~\ref{fig:Benchmark7_cubic}
+
+\begin{figure} 
+\label{fig:Benchmark6_Rod}
+\centering
+\includegraphics[width=0.52\textwidth]{benchmark_6_TM/elastic_model_setup}
+\caption{This is a caption confining from its sides and the bottom}
+\end{figure} . 
 \subsection{Analytical solution}
 The stress in x-axis will be similar to the stress in y-axis whereas the stress in z-axis will be zero since its not confined. because the temperature is increased the rod will expand in z-axis( strain in zz) and that strain calculated  by this equation:
 \begin{equation}
 \varepsilon_{zz}=\frac{\alpha}{2}\Delta T
 \end{equation}
-we divided $\alpha$ by $2$ because in this problem we have two dimension (area thermal expansion coefficient) for more information see this website $ (https://en.wikipedia.org/wiki/Thermal_expansion)$
-
+we divided $\alpha$ by $2$ because in this problem we have two dimension (area thermal expansion coefficient) for more information visit this website \hyperref {''https://en.wikipedia.org/wiki/Thermal_expansion''}
 from that strain we can caculate the stress in x-axis which is as shown in the equation bellow:
 \label{eq:thermal_stress}
 \begin{equation}
@@ -630,7 +637,7 @@ This problem is then solved using moose on a generated 3D mesh for the values be
 \item Thermal Coefficient Expansion $\alpha=0.005$\
 
 \end{itemize}
-A comparison of the numerical results against the analytical solution are shown in
+A comparison of the numerical results against the analytical solution are shown in fig \ref{fig:gravity_rho_g_h}
 \begin{figure}
 \label{fig:benchmark8_THM_elastic}
   \centering
@@ -641,8 +648,68 @@ A comparison of the numerical results against the analytical solution are shown 
  \end{figure}
 
 
+\section{Gravity}
+\subsection{Gravity}
+\subsubsection{Analytical Solution}
+Testing that gravity changes the stress (with depth for example) in the stress divergence kernel
+so the stress will be equal to the gravity and can be calculated from this equation
+\begin{equation}
+\sigma_{zz}=\rho g L
+\end{equation}
+where: \\
+$\rho$ : solid density\\
+$g$ : gravitational acceleration \\
+$L$ : The length \\
+ \begin{equation}
+ \sigma_{xx}= K_o(\rho g L) 
+ \end{equation}
+where:
+$K_o$ :The ratio of horizontal to vertical stress 
+\begin{equation}
+K_o=\frac{E\nu}{E(1-\nu)}
+\end{equation}
+\ifshowallderivations
+Lets explain the steps in details
+\begin{equation}
+K_o=\frac{\sigma_{xx}}{\sigma{zz}}
+\end{equation}
+and 
+\begin{equation}
+\label{eq:ratio of herizontal to vertical stresses }
+K_o=\frac{ (K - \mbox{$\frac{2}{3}$}G)\epsilon_{zz}}{(K + \mbox{$\frac{4}{3}$}G)\epsilon_{zz}}
+\end{equation}
+when:\\
+\begin{equation}
+K=\frac{E}{3(1-2\nu)}
+\end{equation}
+\begin{equation}
+G=\frac{E}{2(1+\nu)}
+\end{equation}
+form more information about the two equation above see the table in this website: (https://en.wikipedia.org/wiki/Lam%C3%A9_parameters)
+by substitute the two equations above in \ref{eq:ratio of herizontal to vertical stresses } and simplify them we end up with 
+$K_o=\frac{E\nu}{E(1-\nu)}$
 
+%\else
+\fi
 
+\subsubsection{Numerical Solution}
+This problem is then solved using moose on a generated 3D mesh for the values bellow:
+\begin{itemize}
+\item Young's modulus $(E)=5e4$\
+\item gravitational acceleration $g =-9.81$\
+\item Poisson's ratio $(\nu) =0.2$\
+\item $L=1$\
+\item  solid density $(\rho=1)$\
+\end{itemize}
+ a comparison of the numerical results against the analytical solution are shown in the figure bellow.
+ \begin{figure}
+\label{fig:gravity_rho_g_h}
+  \centering
+  \includegraphics[width=0.48\textwidth]{gravity/gravity_gravity_rho_g_h_stress_xx}
+  \includegraphics[width=0.48\textwidth]{gravity/gravity_gravity_rho_g_h_stress_zz}\\
+ 
+  \caption{gravity changes the stress  }
+ \end{figure}
 
 \appendix
 
