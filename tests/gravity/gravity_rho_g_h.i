@@ -7,20 +7,19 @@
 # E = 5e4
 # nu = 0.2
 # 
-# expected output:
+# expected output at the location of the postprocessor, which is at the center of the bottom cell (95% down the way):
 # K0 = E*nu/(E*(1-nu)) = 0.25
-# sigma_zz = rho * g * L = -9.81
-# sigma_xx = sigma_yy = K0 * sigma_zz = -2.4525
+# sigma_zz = rho * g * L = -9.81*0.95 = -9.3195
+# sigma_xx = sigma_yy = K0 * sigma_zz = -2.329875
 
 [Mesh]
   type = GeneratedMesh
   dim = 3
+  nz = 10
   xmin = -0.5
   xmax = 0.5
   ymin = -0.5
   ymax = 0.5
-  zmin = -0.5
-  zmax = 0.5
 []
 
 [Variables]
@@ -155,7 +154,6 @@
 []
 
 [Kernels]
-  active = ''
 []
 
 [AuxKernels]
