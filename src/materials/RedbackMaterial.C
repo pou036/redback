@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "Function.h"
 #include "RedbackMaterial.h"
 
 template<>
@@ -458,7 +459,7 @@ RedbackMaterial::computeRedbackTerms()
      default:
        mooseError("density method not implemented yet, use linear");
      }
-    _mixture_density[_qp] = (1-_total_porosity[_qp])*solid_density+ _total_porosity[_qp]*fluid_density;
+    _mixture_density[_qp] = (1-_total_porosity[_qp])*solid_density + _total_porosity[_qp]*fluid_density;
 
     // Terms feeding the stress equilibrium and Darcy flux
     normalized_gravity = _gravity_param;
