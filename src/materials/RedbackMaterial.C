@@ -12,6 +12,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#include "Function.h"
 #include "RedbackMaterial.h"
 
 template<>
