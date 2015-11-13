@@ -118,18 +118,18 @@ RedbackFluidMaterial::computeRedbackTerms()
   //Real second_viscosity = _bulk_viscosity_param + 2*_dynamic_viscosity_param/3.0; //zeta
   _div_fluid_vel[_qp] = _grad_fluid_vel_x[_qp](0) + _grad_fluid_vel_y[_qp](1) + _grad_fluid_vel_z[_qp](2);
   _stress[_qp].zero();
-  _stress[_qp].addIa(_bulk_viscosity_param*_div_fluid_vel[_qp]);
-  _stress[_qp] += _dynamic_viscosity_param*(grad_v + grad_v.transpose());
+  _stress[_qp].addIa(_bulk_viscosity_param/_fluid_density_param*_div_fluid_vel[_qp]);
+  _stress[_qp] += _dynamic_viscosity_param/_fluid_density_param*(grad_v + grad_v.transpose());
   _biot_coeff[_qp] = 1/_fluid_density_param; //_biot_coeff_param;
   _Jacobian_mult[_qp].zero();
 
   // Fluid divergence
-  _div_fluid_kernel[_qp] = _div_fluid_vel[_qp]/_fluid_compressibility_param;
+  _div_fluid_kernel[_qp] = _div_fluid_vel[_qp];
 
   // Assembling mass kernels components
   _pressurization_coefficient[_qp] = _fluid_thermal_expansion_param/_fluid_compressibility_param;
   RealVectorValue fluid_vel_vector = RealVectorValue(_fluid_vel_x[_qp], _fluid_vel_y[_qp], _fluid_vel_z[_qp]);
-  _pressure_convective_mass[_qp] = _grad_pore_pressure[_qp]*fluid_vel_vector;
+  _pressure_convective_mass[_qp] = _grad_pore_pressure[_qp]*fluid_vel_vector - _pressurization_coefficient[_qp]*_grad_temp[_qp]*fluid_vel_vector;
   _thermal_convective_mass[_qp] = _grad_temp[_qp]*fluid_vel_vector;
 
   return;
