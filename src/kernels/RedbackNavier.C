@@ -21,7 +21,6 @@ InputParameters validParams<RedbackNavier>()
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
 
-  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addRequiredCoupledVar("fluid_vel_x", "The x component of fluid velocity");
   params.addRequiredCoupledVar("fluid_vel_y", "The y component of fluid velocity");
   params.addCoupledVar("fluid_vel_z", 0.0, "The z component of fluid velocity");
@@ -32,8 +31,6 @@ InputParameters validParams<RedbackNavier>()
 
 RedbackNavier::RedbackNavier(const InputParameters & parameters) :
   Kernel(parameters),
-  _component(getParam<unsigned int>("component")),
-  _div_fluid_vel(getMaterialProperty<Real>("divergence_of_fluid_velocity")),
   _fluid_vel_x(coupledValue("fluid_vel_x")),
   _fluid_vel_y(coupledValue("fluid_vel_y")),
   _fluid_vel_z(coupledValue("fluid_vel_z")),
@@ -50,19 +47,10 @@ RedbackNavier::~RedbackNavier()
 Real
 RedbackNavier::computeQpResidual()
 {
-  Real vel_component;
-  switch (_component)
-  {
-  case 0: vel_component = _fluid_vel_x[_qp];
-      break;
-  case 1: vel_component = _fluid_vel_y[_qp];
-      break;
-  case 2: vel_component = _fluid_vel_z[_qp];
-      break;
-  default: mooseError("Wrong RedbackNavier dimension component used (needs to be 0, 1, or 2)");
-      break;
-  }
-  return _time_factor*_test[_i][_qp]*_div_fluid_vel[_qp]*vel_component;
+  return _time_factor*_test[_i][_qp]*_grad_u[_qp]
+         *RealVectorValue(_fluid_vel_x[_qp], _fluid_vel_y[_qp], _fluid_vel_z[_qp]);
+
+
 }
 
 Real

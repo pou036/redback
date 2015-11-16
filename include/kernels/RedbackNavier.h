@@ -33,10 +33,6 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  const unsigned int _component;
-
-  const MaterialProperty<Real> & _div_fluid_vel;
-
   VariableValue & _fluid_vel_x;
   VariableValue & _fluid_vel_y;
   VariableValue & _fluid_vel_z;
