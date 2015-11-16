@@ -53,14 +53,14 @@ protected:
   RealVectorValue _gravity_param;
 
   MaterialProperty<RealVectorValue> & _gravity_term;
+  MaterialProperty<Real> & _fluid_density;
   MaterialProperty<Real> & _div_fluid_vel;
   MaterialProperty<Real> & _div_fluid_kernel;
   MaterialProperty<Real> & _pressurization_coefficient;
   MaterialProperty<RealVectorValue> & _thermal_convective_mass;
   MaterialProperty<RealVectorValue> & _pressure_convective_mass;
-  MaterialProperty<RankTwoTensor> & _stress;
-  MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
-  MaterialProperty<Real> & _biot_coeff;
+  MaterialProperty<RankTwoTensor> & _fluid_stress;
+  //MaterialProperty<ElasticityTensorR4> & _Jacobian_fluid_mult;
 
   Real _bulk_viscosity_param, _dynamic_viscosity_param;//, _Re_param;
   Real _fluid_density_param, _fluid_compressibility_param, _fluid_thermal_expansion_param;
