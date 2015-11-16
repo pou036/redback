@@ -22,6 +22,7 @@
 #include "RedbackMassConvection.h"
 #include "RedbackMassDiffusion.h"
 #include "RedbackMechDissip.h"
+#include "RedbackNavier.h"
 #include "RedbackPoromechanics.h"
 #include "RedbackStressDivergenceTensors.h"
 #include "RedbackThermalConvection.h"
@@ -96,6 +97,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackMassConvection);
   registerKernel(RedbackMassDiffusion);
   registerKernel(RedbackMechDissip);
+  registerKernel(RedbackNavier);
   registerKernel(RedbackPoromechanics);
   registerKernel(RedbackStressDivergenceTensors);
   registerKernel(RedbackThermalConvection);
