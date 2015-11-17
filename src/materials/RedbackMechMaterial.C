@@ -536,7 +536,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   }
 
   //The following expression should be further pursued for a forward physics-based model
-  _exponential = _exponential* std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp])));
+  //_exponential = _exponential* std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp])));
+  _exponential = _exponential* std::exp(-(_alpha_1[_qp] + _alpha_2[_qp]*_pore_pres[_qp])); // alphas are actually K1 and K2
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
   {
