@@ -61,7 +61,7 @@
     phi0 = 0.1
     ref_lewis_nb = 1
     total_porosity = 0.1
-    Peclet_number = 1
+    Peclet_number = 1e-10
     solid_density = 0
     disp_z = disp_z
     confining_pressure = 0
@@ -74,6 +74,7 @@
 []
 
 [BCs]
+  active = 'Pressure confine_x confine_y confine_z pore_pressure_top'
   [./confine_x]
     type = PresetBC
     variable = disp_x
@@ -88,7 +89,7 @@
   [../]
   [./confine_z]
     type = PresetBC
-    variable = disp_y
+    variable = disp_z
     value = 0
     boundary = 'bottom left right top_pressure top_no_pressure back front'
   [../]
@@ -100,9 +101,18 @@
   [../]
   [./top_load]
     type = FunctionNeumannBC
-    variable = disp_x
+    variable = disp_y
     boundary = top_pressure
     function = applied_load_fct
+  [../]
+  [./Pressure]
+    [./top_pressure]
+      function = applied_load_fct
+      disp_z = disp_z
+      disp_y = disp_y
+      disp_x = disp_x
+      boundary = top_pressure
+    [../]
   [../]
 []
 
@@ -146,7 +156,7 @@
 []
 
 [Kernels]
-  active = 'td_press poromech'
+  active = 'td_press poromech press_diff'
   [./td_temp]
     type = TimeDerivative
     variable = temp
