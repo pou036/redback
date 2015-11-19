@@ -2,22 +2,18 @@
 
 [Mesh]
   type = FileMesh
-  file = ../../meshes/3d_footing_pb.msh
-  boundary_name = 'back front left right top_pressure top_no_pressure bottom'
-  boundary_id = '0 1 2 3 4 5 6'
+  file = ../../meshes/2d_footing_pb.msh
+  boundary_name = 'bottom right top_no_pressure top_pressure left'
+  boundary_id = '0 1 2 3 4'
 []
 
 [Variables]
-  active = 'pore_pressure disp_z disp_y disp_x'
+  active = 'pore_pressure disp_y disp_x'
   [./disp_x]
     order = FIRST
     family = LAGRANGE
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
-  [../]
-  [./disp_z]
     order = FIRST
     family = LAGRANGE
   [../]
@@ -44,7 +40,6 @@
     ref_pe_rate = 0
     yield_stress = '0. 1 1. 1'
     total_porosity = 0.1
-    disp_z = disp_z
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -63,7 +58,6 @@
     total_porosity = 0.1
     Peclet_number = 1e-6
     solid_density = 0
-    disp_z = disp_z
     confining_pressure = 0
     delta = 0
     is_mechanics_on = true
@@ -74,7 +68,7 @@
 []
 
 [BCs]
-  active = 'Pressure confine_x confine_y confine_z pore_pressure_top'
+  active = 'Pressure confine_x confine_y pore_pressure_top'
   [./confine_x]
     type = PresetBC
     variable = disp_x
@@ -86,12 +80,6 @@
     variable = disp_y
     value = 0
     boundary = bottom
-  [../]
-  [./confine_z]
-    type = PresetBC
-    variable = disp_z
-    value = 0
-    boundary = 'bottom left right top_pressure top_no_pressure back front'
   [../]
   [./pore_pressure_top]
     type = PresetBC
@@ -108,7 +96,6 @@
   [./Pressure]
     [./top_pressure]
       function = applied_load_fct
-      disp_z = disp_z
       disp_y = disp_y
       disp_x = disp_x
       boundary = top_pressure
@@ -254,11 +241,6 @@
     point = '0 0 0'
     variable = pore_pressure
   [../]
-  [./zdisp]
-    type = PointValue
-    point = '0 0 0.5'
-    variable = disp_z
-  [../]
   [./stress_xx]
     type = PointValue
     point = '0 0 0'
@@ -273,6 +255,11 @@
     type = PointValue
     point = '0 0 0'
     variable = stress_zz
+  [../]
+  [./ydisp]
+    type = PointValue
+    variable = disp_y
+    point = '0 0 0'
   [../]
 []
 
@@ -304,7 +291,7 @@
   [../]
   [./my_exodus]
     scalar_as_nodal = true
-    file_base = footing_3D
+    file_base = footing_2D
     type = Exodus
     elemental_as_nodal = true
   [../]
@@ -314,7 +301,6 @@
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
-    disp_z = disp_z
     pore_pres = pore_pressure
   [../]
 []
