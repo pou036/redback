@@ -28,7 +28,7 @@
 []
 
 [GlobalParams]
-  time_factor = 10
+  time_factor = 1
 []
 
 [Materials]
@@ -61,7 +61,6 @@
     phi0 = 0.1
     ref_lewis_nb = 1
     total_porosity = 0.1
-    Peclet_number = 1e-10
     solid_density = 0
     disp_z = disp_z
     confining_pressure = 0
@@ -290,7 +289,7 @@
   num_steps = 1
   solve_type = Newton
   end_time = 10
-  dt = 1e-5
+  dt = 1e-9
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg cp 201'
   nl_abs_tol = 1e-10
