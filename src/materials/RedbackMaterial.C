@@ -23,13 +23,13 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<std::vector<std::string> >("init_from_functions__params", "The names of the parameters to be initialised as functions.");
   params.addParam<std::vector<FunctionName> >("init_from_functions__function_names", "The corresponding names of the functions to be used for the parameters to be initialised as functions.");
   params.addRangeCheckedParam<Real>("phi0", 0.0, "phi0>=0 & phi0<1", "initial porosity value.");
-  params.addRangeCheckedParam<Real>("gr", "gr>=0", "Gruntfest number.");
+  params.addRangeCheckedParam<Real>("gr", 1.0, "gr>=0", "Gruntfest number.");
   params.addParam<Real>("ref_lewis_nb", "Reference Lewis number.");
-  params.addParam<Real>("ar", "Arrhenius number.");
+  params.addParam<Real>("ar", 0.0, "Arrhenius number.");
   params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
-  params.addParam< Real >("alpha_1", 0, "First parameter for activation volume, alpha_1 V_{ref} / (R T_{ref}) in the redback paper");
-  params.addParam< Real >("alpha_2", 0, "Second parameter for activation volume, alpha_2 V_{ref} / (R T_{ref}) in the redback paper");
-  params.addParam< Real >("alpha_3", 0, "Third parameter for activation volume, alpha_3 in the redback paper");
+  params.addParam< Real >("alpha_1", 0.0, "First parameter for activation volume, alpha_1 V_{ref} / (R T_{ref}) in the redback paper");
+  params.addParam< Real >("alpha_2", 0.0, "Second parameter for activation volume, alpha_2 V_{ref} / (R T_{ref}) in the redback paper");
+  params.addParam< Real >("alpha_3", 0.0, "Third parameter for activation volume, alpha_3 in the redback paper");
   params.addParam< Real >("confining_pressure", 1, "Normalised confining pressure");
   params.addParam< Real >("biot_coefficient", 1.0, "Biot coefficient");
   params.addParam<bool>("is_mechanics_on", false, "is mechanics on?");
@@ -47,8 +47,8 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<MooseEnum>("density_method", RedbackMaterial::densityMethodEnum() = "linear", "The method to describe density evolution with temperature and pore pressure"); // TODO: fluid, solid, mixture?...
   params.addParam<MooseEnum>("permeability_method", RedbackMaterial::permeabilityMethodEnum() = "KozenyCarman", "The method to describe permeability evolution");
 
-  params.addParam<Real>("ar_F", "Arrhenius number for the forward reaction.");
-  params.addParam<Real>("ar_R", "Arrhenius number for the reverse reaction.");
+  params.addParam<Real>("ar_F", 0.0, "Arrhenius number for the forward reaction.");
+  params.addParam<Real>("ar_R", 0.0, "Arrhenius number for the reverse reaction.");
   params.addParam<Real>("da_endo", 0, "Damkoehler number for the endothermic reaction.");
   params.addParam<Real>("da_exo", 0, "Damkoehler number for the exothermic reaction.");
   params.addParam<Real>("mu", 0, "Chemical pressurization coefficient.");

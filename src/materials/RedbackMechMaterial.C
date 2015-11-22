@@ -46,15 +46,16 @@ InputParameters validParams<RedbackMechMaterial>()
   // nothing
 
   // Copy-paste from FiniteStrainPlasticMaterial.C
-  params.addRequiredParam< std::vector<Real> >("yield_stress", "Input data as pairs of equivalent plastic strain and yield stress: Should start with equivalent plastic strain 0");
+  //params.addRequiredParam< std::vector<Real> >("yield_stress", "Input data as pairs of equivalent plastic strain and yield stress: Should start with equivalent plastic strain 0");
+  params.addParam< std::vector<Real> > ("yield_stress", std::vector<Real>(0.0,0.0), "Input data as pairs of equivalent plastic strain and yield stress: Should start with equivalent plastic strain 0");
   params.addParam<Real>("rtol",1e-8,"Plastic strain NR tolerance");
   params.addParam<Real>("ftol",1e-4,"Consistency condition NR tolerance");
   params.addParam<Real>("eptol",1e-7,"Equivalent plastic strain NR tolerance");
   params.addClassDescription("Associative J2 plasticity with isotropic hardening.");
 
   //  Copy-paste from FiniteStrainPlasticRateMaterial.C
-  params.addParam< Real >("ref_pe_rate", "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
-  params.addParam< Real >("exponent", "Exponent for rate dependent plasticity (Perzyna)");
+  params.addParam< Real >("ref_pe_rate", 1.0, "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
+  params.addParam< Real >("exponent", 1.0, "Exponent for rate dependent plasticity (Perzyna)");
   params.addCoupledVar("pore_pres", 0.0, "Dimensionless pore pressure");
   params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
   params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
