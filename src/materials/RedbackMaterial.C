@@ -55,7 +55,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("Kc", 0, "Equilibrium constant.");
   params.addParam<Real>("eta1", 1, "ratio of concentrations (see documentation).");
   params.addParam<Real>("eta2", 1, "ratio of concentrations (see documentation).");
-  params.addRangeCheckedParam<Real>("Aphi","Aphi>=0 & Aphi<=1", "percentage of volume change from chemistry contributing to porosity (see documentation)");
+  params.addRangeCheckedParam<Real>("Aphi", 0.0, "Aphi>=0 & Aphi<=1", "percentage of volume change from chemistry contributing to porosity (see documentation)");
   params.addParam<Real>("pressurization_coefficient", 0, "Pressurization coefficient (Lambda).");
   params.addParam<Real>("Peclet_number", 1, "Peclet number");
 
