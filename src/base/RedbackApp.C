@@ -26,6 +26,7 @@
 #include "RedbackThermalConvection.h"
 #include "RedbackThermalDiffusion.h"
 #include "RedbackThermalPressurization.h"
+#include "RedbackVarAnisotropicDiffusion.h"
 
 // Materials
 #include "RedbackMaterial.h"
@@ -34,6 +35,7 @@
 #include "RedbackMechMaterialCC.h"
 #include "RedbackMechMaterialCCanisotropic.h"
 #include "RedbackMechMaterialElastic.h"
+#include "RedbackMaterialElasticVarDiff.h"
 
 // Timesteppers
 #include "ReturnMapIterDT.h"
@@ -98,6 +100,8 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalConvection);
   registerKernel(RedbackThermalDiffusion);
   registerKernel(RedbackThermalPressurization);
+  registerKernel(RedbackVarAnisotropicDiffusion);
+
 
   registerMaterial(RedbackMaterial);
   registerMaterial(RedbackMechMaterialJ2);
@@ -105,6 +109,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialCC);
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
+  registerMaterial(RedbackMaterialElasticVarDiff);
 
   registerExecutioner(ReturnMapIterDT);
 
