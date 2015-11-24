@@ -29,7 +29,7 @@ InputParameters validParams<RedbackMaterial>()
   params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
   params.addParam< Real >("alpha_1", 0, "First parameter for activation volume, alpha_1 V_{ref} / (R T_{ref}) in the redback paper");
   params.addParam< Real >("alpha_2", 0, "Second parameter for activation volume, alpha_2 V_{ref} / (R T_{ref}) in the redback paper");
-  params.addParam< Real >("alpha_3", 0, "Third parameter for activation volume, alpha_3 in the redback paper");
+  params.addParam< Real >("alpha_3", 1, "Third parameter for activation volume, alpha_3 in the redback paper");
   params.addParam< Real >("confining_pressure", 1, "Normalised confining pressure");
   params.addParam< Real >("biot_coefficient", 1.0, "Biot coefficient");
   params.addParam<bool>("is_mechanics_on", false, "is mechanics on?");
