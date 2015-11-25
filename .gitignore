@@ -176,3 +176,7 @@ theory.synctex.gz
 !/doc/theory/data/succombe_files/*.xml
 
 RedbackRevision.h
+
+/doc/doxygen/*
+problems/Oka/best_matches
+problems/Oka/results
