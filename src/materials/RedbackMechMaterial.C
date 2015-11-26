@@ -412,7 +412,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
       Real dmg_coeff = std::pow(((1-_damage[_qp])/_damage[_qp]),2);
       Real Tcr = -_ar[_qp]/std::log(dmg_coeff*_mises_strain_rate[_qp]/_ref_pe_rate);
       Real vartheta0 = 0.95;
-      Real vartheta = vartheta0 * (1 - _T[_qp]/Tcr); //The vartheta coefficient of Einav 2007
+      Real grain_size_med_squared = vartheta0 * (_T[_qp]/Tcr) + (1-vartheta0);
+      Real vartheta = 1 - grain_size_med_squared; //The vartheta coefficient of Einav 2007
       prefactor = vartheta0/std::pow((1-vartheta * _damage[_qp]),2);
       damage_potential = prefactor * (_mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/bulk_modulus);
       damage_rate = (_damage[_qp] - _damage_old[_qp])/_dt;
