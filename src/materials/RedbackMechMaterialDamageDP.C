@@ -35,41 +35,10 @@ RedbackMechMaterialDamageDP::RedbackMechMaterialDamageDP(const InputParameters &
 {
 }
 
-/*
-void
-RedbackMechMaterialDamageDP::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)
-{
-  sig = sig_old + E_ijkl * delta_d;
-  dp = RankTwoTensor(); //Plastic rate of deformation tensor in unrotated configuration
-}
-*/
-
-void
-RedbackMechMaterialDamageDP::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor_dev)
-{
-}
-
-Real
-RedbackMechMaterialDamageDP::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real yield_stress)
-{
-  return 0;
-}
-
-void
-RedbackMechMaterialDamageDP::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr_dev,
-        Real q, Real p, Real p_y, Real q_y, Real yield_stress, RankFourTensor & dresid_dsig)
-{
-}
-
-void
-RedbackMechMaterialDamageDP::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
-{
-}
-
 void
 RedbackMechMaterialDamageDP::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real cohesion)
 {
-    RedbackMechMaterial::computeRedbackTerms(sig, q_y, cohesion);
+    RedbackMechMaterialDP::computeRedbackTerms(sig, q_y, cohesion);
     Real lambda_dot;
 
     Real d_yield_dq, denominator; // The derivative of the yield surface with respect to the deviatoric stress q

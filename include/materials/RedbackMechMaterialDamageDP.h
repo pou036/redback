@@ -30,12 +30,6 @@ public:
   RedbackMechMaterialDamageDP(const InputParameters & parameters);
 
 protected:
-  //void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
-  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
-  void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
-  Real getFlowIncrement(Real, Real, Real, Real, Real);
-  void get_py_qy(Real, Real, Real &, Real &, Real);
-
   MaterialProperty<Real> & _damage_kernel;
   MaterialProperty<Real> & _damage_kernel_jac;
   Real _energetic_coeff;
