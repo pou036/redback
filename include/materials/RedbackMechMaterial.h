@@ -138,6 +138,8 @@ protected:
   bool _has_pore_pres;
   VariableValue & _pore_pres;
   VariableValue & _total_porosity;
+  bool _has_D;
+  VariableValue & _damage;
 
   // Reading material properties from RedbackMaterial
   const MaterialProperty<Real> & _gr;

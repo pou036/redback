@@ -1,13 +1,11 @@
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*              (c) 2014 CSIRO and UNSW Australia               */
 /*                   ALL RIGHTS RESERVED                        */
 /*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
+/*            Prepared by CSIRO and UNSW Australia              */
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
@@ -41,6 +39,7 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addRequiredCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", 0.0, "The z displacement");
   params.addCoupledVar("temperature", 0.0, "temperature variable");
+  params.addCoupledVar("damage", 0.0, "damage variable");
 
   // Copy-paste from FiniteStrainMaterial.C
   // nothing
@@ -120,13 +119,15 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _mechanical_dissipation_mech(declareProperty<Real>("mechanical_dissipation_mech")),
     _mechanical_dissipation_jac_mech(declareProperty<Real>("mechanical_dissipation_jacobian_mech")),
 
-    // Get coupled variables (T & P)
+    // Get coupled variables (T & P & porosity & damage)
     _has_T(isCoupled("temperature")),
     _T(_has_T ? coupledValue("temperature") : _zero),
     _T_old(_has_T ? coupledValueOld("temperature") : _zero),
     _has_pore_pres(isCoupled("pore_pres")),
     _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
     _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
+    _has_D(isCoupled("damage")),
+    _damage(_has_D ? coupledValue("damage") : _zero),
 
     // Get some material properties from RedbackMaterial
     _gr(getMaterialProperty<Real>("gr")),
@@ -198,8 +199,8 @@ void RedbackMechMaterial::stepInitQpProperties()
 void RedbackMechMaterial::computeQpElasticityTensor()
 {
   // Fill in the matrix stiffness material property
-  _elasticity_tensor[_qp] = _Cijkl;
-  _Jacobian_mult[_qp] = _Cijkl;
+  _elasticity_tensor[_qp] = _Cijkl*(1-_damage[_qp]);
+  _Jacobian_mult[_qp] = _Cijkl*(1-_damage[_qp]);
 }
 
 void RedbackMechMaterial::computeStrain()
@@ -269,6 +270,8 @@ void RedbackMechMaterial::computeQpStress()
 
   _returnmap_iter[_qp] = 0;
   returnMap(_stress_old[_qp], _strain_increment[_qp], _elasticity_tensor[_qp], dp, sig, p_y, q_y);
+  p_y *= (1-_damage[_qp]);
+  q_y *= (1-_damage[_qp]);
   _stress[_qp] = sig;
 
   //Rotate the stress to the current configuration
@@ -396,7 +399,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   def_grad_rate = (def_grad - def_grad_old)/_dt;
 
   // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
-  _mechanical_dissipation_mech[_qp] = _gr[_qp]*std::exp(_ar[_qp])*sig.doubleContraction(instantaneous_strain_rate);
+  Real TaylorQuinney = _gr[_qp] * std::exp(_ar[_qp]) * (1-_damage[_qp]);
+  _mechanical_dissipation_mech[_qp] = TaylorQuinney*sig.doubleContraction(instantaneous_strain_rate);
 
   // Compute Mechanical Dissipation Jacobian
   _mechanical_dissipation_jac_mech[_qp] = _mechanical_dissipation_mech[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
@@ -404,8 +408,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _poromech_kernel[_qp] = def_grad_rate * _peclet_number[_qp] / _mixture_compressibility[_qp];
   _poromech_jac[_qp] = (1 / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]));
 
-  // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
-  _mod_gruntfest_number[_qp] = _gr[_qp] *
+  // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO: Remove this number from the tests!!!
+  _mod_gruntfest_number[_qp] = TaylorQuinney * std::exp(- _ar[_qp]) *
       (
       std::fabs(getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent)) +
       std::fabs(_mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp] - p_y), _exponent))
