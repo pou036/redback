@@ -65,8 +65,8 @@
     ar_R = 10
     da_endo = 1e-4
     eta1 = 1e3
-    gr = 1
-    m = 3
+    gr = 4.54e-5 # exp(-Ar), Ar=10
+    alpha_2 = 3
     mu = 1e-3
     phi0 = 0.1
     pressurization_coefficient = 0.5
@@ -155,7 +155,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress Lewis_number total_porosity mech_porosity'
+  active = 'mech_porosity solid_ratio total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress Lewis_number'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -185,11 +185,6 @@
     family = MONOMIAL
   [../]
   [./mises_strain_rate]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
-  [../]
-  [./mech_diss]
     order = CONSTANT
     family = MONOMIAL
     block = 0
@@ -273,7 +268,7 @@
 []
 
 [AuxKernels]
-  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation total_porosity mech_porosity Gruntfest_Number'
+  active = 'mech_porosity volumetric_strain solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -321,11 +316,6 @@
     variable = mises_strain_rate
     block = 0
     property = mises_strain_rate
-  [../]
-  [./mech_dissipation]
-    type = MaterialRealAux
-    variable = mech_diss
-    property = mechanical_dissipation
   [../]
   [./Gruntfest_Number]
     type = MaterialRealAux

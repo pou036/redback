@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Input file for SuCCoMbe to study ETS -->
+<Model>
+	<InitialConditions>
+		<!-- Strings that will be evaluated in [-1,1]^dim -->
+		<IC var='1'>0</IC> <!-- Constant temperature -->
+	</InitialConditions>
+	<BoundaryConditions>
+		<!-- Strings that will be evaluated on boundary of [-1,1]^dim -->
+		<BC var='1'>0</BC> <!-- Constant temperature -->
+	</BoundaryConditions>
+	<PreProcessingCode>
+		<!-- Ordered list of instructions to be run before the equations. In practise it is mainly used to define tmp variables used in equations -->
+		<command index='1'>
+    M_cao = 0.15; % kg/mol</command>
+	</PreProcessingCode>
+	<Equations>
+		<!-- Strings representing PDEs in matlab language, with user-defined equation parameters. -->
+		<dim>1</dim><!-- dimensionality of the problem -->
+		<EQ var='1'>D2*u{1} + Gr.*exp(Ar*delta*u{1}./(1.+delta*u{1}));</EQ>
+	</Equations>
+	<EquationParameters>
+		<bifurcationParameter>Gr</bifurcationParameter>
+		<param>
+			<name>Ar</name>
+			<value>10</value>
+		</param>
+		<param>
+			<name>delta</name>
+			<value>1</value>
+		</param>
+		<param>
+			<name>Gr</name>
+			<value>0.1</value>
+		</param>
+	</EquationParameters>
+	<NumericalParameters>
+		<param>
+			<name>N</name>
+			<value>8</value>
+		</param>
+        <!-- Transient parameters -->
+		<param>
+			<name>startTime</name><!-- start of simulation time -->
+			<value>0.</value>
+		</param>
+		<param>
+			<name>finalTime</name><!-- end of simulation time -->
+			<value>30</value>
+		</param>
+		<param>
+			<name>restartFileNameT</name><!-- input Matlab .mat file -->
+			<value></value>
+		</param>
+		<param>
+			<name>saveFileNameT</name><!-- output Matlab .mat file -->
+			<value>exports/export.mat</value>
+		</param>
+		<param>
+			<name>solverRelTol</name><!-- relative tolerance for ode23s solver -->
+			<value>1.e-4</value>
+		</param>
+		<!-- Steady-state parameters -->
+		<param>
+			<name>restartFileNameSS</name><!-- input Matlab .mat file -->
+			<value></value><!-- SuCCoMBE_S.mat -->
+		</param>
+		<param>
+			<name>saveFileNameSS</name><!-- output Matlab .mat file -->
+			<value>SuCCoMBE_S.mat</value>
+		</param>
+		<param>
+			<name>LambdaInitialGuess</name> <!-- initial value of bifurc. param -->
+			<value>1e-10</value>
+		</param>
+		<param>
+			<name>sMax</name> <!-- Maximum curve length -->
+			<value>1</value>
+		</param>
+		<param>
+			<name>ds</name> <!-- continuation step size along curve -->
+			<value>0.001</value>
+		</param>
+		<param>
+			<name>indexVarPlot</name><!-- which variable to plot against the bifurcation parameter -->
+			<value>1</value>
+		</param>
+		<param>
+			<name>notificationFrequency</name><!-- percentage (0-100) of simulation when to notify progress -->
+			<value>10</value>
+		</param>
+	</NumericalParameters>
+</Model>

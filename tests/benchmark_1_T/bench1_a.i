@@ -90,9 +90,9 @@
   [./adim_rock]
     type = RedbackMaterial
     block = 0
-    m = 1
+    alpha_2 = 1
     ar = 10
-    gr = 0.095
+    gr = 4.313e-6 # 0.095*exp(-Ar), Ar=10
     pore_pres = 0
     temperature = temp
     ref_lewis_nb = 1
@@ -137,7 +137,8 @@
 [Outputs]
   file_base = bench1_a_out
   exodus = true
-  csv = false
+  csv = true
+  execute_on = TIMESTEP_END
   console = true
 []
 

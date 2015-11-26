@@ -42,10 +42,10 @@
   [./mat_nomech]
     type = RedbackMaterial
     block = 0
-    m = 3
+    alpha_2 = 3
     mu = 1e-3
     ar = 10
-    gr = 8 # 11
+    gr = 3.632e-4 # 8*exp(-Ar), Ar=10
     pore_pres = pore_pressure
     temperature = temp
     is_mechanics_on = false
@@ -66,7 +66,7 @@
 []
 
 [Functions]
-  active = 'downfunc central_rotation'
+  active = 'central_rotation downfunc'
   [./upfunc]
     type = ParsedFunction
     value = t
@@ -85,7 +85,7 @@
 []
 
 [BCs]
-  active = 'press_bc low_temp left_disp central_disp_x rigth_disp_y left_disp_y central_disp_y'
+  active = 'central_disp_y central_disp_x press_bc low_temp left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -161,7 +161,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number solid_ratio mises_strain mech_diss mises_strain_rate strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress stress_zz Lewis_number total_porosity mech_porosity'
+  active = 'mech_porosity Mod_Gruntfest_number solid_ratio total_porosity mises_strain mises_strain_rate strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress stress_zz Lewis_number'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -191,11 +191,6 @@
     family = MONOMIAL
   [../]
   [./mises_strain_rate]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
-  [../]
-  [./mech_diss]
     order = CONSTANT
     family = MONOMIAL
     block = 0
@@ -274,7 +269,7 @@
 []
 
 [AuxKernels]
-  active = 'volumetric_strain solid_ratio mises_strain Lewis_number mises_strain_rate strain_rate volumetric_strain_rate mises_stress mean_stress mech_dissipation stress_zz total_porosity mech_porosity Gruntfest_Number'
+  active = 'mech_porosity volumetric_strain solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress stress_zz strain_rate Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -322,11 +317,6 @@
     variable = mises_strain_rate
     block = 0
     property = mises_strain_rate
-  [../]
-  [./mech_dissipation]
-    type = MaterialRealAux
-    variable = mech_diss
-    property = mechanical_dissipation
   [../]
   [./Gruntfest_Number]
     type = MaterialRealAux
@@ -456,10 +446,10 @@
   file_base = ring_shear_out
   output_initial = true
   exodus = true
+  print_linear_residuals = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
   [../]
 []
 

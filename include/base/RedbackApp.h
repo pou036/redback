@@ -11,7 +11,7 @@ InputParameters validParams<RedbackApp>();
 class RedbackApp : public MooseApp
 {
 public:
-  RedbackApp(const std::string & name, InputParameters parameters);
+  RedbackApp(InputParameters parameters);
   virtual ~RedbackApp();
 
   static void registerApps();

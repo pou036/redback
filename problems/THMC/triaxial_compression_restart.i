@@ -60,7 +60,7 @@
     disp_z = disp_z
     pore_pres = pore_pressure
     temperature = temp
-    m = 3
+    alpha_2 = 3
     mu = 1
     ar = 10
     gr = 20
@@ -481,10 +481,10 @@
   output_initial = true
   exodus = true
   checkpoint = true
+  print_linear_residuals = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
     append_restart = true
   [../]
 []

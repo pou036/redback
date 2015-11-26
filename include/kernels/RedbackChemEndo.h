@@ -26,15 +26,18 @@ InputParameters validParams<RedbackChemEndo>();
 class RedbackChemEndo : public Kernel
 {
 public:
-  RedbackChemEndo(const std::string & name, InputParameters parameters);
+  RedbackChemEndo(const InputParameters & parameters);
   virtual ~RedbackChemEndo();
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  MaterialProperty<Real> & _chemical_endothermic_energy;
-  MaterialProperty<Real> & _chemical_endothermic_energy_jac;
+  const MaterialProperty<Real> & _chemical_endothermic_energy;
+  const MaterialProperty<Real> & _chemical_endothermic_energy_jac;
+
+private:
+  Real _time_factor;
 };
 
 

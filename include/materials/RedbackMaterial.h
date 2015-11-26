@@ -28,7 +28,7 @@ InputParameters validParams<RedbackMaterial>();
 class RedbackMaterial : public Material
 {
 public:
-  RedbackMaterial(const std::string & name, InputParameters parameters);
+  RedbackMaterial(const InputParameters & parameters);
 
   /// Static method for use in validParams for getting the density method
   static MooseEnum densityMethodEnum();
@@ -54,12 +54,20 @@ protected:
   virtual void computeRedbackTerms();
 
   bool _has_T;
-  VariableValue & _T, & _T_old;
+  VariableValue & _T;
   bool _has_pore_pres;
   VariableValue & _pore_pres;//, & _pore_pres_old;
   VariableValue & _total_porosity;
+  VariableValue & _inverse_lewis_number_tilde;
 
-  Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param, _m_param, _peclet_number; //_ar_c_param, _da_param, _mu_param,
+  // functionality to initialise some parameters from function (overwrites initialisation as float)
+  std::vector<std::string> _init_from_functions__params;
+  std::vector<FunctionName> _init_from_functions__function_names;
+  std::vector<Function *> _init_functions;
+  int _num_init_functions;
+
+  Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param;
+  Real _confining_pressure_param, _biot_coeff_param, _alpha_1_param, _alpha_2_param, _alpha_3_param, _peclet_number_param; //_ar_c_param, _da_param, _mu_param,
   Real  _ar_F_param, _ar_R_param, _da_endo_param, _da_exo_param, _mu_param, _Kc_param, _eta1_param, _eta2_param, _Aphi_param, _pressurization_coefficient_param;
   Real _solid_compressibility_param, _fluid_compressibility_param, _solid_thermal_expansion_param, _fluid_thermal_expansion_param, _solid_density_param, _fluid_density_param;
   bool _is_mechanics_on, _is_chemistry_on, _are_convective_terms_on;
@@ -72,18 +80,19 @@ protected:
   MaterialProperty<Real> & _gr;
   MaterialProperty<Real> & _ref_lewis_nb;
   MaterialProperty<Real> & _ar;
+  MaterialProperty<Real> & _confining_pressure;
+  MaterialProperty<Real> & _biot_coeff;
+  MaterialProperty<Real> & _alpha_1;
+  MaterialProperty<Real> & _alpha_2;
+  MaterialProperty<Real> & _alpha_3;
+  MaterialProperty<Real> & _peclet_number;
   MaterialProperty<Real> & _delta;
-  MaterialProperty<Real> & _m;
-  
   MaterialProperty<Real> & _initial_porosity;
-  //MaterialProperty<Real> & _porosity;
   MaterialProperty<Real> & _lewis_number;
   MaterialProperty<Real> & _mixture_compressibility;
 
-  MaterialProperty<Real> & _mod_gruntfest_number;
-  MaterialProperty<Real> & _mechanical_dissipation;
-  MaterialProperty<Real> & _mechanical_dissipation_jac;
-  MaterialProperty<Real> & _poromech_jac;
+  MaterialProperty<Real> & _mechanical_dissipation_no_mech;
+  MaterialProperty<Real> & _mechanical_dissipation_jac_no_mech;
 
   MaterialProperty<Real> & _ar_F;
   MaterialProperty<Real> & _ar_R;
@@ -99,11 +108,14 @@ protected:
   MaterialProperty<Real> & _chemical_source_mass_jac;
 
   MaterialProperty<RealVectorValue> & _thermal_convective_mass;
-  MaterialProperty<RealVectorValue> & _thermal_convective_mass_jac;
   MaterialProperty<RealVectorValue> & _pressure_convective_mass;
-  MaterialProperty<RealVectorValue> & _pressure_convective_mass_jac;
+  //MaterialProperty<RealVectorValue> & _convective_mass_jac_vec;
+  //MaterialProperty<Real> & _convective_mass_jac_real;
+  //MaterialProperty<RealVectorValue> & _convective_mass_off_diag_vec;
+  //MaterialProperty<Real> & _convective_mass_off_diag_real;
   MaterialProperty<RealVectorValue> & _mixture_convective_energy;
-  MaterialProperty<RealVectorValue> & _mixture_convective_energy_jac;
+  //MaterialProperty<Real> & _mixture_convective_energy_jac;
+  //MaterialProperty<Real> & _mixture_convective_energy_off_jac;
 
   MaterialProperty<RealVectorValue> & _fluid_velocity;
   MaterialProperty<Real> & _solid_compressibility; // \bar(\beta_s)/\sigma_{ref}
@@ -123,12 +135,16 @@ protected:
 
   MaterialProperty<Real> & _pressurization_coefficient;
 
+  VariableGradient& _grad_temp;
   VariableGradient& _grad_pore_pressure;
+  //VariableSecond& _grad_grad_pore_pressure;
 
   VariableValue & _dispx_dot;
   VariableValue & _dispy_dot;
   VariableValue & _dispz_dot;
   MaterialProperty<RealVectorValue> & _solid_velocity;
+
+  Real _T0_param, _P0_param;
 
 };
 

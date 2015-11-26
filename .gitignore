@@ -164,10 +164,15 @@ peacock_*.e
 
 *.template
 tests/*/*.trace
-problems/Oka/pics_postprocess
 
-# Allow csv files in Oka folder
-!/problems/Oka/fig*/*.csv
-!/problems/Oka/results
-problems/Oka/best_matches
 !/tests/transverseBC/*.msh
+theory.synctex.gz
+
+# Allow files in documentation directories
+!/doc/theory/theory.pdf
+!/doc/theory/figures/*/*.eps
+/doc/**/*-eps-converted-to.pdf
+!/doc/theory/figures/*/*.pdf
+!/doc/theory/data/succombe_files/*.xml
+
+RedbackRevision.h

@@ -23,7 +23,7 @@ InputParameters validParams<FunctionDirichletTransverseBC>();
 class FunctionDirichletTransverseBC : public PresetNodalBC
 {
 public:
-  FunctionDirichletTransverseBC(const std::string & name, InputParameters parameters);
+  FunctionDirichletTransverseBC(const InputParameters & parameters);
 
 protected:
   /**

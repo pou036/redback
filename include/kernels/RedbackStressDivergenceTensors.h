@@ -21,7 +21,7 @@ InputParameters validParams<RedbackStressDivergenceTensors>();
 class RedbackStressDivergenceTensors : public Kernel
 {
 public:
-  RedbackStressDivergenceTensors(const std::string & name, InputParameters parameters);
+  RedbackStressDivergenceTensors(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -32,11 +32,13 @@ protected:
   RealVectorValue _poromech_stress_row;
 
 
-  MaterialProperty<RankTwoTensor> & _stress;
-  MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+  const MaterialProperty<RankTwoTensor> & _stress;
+  const MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
 
   const unsigned int _component;
+
+  const MaterialProperty<Real> & _biot_coeff;
 
 private:
   const bool _xdisp_coupled;
@@ -51,7 +53,7 @@ private:
   const unsigned int _temp_var;
   const unsigned int _porepressure_var;
 
-  MaterialProperty<RealVectorValue> & _gravity_term;
+  const MaterialProperty<RealVectorValue> & _gravity_term;
 };
 
 #endif //REDBACKSTRESSDIVERGENCETENSORS_H

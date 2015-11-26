@@ -9,4 +9,9 @@
     input = 'bench_source_term.i'
     exodiff = 'bench_source_term_out.e'
   [../]
+  [./test_darcy] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'bench_darcy_flow.i'
+    exodiff = 'bench_darcy_flow.e'
+  [../]
 []

@@ -104,10 +104,10 @@
     ar_F = 20
     ar_R = 10
     da_endo = 1
-    gr = 2
+    gr = 9.08e-5 # 2*exp(-Ar), Ar=10
     is_mechanics_on = false
     is_chemistry_on = true
-    m = 1
+    alpha_2 = 1
     mu = 1e-3
     ref_lewis_nb = 1
     temperature = temp
@@ -147,6 +147,7 @@
 [Outputs]
   exodus = true
   console = true
+  execute_on = TIMESTEP_END
   file_base = bench_TC_out
 []
 

@@ -7,29 +7,29 @@ InputParameters validParams<RedbackStressDivergenceTensors>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
-  params.addCoupledVar("disp_x", "The x displacement");
-  params.addCoupledVar("disp_y", "The y displacement");
-  params.addCoupledVar("disp_z", "The z displacement");
-  params.addCoupledVar("temp", "The temperature");
-  params.addCoupledVar("pore_pres", 0, "The pore fluid pressure");
+  params.addCoupledVar("disp_x", 0.0, "The x displacement");
+  params.addCoupledVar("disp_y", 0.0, "The y displacement");
+  params.addCoupledVar("disp_z", 0.0, "The z displacement");
+  params.addCoupledVar("temp", 0.0, "The temperature");
+  params.addCoupledVar("pore_pres", 0.0, "The pore fluid pressure");
   params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
 
-//  params.set<bool>("use_displaced_mesh") = true;
   // Using the displaced mesh will be set in the solid mechanics action input now.
-  params.set<bool>("use_displaced_mesh") = false;
+  //params.set<bool>("use_displaced_mesh") = true;
 
   return params;
 }
 
 
-RedbackStressDivergenceTensors::RedbackStressDivergenceTensors(const std::string & name, InputParameters parameters) :
-    Kernel(name, parameters),
+RedbackStressDivergenceTensors::RedbackStressDivergenceTensors(const InputParameters & parameters) :
+    Kernel(parameters),
     _pore_pres(coupledValue("pore_pres")),
 
     _stress(getMaterialProperty<RankTwoTensor>("stress" + getParam<std::string>("appended_property_name"))),
     _Jacobian_mult(getMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
     // _d_stress_dT(getMaterialProperty<RankTwoTensor>("d_stress_dT"+ getParam<std::string>("appended_property_name"))),
     _component(getParam<unsigned int>("component")),
+    _biot_coeff(getMaterialProperty<Real>("biot_coefficient")),
 
     _xdisp_coupled(isCoupled("disp_x")),
     _ydisp_coupled(isCoupled("disp_y")),
@@ -54,18 +54,25 @@ RedbackStressDivergenceTensors::computeQpResidual()
    * is not depending on displacements (incompressible case) and the stresses of
    * TensorMechanics are now effective stresses
    * The quantity _poromech_stress is the total stress obeying to Terzaghi's
-   * principle: poromech_stress(ij) = stress(ij) + pore_pressure * delta(ij).
+   * principle: poromech_stress(ij) = stress(ij) + biot_coefficient * pore_pressure * delta(ij).
    * Jacobians are the same, since pore pressure is not depending on displacements
    */
 
   if ( _pore_pres_coupled )
   {
     _poromech_stress_row = _stress[_qp].row(_component);
-    _poromech_stress_row(_component) += _pore_pres[_qp];
-    return (_poromech_stress_row + _gravity_term[_qp])* _grad_test[_i][_qp];
+    _poromech_stress_row(_component) -= _biot_coeff[_qp]*_pore_pres[_qp];
+    //return (_poromech_stress_row - _gravity_term[_qp])* _grad_test[_i][_qp];
+    return (_poromech_stress_row )* _grad_test[_i][_qp]- _gravity_term[_qp](_component)*_test[_i][_qp];
+
+
+    // Note: 30th of October 2015: Negative signs in gravity and pore pressure are being currently tested for the correct sign convention.
+    // In this configuration negative gravity_term because we consider positive stresses in extension!
+    // Thus, the gravity vector needs to be given with a negative component in Z (e.g. 0 0 -9.81)
   }
 
-  return (_stress[_qp].row(_component) + _gravity_term[_qp])* _grad_test[_i][_qp]; //TODO: Add the gravity kernel
+//  return (_stress[_qp].row(_component) - _gravity_term[_qp])* _grad_test[_i][_qp]; //TODO: Add the gravity kernel
+  return (_stress[_qp].row(_component))* _grad_test[_i][_qp] - _gravity_term[_qp](_component)*_test[_i][_qp]; //TODO: Add the gravity kernel
 }
 
 Real

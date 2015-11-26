@@ -55,14 +55,13 @@
     disp_x = disp_x
     disp_z = 0
     temperature = temp
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     yield_stress = '0. 1 1. 1'
     exponent = 1
     ref_pe_rate = 1
     youngs_modulus = 10
     poisson_ratio = 0.3
     slope_yield_surface = 0.3
-    total_porosity = porosity
+    total_porosity = total_porosity
   [../]
   [./mat1]
     type = RedbackMaterial
@@ -73,15 +72,15 @@
     temperature = temp
     Aphi = 0
     ar = 5
-    gr = 1
-    m = 2
+    gr = 6.7e-3 # exp(-Ar)
     pore_pres = 0
     is_mechanics_on = true
     phi0 = 0.5
     ref_lewis_nb = 1
     ar_F = 1
     ar_R = 1
-    total_porosity = porosity
+    total_porosity = total_porosity
+    alpha_2 = 1
   [../]
 []
 
@@ -144,7 +143,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number returnmap_iter mises_strain mech_diss mises_strain_rate mises_stress porosity'
+  active = 'Mod_Gruntfest_number returnmap_iter mises_strain mises_strain_rate mises_stress total_porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -178,11 +177,6 @@
     family = MONOMIAL
     block = 0
   [../]
-  [./mech_diss]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
-  [../]
   [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
@@ -193,8 +187,7 @@
     family = MONOMIAL
     block = 0
   [../]
-  [./porosity]
-    order = FIRST
+  [./total_porosity]
     family = MONOMIAL
     block = 0
   [../]
@@ -217,7 +210,7 @@
 []
 
 [AuxKernels]
-  active = 'mises_strain mises_strain_rate porosity mises_stress mech_dissipation returnmap_iter Gruntfest_Number'
+  active = 'total_porosity mises_strain mises_strain_rate mises_stress returnmap_iter Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -266,11 +259,6 @@
     block = 0
     property = mises_strain_rate
   [../]
-  [./mech_dissipation]
-    type = MaterialRealAux
-    variable = mech_diss
-    property = mechanical_dissipation
-  [../]
   [./Gruntfest_Number]
     type = MaterialRealAux
     variable = Mod_Gruntfest_number
@@ -283,9 +271,9 @@
     property = returnmap_iter
     block = 0
   [../]
-  [./porosity]
+  [./total_porosity]
     type = RedbackTotalPorosityAux
-    variable = porosity
+    variable = total_porosity
   [../]
 []
 

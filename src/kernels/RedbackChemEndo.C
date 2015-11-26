@@ -19,15 +19,18 @@ template<>
 InputParameters validParams<RedbackChemEndo>()
 {
   InputParameters params = validParams<Kernel>();
+  params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
 
+  params.set<bool>("use_displaced_mesh") = true;
   return params;
 }
 
 
-RedbackChemEndo::RedbackChemEndo(const std::string & name, InputParameters parameters) :
-  Kernel(name, parameters),
+RedbackChemEndo::RedbackChemEndo(const InputParameters & parameters) :
+  Kernel(parameters),
   _chemical_endothermic_energy(getMaterialProperty<Real>("chemical_endothermic_energy")),
-  _chemical_endothermic_energy_jac(getMaterialProperty<Real>("chemical_endothermic_energy_jacobian"))
+  _chemical_endothermic_energy_jac(getMaterialProperty<Real>("chemical_endothermic_energy_jacobian")),
+  _time_factor(getParam<Real>("time_factor"))
 {
 
 }
@@ -40,12 +43,12 @@ RedbackChemEndo::~RedbackChemEndo()
 Real
 RedbackChemEndo::computeQpResidual()
 {
-  return _test[_i][_qp]*_chemical_endothermic_energy[_qp];
+  return _time_factor*_test[_i][_qp]*_chemical_endothermic_energy[_qp];
 }
 
 Real
 RedbackChemEndo::computeQpJacobian()
 {
   //std::cout<<"chemical endothermic kernel="<<_chemical_endothermic_energy[_qp] <<std::endl;
-  return _test[_i][_qp] * _chemical_endothermic_energy_jac[_qp] * _phi[_j][_qp];
+  return _time_factor*_test[_i][_qp] * _chemical_endothermic_energy_jac[_qp] * _phi[_j][_qp];
 }

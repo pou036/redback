@@ -47,7 +47,7 @@
     variable = temp
     ar_c = 40
     gr = 1.2e-7
-    m = 3
+    alpha_2 = 3
     pressure = pressure
     ar = 20
     delta = 1e-3

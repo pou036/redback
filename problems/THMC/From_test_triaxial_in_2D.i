@@ -45,7 +45,7 @@
     C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     yield_stress = '0. 1 1. 1'
     disp_z = disp_z
-    m = 3
+    alpha_2 = 3
     mu = 1e-3
     ar = 10
     gr = 0.2
@@ -439,10 +439,10 @@
   file_base = bench_THMC_DP_out
   output_initial = true
   exodus = true
+  print_linear_residuals = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
   [../]
 []
 

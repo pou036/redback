@@ -160,7 +160,7 @@
   [./adim_rock]
     type = RedbackMaterial
     block = 0
-    m = 3
+    alpha_2 = 3
     mu = 1e-3
     ar = 10
     yield_stress = '0 1 1 1'

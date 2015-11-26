@@ -48,7 +48,7 @@
     yield_stress = '0. 1 1. 1'
     disp_z = disp_z
     ar_c = 1
-    m = 2
+    alpha_2 = 2
     da = 1
     mu = 1
     ar = 10
@@ -65,7 +65,7 @@
     yield_stress = '0. 0.9 1 0.9'
     disp_z = disp_z
     ar_c = 1
-    m = 2
+    alpha_2 = 2
     da = 1
     mu = 1
     ar = 10
@@ -248,10 +248,10 @@
   file_base = out
   output_initial = true
   exodus = true
+  print_linear_residuals = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
   [../]
 []
 

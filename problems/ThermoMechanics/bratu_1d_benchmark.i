@@ -75,7 +75,7 @@
     type = RedbackMaterial
     block = 0
     ar_c = 40
-    m = 1
+    alpha_2 = 1
     da = 1
     mu = 1e-3
     ar = 20

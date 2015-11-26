@@ -1,22 +1,22 @@
 [Tests]
   [./test_bench1a_temperature] # can't put a dot in that name!
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'bench1_a.i'
-    exodiff = 'bench1_a_out.e'
+    csvdiff = 'bench1_a_out.csv'
   [../]
   [./test_bench1b_temperature] # can't put a dot in that name!
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'bench1_b.i'
-    exodiff = 'bench1_b_out.e'
+    csvdiff = 'bench1_b_out.csv'
   [../]
   [./test_bench1c_temperature] # can't put a dot in that name!
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'bench1_c.i'
-    exodiff = 'bench1_c_out.e'
+    csvdiff = 'bench1_c_out.csv'
   [../]
   [./test_bench1d_temperature] # can't put a dot in that name!
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'bench1_d.i'
-    exodiff = 'bench1_d_out.e'
+    csvdiff = 'bench1_d_out.csv'
   [../]
 []

@@ -41,7 +41,7 @@
   [./mat_nomech]
     type = RedbackMaterial
     block = 0
-    m = 3
+    alpha_2 = 3
     mu = 1e-3
     ar = 10
     gr = 1 # 11
@@ -464,10 +464,10 @@
   file_base = ring_shear_out
   output_initial = true
   exodus = true
+  print_linear_residuals = true
   [./console]
     type = Console
     perf_log = true
-    linear_residuals = true
   [../]
 []
 

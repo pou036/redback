@@ -90,11 +90,10 @@
   [./adim_rock]
     type = RedbackMaterial
     block = 0
-    m = 1
+    alpha_2 = 1
     ar = 10
     yield_stress = '0 1 1 1'
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
-    gr = 0.095
+    gr = 4.313e-6 # 0.095*exp(-Ar), Ar=10
     pore_pres = 0
     temperature = temp
     is_mechanics_on = false
@@ -140,7 +139,8 @@
 [Outputs]
   file_base = bench1_b_out
   exodus = true
-  csv = false
+  csv = true
+  execute_on = TIMESTEP_END
   console = true
 []
 

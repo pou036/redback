@@ -112,7 +112,7 @@
   [./adim_rock]
     type = RedbackMaterial
     block = 0
-    m = 1
+    alpha_2 = 1
     ar = 10
     gr = 0.9
     pore_pres = pore_pressure
@@ -165,6 +165,7 @@
 [Outputs]
   exodus = true
   console = true
+  execute_on = TIMESTEP_END
   file_base = bench_diffusion_out
 []
 

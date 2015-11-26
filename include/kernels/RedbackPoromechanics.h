@@ -28,7 +28,7 @@ InputParameters validParams<RedbackPoromechanics>();
 class RedbackPoromechanics : public Kernel
 {
 public:
-  RedbackPoromechanics(const std::string & name, InputParameters parameters);
+  RedbackPoromechanics(const InputParameters & parameters);
   virtual ~RedbackPoromechanics();
 
 protected:
@@ -36,11 +36,13 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  MaterialProperty<Real> & _volumetric_strain_rate;
-  MaterialProperty<Real> & _mixture_compressibility;
-  MaterialProperty<Real> & _poromech_jac;
+  const MaterialProperty<Real> & _poromech_kernel;
+  const MaterialProperty<Real> & _poromech_jac;
 
   unsigned int _temp_var; // variable number of the temperature variable
+
+private:
+  Real _time_factor;
 };
 
 

@@ -42,7 +42,7 @@
     disp_x = disp_x
     yield_stress = '0. 1 1. 1'
     disp_z = disp_z
-    m = 3
+    alpha_2 = 3
     ar = 10
     gr = 0.3
     is_mechanics_on = false
@@ -68,7 +68,7 @@
     disp_x = disp_x
     yield_stress = '0. 1 1e-6 0.8 1 0.8'
     disp_z = disp_z
-    m = 3
+    alpha_2 = 3
     ar = 10
     gr = 3
     is_mechanics_on = false
@@ -93,7 +93,7 @@
     ref_lewis_nb = 1
     ar_F = 20
     disp_x = disp_x
-    m = 3
+    alpha_2 = 3
     disp_y = disp_y
     ar_R = 10
     ar = 10

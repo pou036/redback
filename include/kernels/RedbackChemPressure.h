@@ -26,16 +26,22 @@ InputParameters validParams<RedbackChemPressure>();
 class RedbackChemPressure : public Kernel
 {
 public:
-  RedbackChemPressure(const std::string & name, InputParameters parameters);
+  RedbackChemPressure(const InputParameters & parameters);
   virtual ~RedbackChemPressure();
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
  // VariableValue &_temp;
-  MaterialProperty<Real> & _chemical_source_mass;
-  MaterialProperty<Real> & _chemical_source_mass_jac;
+  const MaterialProperty<Real> & _chemical_source_mass;
+  const MaterialProperty<Real> & _chemical_source_mass_jac;
+
+  unsigned int _temp_var; // variable number of the temperature variable
+
+private:
+  Real _time_factor;
 };
 
 

@@ -1,4 +1,32 @@
 [Tests]
+  [./test_7_HM_elastic] # can't put a dot in that name!
+    # Undrained odometer test (in finite strain)
+    # to compare with MOOSE poromechanics test
+    type = 'CSVDiff'
+    input = 'bench_HM_elastic.i'
+    csvdiff = 'bench_HM_elastic.csv'
+    rel_err = 5e-3
+  [../]
+  [./test_7_HM_elastic_porosity] # can't put a dot in that name!
+    # Undrained odometer test (in finite strain)
+    # with porosity evolution
+    type = 'CSVDiff'
+    input = 'bench_HM_elastic_porosity.i'
+    csvdiff = 'bench_HM_elastic_porosity.csv'
+    rel_err = 1e-8
+  [../]
+  [./test_7_HM_elastic_no_porosity] # can't put a dot in that name!
+    # Undrained odometer test (in finite strain)
+    # without porosity evolution
+    # (same as test_7_HM_elastic but different numerical values)
+    type = 'CSVDiff'
+    input = 'bench_HM_elastic_no_porosity.i'
+    csvdiff = 'bench_HM_elastic_no_porosity.csv'
+    rel_err = 5e-5
+  [../]
+  
+  # The following "test" the plasticity kernels,
+  # just by running them (no analytical solution)
   [./test_7_HM_J2] # can't put a dot in that name!
     type = 'Exodiff'
     input = 'bench_HM_J2.i'
@@ -13,5 +41,6 @@
     type = 'Exodiff'
     input = 'bench_HM_CC.i'
     exodiff = 'bench_HM_CC_out.e'
+    rel_err = 1e-5
   [../]
 []

@@ -28,7 +28,7 @@ InputParameters validParams<RedbackThermalPressurization>();
 class RedbackThermalPressurization : public Kernel
 {
 public:
-  RedbackThermalPressurization(const std::string & name, InputParameters parameters);
+  RedbackThermalPressurization(const InputParameters & parameters);
   virtual ~RedbackThermalPressurization();
 
 protected:
@@ -39,8 +39,11 @@ protected:
   VariableValue & _temp_dot;
   VariableValue & _dtemp_dot_dtemp;
 
-  MaterialProperty<Real> & _pressurization_coefficient;
+  const MaterialProperty<Real> & _pressurization_coefficient;
   unsigned int _temp_var; // variable number of the temperature variable
+
+private:
+  Real _time_factor;
 };
 
 

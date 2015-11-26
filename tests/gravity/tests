@@ -1,0 +1,26 @@
+[Tests]
+  [./test_gravity_horizontal] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'gravity_horizontal.i'
+    exodiff = 'gravity_horizontal.e'
+  [../]
+  [./test_gravity_vertical] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'gravity_vertical.i'
+    exodiff = 'gravity_vertical.e'
+  [../]
+  [./test_rho_g_h] # can't put a dot in that name!
+    # Testing geostatic gradient rho * g * h only
+    type = 'CSVDiff'
+    input = 'gravity_rho_g_h.i'
+    csvdiff = 'gravity_rho_g_h.csv'
+    rel_err = 1e-5
+  [../]
+  [./test_gravity_poromechanics] # can't put a dot in that name!
+    # Testing geostatic gradient rho * g * h with pore pressure
+    type = 'CSVDiff'
+    input = 'gravity_poro_stress.i'
+    csvdiff = 'gravity_poro_stress.csv'
+    rel_err = 1e-5
+  [../]
+[]

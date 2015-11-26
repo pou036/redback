@@ -26,7 +26,7 @@ InputParameters validParams<RedbackMechMaterialJ2>();
 class RedbackMechMaterialJ2 : public RedbackMechMaterial
 {
 public:
-  RedbackMechMaterialJ2(const std::string & name, InputParameters parameters);
+  RedbackMechMaterialJ2(const InputParameters & parameters);
 
 protected:
   void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
