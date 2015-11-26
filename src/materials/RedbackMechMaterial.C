@@ -128,6 +128,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
     _has_D(isCoupled("damage")),
     _damage(_has_D ? coupledValue("damage") : _zero),
+	_damage_old(_has_D ? coupledValueOld("damage") : _zero),
 
     // Get some material properties from RedbackMaterial
     _gr(getMaterialProperty<Real>("gr")),
@@ -398,9 +399,30 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   def_grad_old = _grad_disp_x_old[_qp](0) +_grad_disp_y_old[_qp](1) + _grad_disp_z_old[_qp](2);
   def_grad_rate = (def_grad - def_grad_old)/_dt;
 
+  //formulate the Taylor-Quinney coefficient and Gruntfest numbers for the case of damage
+  Real TaylorQuinney, Gruntfest;
+  TaylorQuinney = 1;
+    if (_has_D)
+    {
+      Real  bulk_modulus, shear_modulus, prefactor, damage_potential, damage_rate;
+
+      bulk_modulus = _youngs_modulus*_poisson_ratio/(1+_poisson_ratio)/(1-2*_poisson_ratio); // First Lame modulus
+      shear_modulus = 0.5*_youngs_modulus/(1+_poisson_ratio); // Second Lame modulus (shear)
+
+      Real dmg_coeff = std::pow(((1-_damage[_qp])/_damage[_qp]),2);
+      Real Tcr = -_ar[_qp]/std::log(dmg_coeff*_mises_strain_rate[_qp]/_ref_pe_rate);
+      Real vartheta0 = 0.95;
+      Real vartheta = vartheta0 * (1 - _T[_qp]/Tcr); //The vartheta coefficient of Einav 2007
+      prefactor = vartheta0/std::pow((1-vartheta * _damage[_qp]),2);
+      damage_potential = prefactor * (_mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/bulk_modulus);
+      damage_rate = (_damage[_qp] - _damage_old[_qp])/_dt;
+
+      TaylorQuinney = 1 - (damage_potential * damage_rate / sig.doubleContraction(instantaneous_strain_rate));
+    }
+  Gruntfest = TaylorQuinney* _gr[_qp]* std::exp(_ar[_qp]);
+
   // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
-  Real TaylorQuinney = _gr[_qp] * std::exp(_ar[_qp]) * (1-_damage[_qp]);
-  _mechanical_dissipation_mech[_qp] = TaylorQuinney*sig.doubleContraction(instantaneous_strain_rate);
+  _mechanical_dissipation_mech[_qp] = Gruntfest*sig.doubleContraction(instantaneous_strain_rate);
 
   // Compute Mechanical Dissipation Jacobian
   _mechanical_dissipation_jac_mech[_qp] = _mechanical_dissipation_mech[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
@@ -409,7 +431,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _poromech_jac[_qp] = (1 / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]));
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO: Remove this number from the tests!!!
-  _mod_gruntfest_number[_qp] = TaylorQuinney * std::exp(- _ar[_qp]) *
+  _mod_gruntfest_number[_qp] = Gruntfest * std::exp(- _ar[_qp]) *
       (
       std::fabs(getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent)) +
       std::fabs(_mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp] - p_y), _exponent))
