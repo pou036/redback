@@ -69,6 +69,7 @@ RedbackMechMaterialDamageDP::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, R
 void
 RedbackMechMaterialDamageDP::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real cohesion)
 {
+    RedbackMechMaterial::computeRedbackTerms(sig, q_y, cohesion);
     Real lambda_dot;
 
     Real d_yield_dq, denominator; // The derivative of the yield surface with respect to the deviatoric stress q
