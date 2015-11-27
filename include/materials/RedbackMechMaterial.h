@@ -125,6 +125,10 @@ protected:
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _mechanical_dissipation_mech;
   MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
+  MaterialProperty<Real> & _damage_kernel;
+  MaterialProperty<Real> & _damage_kernel_jac;
+  Real _energetic_coeff;
+
   Real _exponential;
   //VariableValue & _dispx_dot;
   //VariableValue & _dispy_dot;
@@ -159,6 +163,9 @@ protected:
   Real _T0_param, _P0_param;
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
+  virtual void get_py_qy_damaged(Real, Real, Real &, Real &, Real);
+  virtual void form_damage_kernels(Real);
+
 };
 
 #endif //REDBACKMECHMATERIAL_H

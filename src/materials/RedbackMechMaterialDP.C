@@ -160,3 +160,32 @@ RedbackMechMaterialDP::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yi
     p_y = getPressureProjection(p /*p*/, q /*q*/, yield_stress/*yield stress*/);
     q_y = yield_stress + _slope_yield_surface * p_y; // yield deviatoric stress
 }
+
+void
+RedbackMechMaterialDP::form_damage_kernels(Real cohesion)
+{
+  Real lambda_dot;
+
+  Real d_yield_dq, denominator; // The derivative of the yield surface with respect to the deviatoric stress q
+
+  denominator = _slope_yield_surface * _mean_stress[_qp] + cohesion* (1 -_damage[_qp]);
+//  d_yield_dq = 2 * (_mises_stress[_qp]) / std::pow(denominator,2);
+  d_yield_dq = 2 / std::pow(denominator,2);
+
+  if (d_yield_dq > 0) //ensuring positiveness of the plastic multiplier
+  {
+    lambda_dot = _mises_strain_rate[_qp] / d_yield_dq;
+  }
+  else
+    lambda_dot = 0;
+
+  //Based on the damage approach of Einav (2007) and Tengattini et al (2014)
+  Real plastic_damage;
+  //plastic_damage = _energetic_coeff * (1 - _damage[_qp]) * (1 -_damage[_qp]) * 2 * lambda_dot;
+  plastic_damage = _energetic_coeff * (1 - _damage[_qp]) * (1 -_damage[_qp]) * 2 * lambda_dot;
+
+  //Declare properties for the damage kernel
+  _damage_kernel[_qp] = plastic_damage;
+  _damage_kernel_jac[_qp] = 0;
+}
+

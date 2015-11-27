@@ -51,14 +51,6 @@ RedbackMechMaterialDamageDP::computeRedbackTerms(RankTwoTensor & sig, Real q_y, 
     Real plastic_damage;
     plastic_damage = _energetic_coeff * (1 - _damage[_qp]) * (1 -_damage[_qp]) * 2 * lambda_dot;
 
-    /*
-    RankTwoTensor test_tensor;
-    test_tensor = (sig - _stress_old[_qp]);
-
-    RankTwoTensor elastic_damage; //The elastic damage can be a tensor if needed
-    elastic_damage = test_tensor/_dt;
-    */
-
     //Declare properties for the damage kernel
     _damage_kernel[_qp] = plastic_damage;
     _damage_kernel_jac[_qp] = 4 * _energetic_coeff * (1 - _damage[_qp]) * lambda_dot
