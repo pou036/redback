@@ -8,7 +8,7 @@
 []
 
 [Variables]
-  active = 'damage disp_y disp_x'
+  active = 'temp disp_y disp_x damage'
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -162,6 +162,18 @@
     type = RedbackDamage
     variable = damage
   [../]
+  [./td_temp]
+    type = TimeDerivative
+    variable = temp
+  [../]
+  [./diffusion_temp]
+    type = Diffusion
+    variable = temp
+  [../]
+  [./mech_dissip]
+    type = RedbackMechDissip
+    variable = temp
+  [../]
 []
 
 [AuxKernels]
@@ -271,7 +283,7 @@
 [Executioner]
   type = Transient
   num_steps = 500
-  solve_type = Newton
+  solve_type = PJFNK
   end_time = 10
   dt = 1e-4
   petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -ksp_gmres_restart'
@@ -283,7 +295,7 @@
 []
 
 [Outputs]
-  file_base = footing_2D_damage_J2
+  file_base = TM_footing_damage
   [./my_console]
     output_linear = true
     type = Console

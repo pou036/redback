@@ -60,7 +60,8 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
 
   // For the damage mechanics functionality
-  params.addParam< Real >("energies_fraction", 1.0, "The fraction of energies used in damage flow law (e.g. E_D/E_D0)");
+  params.addParam< Real >("damage_coefficient", 0.0, "The fraction of energies used in damage flow law (e.g. E_D/E_D0)");
+  params.addParam< Real >("healing_coefficient", 0.0, "The fraction of energies used in healing flow law (e.g. E_H/E_H0)");
 
 
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
@@ -125,7 +126,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
 
     _damage_kernel(declareProperty<Real>("damage_kernel")),
     _damage_kernel_jac(declareProperty<Real>("damage_kernel_jacobian")),
-    _energetic_coeff(getParam<Real>("energies_fraction")),
+    _damage_coeff(getParam<Real>("damage_coefficient")),
+	_healing_coeff(getParam<Real>("healing_coefficient")),
 
     // Get coupled variables (T & P & porosity & damage)
     _has_T(isCoupled("temperature")),
@@ -408,8 +410,9 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   def_grad_rate = (def_grad - def_grad_old)/_dt;
 
   //formulate the Taylor-Quinney coefficient and Gruntfest numbers for the case of damage
-  Real taylor_quinney, gruntfest_number;
+  Real taylor_quinney, gruntfest_number, damage_dissipation;
   taylor_quinney = 1;
+  damage_dissipation = 0;
 
   if (_has_D)
     {
@@ -428,10 +431,13 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
       Real vartheta = 1 - grain_size_med_squared; //The vartheta coefficient of Einav 2007
       prefactor = vartheta0/std::pow((1-vartheta * _damage[_qp]),2);
 
-      damage_potential = prefactor * (_mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/bulk_modulus);
+      //damage_potential = prefactor * (_mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/bulk_modulus);
+      damage_potential = - std::pow((1-_damage[_qp]),1) * (_mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/bulk_modulus);
       damage_rate = (_damage[_qp] - _damage_old[_qp])/_dt;
+      damage_dissipation = damage_potential*damage_rate;
 
-      taylor_quinney = 1 - (damage_potential * damage_rate / sig.doubleContraction(instantaneous_strain_rate));
+      //taylor_quinney = 1 - (damage_potential * damage_rate / sig.doubleContraction(instantaneous_strain_rate));
+      //taylor_quinney = 1 - (damage_rate / sig.doubleContraction(instantaneous_strain_rate));
 
       form_damage_kernels(q_y);
     }
@@ -439,7 +445,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   gruntfest_number = taylor_quinney * _gr[_qp] * std::exp(_ar[_qp]);
 
   // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
-  _mechanical_dissipation_mech[_qp] = gruntfest_number*sig.doubleContraction(instantaneous_strain_rate);
+  _mechanical_dissipation_mech[_qp] = gruntfest_number*sig.doubleContraction(instantaneous_strain_rate) + damage_dissipation;
 
   // Compute Mechanical Dissipation Jacobian
   _mechanical_dissipation_jac_mech[_qp] = _mechanical_dissipation_mech[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
