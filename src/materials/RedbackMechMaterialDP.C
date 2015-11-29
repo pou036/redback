@@ -18,23 +18,23 @@ InputParameters validParams<RedbackMechMaterialDP>()
   InputParameters params = validParams<RedbackMechMaterial>();
   // TODO: deal with sign of _slope_yield_surface properly in DP case
   params.addParam< Real >("slope_yield_surface", 0,"Slope of yield surface (positive, see documentation)");
-  params.addParam<MooseEnum>("damage_method", RedbackMechMaterialDP::damageMethodEnum() = "CreepDamage", "The method to describe damage evolution");
+//  params.addParam<MooseEnum>("damage_method", RedbackMechMaterialDP::damageMethodEnum() = "CreepDamage", "The method to describe damage evolution");
 
   return params;
 }
 
 RedbackMechMaterialDP::RedbackMechMaterialDP(const InputParameters & parameters) :
     RedbackMechMaterial(parameters),
-    _slope_yield_surface(getParam<Real>("slope_yield_surface")),
-    _damage_method((DamageMethod)(int)getParam<MooseEnum>("damage_method"))
+    _slope_yield_surface(getParam<Real>("slope_yield_surface"))
+//    _damage_method((DamageMethod)(int)getParam<MooseEnum>("damage_method"))
 {
 }
 
-MooseEnum
+/*MooseEnum
 RedbackMechMaterialDP::damageMethodEnum()
 {
-  return MooseEnum("BrittleDamage CreepDamage BreakageMechancis DamageHealing FromMultiApp");
-}
+  return MooseEnum("BrittleDamage CreepDamage BreakageMechanics DamageHealing FromMultiApp");
+}*/
 
 /**
  * Compute pressure projection of stress on Drucker-Prager yield surface
@@ -182,7 +182,7 @@ RedbackMechMaterialDP::form_damage_kernels(Real cohesion)
       case CreepDamage:
           formCreepDamage(cohesion);
          break;
-      case BreakageMechancis:
+      case BreakageMechanics:
           formBreakageDamage(cohesion);
          break;
       case DamageHealing:
@@ -190,7 +190,7 @@ RedbackMechMaterialDP::form_damage_kernels(Real cohesion)
          break;
       default:
          mooseError("damage method not implemented yet, use other options");
-         }
+    }
 }
 
 void

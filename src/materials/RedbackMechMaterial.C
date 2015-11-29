@@ -22,7 +22,7 @@ the Redback material and the tensor mechanics finite strain equivalent
 Three yield criteria are included:
 1. pressure-independent (J2 plasticity)
 2. linear pressure-dependent (Drucker-Prager with smoothing of the apex)
-3. Non-linear, capped pressur dependent (modified cam clay)
+3. Non-linear, capped pressure dependent (modified cam clay)
 
 Integration is performed for associative flow rules in an incremental manner using Newton Raphson.
 Isotropic hardening/softening has been incorporated where yield stress as a function of equivalent
@@ -40,8 +40,6 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addCoupledVar("disp_z", 0.0, "The z displacement");
   params.addCoupledVar("temperature", 0.0, "temperature variable");
   params.addCoupledVar("damage", 0.0, "damage variable");
-
-//  params.addParam<MooseEnum>("permeability_method", RedbackMechMaterial::permeabilityMethodEnum() = "KozenyCarman", "The method to describe permeability evolution");
 
   // Copy-paste from FiniteStrainMaterial.C
   // nothing
@@ -64,6 +62,7 @@ InputParameters validParams<RedbackMechMaterial>()
   // For the damage mechanics functionality
   params.addParam< Real >("damage_coefficient", 0.0, "The fraction of energies used in damage flow law (e.g. E_D/E_D0)");
   params.addParam< Real >("healing_coefficient", 0.0, "The fraction of energies used in healing flow law (e.g. E_H/E_H0)");
+  params.addParam<MooseEnum>("damage_method", RedbackMechMaterial::damageMethodEnum() = "CreepDamage", "The method to describe damage evolution");
 
 
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
@@ -144,7 +143,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _damage(coupledValue("damage")),
     _damage_old(coupledValueOld("damage")),
 
-    //_permeability_method((PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method")),
+    _damage_method((DamageMethod)(int)getParam<MooseEnum>("damage_method")),
 
     // Get some material properties from RedbackMaterial
     _gr(getMaterialProperty<Real>("gr")),
@@ -176,12 +175,11 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int) fill_method);
 }
 
-/*MooseEnum
-RedbackMechMaterial::permeabilityMethodEnum()
+MooseEnum
+RedbackMechMaterial::damageMethodEnum()
 {
-  return MooseEnum("KozenyCarman DamageMechanics");
-}*/
-
+  return MooseEnum("BrittleDamage CreepDamage BreakageMechanics DamageHealing FromMultiApp");
+}
 
 void
 RedbackMechMaterial::initQpStatefulProperties()
@@ -292,7 +290,6 @@ void RedbackMechMaterial::computeQpStress()
 
   //Solve J2 plastic constitutive equations based on current strain increment
   //Returns current  stress and plastic rate of deformation tensor
-
   _returnmap_iter[_qp] = 0;
   returnMap(_stress_old[_qp], _strain_increment[_qp], _elasticity_tensor[_qp], dp, sig, p_y, q_y);
   _stress[_qp] = sig;
@@ -403,7 +400,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _mises_stress[_qp] = getSigEqv(sig);
   _mean_stress[_qp] = sig.trace()/3.0;
 
-  // Compute platic strains
+  // Compute plastic strains
   RankTwoTensor instantaneous_strain_rate, total_volumetric_strain_rate;
 
   if (_dt == 0)
@@ -431,70 +428,39 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
 
   //formulate the Taylor-Quinney coefficient and Gruntfest numbers for the case of damage
-  Real taylor_quinney, gruntfest_number, damage_dissipation;
-  taylor_quinney = 1;
-  damage_dissipation = 0;
-
-  /* // Ensuring that damage will never be off-bounds. Ideally this should be taken care of by the constitutive law
-  if (_damage[_qp] < 0)
-      _damage[_qp] = 0;
-  if (_damage[_qp] > 1)
-      _damage[_qp] = 1; */
+  Real gruntfest_number;
 
   if (_has_D)
     {
-      _mechanical_porosity[_qp] += std::pow(_damage[_qp],3/2);
-      //Implementing a damage potential for the damage mechanics model.
-      Real vartheta0 = 0.95;
-      //_damage[_qp] *= vartheta0;
+     _mechanical_porosity[_qp] += std::pow(_damage[_qp],3/2);
 
-      Real  bulk_modulus, shear_modulus, prefactor, damage_potential, damage_rate;
+     switch (_damage_method)
+      {
+       case BrittleDamage:
+        formDamageDissipation(sig);
+       break;
+       case CreepDamage:
+        formDamageDissipation(sig);
+       break;
+       case BreakageMechanics:
+        formBreakageDamageDissipation();
+       break;
+       case DamageHealing:
+        formBreakageHealingDamageDissipation();
+       break;
+       default:
+        mooseError("damage method not implemented yet, use other options");
+      }
 
-      bulk_modulus = _youngs_modulus*_poisson_ratio/(1+_poisson_ratio)/(1-2*_poisson_ratio); // First Lame modulus
-      shear_modulus = 0.5*_youngs_modulus/(1+_poisson_ratio); // Second Lame modulus (shear)
-
-      /* Veveakis and Einav model of breakage and healing. Under construction...
-      Real dmg_coeff = std::pow(((1-_damage[_qp])/_damage[_qp]),2);
-      Real Tcr = -_ar[_qp]/std::log(dmg_coeff*_mises_strain_rate[_qp]/_ref_pe_rate);
-      Real grain_size_med_squared = vartheta0 * ( (1 + _delta[_qp] * _T[_qp]) /Tcr) + (1-vartheta0);
-      Real vartheta = 1 - grain_size_med_squared; //The vartheta coefficient of Einav 2007
-      prefactor = vartheta0/std::pow((1-vartheta * _damage[_qp]),2);
-
-      damage_potential = prefactor * (_mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/bulk_modulus);
-      */
-
-      damage_potential = std::pow((1-_damage[_qp]),1) * (2 * _mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/(2 * bulk_modulus));
-      damage_rate = (_damage[_qp] - _damage_old[_qp])/_dt;
-      damage_dissipation = damage_potential*damage_rate;
-
-      //taylor_quinney = 1 - (damage_potential * damage_rate / sig.doubleContraction(instantaneous_strain_rate));
-      //taylor_quinney = 1 - (damage_rate / sig.doubleContraction(instantaneous_strain_rate));
-
-      form_damage_kernels(q_y);
-
-      /*
-      //update lewis number through permeability method
-      switch (_permeability_method)
-           {
-           case KozenyCarman:
-             // Kozeny Carman law of permeability
-            _lewis_number[_qp];
-             break;
-           case DamageMechanics:
-             // Damage Mechanics law from Poulet et al 2012
-           _mechanical_porosity[_qp] += std::pow(_damage[_qp],3/2);
-            _lewis_number[_qp];
-            break;
-           default:
-             mooseError("permeability method not implemented yet, use KozenyKarman or DamageMechanics");
-           }*/
+     form_damage_kernels(q_y);
     }
 
+  gruntfest_number = _gr[_qp] * std::exp(_ar[_qp]);
 
-  gruntfest_number = taylor_quinney * _gr[_qp] * std::exp(_ar[_qp]);
-
-  // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
-  _mechanical_dissipation_mech[_qp] = gruntfest_number*sig.doubleContraction(instantaneous_strain_rate) + damage_dissipation;
+  // Compute Mechanical Dissipation.
+  _mechanical_dissipation_mech[_qp] = gruntfest_number*sig.doubleContraction(instantaneous_strain_rate) + _damage_dissipation;
+  //if (_mechanical_dissipation_mech[_qp] < 0)
+  //mooseError("Dissipation is negative. Check the reason!");
 
   // Compute Mechanical Dissipation Jacobian
   _mechanical_dissipation_jac_mech[_qp] = _mechanical_dissipation_mech[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
@@ -704,5 +670,61 @@ RedbackMechMaterial::get_py_qy_damaged(Real p, Real q, Real & p_y, Real & q_y, R
 void
 RedbackMechMaterial::form_damage_kernels(Real cohesion)
 {
-	mooseError("form_damage_kernels must be overwritten in children class");
+  mooseError("form_damage_kernels must be overwritten in children class");
+}
+
+void
+RedbackMechMaterial::formDamageDissipation(RankTwoTensor & sig)
+{
+  Real energy_ratio;
+  Real  bulk_modulus, shear_modulus, damage_potential, damage_rate;
+
+  bulk_modulus = _youngs_modulus*_poisson_ratio/(1+_poisson_ratio)/(1-2*_poisson_ratio); // First Lame modulus
+  shear_modulus = 0.5*_youngs_modulus/(1+_poisson_ratio); // Second Lame modulus (shear)
+
+  damage_potential = std::pow((1-_damage[_qp]),1) * (2 * _mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/(2 * bulk_modulus));
+  damage_rate = (_damage[_qp] - _damage_old[_qp])/_dt;
+
+  _damage_dissipation = damage_potential * damage_rate;
+}
+
+void
+RedbackMechMaterial::formBreakageDamageDissipation()
+{
+    mooseError("damage method not implemented yet, use other options");
+}
+
+void
+RedbackMechMaterial::formBreakageHealingDamageDissipation()
+{
+
+    mooseError("damage method not implemented yet, use other options");
+
+	/*//Implementing a damage potential for the damage mechanics model.
+	      Real taylor_quinney, gruntfest_number, damage_dissipation;
+	      Real vartheta0 = 0.95;
+	      //_damage[_qp] *= vartheta0;
+
+	      Real  bulk_modulus, shear_modulus, prefactor, damage_potential, damage_rate;
+
+	      bulk_modulus = _youngs_modulus*_poisson_ratio/(1+_poisson_ratio)/(1-2*_poisson_ratio); // First Lame modulus
+	      shear_modulus = 0.5*_youngs_modulus/(1+_poisson_ratio); // Second Lame modulus (shear)
+
+	      // Veveakis and Einav model of breakage and healing. Under construction...
+	      Real dmg_coeff = std::pow(((1-_damage[_qp])/_damage[_qp]),2);
+	      Real Tcr = -_ar[_qp]/std::log(dmg_coeff*_mises_strain_rate[_qp]/_ref_pe_rate);
+	      Real grain_size_med_squared = vartheta0 * ( (1 + _delta[_qp] * _T[_qp]) /Tcr) + (1-vartheta0);
+	      Real vartheta = 1 - grain_size_med_squared; //The vartheta coefficient of Einav 2007
+	      prefactor = vartheta0/std::pow((1-vartheta * _damage[_qp]),2);
+
+	      damage_potential = prefactor * (_mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/bulk_modulus);
+
+
+	      damage_potential = std::pow((1-_damage[_qp]),1) * (2 * _mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/(2 * bulk_modulus));
+	      damage_rate = (_damage[_qp] - _damage_old[_qp])/_dt;
+	      damage_dissipation = damage_potential*damage_rate;
+
+	      //taylor_quinney = 1 - (damage_potential * damage_rate / sig.doubleContraction(instantaneous_strain_rate));
+	      //taylor_quinney = 1 - (damage_rate / sig.doubleContraction(instantaneous_strain_rate));
+*/
 }

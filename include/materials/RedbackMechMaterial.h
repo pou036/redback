@@ -37,14 +37,15 @@ class RedbackMechMaterial : public Material
 public:
   RedbackMechMaterial(const InputParameters & parameters);
 
-  /// Static method for use in validParams for getting the permeability method
-  /*static MooseEnum permeabilityMethodEnum();
-  enum PermeabilityMethod
+  static MooseEnum damageMethodEnum();
+  enum DamageMethod
   {
-    KozenyCarman,
-    DamageMechanics
+    BrittleDamage,
+    CreepDamage,
+    BreakageMechanics,
+    DamageHealing,
+    FromMultiApp
   };
-  */
 
 protected:
   // Copy-paste from TensorMechanicsMaterial.h
@@ -154,7 +155,7 @@ protected:
   bool _has_D;
   VariableValue & _damage, & _damage_old;
 
-  //PermeabilityMethod _permeability_method;
+  DamageMethod _damage_method;
 
   // Reading material properties from RedbackMaterial
   const MaterialProperty<Real> & _gr;
@@ -177,6 +178,12 @@ protected:
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
   virtual void get_py_qy_damaged(Real, Real, Real &, Real &, Real);
   virtual void form_damage_kernels(Real);
+
+  virtual void formDamageDissipation(RankTwoTensor &);
+  virtual void formBreakageDamageDissipation();
+  virtual void formBreakageHealingDamageDissipation();
+
+  Real _damage_dissipation;
 
 };
 
