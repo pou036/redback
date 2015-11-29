@@ -38,13 +38,13 @@ public:
   RedbackMechMaterial(const InputParameters & parameters);
 
   /// Static method for use in validParams for getting the permeability method
-  static MooseEnum permeabilityMethodEnum();
+  /*static MooseEnum permeabilityMethodEnum();
   enum PermeabilityMethod
   {
     KozenyCarman,
     DamageMechanics
   };
-
+  */
 
 protected:
   // Copy-paste from TensorMechanicsMaterial.h
@@ -154,7 +154,7 @@ protected:
   bool _has_D;
   VariableValue & _damage, & _damage_old;
 
-  PermeabilityMethod _permeability_method;
+  //PermeabilityMethod _permeability_method;
 
   // Reading material properties from RedbackMaterial
   const MaterialProperty<Real> & _gr;

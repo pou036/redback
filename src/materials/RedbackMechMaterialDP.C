@@ -18,13 +18,22 @@ InputParameters validParams<RedbackMechMaterialDP>()
   InputParameters params = validParams<RedbackMechMaterial>();
   // TODO: deal with sign of _slope_yield_surface properly in DP case
   params.addParam< Real >("slope_yield_surface", 0,"Slope of yield surface (positive, see documentation)");
+  params.addParam<MooseEnum>("damage_method", RedbackMechMaterialDP::damageMethodEnum() = "CreepDamage", "The method to describe damage evolution");
+
   return params;
 }
 
 RedbackMechMaterialDP::RedbackMechMaterialDP(const InputParameters & parameters) :
     RedbackMechMaterial(parameters),
-    _slope_yield_surface(getParam<Real>("slope_yield_surface"))
+    _slope_yield_surface(getParam<Real>("slope_yield_surface")),
+    _damage_method((DamageMethod)(int)getParam<MooseEnum>("damage_method"))
 {
+}
+
+MooseEnum
+RedbackMechMaterialDP::damageMethodEnum()
+{
+  return MooseEnum("BrittleDamage CreepDamage BreakageMechancis DamageHealing FromMultiApp");
 }
 
 /**
@@ -164,37 +173,110 @@ RedbackMechMaterialDP::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yi
 void
 RedbackMechMaterialDP::form_damage_kernels(Real cohesion)
 {
-  Real lambda_dot;
+  //update damage evolution law from selected method
+  switch (_damage_method)
+    {
+      case BrittleDamage:
+    	  formBrittleDamage();
+         break;
+      case CreepDamage:
+          formCreepDamage(cohesion);
+         break;
+      case BreakageMechancis:
+          formBreakageDamage(cohesion);
+         break;
+      case DamageHealing:
+          formBreakageHealingDamage(cohesion);
+         break;
+      default:
+         mooseError("damage method not implemented yet, use other options");
+         }
+}
 
-  Real d_yield_dq, denominator; // The derivative of the yield surface with respect to the deviatoric stress q
-
-  denominator = _slope_yield_surface * _mean_stress[_qp] + cohesion* (1 -_damage[_qp]);
-//  d_yield_dq = 2 * (_mises_stress[_qp]) / std::pow(denominator,2);
-  d_yield_dq = 2 / std::pow(denominator,2);
-
-  if (d_yield_dq > 0) //ensuring positiveness of the plastic multiplier
-  {
-    lambda_dot = _mises_strain_rate[_qp] / d_yield_dq;
-  }
-  else
-    lambda_dot = 0;
-
+void
+RedbackMechMaterialDP::formBrittleDamage()
+{
   Real plastic_damage, healing_damage;
-  /*
-  //Based on the damage approach of Einav (2007) and Tengattini et al (2014)
-  plastic_damage = _damage_coeff * (1 - _damage[_qp]) * (1 -_damage[_qp]) * 2 * lambda_dot;
+  Real kachanov, exponent_kachanov;
 
-  //healing mechanism where damage is reduced through temperature increase
-  healing_damage = - _healing_coeff * _damage[_qp] * _damage[_qp] *  std::exp(-_ar[_qp]/(1 + _delta[_qp] *_T[_qp]));
-  */
-
-  //Based on Kachanov's brittle damage
-  Real kachanov = _mises_stress[_qp]/(1 - _damage[_qp]);
-  plastic_damage = _damage_coeff * std::pow(kachanov,1);
+  // Kachanov's original law of Brittle Damage
+  exponent_kachanov = 1;
+  kachanov = _mises_stress[_qp]/(1 - _damage[_qp]);
+  plastic_damage = _damage_coeff * std::pow(kachanov,exponent_kachanov);
   healing_damage = 0;
-
-  //Declare properties for the damage kernel
   _damage_kernel[_qp] = plastic_damage + healing_damage;
   _damage_kernel_jac[_qp] = 0;
 }
 
+void
+RedbackMechMaterialDP::formCreepDamage(Real cohesion)
+{
+  Real plastic_damage, healing_damage;
+  Real lambda_dot;
+  Real d_yield_dq; // The derivative of the yield surface with respect to the deviatoric stress q
+
+  // Damage evolution law for creep damage
+  //J2 plastic potential with evolving cohesion for the damage evolution law (remember that cohesion is q_y which is updated as q_y * (1-D) in the get_py_qy_damaged function)
+  d_yield_dq = 1 / std::pow(cohesion,2);
+  if (d_yield_dq > 0) //ensuring positiveness of the plastic multiplier
+     {
+  /* the plastic multiplier could be having this form:
+   * lambda_dot = _mises_stress[_qp] * _mises_strain_rate[_qp] / d_yield_dq;
+   * but cohesion in J2 plasticity is the mises stress at yield, so we are going with a much simpler form: */
+      lambda_dot = _mises_strain_rate[_qp] / d_yield_dq;
+     }
+  else
+       lambda_dot = 0;
+  plastic_damage = _damage_coeff * lambda_dot;
+  healing_damage = 0;
+  _damage_kernel[_qp] = plastic_damage + healing_damage;
+  _damage_kernel_jac[_qp] = 0;
+}
+
+void
+RedbackMechMaterialDP::formBreakageDamage(Real cohesion)
+{
+  Real plastic_damage, healing_damage;
+  Real lambda_dot;
+  Real d_yield_dq, denominator; // The derivative of the yield surface with respect to the deviatoric stress q
+
+  // Damage evolution law for Breakage
+  denominator = _slope_yield_surface * _mean_stress[_qp] + cohesion* (1 -_damage[_qp]); //Drucker-Prager potential for the damage evolution law
+  d_yield_dq = 2 * (_mises_stress[_qp]) / std::pow(denominator,2);
+  //d_yield_dq = 2 / std::pow(denominator,2);
+  if (d_yield_dq > 0) //ensuring positiveness of the plastic multiplier
+    {
+     lambda_dot = _mises_stress[_qp] * _mises_strain_rate[_qp] / d_yield_dq;
+    }
+  else
+  lambda_dot = 0;
+  plastic_damage = _damage_coeff * (1 - _damage[_qp]) * (1 -_damage[_qp]) * 2 * lambda_dot;
+  healing_damage = 0;
+
+  _damage_kernel[_qp] = plastic_damage + healing_damage;
+  _damage_kernel_jac[_qp] = 0;
+}
+
+void
+RedbackMechMaterialDP::formBreakageHealingDamage(Real cohesion)
+{
+  Real plastic_damage, healing_damage;
+  Real lambda_dot;
+  Real d_yield_dq, denominator; // The derivative of the yield surface with respect to the deviatoric stress q
+
+  // Damage evolution law for Breakage
+  denominator = _slope_yield_surface * _mean_stress[_qp] + cohesion* (1 -_damage[_qp]);
+  //d_yield_dq = 2 * (_mises_stress[_qp]) / std::pow(denominator,2);
+  d_yield_dq = 2 / std::pow(denominator,2);
+  if (d_yield_dq > 0) //ensuring positiveness of the plastic multiplier
+    {
+     lambda_dot = _mises_stress[_qp] * _mises_strain_rate[_qp] / d_yield_dq;
+    }
+  else
+     lambda_dot = 0;
+  plastic_damage = _damage_coeff * (1 - _damage[_qp]) * (1 -_damage[_qp]) * 2 * lambda_dot;
+  healing_damage = - _healing_coeff * _damage[_qp] * _damage[_qp] *  std::exp(-_ar[_qp]/(1 + _delta[_qp] *_T[_qp]));
+
+  _damage_kernel[_qp] = plastic_damage + healing_damage;
+  _damage_kernel_jac[_qp] = 0;
+}

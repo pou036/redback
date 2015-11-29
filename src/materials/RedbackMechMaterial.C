@@ -41,7 +41,7 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addCoupledVar("temperature", 0.0, "temperature variable");
   params.addCoupledVar("damage", 0.0, "damage variable");
 
-  params.addParam<MooseEnum>("permeability_method", RedbackMechMaterial::permeabilityMethodEnum() = "KozenyCarman", "The method to describe permeability evolution");
+//  params.addParam<MooseEnum>("permeability_method", RedbackMechMaterial::permeabilityMethodEnum() = "KozenyCarman", "The method to describe permeability evolution");
 
   // Copy-paste from FiniteStrainMaterial.C
   // nothing
@@ -144,7 +144,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _damage(coupledValue("damage")),
     _damage_old(coupledValueOld("damage")),
 
-    _permeability_method((PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method")),
+    //_permeability_method((PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method")),
 
     // Get some material properties from RedbackMaterial
     _gr(getMaterialProperty<Real>("gr")),
@@ -176,11 +176,11 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int) fill_method);
 }
 
-MooseEnum
+/*MooseEnum
 RedbackMechMaterial::permeabilityMethodEnum()
 {
   return MooseEnum("KozenyCarman DamageMechanics");
-}
+}*/
 
 
 void
@@ -435,9 +435,16 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   taylor_quinney = 1;
   damage_dissipation = 0;
 
+  /* // Ensuring that damage will never be off-bounds. Ideally this should be taken care of by the constitutive law
+  if (_damage[_qp] < 0)
+      _damage[_qp] = 0;
+  if (_damage[_qp] > 1)
+      _damage[_qp] = 1; */
+
   if (_has_D)
     {
-      //Implementing a damage mechanics model. In this case it is the breakage mechanics model of Einav (2007)
+      _mechanical_porosity[_qp] += std::pow(_damage[_qp],3/2);
+      //Implementing a damage potential for the damage mechanics model.
       Real vartheta0 = 0.95;
       //_damage[_qp] *= vartheta0;
 
@@ -445,6 +452,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
       bulk_modulus = _youngs_modulus*_poisson_ratio/(1+_poisson_ratio)/(1-2*_poisson_ratio); // First Lame modulus
       shear_modulus = 0.5*_youngs_modulus/(1+_poisson_ratio); // Second Lame modulus (shear)
+
       /* Veveakis and Einav model of breakage and healing. Under construction...
       Real dmg_coeff = std::pow(((1-_damage[_qp])/_damage[_qp]),2);
       Real Tcr = -_ar[_qp]/std::log(dmg_coeff*_mises_strain_rate[_qp]/_ref_pe_rate);
@@ -454,6 +462,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
       damage_potential = prefactor * (_mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/bulk_modulus);
       */
+
       damage_potential = std::pow((1-_damage[_qp]),1) * (2 * _mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/(2 * bulk_modulus));
       damage_rate = (_damage[_qp] - _damage_old[_qp])/_dt;
       damage_dissipation = damage_potential*damage_rate;
@@ -463,6 +472,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
       form_damage_kernels(q_y);
 
+      /*
       //update lewis number through permeability method
       switch (_permeability_method)
            {
@@ -477,8 +487,9 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
             break;
            default:
              mooseError("permeability method not implemented yet, use KozenyKarman or DamageMechanics");
-           }
+           }*/
     }
+
 
   gruntfest_number = taylor_quinney * _gr[_qp] * std::exp(_ar[_qp]);
 

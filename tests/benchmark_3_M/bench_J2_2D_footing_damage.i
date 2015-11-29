@@ -35,12 +35,12 @@
     block = 0
     disp_x = disp_x
     disp_y = disp_y
-    youngs_modulus = 3.6
+    youngs_modulus = 100
     poisson_ratio = 0.2
-    yield_stress = '0. 0.01 0.01 0.01 0.1 0.01' # 0. 0.01 0.01 0.005 0.1 0.001
+    yield_stress = '0 1 0 1' # 0. 0.01 0.01 0.005 0.1 0.001
     total_porosity = 0.1
     damage = damage
-    damage_coefficient = 1e2
+    damage_coefficient = 60
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -149,7 +149,7 @@
 [Functions]
   [./applied_load_fct]
     type = ConstantFunction
-    value = 1e-1
+    value = 10
   [../]
 []
 
@@ -271,7 +271,7 @@
 [Executioner]
   type = Transient
   num_steps = 500
-  solve_type = Newton
+  solve_type = PJFNK
   end_time = 10
   dt = 1e-4
   petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -ksp_gmres_restart'
