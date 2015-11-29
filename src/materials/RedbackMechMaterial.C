@@ -41,6 +41,8 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addCoupledVar("temperature", 0.0, "temperature variable");
   params.addCoupledVar("damage", 0.0, "damage variable");
 
+  params.addParam<MooseEnum>("permeability_method", RedbackMechMaterial::permeabilityMethodEnum() = "KozenyCarman", "The method to describe permeability evolution");
+
   // Copy-paste from FiniteStrainMaterial.C
   // nothing
 
@@ -142,8 +144,11 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _damage(coupledValue("damage")),
     _damage_old(coupledValueOld("damage")),
 
+    _permeability_method((PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method")),
+
     // Get some material properties from RedbackMaterial
     _gr(getMaterialProperty<Real>("gr")),
+    _lewis_number(getMaterialProperty<Real>("lewis_number")),
     _ar(getMaterialProperty<Real>("ar")),
     _confining_pressure(getMaterialProperty<Real>("confining_pressure")),
     _alpha_1(getMaterialProperty<Real>("alpha_1")),
@@ -170,6 +175,13 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic elasticity tensor.
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int) fill_method);
 }
+
+MooseEnum
+RedbackMechMaterial::permeabilityMethodEnum()
+{
+  return MooseEnum("KozenyCarman DamageMechanics");
+}
+
 
 void
 RedbackMechMaterial::initQpStatefulProperties()
@@ -409,6 +421,15 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   def_grad_old = _grad_disp_x_old[_qp](0) +_grad_disp_y_old[_qp](1) + _grad_disp_z_old[_qp](2);
   def_grad_rate = (def_grad - def_grad_old)/_dt;
 
+  // Update mechanical porosity (elastic and plastic components)
+  // TODO: set T0 properly (once only, at the very beginning). Until then, T = T - T0, P = P - P0
+  delta_phi_mech_el = (1.0 - _total_porosity[_qp])*(_solid_compressibility[_qp]*(_pore_pres[_qp] - _P0_param)
+      - _solid_thermal_expansion[_qp]*(_T[_qp] - _T0_param)
+      + (_elastic_strain[_qp] - _elastic_strain_old[_qp]).trace());
+  delta_phi_mech_pl = (1.0 - _total_porosity[_qp])*(_plastic_strain[_qp] - _plastic_strain_old[_qp]).trace();
+
+  _mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
+
   //formulate the Taylor-Quinney coefficient and Gruntfest numbers for the case of damage
   Real taylor_quinney, gruntfest_number, damage_dissipation;
   taylor_quinney = 1;
@@ -424,15 +445,16 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
       bulk_modulus = _youngs_modulus*_poisson_ratio/(1+_poisson_ratio)/(1-2*_poisson_ratio); // First Lame modulus
       shear_modulus = 0.5*_youngs_modulus/(1+_poisson_ratio); // Second Lame modulus (shear)
-
+      /* Veveakis and Einav model of breakage and healing. Under construction...
       Real dmg_coeff = std::pow(((1-_damage[_qp])/_damage[_qp]),2);
       Real Tcr = -_ar[_qp]/std::log(dmg_coeff*_mises_strain_rate[_qp]/_ref_pe_rate);
-      Real grain_size_med_squared = vartheta0 * (_T[_qp]/Tcr) + (1-vartheta0);
+      Real grain_size_med_squared = vartheta0 * ( (1 + _delta[_qp] * _T[_qp]) /Tcr) + (1-vartheta0);
       Real vartheta = 1 - grain_size_med_squared; //The vartheta coefficient of Einav 2007
       prefactor = vartheta0/std::pow((1-vartheta * _damage[_qp]),2);
 
-      //damage_potential = prefactor * (_mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/bulk_modulus);
-      damage_potential = - std::pow((1-_damage[_qp]),1) * (_mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/bulk_modulus);
+      damage_potential = prefactor * (_mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/bulk_modulus);
+      */
+      damage_potential = std::pow((1-_damage[_qp]),1) * (2 * _mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/(2 * bulk_modulus));
       damage_rate = (_damage[_qp] - _damage_old[_qp])/_dt;
       damage_dissipation = damage_potential*damage_rate;
 
@@ -440,6 +462,22 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
       //taylor_quinney = 1 - (damage_rate / sig.doubleContraction(instantaneous_strain_rate));
 
       form_damage_kernels(q_y);
+
+      //update lewis number through permeability method
+      switch (_permeability_method)
+           {
+           case KozenyCarman:
+             // Kozeny Carman law of permeability
+            _lewis_number[_qp];
+             break;
+           case DamageMechanics:
+             // Damage Mechanics law from Poulet et al 2012
+           _mechanical_porosity[_qp] += std::pow(_damage[_qp],3/2);
+            _lewis_number[_qp];
+            break;
+           default:
+             mooseError("permeability method not implemented yet, use KozenyKarman or DamageMechanics");
+           }
     }
 
   gruntfest_number = taylor_quinney * _gr[_qp] * std::exp(_ar[_qp]);
@@ -460,14 +498,6 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
       std::fabs(_mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp] - p_y), _exponent))
       );
 
-  // Update mechanical porosity (elastic and plastic components)
-  // TODO: set T0 properly (once only, at the very beginning). Until then, T = T - T0, P = P - P0
-  delta_phi_mech_el = (1.0 - _total_porosity[_qp])*(_solid_compressibility[_qp]*(_pore_pres[_qp] - _P0_param)
-      - _solid_thermal_expansion[_qp]*(_T[_qp] - _T0_param)
-      + (_elastic_strain[_qp] - _elastic_strain_old[_qp]).trace());
-  delta_phi_mech_pl = (1.0 - _total_porosity[_qp])*(_plastic_strain[_qp] - _plastic_strain_old[_qp]).trace();
-
-  _mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
   return;
 }
 
@@ -586,7 +616,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   }
 
   //The following expression should be further pursued for a forward physics-based model
-  _exponential = _exponential* std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp])));
+  _exponential = (_exponential / (1-_damage[_qp])) * std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp])));
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
   {

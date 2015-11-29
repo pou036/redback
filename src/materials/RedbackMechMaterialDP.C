@@ -179,12 +179,19 @@ RedbackMechMaterialDP::form_damage_kernels(Real cohesion)
   else
     lambda_dot = 0;
 
-  //Based on the damage approach of Einav (2007) and Tengattini et al (2014)
   Real plastic_damage, healing_damage;
+  /*
+  //Based on the damage approach of Einav (2007) and Tengattini et al (2014)
   plastic_damage = _damage_coeff * (1 - _damage[_qp]) * (1 -_damage[_qp]) * 2 * lambda_dot;
 
   //healing mechanism where damage is reduced through temperature increase
   healing_damage = - _healing_coeff * _damage[_qp] * _damage[_qp] *  std::exp(-_ar[_qp]/(1 + _delta[_qp] *_T[_qp]));
+  */
+
+  //Based on Kachanov's brittle damage
+  Real kachanov = _mises_stress[_qp]/(1 - _damage[_qp]);
+  plastic_damage = _damage_coeff * std::pow(kachanov,1);
+  healing_damage = 0;
 
   //Declare properties for the damage kernel
   _damage_kernel[_qp] = plastic_damage + healing_damage;
