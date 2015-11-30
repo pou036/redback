@@ -458,9 +458,13 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   gruntfest_number = _gr[_qp] * std::exp(_ar[_qp]);
 
   // Compute Mechanical Dissipation.
-  _mechanical_dissipation_mech[_qp] = gruntfest_number*sig.doubleContraction(instantaneous_strain_rate) + _damage_dissipation;
-  //if (_mechanical_dissipation_mech[_qp] < 0)
-  //mooseError("Dissipation is negative. Check the reason!");
+  _mechanical_dissipation_mech[_qp] = gruntfest_number*sig.doubleContraction(instantaneous_strain_rate) + _damage_dissipation; //The negative sign in damage dissipation is according to thermodynamics with internal state variables (see Rosakis et al, 2000)
+  /* The following loop can ensure positive mechanical dissipation.
+   * if (_mechanical_dissipation_mech[_qp] < 0)
+  {
+      std::cout<< "Dissipation is negative and equal to:  "<< _mechanical_dissipation_mech[_qp] <<std::endl;
+	  mooseWarning("Dissipation is negative. Check the reason!");
+  }*/
 
   // Compute Mechanical Dissipation Jacobian
   _mechanical_dissipation_jac_mech[_qp] = _mechanical_dissipation_mech[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
@@ -474,6 +478,12 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
       std::fabs(getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent)) +
       std::fabs(_mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp] - p_y), _exponent))
       );
+
+/* This is a sample of printing a 4th order tensor element.
+  Real elastic_ten = _elasticity_tensor[_qp](0,0,0,0);
+  std::cout<< "damage =" << _damage[_qp] <<std::endl;
+  std::cout<< "yield stress =" << q_y <<std::endl;
+  std::cout<< "elastic modulus =" << elastic_ten <<std::endl<<std::endl<<std::endl;*/
 
   return;
 }
@@ -579,7 +589,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   err3 = 1.1 * tol3;
   iterisohard = 0;
 
-  //volumetric_plastic_strain = dp.trace()/3.0;
+  //volumetric_plastic_strain = dp.trace();
   mean_stress_old = sig_old.trace()/3.0;
   eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
   yield_stress = getYieldStress(eqvpstrain);
@@ -676,15 +686,34 @@ RedbackMechMaterial::form_damage_kernels(Real cohesion)
 void
 RedbackMechMaterial::formDamageDissipation(RankTwoTensor & sig)
 {
-  Real energy_ratio;
-  Real  bulk_modulus, shear_modulus, damage_potential, damage_rate;
+  /* The damage potential is being formed in this function. We start by postulating a helmholtz free energy of the form:
+   *  Psi = Psi_damage * Psi0
+   *  where Psi_damage = 1/2 *(1-D)^2
+   *  and Psi0 is the purely mechanical expression of the Helmholtz free energy, which in turn is split into a volumetric and a deviatoric part:
+   *  Psi0 = Psi0_vol + Psi0_dev
+   *  The volumetric part is: Psi0_vol = (2/3)*K*(epsilon^e_v)^2
+   *  The deviatoric part is: Psi0_dev = (3/2)*G*(epsilon^e_d)^2
+   *  Then, the damage potential is defined as damage_potential = - d Psi / d D =  (1-D) * Psi0
+   */
+
+  Real bulk_modulus, shear_modulus, vol_elastic_strain, dev_elastic_strain;
+  Real Psi0, Psi0_vol, Psi0_dev;
+  Real damage_potential, damage_rate;
 
   bulk_modulus = _youngs_modulus*_poisson_ratio/(1+_poisson_ratio)/(1-2*_poisson_ratio); // First Lame modulus
   shear_modulus = 0.5*_youngs_modulus/(1+_poisson_ratio); // Second Lame modulus (shear)
 
-  damage_potential = std::pow((1-_damage[_qp]),1) * (2 * _mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/(2 * bulk_modulus));
+  vol_elastic_strain = _elastic_strain[_qp].trace();
+  dev_elastic_strain = std::pow(2.0/3.0,0.5) * _elastic_strain[_qp].L2norm();
+
+  Psi0_vol = (2/3) * bulk_modulus * std::pow(vol_elastic_strain,2);
+  Psi0_dev = (3/2) * shear_modulus * std::pow(dev_elastic_strain,2);
+  Psi0 = Psi0_vol + Psi0_dev;
+
+  damage_potential = (1-_damage[_qp]) * Psi0;
   damage_rate = (_damage[_qp] - _damage_old[_qp])/_dt;
 
+  // _damage_dissipation is equal to (- d Psi / d D * D_dot) which in this code is (damage_potential * damage_rate)
   _damage_dissipation = damage_potential * damage_rate;
 }
 
@@ -697,34 +726,41 @@ RedbackMechMaterial::formBreakageDamageDissipation()
 void
 RedbackMechMaterial::formBreakageHealingDamageDissipation()
 {
+  Real bulk_modulus, shear_modulus, vol_elastic_strain, dev_elastic_strain;
+  Real Psi0, Psi0_vol, Psi0_dev;
+  Real damage_potential, damage_rate;
+  Real vartheta0, prefactor;
 
-    mooseError("damage method not implemented yet, use other options");
+  vartheta0 = 0.95;
+  //_damage[_qp] *= vartheta0;
+  bulk_modulus = _youngs_modulus*_poisson_ratio/(1+_poisson_ratio)/(1-2*_poisson_ratio); // First Lame modulus
+  shear_modulus = 0.5*_youngs_modulus/(1+_poisson_ratio); // Second Lame modulus (shear)
 
-	/*//Implementing a damage potential for the damage mechanics model.
-	      Real taylor_quinney, gruntfest_number, damage_dissipation;
-	      Real vartheta0 = 0.95;
-	      //_damage[_qp] *= vartheta0;
+  vol_elastic_strain = _elastic_strain[_qp].trace();
+  dev_elastic_strain = std::pow(2.0/3.0,0.5) * _elastic_strain[_qp].L2norm();
 
-	      Real  bulk_modulus, shear_modulus, prefactor, damage_potential, damage_rate;
+  Psi0_vol = (2/3) * bulk_modulus * std::pow(vol_elastic_strain,2);
+  Psi0_dev = (3/2) * shear_modulus * std::pow(dev_elastic_strain,2);
+  Psi0 = Psi0_vol + Psi0_dev;
 
-	      bulk_modulus = _youngs_modulus*_poisson_ratio/(1+_poisson_ratio)/(1-2*_poisson_ratio); // First Lame modulus
-	      shear_modulus = 0.5*_youngs_modulus/(1+_poisson_ratio); // Second Lame modulus (shear)
+  /*// Veveakis and Einav model of breakage and healing. Under construction...
+  Real dmg_coeff = std::pow(((1-_damage[_qp])/_damage[_qp]),2);
 
-	      // Veveakis and Einav model of breakage and healing. Under construction...
-	      Real dmg_coeff = std::pow(((1-_damage[_qp])/_damage[_qp]),2);
-	      Real Tcr = -_ar[_qp]/std::log(dmg_coeff*_mises_strain_rate[_qp]/_ref_pe_rate);
-	      Real grain_size_med_squared = vartheta0 * ( (1 + _delta[_qp] * _T[_qp]) /Tcr) + (1-vartheta0);
-	      Real vartheta = 1 - grain_size_med_squared; //The vartheta coefficient of Einav 2007
-	      prefactor = vartheta0/std::pow((1-vartheta * _damage[_qp]),2);
+  Real Tcr = -_ar[_qp]/std::log(dmg_coeff*_mises_strain_rate[_qp]/_ref_pe_rate);
+  if (_damage[_qp] = 0)
+      Tcr = 0;
+  //std::cout<< "Tcr =" << Tcr <<std::endl;
 
-	      damage_potential = prefactor * (_mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/bulk_modulus);
+  Real grain_size_med_squared = vartheta0 * ( (1 + _delta[_qp] * _T[_qp]) /Tcr) + (1-vartheta0);
 
+  Real vartheta = 1 - grain_size_med_squared; //The vartheta coefficient of Einav 2007
 
-	      damage_potential = std::pow((1-_damage[_qp]),1) * (2 * _mises_stress[_qp]*_mises_stress[_qp]/(3*shear_modulus) + _mean_stress[_qp]*_mean_stress[_qp]/(2 * bulk_modulus));
-	      damage_rate = (_damage[_qp] - _damage_old[_qp])/_dt;
-	      damage_dissipation = damage_potential*damage_rate;
+  prefactor = vartheta0/std::pow((1 - vartheta * _damage[_qp]),2);*/
 
-	      //taylor_quinney = 1 - (damage_potential * damage_rate / sig.doubleContraction(instantaneous_strain_rate));
-	      //taylor_quinney = 1 - (damage_rate / sig.doubleContraction(instantaneous_strain_rate));
-*/
+  //damage_potential = prefactor * Psi0;
+  damage_potential = (1-_damage[_qp]) * Psi0;
+  damage_rate = (_damage[_qp] - _damage_old[_qp])/_dt;
+
+  _damage_dissipation = damage_potential * damage_rate;
+
 }

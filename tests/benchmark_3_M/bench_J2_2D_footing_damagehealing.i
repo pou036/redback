@@ -41,6 +41,8 @@
     total_porosity = 0.1
     damage = damage
     damage_coefficient = 60
+    damage_method = DamageHealing
+    healing_coefficient = 1e4
   [../]
   [./mat_nomech]
     type = RedbackMaterial

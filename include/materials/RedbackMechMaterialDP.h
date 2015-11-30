@@ -28,21 +28,9 @@ class RedbackMechMaterialDP : public RedbackMechMaterial
 public:
   RedbackMechMaterialDP(const InputParameters & parameters);
 
-  /// Static method for use in validParams for getting the damage evolution method
-  /*static MooseEnum damageMethodEnum();
-  enum DamageMethod
-  {
-    BrittleDamage,
-    CreepDamage,
-    BreakageMechanics,
-    DamageHealing,
-    FromMultiApp
-  };*/
-
 protected:
   Real _slope_yield_surface;  // coefficient for yield surface
-
-  //DamageMethod _damage_method;
+  Real _ar_healing;
 
   void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
   void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
