@@ -37,6 +37,16 @@ class RedbackMechMaterial : public Material
 public:
   RedbackMechMaterial(const InputParameters & parameters);
 
+  static MooseEnum damageMethodEnum();
+  enum DamageMethod
+  {
+    BrittleDamage,
+    CreepDamage,
+    BreakageMechanics,
+    DamageHealing,
+    FromMultiApp
+  };
+
 protected:
   // Copy-paste from TensorMechanicsMaterial.h
   virtual void computeProperties();
@@ -125,6 +135,10 @@ protected:
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _mechanical_dissipation_mech;
   MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
+  MaterialProperty<Real> & _damage_kernel;
+  MaterialProperty<Real> & _damage_kernel_jac;
+  Real _damage_coeff, _healing_coeff;
+
   Real _exponential;
   //VariableValue & _dispx_dot;
   //VariableValue & _dispy_dot;
@@ -138,9 +152,14 @@ protected:
   bool _has_pore_pres;
   VariableValue & _pore_pres;
   VariableValue & _total_porosity;
+  bool _has_D;
+  VariableValue & _damage, & _damage_old;
+
+  DamageMethod _damage_method;
 
   // Reading material properties from RedbackMaterial
   const MaterialProperty<Real> & _gr;
+  const MaterialProperty<Real> & _lewis_number;
   const MaterialProperty<Real> & _ar;
   const MaterialProperty<Real> & _confining_pressure;
   const MaterialProperty<Real> & _alpha_1;
@@ -157,6 +176,15 @@ protected:
   Real _T0_param, _P0_param;
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
+  virtual void get_py_qy_damaged(Real, Real, Real &, Real &, Real);
+  virtual void form_damage_kernels(Real);
+
+  virtual void formDamageDissipation(RankTwoTensor &);
+  virtual void formBreakageDamageDissipation();
+  virtual void formBreakageHealingDamageDissipation();
+
+  Real _damage_dissipation;
+
 };
 
 #endif //REDBACKMECHMATERIAL_H

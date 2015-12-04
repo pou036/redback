@@ -180,3 +180,8 @@ RedbackRevision.h
 /doc/doxygen/*
 problems/Oka/best_matches
 problems/Oka/results
+RedbackMechMaterial2.h
+RedbackMechMaterial2.C
+moose_tests.sh
+.clang-format
+.clang_complete

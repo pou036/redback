@@ -1,3 +1,15 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
+/*                                                              */
+/*              (c) 2014 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #include "RedbackApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
@@ -26,6 +38,7 @@
 #include "RedbackThermalConvection.h"
 #include "RedbackThermalDiffusion.h"
 #include "RedbackThermalPressurization.h"
+#include "RedbackDamage.h"
 
 // Materials
 #include "RedbackMaterial.h"
@@ -98,6 +111,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalConvection);
   registerKernel(RedbackThermalDiffusion);
   registerKernel(RedbackThermalPressurization);
+  registerKernel(RedbackDamage);
 
   registerMaterial(RedbackMaterial);
   registerMaterial(RedbackMechMaterialJ2);
@@ -105,6 +119,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialCC);
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
+
 
   registerExecutioner(ReturnMapIterDT);
 

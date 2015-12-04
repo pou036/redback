@@ -10,11 +10,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "RedbackMassDiffusion.h"
+#include "RedbackDamage.h"
 
 
 template<>
-InputParameters validParams<RedbackMassDiffusion>()
+InputParameters validParams<RedbackDamage>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
@@ -23,26 +23,29 @@ InputParameters validParams<RedbackMassDiffusion>()
   return params;
 }
 
-RedbackMassDiffusion::RedbackMassDiffusion(const InputParameters & parameters) :
+
+RedbackDamage::RedbackDamage(const InputParameters & parameters) :
   Kernel(parameters),
-  _Le(getMaterialProperty<Real>("lewis_number")),
-  _gravity_term(getMaterialProperty<RealVectorValue>("fluid_gravity_term")),
+  _damage_kernel(getMaterialProperty<Real>("damage_kernel")),
+  _damage_kernel_jac(getMaterialProperty<Real>("damage_kernel_jacobian")),
   _time_factor(getParam<Real>("time_factor"))
 {
+
 }
 
-RedbackMassDiffusion::~RedbackMassDiffusion()
+RedbackDamage::~RedbackDamage()
 {
-}
 
-Real
-RedbackMassDiffusion::computeQpResidual()
-{
-  return (_time_factor/_Le[_qp]) * (_grad_u[_qp] - _gravity_term[_qp]) * _grad_test[_i][_qp];
 }
 
 Real
-RedbackMassDiffusion::computeQpJacobian()
+RedbackDamage::computeQpResidual()
 {
-  return (_time_factor/_Le[_qp])*_grad_phi[_j][_qp] * _grad_test[_i][_qp];
+    return -_time_factor*_test[_i][_qp]*_damage_kernel[_qp];
+}
+
+Real
+RedbackDamage::computeQpJacobian()
+{
+    return -_time_factor*_test[_i][_qp] *_damage_kernel_jac[_qp] * _phi[_j][_qp];
 }

@@ -1,13 +1,11 @@
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*              (c) 2014 CSIRO and UNSW Australia               */
 /*                   ALL RIGHTS RESERVED                        */
 /*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
+/*            Prepared by CSIRO and UNSW Australia              */
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
@@ -24,7 +22,7 @@ the Redback material and the tensor mechanics finite strain equivalent
 Three yield criteria are included:
 1. pressure-independent (J2 plasticity)
 2. linear pressure-dependent (Drucker-Prager with smoothing of the apex)
-3. Non-linear, capped pressur dependent (modified cam clay)
+3. Non-linear, capped pressure dependent (modified cam clay)
 
 Integration is performed for associative flow rules in an incremental manner using Newton Raphson.
 Isotropic hardening/softening has been incorporated where yield stress as a function of equivalent
@@ -41,6 +39,7 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addRequiredCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", 0.0, "The z displacement");
   params.addCoupledVar("temperature", 0.0, "temperature variable");
+  params.addCoupledVar("damage", 0.0, "damage variable");
 
   // Copy-paste from FiniteStrainMaterial.C
   // nothing
@@ -51,7 +50,7 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addParam<Real>("rtol",1e-8,"Plastic strain NR tolerance");
   params.addParam<Real>("ftol",1e-4,"Consistency condition NR tolerance");
   params.addParam<Real>("eptol",1e-7,"Equivalent plastic strain NR tolerance");
-  params.addClassDescription("Associative J2 plasticity with isotropic hardening.");
+  params.addClassDescription("Associative overstress plasticity");
 
   //  Copy-paste from FiniteStrainPlasticRateMaterial.C
   params.addParam< Real >("ref_pe_rate", 1.0, "Reference plastic strain rate parameter for rate dependent plasticity (Overstress model)");
@@ -59,6 +58,12 @@ InputParameters validParams<RedbackMechMaterial>()
   params.addCoupledVar("pore_pres", 0.0, "Dimensionless pore pressure");
   params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
   params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
+
+  // For the damage mechanics functionality
+  params.addParam< Real >("damage_coefficient", 0.0, "The fraction of energies used in damage flow law (e.g. E_D/E_D0)");
+  params.addParam< Real >("healing_coefficient", 0.0, "The fraction of energies used in healing flow law (e.g. E_H/E_H0)");
+  params.addParam<MooseEnum>("damage_method", RedbackMechMaterial::damageMethodEnum() = "CreepDamage", "The method to describe damage evolution");
+
 
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
@@ -120,16 +125,29 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _mechanical_dissipation_mech(declareProperty<Real>("mechanical_dissipation_mech")),
     _mechanical_dissipation_jac_mech(declareProperty<Real>("mechanical_dissipation_jacobian_mech")),
 
-    // Get coupled variables (T & P)
+    _damage_kernel(declareProperty<Real>("damage_kernel")),
+    _damage_kernel_jac(declareProperty<Real>("damage_kernel_jacobian")),
+    _damage_coeff(getParam<Real>("damage_coefficient")),
+	_healing_coeff(getParam<Real>("healing_coefficient")),
+
+    // Get coupled variables (T & P & porosity & damage)
     _has_T(isCoupled("temperature")),
     _T(_has_T ? coupledValue("temperature") : _zero),
     _T_old(_has_T ? coupledValueOld("temperature") : _zero),
     _has_pore_pres(isCoupled("pore_pres")),
     _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
     _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
+    _has_D(isCoupled("damage")),
+    //_damage(_has_D ? coupledValue("damage") : _zero),
+    //_damage_old(_has_D ? coupledValueOld("damage") : _zero),
+    _damage(coupledValue("damage")),
+    _damage_old(coupledValueOld("damage")),
+
+    _damage_method((DamageMethod)(int)getParam<MooseEnum>("damage_method")),
 
     // Get some material properties from RedbackMaterial
     _gr(getMaterialProperty<Real>("gr")),
+    _lewis_number(getMaterialProperty<Real>("lewis_number")),
     _ar(getMaterialProperty<Real>("ar")),
     _confining_pressure(getMaterialProperty<Real>("confining_pressure")),
     _alpha_1(getMaterialProperty<Real>("alpha_1")),
@@ -155,6 +173,12 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   MooseEnum fill_method = RankFourTensor::fillMethodEnum();
   fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic elasticity tensor.
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int) fill_method);
+}
+
+MooseEnum
+RedbackMechMaterial::damageMethodEnum()
+{
+  return MooseEnum("BrittleDamage CreepDamage BreakageMechanics DamageHealing FromMultiApp");
 }
 
 void
@@ -198,8 +222,8 @@ void RedbackMechMaterial::stepInitQpProperties()
 void RedbackMechMaterial::computeQpElasticityTensor()
 {
   // Fill in the matrix stiffness material property
-  _elasticity_tensor[_qp] = _Cijkl;
-  _Jacobian_mult[_qp] = _Cijkl;
+  _elasticity_tensor[_qp] = _Cijkl*(1-_damage[_qp]);
+  _Jacobian_mult[_qp] = _Cijkl*(1-_damage[_qp]);
 }
 
 void RedbackMechMaterial::computeStrain()
@@ -266,7 +290,6 @@ void RedbackMechMaterial::computeQpStress()
 
   //Solve J2 plastic constitutive equations based on current strain increment
   //Returns current  stress and plastic rate of deformation tensor
-
   _returnmap_iter[_qp] = 0;
   returnMap(_stress_old[_qp], _strain_increment[_qp], _elasticity_tensor[_qp], dp, sig, p_y, q_y);
   _stress[_qp] = sig;
@@ -377,7 +400,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _mises_stress[_qp] = getSigEqv(sig);
   _mean_stress[_qp] = sig.trace()/3.0;
 
-  // Compute platic strains
+  // Compute plastic strains
   RankTwoTensor instantaneous_strain_rate, total_volumetric_strain_rate;
 
   if (_dt == 0)
@@ -395,22 +418,6 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   def_grad_old = _grad_disp_x_old[_qp](0) +_grad_disp_y_old[_qp](1) + _grad_disp_z_old[_qp](2);
   def_grad_rate = (def_grad - def_grad_old)/_dt;
 
-  // Compute Mechanical Dissipation. Note that the term of the pore-pressure denotes chemical degradation of the skeleton
-  _mechanical_dissipation_mech[_qp] = _gr[_qp]*std::exp(_ar[_qp])*sig.doubleContraction(instantaneous_strain_rate);
-
-  // Compute Mechanical Dissipation Jacobian
-  _mechanical_dissipation_jac_mech[_qp] = _mechanical_dissipation_mech[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
-
-  _poromech_kernel[_qp] = def_grad_rate * _peclet_number[_qp] / _mixture_compressibility[_qp];
-  _poromech_jac[_qp] = (1 / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]));
-
-  // Compute the equivalent Gruntfest number for comparison with SuCCoMBE
-  _mod_gruntfest_number[_qp] = _gr[_qp] *
-      (
-      std::fabs(getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent)) +
-      std::fabs(_mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp] - p_y), _exponent))
-      );
-
   // Update mechanical porosity (elastic and plastic components)
   // TODO: set T0 properly (once only, at the very beginning). Until then, T = T - T0, P = P - P0
   delta_phi_mech_el = (1.0 - _total_porosity[_qp])*(_solid_compressibility[_qp]*(_pore_pres[_qp] - _P0_param)
@@ -419,6 +426,65 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   delta_phi_mech_pl = (1.0 - _total_porosity[_qp])*(_plastic_strain[_qp] - _plastic_strain_old[_qp]).trace();
 
   _mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
+
+  //formulate the Taylor-Quinney coefficient and Gruntfest numbers for the case of damage
+  Real gruntfest_number;
+
+  if (_has_D)
+    {
+     _mechanical_porosity[_qp] += std::pow(_damage[_qp],3/2);
+
+     switch (_damage_method)
+      {
+       case BrittleDamage:
+        formDamageDissipation(sig);
+       break;
+       case CreepDamage:
+        formDamageDissipation(sig);
+       break;
+       case BreakageMechanics:
+        formBreakageDamageDissipation();
+       break;
+       case DamageHealing:
+        formBreakageHealingDamageDissipation();
+       break;
+       default:
+        mooseError("damage method not implemented yet, use other options");
+      }
+
+     form_damage_kernels(q_y);
+    }
+
+  gruntfest_number = _gr[_qp] * std::exp(_ar[_qp]);
+
+  // Compute Mechanical Dissipation.
+  _mechanical_dissipation_mech[_qp] = gruntfest_number*sig.doubleContraction(instantaneous_strain_rate) + _damage_dissipation; //The negative sign in damage dissipation is according to thermodynamics with internal state variables (see Rosakis et al, 2000)
+  /* The following loop can ensure positive mechanical dissipation.
+   * if (_mechanical_dissipation_mech[_qp] < 0)
+  {
+      std::cout<< "Dissipation is negative and equal to:  "<< _mechanical_dissipation_mech[_qp] <<std::endl;
+	  mooseWarning("Dissipation is negative. Check the reason!");
+  }*/
+
+  // Compute Mechanical Dissipation Jacobian
+  _mechanical_dissipation_jac_mech[_qp] = _mechanical_dissipation_mech[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+
+  _poromech_kernel[_qp] = def_grad_rate * _peclet_number[_qp] / _mixture_compressibility[_qp];
+  _poromech_jac[_qp] = (1 / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]));
+
+  // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO: Remove this number from the tests!!!
+  _mod_gruntfest_number[_qp] = gruntfest_number * std::exp(- _ar[_qp]) *
+      (
+      std::fabs(getSigEqv(sig) * std::pow( macaulayBracket( getSigEqv(sig) / q_y - 1.0 ), _exponent)) +
+      std::fabs(_mean_stress[_qp] * std::pow( macaulayBracket(_mean_stress[_qp] - p_y), _exponent))
+      );
+
+/* This is a sample of printing a 4th order tensor element.
+  Real elastic_ten = _elasticity_tensor[_qp](0,0,0,0);
+  std::cout<< "damage =" << _damage[_qp] <<std::endl;
+  std::cout<< "yield stress =" << q_y <<std::endl;
+  std::cout<< "elastic modulus =" << elastic_ten <<std::endl<<std::endl<<std::endl;*/
+
   return;
 }
 
@@ -523,7 +589,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   err3 = 1.1 * tol3;
   iterisohard = 0;
 
-  //volumetric_plastic_strain = dp.trace()/3.0;
+  //volumetric_plastic_strain = dp.trace();
   mean_stress_old = sig_old.trace()/3.0;
   eqvpstrain = std::pow(2.0/3.0,0.5) * dp.L2norm();
   yield_stress = getYieldStress(eqvpstrain);
@@ -537,7 +603,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
   }
 
   //The following expression should be further pursued for a forward physics-based model
-  _exponential = _exponential* std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp])));
+  _exponential = (_exponential / (1-_damage[_qp])) * std::exp(-_alpha_1[_qp]*_confining_pressure[_qp] - _pore_pres[_qp]*_alpha_2[_qp]*(1 + _alpha_3[_qp]*std::log(_confining_pressure[_qp])));
 
   while (err3 > tol3 && iterisohard < maxiterisohard) //Hardness update iteration
   {
@@ -550,7 +616,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
     // Compute distance to current yield surface (line), only valid for associative potential
     p = sig_new.trace()/3.0;
     q = getSigEqv(sig_new);
-    get_py_qy(p, q, p_y, q_y, yield_stress);
+    get_py_qy_damaged(p, q, p_y, q_y, yield_stress);
 
     //TODO: checking whether in plasticity
 
@@ -575,7 +641,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
       // Update residual
       p = sig_new.trace()/3.0;
       q = getSigEqv(sig_new);
-      get_py_qy(p, q, p_y, q_y, yield_stress);
+      get_py_qy_damaged(p, q, p_y, q_y, yield_stress);
+
       flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
       if (flow_incr < 0.0) //negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment: Reduce time increment.");
@@ -600,4 +667,100 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old, const RankTwoTenso
 
   dp = dpn; //Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
+}
+
+void
+RedbackMechMaterial::get_py_qy_damaged(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+{
+  get_py_qy(p, q, p_y, q_y, yield_stress);
+  p_y *= (1-_damage[_qp]);
+  q_y *= (1-_damage[_qp]);
+}
+
+void
+RedbackMechMaterial::form_damage_kernels(Real cohesion)
+{
+  mooseError("form_damage_kernels must be overwritten in children class");
+}
+
+void
+RedbackMechMaterial::formDamageDissipation(RankTwoTensor & sig)
+{
+  /* The damage potential is being formed in this function. We start by postulating a helmholtz free energy of the form:
+   *  Psi = Psi_damage * Psi0
+   *  where Psi_damage = 1/2 *(1-D)^2
+   *  and Psi0 is the purely mechanical expression of the Helmholtz free energy, which in turn is split into a volumetric and a deviatoric part:
+   *  Psi0 = Psi0_vol + Psi0_dev
+   *  The volumetric part is: Psi0_vol = (2/3)*K*(epsilon^e_v)^2
+   *  The deviatoric part is: Psi0_dev = (3/2)*G*(epsilon^e_d)^2
+   *  Then, the damage potential is defined as damage_potential = - d Psi / d D =  (1-D) * Psi0
+   */
+
+  Real bulk_modulus, shear_modulus, vol_elastic_strain, dev_elastic_strain;
+  Real Psi0, Psi0_vol, Psi0_dev;
+  Real damage_potential, damage_rate;
+
+  bulk_modulus = _youngs_modulus*_poisson_ratio/(1+_poisson_ratio)/(1-2*_poisson_ratio); // First Lame modulus
+  shear_modulus = 0.5*_youngs_modulus/(1+_poisson_ratio); // Second Lame modulus (shear)
+
+  vol_elastic_strain = _elastic_strain[_qp].trace();
+  dev_elastic_strain = std::pow(2.0/3.0,0.5) * _elastic_strain[_qp].L2norm();
+
+  Psi0_vol = (2/3) * bulk_modulus * std::pow(vol_elastic_strain,2);
+  Psi0_dev = (3/2) * shear_modulus * std::pow(dev_elastic_strain,2);
+  Psi0 = Psi0_vol + Psi0_dev;
+
+  damage_potential = (1-_damage[_qp]) * Psi0;
+  damage_rate = (_damage[_qp] - _damage_old[_qp])/_dt;
+
+  // _damage_dissipation is equal to (- d Psi / d D * D_dot) which in this code is (damage_potential * damage_rate)
+  _damage_dissipation = damage_potential * damage_rate;
+}
+
+void
+RedbackMechMaterial::formBreakageDamageDissipation()
+{
+    mooseError("damage method not implemented yet, use other options");
+}
+
+void
+RedbackMechMaterial::formBreakageHealingDamageDissipation()
+{
+  Real bulk_modulus, shear_modulus, vol_elastic_strain, dev_elastic_strain;
+  Real Psi0, Psi0_vol, Psi0_dev;
+  Real damage_potential, damage_rate;
+  Real vartheta0, prefactor;
+
+  vartheta0 = 0.95;
+  //_damage[_qp] *= vartheta0;
+  bulk_modulus = _youngs_modulus*_poisson_ratio/(1+_poisson_ratio)/(1-2*_poisson_ratio); // First Lame modulus
+  shear_modulus = 0.5*_youngs_modulus/(1+_poisson_ratio); // Second Lame modulus (shear)
+
+  vol_elastic_strain = _elastic_strain[_qp].trace();
+  dev_elastic_strain = std::pow(2.0/3.0,0.5) * _elastic_strain[_qp].L2norm();
+
+  Psi0_vol = (2/3) * bulk_modulus * std::pow(vol_elastic_strain,2);
+  Psi0_dev = (3/2) * shear_modulus * std::pow(dev_elastic_strain,2);
+  Psi0 = Psi0_vol + Psi0_dev;
+
+  /*// Veveakis and Einav model of breakage and healing. Under construction...
+  Real dmg_coeff = std::pow(((1-_damage[_qp])/_damage[_qp]),2);
+
+  Real Tcr = -_ar[_qp]/std::log(dmg_coeff*_mises_strain_rate[_qp]/_ref_pe_rate);
+  if (_damage[_qp] = 0)
+      Tcr = 0;
+  //std::cout<< "Tcr =" << Tcr <<std::endl;
+
+  Real grain_size_med_squared = vartheta0 * ( (1 + _delta[_qp] * _T[_qp]) /Tcr) + (1-vartheta0);
+
+  Real vartheta = 1 - grain_size_med_squared; //The vartheta coefficient of Einav 2007
+
+  prefactor = vartheta0/std::pow((1 - vartheta * _damage[_qp]),2);*/
+
+  //damage_potential = prefactor * Psi0;
+  damage_potential = (1-_damage[_qp]) * Psi0;
+  damage_rate = (_damage[_qp] - _damage_old[_qp])/_dt;
+
+  _damage_dissipation = damage_potential * damage_rate;
+
 }
