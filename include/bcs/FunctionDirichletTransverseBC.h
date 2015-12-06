@@ -33,10 +33,10 @@ protected:
 
   /// Function being used for evaluation of this BC
   Function & _func;
-  
+
   /// Center point to calculate transversal direction for boundary point.
   const RealVectorValue & _center;
-  
+
   /// Axis of rotation, vector to calculate transversal direction for boundary point.
   const RealVectorValue & _axis;
 
