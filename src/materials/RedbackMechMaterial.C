@@ -51,7 +51,7 @@ template <> InputParameters validParams<RedbackMechMaterial>()
   // params.addRequiredParam< std::vector<Real> >("yield_stress", "Input data as
   // pairs of equivalent plastic strain and yield stress: Should start with
   // equivalent plastic strain 0");
-  params.addParam<std::vector<Real>>("yield_stress",
+  params.addParam<std::vector<Real> >("yield_stress",
                                      std::vector<Real>(0.0, 0.0),
                                      "Input data as pairs of equivalent "
                                      "plastic strain and yield stress: Should "
@@ -133,7 +133,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters)
 
     // Copy-paste from FiniteStrainPlasticMaterial.C
     _yield_stress_vector(
-    getParam<std::vector<Real>>("yield_stress")), // Read from input file
+    getParam<std::vector<Real> >("yield_stress")), // Read from input file
     _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
     _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
     _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
