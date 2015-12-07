@@ -2,13 +2,13 @@
 
 [Mesh]
   type = FileMesh
-  file = ../../meshes/2d_footing_pb.msh
+  file = ../../meshes/2d_footing_pb_fine.msh
   boundary_name = 'bottom right top_no_pressure top_pressure left'
   boundary_id = '0 1 2 3 4'
 []
 
 [Variables]
-  active = 'pore_pressure disp_y disp_x'
+  active = 'temp disp_y disp_x damage'
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -21,6 +21,8 @@
   [../]
   [./pore_pressure]
   [../]
+  [./damage]
+  [../]
 []
 
 [GlobalParams]
@@ -29,24 +31,22 @@
 
 [Materials]
   [./mat_mech]
-    type = RedbackMechMaterialJ2
+    type = RedbackMechMaterialDP
     block = 0
     disp_x = disp_x
     disp_y = disp_y
-    pore_pres = pore_pressure
-    exponent = 1
     youngs_modulus = 3.6
     poisson_ratio = 0.2
-    ref_pe_rate = 1
-    yield_stress = '0. 0.01 0.01 0.005 0.1 0.001'
+    yield_stress = '0. 0.01 0.01 0.01 0.1 0.01' # 0. 0.01 0.01 0.005 0.1 0.001
     total_porosity = 0.1
+    damage = damage
+    damage_coefficient = 1e2
   [../]
   [./mat_nomech]
     type = RedbackMaterial
     block = 0
     disp_x = disp_x
     disp_y = disp_y
-    pore_pres = pore_pressure
     Aphi = 0
     ar = 0
     ar_F = 0
@@ -67,7 +67,7 @@
 []
 
 [BCs]
-  active = 'Pressure confine_x confine_y pore_pressure_top'
+  active = 'Pressure confine_x confine_y'
   [./confine_x]
     type = PresetBC
     variable = disp_x
@@ -154,44 +154,25 @@
 []
 
 [Kernels]
-  active = 'td_press poromech press_diff'
+  [./td_damage]
+    type = TimeDerivative
+    variable = damage
+  [../]
+  [./damage_kernel]
+    type = RedbackDamage
+    variable = damage
+  [../]
   [./td_temp]
     type = TimeDerivative
     variable = temp
   [../]
-  [./temp_diff]
+  [./diffusion_temp]
     type = Diffusion
     variable = temp
   [../]
-  [./temp_dissip]
+  [./mech_dissip]
     type = RedbackMechDissip
     variable = temp
-  [../]
-  [./temp_endo_chem]
-    type = RedbackChemEndo
-    variable = temp
-  [../]
-  [./td_press]
-    type = TimeDerivative
-    variable = pore_pressure
-  [../]
-  [./press_diff]
-    type = RedbackMassDiffusion
-    variable = pore_pressure
-  [../]
-  [./chem_press]
-    type = RedbackChemPressure
-    variable = pore_pressure
-    block = 0
-  [../]
-  [./thermal_pressurization]
-    type = RedbackThermalPressurization
-    variable = pore_pressure
-    temperature = temp
-  [../]
-  [./poromech]
-    type = RedbackPoromechanics
-    variable = pore_pressure
   [../]
 []
 
@@ -262,11 +243,11 @@
 []
 
 [Postprocessors]
-  [./p0]
-    type = PointValue
-    point = '0 0 0'
-    variable = pore_pressure
-  [../]
+  # [./p0]
+  # type = PointValue
+  # point = '0 0 0'
+  # variable = pore_pressure
+  # [../]
   [./stress_xx]
     type = PointValue
     point = '0 0 0'
@@ -302,7 +283,7 @@
 [Executioner]
   type = Transient
   num_steps = 500
-  solve_type = Newton
+  solve_type = PJFNK
   end_time = 10
   dt = 1e-4
   petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -ksp_gmres_restart'
@@ -314,6 +295,7 @@
 []
 
 [Outputs]
+  file_base = TM_footing_damage
   [./my_console]
     output_linear = true
     type = Console
@@ -331,7 +313,14 @@
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
-    pore_pres = pore_pressure
+  [../]
+[]
+
+[ICs]
+  [./damage_ic]
+    variable = damage
+    type = ConstantIC
+    value = 0
   [../]
 []
 

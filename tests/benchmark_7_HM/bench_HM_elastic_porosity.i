@@ -1,17 +1,17 @@
 # An undrained oedometer test on a saturated poroelastic sample
 # to compare with MOOSE poromechanics test.
-# 
+#
 # The sample is a single unit element, with roller BCs on the sides
 # and bottom.  A constant displacement is applied to the top: disp_z = -0.01*t.
 # There is no fluid flow.
-# 
+#
 # Under these conditions
 # porepressure = -(Biot coefficient)*(Biot modulus)*disp_z/L
 # stress_xx = (bulk - 2*shear/3)*strain_zz (remember this is effective stress)
 # stress_zz = (bulk + 4*shear/3)*strain_zz (remember this is effective stress)
 # where L is the height of the sample (L=1 in this test),
 # strain_zz = v_z * t /L + 0.5*[v_z * t /L]^2   (in finite strain)
-# 
+#
 # Parameters:
 # Biot coefficient = 0.3
 # Porosity = 0.1
@@ -19,7 +19,7 @@
 # Shear modulus = 1.5
 # fluid bulk modulus = 1/0.3 = 3.333333
 # 1/Biot modulus = (1 - 0.3)*(0.3 - 0.1)/2 + 0.1*0.3 = 0.1. BiotModulus = 10
-# 
+#
 # Desired output:
 # zdisp = -0.01*t
 # p0 = 0.03*t

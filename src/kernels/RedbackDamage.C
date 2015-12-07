@@ -10,11 +10,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "RedbackChemEndo.h"
+#include "RedbackDamage.h"
 
 
 template<>
-InputParameters validParams<RedbackChemEndo>()
+InputParameters validParams<RedbackDamage>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
@@ -24,28 +24,28 @@ InputParameters validParams<RedbackChemEndo>()
 }
 
 
-RedbackChemEndo::RedbackChemEndo(const InputParameters & parameters) :
+RedbackDamage::RedbackDamage(const InputParameters & parameters) :
   Kernel(parameters),
-  _chemical_endothermic_energy(getMaterialProperty<Real>("chemical_endothermic_energy")),
-  _chemical_endothermic_energy_jac(getMaterialProperty<Real>("chemical_endothermic_energy_jacobian")),
+  _damage_kernel(getMaterialProperty<Real>("damage_kernel")),
+  _damage_kernel_jac(getMaterialProperty<Real>("damage_kernel_jacobian")),
   _time_factor(getParam<Real>("time_factor"))
 {
 
 }
 
-RedbackChemEndo::~RedbackChemEndo()
+RedbackDamage::~RedbackDamage()
 {
 
 }
 
 Real
-RedbackChemEndo::computeQpResidual()
+RedbackDamage::computeQpResidual()
 {
-  return _time_factor*_test[_i][_qp]*_chemical_endothermic_energy[_qp];
+    return -_time_factor*_test[_i][_qp]*_damage_kernel[_qp];
 }
 
 Real
-RedbackChemEndo::computeQpJacobian()
+RedbackDamage::computeQpJacobian()
 {
-  return _time_factor*_test[_i][_qp] * _chemical_endothermic_energy_jac[_qp] * _phi[_j][_qp];
+    return -_time_factor*_test[_i][_qp] *_damage_kernel_jac[_qp] * _phi[_j][_qp];
 }

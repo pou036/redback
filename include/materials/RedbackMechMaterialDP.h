@@ -30,6 +30,7 @@ public:
 
 protected:
   Real _slope_yield_surface;  // coefficient for yield surface
+  Real _ar_healing;
 
   void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
   void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
@@ -37,6 +38,12 @@ protected:
   void get_py_qy(Real, Real, Real &, Real &, Real);
   Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real);
   Real getPressureProjection(Real, Real, Real);
+
+  virtual void form_damage_kernels(Real);
+  virtual void formBrittleDamage();
+  virtual void formCreepDamage(Real);
+  virtual void formBreakageDamage(Real);
+  virtual void formBreakageHealingDamage(Real);
 
 };
 
