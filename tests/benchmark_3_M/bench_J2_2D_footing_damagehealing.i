@@ -8,7 +8,7 @@
 []
 
 [Variables]
-  active = 'pore_pressure disp_y disp_x'
+  active = 'damage disp_y disp_x'
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -21,6 +21,8 @@
   [../]
   [./pore_pressure]
   [../]
+  [./damage]
+  [../]
 []
 
 [GlobalParams]
@@ -29,24 +31,24 @@
 
 [Materials]
   [./mat_mech]
-    type = RedbackMechMaterialJ2
+    type = RedbackMechMaterialDP
     block = 0
     disp_x = disp_x
     disp_y = disp_y
-    pore_pres = pore_pressure
-    exponent = 1
-    youngs_modulus = 3.6
+    youngs_modulus = 100
     poisson_ratio = 0.2
-    ref_pe_rate = 1
-    yield_stress = '0. 0.01 0.01 0.005 0.1 0.001'
+    yield_stress = '0 1 0 1' # 0. 0.01 0.01 0.005 0.1 0.001
     total_porosity = 0.1
+    damage = damage
+    damage_coefficient = 60
+    damage_method = DamageHealing
+    healing_coefficient = 8e3
   [../]
   [./mat_nomech]
     type = RedbackMaterial
     block = 0
     disp_x = disp_x
     disp_y = disp_y
-    pore_pres = pore_pressure
     Aphi = 0
     ar = 0
     ar_F = 0
@@ -67,7 +69,7 @@
 []
 
 [BCs]
-  active = 'Pressure confine_x confine_y pore_pressure_top'
+  active = 'Pressure confine_x confine_y'
   [./confine_x]
     type = PresetBC
     variable = disp_x
@@ -103,7 +105,7 @@
 []
 
 [AuxVariables]
-  active = 'stress_yy mises_strain_rate stress_xz stress_xx stress_xy mises_stress stress_zz eqv_plastic_strain stress_yz'
+  active = 'stress_yy mises_strain_rate stress_xz stress_xx stress_xy mises_stress stress_zz eqv_plastic_strain stress_yz returnmap_iter'
   [./total_porosity]
     order = FIRST
     family = MONOMIAL
@@ -144,59 +146,33 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./returnmap_iter]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
 []
 
 [Functions]
   [./applied_load_fct]
     type = ConstantFunction
-    value = 1e-1
+    value = 10
   [../]
 []
 
 [Kernels]
-  active = 'td_press poromech press_diff'
-  [./td_temp]
+  [./td_damage]
     type = TimeDerivative
-    variable = temp
+    variable = damage
   [../]
-  [./temp_diff]
-    type = Diffusion
-    variable = temp
-  [../]
-  [./temp_dissip]
-    type = RedbackMechDissip
-    variable = temp
-  [../]
-  [./temp_endo_chem]
-    type = RedbackChemEndo
-    variable = temp
-  [../]
-  [./td_press]
-    type = TimeDerivative
-    variable = pore_pressure
-  [../]
-  [./press_diff]
-    type = RedbackMassDiffusion
-    variable = pore_pressure
-  [../]
-  [./chem_press]
-    type = RedbackChemPressure
-    variable = pore_pressure
-    block = 0
-  [../]
-  [./thermal_pressurization]
-    type = RedbackThermalPressurization
-    variable = pore_pressure
-    temperature = temp
-  [../]
-  [./poromech]
-    type = RedbackPoromechanics
-    variable = pore_pressure
+  [./damage_kernel]
+    type = RedbackDamage
+    variable = damage
   [../]
 []
 
 [AuxKernels]
-  active = 'stress_yy mises_strain_rate stress_xz stress_xx stress_xy mises_stress stress_zz eqv_plastic_strain stress_yz'
+  active = 'stress_yy mises_strain_rate stress_xz stress_xx stress_xy mises_stress stress_zz eqv_plastic_strain stress_yz returnmap_iter'
   [./total_porosity]
     type = RedbackTotalPorosityAux
     variable = total_porosity
@@ -259,14 +235,20 @@
     variable = mises_strain_rate
     property = mises_strain_rate
   [../]
+  [./returnmap_iter]
+    type = MaterialRealAux
+    variable = returnmap_iter
+    property = returnmap_iter
+    block = 0
+  [../]
 []
 
 [Postprocessors]
-  [./p0]
-    type = PointValue
-    point = '0 0 0'
-    variable = pore_pressure
-  [../]
+  # [./p0]
+  # type = PointValue
+  # point = '0 0 0'
+  # variable = pore_pressure
+  # [../]
   [./stress_xx]
     type = PointValue
     point = '0 0 0'
@@ -287,6 +269,10 @@
     variable = disp_y
     point = '0 0 0'
   [../]
+  [./max_returnmap_iter]
+    type = ElementExtremeValue
+    variable = returnmap_iter
+  [../]
 []
 
 [Preconditioning]
@@ -294,6 +280,9 @@
     # petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     # petsc_options_value = 'bcgs bjacobi 1E-14 1E-10 10000'
     #
+    petsc_options = '-snes_monitor -snes_linesearch_monitor -ksp_monitor'
+    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it -sub_pc_type -sub_pc_factor_shift_type'
+    petsc_options_value = 'gmres asm 1E-1 1E-10 200 500 lu NONZERO'
     type = SMP
     full = true
   [../]
@@ -301,9 +290,9 @@
 
 [Executioner]
   type = Transient
-  num_steps = 500
-  solve_type = Newton
-  end_time = 10
+  num_steps = 5000
+  solve_type = PJFNK
+  end_time = 100
   dt = 1e-4
   petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -ksp_gmres_restart'
   petsc_options_value = 'gmres asm lu 201'
@@ -311,9 +300,20 @@
   nl_rel_step_tol = 1e-10
   nl_rel_tol = 1e-06
   nl_abs_step_tol = 1e-10
+    [./TimeStepper]
+      type = ReturnMapIterDT
+      dt = 1e-4
+      min_iter = 10
+      ratio = 0.5
+      max_iter = 20
+      dt_max = 1e-4
+      postprocessor = max_returnmap_iter
+      dt_min = 1e-7
+    [../]
 []
 
 [Outputs]
+  file_base = footing_2D_J2_damagehealing
   [./my_console]
     output_linear = true
     type = Console
@@ -321,7 +321,7 @@
   [../]
   [./my_exodus]
     scalar_as_nodal = true
-    file_base = footing_2D_J2
+    file_base = footing_2D_J2_damagehealing
     type = Exodus
     elemental_as_nodal = true
   [../]
@@ -331,7 +331,13 @@
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
-    pore_pres = pore_pressure
   [../]
 []
 
+[ICs]
+  [./damage_ic]
+    variable = damage
+    type = ConstantIC
+    value = 0
+  [../]
+[]

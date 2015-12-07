@@ -117,7 +117,7 @@
     pore_pres = pressure
     temperature = temp
     disp_z = 0
-	total_porosity = porosity
+  total_porosity = porosity
   [../]
 []
 
@@ -153,4 +153,3 @@
   exodus = true
   console = true
 []
-

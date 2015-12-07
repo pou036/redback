@@ -111,8 +111,6 @@ EllipseTest::isPointOutsideOfEllipseTestCircle()
   CPPUNIT_ASSERT(r == false);
   r = Ellipse::isPointOutsideOfEllipse(/*m=*/1.0, /*p_c=*/-3.0, /*x=*/-1.5, /*y=*/2.0);
   CPPUNIT_ASSERT(r == true);
-
-  //std::cout << "is point outside ellipse? " << r << std::endl << std::endl;
 }
 
 /**
@@ -204,8 +202,6 @@ EllipseTest::isPointOutsideOfEllipseTestMajorAxisHorizontal()
   CPPUNIT_ASSERT(r == false);
   r = Ellipse::isPointOutsideOfEllipse(/*m=*/0.5, /*p_c=*/-3.0, /*x=*/-1.5, /*y=*/2.0);
   CPPUNIT_ASSERT(r == true);
-
-  //std::cout << "is point outside ellipse? " << r << std::endl << std::endl;
 }
 
 /**
@@ -297,8 +293,6 @@ EllipseTest::isPointOutsideOfEllipseTestMajorAxisVertical()
   CPPUNIT_ASSERT(r == false);
   r = Ellipse::isPointOutsideOfEllipse(/*m=*/1.5, /*p_c=*/-3.0, /*x=*/-1.5, /*y=*/2.5);
   CPPUNIT_ASSERT(r == true);
-
-  //std::cout << "is point outside ellipse? " << r << std::endl << std::endl;
 }
 
 /**
@@ -351,10 +345,6 @@ EllipseTest::distanceCCTestCircle()
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.5, d, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5, x2, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5, y2, 1e-5);
-
-  /*std::cout << "distance to the ellipse: " << d << std::endl;
-  std::cout << "projection point on ellipse: coord(0)=" << x2 << std::endl;
-  std::cout << "projection point on ellipse: coord(0)=" << y2 << std::endl;*/
 }
 
 /**
@@ -558,5 +548,3 @@ EllipseTest::isPointOutsideOfRotatedEllipseTestMajorAxisVertical()
   r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/0.5, /*y1*/0.39);
   CPPUNIT_ASSERT(r == false);
 }
-
-
