@@ -52,7 +52,6 @@ template <> InputParameters validParams<RedbackMechMaterial>()
   // pairs of equivalent plastic strain and yield stress: Should start with
   // equivalent plastic strain 0");
   params.addParam<std::vector<Real> >("yield_stress",
-                                     std::vector<Real>(0.0, 0.0),
                                      "Input data as pairs of equivalent "
                                      "plastic strain and yield stress: Should "
                                      "start with equivalent plastic strain 0");
