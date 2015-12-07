@@ -9,11 +9,14 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
-
+// Main Application
 #include "RedbackApp.h"
 #include "Moose.h"
 #include "AppFactory.h"
-#include "ModulesApp.h"
+#include "ActionFactory.h"
+
+// Modules
+#include "TensorMechanicsApp.h"
 
 // Actions
 #include "RedbackAction.h"
@@ -68,11 +71,11 @@ RedbackApp::RedbackApp(InputParameters parameters) :
   srand(processor_id());
 
   Moose::registerObjects(_factory);
-  ModulesApp::registerObjects(_factory);
+  TensorMechanicsApp::registerObjects(_factory);
   RedbackApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
-  ModulesApp::associateSyntax(_syntax, _action_factory);
+  TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
   RedbackApp::associateSyntax(_syntax, _action_factory);
 }
 
