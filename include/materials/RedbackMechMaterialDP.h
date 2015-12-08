@@ -30,7 +30,6 @@ public:
 
 protected:
   Real _slope_yield_surface;  // coefficient for yield surface
-  Real _ar_healing;
 
   void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
   void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
