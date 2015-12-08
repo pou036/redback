@@ -19,18 +19,13 @@ template <> InputParameters validParams<RedbackMechMaterialDP>()
   params.addParam<Real>("slope_yield_surface",
                         0,
                         "Slope of yield surface (positive, see documentation)");
-  params.addParam<Real>(
-  "ar_healing",
-  0,
-  "The arrhenius number (activation energy) for the healing mechanism");
 
   return params;
 }
 
 RedbackMechMaterialDP::RedbackMechMaterialDP(const InputParameters & parameters)
   : RedbackMechMaterial(parameters),
-    _slope_yield_surface(getParam<Real>("slope_yield_surface")),
-    _ar_healing(getParam<Real>("ar_healing"))
+    _slope_yield_surface(getParam<Real>("slope_yield_surface"))
 {
 }
 
