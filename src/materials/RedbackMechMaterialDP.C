@@ -240,10 +240,10 @@ void RedbackMechMaterialDP::form_damage_kernels(Real cohesion)
       formCreepDamage(cohesion);
       break;
     case BreakageMechanics:
-      formBreakageDamage(cohesion);
+      mooseError("damage method not implemented yet, use other options");
       break;
     case DamageHealing:
-      formBreakageHealingDamage(cohesion);
+      mooseError("damage method not implemented yet, use other options");
       break;
     default:
       mooseError("damage method not implemented yet, use other options");
@@ -292,69 +292,6 @@ void RedbackMechMaterialDP::formCreepDamage(Real cohesion)
 
   plastic_damage = _damage_coeff * lambda_dot;
   healing_damage = 0;
-  _damage_kernel[_qp] = plastic_damage + healing_damage;
-  _damage_kernel_jac[_qp] = 0;
-}
-
-void RedbackMechMaterialDP::formBreakageDamage(Real cohesion)
-{
-  Real plastic_damage, healing_damage;
-  Real lambda_dot;
-  Real d_yield_dq, denominator; // The derivative of the yield surface with
-                                // respect to the deviatoric stress q
-
-  // Damage evolution law for Breakage
-  denominator =
-  _slope_yield_surface * _mean_stress[_qp] +
-  cohesion *
-  (1 - _damage[_qp]); // Drucker-Prager potential for the damage evolution law
-  d_yield_dq = 2 * (_mises_stress[_qp]) / std::pow(denominator, 2);
-  // d_yield_dq = 2 / std::pow(denominator,2);
-  if (d_yield_dq > 0) // ensuring positiveness of the plastic multiplier
-  {
-    lambda_dot = _mises_stress[_qp] * _mises_strain_rate[_qp] / d_yield_dq;
-  }
-  else
-    lambda_dot = 0;
-  plastic_damage =
-  _damage_coeff * (1 - _damage[_qp]) * (1 - _damage[_qp]) * 2 * lambda_dot;
-  healing_damage = 0;
-
-  _damage_kernel[_qp] = plastic_damage + healing_damage;
-  _damage_kernel_jac[_qp] = 0;
-}
-
-void RedbackMechMaterialDP::formBreakageHealingDamage(Real cohesion)
-{
-  Real plastic_damage, healing_damage;
-  Real lambda_dot;
-  Real d_yield_dq, denominator; // The derivative of the yield surface with
-                                // respect to the deviatoric stress q
-
-  // Damage evolution law for Breakage (creep damage)
-  // J2 plastic potential with evolving cohesion for the damage evolution law
-  // (remember that cohesion is q_y which is updated as q_y * (1-D) in the
-  // get_py_qy_damaged function)
-  denominator = cohesion;
-  d_yield_dq = 2 / std::pow(denominator, 2);
-  if (d_yield_dq > 0) // ensuring positiveness of the plastic multiplier
-  {
-    // lambda_dot = _mises_stress[_qp] * _mises_strain_rate[_qp] / d_yield_dq;
-    lambda_dot = _mises_strain_rate[_qp] / d_yield_dq;
-  }
-  else
-    lambda_dot = 0;
-
-  Real activation_enthalpy, deviatoric_coeff, volumetric_coeff;
-  deviatoric_coeff = 0;
-  volumetric_coeff = 0;
-  activation_enthalpy = _ar_healing + deviatoric_coeff * _mises_stress[_qp] +
-                        volumetric_coeff * _mean_stress[_qp];
-
-  plastic_damage = _damage_coeff * lambda_dot;
-  healing_damage = -_healing_coeff * _damage[_qp] * _damage[_qp] *
-                   std::exp(-activation_enthalpy / (1 + _delta[_qp] * _T[_qp]));
-
   _damage_kernel[_qp] = plastic_damage + healing_damage;
   _damage_kernel_jac[_qp] = 0;
 }
