@@ -180,8 +180,6 @@ protected:
   virtual void form_damage_kernels(Real);
 
   virtual void formDamageDissipation(RankTwoTensor &);
-  virtual void formBreakageDamageDissipation();
-  virtual void formBreakageHealingDamageDissipation();
 
   Real _damage_dissipation;
 

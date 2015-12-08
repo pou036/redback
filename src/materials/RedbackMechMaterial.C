@@ -513,10 +513,10 @@ void RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig,
         formDamageDissipation(sig);
         break;
       case BreakageMechanics:
-        formBreakageDamageDissipation();
+        formDamageDissipation(sig);
         break;
       case DamageHealing:
-        formBreakageHealingDamageDissipation();
+        formDamageDissipation(sig);
         break;
       default:
         mooseError("damage method not implemented yet, use other options");
@@ -826,53 +826,5 @@ void RedbackMechMaterial::formDamageDissipation(RankTwoTensor & sig)
 
   // _damage_dissipation is equal to (- d Psi / d D * D_dot) which in this code
   // is (damage_potential * damage_rate)
-  _damage_dissipation = damage_potential * damage_rate;
-}
-
-void RedbackMechMaterial::formBreakageDamageDissipation()
-{
-  mooseError("damage method not implemented yet, use other options");
-}
-
-void RedbackMechMaterial::formBreakageHealingDamageDissipation()
-{
-  Real bulk_modulus, shear_modulus, vol_elastic_strain, dev_elastic_strain;
-  Real Psi0, Psi0_vol, Psi0_dev;
-  Real damage_potential, damage_rate;
-  Real vartheta0, prefactor;
-
-  vartheta0 = 0.95;
-  //_damage[_qp] *= vartheta0;
-  bulk_modulus = _youngs_modulus * _poisson_ratio / (1 + _poisson_ratio) /
-                 (1 - 2 * _poisson_ratio); // First Lame modulus
-  shear_modulus =
-  0.5 * _youngs_modulus / (1 + _poisson_ratio); // Second Lame modulus (shear)
-
-  vol_elastic_strain = _elastic_strain[_qp].trace();
-  dev_elastic_strain = std::pow(2.0 / 3.0, 0.5) * _elastic_strain[_qp].L2norm();
-
-  Psi0_vol = (2 / 3) * bulk_modulus * std::pow(vol_elastic_strain, 2);
-  Psi0_dev = (3 / 2) * shear_modulus * std::pow(dev_elastic_strain, 2);
-  Psi0 = Psi0_vol + Psi0_dev;
-
-  /*// Veveakis and Einav model of breakage and healing. Under construction...
-  Real dmg_coeff = std::pow(((1-_damage[_qp])/_damage[_qp]),2);
-
-  Real Tcr = -_ar[_qp]/std::log(dmg_coeff*_mises_strain_rate[_qp]/_ref_pe_rate);
-  if (_damage[_qp] = 0)
-      Tcr = 0;
-
-  Real grain_size_med_squared = vartheta0 * ( (1 + _delta[_qp] * _T[_qp]) /Tcr)
-  + (1-vartheta0);
-
-  Real vartheta = 1 - grain_size_med_squared; //The vartheta coefficient of
-  Einav 2007
-
-  prefactor = vartheta0/std::pow((1 - vartheta * _damage[_qp]),2);*/
-
-  // damage_potential = prefactor * Psi0;
-  damage_potential = (1 - _damage[_qp]) * Psi0;
-  damage_rate = (_damage[_qp] - _damage_old[_qp]) / _dt;
-
   _damage_dissipation = damage_potential * damage_rate;
 }
