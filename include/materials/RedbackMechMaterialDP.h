@@ -42,8 +42,6 @@ protected:
   virtual void form_damage_kernels(Real);
   virtual void formBrittleDamage();
   virtual void formCreepDamage(Real);
-  virtual void formBreakageDamage(Real);
-  virtual void formBreakageHealingDamage(Real);
 
 };
 
