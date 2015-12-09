@@ -12,9 +12,9 @@
 
 #include "RedbackChemExo.h"
 
-
-template<>
-InputParameters validParams<RedbackChemExo>()
+template <>
+InputParameters
+validParams<RedbackChemExo>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
@@ -23,25 +23,22 @@ InputParameters validParams<RedbackChemExo>()
   return params;
 }
 
-
 RedbackChemExo::RedbackChemExo(const InputParameters & parameters) :
-  Kernel(parameters),
-  _chemical_exothermic_energy(getMaterialProperty<Real>("chemical_exothermic_energy")),
-  _chemical_exothermic_energy_jac(getMaterialProperty<Real>("chemical_exothermic_energy_jacobian")),
-  _time_factor(getParam<Real>("time_factor"))
+    Kernel(parameters),
+    _chemical_exothermic_energy(getMaterialProperty<Real>("chemical_exothermic_energy")),
+    _chemical_exothermic_energy_jac(getMaterialProperty<Real>("chemical_exothermic_energy_jacobian")),
+    _time_factor(getParam<Real>("time_factor"))
 {
-
 }
 
 RedbackChemExo::~RedbackChemExo()
 {
-
 }
 
 Real
 RedbackChemExo::computeQpResidual()
 {
-  return -_time_factor*_test[_i][_qp]*_chemical_exothermic_energy[_qp];
+  return -_time_factor * _test[_i][_qp] * _chemical_exothermic_energy[_qp];
 }
 
 Real

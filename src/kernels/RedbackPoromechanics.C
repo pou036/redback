@@ -12,8 +12,9 @@
 
 #include "RedbackPoromechanics.h"
 
-template<>
-InputParameters validParams<RedbackPoromechanics>()
+template <>
+InputParameters
+validParams<RedbackPoromechanics>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("temperature", 0.0, "Temperature variable.");

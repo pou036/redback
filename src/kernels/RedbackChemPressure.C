@@ -12,9 +12,9 @@
 
 #include "RedbackChemPressure.h"
 
-
-template<>
-InputParameters validParams<RedbackChemPressure>()
+template <>
+InputParameters
+validParams<RedbackChemPressure>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("temperature", 0.0, "Temperature variable.");
@@ -24,26 +24,23 @@ InputParameters validParams<RedbackChemPressure>()
   return params;
 }
 
-
 RedbackChemPressure::RedbackChemPressure(const InputParameters & parameters) :
-  Kernel(parameters),
-  _chemical_source_mass(getMaterialProperty<Real>("chemical_source_mass")),
-  _chemical_source_mass_jac(getMaterialProperty<Real>("chemical_source_mass_jacobian")),
-  _temp_var(coupled("temperature")),
-  _time_factor(getParam<Real>("time_factor"))
+    Kernel(parameters),
+    _chemical_source_mass(getMaterialProperty<Real>("chemical_source_mass")),
+    _chemical_source_mass_jac(getMaterialProperty<Real>("chemical_source_mass_jacobian")),
+    _temp_var(coupled("temperature")),
+    _time_factor(getParam<Real>("time_factor"))
 {
-
 }
 
 RedbackChemPressure::~RedbackChemPressure()
 {
-
 }
 
 Real
 RedbackChemPressure::computeQpResidual()
 {
-  return -_time_factor*_test[_i][_qp]*_chemical_source_mass[_qp];
+  return -_time_factor * _test[_i][_qp] * _chemical_source_mass[_qp];
 }
 
 Real
@@ -57,7 +54,7 @@ RedbackChemPressure::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _temp_var)
   {
-    return -_time_factor*_test[_i][_qp] * _chemical_source_mass_jac[_qp] * _phi[_j][_qp];
+    return -_time_factor * _test[_i][_qp] * _chemical_source_mass_jac[_qp] * _phi[_j][_qp];
   }
   return 0;
 }

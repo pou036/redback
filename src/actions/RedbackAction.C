@@ -4,8 +4,9 @@
 #include "FEProblem.h"
 #include "Parser.h"
 
-template<>
-InputParameters validParams<RedbackAction>()
+template <>
+InputParameters
+validParams<RedbackAction>()
 {
   InputParameters params = validParams<Action>();
   params.addParam<NonlinearVariableName>("disp_x", "", "The x displacement");
@@ -13,11 +14,12 @@ InputParameters validParams<RedbackAction>()
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
   params.addParam<NonlinearVariableName>("temp", "", "The temperature");
   params.addParam<NonlinearVariableName>("pore_pres", "", "The pore fluid pressure");
-  params.addParam<std::string>("appended_property_name", "", "Name appended to material properties to make them unique");
+  params.addParam<std::string>(
+    "appended_property_name", "", "Name appended to material properties to make them unique");
 
   // changed this from true to false
   params.set<bool>("use_displaced_mesh") = true;
-  //params.set<bool>("use_displaced_mesh") = false;
+  // params.set<bool>("use_displaced_mesh") = false;
   return params;
 }
 
@@ -44,12 +46,12 @@ RedbackAction::act()
 
   keys.push_back("disp_x");
   vars.push_back(_disp_x);
-  if ( _disp_y != "" )
+  if (_disp_y != "")
   {
     ++dim;
     keys.push_back("disp_y");
     vars.push_back(_disp_y);
-    if ( _disp_z != "" )
+    if (_disp_z != "")
     {
       ++dim;
       keys.push_back("disp_z");
@@ -65,11 +67,11 @@ RedbackAction::act()
     vars.push_back(_temp);
   }
   if (_pore_pres != "")
-    {
-      ++num_coupled;
-      keys.push_back("pore_pres");
-      vars.push_back(_pore_pres);
-    }
+  {
+    ++num_coupled;
+    keys.push_back("pore_pres");
+    vars.push_back(_pore_pres);
+  }
 
   /*
   // Create divergence objects

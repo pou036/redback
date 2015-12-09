@@ -4,26 +4,27 @@
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
 
-//Forward declarations
+// Forward declarations
 class RedbackTotalPorosityAux;
 
-template<>
+template <>
 InputParameters validParams<RedbackTotalPorosityAux>();
-
 
 class RedbackTotalPorosityAux : public AuxKernel
 {
 public:
   RedbackTotalPorosityAux(const InputParameters & parameters);
-  virtual ~RedbackTotalPorosityAux() {}
+  virtual ~RedbackTotalPorosityAux()
+  {
+  }
 
 protected:
   virtual Real computeValue();
-  bool _is_mechanics_on;//, _is_chemistry_on;
+  bool _is_mechanics_on; //, _is_chemistry_on;
 
 private:
   VariableValue & _delta_porosity_mech;
-  //MaterialProperty<Real> & _delta_porosity_mech;
+  // MaterialProperty<Real> & _delta_porosity_mech;
   const MaterialProperty<Real> & _delta_porosity_chem;
   const MaterialProperty<Real> & _initial_porosity;
 };

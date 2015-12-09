@@ -12,9 +12,9 @@
 
 #include "RedbackThermalDiffusion.h"
 
-
-template<>
-InputParameters validParams<RedbackThermalDiffusion>()
+template <>
+InputParameters
+validParams<RedbackThermalDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
@@ -24,8 +24,7 @@ InputParameters validParams<RedbackThermalDiffusion>()
 }
 
 RedbackThermalDiffusion::RedbackThermalDiffusion(const InputParameters & parameters) :
-  Kernel(parameters),
-  _time_factor(getParam<Real>("time_factor"))
+    Kernel(parameters), _time_factor(getParam<Real>("time_factor"))
 {
 }
 
@@ -42,5 +41,5 @@ RedbackThermalDiffusion::computeQpResidual()
 Real
 RedbackThermalDiffusion::computeQpJacobian()
 {
-  return _time_factor*_grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  return _time_factor * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }

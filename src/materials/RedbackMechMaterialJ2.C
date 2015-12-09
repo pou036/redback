@@ -12,24 +12,24 @@
 
 #include "RedbackMechMaterialJ2.h"
 
-template<>
-InputParameters validParams<RedbackMechMaterialJ2>()
+template <>
+InputParameters
+validParams<RedbackMechMaterialJ2>()
 {
   InputParameters params = validParams<RedbackMechMaterial>();
   return params;
 }
 
-RedbackMechMaterialJ2::RedbackMechMaterialJ2(const InputParameters & parameters) :
-    RedbackMechMaterial(parameters)
+RedbackMechMaterialJ2::RedbackMechMaterialJ2(const InputParameters & parameters) : RedbackMechMaterial(parameters)
 {
 }
-
 
 /**
  * Get unitary flow tensor in deviatoric direction, J2 plasticity. It only has a deviatoric part
  */
 void
-RedbackMechMaterialJ2::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor_dev)
+RedbackMechMaterialJ2::getFlowTensor(
+  const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor_dev)
 {
   RankTwoTensor sig_dev;
   Real val;
@@ -39,16 +39,14 @@ RedbackMechMaterialJ2::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, 
   if (q > 1e-8)
     val = 3.0 / (2.0 * q);
   flow_tensor_dev = sig_dev * val;
-  //flow_tensor_dev /= flow_tensor_dev.L2norm();
+  // flow_tensor_dev /= flow_tensor_dev.L2norm();
   // TODO: norm is actually sqrt(3/2)
 }
-
 
 Real
 RedbackMechMaterialJ2::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real yield_stress)
 {
-  return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) *
-      _exponential;
+  return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) * _exponential;
 }
 
 /**
@@ -58,15 +56,23 @@ Real
 RedbackMechMaterialJ2::getDerivativeFlowIncrement(const RankTwoTensor & sig, Real yield_stress)
 {
   // Derivative of getFlowIncrement with respect to equivalent stress
-  return _ref_pe_rate * _dt * _exponent * std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
+  return _ref_pe_rate * _dt * _exponent *
+         std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
 }
 
-//Jacobian for stress update algorithm
+// Jacobian for stress update algorithm
 void
-RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr_dev,
-        Real q, Real p, Real p_y, Real q_y, Real yield_stress, RankFourTensor & dresid_dsig)
+RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig,
+                              const RankFourTensor & E_ijkl,
+                              Real flow_incr_dev,
+                              Real q,
+                              Real p,
+                              Real p_y,
+                              Real q_y,
+                              Real yield_stress,
+                              RankFourTensor & dresid_dsig)
 {
-  unsigned i, j, k ,l;
+  unsigned i, j, k, l;
   RankTwoTensor sig_dev, flow_dirn_dev, fij;
   RankTwoTensor dfi_dft;
   RankFourTensor dft_dsig, dfd_dft, dfd_dsig, dfi_dsig;
@@ -84,7 +90,7 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig, const RankFourTensor & 
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dfi_dsig(i,j,k,l) = flow_dirn_dev(i,j) * flow_dirn_dev(k,l) * dfi_dseqv_dev; //d_flow_increment/d_sig
+          dfi_dsig(i, j, k, l) = flow_dirn_dev(i, j) * flow_dirn_dev(k, l) * dfi_dseqv_dev; // d_flow_increment/d_sig
 
   f1 = 0.0;
   f2 = 0.0;
@@ -101,10 +107,11 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig, const RankFourTensor & 
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dft_dsig(i,j,k,l) = f1 * deltaFunc(i,k) * deltaFunc(j,l) - f2 * deltaFunc(i,j) * deltaFunc(k,l) - f3 * sig_dev(i,j) * sig_dev(k,l); //d_flow_dirn/d_sig - 2nd part
+          dft_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) - f2 * deltaFunc(i, j) * deltaFunc(k, l) -
+                                 f3 * sig_dev(i, j) * sig_dev(k, l); // d_flow_dirn/d_sig - 2nd part
 
-  dfd_dsig = dft_dsig; //d_flow_dirn/d_sig
-  dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr_dev + dfi_dsig; //Jacobian
+  dfd_dsig = dft_dsig; // d_flow_dirn/d_sig
+  dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr_dev + dfi_dsig; // Jacobian
 }
 
 void

@@ -19,9 +19,8 @@
 
 class RedbackChemPressure;
 
-template<>
+template <>
 InputParameters validParams<RedbackChemPressure>();
-
 
 class RedbackChemPressure : public Kernel
 {
@@ -34,7 +33,7 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
- // VariableValue &_temp;
+  // VariableValue &_temp;
   const MaterialProperty<Real> & _chemical_source_mass;
   const MaterialProperty<Real> & _chemical_source_mass_jac;
 
@@ -43,6 +42,5 @@ protected:
 private:
   Real _time_factor;
 };
-
 
 #endif /* REDBACKCHEMPRESSURE_H */
