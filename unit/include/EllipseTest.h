@@ -15,7 +15,7 @@
 #ifndef ELLIPSETEST_H
 #define ELLIPSETEST_H
 
-//CPPUnit includes
+// CPPUnit includes
 #include "cppunit/extensions/HelperMacros.h"
 
 // Moose includes
@@ -24,20 +24,20 @@
 class EllipseTest : public CppUnit::TestFixture
 {
 
-  CPPUNIT_TEST_SUITE( EllipseTest );
+  CPPUNIT_TEST_SUITE(EllipseTest);
 
-  CPPUNIT_TEST( distanceCCTestCircle );
-  CPPUNIT_TEST( distanceCCTestMajorAxisHorizontal );
-  CPPUNIT_TEST( distanceCCTestMajorAxisVertical );
-  CPPUNIT_TEST( isPointOutsideOfEllipseTestCircle );
-  CPPUNIT_TEST( isPointOutsideOfEllipseTestMajorAxisHorizontal );
-  CPPUNIT_TEST( isPointOutsideOfEllipseTestMajorAxisVertical );
-  CPPUNIT_TEST( distanceCCanisotropicTestMajorAxisHorizontal );
-  CPPUNIT_TEST( distanceCCanisotropicTestMajorAxisVertical );
-  CPPUNIT_TEST( rotatePointTest );
-  CPPUNIT_TEST( getDafaliasEllipseAxesAndCentreTest );
-  CPPUNIT_TEST( isPointOutsideOfRotatedEllipseTestMajorAxisHorizontal );
-  CPPUNIT_TEST( isPointOutsideOfRotatedEllipseTestMajorAxisVertical );
+  CPPUNIT_TEST(distanceCCTestCircle);
+  CPPUNIT_TEST(distanceCCTestMajorAxisHorizontal);
+  CPPUNIT_TEST(distanceCCTestMajorAxisVertical);
+  CPPUNIT_TEST(isPointOutsideOfEllipseTestCircle);
+  CPPUNIT_TEST(isPointOutsideOfEllipseTestMajorAxisHorizontal);
+  CPPUNIT_TEST(isPointOutsideOfEllipseTestMajorAxisVertical);
+  CPPUNIT_TEST(distanceCCanisotropicTestMajorAxisHorizontal);
+  CPPUNIT_TEST(distanceCCanisotropicTestMajorAxisVertical);
+  CPPUNIT_TEST(rotatePointTest);
+  CPPUNIT_TEST(getDafaliasEllipseAxesAndCentreTest);
+  CPPUNIT_TEST(isPointOutsideOfRotatedEllipseTestMajorAxisHorizontal);
+  CPPUNIT_TEST(isPointOutsideOfRotatedEllipseTestMajorAxisVertical);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -57,7 +57,6 @@ public:
   void isPointOutsideOfEllipseTestMajorAxisVertical();
   void isPointOutsideOfRotatedEllipseTestMajorAxisHorizontal();
   void isPointOutsideOfRotatedEllipseTestMajorAxisVertical();
-
 };
 
-#endif  // ELLIPSETEST_H
+#endif // ELLIPSETEST_H

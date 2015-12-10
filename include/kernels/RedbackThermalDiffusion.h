@@ -19,9 +19,8 @@
 
 class RedbackThermalDiffusion;
 
-template<>
+template <>
 InputParameters validParams<RedbackThermalDiffusion>();
-
 
 class RedbackThermalDiffusion : public Kernel
 {
@@ -36,6 +35,5 @@ protected:
 private:
   Real _time_factor;
 };
-
 
 #endif /* REDBACKTHERMALDIFFUSION_H */

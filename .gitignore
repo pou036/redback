@@ -182,3 +182,5 @@ problems/Oka/best_matches
 problems/Oka/results
 RedbackMechMaterial2.h
 RedbackMechMaterial2.C
+*.h_backup
+*.C_backup

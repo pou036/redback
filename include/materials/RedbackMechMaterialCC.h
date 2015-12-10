@@ -17,10 +17,10 @@
 
 #include "RedbackMechMaterial.h"
 
-//Forward Declarations
+// Forward Declarations
 class RedbackMechMaterialCC;
 
-template<>
+template <>
 InputParameters validParams<RedbackMechMaterialCC>();
 
 class RedbackMechMaterialCC : public RedbackMechMaterial
@@ -29,7 +29,7 @@ public:
   RedbackMechMaterialCC(const InputParameters & parameters);
 
 protected:
-  Real _slope_yield_surface;  // coefficient for yield surface
+  Real _slope_yield_surface; // coefficient for yield surface
 
   void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
   void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
@@ -38,4 +38,4 @@ protected:
   Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real);
 };
 
-#endif //REDBACKMECHMATERIALCC_H
+#endif // REDBACKMECHMATERIALCC_H

@@ -5,7 +5,7 @@
 
 class RedbackApp;
 
-template<>
+template <>
 InputParameters validParams<RedbackApp>();
 
 class RedbackApp : public MooseApp

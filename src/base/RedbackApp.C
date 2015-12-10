@@ -57,16 +57,15 @@
 // AuxKernels
 #include "RedbackTotalPorosityAux.h"
 
-
-template<>
-InputParameters validParams<RedbackApp>()
+template <>
+InputParameters
+validParams<RedbackApp>()
 {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-RedbackApp::RedbackApp(InputParameters parameters) :
-    MooseApp(parameters)
+RedbackApp::RedbackApp(InputParameters parameters) : MooseApp(parameters)
 {
   srand(processor_id());
 
@@ -86,18 +85,18 @@ RedbackApp::~RedbackApp()
 void
 RedbackApp::registerApps()
 {
-  #undef  registerApp
-  #define registerApp(name) AppFactory::instance().reg<name>(#name)
+#undef registerApp
+#define registerApp(name) AppFactory::instance().reg<name>(#name)
   registerApp(RedbackApp);
-  #undef  registerApp
-  #define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
+#undef registerApp
+#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
 }
 
 void
 RedbackApp::registerObjects(Factory & factory)
 {
-  #undef registerObject
-  #define registerObject(name) factory.reg<name>(stringifyName(name))
+#undef registerObject
+#define registerObject(name) factory.reg<name>(stringifyName(name))
   registerBoundaryCondition(FunctionDirichletTransverseBC);
 
   registerInitialCondition(FunctionWithRandomIC);
@@ -123,23 +122,22 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
 
-
   registerExecutioner(ReturnMapIterDT);
 
   registerAux(RedbackTotalPorosityAux);
-  #undef registerObject
-  #define registerObject(name) factory.regLegacy<name>(stringifyName(name))
+#undef registerObject
+#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
 
 void
 RedbackApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-  #undef registerAction
-  #define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
+#undef registerAction
+#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
   syntax.registerActionSyntax("RedbackMechAction", "RedbackMechAction/*");
   registerAction(RedbackMechAction, "add_kernel");
-  //syntax.registerActionSyntax("RedbackAction", "RedbackAction/*");
-  //registerAction(RedbackMechAction, "add_aux_variable");
-  #undef registerAction
-  #define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
+// syntax.registerActionSyntax("RedbackAction", "RedbackAction/*");
+// registerAction(RedbackMechAction, "add_aux_variable");
+#undef registerAction
+#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
 }

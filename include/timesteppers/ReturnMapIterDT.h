@@ -20,7 +20,7 @@
 
 class ReturnMapIterDT;
 
-template<>
+template <>
 InputParameters validParams<ReturnMapIterDT>();
 
 /**
@@ -29,9 +29,7 @@ InputParameters validParams<ReturnMapIterDT>();
  * supplied ratio. If the value is below a lower threshold the time step is
  * increased by 1/ratio.
  **/
-class ReturnMapIterDT :
-    public TimeStepper,
-    public PostprocessorInterface
+class ReturnMapIterDT : public TimeStepper, public PostprocessorInterface
 {
 public:
   ReturnMapIterDT(const InputParameters & parameters);
@@ -49,6 +47,5 @@ protected:
   Real _dt_min;
   Real _dt_max;
 };
-
 
 #endif /* RETURNMAPITERDT_H */
