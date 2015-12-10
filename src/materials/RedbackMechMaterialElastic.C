@@ -12,8 +12,9 @@
 
 #include "RedbackMechMaterialElastic.h"
 
-template<>
-InputParameters validParams<RedbackMechMaterialElastic>()
+template <>
+InputParameters
+validParams<RedbackMechMaterialElastic>()
 {
   InputParameters params = validParams<RedbackMechMaterial>();
   return params;
@@ -25,14 +26,21 @@ RedbackMechMaterialElastic::RedbackMechMaterialElastic(const InputParameters & p
 }
 
 void
-RedbackMechMaterialElastic::returnMap(const RankTwoTensor & sig_old, const RankTwoTensor & delta_d, const RankFourTensor & E_ijkl, RankTwoTensor & dp, RankTwoTensor & sig, Real & p_y, Real & q_y)
+RedbackMechMaterialElastic::returnMap(const RankTwoTensor & sig_old,
+                                      const RankTwoTensor & delta_d,
+                                      const RankFourTensor & E_ijkl,
+                                      RankTwoTensor & dp,
+                                      RankTwoTensor & sig,
+                                      Real & p_y,
+                                      Real & q_y)
 {
   sig = sig_old + E_ijkl * delta_d;
-  dp = RankTwoTensor(); //Plastic rate of deformation tensor in unrotated configuration
+  dp = RankTwoTensor(); // Plastic rate of deformation tensor in unrotated configuration
 }
 
 void
-RedbackMechMaterialElastic::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor_dev)
+RedbackMechMaterialElastic::getFlowTensor(
+  const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor_dev)
 {
 }
 
@@ -43,8 +51,15 @@ RedbackMechMaterialElastic::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Rea
 }
 
 void
-RedbackMechMaterialElastic::getJac(const RankTwoTensor & sig, const RankFourTensor & E_ijkl, Real flow_incr_dev,
-        Real q, Real p, Real p_y, Real q_y, Real yield_stress, RankFourTensor & dresid_dsig)
+RedbackMechMaterialElastic::getJac(const RankTwoTensor & sig,
+                                   const RankFourTensor & E_ijkl,
+                                   Real flow_incr_dev,
+                                   Real q,
+                                   Real p,
+                                   Real p_y,
+                                   Real q_y,
+                                   Real yield_stress,
+                                   RankFourTensor & dresid_dsig)
 {
 }
 

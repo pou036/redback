@@ -9,11 +9,11 @@
 
 #include "PresetNodalBC.h"
 
-//Forward Declarations
+// Forward Declarations
 class FunctionDirichletTransverseBC;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionDirichletTransverseBC>();
 
 /**

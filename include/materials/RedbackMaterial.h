@@ -18,11 +18,10 @@
 //#include "FiniteStrainPlasticMaterial.h"
 #include "Material.h"
 
-
-//Forward Declarations
+// Forward Declarations
 class RedbackMaterial;
 
-template<>
+template <>
 InputParameters validParams<RedbackMaterial>();
 
 class RedbackMaterial : public Material
@@ -56,7 +55,7 @@ protected:
   bool _has_T;
   VariableValue & _T;
   bool _has_pore_pres;
-  VariableValue & _pore_pres;//, & _pore_pres_old;
+  VariableValue & _pore_pres; //, & _pore_pres_old;
   VariableValue & _total_porosity;
   VariableValue & _inverse_lewis_number_tilde;
 
@@ -67,9 +66,12 @@ protected:
   int _num_init_functions;
 
   Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param;
-  Real _confining_pressure_param, _biot_coeff_param, _alpha_1_param, _alpha_2_param, _alpha_3_param, _peclet_number_param; //_ar_c_param, _da_param, _mu_param,
-  Real  _ar_F_param, _ar_R_param, _da_endo_param, _da_exo_param, _mu_param, _Kc_param, _eta1_param, _eta2_param, _Aphi_param, _pressurization_coefficient_param;
-  Real _solid_compressibility_param, _fluid_compressibility_param, _solid_thermal_expansion_param, _fluid_thermal_expansion_param, _solid_density_param, _fluid_density_param;
+  Real _confining_pressure_param, _biot_coeff_param, _alpha_1_param, _alpha_2_param, _alpha_3_param,
+    _peclet_number_param; //_ar_c_param, _da_param, _mu_param,
+  Real _ar_F_param, _ar_R_param, _da_endo_param, _da_exo_param, _mu_param, _Kc_param, _eta1_param, _eta2_param,
+    _Aphi_param, _pressurization_coefficient_param;
+  Real _solid_compressibility_param, _fluid_compressibility_param, _solid_thermal_expansion_param,
+    _fluid_thermal_expansion_param, _solid_density_param, _fluid_density_param;
   bool _is_mechanics_on, _is_chemistry_on, _are_convective_terms_on;
 
   RealVectorValue _gravity_param;
@@ -109,17 +111,17 @@ protected:
 
   MaterialProperty<RealVectorValue> & _thermal_convective_mass;
   MaterialProperty<RealVectorValue> & _pressure_convective_mass;
-  //MaterialProperty<RealVectorValue> & _convective_mass_jac_vec;
-  //MaterialProperty<Real> & _convective_mass_jac_real;
-  //MaterialProperty<RealVectorValue> & _convective_mass_off_diag_vec;
-  //MaterialProperty<Real> & _convective_mass_off_diag_real;
+  // MaterialProperty<RealVectorValue> & _convective_mass_jac_vec;
+  // MaterialProperty<Real> & _convective_mass_jac_real;
+  // MaterialProperty<RealVectorValue> & _convective_mass_off_diag_vec;
+  // MaterialProperty<Real> & _convective_mass_off_diag_real;
   MaterialProperty<RealVectorValue> & _mixture_convective_energy;
-  //MaterialProperty<Real> & _mixture_convective_energy_jac;
-  //MaterialProperty<Real> & _mixture_convective_energy_off_jac;
+  // MaterialProperty<Real> & _mixture_convective_energy_jac;
+  // MaterialProperty<Real> & _mixture_convective_energy_off_jac;
 
   MaterialProperty<RealVectorValue> & _fluid_velocity;
-  MaterialProperty<Real> & _solid_compressibility; // \bar(\beta_s)/\sigma_{ref}
-  MaterialProperty<Real> & _fluid_compressibility; // \bar(\beta_f)/\sigma_{ref}
+  MaterialProperty<Real> & _solid_compressibility;   // \bar(\beta_s)/\sigma_{ref}
+  MaterialProperty<Real> & _fluid_compressibility;   // \bar(\beta_f)/\sigma_{ref}
   MaterialProperty<Real> & _solid_thermal_expansion; // \bar(\lambda_s)/ \delta T_ref
   MaterialProperty<Real> & _fluid_thermal_expansion; // \bar(\lambda_f)/delta T_ref
 
@@ -135,9 +137,9 @@ protected:
 
   MaterialProperty<Real> & _pressurization_coefficient;
 
-  VariableGradient& _grad_temp;
-  VariableGradient& _grad_pore_pressure;
-  //VariableSecond& _grad_grad_pore_pressure;
+  VariableGradient & _grad_temp;
+  VariableGradient & _grad_pore_pressure;
+  // VariableSecond& _grad_grad_pore_pressure;
 
   VariableValue & _dispx_dot;
   VariableValue & _dispy_dot;
@@ -145,7 +147,6 @@ protected:
   MaterialProperty<RealVectorValue> & _solid_velocity;
 
   Real _T0_param, _P0_param;
-
 };
 
-#endif //REDBACKMATERIAL_H
+#endif // REDBACKMATERIAL_H

@@ -5,12 +5,12 @@
 #include "ElasticityTensorR4.h"
 #include "RankTwoTensor.h"
 
-//Forward Declarations
+// Forward Declarations
 class RedbackStressDivergenceTensors;
 class ElasticityTensorR4;
 class RankTwoTensor;
 
-template<>
+template <>
 InputParameters validParams<RedbackStressDivergenceTensors>();
 
 /**
@@ -30,7 +30,6 @@ protected:
 
   VariableValue & _pore_pres;
   RealVectorValue _poromech_stress_row;
-
 
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
@@ -56,4 +55,4 @@ private:
   const MaterialProperty<RealVectorValue> & _gravity_term;
 };
 
-#endif //REDBACKSTRESSDIVERGENCETENSORS_H
+#endif // REDBACKSTRESSDIVERGENCETENSORS_H

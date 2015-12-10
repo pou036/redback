@@ -19,9 +19,8 @@
 
 class RedbackChemExo;
 
-template<>
+template <>
 InputParameters validParams<RedbackChemExo>();
-
 
 class RedbackChemExo : public Kernel
 {
@@ -39,6 +38,5 @@ protected:
 private:
   Real _time_factor;
 };
-
 
 #endif /* REDBACKCHEMEXO_H */

@@ -14,8 +14,9 @@
 
 #include "ReturnMapIterDT.h"
 
-template<>
-InputParameters validParams<ReturnMapIterDT>()
+template <>
+InputParameters
+validParams<ReturnMapIterDT>()
 {
   InputParameters params = validParams<TimeStepper>();
   params.addRequiredParam<PostprocessorName>("postprocessor", "This has to be an ElementExtremeValue postprocessor.");
