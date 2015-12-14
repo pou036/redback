@@ -1,22 +1,20 @@
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*              (c) 2014 CSIRO and UNSW Australia               */
 /*                   ALL RIGHTS RESERVED                        */
 /*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
+/*            Prepared by CSIRO and UNSW Australia              */
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
 #include "RedbackThermalDiffusion.h"
 
-
-template<>
-InputParameters validParams<RedbackThermalDiffusion>()
+template <>
+InputParameters
+validParams<RedbackThermalDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
@@ -26,8 +24,7 @@ InputParameters validParams<RedbackThermalDiffusion>()
 }
 
 RedbackThermalDiffusion::RedbackThermalDiffusion(const InputParameters & parameters) :
-  Kernel(parameters),
-  _time_factor(getParam<Real>("time_factor"))
+    Kernel(parameters), _time_factor(getParam<Real>("time_factor"))
 {
 }
 
@@ -44,5 +41,5 @@ RedbackThermalDiffusion::computeQpResidual()
 Real
 RedbackThermalDiffusion::computeQpJacobian()
 {
-  return _time_factor*_grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  return _time_factor * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }

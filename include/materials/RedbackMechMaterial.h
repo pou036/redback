@@ -22,10 +22,10 @@
 #include "RotationTensor.h"
 //#include "FiniteStrainPlasticMaterial.h"
 
-//Forward Declarations
+// Forward Declarations
 class RedbackMechMaterial;
 
-template<>
+template <>
 InputParameters validParams<RedbackMechMaterial>();
 
 /**
@@ -36,6 +36,16 @@ class RedbackMechMaterial : public Material
 {
 public:
   RedbackMechMaterial(const InputParameters & parameters);
+
+  static MooseEnum damageMethodEnum();
+  enum DamageMethod
+  {
+    BrittleDamage,
+    CreepDamage,
+    BreakageMechanics,
+    DamageHealing,
+    FromMultiApp
+  };
 
 protected:
   // Copy-paste from TensorMechanicsMaterial.h
@@ -66,12 +76,12 @@ protected:
   ElasticityTensorR4 _Cijkl;
 
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
-  //RankTwoTensor _strain_increment;
+  // RankTwoTensor _strain_increment;
 
   /// Current deformation gradient
-  //RankTwoTensor _dfgrd;
+  // RankTwoTensor _dfgrd;
 
-  //VariableValue & _T;
+  // VariableValue & _T;
 
   // Copy-paste from FiniteStrainMaterial.h
   MaterialProperty<RankTwoTensor> & _strain_rate;
@@ -89,18 +99,25 @@ protected:
   MaterialProperty<Real> & _eqv_plastic_strain;
   MaterialProperty<Real> & _eqv_plastic_strain_old;
 
-  //virtual Real yieldFunction(const RankTwoTensor & stress, const Real yield_stress);
+  // virtual Real yieldFunction(const RankTwoTensor & stress, const Real yield_stress);
   Real getSigEqv(const RankTwoTensor & stress);
   Real deltaFunc(unsigned int i, unsigned int j);
   Real getYieldStress(const Real equivalent_plastic_strain);
 
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
-  virtual void returnMap(const RankTwoTensor &, const RankTwoTensor &, const RankFourTensor &, RankTwoTensor &, RankTwoTensor &, Real &, Real &);
+  virtual void returnMap(const RankTwoTensor &,
+                         const RankTwoTensor &,
+                         const RankFourTensor &,
+                         RankTwoTensor &,
+                         RankTwoTensor &,
+                         Real &,
+                         Real &);
   // The following functions are needed in the return map, but the definition
   // is dependant on the yield criterion. Therefore we define them as abstract
   // virtual functions here such that no implementation is needed in
   // RedbackMechMaterial.C
-  virtual void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) = 0;
+  virtual void
+  getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) = 0;
   virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &) = 0;
   virtual Real getFlowIncrement(Real, Real, Real, Real, Real) = 0;
   virtual void get_py_qy(Real, Real, Real &, Real &, Real) = 0;
@@ -125,22 +142,31 @@ protected:
   MaterialProperty<Real> & _mod_gruntfest_number;
   MaterialProperty<Real> & _mechanical_dissipation_mech;
   MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
-  Real _exponential;
-  //VariableValue & _dispx_dot;
-  //VariableValue & _dispy_dot;
-  //VariableValue & _dispz_dot;
+  MaterialProperty<Real> & _damage_kernel;
+  MaterialProperty<Real> & _damage_kernel_jac;
+  Real _damage_coeff, _healing_coeff;
 
-  //MaterialProperty<RealVectorValue> & _solid_velocity;
+  Real _exponential;
+  // VariableValue & _dispx_dot;
+  // VariableValue & _dispy_dot;
+  // VariableValue & _dispz_dot;
+
+  // MaterialProperty<RealVectorValue> & _solid_velocity;
 
   // Using variables
   bool _has_T;
-  VariableValue & _T, & _T_old;
+  VariableValue &_T, &_T_old;
   bool _has_pore_pres;
   VariableValue & _pore_pres;
   VariableValue & _total_porosity;
+  bool _has_D;
+  VariableValue &_damage, &_damage_old;
+
+  DamageMethod _damage_method;
 
   // Reading material properties from RedbackMaterial
   const MaterialProperty<Real> & _gr;
+  const MaterialProperty<Real> & _lewis_number;
   const MaterialProperty<Real> & _ar;
   const MaterialProperty<Real> & _confining_pressure;
   const MaterialProperty<Real> & _alpha_1;
@@ -157,6 +183,12 @@ protected:
   Real _T0_param, _P0_param;
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
+  virtual void get_py_qy_damaged(Real, Real, Real &, Real &, Real);
+  virtual void form_damage_kernels(Real);
+
+  virtual void formDamageDissipation(RankTwoTensor &);
+
+  Real _damage_dissipation;
 };
 
-#endif //REDBACKMECHMATERIAL_H
+#endif // REDBACKMECHMATERIAL_H

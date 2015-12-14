@@ -24,7 +24,7 @@ y1 = -1.5; // arbitrary point at (0,y1) to densify mesh
 
 /****** Mesh parameters *********/
 lc1 = 0.05; // mesh characteristic length where pressure is applied
-lc2 = 1; // mesh characteristic length elsewhere
+lc2 = 0.7; // mesh characteristic length elsewhere
 /***********************************************/
 
 

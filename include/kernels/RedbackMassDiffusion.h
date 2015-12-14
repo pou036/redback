@@ -19,9 +19,8 @@
 
 class RedbackMassDiffusion;
 
-template<>
+template <>
 InputParameters validParams<RedbackMassDiffusion>();
-
 
 class RedbackMassDiffusion : public Kernel
 {
@@ -33,7 +32,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-//  VariableValue & _T;
+  //  VariableValue & _T;
 
   const MaterialProperty<Real> & _Le;
   const MaterialProperty<RealVectorValue> & _gravity_term;
@@ -41,6 +40,5 @@ protected:
 private:
   Real _time_factor;
 };
-
 
 #endif /* REDBACKMASSDIFFUSION_H */

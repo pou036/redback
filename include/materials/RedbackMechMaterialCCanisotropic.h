@@ -17,10 +17,10 @@
 
 #include "RedbackMechMaterialCC.h"
 
-//Forward Declarations
+// Forward Declarations
 class RedbackMechMaterialCCanisotropic;
 
-template<>
+template <>
 InputParameters validParams<RedbackMechMaterialCCanisotropic>();
 
 class RedbackMechMaterialCCanisotropic : public RedbackMechMaterialCC
@@ -31,7 +31,7 @@ public:
 protected:
   Real _initial_anisotropy_param; // Initial coefficient alpha of anisotropy (Dafalias 2013)
 
-  MaterialProperty<Real> & _anisotropy_coeff;// current coefficient alpha of anisotropy (Dafalias 2013)
+  MaterialProperty<Real> & _anisotropy_coeff; // current coefficient alpha of anisotropy (Dafalias 2013)
 
   virtual void stepInitQpProperties();
   void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
@@ -41,4 +41,4 @@ protected:
   Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real);
 };
 
-#endif //REDBACKMECHMATERIALCCANISOTROPIC_H
+#endif // REDBACKMECHMATERIALCCANISOTROPIC_H

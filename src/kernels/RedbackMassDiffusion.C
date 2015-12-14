@@ -1,22 +1,20 @@
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*              (c) 2014 CSIRO and UNSW Australia               */
 /*                   ALL RIGHTS RESERVED                        */
 /*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
+/*            Prepared by CSIRO and UNSW Australia              */
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
 #include "RedbackMassDiffusion.h"
 
-
-template<>
-InputParameters validParams<RedbackMassDiffusion>()
+template <>
+InputParameters
+validParams<RedbackMassDiffusion>()
 {
   InputParameters params = validParams<Kernel>();
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
@@ -26,10 +24,10 @@ InputParameters validParams<RedbackMassDiffusion>()
 }
 
 RedbackMassDiffusion::RedbackMassDiffusion(const InputParameters & parameters) :
-  Kernel(parameters),
-  _Le(getMaterialProperty<Real>("lewis_number")),
-  _gravity_term(getMaterialProperty<RealVectorValue>("fluid_gravity_term")),
-  _time_factor(getParam<Real>("time_factor"))
+    Kernel(parameters),
+    _Le(getMaterialProperty<Real>("lewis_number")),
+    _gravity_term(getMaterialProperty<RealVectorValue>("fluid_gravity_term")),
+    _time_factor(getParam<Real>("time_factor"))
 {
 }
 
@@ -40,11 +38,11 @@ RedbackMassDiffusion::~RedbackMassDiffusion()
 Real
 RedbackMassDiffusion::computeQpResidual()
 {
-  return (_time_factor/_Le[_qp]) * (_grad_u[_qp] - _gravity_term[_qp]) * _grad_test[_i][_qp];
+  return (_time_factor / _Le[_qp]) * (_grad_u[_qp] - _gravity_term[_qp]) * _grad_test[_i][_qp];
 }
 
 Real
 RedbackMassDiffusion::computeQpJacobian()
 {
-  return (_time_factor/_Le[_qp])*_grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  return (_time_factor / _Le[_qp]) * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }
