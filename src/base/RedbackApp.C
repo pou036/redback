@@ -51,7 +51,7 @@
 #include "RedbackMechMaterialCC.h"
 #include "RedbackMechMaterialCCanisotropic.h"
 #include "RedbackMechMaterialElastic.h"
-#include "RedbackMaterialElasticVarDiff.h""
+#include "RedbackMaterialElasticVarDiff.h"
 
 // Timesteppers
 #include "ReturnMapIterDT.h"
