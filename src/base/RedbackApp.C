@@ -12,6 +12,7 @@
 // Main Application
 #include "RedbackApp.h"
 #include "Moose.h"
+#include "MooseSyntax.h"
 #include "AppFactory.h"
 #include "ActionFactory.h"
 
