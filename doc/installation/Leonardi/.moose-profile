@@ -1,0 +1,10 @@
+set base_path   ~/moose-compilers
+
+export CC=mpicc
+export CXX=mpicxx
+export F90=mpif90
+export F77=mpif77
+export FC=mpif90
+
+export ARCH=gcc
+export PETSC_DIR=$PACKAGES_DIR/petsc/petsc-3.6.0/$ARCH-opt

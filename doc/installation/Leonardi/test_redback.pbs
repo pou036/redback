@@ -1,0 +1,42 @@
+#!/bin/bash
+
+## this is a sample file for running a job using Redback
+
+# submit using "qsub test.pbs"
+
+# Lines starting with "#PBS" are directives to the scheduler
+
+# Job name -- something meaningful to you
+#PBS -N test-redback
+
+# Job attributes, used by the scheduler
+#PBS -l walltime=00:01:00
+#PBS -l vmem=1gb
+#PBS -l nodes=1:ppn=2
+
+## Comment out to use automatic assignment to best-fit queue
+#PBS -q debug
+
+# Specify output files to go somewhere sensible
+##PBS -o ~/test_redback.out
+##PBS -e ~/test_redback.err
+
+# Set up mail notifications
+##PBS -M email
+#PBS -m abe
+
+# The job proper start here
+# This will normally invoke whatever program you are planning to run
+
+echo "starting:" `date`
+echo "    host:" `hostname`
+echo "  loading modules"
+export PACKAGES_DIR=~/moose-compilers
+export MODULEPATH=$MODULEPATH:$PACKAGES_DIR/modulefiles
+module load rocks-openmpi
+module load opt-python
+module load moose-dev-gcc
+
+cd ~/projects/redback/tests/benchmark_11_THMC
+mpirun -n $PBS_NUM_PPN ~/projects/redback/redback-opt -i bench_THMC_CC.i
+echo "  ending:" `date`
