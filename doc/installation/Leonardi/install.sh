@@ -99,8 +99,8 @@ scripts/update_and_rebuild_libmesh.sh
 
 printf "\n\n**** step 4: moose build and tests ****\n\n"
 cd ~/projects/moose/test
-make $NUM_PROC
-./run_tests $NUM_PROC
+make -j$NUM_PROC
+./run_tests -j$NUM_PROC
 #TODO: pipe the results; make sure it says "0 failed"
 
 printf "\n\n**** step 5: redback ****\n\n"
@@ -109,8 +109,8 @@ cd ~/projects
 git clone https://github.com/pou036/redback
 cd ~/projects/redback
 git checkout master
-make $NUM_PROC
-./run_tests $NUM_PROC
+make -j$NUM_PROC
+./run_tests -j$NUM_PROC
 #TODO: pipe the results; make sure it says "0 failed"
 
 echo "ended:" `date`
