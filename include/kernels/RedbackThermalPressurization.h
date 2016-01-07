@@ -19,7 +19,7 @@
 
 class RedbackThermalPressurization;
 
-template<>
+template <>
 InputParameters validParams<RedbackThermalPressurization>();
 
 /**
@@ -45,6 +45,5 @@ protected:
 private:
   Real _time_factor;
 };
-
 
 #endif /* REDBACKTHERMALPRESSURIZATION_H */

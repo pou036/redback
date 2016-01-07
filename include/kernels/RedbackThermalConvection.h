@@ -6,9 +6,10 @@
 class RedbackThermalConvection : public Kernel
 {
 public:
-
   RedbackThermalConvection(const InputParameters & parameters);
-  virtual ~RedbackThermalConvection() {}
+  virtual ~RedbackThermalConvection()
+  {
+  }
 
 protected:
   virtual Real computeQpResidual();
@@ -16,8 +17,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   const MaterialProperty<RealVectorValue> & _mixture_convective_energy;
-  //MaterialProperty<Real> & _mixture_convective_energy_jac;
-  //MaterialProperty<Real> & _mixture_convective_energy_off_jac;
+  // MaterialProperty<Real> & _mixture_convective_energy_jac;
+  // MaterialProperty<Real> & _mixture_convective_energy_off_jac;
 
   unsigned int _pore_pres_var; // variable number of the pore pressure variable
 
@@ -25,7 +26,7 @@ private:
   Real _time_factor;
 };
 
-template<>
+template <>
 InputParameters validParams<RedbackThermalConvection>();
 
-#endif //REDBACKTHERMALCONVECTION_H
+#endif // REDBACKTHERMALCONVECTION_H

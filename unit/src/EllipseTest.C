@@ -14,13 +14,15 @@
 
 #include "EllipseTest.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION( EllipseTest );
+CPPUNIT_TEST_SUITE_REGISTRATION(EllipseTest);
 
 EllipseTest::EllipseTest()
-{}
+{
+}
 
 EllipseTest::~EllipseTest()
-{}
+{
+}
 
 /**
  * Testing Ellipse::isPointOutsideOfEllipse
@@ -111,8 +113,6 @@ EllipseTest::isPointOutsideOfEllipseTestCircle()
   CPPUNIT_ASSERT(r == false);
   r = Ellipse::isPointOutsideOfEllipse(/*m=*/1.0, /*p_c=*/-3.0, /*x=*/-1.5, /*y=*/2.0);
   CPPUNIT_ASSERT(r == true);
-
-  //std::cout << "is point outside ellipse? " << r << std::endl << std::endl;
 }
 
 /**
@@ -204,8 +204,6 @@ EllipseTest::isPointOutsideOfEllipseTestMajorAxisHorizontal()
   CPPUNIT_ASSERT(r == false);
   r = Ellipse::isPointOutsideOfEllipse(/*m=*/0.5, /*p_c=*/-3.0, /*x=*/-1.5, /*y=*/2.0);
   CPPUNIT_ASSERT(r == true);
-
-  //std::cout << "is point outside ellipse? " << r << std::endl << std::endl;
 }
 
 /**
@@ -297,8 +295,6 @@ EllipseTest::isPointOutsideOfEllipseTestMajorAxisVertical()
   CPPUNIT_ASSERT(r == false);
   r = Ellipse::isPointOutsideOfEllipse(/*m=*/1.5, /*p_c=*/-3.0, /*x=*/-1.5, /*y=*/2.5);
   CPPUNIT_ASSERT(r == true);
-
-  //std::cout << "is point outside ellipse? " << r << std::endl << std::endl;
 }
 
 /**
@@ -313,24 +309,24 @@ EllipseTest::distanceCCTestCircle()
   // Case: circle, p_c < 0
   // top right quadrant
   d = Ellipse::distanceCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/1.5, /*y1=*/3.0, x2, y2);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(3*std::sqrt(2) - 1.5, d, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5/std::sqrt(2) - 1.5, x2, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5/std::sqrt(2), y2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(3 * std::sqrt(2) - 1.5, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2) - 1.5, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y2, 1e-5);
   // top left quadrant
   d = Ellipse::distanceCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/-4.5, /*y1=*/3.0, x2, y2);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(3*std::sqrt(2) - 1.5, d, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5/std::sqrt(2) - 1.5, x2, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5/std::sqrt(2), y2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(3 * std::sqrt(2) - 1.5, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5 / std::sqrt(2) - 1.5, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y2, 1e-5);
   // bottom right quadrant
   d = Ellipse::distanceCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/1.5, /*y1=*/-3.0, x2, y2);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(3*std::sqrt(2) - 1.5, d, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5/std::sqrt(2) - 1.5, x2, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5/std::sqrt(2), y2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(3 * std::sqrt(2) - 1.5, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2) - 1.5, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5 / std::sqrt(2), y2, 1e-5);
   // bottom left quadrant
   d = Ellipse::distanceCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/-4.5, /*y1=*/-3.0, x2, y2);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(3*std::sqrt(2) - 1.5, d, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5/std::sqrt(2) - 1.5, x2, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5/std::sqrt(2), y2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(3 * std::sqrt(2) - 1.5, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5 / std::sqrt(2) - 1.5, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5 / std::sqrt(2), y2, 1e-5);
   // on horizontal axis, left hand side of ellipse
   d = Ellipse::distanceCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/-4.0, /*y1=*/0.0, x2, y2);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, d, 1e-5);
@@ -351,10 +347,6 @@ EllipseTest::distanceCCTestCircle()
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.5, d, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5, x2, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5, y2, 1e-5);
-
-  /*std::cout << "distance to the ellipse: " << d << std::endl;
-  std::cout << "projection point on ellipse: coord(0)=" << x2 << std::endl;
-  std::cout << "projection point on ellipse: coord(0)=" << y2 << std::endl;*/
 }
 
 /**
@@ -471,7 +463,7 @@ EllipseTest::distanceCCanisotropicTestMajorAxisHorizontal()
 {
   Real d, x2, y2;
 
-  d = Ellipse::distanceCCanisotropic(/*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/2.0, /*y1*/1.5, x2, y2);
+  d = Ellipse::distanceCCanisotropic(/*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/2.0, /*y1*/ 1.5, x2, y2);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.340201, d, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.731422, x2, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.291187, y2, 1e-5);
@@ -484,10 +476,17 @@ void
 EllipseTest::rotatePointTest()
 {
   Real z0, z1;
-  Ellipse::rotatePoint(/*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*forward=*/true, /*y0=*/2.0, /*y1*/1.5, z0, z1);
+  Ellipse::rotatePoint(/*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*forward=*/true, /*y0=*/2.0, /*y1*/ 1.5, z0, z1);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.47087, z0, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.72563, z1, 1e-5);
-  Ellipse::rotatePoint(/*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*forward=*/false, /*y0=*/1.47087101353638, /*y1*/-0.725629700011281, z0, z1);
+  Ellipse::rotatePoint(/*m=*/1.4,
+                       /*p_0=*/2.0,
+                       /*alpha=*/0.2,
+                       /*forward=*/false,
+                       /*y0=*/1.47087101353638,
+                       /*y1*/ -0.725629700011281,
+                       z0,
+                       z1);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, z0, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5, z1, 1e-5);
 }
@@ -499,14 +498,14 @@ void
 EllipseTest::getDafaliasEllipseAxesAndCentreTest()
 {
   Real horizontal_axis, vertical_axis, center_p, center_q;
-  Ellipse::getDafaliasEllipseAxesAndCentre(/*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, horizontal_axis, vertical_axis, center_p, center_q);
+  Ellipse::getDafaliasEllipseAxesAndCentre(
+    /*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, horizontal_axis, vertical_axis, center_p, center_q);
 
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.4142135, horizontal_axis, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.979796, vertical_axis, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, center_p, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.2, center_q, 1e-5);
 }
-
 
 /**
  * Testing Ellipse::distanceCCanisotropic
@@ -517,7 +516,7 @@ EllipseTest::distanceCCanisotropicTestMajorAxisVertical()
 {
   Real d, x2, y2;
 
-  d = Ellipse::distanceCCanisotropic(/*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/2.0, /*y1*/1.5, x2, y2);
+  d = Ellipse::distanceCCanisotropic(/*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/2.0, /*y1*/ 1.5, x2, y2);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.952959979, d, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.7821427634, x2, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.57227647, y2, 1e-5);
@@ -532,11 +531,11 @@ EllipseTest::isPointOutsideOfRotatedEllipseTestMajorAxisHorizontal()
 {
   bool r;
   Real d, x2, y2;
-  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/2.0, /*y1*/1.5);
+  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/2.0, /*y1*/ 1.5);
   CPPUNIT_ASSERT(r == true);
-  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.5, /*y1*/1.51);
+  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.5, /*y1*/ 1.51);
   CPPUNIT_ASSERT(r == true);
-  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.5, /*y1*/1.49);
+  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.5, /*y1*/ 1.49);
   CPPUNIT_ASSERT(r == false);
 }
 
@@ -549,14 +548,12 @@ EllipseTest::isPointOutsideOfRotatedEllipseTestMajorAxisVertical()
 {
   bool r;
   Real d, x2, y2;
-  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.53, /*y1*/0.0);
+  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.53, /*y1*/ 0.0);
   CPPUNIT_ASSERT(r == true);
-  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.49, /*y1*/0.0);
+  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.49, /*y1*/ 0.0);
   CPPUNIT_ASSERT(r == false);
-  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/0.5, /*y1*/0.41);
+  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/0.5, /*y1*/ 0.41);
   CPPUNIT_ASSERT(r == true);
-  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/0.5, /*y1*/0.39);
+  r = Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/0.5, /*y1*/ 0.39);
   CPPUNIT_ASSERT(r == false);
 }
-
-

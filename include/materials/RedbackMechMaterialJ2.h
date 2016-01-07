@@ -17,10 +17,10 @@
 
 #include "RedbackMechMaterial.h"
 
-//Forward Declarations
+// Forward Declarations
 class RedbackMechMaterialJ2;
 
-template<>
+template <>
 InputParameters validParams<RedbackMechMaterialJ2>();
 
 class RedbackMechMaterialJ2 : public RedbackMechMaterial
@@ -36,4 +36,4 @@ protected:
   Real getDerivativeFlowIncrement(const RankTwoTensor &, Real);
 };
 
-#endif //REDBACKMECHMATERIAL_H
+#endif // REDBACKMECHMATERIAL_H

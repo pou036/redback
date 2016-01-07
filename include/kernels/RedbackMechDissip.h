@@ -20,9 +20,8 @@
 
 class RedbackMechDissip;
 
-template<>
+template <>
 InputParameters validParams<RedbackMechDissip>();
-
 
 class RedbackMechDissip : public Kernel
 {
@@ -34,13 +33,12 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  //VariableValue & _pressure;
+  // VariableValue & _pressure;
   const MaterialProperty<Real> & _mechanical_dissipation;
   const MaterialProperty<Real> & _mechanical_dissipation_jac;
 
 private:
   Real _time_factor;
 };
-
 
 #endif /* REDBACKMECHDISSIP_H */

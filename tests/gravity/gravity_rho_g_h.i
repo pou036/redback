@@ -6,7 +6,7 @@
 # g = -9.81
 # E = 5e4
 # nu = 0.2
-# 
+#
 # expected output at the location of the postprocessor, which is at the center of the bottom cell (95% down the way):
 # K0 = E*nu/(E*(1-nu)) = 0.25
 # sigma_zz = rho * g * L = -9.81*0.95 = -9.3195

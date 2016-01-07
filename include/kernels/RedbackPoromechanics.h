@@ -19,7 +19,7 @@
 
 class RedbackPoromechanics;
 
-template<>
+template <>
 InputParameters validParams<RedbackPoromechanics>();
 
 /**
@@ -44,6 +44,5 @@ protected:
 private:
   Real _time_factor;
 };
-
 
 #endif /* REDBACKPOROMECHANICS_H */

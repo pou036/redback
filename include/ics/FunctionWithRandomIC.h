@@ -24,9 +24,12 @@
 // Forward Declarations
 class FunctionWithRandomIC;
 class Function;
-namespace libMesh { class Point; }
+namespace libMesh
+{
+class Point;
+}
 
-template<>
+template <>
 InputParameters validParams<FunctionWithRandomIC>();
 
 /**
@@ -35,7 +38,6 @@ InputParameters validParams<FunctionWithRandomIC>();
 class FunctionWithRandomIC : public InitialCondition
 {
 public:
-
   /**
    * Constructor
    *
@@ -43,7 +45,6 @@ public:
    * @param parameters The parameters object holding data for the class to use.
    */
   FunctionWithRandomIC(const InputParameters & parameters);
-
 
 protected:
   /**
@@ -55,7 +56,7 @@ protected:
    *
    * This must be overridden by derived classes.
    */
-  virtual Real value(const Point &p);
+  virtual Real value(const Point & p);
 
   Real _min;
   Real _max;
@@ -63,4 +64,4 @@ protected:
   Function & _func;
 };
 
-#endif //FUNCTIONWITHRANDOMIC_H
+#endif // FUNCTIONWITHRANDOMIC_H

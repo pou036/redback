@@ -1,21 +1,20 @@
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*              (c) 2014 CSIRO and UNSW Australia               */
 /*                   ALL RIGHTS RESERVED                        */
 /*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
+/*            Prepared by CSIRO and UNSW Australia              */
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
 #include "RedbackPoromechanics.h"
 
-template<>
-InputParameters validParams<RedbackPoromechanics>()
+template <>
+InputParameters
+validParams<RedbackPoromechanics>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("temperature", 0.0, "Temperature variable.");
