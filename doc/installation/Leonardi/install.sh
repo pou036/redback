@@ -7,40 +7,43 @@ DO_INSTALL_PREREQUISITES=1 # value 0 or 1. No space around the equal sign!
 DO_COMPILE_LIBMESH=1 # value 0 or 1. No space around the equal sign!  This al
 DO_INSTALL_OR_UPDATE_MOOSE_REDBACK=1 # value 0 or 1. No space around the equal sign!
 
+
+#setting up environment variables
 echo "starting:" `date`
 export NUM_PROC=12
 export MOOSE_JOBS=$NUM_PROC
 
+mkdir ~/moose-compilers
+export PACKAGES_DIR=~/moose-compilers
 
+mkdir ~/moose-compilers/modulefiles
+export MODULEPATH=$MODULEPATH:$PACKAGES_DIR/modulefiles
+
+#copy the module file over if it doesn't already exist
+cp ~/moose-dev-gcc ~/moose-compilers/modulefiles
+
+# loading modules
+#these two are preexisting
+module purge
+module load rocks-openmpi
+module load opt-python
+# this one is in $PACKAGES_DIR/modulefiles
+module load moose-dev-gcc
+
+
+source ~/.moose-profile
 if [ $DO_INSTALL_PREREQUISITES -eq 1 ]
   then
     printf "\n\n**** step 1: petsc ****\n\n"
 
-    # dependencies
+    # petsc
     mkdir ~/tmp
     export CLUSTER_TEMP=`mktemp -d ~/tmp/cluster_temp.XXXXXX`
     cd $CLUSTER_TEMP
     curl -L -O http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.6.0.tar.gz
     umask 0022
-    mkdir ~/moose-compilers
-    export PACKAGES_DIR=~/moose-compilers
-
     cd $CLUSTER_TEMP
     tar -xf petsc-3.6.0.tar.gz
-    mkdir ~/moose-compilers/modulefiles
-
-    export MODULEPATH=$MODULEPATH:$PACKAGES_DIR/modulefiles
-
-    source ~/.moose-profile
-    cp ~/moose-dev-gcc ~/moose-compilers/modulefiles
-
-    # loading modules; these two are preexisting
-    module purge
-    module load rocks-openmpi
-    module load opt-python
-
-    # this one is in $PACKAGES_DIR/modulefiles
-    module load moose-dev-gcc
 
     #PETSC setup
     cd $CLUSTER_TEMP/petsc-3.6.0
