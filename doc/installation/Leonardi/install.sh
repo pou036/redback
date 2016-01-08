@@ -97,6 +97,7 @@ if [ $DO_COMPILE_LIBMESH -eq 1 ] || [ $DO_INSTALL_OR_UPDATE_MOOSE_REDBACK -eq 1 
     git checkout master
     git pull
     #here we force the libmesh configure file to use PAX in single-volume mode.
+    #https://lists.gnu.org/archive/html/automake/2011-03/msg00113.html
     #sed is different on osx and linux.  this is the osx version:
     #sed -i '' "s/'pax -r'/'pax -O -r'/g" ~/projects/moose/libmesh/configure
     #and this is the linux version:
