@@ -10,7 +10,7 @@ DO_INSTALL_OR_UPDATE_MOOSE_REDBACK=1 # value 0 or 1. No space around the equal s
 
 ####### Nothing to touch below ! #############################
 export INSTALL_ROOT_DIR=~
-
+mkdir $INSTALL_ROOT_DIR
 #setting up environment variables
 echo "starting:" `date`
 export NUM_PROC=12
@@ -114,7 +114,7 @@ if [ $DO_COMPILE_LIBMESH -eq 1 ] || [ $DO_INSTALL_OR_UPDATE_MOOSE_REDBACK -eq 1 
     #sed is different on osx and linux.  this is the osx version:
     #sed -i '' "s/'pax -r'/'pax -O -r'/g" $INSTALL_ROOT_DIR/projects/moose/libmesh/configure
     #and this is the linux version:
-    sed -i -e 's/pax -r/pax -O -r/g' $INSTALL_ROOT_DIR/projects/moose/libmesh/configure
+    sed -i -e 's/pax -r/pax -r -O/g' $INSTALL_ROOT_DIR/projects/moose/libmesh/configure
 
 fi # end of step 2
 
