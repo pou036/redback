@@ -1,4 +1,4 @@
-/* Cylinder Y */
+/* Cylinder along Y */
 
 lc = 0.3; // mesh characteristic length (smaller = finer mesh)
 radius = 1; // radius of cylinder
