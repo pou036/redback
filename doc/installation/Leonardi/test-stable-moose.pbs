@@ -27,7 +27,7 @@
 #PBS -m abe
 
 # The job proper start here
-export STABLE_MOOSE_ROOT_DIR=/home/z3506778
+export STABLE_MOOSE_ROOT_DIR=/home/z3506778/stable_MOOSE
 echo "starting:" `date`
 module load rocks-openmpi
 module load opt-python
