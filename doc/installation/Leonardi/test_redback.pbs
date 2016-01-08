@@ -35,8 +35,6 @@ export PACKAGES_DIR=~/moose-compilers
 export MODULEPATH=$MODULEPATH:$PACKAGES_DIR/modulefiles
 module load rocks-openmpi
 module load opt-python
-module load moose-dev-gcc
-
 cd ~/projects/redback/tests/benchmark_11_THMC
 mpirun -n $PBS_NUM_PPN ~/projects/redback/redback-opt -i bench_THMC_CC.i
 echo "  ending:" `date`
