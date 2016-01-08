@@ -31,8 +31,6 @@
 echo "starting:" `date`
 echo "    host:" `hostname`
 echo "  loading modules"
-export PACKAGES_DIR=~/moose-compilers
-export MODULEPATH=$MODULEPATH:$PACKAGES_DIR/modulefiles
 module load rocks-openmpi
 module load opt-python
 cd ~/projects/redback/tests/benchmark_11_THMC
