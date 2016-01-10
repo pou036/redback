@@ -1,9 +1,9 @@
-#!/bin/bash
+#!/bin/bash -vx
 #this script allows you to install Moose and Redback on Leonardi
 #before running this script, .moose-profile and moose-dev-gcc must be in ~/.
 #to use: ./install.sh
 
-DO_INSTALL_PREREQUISITES=1 # value 0 or 1. No space around the equal sign!
+DO_INSTALL_PREREQUISITES=0 # value 0 or 1. No space around the equal sign!
 DO_COMPILE_LIBMESH=1 # value 0 or 1. No space around the equal sign!  This al
 DO_INSTALL_OR_UPDATE_MOOSE_REDBACK=1 # value 0 or 1. No space around the equal sign!
 
@@ -123,6 +123,7 @@ if [ $DO_COMPILE_LIBMESH -eq 1 ]
   then
     #this is the slow part - takes an hour or more.
     printf "\n\n**** step 3: libmesh setup ****\n\n"
+    cd $INSTALL_ROOT_DIR/projects/moose
     scripts/update_and_rebuild_libmesh.sh
 fi
 
