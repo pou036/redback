@@ -3,7 +3,7 @@
 #before running this script, .moose-profile and moose-dev-gcc must be in ~/.
 #to use: ./install.sh
 
-DO_INSTALL_PREREQUISITES=0 # value 0 or 1. No space around the equal sign!
+DO_INSTALL_PREREQUISITES=1 # value 0 or 1. No space around the equal sign!
 DO_COMPILE_LIBMESH=1 # value 0 or 1. No space around the equal sign!  This al
 DO_INSTALL_OR_UPDATE_MOOSE_REDBACK=1 # value 0 or 1. No space around the equal sign!
 
@@ -114,7 +114,8 @@ if [ $DO_COMPILE_LIBMESH -eq 1 ] || [ $DO_INSTALL_OR_UPDATE_MOOSE_REDBACK -eq 1 
     #sed is different on osx and linux.  this is the osx version:
     #sed -i '' "s/'pax -r'/'pax -O -r'/g" $INSTALL_ROOT_DIR/projects/moose/libmesh/configure
     #and this is the linux version:
-    sed -i -e 's/pax -r/pax -r -O/g' $INSTALL_ROOT_DIR/projects/moose/libmesh/configure
+    #doesn't work, too bad.
+    #sed -i -e 's/pax -r/pax -r -O/g' $INSTALL_ROOT_DIR/projects/moose/libmesh/configure
 
 fi # end of step 2
 
