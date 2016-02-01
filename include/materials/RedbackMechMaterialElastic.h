@@ -36,10 +36,7 @@ protected:
                  RankTwoTensor &,
                  Real &,
                  Real &);
-  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
-  void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
-  Real getFlowIncrement(Real, Real, Real, Real, Real);
-  void get_py_qy(Real, Real, Real &, Real &, Real);
+
 };
 
 #endif // REDBACKMECHMATERIALELASTIC_H

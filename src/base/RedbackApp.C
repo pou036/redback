@@ -58,6 +58,11 @@
 // AuxKernels
 #include "RedbackTotalPorosityAux.h"
 
+#include "RedbackPlasticityUOBase.h"
+#include "RedbackPlasticityUOJ2.h"
+#include "RedbackPlasticityUODP.h"
+
+
 template <>
 InputParameters
 validParams<RedbackApp>()
@@ -122,6 +127,12 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialCC);
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
+
+  //experimental!
+  registerMaterial(RedbackMechMaterial);
+
+  registerUserObject(RedbackPlasticityUOJ2);
+  registerUserObject(RedbackPlasticityUODP);
 
   registerExecutioner(ReturnMapIterDT);
 

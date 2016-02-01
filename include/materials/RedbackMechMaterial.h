@@ -20,6 +20,7 @@
 #include "RankFourTensor.h"
 #include "ElasticityTensorR4.h"
 #include "RotationTensor.h"
+#include "RedbackPlasticityUOBase.h"
 //#include "FiniteStrainPlasticMaterial.h"
 
 // Forward Declarations
@@ -116,11 +117,11 @@ protected:
   // is dependant on the yield criterion. Therefore we define them as abstract
   // virtual functions here such that no implementation is needed in
   // RedbackMechMaterial.C
-  virtual void
-  getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) = 0;
-  virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &) = 0;
-  virtual Real getFlowIncrement(Real, Real, Real, Real, Real) = 0;
-  virtual void get_py_qy(Real, Real, Real &, Real &, Real) = 0;
+  // virtual void
+  // getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) = 0;
+  // virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &) = 0;
+  // virtual Real getFlowIncrement(Real, Real, Real, Real, Real) = 0;
+  // virtual void get_py_qy(Real, Real, Real &, Real &, Real) = 0;
 
   Real _ref_pe_rate;
   Real _exponent;
@@ -189,6 +190,9 @@ protected:
   virtual void formDamageDissipation(RankTwoTensor &);
 
   Real _damage_dissipation;
+
+  UserObjectName plasticity_uo_name;
+  const RedbackPlasticityUOBase * plasticity_model;
 };
 
 #endif // REDBACKMECHMATERIAL_H

@@ -37,33 +37,3 @@ RedbackMechMaterialElastic::returnMap(const RankTwoTensor & sig_old,
   sig = sig_old + E_ijkl * delta_d;
   dp = RankTwoTensor(); // Plastic rate of deformation tensor in unrotated configuration
 }
-
-void
-RedbackMechMaterialElastic::getFlowTensor(
-  const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor_dev)
-{
-}
-
-Real
-RedbackMechMaterialElastic::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real yield_stress)
-{
-  return 0;
-}
-
-void
-RedbackMechMaterialElastic::getJac(const RankTwoTensor & sig,
-                                   const RankFourTensor & E_ijkl,
-                                   Real flow_incr_dev,
-                                   Real q,
-                                   Real p,
-                                   Real p_y,
-                                   Real q_y,
-                                   Real yield_stress,
-                                   RankFourTensor & dresid_dsig)
-{
-}
-
-void
-RedbackMechMaterialElastic::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
-{
-}

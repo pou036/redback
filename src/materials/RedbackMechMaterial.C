@@ -86,6 +86,9 @@ validParams<RedbackMechMaterial>()
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
 
+  //userobject
+  params.addRequiredParam<UserObjectName>("plasticity_userobject", "The name of the UserObject that provides the plasticity model");
+
   return params;
 }
 
@@ -190,6 +193,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   MooseEnum fill_method = RankFourTensor::fillMethodEnum();
   fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic elasticity tensor.
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int)fill_method);
+
+  plasticity_model = &getUserObjectByName<RedbackPlasticityUOBase>(getParam<UserObjectName>("plasticity_userobject"));
 }
 
 MooseEnum
@@ -669,8 +674,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
     // TODO: checking whether in plasticity
 
-    flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
-    getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
+    flow_incr = plasticity_model->getFlowIncrement(q, p, q_y, p_y, yield_stress, _dt, _exponent, _exponential, _ref_pe_rate);
+    plasticity_model->getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
     flow_tensor *= flow_incr;
     resid = flow_tensor - delta_dp;
     err1 = resid.L2norm();
@@ -681,7 +686,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
       iter++;
 
       // Jacobian = d(residual)/d(sigma)
-      getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig);
+      plasticity_model->getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig, _dt, _exponent, _exponential, _ref_pe_rate);
       dr_dsig_inv = dr_dsig.invSymm();
       ddsig = -dr_dsig_inv * resid;         // Newton Raphson
       delta_dp -= E_ijkl.invSymm() * ddsig; // Update increment of plastic rate of deformation tensor
@@ -692,10 +697,10 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
       q = getSigEqv(sig_new);
       get_py_qy_damaged(p, q, p_y, q_y, yield_stress);
 
-      flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
+      flow_incr = plasticity_model->getFlowIncrement(q, p, q_y, p_y, yield_stress, _dt, _exponent, _exponential, _ref_pe_rate);
       if (flow_incr < 0.0) // negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment: Reduce time increment.");
-      getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
+      plasticity_model->getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
       flow_tensor *= flow_incr;
       resid = flow_tensor - delta_dp; // Residual
       err1 = resid.L2norm();
@@ -724,7 +729,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 void
 RedbackMechMaterial::get_py_qy_damaged(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
 {
-  get_py_qy(p, q, p_y, q_y, yield_stress);
+  plasticity_model->get_py_qy(p, q, p_y, q_y, yield_stress);
   p_y *= (1 - _damage[_qp]);
   q_y *= (1 - _damage[_qp]);
 }
