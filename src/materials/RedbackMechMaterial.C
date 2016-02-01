@@ -738,6 +738,10 @@ void
 RedbackMechMaterial::form_damage_kernels(Real cohesion)
 {
   mooseError("form_damage_kernels must be overwritten in children class");
+  //TODO: Implementation is in the UO.  add the linking logic here at some point.  
+
+
+
 }
 
 void

@@ -24,7 +24,15 @@ public:
   RedbackPlasticityUODP(const InputParameters & parameters);
   virtual ~RedbackPlasticityUODP() {}
 
-
+  static MooseEnum damageMethodEnum();
+  enum DamageMethod
+  {
+    BrittleDamage,
+    CreepDamage,
+    BreakageMechanics,
+    DamageHealing,
+    FromMultiApp
+  };
 
   virtual Real getFlowIncrement(Real, Real, Real, Real, Real, Real, Real, Real, Real) const;
 
@@ -35,18 +43,18 @@ public:
 
   virtual void get_py_qy(Real, Real, Real &, Real &, Real) const;
 
+  virtual void form_damage_kernels(DamageMethod, VariableValue &, Real, Real, MaterialProperty<Real> &, MaterialProperty<Real> &, MaterialProperty<Real> &, MaterialProperty<Real> &, unsigned int) const;
+
 protected:
   Real _slope_yield_surface; // coefficient for yield surface
 
   Real getPressureProjection(Real, Real, Real);
   virtual Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real, Real, Real, Real) const;
-
-  virtual void form_damage_kernels(MooseEnum, Real) const;
-
-  virtual void formBrittleDamage(VariableValue &, Real, Real, MaterialProperty<Real>, MaterialProperty<Real>, MaterialProperty<Real>, MaterialProperty<Real>, unsigned int) const;
-  virtual void formCreepDamage(VariableValue &, Real, Real, MaterialProperty<Real>, MaterialProperty<Real>, MaterialProperty<Real>, MaterialProperty<Real>, unsigned int) const;
-
   virtual Real getPressureProjection(Real, Real, Real) const;
+
+  virtual void formBrittleDamage(VariableValue &, Real, Real, MaterialProperty<Real> &, MaterialProperty<Real> &, MaterialProperty<Real> &, MaterialProperty<Real> &, unsigned int) const;
+  virtual void formCreepDamage(VariableValue &, Real, Real, MaterialProperty<Real> &, MaterialProperty<Real> &, MaterialProperty<Real> &, MaterialProperty<Real> &, unsigned int) const;
+
 
 
 };

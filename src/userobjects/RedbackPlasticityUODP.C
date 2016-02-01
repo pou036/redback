@@ -192,26 +192,35 @@ RedbackPlasticityUODP::getPressureProjection(Real pressure, Real sig_eqv, Real c
 }
 
 void
-RedbackPlasticityUODP::form_damage_kernels(MooseEnum damage_method, Real cohesion) const
+RedbackPlasticityUODP::form_damage_kernels(
+  DamageMethod damage_method,
+  VariableValue & damage,
+  Real cohesion,
+  Real damage_coeff,
+  MaterialProperty<Real> & damage_kernel,
+  MaterialProperty<Real> & damage_kernel_jac,
+  MaterialProperty<Real> & mises_stress,
+  MaterialProperty<Real> & mises_strain_rate,
+  unsigned int qp) const
 {
   // update damage evolution law from selected method
   switch (damage_method)
   {
-    // case BrittleDamage:
-    //   //signatures are not working yet
-    //   //formBrittleDamage();
-    //   break;
-    // case CreepDamage:
-    //   //formCreepDamage(cohesion);
-    //   break;
-    // case BreakageMechanics:
-    //   mooseError("damage method not implemented yet, use other options");
-    //   break;
-    // case DamageHealing:
-    //   mooseError("damage method not implemented yet, use other options");
-    //   break;
-    // default:
-    //   mooseError("damage method not implemented yet, use other options");
+    case BrittleDamage:
+      //signatures are not working yet
+      formBrittleDamage(damage, cohesion, damage_coeff, damage_kernel, damage_kernel_jac, mises_stress, mises_strain_rate, qp);
+      break;
+    case CreepDamage:
+      formCreepDamage(damage, cohesion, damage_coeff, damage_kernel, damage_kernel_jac, mises_stress, mises_strain_rate, qp);
+      break;
+    case BreakageMechanics:
+      mooseError("damage method not implemented yet, use other options");
+      break;
+    case DamageHealing:
+      mooseError("damage method not implemented yet, use other options");
+      break;
+    default:
+      mooseError("damage method not implemented yet, use other options");
   }
 }
 
@@ -221,10 +230,10 @@ RedbackPlasticityUODP::formBrittleDamage(
   VariableValue & damage,
   Real cohesion,
   Real damage_coeff,
-  MaterialProperty<Real> damage_kernel,
-  MaterialProperty<Real> damage_kernel_jac,
-  MaterialProperty<Real> mises_stress,
-  MaterialProperty<Real> mises_strain_rate,
+  MaterialProperty<Real> & damage_kernel,
+  MaterialProperty<Real> & damage_kernel_jac,
+  MaterialProperty<Real> & mises_stress,
+  MaterialProperty<Real> & mises_strain_rate,
   unsigned int qp) const
 {
   Real plastic_damage, healing_damage;
@@ -247,10 +256,10 @@ RedbackPlasticityUODP::formCreepDamage(
   VariableValue & damage,
   Real cohesion,
   Real damage_coeff,
-  MaterialProperty<Real> damage_kernel,
-  MaterialProperty<Real> damage_kernel_jac,
-  MaterialProperty<Real> mises_stress,
-  MaterialProperty<Real> mises_strain_rate,
+  MaterialProperty<Real> & damage_kernel,
+  MaterialProperty<Real> & damage_kernel_jac,
+  MaterialProperty<Real> & mises_stress,
+  MaterialProperty<Real> & mises_strain_rate,
   unsigned int qp) const
 {
   Real plastic_damage, healing_damage;
