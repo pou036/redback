@@ -48,6 +48,8 @@ validParams<RedbackMaterial>()
   params.addCoupledVar("inverse_lewis_number_tilde",
                        0.0,
                        "Varying component of (inverse of) Lewis number, coming from mutli-app for example");
+  params.addCoupledVar("continuation_parameter", 1.0, "The continuation parameter");
+
 
   // params.addCoupledVar("solid_velocity_aux", "Solid velocity (AuxKernel) from RedbackMechMaterial (if used)");
   params.addParam<MooseEnum>(
@@ -107,6 +109,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
 
     _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
     _inverse_lewis_number_tilde(coupledValue("inverse_lewis_number_tilde")),
+    _continuation_parameter(coupledScalarValue("continuation_parameter")),
 
     //_disp_x(isCoupled("disp_x") ? coupledValue("disp_x") : _zero),
 
@@ -297,6 +300,7 @@ RedbackMaterial::stepInitQpProperties()
   {
     _gr[_qp] = _gr_param;
   }
+  _gr[_qp] *= _continuation_parameter[0];
   pos = find(_init_from_functions__params.begin(), _init_from_functions__params.end(), "ref_lewis_nb") -
         _init_from_functions__params.begin();
   if (pos < _num_init_functions)
