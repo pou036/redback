@@ -31,7 +31,7 @@ protected:
   VariableValue & _directional_derivative;
 
   virtual Real computeQpResidual();
-  //virtual Real computeQpJacobian();
+  virtual Real computeQpJacobian();
   //virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
 

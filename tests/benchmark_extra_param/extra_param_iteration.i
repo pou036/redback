@@ -6,10 +6,18 @@
 
 [Variables]
   [./temp]
+    # 0.03276648
+    initial_condition = 0.03276648
   [../]
   [./lambda]
     family = SCALAR
+    initial_condition = 2.4e-6 # 2*lambda_old - lambda_older
   [../]
+[]
+
+[GlobalParams]
+  ds = 1e-5 # 0.026146068099760434
+  ds_old = 1e-5 # 0.010300165599414025
 []
 
 [AuxVariables]
@@ -66,7 +74,7 @@
     sum_var_old_1 = old_temp
     sum_var_4_older = 0
     sum_var_6_old = 0
-    nodes = 0
+    nodes = '0 1 2 3 4 5 6 7 8 9 10'
     sum_var_1_older = older_temp
     sum_var_6_older = 0
     sum_var_5_older = 0
@@ -125,7 +133,7 @@
 []
 
 [Postprocessors]
-  active = 'middle_temp'
+  active = 'temp_pt_1 temp_pt_0 temp_pt_3 temp_pt_2 temp_pt_5 temp_pt_4'
   [./middle_temp]
     type = PointValue
     variable = temp
@@ -133,6 +141,36 @@
   [../]
   [./strain]
     type = StrainRatePoint
+    variable = temp
+    point = '0 0 0'
+  [../]
+  [./temp_pt_0]
+    type = PointValue
+    variable = temp
+    point = '-1 0 0'
+  [../]
+  [./temp_pt_1]
+    type = PointValue
+    variable = temp
+    point = '-0.8 0 0'
+  [../]
+  [./temp_pt_2]
+    type = PointValue
+    variable = temp
+    point = '-0.6 0 0'
+  [../]
+  [./temp_pt_3]
+    type = PointValue
+    variable = temp
+    point = '-0.4 0 0'
+  [../]
+  [./temp_pt_4]
+    type = PointValue
+    variable = temp
+    point = '-0.2 0 0'
+  [../]
+  [./temp_pt_5]
+    type = PointValue
     variable = temp
     point = '0 0 0'
   [../]
@@ -151,24 +189,13 @@
   execute_on = 'initial timestep_end'
 []
 
-[ICs]
-  [./temp_ic]
-    variable = temp
-    value = 0
-    type = ConstantIC
-    block = 0
-  [../]
-[]
-
 [ScalarKernels]
   [./continuation_kernel]
-    ds_old = 1e-7
-    continuation_parameter_old = 4.4e-6
-    continuation_parameter_older = 4.316e-6
+    continuation_parameter_old = 1.7e-6
+    continuation_parameter_older = 1e-6
     directional_derivative = directional_derivative
     variable = lambda
     type = RedbackContinuation
-    ds = 1e-4
   [../]
 []
 

@@ -93,8 +93,8 @@
     block = 0
     alpha_2 = 1
     ar = 10
-    gr = 4.313e-6 # 0.095*exp(-Ar), Ar=10
     pore_pres = 0
+    gr = 1e-6 # 0.095*exp(-Ar), Ar=10
     temperature = temp
     ref_lewis_nb = 1
     ar_F = 40
@@ -107,8 +107,38 @@
 []
 
 [Postprocessors]
-  active = 'middle_temp'
+  active = 'temp_pt_0 temp_pt_1 temp_pt_2 temp_pt_3 temp_pt_4 temp_pt_5'
   [./middle_temp]
+    type = PointValue
+    variable = temp
+    point = '0 0 0'
+  [../]
+  [./temp_pt_0]
+    type = PointValue
+    variable = temp
+    point = '-1 0 0'
+  [../]
+  [./temp_pt_1]
+    type = PointValue
+    variable = temp
+    point = '-0.8 0 0'
+  [../]
+  [./temp_pt_2]
+    type = PointValue
+    variable = temp
+    point = '-0.6 0 0'
+  [../]
+  [./temp_pt_3]
+    type = PointValue
+    variable = temp
+    point = '-0.4 0 0'
+  [../]
+  [./temp_pt_4]
+    type = PointValue
+    variable = temp
+    point = '-0.2 0 0'
+  [../]
+  [./temp_pt_5]
     type = PointValue
     variable = temp
     point = '0 0 0'

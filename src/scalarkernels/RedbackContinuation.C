@@ -45,14 +45,16 @@ RedbackContinuation::computeQpResidual()
   return _directional_derivative[0] + lambda_dot_old_param*(_u[_i] - _continuation_parameter_old_param) - _ds_param;
 }
 
-/*Real
+Real
 RedbackContinuation::computeQpJacobian()
 {
   // dF/dx
-  return -3.;
+  Real lambda_dot_old_param = (_continuation_parameter_old_param - _continuation_parameter_older_param)/_ds_old_param;
+  // TODO: compute lambda_dot_old_param only once...
+  return lambda_dot_old_param;
 }
 
-Real
+/*Real
 RedbackContinuation::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _y_var)

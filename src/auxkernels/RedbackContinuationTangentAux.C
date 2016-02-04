@@ -13,6 +13,7 @@
 /****************************************************************/
 
 #include "RedbackContinuationTangentAux.h"
+#include "MooseMesh.h"
 
 template<>
 InputParameters validParams<RedbackContinuationTangentAux>()
@@ -75,8 +76,24 @@ RedbackContinuationTangentAux::~RedbackContinuationTangentAux()
 void
 RedbackContinuationTangentAux::compute()
 {
-  //_subproblem.reinitNodes(_node_ids, _tid);        // compute variables at nodes
-  for (_i = 0; _i < _var.order(); ++_i)
+  _subproblem.reinitNodes(_node_ids, _tid);        // compute variables at nodes
+  // _node_ids(getParam<std::vector<dof_id_type> >("nodes")) <--- CODE from parent class, to grab only user given nodes.
+
+  // How to get all the nodes programmatically???
+  // See AllLocalDofIndicesThread ?
+  // See MooseVariable.C where reinitNodes() is defined) --> _subproblem.mesh()
+  /*DofMap & dof_map;
+  dof_map = _nl_sys.get_dof_map();
+  dof_id_type local_dof_begin = _dof_map.first_dof();
+  dof_id_type local_dof_end = _dof_map.end_dof();*/
+  //Real test = _subproblem.mesh().getMesh().n_nodes();
+  //std::cout << "test=" << test << std::endl;
+
+// TODO: get the full list of nodes programmatically!!!
+
+
+  //std::cout << "_var.order()=" << _var.order()<<std::endl;
+  for (_i = 0; _i < _var.order(); ++_i) // _var.order()=1 for a scalar
   {
     Real value = computeValue();
     _communicator.sum(value);
@@ -90,12 +107,15 @@ RedbackContinuationTangentAux::computeValue()
   Real sum = 0;
   // TODO: check that all variables to sum have same size!
   for (unsigned int i = 0; i < _sum_var_1.size(); i++)
+  {
     sum += (  (_sum_var_1[i] - _sum_var_old_1[i]) * (_sum_var_old_1[i] - _sum_var_older_1[i])
-            + (_sum_var_2[i] - _sum_var_old_2[i]) * (_sum_var_old_2[i] - _sum_var_older_2[i])
-            + (_sum_var_3[i] - _sum_var_old_3[i]) * (_sum_var_old_3[i] - _sum_var_older_3[i])
-            + (_sum_var_4[i] - _sum_var_old_4[i]) * (_sum_var_old_4[i] - _sum_var_older_4[i])
-            + (_sum_var_5[i] - _sum_var_old_5[i]) * (_sum_var_old_5[i] - _sum_var_older_5[i])
-            + (_sum_var_6[i] - _sum_var_old_6[i]) * (_sum_var_old_6[i] - _sum_var_older_6[i])
+        //TODO: implement a switch to only sum variables which are defined!!!
+            //+ (_sum_var_2[i] - _sum_var_old_2[i]) * (_sum_var_old_2[i] - _sum_var_older_2[i])
+            //+ (_sum_var_3[i] - _sum_var_old_3[i]) * (_sum_var_old_3[i] - _sum_var_older_3[i])
+            //+ (_sum_var_4[i] - _sum_var_old_4[i]) * (_sum_var_old_4[i] - _sum_var_older_4[i])
+            //+ (_sum_var_5[i] - _sum_var_old_5[i]) * (_sum_var_old_5[i] - _sum_var_older_5[i])
+            //+ (_sum_var_6[i] - _sum_var_old_6[i]) * (_sum_var_old_6[i] - _sum_var_older_6[i])
            )/_ds_old_param;
+  }
   return sum;
 }
