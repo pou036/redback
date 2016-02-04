@@ -39,7 +39,7 @@
     youngs_modulus = 1000
     poisson_ratio = 0.3
     total_porosity = total_porosity
-    plasticity_userobject = J2
+    plasticity_userobject = DP
   [../]
   [./mat1]
     type = RedbackMaterial
@@ -63,8 +63,9 @@
 []
 
 [UserObjects]
-  [./J2]
-    type = RedbackPlasticityUOJ2
+  [./DP]
+    type = RedbackPlasticityUODP
+    slope_yield_surface = -0.6
   [../]
 []
 
@@ -172,7 +173,7 @@
 []
 
 [Outputs]
-  file_base = bench_elastic_1
+  file_base = bench_userobject_1
   output_initial = true
   exodus = true
   csv = true

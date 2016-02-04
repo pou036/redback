@@ -11,7 +11,10 @@ template<>
 InputParameters validParams<RedbackPlasticityUODP>()
 {
   InputParameters params = validParams<RedbackPlasticityUOBase>();
-  params.addParam<Real>("slope_yield_surface", 0, "Slope of yield surface (positive, see documentation)");
+
+//debug
+  params.addRequiredParam<Real>("slope_yield_surface", "Slope of yield surface (positive, see documentation)");
+  // params.addParam<Real>("slope_yield_surface", 0, "Slope of yield surface (positive, see documentation)");
   params.addClassDescription("User object to store plasticity functions based on DP");
   return params;
 }
@@ -204,24 +207,24 @@ RedbackPlasticityUODP::form_damage_kernels(
   unsigned int qp) const
 {
   // update damage evolution law from selected method
-  switch (damage_method)
-  {
-    case BrittleDamage:
-      //signatures are not working yet
-      formBrittleDamage(damage, cohesion, damage_coeff, damage_kernel, damage_kernel_jac, mises_stress, mises_strain_rate, qp);
-      break;
-    case CreepDamage:
-      formCreepDamage(damage, cohesion, damage_coeff, damage_kernel, damage_kernel_jac, mises_stress, mises_strain_rate, qp);
-      break;
-    case BreakageMechanics:
-      mooseError("damage method not implemented yet, use other options");
-      break;
-    case DamageHealing:
-      mooseError("damage method not implemented yet, use other options");
-      break;
-    default:
-      mooseError("damage method not implemented yet, use other options");
-  }
+  // switch (damage_method)
+  // {
+  //   case BrittleDamage:
+  //     //signatures are not working yet
+  //     formBrittleDamage(damage, cohesion, damage_coeff, damage_kernel, damage_kernel_jac, mises_stress, mises_strain_rate, qp);
+  //     break;
+  //   case CreepDamage:
+  //     formCreepDamage(damage, cohesion, damage_coeff, damage_kernel, damage_kernel_jac, mises_stress, mises_strain_rate, qp);
+  //     break;
+  //   case BreakageMechanics:
+  //     mooseError("damage method not implemented yet, use other options");
+  //     break;
+  //   case DamageHealing:
+  //     mooseError("damage method not implemented yet, use other options");
+  //     break;
+  //   default:
+  //     mooseError("damage method not implemented yet, use other options");
+  // }
 }
 
 //placeholder; currently nonworking
