@@ -25,7 +25,7 @@ the Redback material and the tensor mechanics finite strain equivalent
 Three yield criteria are included:
 1. pressure-independent (J2 plasticity)
 2. linear pressure-dependent (Drucker-Prager with smoothing of the apex)
-3. Non-linear, capped pressure dependent (modified cam clay)
+3. Non-linear, capped pressure dependent (modified cam clay)_slope_yield_surface
 
 Integration is performed for associative flow rules in an incremental manner
 using Newton Raphson.
@@ -88,6 +88,8 @@ validParams<RedbackMechMaterial>()
 
   //userobject
   params.addRequiredParam<UserObjectName>("plasticity_userobject", "The name of the UserObject that provides the plasticity model");
+  //debug
+  params.addParam<Real>("slope_yield_surface", 0, "Slope of yield surface (positive, see documentation)");
 
   return params;
 }
@@ -184,6 +186,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
 
     //uo
     _plasticity_userobject(isParamValid("plasticity_userobject") ? & getUserObject<RedbackPlasticityUOBase>("plasticity_userobject") : NULL)
+
 {
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
