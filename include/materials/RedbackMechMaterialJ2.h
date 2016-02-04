@@ -36,4 +36,4 @@ protected:
   Real getDerivativeFlowIncrement(const RankTwoTensor &, Real);
 };
 
-#endif // REDBACKMECHMATERIAL_H
+#endif // REDBACKMECHMATERIALJ2_H

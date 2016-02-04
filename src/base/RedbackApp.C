@@ -61,6 +61,7 @@
 #include "RedbackPlasticityUOBase.h"
 #include "RedbackPlasticityUOJ2.h"
 #include "RedbackPlasticityUODP.h"
+#include "RedbackPlasticityUOCC.h"
 
 
 template <>
@@ -133,6 +134,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerUserObject(RedbackPlasticityUOJ2);
   registerUserObject(RedbackPlasticityUODP);
+  registerUserObject(RedbackPlasticityUOCC);
 
   registerExecutioner(ReturnMapIterDT);
 
