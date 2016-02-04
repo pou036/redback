@@ -191,20 +191,8 @@ protected:
 
   Real _damage_dissipation;
 
-  UserObjectName plasticity_uo_name;
   const RedbackPlasticityUOBase * _plasticity_userobject;
 
-
-
-  //debug
-  Real _slope_yield_surface; // coefficient for yield surface
-
-  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
-  void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
-  Real getFlowIncrement(Real, Real, Real, Real, Real);
-  void get_py_qy(Real, Real, Real &, Real &, Real);
-  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real);
-  Real getPressureProjection(Real, Real, Real);
 };
 
 #endif // REDBACKMECHMATERIAL_H

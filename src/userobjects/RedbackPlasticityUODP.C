@@ -12,15 +12,14 @@ InputParameters validParams<RedbackPlasticityUODP>()
 {
   InputParameters params = validParams<RedbackPlasticityUOBase>();
 
-//debug
   params.addRequiredParam<Real>("slope_yield_surface", "Slope of yield surface (positive, see documentation)");
-  // params.addParam<Real>("slope_yield_surface", 0, "Slope of yield surface (positive, see documentation)");
   params.addClassDescription("User object to store plasticity functions based on DP");
   return params;
 }
 
 RedbackPlasticityUODP::RedbackPlasticityUODP(const InputParameters & parameters) :
-    RedbackPlasticityUOBase(parameters)
+    RedbackPlasticityUOBase(parameters),
+    _slope_yield_surface(getParam<Real>("slope_yield_surface"))
 {
 }
 
@@ -79,9 +78,6 @@ RedbackPlasticityUODP::getFlowTensor(
   // flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm(); // TODO:
   // debugging, returning a tensor of norm sqrt(3/2) to match the J2 case
 }
-
-
-
 
 // Jacobian for stress update algorithm
 void
