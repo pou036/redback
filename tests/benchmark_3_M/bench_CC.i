@@ -41,6 +41,7 @@
     yield_criterion = modified_Cam_Clay
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
+    plasticity_userobject = CC
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -58,6 +59,13 @@
     phi0 = 0.1
     ref_lewis_nb = 1
     total_porosity = total_porosity
+  [../]
+[]
+
+
+[UserObjects]
+  [./CC]
+    type = RedbackPlasticityUOCC
   [../]
 []
 
@@ -390,4 +398,3 @@
     disp_x = disp_x
   [../]
 []
-

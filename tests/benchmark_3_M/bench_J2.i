@@ -40,6 +40,7 @@
     slope_yield_surface = -0.6
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
+    plasticity_userobject = J2
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -55,6 +56,12 @@
     ref_lewis_nb = 1
     phi0 = 0.1
     total_porosity = total_porosity
+  [../]
+[]
+
+[UserObjects]
+  [./J2]
+    type = RedbackPlasticityUOJ2
   [../]
 []
 
@@ -365,4 +372,3 @@
     disp_x = disp_x
   [../]
 []
-
