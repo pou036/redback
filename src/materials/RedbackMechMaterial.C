@@ -333,9 +333,6 @@ RedbackMechMaterial::computeQpStress()
 
   // Update elastic strain tensor in intermediate configuration
   _elastic_strain[_qp] = _elastic_strain_old[_qp] + delta_ee;
-  // thermoelasticity
-  //_elastic_strain[_qp].addIa(_solid_thermal_expansion[_qp]*(_T[_qp] -
-  //_T0_param));
 
   // Rotate elastic strain tensor to the current configuration
   _elastic_strain[_qp] = _rotation_increment[_qp] * _elastic_strain[_qp] * _rotation_increment[_qp].transpose();

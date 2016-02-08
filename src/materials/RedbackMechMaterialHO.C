@@ -72,6 +72,11 @@ RedbackMechMaterialHO::computeQpStrain()
   _antisymmetric_strain[_qp] = (grad_tensor - grad_tensor.transpose()) / 2.0;
   _elastic_strain[_qp] = grad_tensor;
 
+  //_strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp] * (_T[_qp] - _T_old[_qp]));
+  _rotation_increment[_qp].zero();
+  _rotation_increment[_qp].addIa(1);
+
+
   RankTwoTensor wc_grad_tensor(_grad_wc_x[_qp], _grad_wc_y[_qp], _grad_wc_z[_qp]);
   _curvature[_qp] = wc_grad_tensor;
 }
@@ -95,14 +100,25 @@ void RedbackMechMaterialHO::computeQpElasticityTensor()
   _Jacobian_mult_couple[_qp] = _Bijkl;
 }
 
+/*
+ * STARTING PSEUDO-LOOP IN PLASTICITY FUNCTIONS. NEED TO BE OVERWRITTEN WHEN IN PLASTICITY
+ */
 
-
-
-
-
+void
+RedbackMechMaterialHO::returnMap(const RankTwoTensor & sig_old,
+                                      const RankTwoTensor & delta_d,
+                                      const RankFourTensor & E_ijkl,
+                                      RankTwoTensor & dp,
+                                      RankTwoTensor & sig,
+                                      Real & p_y,
+                                      Real & q_y)
+{
+  sig = sig_old + E_ijkl * delta_d;
+  dp = RankTwoTensor(); // Plastic rate of deformation tensor in unrotated configuration
+}
 
 /**
- * Get unitary flow tensor in deviatoric direction, modified Cam-Clay
+ * Get unitary flow tensor in deviatoric direction
  */
 void
 RedbackMechMaterialHO::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real pc, RankTwoTensor & flow_tensor)

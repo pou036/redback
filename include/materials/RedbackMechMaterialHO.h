@@ -33,6 +33,13 @@ protected:
   virtual void computeQpStress();
   virtual void computeQpElasticityTensor();
 
+  void returnMap(const RankTwoTensor &,
+                 const RankTwoTensor &,
+                 const RankFourTensor &,
+                 RankTwoTensor &,
+                 RankTwoTensor &,
+                 Real &,
+                 Real &);
   void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
   void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
   Real getFlowIncrement(Real, Real, Real, Real, Real);
