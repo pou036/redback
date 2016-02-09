@@ -7,8 +7,9 @@
 
 #include "RedbackPlasticityUOJ2.h"
 
-template<>
-InputParameters validParams<RedbackPlasticityUOJ2>()
+template <>
+InputParameters
+validParams<RedbackPlasticityUOJ2>()
 {
   InputParameters params = validParams<RedbackPlasticityUOBase>();
   params.addClassDescription("User object to store plasticity functions based on J2");
@@ -16,8 +17,7 @@ InputParameters validParams<RedbackPlasticityUOJ2>()
   return params;
 }
 
-RedbackPlasticityUOJ2::RedbackPlasticityUOJ2(const InputParameters & parameters) :
-    RedbackPlasticityUOBase(parameters)
+RedbackPlasticityUOJ2::RedbackPlasticityUOJ2(const InputParameters & parameters) : RedbackPlasticityUOBase(parameters)
 {
 }
 
@@ -25,15 +25,24 @@ RedbackPlasticityUOJ2::RedbackPlasticityUOJ2(const InputParameters & parameters)
  * Derivative of getFlowIncrement with respect to equivalent stress, only has deviatoric component in J2 plasiticity
  */
 Real
-RedbackPlasticityUOJ2::getDerivativeFlowIncrement(const RankTwoTensor & sig, Real yield_stress, Real dt, Real exponent, Real exponential, Real ref_pe_rate) const
+RedbackPlasticityUOJ2::getDerivativeFlowIncrement(
+  const RankTwoTensor & sig, Real yield_stress, Real dt, Real exponent, Real exponential, Real ref_pe_rate) const
 {
   // Derivative of getFlowIncrement with respect to equivalent stress
-  return ref_pe_rate * dt * exponent *
-         std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), exponent - 1.0) * exponential / yield_stress;
+  return ref_pe_rate * dt * exponent * std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), exponent - 1.0) *
+         exponential / yield_stress;
 }
 
 Real
-RedbackPlasticityUOJ2::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real yield_stress, Real dt, Real exponent, Real exponential, Real ref_pe_rate) const
+RedbackPlasticityUOJ2::getFlowIncrement(Real sig_eqv,
+                                        Real p,
+                                        Real q_y,
+                                        Real p_y,
+                                        Real yield_stress,
+                                        Real dt,
+                                        Real exponent,
+                                        Real exponential,
+                                        Real ref_pe_rate) const
 {
   return ref_pe_rate * dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), exponent) * exponential;
 }
@@ -53,9 +62,6 @@ RedbackPlasticityUOJ2::getFlowTensor(
   // flow_tensor_dev /= flow_tensor_dev.L2norm();
   // TODO: norm is actually sqrt(3/2)
 }
-
-
-
 
 // Jacobian for stress update algorithm
 void
@@ -111,7 +117,7 @@ RedbackPlasticityUOJ2::getJac(const RankTwoTensor & sig,
           dft_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) - f2 * deltaFunc(i, j) * deltaFunc(k, l) -
                                  f3 * sig_dev(i, j) * sig_dev(k, l); // d_flow_dirn/d_sig - 2nd part
 
-  dfd_dsig = dft_dsig; // d_flow_dirn/d_sig
+  dfd_dsig = dft_dsig;                                                  // d_flow_dirn/d_sig
   dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr_dev + dfi_dsig; // Jacobian
 }
 

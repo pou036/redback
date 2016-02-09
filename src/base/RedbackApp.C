@@ -63,7 +63,6 @@
 #include "RedbackPlasticityUODP.h"
 #include "RedbackPlasticityUOCC.h"
 
-
 template <>
 InputParameters
 validParams<RedbackApp>()
@@ -123,14 +122,14 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackDamage);
 
   registerMaterial(RedbackMaterial);
+  registerMaterial(RedbackMechMaterial);
+  registerMaterial(RedbackMechMaterialElastic);
+
+  // following materials are deprecated; kept for compatibility
   registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialDP);
   registerMaterial(RedbackMechMaterialCC);
   registerMaterial(RedbackMechMaterialCCanisotropic);
-  registerMaterial(RedbackMechMaterialElastic);
-
-  //experimental!
-  registerMaterial(RedbackMechMaterial);
 
   registerUserObject(RedbackPlasticityUOJ2);
   registerUserObject(RedbackPlasticityUODP);

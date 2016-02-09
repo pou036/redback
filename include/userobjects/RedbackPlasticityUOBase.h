@@ -17,7 +17,7 @@
 
 class RedbackPlasticityUOBase;
 
-template<>
+template <>
 InputParameters validParams<RedbackPlasticityUOBase>();
 
 /**
@@ -28,29 +28,46 @@ class RedbackPlasticityUOBase : public GeneralUserObject
 {
 public:
   RedbackPlasticityUOBase(const InputParameters & parameters);
-  virtual ~RedbackPlasticityUOBase() {}
-
-
-  void initialize() {
-  // Explicitly call the initialization routines for our base class
-  // GeneralUserObject::initialize();
-
+  virtual ~RedbackPlasticityUOBase()
+  {
   }
-  void execute() {}
-  void finalize() {}
+
+  void
+  initialize()
+  {
+    // Explicitly call the initialization routines for our base class
+    // GeneralUserObject::initialize();
+  }
+  void
+  execute()
+  {
+  }
+  void
+  finalize()
+  {
+  }
 
   virtual Real getFlowIncrement(Real, Real, Real, Real, Real, Real, Real, Real, Real) const = 0;
 
   virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &) const = 0;
 
-  virtual void
-  getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &, Real, Real, Real, Real) const = 0;
+  virtual void getJac(const RankTwoTensor &,
+                      const RankFourTensor &,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      RankFourTensor &,
+                      Real,
+                      Real,
+                      Real,
+                      Real) const = 0;
 
   virtual void get_py_qy(Real, Real, Real &, Real &, Real) const = 0;
 
-
-
-  //void threadJoin(const UserObject &) {}
+  // void threadJoin(const UserObject &) {}
   // The following functions are needed in the return map, but the definition
   // is dependant on the yield criterion. Therefore we define them as abstract
   // virtual functions here such that no implementation is needed in
@@ -63,19 +80,16 @@ public:
   // virtual void get_py_qy(Real, Real, Real &, Real &, Real) = 0;
 
 protected:
-
   // needs these set up:
   // Real _ref_pe_rate;
   // Real _exponent;
   // Real _exponential;
   // Real _dt;
 
-
-
   // some math functions that the called functions use
 
-  //the signature of getDerivativeFlowIncrement depends on the model, so omitted here.
-  //virtual Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real) const = 0;
+  // the signature of getDerivativeFlowIncrement depends on the model, so omitted here.
+  // virtual Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real) const = 0;
   Real macaulayBracket(Real) const;
   Real getSigEqv(const RankTwoTensor & stress) const;
   Real deltaFunc(unsigned int i, unsigned int j) const;
@@ -85,8 +99,6 @@ protected:
   // _exponent
   // _exponential
 
-
-
   // TODO
   // std::string _strength_prop_name;
   // std::string _base_name;
@@ -94,7 +106,6 @@ protected:
   // std::string _pk2_prop_name;
   // const MaterialProperty<RankTwoTensor> & _pk2;
   // const MaterialProperty<RankTwoTensor> & _ce;
-
 };
 
-#endif
+#endif // REDBACKPLASTICITYUOBASE_H

@@ -11,7 +11,7 @@
 
 class RedbackPlasticityUODP;
 
-template<>
+template <>
 InputParameters validParams<RedbackPlasticityUODP>();
 
 /**
@@ -22,7 +22,9 @@ class RedbackPlasticityUODP : public RedbackPlasticityUOBase
 {
 public:
   RedbackPlasticityUODP(const InputParameters & parameters);
-  virtual ~RedbackPlasticityUODP() {}
+  virtual ~RedbackPlasticityUODP()
+  {
+  }
 
   static MooseEnum damageMethodEnum();
   enum DamageMethod
@@ -38,12 +40,31 @@ public:
 
   virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &) const;
 
-  virtual void
-  getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &, Real, Real, Real, Real) const;
+  virtual void getJac(const RankTwoTensor &,
+                      const RankFourTensor &,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      RankFourTensor &,
+                      Real,
+                      Real,
+                      Real,
+                      Real) const;
 
   virtual void get_py_qy(Real, Real, Real &, Real &, Real) const;
 
-  virtual void form_damage_kernels(DamageMethod, VariableValue &, Real, Real, MaterialProperty<Real> &, MaterialProperty<Real> &, MaterialProperty<Real> &, MaterialProperty<Real> &, unsigned int) const;
+  virtual void form_damage_kernels(DamageMethod,
+                                   VariableValue &,
+                                   Real,
+                                   Real,
+                                   MaterialProperty<Real> &,
+                                   MaterialProperty<Real> &,
+                                   MaterialProperty<Real> &,
+                                   MaterialProperty<Real> &,
+                                   unsigned int) const;
 
 protected:
   Real _slope_yield_surface; // coefficient for yield surface
@@ -52,11 +73,22 @@ protected:
   virtual Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real, Real, Real, Real) const;
   virtual Real getPressureProjection(Real, Real, Real) const;
 
-  virtual void formBrittleDamage(VariableValue &, Real, Real, MaterialProperty<Real> &, MaterialProperty<Real> &, MaterialProperty<Real> &, MaterialProperty<Real> &, unsigned int) const;
-  virtual void formCreepDamage(VariableValue &, Real, Real, MaterialProperty<Real> &, MaterialProperty<Real> &, MaterialProperty<Real> &, MaterialProperty<Real> &, unsigned int) const;
-
-
-
+  virtual void formBrittleDamage(VariableValue &,
+                                 Real,
+                                 Real,
+                                 MaterialProperty<Real> &,
+                                 MaterialProperty<Real> &,
+                                 MaterialProperty<Real> &,
+                                 MaterialProperty<Real> &,
+                                 unsigned int) const;
+  virtual void formCreepDamage(VariableValue &,
+                               Real,
+                               Real,
+                               MaterialProperty<Real> &,
+                               MaterialProperty<Real> &,
+                               MaterialProperty<Real> &,
+                               MaterialProperty<Real> &,
+                               unsigned int) const;
 };
 
 #endif // REDBACKPLASTICITYUODP_H

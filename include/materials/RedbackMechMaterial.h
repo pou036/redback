@@ -192,7 +192,6 @@ protected:
   Real _damage_dissipation;
 
   const RedbackPlasticityUOBase * _plasticity_userobject;
-
 };
 
 #endif // REDBACKMECHMATERIAL_H

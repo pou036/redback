@@ -7,8 +7,9 @@
 
 #include "RedbackPlasticityUODP.h"
 
-template<>
-InputParameters validParams<RedbackPlasticityUODP>()
+template <>
+InputParameters
+validParams<RedbackPlasticityUODP>()
 {
   InputParameters params = validParams<RedbackPlasticityUOBase>();
 
@@ -18,8 +19,7 @@ InputParameters validParams<RedbackPlasticityUODP>()
 }
 
 RedbackPlasticityUODP::RedbackPlasticityUODP(const InputParameters & parameters) :
-    RedbackPlasticityUOBase(parameters),
-    _slope_yield_surface(getParam<Real>("slope_yield_surface"))
+    RedbackPlasticityUOBase(parameters), _slope_yield_surface(getParam<Real>("slope_yield_surface"))
 {
 }
 
@@ -27,8 +27,15 @@ RedbackPlasticityUODP::RedbackPlasticityUODP(const InputParameters & parameters)
  * Derivative of getFlowIncrement with respect to equivalent stress, only has deviatoric component in J2 plasiticity
  */
 Real
-RedbackPlasticityUODP::getDerivativeFlowIncrement(
-  const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real q_yield_stress, Real p_yield_stress, Real dt, Real exponent, Real exponential, Real ref_pe_rate) const
+RedbackPlasticityUODP::getDerivativeFlowIncrement(const RankTwoTensor & sig,
+                                                  Real pressure,
+                                                  Real sig_eqv,
+                                                  Real q_yield_stress,
+                                                  Real p_yield_stress,
+                                                  Real dt,
+                                                  Real exponent,
+                                                  Real exponential,
+                                                  Real ref_pe_rate) const
 {
   Real delta_lambda_p =
     ref_pe_rate * dt * std::pow(macaulayBracket(pressure - p_yield_stress), exponent) * exponential;
@@ -41,16 +48,23 @@ RedbackPlasticityUODP::getDerivativeFlowIncrement(
     ref_pe_rate * dt * exponent *
     std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * (sig_eqv / q_yield_stress - 1.0)), exponent - 1.0) *
     exponential / q_yield_stress;
-  Real der_flow_incr_vol = ref_pe_rate * dt * exponent *
-                           std::pow(macaulayBracket(pressure - p_yield_stress), exponent - 1.0) * exponential;
+  Real der_flow_incr_vol =
+    ref_pe_rate * dt * exponent * std::pow(macaulayBracket(pressure - p_yield_stress), exponent - 1.0) * exponential;
   return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
 }
 
 Real
-RedbackPlasticityUODP::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real yield_stress, Real dt, Real exponent, Real exponential, Real ref_pe_rate) const
+RedbackPlasticityUODP::getFlowIncrement(Real sig_eqv,
+                                        Real pressure,
+                                        Real q_yield_stress,
+                                        Real p_yield_stress,
+                                        Real yield_stress,
+                                        Real dt,
+                                        Real exponent,
+                                        Real exponential,
+                                        Real ref_pe_rate) const
 {
-  Real flow_incr_vol =
-    ref_pe_rate * dt * std::pow(macaulayBracket(pressure - p_yield_stress), exponent) * exponential;
+  Real flow_incr_vol = ref_pe_rate * dt * std::pow(macaulayBracket(pressure - p_yield_stress), exponent) * exponential;
   // TODO: q_yield_stress can be 0, we should handle that case properly...
   Real flow_incr_dev =
     ref_pe_rate * dt *
@@ -104,7 +118,8 @@ RedbackPlasticityUODP::getJac(const RankTwoTensor & sig,
 
   sig_dev = sig.deviatoric();
 
-  dfi_dseqv = getDerivativeFlowIncrement(sig, pressure, sig_eqv, q_yield_stress, p_yield_stress, dt, exponent, exponential, ref_pe_rate);
+  dfi_dseqv = getDerivativeFlowIncrement(
+    sig, pressure, sig_eqv, q_yield_stress, p_yield_stress, dt, exponent, exponential, ref_pe_rate);
   getFlowTensor(sig, sig_eqv, pressure, yield_stress, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the
@@ -191,26 +206,27 @@ RedbackPlasticityUODP::getPressureProjection(Real pressure, Real sig_eqv, Real c
 }
 
 void
-RedbackPlasticityUODP::form_damage_kernels(
-  DamageMethod damage_method,
-  VariableValue & damage,
-  Real cohesion,
-  Real damage_coeff,
-  MaterialProperty<Real> & damage_kernel,
-  MaterialProperty<Real> & damage_kernel_jac,
-  MaterialProperty<Real> & mises_stress,
-  MaterialProperty<Real> & mises_strain_rate,
-  unsigned int qp) const
+RedbackPlasticityUODP::form_damage_kernels(DamageMethod damage_method,
+                                           VariableValue & damage,
+                                           Real cohesion,
+                                           Real damage_coeff,
+                                           MaterialProperty<Real> & damage_kernel,
+                                           MaterialProperty<Real> & damage_kernel_jac,
+                                           MaterialProperty<Real> & mises_stress,
+                                           MaterialProperty<Real> & mises_strain_rate,
+                                           unsigned int qp) const
 {
   // update damage evolution law from selected method
   // switch (damage_method)
   // {
   //   case BrittleDamage:
   //     //signatures are not working yet
-  //     formBrittleDamage(damage, cohesion, damage_coeff, damage_kernel, damage_kernel_jac, mises_stress, mises_strain_rate, qp);
+  //     formBrittleDamage(damage, cohesion, damage_coeff, damage_kernel, damage_kernel_jac, mises_stress,
+  //     mises_strain_rate, qp);
   //     break;
   //   case CreepDamage:
-  //     formCreepDamage(damage, cohesion, damage_coeff, damage_kernel, damage_kernel_jac, mises_stress, mises_strain_rate, qp);
+  //     formCreepDamage(damage, cohesion, damage_coeff, damage_kernel, damage_kernel_jac, mises_stress,
+  //     mises_strain_rate, qp);
   //     break;
   //   case BreakageMechanics:
   //     mooseError("damage method not implemented yet, use other options");
@@ -223,17 +239,16 @@ RedbackPlasticityUODP::form_damage_kernels(
   // }
 }
 
-//placeholder; currently nonworking
+// placeholder; currently nonworking
 void
-RedbackPlasticityUODP::formBrittleDamage(
-  VariableValue & damage,
-  Real cohesion,
-  Real damage_coeff,
-  MaterialProperty<Real> & damage_kernel,
-  MaterialProperty<Real> & damage_kernel_jac,
-  MaterialProperty<Real> & mises_stress,
-  MaterialProperty<Real> & mises_strain_rate,
-  unsigned int qp) const
+RedbackPlasticityUODP::formBrittleDamage(VariableValue & damage,
+                                         Real cohesion,
+                                         Real damage_coeff,
+                                         MaterialProperty<Real> & damage_kernel,
+                                         MaterialProperty<Real> & damage_kernel_jac,
+                                         MaterialProperty<Real> & mises_stress,
+                                         MaterialProperty<Real> & mises_strain_rate,
+                                         unsigned int qp) const
 {
   Real plastic_damage, healing_damage;
   Real kachanov, exponent_kachanov;
@@ -249,17 +264,16 @@ RedbackPlasticityUODP::formBrittleDamage(
   damage_kernel_jac[qp] = 0;
 }
 
-//placeholder; currently nonworking
+// placeholder; currently nonworking
 void
-RedbackPlasticityUODP::formCreepDamage(
-  VariableValue & damage,
-  Real cohesion,
-  Real damage_coeff,
-  MaterialProperty<Real> & damage_kernel,
-  MaterialProperty<Real> & damage_kernel_jac,
-  MaterialProperty<Real> & mises_stress,
-  MaterialProperty<Real> & mises_strain_rate,
-  unsigned int qp) const
+RedbackPlasticityUODP::formCreepDamage(VariableValue & damage,
+                                       Real cohesion,
+                                       Real damage_coeff,
+                                       MaterialProperty<Real> & damage_kernel,
+                                       MaterialProperty<Real> & damage_kernel_jac,
+                                       MaterialProperty<Real> & mises_stress,
+                                       MaterialProperty<Real> & mises_strain_rate,
+                                       unsigned int qp) const
 {
   Real plastic_damage, healing_damage;
   Real lambda_dot;

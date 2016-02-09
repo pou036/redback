@@ -11,7 +11,7 @@
 
 class RedbackPlasticityUOJ2;
 
-template<>
+template <>
 InputParameters validParams<RedbackPlasticityUOJ2>();
 
 /**
@@ -22,19 +22,31 @@ class RedbackPlasticityUOJ2 : public RedbackPlasticityUOBase
 {
 public:
   RedbackPlasticityUOJ2(const InputParameters & parameters);
-  virtual ~RedbackPlasticityUOJ2() {}
+  virtual ~RedbackPlasticityUOJ2()
+  {
+  }
 
   virtual Real getFlowIncrement(Real, Real, Real, Real, Real, Real, Real, Real, Real) const;
 
   virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &) const;
 
-  virtual void
-  getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &, Real, Real, Real, Real) const;
+  virtual void getJac(const RankTwoTensor &,
+                      const RankFourTensor &,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      RankFourTensor &,
+                      Real,
+                      Real,
+                      Real,
+                      Real) const;
 
   virtual void get_py_qy(Real, Real, Real &, Real &, Real) const;
 
 protected:
-
   virtual Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real) const;
 };
 

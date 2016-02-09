@@ -9,8 +9,9 @@
 #include "Ellipse.h"
 #include <cmath> //used for fabs
 
-template<>
-InputParameters validParams<RedbackPlasticityUOCC>()
+template <>
+InputParameters
+validParams<RedbackPlasticityUOCC>()
 {
   InputParameters params = validParams<RedbackPlasticityUOBase>();
   params.addClassDescription("User object to store plasticity functions based on CC");
@@ -19,8 +20,7 @@ InputParameters validParams<RedbackPlasticityUOCC>()
 }
 
 RedbackPlasticityUOCC::RedbackPlasticityUOCC(const InputParameters & parameters) :
-    RedbackPlasticityUOBase(parameters),
-    _slope_yield_surface(getParam<Real>("slope_yield_surface"))
+    RedbackPlasticityUOBase(parameters), _slope_yield_surface(getParam<Real>("slope_yield_surface"))
 {
 }
 
@@ -28,13 +28,20 @@ RedbackPlasticityUOCC::RedbackPlasticityUOCC(const InputParameters & parameters)
  * Derivative of getFlowIncrement with respect to equivalent stress, only has deviatoric component in J2 plasiticity
  */
 Real
-RedbackPlasticityUOCC::getDerivativeFlowIncrement(
-  const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress, Real dt, Real exponent, Real exponential, Real ref_pe_rate) const
+RedbackPlasticityUOCC::getDerivativeFlowIncrement(const RankTwoTensor & sig,
+                                                  Real pressure,
+                                                  Real sig_eqv,
+                                                  Real pc,
+                                                  Real q_yield_stress,
+                                                  Real p_yield_stress,
+                                                  Real dt,
+                                                  Real exponent,
+                                                  Real exponential,
+                                                  Real ref_pe_rate) const
 {
   if (Ellipse::isPointOutsideOfEllipse(/*m=*/_slope_yield_surface, /*p_c=*/pc, /*x=*/pressure, /*y=*/sig_eqv))
   {
-    Real delta_lambda_p =
-      ref_pe_rate * dt * std::pow(std::fabs(pressure - p_yield_stress), exponent) * exponential;
+    Real delta_lambda_p = ref_pe_rate * dt * std::pow(std::fabs(pressure - p_yield_stress), exponent) * exponential;
     Real delta_lambda_q = ref_pe_rate * dt * std::pow(std::fabs(sig_eqv - q_yield_stress), exponent) * exponential;
     Real delta_lambda = (std::pow(delta_lambda_p * delta_lambda_p + delta_lambda_q * delta_lambda_q, 0.5));
     Real der_flow_incr_dev =
@@ -48,7 +55,15 @@ RedbackPlasticityUOCC::getDerivativeFlowIncrement(
 }
 
 Real
-RedbackPlasticityUOCC::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real pc, Real dt, Real exponent, Real exponential, Real ref_pe_rate) const
+RedbackPlasticityUOCC::getFlowIncrement(Real sig_eqv,
+                                        Real pressure,
+                                        Real q_yield_stress,
+                                        Real p_yield_stress,
+                                        Real pc,
+                                        Real dt,
+                                        Real exponent,
+                                        Real exponential,
+                                        Real ref_pe_rate) const
 {
   pc *= -1;
   if (Ellipse::isPointOutsideOfEllipse(/*m=*/_slope_yield_surface, /*p_c=*/pc, /*x=*/pressure, /*y=*/sig_eqv))
@@ -101,7 +116,8 @@ RedbackPlasticityUOCC::getJac(const RankTwoTensor & sig,
 
   sig_dev = sig.deviatoric();
 
-  dfi_dseqv = getDerivativeFlowIncrement(sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress, dt, exponent, exponential, ref_pe_rate);
+  dfi_dseqv = getDerivativeFlowIncrement(
+    sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress, dt, exponent, exponential, ref_pe_rate);
   getFlowTensor(sig, sig_eqv, pressure, pc, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the residual with respect to stress, dr_dsig

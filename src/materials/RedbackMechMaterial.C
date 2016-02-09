@@ -84,10 +84,9 @@ validParams<RedbackMechMaterial>()
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
 
-  //userobject
-  params.addParam<UserObjectName>("plasticity_userobject", "The name of the UserObject that provides the plasticity model");
-  //debug
-
+  // userobject; see RedbackPlasticityUOBase.
+  params.addParam<UserObjectName>("plasticity_userobject",
+                                  "The name of the UserObject that provides the plasticity model");
 
   return params;
 }
@@ -181,8 +180,9 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _returnmap_iter(declareProperty<Real>("returnmap_iter")),
     _T0_param(getParam<Real>("temperature_reference")),
     _P0_param(getParam<Real>("pressure_reference")),
-    //uo
-    _plasticity_userobject(isParamValid("plasticity_userobject") ? & getUserObject<RedbackPlasticityUOBase>("plasticity_userobject") : NULL)
+    // uo
+    _plasticity_userobject(
+      isParamValid("plasticity_userobject") ? &getUserObject<RedbackPlasticityUOBase>("plasticity_userobject") : NULL)
 {
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
@@ -195,7 +195,6 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   MooseEnum fill_method = RankFourTensor::fillMethodEnum();
   fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic elasticity tensor.
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int)fill_method);
-
 }
 
 MooseEnum
@@ -675,7 +674,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
     // TODO: checking whether in plasticity
 
-    flow_incr = _plasticity_userobject->getFlowIncrement(q, p, q_y, p_y, yield_stress, _dt, _exponent, _exponential, _ref_pe_rate);
+    flow_incr = _plasticity_userobject->getFlowIncrement(
+      q, p, q_y, p_y, yield_stress, _dt, _exponent, _exponential, _ref_pe_rate);
     _plasticity_userobject->getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
 
     flow_tensor *= flow_incr;
@@ -688,7 +688,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
       iter++;
 
       // Jacobian = d(residual)/d(sigma)
-      _plasticity_userobject->getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig, _dt, _exponent, _exponential, _ref_pe_rate);
+      _plasticity_userobject->getJac(
+        sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig, _dt, _exponent, _exponential, _ref_pe_rate);
 
       dr_dsig_inv = dr_dsig.invSymm();
       ddsig = -dr_dsig_inv * resid;         // Newton Raphson
@@ -699,12 +700,12 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
       p = sig_new.trace() / 3.0;
       q = getSigEqv(sig_new);
       get_py_qy_damaged(p, q, p_y, q_y, yield_stress);
-      flow_incr = _plasticity_userobject->getFlowIncrement(q, p, q_y, p_y, yield_stress, _dt, _exponent, _exponential, _ref_pe_rate);
+      flow_incr = _plasticity_userobject->getFlowIncrement(
+        q, p, q_y, p_y, yield_stress, _dt, _exponent, _exponential, _ref_pe_rate);
       if (flow_incr < 0.0) // negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment: Reduce time increment.");
 
       _plasticity_userobject->getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
-
 
       flow_tensor *= flow_incr;
       resid = flow_tensor - delta_dp; // Residual
@@ -745,10 +746,7 @@ void
 RedbackMechMaterial::form_damage_kernels(Real cohesion)
 {
   mooseError("form_damage_kernels must be overwritten in children class");
-  //TODO: Implementation is in the UO.  add the linking logic here at some point.
-
-
-
+  // TODO: Implementation is in the UO.  add the linking logic here at some point.
 }
 
 void
@@ -789,6 +787,3 @@ RedbackMechMaterial::formDamageDissipation(RankTwoTensor & sig)
   // is (damage_potential * damage_rate)
   _damage_dissipation = damage_potential * damage_rate;
 }
-
-
-//------------debug
