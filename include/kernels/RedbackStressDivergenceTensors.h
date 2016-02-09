@@ -16,7 +16,7 @@ InputParameters validParams<RedbackStressDivergenceTensors>();
 /**
  * RedbackStressDivergenceTensors mostly copies from StressDivergence.  There are small changes to use
  * RankFourTensor and RankTwoTensors instead of SymmElasticityTensors and SymmTensors.  This is done
- * to allow for more mathematical transparancy.
+ * to allow for more mathematical transparency.
  */
 class RedbackStressDivergenceTensors : public Kernel
 {
@@ -30,6 +30,8 @@ protected:
 
   VariableValue & _pore_pres;
   RealVectorValue _poromech_stress_row;
+
+  std::string _base_name;
 
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;

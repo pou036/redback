@@ -46,6 +46,8 @@ validParams<RedbackMechMaterial>()
   params.addCoupledVar("disp_z", 0.0, "The z displacement");
   params.addCoupledVar("temperature", 0.0, "temperature variable");
   params.addCoupledVar("damage", 0.0, "damage variable");
+  params.addRequiredParam<std::vector<Real> >("C_ijkl", "Stiffness tensor for material");
+  params.addParam<MooseEnum>("fill_method", RankFourTensor::fillMethodEnum() = "symmetric9", "The fill method");
 
   // Copy-paste from FiniteStrainMaterial.C
   // nothing
@@ -104,7 +106,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _elasticity_tensor(declareProperty<ElasticityTensorR4>("elasticity_tensor")),
     _Jacobian_mult(declareProperty<ElasticityTensorR4>("Jacobian_mult")),
     // _d_stress_dT(declareProperty<RankTwoTensor>("d_stress_dT")),
-    _Cijkl(),
+    _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
 
     // Copy-paste from FiniteStrainMaterial.C
     _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),
@@ -179,7 +181,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _T0_param(getParam<Real>("temperature_reference")),
     _P0_param(getParam<Real>("pressure_reference"))
 {
-  Real E = _youngs_modulus;
+  /*Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
   Real l1 = E * nu / (1 + nu) / (1 - 2 * nu); // First Lame modulus
   Real l2 = 0.5 * E / (1 + nu);               // Second Lame modulus (shear)
@@ -189,7 +191,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   // Choose fill method, hardcoded.
   MooseEnum fill_method = RankFourTensor::fillMethodEnum();
   fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic elasticity tensor.
-  _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int)fill_method);
+  _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int)fill_method);*/
 }
 
 MooseEnum
