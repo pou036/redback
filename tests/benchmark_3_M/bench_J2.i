@@ -28,7 +28,7 @@
 
 [Materials]
   [./mat_mech]
-    type = RedbackMechMaterialJ2
+    type = RedbackMechMaterial
     block = 0
     disp_x = disp_x
     disp_y = disp_y

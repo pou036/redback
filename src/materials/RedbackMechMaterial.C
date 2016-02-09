@@ -85,7 +85,7 @@ validParams<RedbackMechMaterial>()
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
 
   //userobject
-  params.addRequiredParam<UserObjectName>("plasticity_userobject", "The name of the UserObject that provides the plasticity model");
+  params.addParam<UserObjectName>("plasticity_userobject", "The name of the UserObject that provides the plasticity model");
   //debug
 
 

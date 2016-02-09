@@ -37,7 +37,7 @@
 
 [Materials]
   [./mat_mech]
-    type = RedbackMechMaterialJ2
+    type = RedbackMechMaterial
     block = 0
     disp_x = disp_x
     disp_y = disp_y
@@ -50,6 +50,7 @@
     ref_pe_rate = 1
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
+    plasticity_userobject = J2
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -75,6 +76,12 @@
     ref_lewis_nb = 1
     total_porosity = total_porosity
     solid_compressibility = 0
+  [../]
+[]
+
+[UserObjects]
+  [./J2]
+    type = RedbackPlasticityUOJ2
   [../]
 []
 
@@ -473,4 +480,3 @@
     value = 0
   [../]
 []
-

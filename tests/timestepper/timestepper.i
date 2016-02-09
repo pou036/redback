@@ -49,7 +49,7 @@
 
 [Materials]
   [./mat0]
-    type = RedbackMechMaterialCC
+    type = RedbackMechMaterial
     block = 0
     disp_y = disp_y
     disp_x = disp_x
@@ -62,6 +62,7 @@
     poisson_ratio = 0.3
     slope_yield_surface = 0.3
     total_porosity = total_porosity
+    plasticity_userobject = CC
   [../]
   [./mat1]
     type = RedbackMaterial
@@ -83,6 +84,14 @@
     alpha_2 = 1
   [../]
 []
+
+[UserObjects]
+  [./CC]
+    type = RedbackPlasticityUOCC
+    slope_yield_surface = 0.3
+  [../]
+[]
+
 
 [BCs]
   active = 'constant_force_right temp_box left_disp rigth_disp_y left_disp_y'
@@ -382,4 +391,3 @@
     disp_x = disp_x
   [../]
 []
-

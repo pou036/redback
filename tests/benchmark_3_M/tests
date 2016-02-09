@@ -14,16 +14,16 @@
     input = 'bench_CC.i'
     csvdiff = 'bench_CC_out.csv'
   [../]
-  [./test_3_M_CC_anisotropic0] # can't put a dot in that name!
-    type = 'CSVDiff'
-    input = 'bench_CC_anisotropic0.i' # with value of alpha=0 (to compare with CC)
-    csvdiff = 'bench_CC_out.csv'
-  [../]
-  [./test_3_M_CC_anisotropic1] # can't put a dot in that name!
-    type = 'CSVDiff'
-    input = 'bench_CC_anisotropic1.i' # with value of alpha=0.3
-    csvdiff = 'bench_CC_anisotropic1_out.csv'
-  [../]
+#  [./test_3_M_CC_anisotropic0] # can't put a dot in that name!
+#    type = 'CSVDiff'
+#    input = 'bench_CC_anisotropic0.i' # with value of alpha=0 (to compare with CC)
+#    csvdiff = 'bench_CC_out.csv'
+#  [../]
+#  [./test_3_M_CC_anisotropic1] # can't put a dot in that name!
+#    type = 'CSVDiff'
+#    input = 'bench_CC_anisotropic1.i' # with value of alpha=0.3
+#    csvdiff = 'bench_CC_anisotropic1_out.csv'
+#  [../]
   [./test_3_M_elastic_1] # can't put a dot in that name!
     type = 'Exodiff'
     input = 'bench_elastic_1.i'

@@ -35,7 +35,7 @@
 
 [Materials]
   [./mat_mech]
-    type = RedbackMechMaterialDP
+    type = RedbackMechMaterial
     block = 0
     disp_x = disp_x
     disp_y = disp_y
@@ -49,6 +49,7 @@
     yield_criterion = Drucker_Prager
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
+    plasticity_userobject = DP
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -66,6 +67,13 @@
     ref_lewis_nb = 1
     temperature = temp
     total_porosity = total_porosity
+  [../]
+[]
+
+[UserObjects]
+  [./DP]
+    type = RedbackPlasticityUODP
+    slope_yield_surface = -0.6
   [../]
 []
 
@@ -402,4 +410,3 @@
     value = 0
   [../]
 []
-
