@@ -77,17 +77,33 @@ void
 RedbackContinuationTangentAux::compute()
 {
   _subproblem.reinitNodes(_node_ids, _tid);        // compute variables at nodes
-  // _node_ids(getParam<std::vector<dof_id_type> >("nodes")) <--- CODE from parent class, to grab only user given nodes.
+  int nb_nodes  = _subproblem.mesh().getMesh().n_nodes();
 
-  // How to get all the nodes programmatically???
-  // See AllLocalDofIndicesThread ?
-  // See MooseVariable.C where reinitNodes() is defined) --> _subproblem.mesh()
-  /*DofMap & dof_map;
-  dof_map = _nl_sys.get_dof_map();
-  dof_id_type local_dof_begin = _dof_map.first_dof();
-  dof_id_type local_dof_end = _dof_map.end_dof();*/
-  //Real test = _subproblem.mesh().getMesh().n_nodes();
-  //std::cout << "test=" << test << std::endl;
+
+  /*std::vector<int> test_vector(nb_nodes);
+  for (int k = 0; k < nb_nodes; ++k)
+  {
+    std::fill(test_vector.begin() + k, test_vector.begin() + k, k);
+    std::cout << " k  = " << k << std::endl;
+  }*/
+
+
+/*
+  std::vector<dof_id_type> all_node_ids(nb_nodes);
+  const libMesh::MeshBase::node_iterator begin = _subproblem.mesh().getMesh().nodes_begin();
+  const libMesh::MeshBase::node_iterator end = _subproblem.mesh().getMesh().nodes_end();
+  //for (libMesh::MeshBase::node_iterator k = begin; k != end; ++k)
+  for (int k = 0; k < nb_nodes; ++k)
+  {
+    std::fill(all_node_ids.begin() + k, all_node_ids.begin() + k, (dof_id_type)k);
+    std::cout << " k  = " << k << ", all_node_ids[k]=" << all_node_ids[k] << std::endl;
+  }
+*/
+  /*int nb_nodes  = _subproblem.mesh().getMesh().max_node_id();
+  int nb_nodes2  = _subproblem.mesh().getMesh().n_nodes();
+  std::cout << "nb of nodes = " << nb_nodes << std::endl;
+  std::cout << "nb of nodes2 = " << nb_nodes2 << std::endl;
+  //std::cout << "test=" << test << std::endl;*/
 
 // TODO: get the full list of nodes programmatically!!!
 
