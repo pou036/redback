@@ -60,6 +60,7 @@
 
 // AuxKernels
 #include "RedbackContinuationTangentAux.h"
+#include "RedbackDiffVarsAux.h"
 #include "RedbackTotalPorosityAux.h"
 
 template <>
@@ -132,6 +133,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerExecutioner(ReturnMapIterDT);
 
   registerAux(RedbackContinuationTangentAux);
+  registerAux(RedbackDiffVarsAux);
   registerAux(RedbackTotalPorosityAux);
 #undef registerObject
 #define registerObject(name) factory.regLegacy<name>(stringifyName(name))
