@@ -78,42 +78,22 @@ RedbackContinuationTangentAux::compute()
 {
   _subproblem.reinitNodes(_node_ids, _tid);        // compute variables at nodes
   int nb_nodes  = _subproblem.mesh().getMesh().n_nodes();
-
-
-  /*std::vector<int> test_vector(nb_nodes);
-  for (int k = 0; k < nb_nodes; ++k)
-  {
-    std::fill(test_vector.begin() + k, test_vector.begin() + k, k);
-    std::cout << " k  = " << k << std::endl;
-  }*/
-
-
-/*
   std::vector<dof_id_type> all_node_ids(nb_nodes);
-  const libMesh::MeshBase::node_iterator begin = _subproblem.mesh().getMesh().nodes_begin();
-  const libMesh::MeshBase::node_iterator end = _subproblem.mesh().getMesh().nodes_end();
+
+
+  //const libMesh::MeshBase::node_iterator begin = _subproblem.mesh().getMesh().nodes_begin();
+  //const libMesh::MeshBase::node_iterator end = _subproblem.mesh().getMesh().nodes_end();
   //for (libMesh::MeshBase::node_iterator k = begin; k != end; ++k)
   for (int k = 0; k < nb_nodes; ++k)
   {
-    std::fill(all_node_ids.begin() + k, all_node_ids.begin() + k, (dof_id_type)k);
-    std::cout << " k  = " << k << ", all_node_ids[k]=" << all_node_ids[k] << std::endl;
+    all_node_ids[k] = k;
   }
-*/
-  /*int nb_nodes  = _subproblem.mesh().getMesh().max_node_id();
-  int nb_nodes2  = _subproblem.mesh().getMesh().n_nodes();
-  std::cout << "nb of nodes = " << nb_nodes << std::endl;
-  std::cout << "nb of nodes2 = " << nb_nodes2 << std::endl;
-  //std::cout << "test=" << test << std::endl;*/
 
-// TODO: get the full list of nodes programmatically!!!
-
-
-  //std::cout << "_var.order()=" << _var.order()<<std::endl;
   for (_i = 0; _i < _var.order(); ++_i) // _var.order()=1 for a scalar
   {
     Real value = computeValue();
     _communicator.sum(value);
-    _var.setValue(_i, value);                  // update variable data, which is referenced by other kernels, so the value is up-to-date
+    _var.setValue(_i, value); // update variable data, which is referenced by other kernels, so the value is up-to-date
   }
 }
 
