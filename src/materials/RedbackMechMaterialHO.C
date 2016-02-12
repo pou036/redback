@@ -41,6 +41,7 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _symmetric_stress(declareProperty<RankTwoTensor>("symmetric_stress")),
     _antisymmetric_stress(declareProperty<RankTwoTensor>("antisymmetric_stress")),
     _stress_couple(declareProperty<RankTwoTensor>("coupled_stress")),
+    _macro_rotation(declareProperty<RankTwoTensor>("macro_rotation")),
     _elastic_flexural_rigidity_tensor(declareProperty<ElasticityTensorR4>("elastic_flexural_rigidity_tensor")),
     _Jacobian_mult_couple(declareProperty<ElasticityTensorR4>("coupled_Jacobian_mult")),
     _Bijkl_vector(getParam<std::vector<Real> >("B_ijkl")),
@@ -71,6 +72,10 @@ RedbackMechMaterialHO::computeQpStrain()
   _symmetric_strain[_qp] = (grad_tensor + grad_tensor.transpose()) / 2.0;
   _antisymmetric_strain[_qp] = (grad_tensor - grad_tensor.transpose()) / 2.0;
   _elastic_strain[_qp] = grad_tensor;
+
+  /* Setting up a macro-rotation (antisymmetric part of the strain) tensor to be used in Cosserat BCs*/
+  RankTwoTensor mgrad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
+  _macro_rotation[_qp] = (mgrad_tensor - mgrad_tensor.transpose()) / 2.0;
 
   //_strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp] * (_T[_qp] - _T_old[_qp])); TODO
   _rotation_increment[_qp].zero();
