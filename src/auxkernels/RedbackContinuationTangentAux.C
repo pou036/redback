@@ -76,10 +76,8 @@ RedbackContinuationTangentAux::~RedbackContinuationTangentAux()
 void
 RedbackContinuationTangentAux::compute()
 {
-  _subproblem.reinitNodes(_node_ids, _tid);        // compute variables at nodes
   int nb_nodes  = _subproblem.mesh().getMesh().n_nodes();
   std::vector<dof_id_type> all_node_ids(nb_nodes);
-
 
   //const libMesh::MeshBase::node_iterator begin = _subproblem.mesh().getMesh().nodes_begin();
   //const libMesh::MeshBase::node_iterator end = _subproblem.mesh().getMesh().nodes_end();
@@ -88,6 +86,7 @@ RedbackContinuationTangentAux::compute()
   {
     all_node_ids[k] = k;
   }
+  _subproblem.reinitNodes(all_node_ids, _tid); // compute variables at nodes
 
   for (_i = 0; _i < _var.order(); ++_i) // _var.order()=1 for a scalar
   {
