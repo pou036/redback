@@ -258,8 +258,6 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
   }
 }
 
-//=================================================================
-
 MooseEnum
 RedbackMaterial::densityMethodEnum()
 {
