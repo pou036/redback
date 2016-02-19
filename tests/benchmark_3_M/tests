@@ -39,4 +39,22 @@
     input = 'bench_elastic_3.i'
     exodiff = 'bench_elastic_3.e'
   [../]
+  [./shear_HO_1]
+    type = 'Exodiff'
+    input = 'bench_elastic_HO.i'
+    exodiff = 'bench_elastic_HO.e'
+    abs_zero = 1e-9
+  [../]
+#  [./tension]
+#    type = 'Exodiff'
+#    input = 'cosserat_tension.i'
+#    exodiff = 'cosserat_tension_out.e'
+#    abs_zero = 1e-9
+#  [../]
+[./shear_rotation_HO]
+  type = 'Exodiff'
+  input = 'bench_elastic_HO_shear.i'
+  exodiff = 'bench_elastic_HO_shear.e'
+  abs_zero = 1e-9
+[../]
 []

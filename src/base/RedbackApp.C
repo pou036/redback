@@ -25,6 +25,7 @@
 
 // Boundary conditions
 #include "FunctionDirichletTransverseBC.h"
+#include "RedbackRotationBC.h"
 
 // Initial conditions
 #include "FunctionWithRandomIC.h"
@@ -100,6 +101,7 @@ RedbackApp::registerObjects(Factory & factory)
 #undef registerObject
 #define registerObject(name) factory.reg<name>(stringifyName(name))
   registerBoundaryCondition(FunctionDirichletTransverseBC);
+  registerBoundaryCondition(RedbackRotationBC);
 
   registerInitialCondition(FunctionWithRandomIC);
   registerInitialCondition(FunctionTimesRandomIC);

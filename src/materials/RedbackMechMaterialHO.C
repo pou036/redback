@@ -12,6 +12,7 @@
 
 #include "Function.h"
 #include "RedbackMechMaterialHO.h"
+#include "myLib.h"
 
 /**
  * RedbackMechMaterialHO handles a high order material.
@@ -88,12 +89,18 @@ RedbackMechMaterialHO::computeQpStrain()
 void
 RedbackMechMaterialHO::computeQpStress()
 {
-  RedbackMechMaterial::computeQpStress();
+  //RedbackMechMaterial::computeQpStress();
+
+  _stress[_qp] = _elasticity_tensor[_qp] * _elastic_strain[_qp];
 
   // Additional outputs for post-processing
   _symmetric_stress[_qp] = (_stress[_qp] + _stress[_qp].transpose()) / 2.0;
   _antisymmetric_stress[_qp] = (_stress[_qp] - _stress[_qp].transpose()) / 2.0;
   _stress_couple[_qp] = _elastic_flexural_rigidity_tensor[_qp] * _curvature[_qp];
+
+  // Compute the energy dissipation and the properties declared
+  computeRedbackTerms(_stress[_qp], 0, 0);
+  myLib::SayHello("world");
 }
 
 void RedbackMechMaterialHO::computeQpElasticityTensor()
@@ -120,6 +127,8 @@ RedbackMechMaterialHO::returnMap(const RankTwoTensor & sig_old,
   //  _stress[_qp] = _elasticity_tensor[_qp] * _elastic_strain[_qp];
 
    sig = _elasticity_tensor[_qp] * _elastic_strain[_qp];
+   //std::cout << std::setprecision(12) << std::fixed;
+
   //sig = sig_old + E_ijkl * delta_d;
   dp = RankTwoTensor(); // Plastic rate of deformation tensor in unrotated configuration
 }
