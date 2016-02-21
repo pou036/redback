@@ -1,0 +1,13 @@
+#%Module1.0#####################################################################
+##
+## MOOSE module
+##
+set base_path   ~/moose-compilers
+
+setenv CC       mpicc
+setenv CXX      mpicxx
+setenv F90      mpif90
+setenv F77      mpif77
+setenv FC       mpif90
+
+setenv          PETSC_DIR       $base_path/petsc/petsc-3.6.0/gcc-opt

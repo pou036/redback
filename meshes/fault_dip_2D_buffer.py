@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-''' Script to change the element physical tags in fault_dip_2D.msh 
+''' Script to change the element physical tags in fault_dip_2D.msh
     in order to add a buffer around the Fault
       +——————————-—-—————————+
       |           +—+        |
@@ -12,7 +12,7 @@
 from Canvas import Line
 
 def createModifiedMesh(input_geo, input_msh, output_msh, n_layers=1):
-    ''' Function to create new mesh by adding padding buffer 
+    ''' Function to create new mesh by adding padding buffer
     (n elements on top and bottom)'''
     with open(input_geo) as fgeo_in:
         for line in fgeo_in:
@@ -54,8 +54,8 @@ def createModifiedMesh(input_geo, input_msh, output_msh, n_layers=1):
     return
 
 if __name__ == '__main__':
-    createModifiedMesh(input_geo='fault_dip_2D.geo', 
-                       input_msh='fault_dip_2D_thin.msh', 
-                       output_msh='fault_dip_2D_thin2.msh', 
+    createModifiedMesh(input_geo='fault_dip_2D.geo',
+                       input_msh='fault_dip_2D_thin.msh',
+                       output_msh='fault_dip_2D_thin2.msh',
                        n_layers=3)
     print 'Finished'

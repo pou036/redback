@@ -18,9 +18,9 @@ output_file_name = 'bench_HM_elastic_no_porosity.csv'
   reader = csv.reader(f_in)
   for row in reader:
     print row'''
-  
-  
-  
+
+
+
 # The MOOSE way (as done in CSVDiffer.py
 with open(input_file_name) as f:
   text = f.read()
@@ -30,5 +30,5 @@ with open(input_file_name) as f:
   with open(output_file_name, 'wb') as f_out:
     for line in lines:
       f_out.write(line + '\n')
-    
+
 print 'Finished. Read "{0}" and wrote clean version in "{1}"'.format(input_file_name, output_file_name)

@@ -5,7 +5,7 @@
 
 class RedbackAction;
 
-template<>
+template <>
 InputParameters validParams<RedbackAction>();
 
 class RedbackAction : public Action
@@ -23,4 +23,4 @@ private:
   const std::string _pore_pres;
 };
 
-#endif //REDBACKACTION_H
+#endif // REDBACKACTION_H

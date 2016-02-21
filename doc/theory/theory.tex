@@ -5,7 +5,7 @@
 %\usepackage{tabularx}
 %\usepackage{comment}
 %\usepackage{xspace}
-%\usepackage{array}
+\usepackage{array}
 \usepackage{caption}
 
 \RequirePackage{fix-cm}
@@ -22,10 +22,14 @@
 \usepackage{rotating}
 \usepackage{hyperref}
 \usepackage{epstopdf}
-
+\usepackage{url}
 
 \DeclareCaptionFont{white}{\color{white}}
 \DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
 
 \graphicspath{
 {figures/}
@@ -264,7 +268,8 @@ thus set $A_{\phi} = 1$.
   \caption{Dimensionless parameters used in \redback{}. The coefficient $\delta$ is defined
 such that $T^{\star} = (T-T_{ref})/(\delta T_{ref})$}
 \label{tab:dimensionless_nbs}
-\begin{tabular}{@{} l p{0.18\textwidth} l p{0.52\textwidth} @{}}
+%\begin{tabular}{@{} l p{0.18\textwidth} l p{0.52\textwidth} @{}}
+\begin{tabular}{| L{1cm} | L{2.5cm} | L{6cm} | L{5cm} |}
 \hline\noalign{\smallskip}
 Group & Name & Definition & Interpretation \\
 \noalign{\smallskip}\hline\noalign{\smallskip}
@@ -383,14 +388,20 @@ The numerical results match the theory with the time evolutions shown on Fig.~\r
 \section{Benchmark 6 - TM}
 Those benchmarks look at thermal-mechanical simulations.
 \subsection{Problem Description}
-by heating of an elastic rod from the back and the front ,this the rod  confined in all sides except  the top . 
+by heating of an elastic rod from the back and the front ,this the rod  confined in all sides except  the top As shown in fig~\ref{fig:Benchmark7_cubic}
+
+\begin{figure} 
+\label{fig:Benchmark6_Rod}
+\centering
+\includegraphics[width=0.52\textwidth]{benchmark_6_TM/elastic_model_setup}
+\caption{This is a caption confining from its sides and the bottom}
+\end{figure} . 
 \subsection{Analytical solution}
 The stress in x-axis will be similar to the stress in y-axis whereas the stress in z-axis will be zero since its not confined. because the temperature is increased the rod will expand in z-axis( strain in zz) and that strain calculated  by this equation:
 \begin{equation}
 \varepsilon_{zz}=\frac{\alpha}{2}\Delta T
 \end{equation}
-we divided $\alpha$ by $2$ because in this problem we have two dimension (area thermal expansion coefficient) for more information see this website $ (https://en.wikipedia.org/wiki/Thermal_expansion)$
-
+we divided $\alpha$ by $2$ because in this problem we have two dimension (area thermal expansion coefficient) for more information visit this website \hyperref {''https://en.wikipedia.org/wiki/Thermal_expansion''}
 from that strain we can caculate the stress in x-axis which is as shown in the equation bellow:
 \label{eq:thermal_stress}
 \begin{equation}
@@ -416,6 +427,7 @@ This problem is then solved using moose on a generated 3D mesh and a comparison 
 Those benchmarks look at hydro-mechanical simulations.
 
 \subsection{Elastic}
+\label{subsec:bench_7_elastic}
  This benchmark (\texttt{redback/tests/benchmark\_7\_ HM}) looks at Undrained odometer test (in finite strain) to compare with \moose poromechanics test (Infinitesimal strain).
 \subsubsection{Problem Description}
 
@@ -423,10 +435,10 @@ A cubic single-element fully-saturated sample has roller BCs applied to its side
 Under these conditions, and denoting the height ($z$ length) of the sample by $L$.As shown in fig~\ref{fig:Benchmark7_cubic}
 
 \begin{figure} 
-\label{fig:Benchmark7_cubic}
-\centering
-\includegraphics[width=0.5\textwidth]{benchmark_7_HM/elastic_model_setup}
-\caption{This is a caption confining from its sides and the bottom}
+  \centering
+  \includegraphics[width=0.25\textwidth]{benchmark_7_HM/elastic_model_setupx}
+  \caption{Model setup for benchmark~\ref{subsec:bench_7_elastic} showing applied boundary conditions, with all faces but the top constrained in normal displacement, and an applied downwards velocity on the top face.}
+  \label{fig:Benchmark7_cubic}
 \end{figure}
  
 \subsubsection{Analytical Solution}
@@ -486,14 +498,16 @@ E=\frac{9KG}{3K+G•}
 \end{equation}
 A comparison of the numerical results against the analytical solution are shown in fig~\ref{fig:benchmark7_Elastic}
 \begin{figure}
-\label{fig:benchmark7_Elastic}
   \centering
   \includegraphics[width=0.32\textwidth]{benchmark_7_HM/benchmark_7_HM_bench_HM_elastic_stress_xx}
   \includegraphics[width=0.32\textwidth]{benchmark_7_HM/benchmark_7_HM_bench_HM_elastic_stress_zz}
   \includegraphics[width=0.32\textwidth]{benchmark_7_HM/benchmark_7_HM_bench_HM_elastic_p0}
- \end{figure}
+  \caption{Comparison of analytical vs numerical results for benchmark~\ref{subsec:bench_7_elastic}}
+  \label{fig:benchmark7_Elastic}
+\end{figure}
  
 \subsection{Elastic No Porosity }
+\label{subsec:bench_7_elastic_no_porosity}
 
 The porosity is kept constant so it is same as the above problem(Elastic)but with changing in the properties :
 \begin{itemize}
@@ -509,17 +523,17 @@ The porosity is kept constant so it is same as the above problem(Elastic)but wit
 
 A comparison of the numerical results against the analytical solution are shown in Fig.~\ref{fig:benchmark7_no_porosity}.
 \begin{figure}
-  \label{fig:benchmark7_no_porosity}
   \centering
   \includegraphics[width=0.32\textwidth]{benchmark_7_HM/benchmark_7_HM_bench_HM_elastic_no_porosity_stress_xx}
   \includegraphics[width=0.32\textwidth]{benchmark_7_HM/benchmark_7_HM_bench_HM_elastic_no_porosity_stress_zz}
   \includegraphics[width=0.32\textwidth]{benchmark_7_HM/benchmark_7_HM_bench_HM_elastic_no_porosity_p0}
-  \caption{elastic without changing in porosity}
+  \caption{Comparison of analytical vs numerical results for benchmark~\ref{subsec:bench_7_elastic_no_porosity}}
+  \label{fig:benchmark7_no_porosity}
  \end{figure}
  
 \subsection{Elastic Porosity}
-In this problem The porosity evolves according to Eq.~\ref{eq:solid_mass_balance_2} and that  equation may be solved in closed form calculate  to  small changing in the porosity \label{eq:material_derivative}
-\begin{equation}
+\label{subsec:bench_7_elastic_with_porosity}
+In this problem the porosity evolves according to Eq.~\ref{eq:solid_mass_balance_2} and that  equation may be solved in closed form   to calculate the small changes in porosity \begin{equation}
 \label{eq:Evolution_of_Porosity}
 \phi = \phi_o+(1-\phi) \left[ \phi_0+\beta_s (p-p_o) - \epsilon_v \right] \ .
 \end{equation}
@@ -582,17 +596,16 @@ The last term the equation above is zero since we assume that we have one cell a
 \fi
 .A comparison of the numerical results against the analytical solution are shown in Fig.~\ref{fig:benchmark7_with_porosity}.
 \begin{figure}
-\label{fig:benchmark7_with_porosity}
   \centering
   \includegraphics[width=0.48\textwidth]{benchmark_7_HM/benchmark_7_HM_bench_HM_elastic_porosity_stress_xx}
   \includegraphics[width=0.48\textwidth]{benchmark_7_HM/benchmark_7_HM_bench_HM_elastic_porosity_stress_zz}\\
   \includegraphics[width=0.48\textwidth]{benchmark_7_HM/benchmark_7_HM_bench_HM_elastic_porosity_p0}
-  \includegraphics[width=0.48\textwidth]{benchmark_7_HM/benchmark_7_HM_bench_HM_elastic_porosity_total_porosity}
-  \caption{elastic with changing in porosity}
-  
+  \caption{Comparison of analytical vs numerical results for benchmark~\ref{subsec:bench_7_elastic_with_porosity}}
+  \label{fig:benchmark7_with_porosity}  
  \end{figure}
 
 \section{Benchmark 8 - THM}
+\label{subsec:bench_8_THM}
 Those benchmarks look at thermal-hydro-mechanical simulations.
 \subsection{Analytical solution}
 The results are similar to those from Bench-HM elastic in Benchmark-7-HM
@@ -605,7 +618,6 @@ The results are similar to those from Bench-HM elastic in Benchmark-7-HM
  
  so the stresses equation will become :
  \begin{equation}
- \label{eq:thermal_stress}
 \sigma_{xx}^{\mathrm{eff}} =\left[ (K - \mbox{$\frac{2}{3}$}G)\left[\left( v_{z}t/L\right)+\left(\frac{1}{2}\left( v_{z}t/L\right)^2\right) \right]\right]+\sigma_{th} \ . 
 \end{equation}
 \begin{equation}
@@ -630,22 +642,152 @@ This problem is then solved using moose on a generated 3D mesh for the values be
 \item Thermal Coefficient Expansion $\alpha=0.005$\
 
 \end{itemize}
-A comparison of the numerical results against the analytical solution are shown in
+A comparison of the numerical results against the analytical solution are shown in fig \ref{fig:gravity_rho_g_h}
 \begin{figure}
 \label{fig:benchmark8_THM_elastic}
   \centering
   \includegraphics[width=0.33\textwidth]{benchmark_8_THM/benchmark_8_THM_bench_THM_elastic_stress_xx}
   \includegraphics[width=0.33\textwidth]{benchmark_8_THM/benchmark_8_THM_bench_THM_elastic_stress_zz}\\
   \includegraphics[width=0.33\textwidth]{benchmark_8_THM/benchmark_8_THM_bench_THM_elastic_p0}
-  \caption{elastic with the effect of thermal stress }
+  \caption{ Comparison of analytical vs numerical results for elastic with the effect of thermal stress for benchmark~\ref{subsec:bench_8_THM}}
  \end{figure}
 
 
+\section{Gravity}
+\subsection{Gravity}
+\label{subsec:gravity rho g h}
+\subsubsection{Analytical Solution}
+Testing that gravity changes the stress (with depth for example) in the stress divergence kernel
+so the stress will be equal to the gravity and can be calculated from this equation
+\begin{equation}
+\sigma_{zz}=\rho g L
+\end{equation}
+where: \\
+$\rho$ : solid density\\
+$g$ : gravitational acceleration \\
+$L$ : The length \\
+ \begin{equation}
+ \sigma_{xx}= K_o(\rho g L) 
+ \end{equation}
+where:
+$K_o$ :The ratio of horizontal to vertical stress 
+\begin{equation}
+K_o=\frac{E\nu}{E(1-\nu)}
+\end{equation}
+\ifshowallderivations
+Lets explain the steps in details
+\begin{equation}
+K_o=\frac{\sigma_{xx}}{\sigma{zz}}
+\end{equation}
+and 
+\begin{equation}
+\label{eq:ratio of herizontal to vertical stresses }
+K_o=\frac{ (K - \mbox{$\frac{2}{3}$}G)\epsilon_{zz}}{(K + \mbox{$\frac{4}{3}$}G)\epsilon_{zz}}
+\end{equation}
+when:\\
+\begin{equation}
+K=\frac{E}{3(1-2\nu)}
+\end{equation}
+\begin{equation}
+G=\frac{E}{2(1+\nu)}
+\end{equation}
+form more information about the two equation above see the table in this website: (https://en.wikipedia.org/wiki/Lam%C3%A9_parameters)
+by substitute the two equations above in \ref{eq:ratio of herizontal to vertical stresses } and simplify them we end up with 
+$K_o=\frac{E\nu}{E(1-\nu)}$
 
+%\else
+\fi
 
+\subsubsection{Numerical Solution}
+This problem is then solved using moose on a generated 3D mesh for the values bellow:
+\begin{itemize}
+\item Young's modulus $(E)=5e4$\
+\item gravitational acceleration $g =-9.81$\
+\item Poisson's ratio $(\nu) =0.2$\
+\item $L=1$\
+\item  solid density $(\rho=1)$\
+\end{itemize}
+ a comparison of the numerical results against the analytical solution are shown in the figure \ref{fig:gravity_rho_g_h}
+ \begin{figure}
+  \centering
+  \includegraphics[width=0.48\textwidth]{gravity/gravity_gravity_rho_g_h_stress_xx}
+  \includegraphics[width=0.48\textwidth]{gravity/gravity_gravity_rho_g_h_stress_zz}\\
+  \caption{gravity ($\rho g h$) changes the stress  }
+  \label{fig:gravity_rho_g_h}
+\end{figure}
+
+\subsection{Gravity poro stress}
+\label{subsec:gravity_poro_stress}
+\subsubsection{Analytical Solution}
+Testing that gravity changes the stress (with depth for example) in the stress divergence kernel and taking into account pore pressure.
+The system is solved analytically as follows:
+\begin{equation}
+\label{eq:stress_pore_pressure_gravity}
+\sigma^{\prime}_{zz}+p_f=\rho g h
+\end{equation}
+\begin{equation}
+p_f=-\frac{Pe}{(1-\phi)\beta}\frac{\sigma^{\prime}_{zz}}{(k+\frac{4G}{3})}
+\end{equation}
+\begin{equation}
+\label{eq:pore_pressure}
+\sigma^{\prime}_{xx}=\sigma^{\prime}_{yy}=K_0\sigma^{\prime}_{zz}
+\end{equation}
+and this gives the solution:
+\begin{equation}
+\label{eq:pore_pressure_gravity}
+P_f=-\frac{Pe \rho g h}{\beta(1-\phi)k^{\prime}-Pe}
+\end{equation}
+where:\\
+$k^{\prime}= (K+\frac{4G}{3})$\\
+lets explain the Eq. \ref{eq:pore_pressure_gravity} in more details:\\ 
+\ifshowallderivations
+from Eq.\ref{eq:stress_pore_pressure_gravity}and \ref{eq:pore_pressure} we get this equation 
+\begin{equation}
+\sigma^{\prime}_{zz}=\rho g h + \frac{Pe}{\beta(1-\phi)}\frac{\sigma^{\prime}_{zz}}{(K+\frac{4G}{3})}
+\end{equation}
+by rearrange the equation above we end up with 
+\begin{equation}
+\sigma^{\prime}_{zz}-\frac{Pe}{\beta(1-\phi)}\frac{\sigma^{\prime}_{zz}}{(K+\frac{4G}{3})}=\rho g h
+\end{equation}
+by simplifying more 
+\begin{equation}
+\sigma^{\prime}_{zz}\left(1-\frac{Pe}{\beta(1-\phi)k^{\prime}}\right)=\rho g h
+\end{equation}
+and 
+\begin{equation}
+\sigma^{\prime}_{zz}=\frac{\rho g h}{\left(1-\frac{Pe}{\beta(1-\phi)k^{\prime}}\right)}
+\end{equation}
+by multiply the equation above by $ \frac{\beta(1-\phi)K^{\prime}}{\beta(1-\phi)K^{\prime}}$
+we end up with 
+\begin{equation}
+\sigma^{\prime}_{zz}=\frac{(\rho g h)\beta(1-\phi)K^{\prime}}{\beta(1-\phi)K^{\prime}-Pe}
+\end{equation}
+by substitute the above equation in Eq.\ref{eq:pore_pressure} we get the Eq. \ref{eq:pore_pressure_gravity}
+%\else
+\fi
+\subsubsection{Numerical Solution}
+This problem is then solved using moose on a generated 3D mesh for the values bellow:
+\begin{itemize}
+\item Young's modulus $(E)=5e4$\
+\item gravitational acceleration $g =-9.81$\
+\item Poisson's ratio $(\nu) =0.2$\
+\item $L=1$\
+\item  solid density $(\rho=1)$\
+\item solid compressibility $\beta=1.111111$ 
+\item P\'{e}clet number $(Pe)=10$\ 
+\item $K=27,777.8$
+\item $G=20,833.333$
+\end{itemize}
+ a comparison of the numerical results against the analytical solution are shown in the figure\ref{fig:gravity_Poro_stress}
+ \begin{figure}
+  \centering
+  \includegraphics[width=0.48\textwidth]{gravity/gravity_gravity_poro_stress_stress_xx}
+  \includegraphics[width=0.48\textwidth]{gravity/gravity_gravity_poro_stress_stress_zz}\\
+  \caption{ a comparison of the numerical results against the analytical solution are shown in the figure \ref{fig:gravity_rho_g_h} gravity changes the stress and taking into account pore pressure. }
+  \label{fig:gravity_Poro_stress}
+\end{figure}
 
 \appendix
-
 \chapter{Derivations}
 \label{chapter:derivations}
 This chapter documents some of the derivations used to obtain the equations presented in Sec.\ref{chapter:gov_eqs}.

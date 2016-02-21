@@ -1,11 +1,24 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
+/*                                                              */
+/*              (c) 2014 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #include "RedbackTotalPorosityAux.h"
 
-template<>
-InputParameters validParams<RedbackTotalPorosityAux>()
+template <>
+InputParameters
+validParams<RedbackTotalPorosityAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addParam<bool>("is_mechanics_on", false, "is mechanics on?");
-  //params.addParam<bool>("is_chemistry_on", false, "is chemistry on?");
+  // params.addParam<bool>("is_chemistry_on", false, "is chemistry on?");
   params.addCoupledVar("mechanical_porosity", 0.0, "Mechanical porosity (as AuxKernel)");
   return params;
 }
@@ -23,7 +36,7 @@ Real
 RedbackTotalPorosityAux::computeValue()
 {
   Real total_porosity;
-  //Moose::out << "RedbackTotalPorosityAux::computeValue() at _qp" << _qp << "\n";
+  // Moose::out << "RedbackTotalPorosityAux::computeValue() at _qp" << _qp << "\n";
   total_porosity = _initial_porosity[_qp] + _delta_porosity_chem[_qp];
   if (_is_mechanics_on)
     total_porosity = total_porosity + _delta_porosity_mech[_qp];
