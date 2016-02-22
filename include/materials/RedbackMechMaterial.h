@@ -81,7 +81,7 @@ protected:
   /// Current deformation gradient
   // RankTwoTensor _dfgrd;
 
-  // VariableValue & _T;
+  // const VariableValue & _T;
 
   // Copy-paste from FiniteStrainMaterial.h
   MaterialProperty<RankTwoTensor> & _strain_rate;
@@ -147,20 +147,22 @@ protected:
   Real _damage_coeff, _healing_coeff;
 
   Real _exponential;
-  // VariableValue & _dispx_dot;
-  // VariableValue & _dispy_dot;
-  // VariableValue & _dispz_dot;
+  // const VariableValue & _dispx_dot;
+  // const VariableValue & _dispy_dot;
+  // const VariableValue & _dispz_dot;
 
   // MaterialProperty<RealVectorValue> & _solid_velocity;
 
   // Using variables
   bool _has_T;
-  VariableValue &_T, &_T_old;
+  const VariableValue & _T;
+  const VariableValue & _T_old;
   bool _has_pore_pres;
-  VariableValue & _pore_pres;
-  VariableValue & _total_porosity;
+  const VariableValue & _pore_pres;
+  const VariableValue & _total_porosity;
   bool _has_D;
-  VariableValue &_damage, &_damage_old;
+  const VariableValue & _damage;
+  const VariableValue & _damage_old;
 
   DamageMethod _damage_method;
 
