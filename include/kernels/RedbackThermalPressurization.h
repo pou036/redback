@@ -36,8 +36,8 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  VariableValue & _temp_dot;
-  VariableValue & _dtemp_dot_dtemp;
+  const VariableValue & _temp_dot;
+  const VariableValue & _dtemp_dot_dtemp;
 
   const MaterialProperty<Real> & _pressurization_coefficient;
   unsigned int _temp_var; // variable number of the temperature variable
