@@ -28,7 +28,7 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  VariableValue & _pore_pres;
+  const VariableValue & _pore_pres;
   RealVectorValue _poromech_stress_row;
 
   const MaterialProperty<RankTwoTensor> & _stress;
