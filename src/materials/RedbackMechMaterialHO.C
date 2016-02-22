@@ -12,7 +12,7 @@
 
 #include "Function.h"
 #include "RedbackMechMaterialHO.h"
-#include "myLib.h"
+#include "myLibech.h"
 
 /**
  * RedbackMechMaterialHO handles a high order material.
@@ -42,6 +42,7 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _symmetric_stress(declareProperty<RankTwoTensor>("symmetric_stress")),
     _antisymmetric_stress(declareProperty<RankTwoTensor>("antisymmetric_stress")),
     _stress_couple(declareProperty<RankTwoTensor>("coupled_stress")),
+    _stress_trace(declareProperty<Real>("stress_trace")),
     _macro_rotation(declareProperty<RankTwoTensor>("macro_rotation")),
     _elastic_flexural_rigidity_tensor(declareProperty<ElasticityTensorR4>("elastic_flexural_rigidity_tensor")),
     _Jacobian_mult_couple(declareProperty<ElasticityTensorR4>("coupled_Jacobian_mult")),
@@ -100,7 +101,11 @@ RedbackMechMaterialHO::computeQpStress()
 
   // Compute the energy dissipation and the properties declared
   computeRedbackTerms(_stress[_qp], 0, 0);
-  myLib::SayHello("world");
+  //myLib::
+  //SayHello("world");
+ _stress_trace[_qp] =_stress[_qp].trace();
+traceaff(_stress_trace[0]);
+std::cout << "la trace plus un du tenseur des contraintes vaut " << traceplus(_stress_trace[0]) << std::endl;
 }
 
 void RedbackMechMaterialHO::computeQpElasticityTensor()

@@ -54,6 +54,8 @@ protected:
   MaterialProperty<RankTwoTensor> & _antisymmetric_stress;
   MaterialProperty<RankTwoTensor> & _stress_couple;
 
+  MaterialProperty<Real> & _stress_trace;
+
   MaterialProperty<RankTwoTensor> & _macro_rotation;
 
   MaterialProperty<ElasticityTensorR4> & _elastic_flexural_rigidity_tensor;

@@ -35,7 +35,7 @@
     variable = antisymmetric_strain_bc
     boundary = bottom
   [../]
-  [./Rotation_wcz_0.9]
+  [./Rotation_wcz_0_9]
     type = PointValue
     variable = wc_z
     point = '0.5 0.9 0.5'
@@ -275,4 +275,3 @@
   exodus = true
   file_base = bench_elastic_HO_shear
 []
-

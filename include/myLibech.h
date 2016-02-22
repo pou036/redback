@@ -3,7 +3,8 @@ extern "C"
 {
 #endif
 
-void SayHello(std::string Name);
+void traceaff(double valeur);
+double traceplus(double valeur);
 
 #ifdef __cplusplus
 }
