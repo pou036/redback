@@ -14,7 +14,7 @@ InputParameters validParams<RedbackFluidStressDivergenceTensors>()
   params.addRequiredCoupledVar("pore_pres", "The pore fluid pressure");
 
   // Using the displaced mesh will be set in the solid mechanics action input now.
-  //params.set<bool>("use_displaced_mesh") = true;
+  params.set<bool>("use_displaced_mesh") = true;
 
   return params;
 }
@@ -47,7 +47,7 @@ RedbackFluidStressDivergenceTensors::RedbackFluidStressDivergenceTensors(const I
 Real
 RedbackFluidStressDivergenceTensors::computeQpResidual()
 {
-  return (_fluid_stress[_qp].row(_component))* _grad_test[_i][_qp] / _fluid_density[_qp]
+	 return (_fluid_stress[_qp].row(_component))* _grad_test[_i][_qp] / _fluid_density[_qp]
          + (_grad_pore_pressure[_qp](_component)/_fluid_density[_qp] - _gravity_term[_qp](_component)*_test[_i][_qp]);
 }
 

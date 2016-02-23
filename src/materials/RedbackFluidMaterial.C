@@ -50,7 +50,8 @@ RedbackFluidMaterial::RedbackFluidMaterial(const InputParameters & parameters) :
 
   _grad_fluid_vel_x(coupledGradient("fluid_vel_x")),
   _grad_fluid_vel_y(coupledGradient("fluid_vel_y")),
-  _grad_fluid_vel_z(_mesh.dimension() == 3 ? coupledGradient("fluid_vel_z") : _grad_zero),
+//  _grad_fluid_vel_z(_mesh.dimension() == 3 ? coupledGradient("fluid_vel_z") : _grad_zero),
+  _grad_fluid_vel_z(coupledGradient("fluid_vel_z")),
 
   _gravity_param(getParam<RealVectorValue>("gravity")),
   _gravity_term(declareProperty<RealVectorValue>("gravity_term")), // actually fluid gravity (but need to be called mixture for the kernel)
