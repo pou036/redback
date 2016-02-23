@@ -137,8 +137,8 @@ protected:
 
   MaterialProperty<Real> & _pressurization_coefficient;
 
-  VariableGradient & _grad_temp;
-  VariableGradient & _grad_pore_pressure;
+  const VariableGradient & _grad_temp;
+  const VariableGradient & _grad_pore_pressure;
   // VariableSecond& _grad_grad_pore_pressure;
 
   const VariableValue & _dispx_dot;
