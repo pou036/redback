@@ -1,0 +1,12 @@
+[Tests]
+  [./test_image_subdomain_3D_step1] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'mesh_generation_3D_step1.i'
+    exodiff = '1block_mesh_3D.e'
+  [../]
+  [./test_image_subdomain_3D_step3] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'mesh_generation_3D_step3.i'
+    exodiff = '2blocks_mesh_3D.e'
+  [../]
+[]
