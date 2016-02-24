@@ -1,0 +1,57 @@
+[Mesh]
+  type = FileMesh
+  file = 1block_mesh.e
+[]
+
+[Variables]
+  [./u]
+    order = FIRST
+    family = LAGRANGE
+  [../]
+[]
+
+[Kernels]
+  [./td]
+    type = TimeDerivative
+    variable = u
+  [../]
+[]
+
+[Functions]
+  [./image_func]
+    type = ImageFunction
+    threshold = 90
+    upper_value = 1
+    lower_value = 0
+    file = image.png
+  [../]
+[]
+
+[Materials]
+  [./idfile_writer]
+    type = ImageProcessing
+    block = 0
+    function = image_func
+  [../]
+[]
+
+[ICs]
+  [./u_ic]
+    type = FunctionIC
+    function = image_func
+    variable = u
+  [../]
+[]
+
+[Executioner]
+  type = Transient
+  num_steps = 1
+  dt = 0.00001
+  solve_type = PJFNK
+[]
+
+[Outputs]
+  file_base = 1block_intermediate
+  exodus = true
+[]
+
