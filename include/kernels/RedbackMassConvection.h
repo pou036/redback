@@ -16,7 +16,7 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  VariableGradient & _grad_temp;
+  const VariableGradient & _grad_temp;
 
   const MaterialProperty<RealVectorValue> & _pressure_convective_mass;
   const MaterialProperty<RealVectorValue> & _thermal_convective_mass;
