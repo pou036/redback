@@ -7,7 +7,7 @@ ybase = -5;
 y1 = -0.05; //-0.05; // bottom of middle layer
 y2 = 0.05;  //0.05; // top of middle layer
 ymax = 5;
-/****** MESH ***********/
+/****** MESH ************/
 nb_cells_x = 1; // nb cells in X dir along fault
 
 nb_cells_y_top = 10;
