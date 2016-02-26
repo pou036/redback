@@ -4,7 +4,7 @@
 
 import os, sys, shutil
 
-input_filename = 'idfile.txt'
+input_filename = 'gold/idfile.txt'
 output_filename = 'idfile_unique.txt'
 
 with open(input_filename, 'rb') as f_in:
@@ -20,4 +20,4 @@ new_txt = ' '.join(sorted(tmp2, key=float))
 with open(output_filename, 'wb') as f_out:
     f_out.write(new_txt)
 
-print 'Created file "{0}" with unique indices'.format(output_filename)
+print 'End of third step, created file "{0}" with unique indices'.format(output_filename)

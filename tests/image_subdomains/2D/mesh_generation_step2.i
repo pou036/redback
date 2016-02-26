@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = 1block_mesh.e
+  file = gold/1block_mesh.e
 []
 
 [Variables]
@@ -48,10 +48,5 @@
   num_steps = 1
   dt = 0.00001
   solve_type = PJFNK
-[]
-
-[Outputs]
-  file_base = 1block_intermediate
-  exodus = true
 []
 

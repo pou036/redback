@@ -1,13 +1,13 @@
 [Mesh]
   type = FileMesh
-  file = 1block_mesh_3D.e
+  file = gold/1block_mesh_3D.e
 []
 
 [MeshModifiers]
   [./subdomain]
     type = ElementFileSubdomain
     subdomain_ids = 2
-    file = idfile_unique.txt
+    file = gold/idfile_unique.txt
   [../]
 []
 
