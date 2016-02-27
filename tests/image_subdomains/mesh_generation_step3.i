@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = gold/1block_mesh_3D.e
+  file = gold/1block_mesh.e
 []
 
 [MeshModifiers]
@@ -53,7 +53,7 @@
 []
 
 [Outputs]
-  file_base = 2blocks_mesh_3D
+  file_base = 2blocks_mesh
   exodus = true
 []
 

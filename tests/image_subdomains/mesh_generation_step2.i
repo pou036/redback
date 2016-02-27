@@ -3,14 +3,6 @@
   file = gold/1block_mesh.e
 []
 
-[MeshModifiers]
-  [./subdomain]
-    type = ElementFileSubdomain
-    subdomain_ids = 2
-    file = gold/idfile_unique.txt
-  [../]
-[]
-
 [Variables]
   [./u]
     order = FIRST
@@ -31,7 +23,17 @@
     threshold = 90
     upper_value = 1
     lower_value = 0
-    file = image.png
+    file_suffix = png
+    file_base = stack/test_0
+    file_range = '0 3'
+  [../]
+[]
+
+[Materials]
+  [./idfile_writer]
+    type = ImageProcessing
+    block = 0
+    function = image_func
   [../]
 []
 
@@ -48,10 +50,5 @@
   num_steps = 1
   dt = 0.00001
   solve_type = PJFNK
-[]
-
-[Outputs]
-  file_base = 2blocks_mesh
-  exodus = true
 []
 

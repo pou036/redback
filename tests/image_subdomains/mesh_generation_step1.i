@@ -1,8 +1,8 @@
 [Mesh]
   type = GeneratedMesh
-  dim = 2
-  uniform_refine = 5
-  elem_type = TRI6
+  dim = 3
+  uniform_refine = 3
+  elem_type = HEX
 []
 
 [Adaptivity]
@@ -42,10 +42,12 @@
 [Functions]
   [./image_func]
     type = ImageFunction
-    file = image.png
     threshold = 90
     upper_value = 1
     lower_value = 0
+    file_suffix = png
+    file_base = stack/test_0
+    file_range = '0 3'
   [../]
 []
 
