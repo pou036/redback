@@ -58,13 +58,13 @@ protected:
   virtual void computeQpStress();
   virtual void initQpStatefulProperties(); // from FiniteStrainMaterial.h
 
-  VariableGradient & _grad_disp_x;
-  VariableGradient & _grad_disp_y;
-  VariableGradient & _grad_disp_z;
+  const VariableGradient & _grad_disp_x;
+  const VariableGradient & _grad_disp_y;
+  const VariableGradient & _grad_disp_z;
 
-  VariableGradient & _grad_disp_x_old;
-  VariableGradient & _grad_disp_y_old;
-  VariableGradient & _grad_disp_z_old;
+  const VariableGradient & _grad_disp_x_old;
+  const VariableGradient & _grad_disp_y_old;
+  const VariableGradient & _grad_disp_z_old;
 
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankTwoTensor> & _total_strain;
