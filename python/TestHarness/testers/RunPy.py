@@ -11,7 +11,7 @@ class RunPy(Tester):
     params.addRequiredParam('txtdiff',   [], "A list of files to txtdiff.")
     params.addParam('gold_dir',      'gold', "The directory where the \"golden standard\" files reside relative to the TEST_DIR: (default: ./gold/)")
     params.addParam('test_name',          "The name of the test - populated automatically")
-    
+
     params.addParam('skip_test_harness_cli_args', False, "Skip adding global TestHarness CLI Args for this test")
     params.addParam('input_switch', '-i', "The default switch used for indicating an input to the executable")
     params.addParam('errors',             ['ERROR', 'command not found', 'erminate called after throwing an instance of'], "The error messages to detect a failed run")
@@ -96,7 +96,7 @@ class RunPy(Tester):
       # PBS runs
       elif retcode == 0 and options.pbs and 'command not found' in output:
         reason = 'QSUB NOT FOUND'
-        
+
     if reason != '' or self.specs['skip_checks']:
       return (reason, output)
 

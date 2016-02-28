@@ -62,16 +62,12 @@
 // AuxKernels
 #include "RedbackTotalPorosityAux.h"
 
-template <>
-InputParameters
-validParams<RedbackApp>()
-{
+template <> InputParameters validParams<RedbackApp>() {
   InputParameters params = validParams<MooseApp>();
   return params;
 }
 
-RedbackApp::RedbackApp(InputParameters parameters) : MooseApp(parameters)
-{
+RedbackApp::RedbackApp(InputParameters parameters) : MooseApp(parameters) {
   srand(processor_id());
 
   Moose::registerObjects(_factory);
@@ -83,13 +79,10 @@ RedbackApp::RedbackApp(InputParameters parameters) : MooseApp(parameters)
   RedbackApp::associateSyntax(_syntax, _action_factory);
 }
 
-RedbackApp::~RedbackApp()
-{
-}
+RedbackApp::~RedbackApp() {}
 
 void
-RedbackApp::registerApps()
-{
+RedbackApp::registerApps() {
 #undef registerApp
 #define registerApp(name) AppFactory::instance().reg<name>(#name)
   registerApp(RedbackApp);
@@ -98,8 +91,7 @@ RedbackApp::registerApps()
 }
 
 void
-RedbackApp::registerObjects(Factory & factory)
-{
+RedbackApp::registerObjects(Factory &factory) {
 #undef registerObject
 #define registerObject(name) factory.reg<name>(stringifyName(name))
   registerBoundaryCondition(FunctionDirichletTransverseBC);
@@ -138,14 +130,16 @@ RedbackApp::registerObjects(Factory & factory)
 }
 
 void
-RedbackApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
-{
+RedbackApp::associateSyntax(Syntax &syntax,
+                                 ActionFactory &action_factory) {
 #undef registerAction
-#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
+#define registerAction(tplt, action)                                           \
+  action_factory.reg<tplt>(stringifyName(tplt), action)
   syntax.registerActionSyntax("RedbackMechAction", "RedbackMechAction/*");
   registerAction(RedbackMechAction, "add_kernel");
 // syntax.registerActionSyntax("RedbackAction", "RedbackAction/*");
 // registerAction(RedbackMechAction, "add_aux_variable");
 #undef registerAction
-#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
+#define registerAction(tplt, action)                                           \
+  action_factory.regLegacy<tplt>(stringifyName(tplt), action)
 }
