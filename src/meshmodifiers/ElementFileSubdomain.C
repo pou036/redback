@@ -50,7 +50,7 @@ ElementFileSubdomain::modify() {
     FileName file = getParam<FileName>("file");
     std::vector<dof_id_type> elemids;
     std::string line;
-    std::ifstream myfile(file);
+    std::ifstream myfile(file.c_str());
     if (myfile.is_open()) {
       while (myfile.good()) {
         getline(myfile, line);
@@ -60,7 +60,7 @@ ElementFileSubdomain::modify() {
         std::vector<std::string> vstrings(begin, end);
 
         for (int i = 0; i < vstrings.size(); ++i) {
-          elemids.push_back((dof_id_type)std::stoi(vstrings[i]));
+          elemids.push_back((dof_id_type)atoi(vstrings[i].c_str()));
         }
       }
       myfile.close();
