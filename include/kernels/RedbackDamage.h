@@ -20,13 +20,11 @@
 
 class RedbackDamage;
 
-template <>
-InputParameters validParams<RedbackDamage>();
+template <> InputParameters validParams<RedbackDamage>();
 
-class RedbackDamage : public Kernel
-{
+class RedbackDamage : public Kernel {
 public:
-  RedbackDamage(const InputParameters & parameters);
+  RedbackDamage(const InputParameters &parameters);
   virtual ~RedbackDamage();
 
 protected:
@@ -34,8 +32,8 @@ protected:
   virtual Real computeQpJacobian();
 
   // const VariableValue & _pressure;
-  const MaterialProperty<Real> & _damage_kernel;
-  const MaterialProperty<Real> & _damage_kernel_jac;
+  const MaterialProperty<Real> &_damage_kernel;
+  const MaterialProperty<Real> &_damage_kernel_jac;
 
 private:
   Real _time_factor;
