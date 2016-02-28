@@ -1,3 +1,6 @@
+# last step of creating a mesh from CT scan image
+# This generates the file `2blocks_mesh.e` containing the mesh of 2blocks. The subdomain has been created.
+
 [Mesh]
   type = FileMesh
   file = gold/1block_mesh.e

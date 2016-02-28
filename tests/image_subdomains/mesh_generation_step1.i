@@ -1,3 +1,6 @@
+# first step of creating a mesh from CT scan image
+# This generates the file `1block_mesh.e` containing the mesh with 1block but the level of refinement/adaptivity that we want.
+
 [Mesh]
   type = GeneratedMesh
   dim = 3

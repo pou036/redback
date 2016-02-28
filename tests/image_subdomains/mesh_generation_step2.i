@@ -1,3 +1,6 @@
+# second step of creating a mesh from CT scan image
+# This generates the file `idfile.txt` containing the list of element ids of the subdomain.
+
 [Mesh]
   type = FileMesh
   file = gold/1block_mesh.e
