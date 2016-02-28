@@ -19,16 +19,14 @@
 
 class RedbackPoromechanics;
 
-template <>
-InputParameters validParams<RedbackPoromechanics>();
+template <> InputParameters validParams<RedbackPoromechanics>();
 
 /**
  * Kernel that is calling coupledDot
  */
-class RedbackPoromechanics : public Kernel
-{
+class RedbackPoromechanics : public Kernel {
 public:
-  RedbackPoromechanics(const InputParameters & parameters);
+  RedbackPoromechanics(const InputParameters &parameters);
   virtual ~RedbackPoromechanics();
 
 protected:
@@ -36,8 +34,8 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  const MaterialProperty<Real> & _poromech_kernel;
-  const MaterialProperty<Real> & _poromech_jac;
+  const MaterialProperty<Real> &_poromech_kernel;
+  const MaterialProperty<Real> &_poromech_jac;
 
   unsigned int _temp_var; // variable number of the temperature variable
 

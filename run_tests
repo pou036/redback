@@ -17,5 +17,14 @@ import path_tool
 path_tool.activate_module('TestHarness')
 
 from TestHarness import TestHarness
+from Tester import Tester
+
 # Run the tests!
-TestHarness.buildAndRun(sys.argv, app_name, MOOSE_DIR)
+#TestHarness.buildAndRun(sys.argv, app_name, MOOSE_DIR)
+if '--store-timing' in sys.argv:
+  harness = TestTimer(sys.argv, app_name, MOOSE_DIR)
+else:
+  harness = TestHarness(sys.argv, app_name, MOOSE_DIR)
+
+harness.factory.loadPlugins([os.path.join(os.getcwd(), 'python/TestHarness')], 'testers', Tester)
+harness.findAndRunTests()

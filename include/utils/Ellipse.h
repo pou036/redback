@@ -14,11 +14,11 @@
 
 /**
  * Utilities to calculate distance from point to ellipse
- * Code from http://www.geometrictools.com/Documentation/DistancePointEllipseEllipsoid.pdf
+ * Code from
+ * http://www.geometrictools.com/Documentation/DistancePointEllipseEllipsoid.pdf
  * (for modified Cam-Clay model)
  */
-class Ellipse
-{
+class Ellipse {
 public:
   Ellipse();
 
@@ -53,7 +53,8 @@ public:
    * @param y: coordinates of point to check
    * @return result: boolean, true if strictly outside ellipse
    */
-  static bool isPointOutsideOfEllipse(Real const m, Real const p_c, Real const y0, Real const y1);
+  static bool isPointOutsideOfEllipse(Real const m, Real const p_c,
+                                      Real const y0, Real const y1);
 
   /**
    * Function to check if given point (y0, y1) is outside of ellipse defined by
@@ -63,11 +64,13 @@ public:
    * @param y: coordinates of point to check
    * @return result: boolean, true if strictly outside ellipse
    */
-  static bool
-  isPointOutsideOfEllipse2(Real const horizontal_axis, Real const vertical_axis, Real const y0, Real const y1);
+  static bool isPointOutsideOfEllipse2(Real const horizontal_axis,
+                                       Real const vertical_axis, Real const y0,
+                                       Real const y1);
 
   /**
-   * Function to check if given point (y0, y1) is outside of rotated and shifted ellipse
+   * Function to check if given point (y0, y1) is outside of rotated and shifted
+   * ellipse
    * (plasticity zone for Dafalias 2013 anisotropic modified Cam-Clay model).
    * @param m: slope of the critical state line
    * @param p_c: pre-consolidation pressure
@@ -75,8 +78,9 @@ public:
    * @param y: coordinates of point to check
    * @return result: boolean, true if strictly outside ellipse
    */
-  static bool
-  isPointOutsideOfRotatedEllipse(Real const m, Real const p_0, Real const alpha, Real const y0, Real const y1);
+  static bool isPointOutsideOfRotatedEllipse(Real const m, Real const p_0,
+                                             Real const alpha, Real const y0,
+                                             Real const y1);
 
   /**
    * Function to compute the distance from a query point to an ellipse
@@ -88,7 +92,8 @@ public:
    * @param x: coordinates of projection point on the ellipse
    * @return d: distance to ellipse
    */
-  static Real distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1);
+  static Real distanceCC(Real const m, Real const p_c, Real const y0,
+                         Real const y1, Real &x0, Real &x1);
 
   /**
    * Function to compute the distance from a query point to an ellipse
@@ -100,12 +105,14 @@ public:
    * @param x: coordinates of projection point on the ellipse
    * @return d: distance to ellipse
    */
-  static Real distanceToCenteredEllipse(
-    Real const horizontal_axis, Real const vertical_axis, Real const y0, Real const y1, Real & x0, Real & x1);
+  static Real distanceToCenteredEllipse(Real const horizontal_axis,
+                                        Real const vertical_axis, Real const y0,
+                                        Real const y1, Real &x0, Real &x1);
 
   /**
    * Function to compute the distance from a query point to a rotated ellipse
-   * defined by the 3 parameters M, p_c and alpha from the 2013 Dafalias anisotropic
+   * defined by the 3 parameters M, p_c and alpha from the 2013 Dafalias
+   * anisotropic
    * modified Cam-Clay model.
    * It also computes the ellipse point (x0,x1) that is closest to (y0,y1).
    * @param m: slope of the critical state line
@@ -115,20 +122,24 @@ public:
    * @param x: coordinates of projection point on the ellipse
    * @return d: distance to ellipse
    */
-  static Real distanceCCanisotropic(
-    Real const m, Real const p_0, Real const alpha, Real const y0, Real const y1, Real & x0, Real & x1);
+  static Real distanceCCanisotropic(Real const m, Real const p_0,
+                                    Real const alpha, Real const y0,
+                                    Real const y1, Real &x0, Real &x1);
 
   /**
-   * Function to rotate and translate point in new space where Dafalias ellipse is horizontal
+   * Function to rotate and translate point in new space where Dafalias ellipse
+   * is horizontal
    * @param m: slope of the critical state line
    * @param p_c: pre-consolidation pressure
    * @param alpha: Dafalias anisotropic parameter (angle)
-   * @param forward: boolean, true to get to rotated space, false to get backwards
+   * @param forward: boolean, true to get to rotated space, false to get
+   * backwards
    * @param y: coordinates of point to rotate & translate
    * @param z: coordinates of rotated & translated point
    */
-  static void rotatePoint(
-    Real const m, Real const p_0, Real const alpha, bool forward, Real const y0, Real const y1, Real & z0, Real & z1);
+  static void rotatePoint(Real const m, Real const p_0, Real const alpha,
+                          bool forward, Real const y0, Real const y1, Real &z0,
+                          Real &z1);
 
   /**
    * Function to get axes of Dafalias ellipse
@@ -140,13 +151,11 @@ public:
    * @param center_p: 1st coordinate of ellipse's center
    * @param center_q: 2nd coordinate of ellipse's center
    */
-  static void getDafaliasEllipseAxesAndCentre(Real const m,
-                                              Real const p_0,
+  static void getDafaliasEllipseAxesAndCentre(Real const m, Real const p_0,
                                               Real const alpha,
-                                              Real & horizontal_axis,
-                                              Real & vertical_axis,
-                                              Real & center_p,
-                                              Real & center_q);
+                                              Real &horizontal_axis,
+                                              Real &vertical_axis,
+                                              Real &center_p, Real &center_q);
 };
 
 #endif // ELLIPSE_H

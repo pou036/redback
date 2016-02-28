@@ -19,13 +19,11 @@
 
 class RedbackMassDiffusion;
 
-template <>
-InputParameters validParams<RedbackMassDiffusion>();
+template <> InputParameters validParams<RedbackMassDiffusion>();
 
-class RedbackMassDiffusion : public Kernel
-{
+class RedbackMassDiffusion : public Kernel {
 public:
-  RedbackMassDiffusion(const InputParameters & parameters);
+  RedbackMassDiffusion(const InputParameters &parameters);
   virtual ~RedbackMassDiffusion();
 
 protected:
@@ -34,8 +32,8 @@ protected:
 
   //  const VariableValue & _T;
 
-  const MaterialProperty<Real> & _Le;
-  const MaterialProperty<RealVectorValue> & _gravity_term;
+  const MaterialProperty<Real> &_Le;
+  const MaterialProperty<RealVectorValue> &_gravity_term;
 
 private:
   Real _time_factor;

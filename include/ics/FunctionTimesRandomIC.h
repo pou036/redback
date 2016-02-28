@@ -24,19 +24,16 @@
 // Forward Declarations
 class FunctionTimesRandomIC;
 class Function;
-namespace libMesh
-{
+namespace libMesh {
 class Point;
 }
 
-template <>
-InputParameters validParams<FunctionTimesRandomIC>();
+template <> InputParameters validParams<FunctionTimesRandomIC>();
 
 /**
  * FunctionTimesRandomIC just returns a Random value.
  */
-class FunctionTimesRandomIC : public InitialCondition
-{
+class FunctionTimesRandomIC : public InitialCondition {
 public:
   /**
    * Constructor
@@ -44,7 +41,7 @@ public:
    * @param name The name given to the initial condition in the input file.
    * @param parameters The parameters object holding data for the class to use.
    */
-  FunctionTimesRandomIC(const InputParameters & parameters);
+  FunctionTimesRandomIC(const InputParameters &parameters);
 
 protected:
   /**
@@ -56,12 +53,12 @@ protected:
    *
    * This must be overridden by derived classes.
    */
-  virtual Real value(const Point & p);
+  virtual Real value(const Point &p);
 
   Real _min;
   Real _max;
   Real _range;
-  Function & _func;
+  Function &_func;
 };
 
 #endif // FUNCTIONTIMESRANDOMIC_H

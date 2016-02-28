@@ -8,9 +8,7 @@
 PerfLog Moose::perf_log("Redback");
 
 // Begin the main program.
-int
-main(int argc, char * argv[])
-{
+int main(int argc, char *argv[]) {
   // Initialize MPI, solvers and MOOSE
   MooseInit init(argc, argv);
 
@@ -18,7 +16,7 @@ main(int argc, char * argv[])
   RedbackApp::registerApps();
 
   // This creates dynamic memory that we're responsible for deleting
-  MooseApp * app = AppFactory::createApp("RedbackApp", argc, argv);
+  MooseApp *app = AppFactory::createApp("RedbackApp", argc, argv);
 
   // Execute the application
   app->run();

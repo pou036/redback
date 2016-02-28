@@ -3,20 +3,17 @@
 
 #include "Kernel.h"
 
-class RedbackThermalConvection : public Kernel
-{
+class RedbackThermalConvection : public Kernel {
 public:
-  RedbackThermalConvection(const InputParameters & parameters);
-  virtual ~RedbackThermalConvection()
-  {
-  }
+  RedbackThermalConvection(const InputParameters &parameters);
+  virtual ~RedbackThermalConvection() {}
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  const MaterialProperty<RealVectorValue> & _mixture_convective_energy;
+  const MaterialProperty<RealVectorValue> &_mixture_convective_energy;
   // MaterialProperty<Real> & _mixture_convective_energy_jac;
   // MaterialProperty<Real> & _mixture_convective_energy_off_jac;
 
@@ -26,7 +23,6 @@ private:
   Real _time_factor;
 };
 
-template <>
-InputParameters validParams<RedbackThermalConvection>();
+template <> InputParameters validParams<RedbackThermalConvection>();
 
 #endif // REDBACKTHERMALCONVECTION_H
