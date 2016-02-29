@@ -20,11 +20,13 @@
 
 class RedbackMechDissip;
 
-template <> InputParameters validParams<RedbackMechDissip>();
+template <>
+InputParameters validParams<RedbackMechDissip>();
 
-class RedbackMechDissip : public Kernel {
+class RedbackMechDissip : public Kernel
+{
 public:
-  RedbackMechDissip(const InputParameters &parameters);
+  RedbackMechDissip(const InputParameters & parameters);
   virtual ~RedbackMechDissip();
 
 protected:
@@ -32,8 +34,8 @@ protected:
   virtual Real computeQpJacobian();
 
   // const VariableValue & _pressure;
-  const MaterialProperty<Real> &_mechanical_dissipation;
-  const MaterialProperty<Real> &_mechanical_dissipation_jac;
+  const MaterialProperty<Real> & _mechanical_dissipation;
+  const MaterialProperty<Real> & _mechanical_dissipation_jac;
 
 private:
   Real _time_factor;

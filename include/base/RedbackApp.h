@@ -5,16 +5,18 @@
 
 class RedbackApp;
 
-template <> InputParameters validParams<RedbackApp>();
+template <>
+InputParameters validParams<RedbackApp>();
 
-class RedbackApp : public MooseApp {
+class RedbackApp : public MooseApp
+{
 public:
   RedbackApp(InputParameters parameters);
   virtual ~RedbackApp();
 
   static void registerApps();
-  static void registerObjects(Factory &factory);
-  static void associateSyntax(Syntax &syntax, ActionFactory &action_factory);
+  static void registerObjects(Factory & factory);
+  static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
 };
 
 #endif /* REDBACKAPP_H */

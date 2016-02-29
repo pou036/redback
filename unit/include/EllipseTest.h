@@ -21,7 +21,8 @@
 // Moose includes
 #include "Ellipse.h"
 
-class EllipseTest : public CppUnit::TestFixture {
+class EllipseTest : public CppUnit::TestFixture
+{
 
   CPPUNIT_TEST_SUITE(EllipseTest);
 

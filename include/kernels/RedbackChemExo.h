@@ -19,19 +19,21 @@
 
 class RedbackChemExo;
 
-template <> InputParameters validParams<RedbackChemExo>();
+template <>
+InputParameters validParams<RedbackChemExo>();
 
-class RedbackChemExo : public Kernel {
+class RedbackChemExo : public Kernel
+{
 public:
-  RedbackChemExo(const InputParameters &parameters);
+  RedbackChemExo(const InputParameters & parameters);
   virtual ~RedbackChemExo();
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  const MaterialProperty<Real> &_chemical_exothermic_energy;
-  const MaterialProperty<Real> &_chemical_exothermic_energy_jac;
+  const MaterialProperty<Real> & _chemical_exothermic_energy;
+  const MaterialProperty<Real> & _chemical_exothermic_energy_jac;
 
 private:
   Real _time_factor;

@@ -5,9 +5,11 @@
 
 class RedbackMechAction;
 
-template <> InputParameters validParams<RedbackMechAction>();
+template <>
+InputParameters validParams<RedbackMechAction>();
 
-class RedbackMechAction : public Action {
+class RedbackMechAction : public Action
+{
 public:
   RedbackMechAction(InputParameters params);
 

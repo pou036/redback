@@ -21,18 +21,20 @@
 // Forward declerations
 class ElementFileSubdomain;
 
-template <> InputParameters validParams<ElementFileSubdomain>();
+template <>
+InputParameters validParams<ElementFileSubdomain>();
 
 /**
  * MeshModifier for assigning subdomain IDs of all elements
  */
-class ElementFileSubdomain : public MeshModifier {
+class ElementFileSubdomain : public MeshModifier
+{
 public:
   /**
    * Class constructor
    * @param parameters The input parameters
    */
-  ElementFileSubdomain(const InputParameters &parameters);
+  ElementFileSubdomain(const InputParameters & parameters);
 
   /**
    * Class destructor

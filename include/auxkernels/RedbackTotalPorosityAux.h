@@ -7,22 +7,26 @@
 // Forward declarations
 class RedbackTotalPorosityAux;
 
-template <> InputParameters validParams<RedbackTotalPorosityAux>();
+template <>
+InputParameters validParams<RedbackTotalPorosityAux>();
 
-class RedbackTotalPorosityAux : public AuxKernel {
+class RedbackTotalPorosityAux : public AuxKernel
+{
 public:
-  RedbackTotalPorosityAux(const InputParameters &parameters);
-  virtual ~RedbackTotalPorosityAux() {}
+  RedbackTotalPorosityAux(const InputParameters & parameters);
+  virtual ~RedbackTotalPorosityAux()
+  {
+  }
 
 protected:
   virtual Real computeValue();
   bool _is_mechanics_on; //, _is_chemistry_on;
 
 private:
-  const VariableValue &_delta_porosity_mech;
+  const VariableValue & _delta_porosity_mech;
   // MaterialProperty<Real> & _delta_porosity_mech;
-  const MaterialProperty<Real> &_delta_porosity_chem;
-  const MaterialProperty<Real> &_initial_porosity;
+  const MaterialProperty<Real> & _delta_porosity_chem;
+  const MaterialProperty<Real> & _initial_porosity;
 };
 
 #endif // REDBACKTOTALPOROSITYAUX_H

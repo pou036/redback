@@ -16,28 +16,42 @@
 #include "Function.h"
 #include <fstream>
 
-template <> InputParameters validParams<ImageProcessing>() {
+template <>
+InputParameters
+validParams<ImageProcessing>()
+{
   InputParameters params = validParams<Material>();
   params.addRequiredParam<FunctionName>("function", "Name of the function");
   return params;
 }
 
-ImageProcessing::ImageProcessing(const InputParameters &parameters)
-    : Material(parameters), _func(getParam<FunctionName>("function")) {
+ImageProcessing::ImageProcessing(const InputParameters & parameters) :
+    Material(parameters), _func(getParam<FunctionName>("function"))
+{
   _function.resize(1);
-  _function[0] = &getFunctionByName(_func);
+  _function[ 0 ] = &getFunctionByName(_func);
   idFile = fopen("idfile.txt", "w");
   fputs("", idFile);
   fclose(idFile);
 }
 
-void ImageProcessing::initQpStatefulProperties() { computeQpFunctions(); }
-
-void ImageProcessing::computeQpProperties() { computeQpFunctions(); }
+void
+ImageProcessing::initQpStatefulProperties()
+{
+  computeQpFunctions();
+}
 
 void
-ImageProcessing::computeQpFunctions() {
-  if (_t_step == 1 && (*_function[0]).value(_t, _q_point[_qp]) == 0) {
+ImageProcessing::computeQpProperties()
+{
+  computeQpFunctions();
+}
+
+void
+ImageProcessing::computeQpFunctions()
+{
+  if (_t_step == 1 && (*_function[ 0 ]).value(_t, _q_point[ _qp ]) == 0)
+  {
     idFile = fopen("idfile.txt", "a");
     std::ostringstream convert; // stream used for the conversion
     convert << _current_elem->id();
