@@ -37,6 +37,6 @@ FunctionDirichletTransverseBC::computeQpValue()
   TypeVector<Real> vector1 = TypeVector<Real>(_axis);
   TypeVector<Real> vector2 = *static_cast<const TypeVector<Real> *>(_current_node) - TypeVector<Real>(_center);
   TypeVector<Real> vector3 = vector1.cross(vector2);
-  vector3 /= vector3.size();
+  vector3 /= vector3.norm();
   return vector3(_dir_index) * _func.value(_t, *_current_node);
 }
