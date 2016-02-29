@@ -19,11 +19,13 @@
 
 class RedbackThermalDiffusion;
 
-template <> InputParameters validParams<RedbackThermalDiffusion>();
+template <>
+InputParameters validParams<RedbackThermalDiffusion>();
 
-class RedbackThermalDiffusion : public Kernel {
+class RedbackThermalDiffusion : public Kernel
+{
 public:
-  RedbackThermalDiffusion(const InputParameters &parameters);
+  RedbackThermalDiffusion(const InputParameters & parameters);
   virtual ~RedbackThermalDiffusion();
 
 protected:

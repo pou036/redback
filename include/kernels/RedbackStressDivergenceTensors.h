@@ -10,7 +10,8 @@ class RedbackStressDivergenceTensors;
 class ElasticityTensorR4;
 class RankTwoTensor;
 
-template <> InputParameters validParams<RedbackStressDivergenceTensors>();
+template <>
+InputParameters validParams<RedbackStressDivergenceTensors>();
 
 /**
  * RedbackStressDivergenceTensors mostly copies from StressDivergence.  There
@@ -19,25 +20,26 @@ template <> InputParameters validParams<RedbackStressDivergenceTensors>();
  * SymmTensors.  This is done
  * to allow for more mathematical transparancy.
  */
-class RedbackStressDivergenceTensors : public Kernel {
+class RedbackStressDivergenceTensors : public Kernel
+{
 public:
-  RedbackStressDivergenceTensors(const InputParameters &parameters);
+  RedbackStressDivergenceTensors(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  const VariableValue &_pore_pres;
+  const VariableValue & _pore_pres;
   RealVectorValue _poromech_stress_row;
 
-  const MaterialProperty<RankTwoTensor> &_stress;
-  const MaterialProperty<ElasticityTensorR4> &_Jacobian_mult;
+  const MaterialProperty<RankTwoTensor> & _stress;
+  const MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
 
   const unsigned int _component;
 
-  const MaterialProperty<Real> &_biot_coeff;
+  const MaterialProperty<Real> & _biot_coeff;
 
 private:
   const bool _xdisp_coupled;
@@ -52,7 +54,7 @@ private:
   const unsigned int _temp_var;
   const unsigned int _porepressure_var;
 
-  const MaterialProperty<RealVectorValue> &_gravity_term;
+  const MaterialProperty<RealVectorValue> & _gravity_term;
 };
 
 #endif // REDBACKSTRESSDIVERGENCETENSORS_H

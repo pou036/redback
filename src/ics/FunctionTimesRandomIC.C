@@ -18,29 +18,32 @@
 
 #include "libmesh/point.h"
 
-template <> InputParameters validParams<FunctionTimesRandomIC>() {
+template <>
+InputParameters
+validParams<FunctionTimesRandomIC>()
+{
   InputParameters params = validParams<InitialCondition>();
-  params.addParam<Real>("min", 0.0,
-                        "Lower bound of the randomly generated values");
-  params.addParam<Real>("max", 1.0,
-                        "Upper bound of the randomly generated values");
-  params.addParam<unsigned int>("seed", 0,
-                                "Seed value for the random number generator");
-  params.addRequiredParam<FunctionName>(
-      "function", "The initial condition function (without randomness).");
+  params.addParam<Real>("min", 0.0, "Lower bound of the randomly generated values");
+  params.addParam<Real>("max", 1.0, "Upper bound of the randomly generated values");
+  params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");
+  params.addRequiredParam<FunctionName>("function", "The initial condition function (without randomness).");
   return params;
 }
 
-FunctionTimesRandomIC::FunctionTimesRandomIC(const InputParameters &parameters)
-    : InitialCondition(parameters), _min(getParam<Real>("min")),
-      _max(getParam<Real>("max")), _range(_max - _min),
-      _func(getFunction("function")) {
+FunctionTimesRandomIC::FunctionTimesRandomIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
+    _min(getParam<Real>("min")),
+    _max(getParam<Real>("max")),
+    _range(_max - _min),
+    _func(getFunction("function"))
+{
   mooseAssert(_range > 0.0, "Min > Max for FunctionTimesRandomIC!");
   MooseRandom::seed(getParam<unsigned int>("seed"));
 }
 
 Real
-FunctionTimesRandomIC::value(const Point &p) {
+FunctionTimesRandomIC::value(const Point & p)
+{
   // Random number between 0 and 1
   Real rand_num = MooseRandom::rand();
 

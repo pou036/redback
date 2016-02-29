@@ -20,7 +20,8 @@
 
 class ReturnMapIterDT;
 
-template <> InputParameters validParams<ReturnMapIterDT>();
+template <>
+InputParameters validParams<ReturnMapIterDT>();
 
 /**
  * Computes the value of dt based on a value provided by a postprocessor. If
@@ -28,15 +29,16 @@ template <> InputParameters validParams<ReturnMapIterDT>();
  * supplied ratio. If the value is below a lower threshold the time step is
  * increased by 1/ratio.
  **/
-class ReturnMapIterDT : public TimeStepper, public PostprocessorInterface {
+class ReturnMapIterDT : public TimeStepper, public PostprocessorInterface
+{
 public:
-  ReturnMapIterDT(const InputParameters &parameters);
+  ReturnMapIterDT(const InputParameters & parameters);
 
 protected:
   virtual Real computeInitialDT();
   virtual Real computeDT();
 
-  const PostprocessorValue &_extreme_value;
+  const PostprocessorValue & _extreme_value;
   bool _has_initial_dt;
   Real _initial_dt;
   Real _max_iter;

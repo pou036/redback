@@ -20,22 +20,22 @@
 // Forward Declarations
 class RedbackMechMaterialCC;
 
-template <> InputParameters validParams<RedbackMechMaterialCC>();
+template <>
+InputParameters validParams<RedbackMechMaterialCC>();
 
-class RedbackMechMaterialCC : public RedbackMechMaterial {
+class RedbackMechMaterialCC : public RedbackMechMaterial
+{
 public:
-  RedbackMechMaterialCC(const InputParameters &parameters);
+  RedbackMechMaterialCC(const InputParameters & parameters);
 
 protected:
   Real _slope_yield_surface; // coefficient for yield surface
 
-  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real,
-              Real, Real, Real, RankFourTensor &);
+  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
   void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
   Real getFlowIncrement(Real, Real, Real, Real, Real);
   void get_py_qy(Real, Real, Real &, Real &, Real);
-  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real,
-                                  Real);
+  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real);
 };
 
 #endif // REDBACKMECHMATERIALCC_H

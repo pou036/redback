@@ -19,11 +19,13 @@
 
 class RedbackChemPressure;
 
-template <> InputParameters validParams<RedbackChemPressure>();
+template <>
+InputParameters validParams<RedbackChemPressure>();
 
-class RedbackChemPressure : public Kernel {
+class RedbackChemPressure : public Kernel
+{
 public:
-  RedbackChemPressure(const InputParameters &parameters);
+  RedbackChemPressure(const InputParameters & parameters);
   virtual ~RedbackChemPressure();
 
 protected:
@@ -32,8 +34,8 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   // const VariableValue & _temp;
-  const MaterialProperty<Real> &_chemical_source_mass;
-  const MaterialProperty<Real> &_chemical_source_mass_jac;
+  const MaterialProperty<Real> & _chemical_source_mass;
+  const MaterialProperty<Real> & _chemical_source_mass_jac;
 
   unsigned int _temp_var; // variable number of the temperature variable
 

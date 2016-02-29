@@ -20,18 +20,23 @@
 // Forward Declarations
 class RedbackMechMaterial;
 
-template <> InputParameters validParams<RedbackMechMaterial>();
+template <>
+InputParameters validParams<RedbackMechMaterial>();
 
-class RedbackMechMaterialElastic : public RedbackMechMaterial {
+class RedbackMechMaterialElastic : public RedbackMechMaterial
+{
 public:
-  RedbackMechMaterialElastic(const InputParameters &parameters);
+  RedbackMechMaterialElastic(const InputParameters & parameters);
 
 protected:
-  void returnMap(const RankTwoTensor &, const RankTwoTensor &,
-                 const RankFourTensor &, RankTwoTensor &, RankTwoTensor &,
-                 Real &, Real &);
-  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real,
-              Real, Real, Real, RankFourTensor &);
+  void returnMap(const RankTwoTensor &,
+                 const RankTwoTensor &,
+                 const RankFourTensor &,
+                 RankTwoTensor &,
+                 RankTwoTensor &,
+                 Real &,
+                 Real &);
+  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
   void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
   Real getFlowIncrement(Real, Real, Real, Real, Real);
   void get_py_qy(Real, Real, Real &, Real &, Real);
