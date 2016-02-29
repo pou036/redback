@@ -18,7 +18,8 @@
  * http://www.geometrictools.com/Documentation/DistancePointEllipseEllipsoid.pdf
  * (for modified Cam-Clay model)
  */
-class Ellipse {
+class Ellipse
+{
 public:
   Ellipse();
 
@@ -32,7 +33,7 @@ public:
    * @param x: coordinates of projection point on the ellipse
    * @return d: distance from y to ellipse
    */
-  static Real sqrDistanceSpecial(Real const e[2], Real const y[2], Real x[2]);
+  static Real sqrDistanceSpecial(Real const e[ 2 ], Real const y[ 2 ], Real x[ 2 ]);
 
   /**
    * The ellipse is (x0/e0)^2 + (x1/e1)^2 = 1. The query point is (y0,y1). The
@@ -43,7 +44,7 @@ public:
    * @param x: coordinates of projection point on the ellipse
    * @return d: distance from y to ellipse
    */
-  static Real sqrDistance(Real const e[2], Real const y[2], Real x[2]);
+  static Real sqrDistance(Real const e[ 2 ], Real const y[ 2 ], Real x[ 2 ]);
 
   /**
    * Function to check if given point (y0, y1) is outside of ellipse (plasticity
@@ -53,8 +54,7 @@ public:
    * @param y: coordinates of point to check
    * @return result: boolean, true if strictly outside ellipse
    */
-  static bool isPointOutsideOfEllipse(Real const m, Real const p_c,
-                                      Real const y0, Real const y1);
+  static bool isPointOutsideOfEllipse(Real const m, Real const p_c, Real const y0, Real const y1);
 
   /**
    * Function to check if given point (y0, y1) is outside of ellipse defined by
@@ -64,9 +64,8 @@ public:
    * @param y: coordinates of point to check
    * @return result: boolean, true if strictly outside ellipse
    */
-  static bool isPointOutsideOfEllipse2(Real const horizontal_axis,
-                                       Real const vertical_axis, Real const y0,
-                                       Real const y1);
+  static bool
+  isPointOutsideOfEllipse2(Real const horizontal_axis, Real const vertical_axis, Real const y0, Real const y1);
 
   /**
    * Function to check if given point (y0, y1) is outside of rotated and shifted
@@ -78,9 +77,8 @@ public:
    * @param y: coordinates of point to check
    * @return result: boolean, true if strictly outside ellipse
    */
-  static bool isPointOutsideOfRotatedEllipse(Real const m, Real const p_0,
-                                             Real const alpha, Real const y0,
-                                             Real const y1);
+  static bool
+  isPointOutsideOfRotatedEllipse(Real const m, Real const p_0, Real const alpha, Real const y0, Real const y1);
 
   /**
    * Function to compute the distance from a query point to an ellipse
@@ -92,8 +90,7 @@ public:
    * @param x: coordinates of projection point on the ellipse
    * @return d: distance to ellipse
    */
-  static Real distanceCC(Real const m, Real const p_c, Real const y0,
-                         Real const y1, Real &x0, Real &x1);
+  static Real distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1);
 
   /**
    * Function to compute the distance from a query point to an ellipse
@@ -105,9 +102,8 @@ public:
    * @param x: coordinates of projection point on the ellipse
    * @return d: distance to ellipse
    */
-  static Real distanceToCenteredEllipse(Real const horizontal_axis,
-                                        Real const vertical_axis, Real const y0,
-                                        Real const y1, Real &x0, Real &x1);
+  static Real distanceToCenteredEllipse(
+    Real const horizontal_axis, Real const vertical_axis, Real const y0, Real const y1, Real & x0, Real & x1);
 
   /**
    * Function to compute the distance from a query point to a rotated ellipse
@@ -122,9 +118,8 @@ public:
    * @param x: coordinates of projection point on the ellipse
    * @return d: distance to ellipse
    */
-  static Real distanceCCanisotropic(Real const m, Real const p_0,
-                                    Real const alpha, Real const y0,
-                                    Real const y1, Real &x0, Real &x1);
+  static Real distanceCCanisotropic(
+    Real const m, Real const p_0, Real const alpha, Real const y0, Real const y1, Real & x0, Real & x1);
 
   /**
    * Function to rotate and translate point in new space where Dafalias ellipse
@@ -137,9 +132,8 @@ public:
    * @param y: coordinates of point to rotate & translate
    * @param z: coordinates of rotated & translated point
    */
-  static void rotatePoint(Real const m, Real const p_0, Real const alpha,
-                          bool forward, Real const y0, Real const y1, Real &z0,
-                          Real &z1);
+  static void rotatePoint(
+    Real const m, Real const p_0, Real const alpha, bool forward, Real const y0, Real const y1, Real & z0, Real & z1);
 
   /**
    * Function to get axes of Dafalias ellipse
@@ -151,11 +145,13 @@ public:
    * @param center_p: 1st coordinate of ellipse's center
    * @param center_q: 2nd coordinate of ellipse's center
    */
-  static void getDafaliasEllipseAxesAndCentre(Real const m, Real const p_0,
+  static void getDafaliasEllipseAxesAndCentre(Real const m,
+                                              Real const p_0,
                                               Real const alpha,
-                                              Real &horizontal_axis,
-                                              Real &vertical_axis,
-                                              Real &center_p, Real &center_q);
+                                              Real & horizontal_axis,
+                                              Real & vertical_axis,
+                                              Real & center_p,
+                                              Real & center_q);
 };
 
 #endif // ELLIPSE_H

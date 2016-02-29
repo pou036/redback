@@ -20,7 +20,8 @@
 // Forward Declarations
 class ImageProcessing;
 
-template <> InputParameters validParams<ImageProcessing>();
+template <>
+InputParameters validParams<ImageProcessing>();
 
 /**
  * This material automatically declares as material properties whatever is
@@ -33,9 +34,10 @@ template <> InputParameters validParams<ImageProcessing>();
  *to be used
  * during development phases for ultimate flexibility.
  */
-class ImageProcessing : public Material {
+class ImageProcessing : public Material
+{
 public:
-  ImageProcessing(const InputParameters &parameters);
+  ImageProcessing(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();
@@ -43,7 +45,7 @@ protected:
 
   FunctionName _func;
   std::vector<Function *> _function;
-  FILE *idFile;
+  FILE * idFile;
 
 private:
   /**
