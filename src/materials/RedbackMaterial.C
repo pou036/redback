@@ -49,7 +49,10 @@ validParams<RedbackMaterial>()
                        0.0,
                        "Varying component of (inverse of) Lewis number, coming from mutli-app for example");
   params.addCoupledVar("continuation_parameter", 1.0, "The continuation parameter");
-
+  params.addParam<MooseEnum>(
+    "continuation_variable",
+    RedbackMaterial::continuationMethodEnum() = "Gruntfest", // default value
+    "The name of the variable multiplied by the continuation_parameter value");
 
   // params.addCoupledVar("solid_velocity_aux", "Solid velocity (AuxKernel) from RedbackMechMaterial (if used)");
   params.addParam<MooseEnum>(
@@ -204,6 +207,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
 
     _mixture_density(declareProperty<Real>("mixture_density")),
 
+    _continuation_method((ContinuationMethod)(int)getParam<MooseEnum>("continuation_variable")),
     _density_method((DensityMethod)(int)getParam<MooseEnum>("density_method")),
     _permeability_method((PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method")),
 
@@ -264,6 +268,12 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
 //=================================================================
 
 MooseEnum
+RedbackMaterial::continuationMethodEnum()
+{
+  return MooseEnum("Gruntfest Lewis");
+}
+
+MooseEnum
 RedbackMaterial::densityMethodEnum()
 {
   return MooseEnum("linear");
@@ -300,7 +310,6 @@ RedbackMaterial::stepInitQpProperties()
   {
     _gr[_qp] = _gr_param;
   }
-  _gr[_qp] *= _continuation_parameter[0];
   pos = find(_init_from_functions__params.begin(), _init_from_functions__params.end(), "ref_lewis_nb") -
         _init_from_functions__params.begin();
   if (pos < _num_init_functions)
@@ -320,6 +329,18 @@ RedbackMaterial::stepInitQpProperties()
   else
   {
     _ar[_qp] = _ar_param;
+  }
+
+  switch (_continuation_method)
+  {
+    case Gruntfest:
+      _gr[_qp] *= _continuation_parameter[0];
+      break;
+    case Lewis:
+      _ref_lewis_nb[_qp] *= _continuation_parameter[0];
+      break;
+    default:
+      mooseError("Continuation method not implemented yet");
   }
 
   _confining_pressure[_qp] = _confining_pressure_param;
