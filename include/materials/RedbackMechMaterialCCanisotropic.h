@@ -29,9 +29,11 @@ public:
   RedbackMechMaterialCCanisotropic(const InputParameters & parameters);
 
 protected:
-  Real _initial_anisotropy_param; // Initial coefficient alpha of anisotropy (Dafalias 2013)
+  Real _initial_anisotropy_param; // Initial coefficient alpha of anisotropy
+                                  // (Dafalias 2013)
 
-  MaterialProperty<Real> & _anisotropy_coeff; // current coefficient alpha of anisotropy (Dafalias 2013)
+  MaterialProperty<Real> & _anisotropy_coeff; // current coefficient alpha of
+                                              // anisotropy (Dafalias 2013)
 
   virtual void stepInitQpProperties();
   void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);

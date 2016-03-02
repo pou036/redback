@@ -37,10 +37,12 @@ protected:
   /// Center point to calculate transversal direction for boundary point.
   const RealVectorValue & _center;
 
-  /// Axis of rotation, vector to calculate transversal direction for boundary point.
+  /// Axis of rotation, vector to calculate transversal direction for boundary
+  /// point.
   const RealVectorValue & _axis;
 
-  /// Direction index (0 for X, 1 for Y, 2 for Z), since we can't really rely on variable name "disp_x"...
+  /// Direction index (0 for X, 1 for Y, 2 for Z), since we can't really rely on
+  /// variable name "disp_x"...
   const unsigned int & _dir_index;
 };
 

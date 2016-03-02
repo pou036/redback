@@ -35,11 +35,11 @@ RedbackThermalDiffusion::~RedbackThermalDiffusion()
 Real
 RedbackThermalDiffusion::computeQpResidual()
 {
-  return _time_factor * _grad_u[_qp] * _grad_test[_i][_qp];
+  return _time_factor * _grad_u[ _qp ] * _grad_test[ _i ][ _qp ];
 }
 
 Real
 RedbackThermalDiffusion::computeQpJacobian()
 {
-  return _time_factor * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
+  return _time_factor * _grad_phi[ _j ][ _qp ] * _grad_test[ _i ][ _qp ];
 }

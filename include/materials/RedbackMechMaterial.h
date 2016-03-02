@@ -58,13 +58,13 @@ protected:
   virtual void computeQpStress();
   virtual void initQpStatefulProperties(); // from FiniteStrainMaterial.h
 
-  VariableGradient & _grad_disp_x;
-  VariableGradient & _grad_disp_y;
-  VariableGradient & _grad_disp_z;
+  const VariableGradient & _grad_disp_x;
+  const VariableGradient & _grad_disp_y;
+  const VariableGradient & _grad_disp_z;
 
-  VariableGradient & _grad_disp_x_old;
-  VariableGradient & _grad_disp_y_old;
-  VariableGradient & _grad_disp_z_old;
+  const VariableGradient & _grad_disp_x_old;
+  const VariableGradient & _grad_disp_y_old;
+  const VariableGradient & _grad_disp_z_old;
 
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankTwoTensor> & _total_strain;
@@ -81,7 +81,7 @@ protected:
   /// Current deformation gradient
   // RankTwoTensor _dfgrd;
 
-  // VariableValue & _T;
+  // const VariableValue & _T;
 
   // Copy-paste from FiniteStrainMaterial.h
   MaterialProperty<RankTwoTensor> & _strain_rate;
@@ -99,7 +99,8 @@ protected:
   MaterialProperty<Real> & _eqv_plastic_strain;
   MaterialProperty<Real> & _eqv_plastic_strain_old;
 
-  // virtual Real yieldFunction(const RankTwoTensor & stress, const Real yield_stress);
+  // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
+  // yield_stress);
   Real getSigEqv(const RankTwoTensor & stress);
   Real deltaFunc(unsigned int i, unsigned int j);
   Real getYieldStress(const Real equivalent_plastic_strain);
@@ -147,20 +148,22 @@ protected:
   Real _damage_coeff, _healing_coeff;
 
   Real _exponential;
-  // VariableValue & _dispx_dot;
-  // VariableValue & _dispy_dot;
-  // VariableValue & _dispz_dot;
+  // const VariableValue & _dispx_dot;
+  // const VariableValue & _dispy_dot;
+  // const VariableValue & _dispz_dot;
 
   // MaterialProperty<RealVectorValue> & _solid_velocity;
 
   // Using variables
   bool _has_T;
-  VariableValue &_T, &_T_old;
+  const VariableValue & _T;
+  const VariableValue & _T_old;
   bool _has_pore_pres;
-  VariableValue & _pore_pres;
-  VariableValue & _total_porosity;
+  const VariableValue & _pore_pres;
+  const VariableValue & _total_porosity;
   bool _has_D;
-  VariableValue &_damage, &_damage_old;
+  const VariableValue & _damage;
+  const VariableValue & _damage_old;
 
   DamageMethod _damage_method;
 

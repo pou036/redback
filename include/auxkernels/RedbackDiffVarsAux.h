@@ -20,8 +20,8 @@ public:
 
 protected:
   virtual Real computeValue();
-  VariableValue & _variable_1;
-  VariableValue & _variable_2;
+  const VariableValue & _variable_1;
+  const VariableValue & _variable_2;
 
 };
 

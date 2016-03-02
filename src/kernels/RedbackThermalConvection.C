@@ -37,15 +37,17 @@ RedbackThermalConvection::RedbackThermalConvection(const InputParameters & param
 Real
 RedbackThermalConvection::computeQpResidual()
 {
-  return _test[_i][_qp] * (_time_factor * _mixture_convective_energy[_qp] * _grad_u[_qp]);
+  return _test[ _i ][ _qp ] * (_time_factor * _mixture_convective_energy[ _qp ] * _grad_u[ _qp ]);
 }
 
 Real
 RedbackThermalConvection::computeQpJacobian()
 {
   return 0;
-  // return _test[_i][_qp] * _time_factor * _mixture_convective_energy[_qp] * _grad_phi[_j][_qp]
-  //  + _test[_i][_qp] * _time_factor * _mixture_convective_energy_jac[_qp] * _phi[_j][_qp];
+  // return _test[_i][_qp] * _time_factor * _mixture_convective_energy[_qp] *
+  // _grad_phi[_j][_qp]
+  //  + _test[_i][_qp] * _time_factor * _mixture_convective_energy_jac[_qp] *
+  //  _phi[_j][_qp];
 }
 
 Real
@@ -53,7 +55,8 @@ RedbackThermalConvection::computeQpOffDiagJacobian(unsigned int jvar)
 {
   /*if (jvar == _pore_pres_var)
   {
-    return _test[_i][_qp] * _time_factor * _mixture_convective_energy_off_jac[_qp] * _phi[_j][_qp];
+    return _test[_i][_qp] * _time_factor *
+  _mixture_convective_energy_off_jac[_qp] * _phi[_j][_qp];
   }*/
   return 0;
 }
