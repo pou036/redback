@@ -29,7 +29,7 @@ public:
   RedbackMechMaterialHO(const InputParameters & parameters);
 
 protected:
-  virtual void computeQpStrain();
+  virtual void computeQpStrain(const RankTwoTensor & Fhat);
   virtual void computeQpStress();
   virtual void computeQpElasticityTensor();
 

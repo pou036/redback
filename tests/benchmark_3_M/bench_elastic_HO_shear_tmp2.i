@@ -2,7 +2,7 @@
   type = GeneratedMesh
   dim = 3
   nx = 10 # 6
-  ny = 50 # 6
+  ny = 10 # 6
 []
 
 [GlobalParams]
@@ -15,6 +15,7 @@
 []
 
 [Postprocessors]
+  active = 'Rotation_wcz_0_9 antisymmetric_pp antisymmetric_wc symmetric_strain_pp'
   [./disp_y_top]
     type = PointValue
     point = '0.5 1 0.1'
@@ -31,9 +32,10 @@
     variable = wc_z
   [../]
   [./antisymmetric_pp]
-    type = SideAverageValue
+    type = PointValue
     variable = antisymmetric_strain_bc
-    boundary = bottom
+    execute_on = timestep_end
+    point = '0.5 0.5 0.5'
   [../]
   [./Rotation_wcz_0_9]
     type = PointValue
@@ -82,7 +84,7 @@
   [../]
   [./Displ_u_x_0_9]
     type = PointValue
-    variable = wc_z
+    variable = disp_x
     point = '0.5 0.9 0.5'
   [../]
   [./Displ_u_x_0_8]
@@ -125,6 +127,16 @@
     variable = disp_x
     point = '0.5 0.1 0.5'
   [../]
+  [./antisymmetric_wc]
+    type = PointValue
+    variable = antisymmetric_glob
+    point = '0.5 0.9 0.5'
+  [../]
+  [./symmetric_strain_pp]
+    type = PointValue
+    variable = wc_x
+    point = '0.5 0.9 0.5'
+  [../]
 []
 
 [Variables]
@@ -144,6 +156,14 @@
 
 [AuxVariables]
   [./antisymmetric_strain_bc]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./antisymmetric_glob]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./symmetric_strain]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -211,6 +231,22 @@
     type = RankTwoAux
     variable = antisymmetric_strain_bc
     rank_two_tensor = macro_rotation
+    index_j = 0
+    index_i = 1
+    execute_on = timestep_end
+  [../]
+  [./antisymmetric_yx_glob]
+    type = RankTwoAux
+    variable = antisymmetric_glob
+    rank_two_tensor = antisymmetric_strain
+    index_j = 0
+    index_i = 1
+    execute_on = timestep_end
+  [../]
+  [./symmetric_stain_yx]
+    type = RankTwoAux
+    variable = symmetric_strain
+    rank_two_tensor = symmetric_strain
     index_j = 1
     index_i = 0
     execute_on = timestep_end
@@ -352,7 +388,7 @@
 [Executioner]
   type = Transient
   solve_type = Newton
-  num_steps = 1
+  num_steps = 10
 []
 
 [Outputs]
@@ -360,3 +396,4 @@
   exodus = true
   file_base = bench_elastic_HO_shear
 []
+

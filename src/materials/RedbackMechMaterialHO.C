@@ -60,7 +60,7 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
 }
 
 void
-RedbackMechMaterialHO::computeQpStrain()
+RedbackMechMaterialHO::computeQpStrain(const RankTwoTensor & Fhat)
 {
   //strain = (grad_disp + grad_disp^T)/2
   RankTwoTensor grad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
@@ -69,8 +69,11 @@ RedbackMechMaterialHO::computeQpStrain()
   for (unsigned i = 0; i < LIBMESH_DIM; ++i)
     for (unsigned j = 0; j < LIBMESH_DIM; ++j)
       for (unsigned k = 0; k < LIBMESH_DIM; ++k)
+        {
         grad_tensor(i, j) += PermutationTensor::eps(i, j, k) * wc_vector(k);
-
+        //Real tmp = grad_tensor(i, j);
+        //std::cout << "grad_tensor(" << i <<", " << j << " = " << tmp << std::endl;
+      }
   _symmetric_strain[_qp] = (grad_tensor + grad_tensor.transpose()) / 2.0;
   _antisymmetric_strain[_qp] = (grad_tensor - grad_tensor.transpose()) / 2.0;
   _elastic_strain[_qp] = grad_tensor;
@@ -79,6 +82,10 @@ RedbackMechMaterialHO::computeQpStrain()
   RankTwoTensor mgrad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
   _macro_rotation[_qp] = (mgrad_tensor - mgrad_tensor.transpose()) / 2.0;
 
+  /*Real tmp = _antisymmetric_strain[_qp](0,1) ;
+  if (std::abs(tmp) > 1e-50)
+    std::cout << "_antisymmetric_strain[" << _qp<<"](0,1) = " << tmp << std::endl;
+*/
   //_strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp] * (_T[_qp] - _T_old[_qp])); TODO
   _rotation_increment[_qp].zero();
   _rotation_increment[_qp].addIa(1);
@@ -103,9 +110,9 @@ RedbackMechMaterialHO::computeQpStress()
   computeRedbackTerms(_stress[_qp], 0, 0);
   //myLib::
   //SayHello("world");
- _stress_trace[_qp] =_stress[_qp].trace();
-traceaff(_stress_trace[0]);
-std::cout << "la trace plus un du tenseur des contraintes vaut " << traceplus(_stress_trace[0]) << std::endl;
+ //_stress_trace[_qp] =_stress[_qp].trace();
+//traceaff(_stress_trace[0]);
+//std::cout << "la trace plus un du tenseur des contraintes vaut " << traceplus(_stress_trace[0]) << std::endl;
 }
 
 void RedbackMechMaterialHO::computeQpElasticityTensor()
