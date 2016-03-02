@@ -48,7 +48,7 @@ Real
 RedbackFluidStressDivergenceTensors::computeQpResidual()
 {
 	 return (_fluid_stress[_qp].row(_component))* _grad_test[_i][_qp] / _fluid_density[_qp]
-         + (_grad_pore_pressure[_qp](_component)/_fluid_density[_qp] - _gravity_term[_qp](_component)*_test[_i][_qp]);
+          + (_grad_pore_pressure[_qp](_component)/_fluid_density[_qp] - _gravity_term[_qp](_component))*_test[_i][_qp];
 }
 
 Real
