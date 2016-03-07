@@ -12,7 +12,7 @@
 
 #include "Function.h"
 #include "RedbackMechMaterialHO.h"
-#include "myLibech.h"
+#include "myFunc.h"
 
 /**
  * RedbackMechMaterialHO handles a high order material.
@@ -108,6 +108,10 @@ RedbackMechMaterialHO::computeQpStress()
 
   // Compute the energy dissipation and the properties declared
   computeRedbackTerms(_stress[_qp], 0, 0);
+
+  int num = 4;
+  int num2 = display_(&num);
+  std::cout << "le resultat de l'addition vaut " << num2 << std::endl;
   //myLib::
   //SayHello("world");
  //_stress_trace[_qp] =_stress[_qp].trace();
