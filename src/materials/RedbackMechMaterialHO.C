@@ -12,7 +12,7 @@
 
 #include "Function.h"
 #include "RedbackMechMaterialHO.h"
-#include "myFunc.h"
+#include "hadrienelasticity.h"
 
 /**
  * RedbackMechMaterialHO handles a high order material.
@@ -109,14 +109,101 @@ RedbackMechMaterialHO::computeQpStress()
   // Compute the energy dissipation and the properties declared
   computeRedbackTerms(_stress[_qp], 0, 0);
 
-  int num = 4;
-  int num2 = display_(&num);
-  std::cout << "le resultat de l'addition vaut " << num2 << std::endl;
+  //int num = 4;
+  //int num2 = display_(&num);
+  //std::cout << "le resultat de l'addition vaut " << num2 << std::endl;
   //myLib::
   //SayHello("world");
  //_stress_trace[_qp] =_stress[_qp].trace();
 //traceaff(_stress_trace[0]);
 //std::cout << "la trace plus un du tenseur des contraintes vaut " << traceplus(_stress_trace[0]) << std::endl;
+int NPROPS = 4;
+int NSTR = 6;
+int NILL = 1;
+int NSVARSGP = 12;
+
+Real STRESSF[NSTR];
+Real DEFORT[NSTR];
+Real DSDE[NSTR*NSTR];
+Real SVARSGP[NSVARSGP];
+Real PROPS[NPROPS];
+
+DEFORT[0]=_elastic_strain[_qp](0,0);
+DEFORT[1]=_elastic_strain[_qp](1,1);
+DEFORT[2]=_symmetric_strain[_qp](0,1);
+DEFORT[3]=_antisymmetric_strain[_qp](0,1);
+DEFORT[4]=_curvature[_qp](2,0);
+DEFORT[5]=_curvature[_qp](2,1);
+
+Real Kbulk = 0;
+Real Gshear = 10;
+Real GCshear = 20;
+Real Radius = 0.1;
+
+PROPS[0]=Kbulk;
+PROPS[1]=Gshear;
+PROPS[2]=GCshear;
+PROPS[3]=Radius;
+
+for (unsigned i = 0; i < NSTR; ++i){
+STRESSF[i]=0;
+}
+
+for (unsigned i = 0; i < NSVARSGP; ++i){
+SVARSGP[i]=0;
+}
+
+for (unsigned i = 0; i < NSTR; ++i) // line
+for (unsigned j = 0; j < NSTR; ++j) // column
+{
+  int len_column = 2;
+  DSDE[i*len_column+j]=(i+1)*2+j+1;
+}
+
+//usermat_(&STRESSF[NSTR],&DEFORT[NSTR],&DSDE[NSTR][NSTR],&NSTR,&PROPS[NPROPS],&NPROPS,&SVARSGP[NSVARSGP],&NSVARSGP,&NILL,&Kbulk);
+usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL,&Kbulk);
+
+//usermat_();
+
+std::cout << " fortran sigma (11)= " << STRESSF[0] << std::endl;
+std::cout << " Moose sigma (11)= " << _stress[_qp](0,0) << std::endl;
+
+
+std::cout << " fortran sigma (22)= " << STRESSF[1] << std::endl;
+std::cout << " Moose sigma (22)= " << _stress[_qp](1,1) << std::endl;
+
+
+std::cout << " fortran sigma (12) sym = " << STRESSF[2] << std::endl;
+std::cout << " Moose sigma (12) sym = " << _symmetric_stress[_qp](0,1) << std::endl;
+
+
+std::cout << " fortran sigma (12) antisym = " << STRESSF[3] << std::endl;
+std::cout << " Moose sigma (12) antisym = " << _antisymmetric_stress[_qp](0,1) << std::endl;
+
+
+std::cout << " fortran moment (31) = " << STRESSF[4] << std::endl;
+std::cout << " Moose moment (31) = " << _stress_couple[_qp](2,0) << std::endl;
+
+
+std::cout << " fortran moment (32)  = " << STRESSF[5] << std::endl;
+std::cout << " Moose moment (32)  = " << _stress_couple[_qp](2,1) << std::endl;
+
+
+//std::cout << " fortran DEFORT (1)= " << DEFORT[0] << std::endl;
+//std::cout << " fortran DEFORT (2)= " << DEFORT[1] << std::endl;
+//std::cout << " fortran DEFORT (3)  = " << DEFORT[2] << std::endl;
+//std::cout << " fortran DEFORT (4)  = " << DEFORT[3] << std::endl;
+//std::cout << " fortran DEFORT (5) = " << DEFORT[4] << std::endl;
+//std::cout << " fortran DEFORT (6)  = " << DEFORT[5] << std::endl;
+
+//std::cout << " fortran PROPS (1)= " << PROPS[0] << std::endl;
+//std::cout << " fortran PROPS (2)= " << PROPS[1] << std::endl;
+//std::cout << " fortran PROPS (3)  = " << PROPS[2] << std::endl;
+//std::cout << " fortran PROPS (4)  = " << PROPS[3] << std::endl;
+
+//std::cout << " fortran DSDE (1,1)= " << DSDE[0] << std::endl;
+
+
 }
 
 void RedbackMechMaterialHO::computeQpElasticityTensor()

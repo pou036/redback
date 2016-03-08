@@ -11,7 +11,7 @@ hadrienelasticity_objects   := $(patsubst %.f, %.$(obj-suffix), $(hadrienelastic
 hadrienelasticity_deps      := $(patsubst %.$(obj-suffix), %.$(obj-suffix).d, $(hadrienelasticity_objects))
 hadrienelasticity_LIB       := $(hadrienelasticity_DIR)/libhadrienelasticity-$(METHOD).la
 
-app_INCLUDES += -I$(hadrienelasticity_DIR)/src
+app_INCLUDES += -I$(hadrienelasticity_DIR)
 app_LIBS += $(hadrienelasticity_LIB)
 
 #command in the case of a C++ file
