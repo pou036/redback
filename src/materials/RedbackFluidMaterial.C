@@ -24,13 +24,17 @@ InputParameters validParams<RedbackFluidMaterial>()
   params.addCoupledVar("fluid_vel_x", 0.0, "The x component of fluid velocity");
   params.addCoupledVar("fluid_vel_y", 0.0, "The y component of fluid velocity");
   params.addCoupledVar("fluid_vel_z", 0.0, "The z component of fluid velocity");
-  params.addParam<Real>("bulk_viscosity", 0.0, "Fluid bulk viscosity (λ)");
-  params.addParam<Real>("dynamic_viscosity", 0.0, "Fluid dynamic viscosity (μ)");
+  params.addParam<Real>("viscosity_ratio", 0.0, "Ratio of Fluid bulk viscosity to Fluid dynamic viscosity (μB/μ)");
+//  params.addParam<Real>("bulk_viscosity", 0.0, "Fluid bulk viscosity (λ)");
+//  params.addParam<Real>("dynamic_viscosity", 0.0, "Fluid dynamic viscosity (μ)");
   params.addParam<Real>("fluid_density", 0.0, "Reference fluid density (\rho)");
   params.addParam<Real>("fluid_compressibility", 0, "Fluid compressibility (beta^{(f)} in 1/Pa)"); // _fluid_compressibility_param
   params.addParam<Real>("fluid_thermal_expansion", 0, "Fluid expansion (lambda^{(f)} in 1/K)"); // _fluid_thermal_expansion_param
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
+  params.addParam<Real>("Peclet_number", 1, "Peclet number");
+  params.addParam<Real>("Reynolds_number", 1, "Reynolds number");
+  params.addParam<Real>("Froude_number", 1, "Froude number");
 
   params.addParam<RealVectorValue>("gravity", RealVectorValue(), "Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg '0 0 -9.81'");
   return params;
@@ -54,20 +58,29 @@ RedbackFluidMaterial::RedbackFluidMaterial(const InputParameters & parameters) :
   _grad_fluid_vel_z(coupledGradient("fluid_vel_z")),
 
   _gravity_param(getParam<RealVectorValue>("gravity")),
+
+  _peclet_number_param(getParam<Real>("Peclet_number")),
+  _reynolds_number_param(getParam<Real>("Reynolds_number")),
+  _froude_number_param(getParam<Real>("Froude_number")),
+
   _gravity_term(declareProperty<RealVectorValue>("gravity_term")), // actually fluid gravity (but need to be called mixture for the kernel)
 
   _fluid_density(declareProperty<Real>("fluid_density")),
   _div_fluid_vel(declareProperty<Real>("divergence_of_fluid_velocity")),
   _div_fluid_kernel(declareProperty<Real>("divergence_fluid_velocity_kernel")),
   _pressurization_coefficient(declareProperty<Real>("pressurization_coefficient")),
+  _peclet_number(declareProperty<Real>("Peclet_number")),
+  _reynolds_number(declareProperty<Real>("Reynolds_number")),
+  _froude_number(declareProperty<Real>("Froude_number")),
   _thermal_convective_mass(declareProperty<RealVectorValue>("thermal_convective_mass")),
   _pressure_convective_mass(declareProperty<RealVectorValue>("pressure_convective_mass")),
   _fluid_stress(declareProperty<RankTwoTensor>("fluid_stress")),
 
   //_Jacobian_fluid_mult(declareProperty<ElasticityTensorR4>("Jacobian_fluid_mult")),
 
-  _bulk_viscosity_param(getParam<Real>("bulk_viscosity")),
-  _dynamic_viscosity_param(getParam<Real>("dynamic_viscosity")),
+  _viscosity_ratio_param(getParam<Real>("viscosity_ratio")),
+  //_bulk_viscosity_param(getParam<Real>("bulk_viscosity")),
+  //_dynamic_viscosity_param(getParam<Real>("dynamic_viscosity")),
   _fluid_density_param(getParam<Real>("fluid_density")),
   _fluid_compressibility_param(getParam<Real>("fluid_compressibility")),
   _fluid_thermal_expansion_param(getParam<Real>("fluid_thermal_expansion")),
@@ -107,10 +120,15 @@ RedbackFluidMaterial::computeQpProperties()
 void
 RedbackFluidMaterial::computeRedbackTerms()
 {
-  // Gravity term in the momentum kernel
+  _peclet_number[_qp] = _peclet_number_param;
+  _reynolds_number[_qp] = _reynolds_number_param;
+  _froude_number[_qp] = _froude_number_param;
+
   Real fluid_density;
-  fluid_density = _fluid_density_param*(1 + _fluid_compressibility_param*(_pore_pres[_qp] - _P0_param) - _fluid_thermal_expansion_param*(_T[_qp] - _T0_param));
-  _gravity_term[_qp] = _gravity_param;
+  fluid_density = (1 + _fluid_compressibility_param*_pore_pres[_qp] - _fluid_thermal_expansion_param*_T[_qp]);
+
+  // Gravity term in the momentum kernel
+  _gravity_term[_qp] = _gravity_param/pow(_froude_number[_qp],2);
 
   // Constitutive law
   RankTwoTensor grad_v(_grad_fluid_vel_x[_qp], _grad_fluid_vel_y[_qp], _grad_fluid_vel_y[_qp]);
@@ -118,20 +136,21 @@ RedbackFluidMaterial::computeRedbackTerms()
   _div_fluid_vel[_qp] = _grad_fluid_vel_x[_qp](0) + _grad_fluid_vel_y[_qp](1) + _grad_fluid_vel_z[_qp](2);
   // Fluid stress for Newtonian compressible fluid, in small deformation
   _fluid_stress[_qp].zero();
-  _fluid_stress[_qp].addIa(_bulk_viscosity_param*_div_fluid_vel[_qp]);
-  _fluid_stress[_qp] += _dynamic_viscosity_param*(grad_v + grad_v.transpose());
+  _fluid_stress[_qp].addIa((_viscosity_ratio_param-2/3)*_div_fluid_vel[_qp]/_reynolds_number[_qp]);
+  _fluid_stress[_qp] += (grad_v + grad_v.transpose())/_reynolds_number[_qp];
   //_Jacobian_fluid_mult[_qp].zero();
 
-  // Fluid divergence
-  _div_fluid_kernel[_qp] = _div_fluid_vel[_qp] / _fluid_compressibility_param;
+  // Fluid divergence for mass Kernel component
+  _div_fluid_kernel[_qp] = _div_fluid_vel[_qp]*_peclet_number[_qp] / _fluid_compressibility_param;
 
   // Assembling mass kernels components
   _pressurization_coefficient[_qp] = _fluid_thermal_expansion_param/_fluid_compressibility_param;
   RealVectorValue fluid_vel_vector = RealVectorValue(_fluid_vel_x[_qp], _fluid_vel_y[_qp], _fluid_vel_z[_qp]);
   //_pressure_convective_mass[_qp] = _grad_pore_pressure[_qp]*fluid_vel_vector - _pressurization_coefficient[_qp]*_grad_temp[_qp]*fluid_vel_vector;
   //_thermal_convective_mass[_qp] = _grad_temp[_qp]*fluid_vel_vector;
-  _pressure_convective_mass[_qp] = fluid_vel_vector;
-  _thermal_convective_mass[_qp] = _pressurization_coefficient[_qp]*fluid_vel_vector;
+  //^the sum of these two terms is done in massConvection Kernel
+  _pressure_convective_mass[_qp] = fluid_vel_vector*_peclet_number[_qp];
+  _thermal_convective_mass[_qp] = _pressurization_coefficient[_qp]*fluid_vel_vector*_peclet_number[_qp];
 
   return;
 }

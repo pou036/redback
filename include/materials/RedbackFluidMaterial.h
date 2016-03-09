@@ -52,17 +52,22 @@ protected:
 
   RealVectorValue _gravity_param;
 
+  Real _peclet_number_param,_reynolds_number_param,_froude_number_param;
+
   MaterialProperty<RealVectorValue> & _gravity_term;
   MaterialProperty<Real> & _fluid_density;
   MaterialProperty<Real> & _div_fluid_vel;
   MaterialProperty<Real> & _div_fluid_kernel;
   MaterialProperty<Real> & _pressurization_coefficient;
+  MaterialProperty<Real> & _peclet_number;
+  MaterialProperty<Real> & _reynolds_number;
+  MaterialProperty<Real> & _froude_number;
   MaterialProperty<RealVectorValue> & _thermal_convective_mass;
   MaterialProperty<RealVectorValue> & _pressure_convective_mass;
   MaterialProperty<RankTwoTensor> & _fluid_stress;
   //MaterialProperty<ElasticityTensorR4> & _Jacobian_fluid_mult;
 
-  Real _bulk_viscosity_param, _dynamic_viscosity_param;//, _Re_param;
+  Real _viscosity_ratio_param;//_bulk_viscosity_param, _dynamic_viscosity_param;
   Real _fluid_density_param, _fluid_compressibility_param, _fluid_thermal_expansion_param;
 
   VariableGradient& _grad_temp;
