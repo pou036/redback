@@ -41,12 +41,13 @@ RedbackStressDivergenceTensors::RedbackStressDivergenceTensors(const InputParame
     _pore_pres(coupledValue("pore_pres")),
 
     _stress(getMaterialProperty<RankTwoTensor>("stress" + getParam<std::string>("appended_property_name"))),
-    _Jacobian_mult(
-      getMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
+    _Jacobian_mult(hasMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name")) ?
+                   getMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name")) :
+                   getZeroMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
     // _d_stress_dT(getMaterialProperty<RankTwoTensor>("d_stress_dT"+
     // getParam<std::string>("appended_property_name"))),
     _component(getParam<unsigned int>("component")),
-    _biot_coeff(getMaterialProperty<Real>("biot_coefficient")),
+    _biot_coeff(hasMaterialProperty<Real>("biot_coefficient") ? getMaterialProperty<Real>("biot_coefficient"): getZeroMaterialProperty<Real>("biot_coefficient")),
 
     _xdisp_coupled(isCoupled("disp_x")),
     _ydisp_coupled(isCoupled("disp_y")),
@@ -60,7 +61,9 @@ RedbackStressDivergenceTensors::RedbackStressDivergenceTensors(const InputParame
     _temp_var(_temp_coupled ? coupled("temp") : 0),
     _porepressure_var(_pore_pres_coupled ? coupled("pore_pres") : 0),
 
-    _gravity_term(getMaterialProperty<RealVectorValue>("mixture_gravity_term"))
+    _gravity_term(getMaterialProperty<RealVectorValue>("mixture_gravity_term")),
+    //=0 if it has not been declared (only declared for NS)
+    _fluid_density(hasMaterialProperty<Real>("NS_fluid_density") ? getMaterialProperty<Real>("NS_fluid_density") : getZeroMaterialProperty<Real>("NS_fluid_density"))
 {
 }
 
@@ -86,6 +89,13 @@ RedbackStressDivergenceTensors::computeQpResidual()
     // correct sign convention.
     // In this configuration negative gravity_term because we consider positive stresses in extension!
     // Thus, the gravity vector needs to be given with a negative component in Z (e.g. 0 0 -9.81)
+  }
+
+  //stress divergence for Navier Stokes equations
+  if (hasMaterialProperty<Real>("fluid_density"))
+  {
+    return (_stress[_qp].row(_component)) * _grad_test[_i][_qp]/ _fluid_density[_qp]
+            - _gravity_term[_qp](_component)*_test[_i][_qp];
   }
 
   //  return (_stress[_qp].row(_component) - _gravity_term[_qp])* _grad_test[_i][_qp]; //TODO: Add the gravity kernel

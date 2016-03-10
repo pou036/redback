@@ -25,6 +25,8 @@
 
 // Boundary conditions
 #include "FunctionDirichletTransverseBC.h"
+#include "NSOpenOutflow.h"
+
 
 // Initial conditions
 #include "FunctionWithRandomIC.h"
@@ -35,7 +37,6 @@
 #include "RedbackChemExo.h"
 #include "RedbackChemPressure.h"
 #include "RedbackFluidDivergence.h"
-#include "RedbackFluidStressDivergenceTensors.h"
 #include "RedbackMassConvection.h"
 #include "RedbackMassDiffusion.h"
 #include "RedbackMechDissip.h"
@@ -103,6 +104,7 @@ RedbackApp::registerObjects(Factory & factory)
 #undef registerObject
 #define registerObject(name) factory.reg<name>(stringifyName(name))
   registerBoundaryCondition(FunctionDirichletTransverseBC);
+  registerBoundaryCondition(NSOpenOutflow);
 
   registerInitialCondition(FunctionWithRandomIC);
   registerInitialCondition(FunctionTimesRandomIC);
@@ -111,7 +113,6 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
   registerKernel(RedbackFluidDivergence);
-  registerKernel(RedbackFluidStressDivergenceTensors);
   registerKernel(RedbackMassConvection);
   registerKernel(RedbackMassDiffusion);
   registerKernel(RedbackMechDissip);
