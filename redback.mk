@@ -2,53 +2,53 @@
 #ADDITIONAL_LIBS := /usr/local/lib/myLib.dylib
 
 #to compile it and add the path automatically using libtool
-hadrienelasticity_DIR := /Users/pou036/projects/ioannis
-#hadrienelasticity_srcfiles  += $(hadrienelasticity_DIR)/src/​file1.C
-hadrienelasticity_srcfiles  += $(hadrienelasticity_DIR)/hadrienelasticity.f
+multisurfaceplasticityhard_DIR := /Users/pou036/projects/ioannis/perfect_asso_plast
+#multisurfaceplasticityhard_srcfiles  += $(multisurfaceplasticityhard_DIR)/src/​file1.C
+multisurfaceplasticityhard_srcfiles  += $(multisurfaceplasticityhard_DIR)/multisurfaceplasticityhard.f
 
-#hadrienelasticity_objects   := $(patsubst %.f90, %.$(obj-suffix), $(hadrienelasticity_srcfiles))
-hadrienelasticity_objects   := $(patsubst %.f, %.$(obj-suffix), $(hadrienelasticity_srcfiles))
-hadrienelasticity_deps      := $(patsubst %.$(obj-suffix), %.$(obj-suffix).d, $(hadrienelasticity_objects))
-hadrienelasticity_LIB       := $(hadrienelasticity_DIR)/libhadrienelasticity-$(METHOD).la
+#multisurfaceplasticityhard_objects   := $(patsubst %.f90, %.$(obj-suffix), $(multisurfaceplasticityhard_srcfiles))
+multisurfaceplasticityhard_objects   := $(patsubst %.f, %.$(obj-suffix), $(multisurfaceplasticityhard_srcfiles))
+multisurfaceplasticityhard_deps      := $(patsubst %.$(obj-suffix), %.$(obj-suffix).d, $(multisurfaceplasticityhard_objects))
+multisurfaceplasticityhard_LIB       := $(multisurfaceplasticityhard_DIR)/libmultisurfaceplasticityhard-$(METHOD).la
 
-app_INCLUDES += -I$(hadrienelasticity_DIR)
-app_LIBS += $(hadrienelasticity_LIB)
+app_INCLUDES += -I$(multisurfaceplasticityhard_DIR)
+app_LIBS += $(multisurfaceplasticityhard_LIB)
 
 #command in the case of a C++ file
-#$(hadrienelasticity_LIB): $(hadrienelasticity_objects)
+#$(multisurfaceplasticityhard_LIB): $(multisurfaceplasticityhard_objects)
 #				@echo "Linking Library "$@"..."
 #				@$(libmesh_LIBTOOL) --tag=CC $(LIBTOOLFLAGS) --mode=link --quiet \
-#				$(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(hadrienelasticity_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(hadrienelasticity_DIR)
-#				@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hadrienelasticity_LIB) $(hadrienelasticity_DIR)
+#				$(libmesh_CC) $(libmesh_CFLAGS) -o $@ $(multisurfaceplasticityhard_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(multisurfaceplasticityhard_DIR)
+#				@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(multisurfaceplasticityhard_LIB) $(multisurfaceplasticityhard_DIR)
 
-$(hadrienelasticity_LIB): $(hadrienelasticity_objects)
+$(multisurfaceplasticityhard_LIB): $(multisurfaceplasticityhard_objects)
 								@echo "Linking Library "$@"..."
 								@$(libmesh_LIBTOOL) --tag=FC $(LIBTOOLFLAGS) --mode=link --quiet \
-								$(libmesh_F90) $(libmesh_FFLAGS) -o $@ $(hadrienelasticity_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(hadrienelasticity_DIR)
-								@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hadrienelasticity_LIB) $(hadrienelasticity_DIR)
+								$(libmesh_F90) $(libmesh_FFLAGS) -o $@ $(multisurfaceplasticityhard_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(multisurfaceplasticityhard_DIR)
+								@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(multisurfaceplasticityhard_LIB) $(multisurfaceplasticityhard_DIR)
 
 #command in the case of a Fortran file 90
-#$(hadrienelasticity_LIB): $(hadrienelasticity_objects)
+#$(multisurfaceplasticityhard_LIB): $(multisurfaceplasticityhard_objects)
 #		@echo "Linking Library "$@"..."
 #		@$(libmesh_LIBTOOL) --tag=FC $(LIBTOOLFLAGS) --mode=link --quiet \
-#		$(libmesh_F90 $(libmesh_FFLAGS) -o $@ $(hadrienelasticity_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(hadrienelasticity_DIR)
-#		@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hadrienelasticity_LIB) $(hadrienelasticity_DIR)
+#		$(libmesh_F90 $(libmesh_FFLAGS) -o $@ $(multisurfaceplasticityhard_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(multisurfaceplasticityhard_DIR)
+#		@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(multisurfaceplasticityhard_LIB) $(multisurfaceplasticityhard_DIR)
 
 #command in the case of a Fortran file 77
-#$(hadrienelasticity_LIB): $(hadrienelasticity_objects)
+#$(multisurfaceplasticityhard_LIB): $(multisurfaceplasticityhard_objects)
 #								@echo "Linking Library "$@"..."
 #								@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=link --quiet \
-#								$(libmesh_F77) $(libmesh_FFLAGS) -o $@ $(hadrienelasticity_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(hadrienelasticity_DIR)
-#								@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(hadrienelasticity_LIB) $(hadrienelasticity_DIR)
+#								$(libmesh_F77) $(libmesh_FFLAGS) -o $@ $(multisurfaceplasticityhard_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(multisurfaceplasticityhard_DIR)
+#								@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(multisurfaceplasticityhard_LIB) $(multisurfaceplasticityhard_DIR)
 
 
-$(app_EXEC): $(hadrienelasticity_LIB)
--include $(hadrienelasticity_deps)
+$(app_EXEC): $(multisurfaceplasticityhard_LIB)
+-include $(multisurfaceplasticityhard_deps)
 
-clean​hadrienelasticity:
-			@rm -f $(hadrienelasticity_objects)
-			@rm -f $(hadrienelasticity_deps)
-			@rm -f $(hadrienelasticity_LIB)
-			@rm -f $(hadrienelasticity_DIR)/libhadrienelasticity-$(METHOD)*.dylib
-			@rm -f $(hadrienelasticity_DIR)/libhadrienelasticity-$(METHOD)*.so
-			@rm -f $(hadrienelasticity_DIR)/libhadrienelasticity-$(METHOD)*.a
+clean​multisurfaceplasticityhard:
+			@rm -f $(multisurfaceplasticityhard_objects)
+			@rm -f $(multisurfaceplasticityhard_deps)
+			@rm -f $(multisurfaceplasticityhard_LIB)
+			@rm -f $(multisurfaceplasticityhard_DIR)/libmultisurfaceplasticityhard-$(METHOD)*.dylib
+			@rm -f $(multisurfaceplasticityhard_DIR)/libmultisurfaceplasticityhard-$(METHOD)*.so
+			@rm -f $(multisurfaceplasticityhard_DIR)/libmultisurfaceplasticityhard-$(METHOD)*.a

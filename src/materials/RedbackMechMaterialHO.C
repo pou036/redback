@@ -12,7 +12,7 @@
 
 #include "Function.h"
 #include "RedbackMechMaterialHO.h"
-#include "hadrienelasticity.h"
+#include "multisurfaceplasticityhard.h"
 
 /**
  * RedbackMechMaterialHO handles a high order material.
@@ -28,7 +28,7 @@ validParams<RedbackMechMaterialHO>()
   params.addRequiredParam<std::vector<Real> >("B_ijkl", "Flexural bending rigidity tensor.  Should have 9 entries.");
 
   MooseEnum fm = RankFourTensor::fillMethodEnum();
-  fm = "antisymmetric_isotropic";
+  fm = "general_isotropic";
   params.addParam<MooseEnum>("fill_method_bending", fm, "The fill method for the 'bending' tensor.");
 
   return params;
@@ -117,10 +117,10 @@ RedbackMechMaterialHO::computeQpStress()
  //_stress_trace[_qp] =_stress[_qp].trace();
 //traceaff(_stress_trace[0]);
 //std::cout << "la trace plus un du tenseur des contraintes vaut " << traceplus(_stress_trace[0]) << std::endl;
-int NPROPS = 4;
-int NSTR = 6;
+int NPROPS = 6;
+int NSTR = 18;
 int NILL = 1;
-int NSVARSGP = 12;
+int NSVARSGP = 75;
 
 Real STRESSF[NSTR];
 Real DEFORT[NSTR];
@@ -128,65 +128,112 @@ Real DSDE[NSTR*NSTR];
 Real SVARSGP[NSVARSGP];
 Real PROPS[NPROPS];
 
-DEFORT[0]=_elastic_strain[_qp](0,0);
-DEFORT[1]=_elastic_strain[_qp](1,1);
-DEFORT[2]=_symmetric_strain[_qp](0,1);
-DEFORT[3]=_antisymmetric_strain[_qp](0,1);
-DEFORT[4]=_curvature[_qp](2,0);
-DEFORT[5]=_curvature[_qp](2,1);
-
 Real Kbulk = 0;
 Real Gshear = 10;
-Real GCshear = 20;
-Real Radius = 0.1;
+Real GCshear = 20/2;
+Real Radius = 0.05;
+Real mufor = 0;
+Real cfor = 0;
 
 PROPS[0]=Kbulk;
 PROPS[1]=Gshear;
 PROPS[2]=GCshear;
 PROPS[3]=Radius;
+PROPS[4]=mufor;
+PROPS[5]=cfor;
 
-for (unsigned i = 0; i < NSTR; ++i){
-STRESSF[i]=0;
-}
+DEFORT[0]=_elastic_strain[_qp](0,0);
+DEFORT[1]=_elastic_strain[_qp](1,1);
+DEFORT[2]=_elastic_strain[_qp](2,2);
+DEFORT[3]=_symmetric_strain[_qp](1,2);
+DEFORT[4]=_symmetric_strain[_qp](0,2);
+DEFORT[5]=_symmetric_strain[_qp](0,1);
+DEFORT[6]=_antisymmetric_strain[_qp](1,2);;
+DEFORT[7]=_antisymmetric_strain[_qp](0,2);
+DEFORT[8]=_antisymmetric_strain[_qp](0,1);
+DEFORT[9]=_curvature[_qp](0,0);
+DEFORT[10]=_curvature[_qp](0,1);
+DEFORT[11]=_curvature[_qp](0,2);
+DEFORT[12]=_curvature[_qp](1,0);
+DEFORT[13]=_curvature[_qp](1,1);
+DEFORT[14]=_curvature[_qp](1,2);
+DEFORT[15]=_curvature[_qp](2,0);
+DEFORT[16]=_curvature[_qp](2,1);
+DEFORT[17]=_curvature[_qp](2,2);
 
-for (unsigned i = 0; i < NSVARSGP; ++i){
-SVARSGP[i]=0;
-}
+STRESSF[0]=_stress[_qp](0,0);
+STRESSF[1]=_stress[_qp](1,1);
+STRESSF[2]=_stress[_qp](2,2);
+STRESSF[3]=_symmetric_stress[_qp](1,2);
+STRESSF[4]=_symmetric_stress[_qp](0,2);
+STRESSF[5]=_symmetric_stress[_qp](0,1);
+STRESSF[6]=_antisymmetric_stress[_qp](1,2);
+STRESSF[7]=_antisymmetric_stress[_qp](0,2);
+STRESSF[8]=_antisymmetric_stress[_qp](0,1);
+STRESSF[9]=_stress_couple[_qp](0,0);
+STRESSF[10]=_stress_couple[_qp](0,1);
+STRESSF[11]=_stress_couple[_qp](0,2);
+STRESSF[12]=_stress_couple[_qp](1,0);
+STRESSF[13]=_stress_couple[_qp](1,1);
+STRESSF[14]=_stress_couple[_qp](1,2);
+STRESSF[15]=_stress_couple[_qp](2,0);
+STRESSF[16]=_stress_couple[_qp](2,1);
+STRESSF[17]=_stress_couple[_qp](2,2);
 
-for (unsigned i = 0; i < NSTR; ++i) // line
-for (unsigned j = 0; j < NSTR; ++j) // column
-{
-  int len_column = 2;
-  DSDE[i*len_column+j]=(i+1)*2+j+1;
-}
+
 
 //usermat_(&STRESSF[NSTR],&DEFORT[NSTR],&DSDE[NSTR][NSTR],&NSTR,&PROPS[NPROPS],&NPROPS,&SVARSGP[NSVARSGP],&NSVARSGP,&NILL,&Kbulk);
-usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL,&Kbulk);
+usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
 
 //usermat_();
 
 std::cout << " fortran sigma (11)= " << STRESSF[0] << std::endl;
 std::cout << " Moose sigma (11)= " << _stress[_qp](0,0) << std::endl;
 
-
 std::cout << " fortran sigma (22)= " << STRESSF[1] << std::endl;
 std::cout << " Moose sigma (22)= " << _stress[_qp](1,1) << std::endl;
 
+std::cout << " fortran sigma (33)= " << STRESSF[2] << std::endl;
+std::cout << " Moose sigma (33)= " << _stress[_qp](2,2) << std::endl;
 
-std::cout << " fortran sigma (12) sym = " << STRESSF[2] << std::endl;
+std::cout << " fortran sigma (12) sym = " << STRESSF[3] << std::endl;
 std::cout << " Moose sigma (12) sym = " << _symmetric_stress[_qp](0,1) << std::endl;
 
-
-std::cout << " fortran sigma (12) antisym = " << STRESSF[3] << std::endl;
+std::cout << " fortran sigma (12) antisym = " << STRESSF[4] << std::endl;
 std::cout << " Moose sigma (12) antisym = " << _antisymmetric_stress[_qp](0,1) << std::endl;
 
-
-std::cout << " fortran moment (31) = " << STRESSF[4] << std::endl;
+std::cout << " fortran moment (31) = " << STRESSF[5] << std::endl;
 std::cout << " Moose moment (31) = " << _stress_couple[_qp](2,0) << std::endl;
 
-
-std::cout << " fortran moment (32)  = " << STRESSF[5] << std::endl;
+std::cout << " fortran moment (32)  = " << STRESSF[6] << std::endl;
 std::cout << " Moose moment (32)  = " << _stress_couple[_qp](2,1) << std::endl;
+
+_stress[_qp](0,0)=STRESSF[0];
+_stress[_qp](1,1)=STRESSF[1];
+_stress[_qp](2,2)=STRESSF[2];
+_stress[_qp](1,2)=STRESSF[3]+STRESSF[6];
+_stress[_qp](0,2)=STRESSF[4]+STRESSF[7];
+_stress[_qp](0,1)=STRESSF[5]+STRESSF[8];
+_stress[_qp](2,1)=STRESSF[3]-STRESSF[6];
+_stress[_qp](2,0)=STRESSF[4]-STRESSF[7];
+_stress[_qp](1,0)=STRESSF[5]-STRESSF[8];
+STRESSF[9]=_stress_couple[_qp](0,0);
+STRESSF[10]=_stress_couple[_qp](0,1);
+STRESSF[11]=_stress_couple[_qp](0,2);
+STRESSF[12]=_stress_couple[_qp](1,0);
+STRESSF[13]=_stress_couple[_qp](1,1);
+STRESSF[14]=_stress_couple[_qp](1,2);
+STRESSF[15]=_stress_couple[_qp](2,0);
+STRESSF[16]=_stress_couple[_qp](2,1);
+STRESSF[17]=_stress_couple[_qp](2,2);
+
+//_returnmap_iter[_qp] = Na
+//_plastic_strain[_qp] =  ;
+//_eqv_plastic_strain[_qp] =
+//_volumetric_strain[_qp]  = // PLASTIC vol strain
+//_elastic_strain[_qp] =
+//_total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
+//_total_volumetric_strain[_qp] =
 
 
 //std::cout << " fortran DEFORT (1)= " << DEFORT[0] << std::endl;
