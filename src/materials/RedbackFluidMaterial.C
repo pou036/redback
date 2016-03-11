@@ -27,8 +27,8 @@ InputParameters validParams<RedbackFluidMaterial>()
   params.addParam<Real>("viscosity_ratio", 0.0, "Ratio of Fluid bulk viscosity to Fluid dynamic viscosity (μB/μ)");
 //  params.addParam<Real>("bulk_viscosity", 0.0, "Fluid bulk viscosity (λ)");
 //  params.addParam<Real>("dynamic_viscosity", 0.0, "Fluid dynamic viscosity (μ)");
-  params.addParam<Real>("fluid_density", 0.0, "Reference fluid density (\rho)");
-  params.addParam<Real>("fluid_compressibility", 0, "Fluid compressibility (beta^{(f)} in 1/Pa)"); // _fluid_compressibility_param
+  params.addParam<Real>("fluid_density", 1, "Reference fluid density (\rho)");
+  params.addParam<Real>("fluid_compressibility", 1, "Fluid compressibility (beta^{(f)} in 1/Pa)"); //default value is 1 even if the fluid is not compressible because we often divide by compressibility
   params.addParam<Real>("fluid_thermal_expansion", 0, "Fluid expansion (lambda^{(f)} in 1/K)"); // _fluid_thermal_expansion_param
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
@@ -65,7 +65,7 @@ RedbackFluidMaterial::RedbackFluidMaterial(const InputParameters & parameters) :
 
   _gravity_term(declareProperty<RealVectorValue>("mixture_gravity_term")), // actually fluid gravity (but need to be called mixture for the kernel)
 
-  _fluid_density(declareProperty<Real>("NS_fluid_density")),//this fluid density is a component in the stressdivergence kernel
+  _fluid_density(declareProperty<Real>("NS_fluid_density")),//this fluid density is used in the stressdivergence kernel
   _div_fluid_vel(declareProperty<Real>("divergence_of_fluid_velocity")),
   _div_fluid_kernel(declareProperty<Real>("divergence_fluid_velocity_kernel")),
   _pressurization_coefficient(declareProperty<Real>("pressurization_coefficient")),
@@ -135,6 +135,7 @@ RedbackFluidMaterial::computeRedbackTerms()
   _fluid_stress[_qp].zero();
   _fluid_stress[_qp].addIa((_viscosity_ratio_param-2/3)*_div_fluid_vel[_qp]/_reynolds_number[_qp] - _pore_pres[_qp]);
   _fluid_stress[_qp] += (grad_v + grad_v.transpose())/_reynolds_number[_qp];
+
   //_Jacobian_fluid_mult[_qp].zero();
 
   // Fluid divergence for mass Kernel component
