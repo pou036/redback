@@ -78,6 +78,13 @@ RedbackStressDivergenceTensors::computeQpResidual()
    * Jacobians are the same, since pore pressure is not depending on displacements
    */
 
+  //stress divergence for Navier Stokes equations
+  if (hasMaterialProperty<Real>("NS_fluid_density"))
+  {
+    return (_stress[_qp].row(_component)) * _grad_test[_i][_qp]/ _fluid_density[_qp]
+            - _gravity_term[_qp](_component)*_test[_i][_qp];
+  }
+
   if (_pore_pres_coupled)
   {
     _poromech_stress_row = _stress[_qp].row(_component);
@@ -89,13 +96,6 @@ RedbackStressDivergenceTensors::computeQpResidual()
     // correct sign convention.
     // In this configuration negative gravity_term because we consider positive stresses in extension!
     // Thus, the gravity vector needs to be given with a negative component in Z (e.g. 0 0 -9.81)
-  }
-
-  //stress divergence for Navier Stokes equations
-  if (hasMaterialProperty<Real>("fluid_density"))
-  {
-    return (_stress[_qp].row(_component)) * _grad_test[_i][_qp]/ _fluid_density[_qp]
-            - _gravity_term[_qp](_component)*_test[_i][_qp];
   }
 
   //  return (_stress[_qp].row(_component) - _gravity_term[_qp])* _grad_test[_i][_qp]; //TODO: Add the gravity kernel
