@@ -35,6 +35,7 @@
 #include "RedbackChemExo.h"
 #include "RedbackChemPressure.h"
 #include "RedbackFluidDivergence.h"
+#include "RedbackFluidStressDivergenceTensors.h"
 #include "RedbackMassConvection.h"
 #include "RedbackMassDiffusion.h"
 #include "RedbackMechDissip.h"
@@ -110,6 +111,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
   registerKernel(RedbackFluidDivergence);
+  registerKernel(RedbackFluidStressDivergenceTensors);
   registerKernel(RedbackMassConvection);
   registerKernel(RedbackMassDiffusion);
   registerKernel(RedbackMechDissip);

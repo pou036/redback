@@ -63,7 +63,7 @@ RedbackFluidMaterial::RedbackFluidMaterial(const InputParameters & parameters) :
   _reynolds_number_param(getParam<Real>("Reynolds_number")),
   _froude_number_param(getParam<Real>("Froude_number")),
 
-  _gravity_term(declareProperty<RealVectorValue>("mixture_gravity_term")), // actually fluid gravity (but need to be called mixture for the kernel)
+  _gravity_term(declareProperty<RealVectorValue>("gravity_term")), // actually fluid gravity (but need to be called mixture for the kernel)
 
   _fluid_density(declareProperty<Real>("NS_fluid_density")),//this fluid density is used in the stressdivergence kernel
   _div_fluid_vel(declareProperty<Real>("divergence_of_fluid_velocity")),
@@ -74,7 +74,7 @@ RedbackFluidMaterial::RedbackFluidMaterial(const InputParameters & parameters) :
   _froude_number(declareProperty<Real>("Froude_number")),
   _thermal_convective_mass(declareProperty<RealVectorValue>("thermal_convective_mass")),
   _pressure_convective_mass(declareProperty<RealVectorValue>("pressure_convective_mass")),
-  _fluid_stress(declareProperty<RankTwoTensor>("stress")),
+  _fluid_stress(declareProperty<RankTwoTensor>("fluid_stress")),
 
   //_Jacobian_fluid_mult(declareProperty<ElasticityTensorR4>("Jacobian_fluid_mult")),
 
@@ -133,7 +133,7 @@ RedbackFluidMaterial::computeRedbackTerms()
   _div_fluid_vel[_qp] = _grad_fluid_vel_x[_qp](0) + _grad_fluid_vel_y[_qp](1) + _grad_fluid_vel_z[_qp](2);
   // Fluid stress for Newtonian compressible fluid, in small deformation
   _fluid_stress[_qp].zero();
-  _fluid_stress[_qp].addIa((_viscosity_ratio_param-2/3)*_div_fluid_vel[_qp]/_reynolds_number[_qp] - _pore_pres[_qp]);
+  _fluid_stress[_qp].addIa((_viscosity_ratio_param-2/3)*_div_fluid_vel[_qp]/_reynolds_number[_qp]);// - _pore_pres[_qp]);
   _fluid_stress[_qp] += (grad_v + grad_v.transpose())/_reynolds_number[_qp];
 
   //_Jacobian_fluid_mult[_qp].zero();
