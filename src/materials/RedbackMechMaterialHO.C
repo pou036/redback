@@ -130,9 +130,9 @@ Real PROPS[NPROPS];
 
 Real Kbulk = 0;
 Real Gshear = 10;
-Real GCshear = 20/2;
+Real GCshear = 20/2; // on divise par 2 car facteur 4 au lieu d'un facteur 2 dans la loi d'elasticite de Ioannis
 Real Radius = 0.05;
-Real mufor = 0;
+Real mufor = 0; // essai avec le critere le plus simple possible
 Real cfor = 0;
 
 PROPS[0]=Kbulk;
@@ -180,7 +180,7 @@ STRESSF[15]=_stress_couple[_qp](2,0);
 STRESSF[16]=_stress_couple[_qp](2,1);
 STRESSF[17]=_stress_couple[_qp](2,2);
 
-
+_returnmap_iter[_qp] = 0;
 
 //usermat_(&STRESSF[NSTR],&DEFORT[NSTR],&DSDE[NSTR][NSTR],&NSTR,&PROPS[NPROPS],&NPROPS,&SVARSGP[NSVARSGP],&NSVARSGP,&NILL,&Kbulk);
 usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
@@ -217,18 +217,29 @@ _stress[_qp](0,1)=STRESSF[5]+STRESSF[8];
 _stress[_qp](2,1)=STRESSF[3]-STRESSF[6];
 _stress[_qp](2,0)=STRESSF[4]-STRESSF[7];
 _stress[_qp](1,0)=STRESSF[5]-STRESSF[8];
-STRESSF[9]=_stress_couple[_qp](0,0);
-STRESSF[10]=_stress_couple[_qp](0,1);
-STRESSF[11]=_stress_couple[_qp](0,2);
-STRESSF[12]=_stress_couple[_qp](1,0);
-STRESSF[13]=_stress_couple[_qp](1,1);
-STRESSF[14]=_stress_couple[_qp](1,2);
-STRESSF[15]=_stress_couple[_qp](2,0);
-STRESSF[16]=_stress_couple[_qp](2,1);
-STRESSF[17]=_stress_couple[_qp](2,2);
+_stress_couple[_qp](0,0)=STRESSF[9];
+_stress_couple[_qp](0,1)=STRESSF[10];
+_stress_couple[_qp](0,2)=STRESSF[11];
+_stress_couple[_qp](1,0)=STRESSF[12];
+_stress_couple[_qp](1,1)=STRESSF[13];
+_stress_couple[_qp](1,2)=STRESSF[14];
+_stress_couple[_qp](2,0)=STRESSF[15];
+_stress_couple[_qp](2,1)=STRESSF[16];
+_stress_couple[_qp](2,2)=STRESSF[17];
 
-//_returnmap_iter[_qp] = Na
-//_plastic_strain[_qp] =  ;
+_returnmap_iter[_qp] = SVARSGP[54];
+
+for (unsigned i = 0; i < 3; ++i){
+_plastic_strain[_qp](i,i) = SVARSGP[36+i];
+}
+_plastic_strain[_qp](1,2) = SVARSGP[36+3]+SVARSGP[36+6];
+_plastic_strain[_qp](0,2) = SVARSGP[36+4]+SVARSGP[36+7];
+_plastic_strain[_qp](0,1) = SVARSGP[36+5]+SVARSGP[36+8];
+_plastic_strain[_qp](2,1) = SVARSGP[36+3]-SVARSGP[36+6];
+_plastic_strain[_qp](2,0) = SVARSGP[36+4]-SVARSGP[36+7];
+_plastic_strain[_qp](1,0) = SVARSGP[36+5]-SVARSGP[36+8];
+
+
 //_eqv_plastic_strain[_qp] =
 //_volumetric_strain[_qp]  = // PLASTIC vol strain
 //_elastic_strain[_qp] =
