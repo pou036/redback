@@ -46,6 +46,7 @@
 #include "RedbackDamage.h"
 
 // Materials
+#include "ImageProcessing.h"
 #include "RedbackMaterial.h"
 #include "RedbackMechMaterialJ2.h"
 #include "RedbackMechMaterialDP.h"
@@ -53,6 +54,9 @@
 #include "RedbackMechMaterialCCanisotropic.h"
 #include "RedbackMechMaterialElastic.h"
 #include "RedbackMechMaterialHO.h"
+
+// MeshModifiers
+#include "ElementFileSubdomain.h"
 
 // Timesteppers
 #include "ReturnMapIterDT.h"
@@ -119,6 +123,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalPressurization);
   registerKernel(RedbackDamage);
 
+  registerMaterial(ImageProcessing);
   registerMaterial(RedbackMaterial);
   registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialDP);
@@ -126,6 +131,8 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
   registerMaterial(RedbackMechMaterialHO);
+
+  registerMeshModifier(ElementFileSubdomain);
 
   registerExecutioner(ReturnMapIterDT);
 
