@@ -48,7 +48,14 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _symmetric_strain;
   MaterialProperty<RankTwoTensor> & _antisymmetric_strain;
+  MaterialProperty<RankTwoTensor> & _symmetric_plastic_strain;
+  MaterialProperty<RankTwoTensor> & _antisymmetric_plastic_strain;
+
   MaterialProperty<RankTwoTensor> & _curvature;
+  MaterialProperty<RankTwoTensor> & _elastic_curvature;
+  MaterialProperty<RankTwoTensor> & _total_curvature;
+
+
 
   MaterialProperty<RankTwoTensor> & _symmetric_stress;
   MaterialProperty<RankTwoTensor> & _antisymmetric_stress;
@@ -64,6 +71,7 @@ protected:
   std::vector<Real> _Bijkl_vector;
   ElasticityTensorR4 _Bijkl;
 
+
 private:
   VariableValue & _wc_x;
   VariableValue & _wc_y;
@@ -72,6 +80,17 @@ private:
   VariableGradient & _grad_wc_x;
   VariableGradient & _grad_wc_y;
   VariableGradient & _grad_wc_z;
+
+  VariableGradient & _grad_wc_x_old;
+  VariableGradient & _grad_wc_y_old;
+  VariableGradient & _grad_wc_z_old;
+
+  MaterialProperty<RankTwoTensor> & _curvature_increment;
+  MaterialProperty<RankTwoTensor> & _plastic_curvature;
+  MaterialProperty<RankTwoTensor> & _plastic_curvature_old;
+  MaterialProperty<RankTwoTensor> & _elastic_curvature_old;
+  MaterialProperty<RankTwoTensor> & _total_curvature_old;
+
 
   /// determines the translation from B_ijkl to the Rank-4 tensor
   MooseEnum _fill_method_bending;
