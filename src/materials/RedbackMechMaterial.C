@@ -70,6 +70,8 @@ validParams<RedbackMechMaterial>()
                         "parameter for rate dependent "
                         "plasticity (Overstress model)");
   params.addParam<Real>("exponent", 1.0, "Exponent for rate dependent plasticity (Perzyna)");
+  params.addParam<Real>("chemo_mechanical_porosity_coeff", 1.0, "The coefficient of volumetric plastic strain in chemical porosity");
+
   params.addCoupledVar("pore_pres", 0.0, "Dimensionless pore pressure");
   params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
   params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
@@ -125,6 +127,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
     _ref_pe_rate(getParam<Real>("ref_pe_rate")),
     _exponent(getParam<Real>("exponent")),
+    _chemo_mechanical_porosity_coeff(getParam<Real>("chemo_mechanical_porosity_coeff")),
 
     // Redback
     _youngs_modulus(getParam<Real>("youngs_modulus")),
@@ -136,6 +139,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
     _mechanical_porosity(declareProperty<Real>("mechanical_porosity")),
+    _mass_removal_rate(declareProperty<Real>("mass_removal_rate")),
+
     _poromech_kernel(declareProperty<Real>("poromechanics_kernel")),
     _poromech_jac(declareProperty<Real>("poromechanics_jacobian")),
     _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
@@ -218,6 +223,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _volumetric_strain_rate[_qp] = 0;
   _total_volumetric_strain[_qp] = 0;
   _mechanical_porosity[_qp] = 0;
+  _mass_removal_rate[_qp] = 0;
 }
 
 void
@@ -457,6 +463,14 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   delta_phi_mech_pl = (1.0 - _total_porosity[_qp]) * (_plastic_strain[_qp] - _plastic_strain_old[_qp]).trace();
 
   _mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
+
+  // Begin of the chemical degradation method of Hu and Hueckel 2013 (doi:10.1680/geot.SIP13.P.020)
+  _mass_removal_rate[_qp] = 1;
+  if (_volumetric_strain[_qp] > 0)
+  {
+  _mass_removal_rate[_qp] = 1 + _chemo_mechanical_porosity_coeff * _volumetric_strain[_qp];
+  }
+  //End of the chemical degradation method of Hu and Hueckel 2013
 
   // formulate the Taylor-Quinney coefficient and Gruntfest numbers for the case
   // of damage

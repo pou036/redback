@@ -48,6 +48,7 @@ validParams<RedbackMaterial>()
   params.addCoupledVar("inverse_lewis_number_tilde",
                        0.0,
                        "Varying component of (inverse of) Lewis number, coming from mutli-app for example");
+  params.addCoupledVar("concentration", 0.0, "The concentration of species affecting Arrhenius of forward reaction");
 
   // params.addCoupledVar("solid_velocity_aux", "Solid velocity (AuxKernel) from RedbackMechMaterial (if used)");
   params.addParam<MooseEnum>(
@@ -60,17 +61,17 @@ validParams<RedbackMaterial>()
 
   params.addParam<Real>("ar_F", 0.0, "Arrhenius number for the forward reaction.");
   params.addParam<Real>("ar_R", 0.0, "Arrhenius number for the reverse reaction.");
+  params.addParam<Real>("chemical_ar_F_factor", 0.0, "Mutliplying factor of concentration for Arrhenius of the forward reaction.");
   params.addParam<Real>("da_endo", 0, "Damkoehler number for the endothermic reaction.");
   params.addParam<Real>("da_exo", 0, "Damkoehler number for the exothermic reaction.");
   params.addParam<Real>("mu", 0, "Chemical pressurization coefficient.");
   params.addParam<Real>("Kc", 0, "Equilibrium constant.");
   params.addParam<Real>("eta1", 1, "ratio of concentrations (see documentation).");
   params.addParam<Real>("eta2", 1, "ratio of concentrations (see documentation).");
-  params.addRangeCheckedParam<Real>(
-    "Aphi",
-    0.0,
-    "Aphi>=0 & Aphi<=1",
-    "percentage of volume change from chemistry contributing to porosity (see documentation)");
+  params.addParam<Real>(
+      "Aphi",
+      0.0,
+      "percentage of volume change from chemistry contributing to porosity (see documentation)");
   params.addParam<Real>("pressurization_coefficient", 0, "Pressurization coefficient (Lambda).");
   params.addParam<Real>("Peclet_number", 1, "Peclet number");
 
@@ -107,7 +108,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
 
     _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
     _inverse_lewis_number_tilde(coupledValue("inverse_lewis_number_tilde")),
-
+    _concentration(coupledValue("concentration")),
     //_disp_x(isCoupled("disp_x") ? coupledValue("disp_x") : _zero),
 
     _init_from_functions__params(getParam<std::vector<std::string> >("init_from_functions__params")),
@@ -125,6 +126,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _peclet_number_param(getParam<Real>("Peclet_number")),
     _ar_F_param(getParam<Real>("ar_F")),
     _ar_R_param(getParam<Real>("ar_R")),
+    _chemical_ar_F_factor(getParam<Real>("chemical_ar_F_factor")),
     _da_endo_param(getParam<Real>("da_endo")),
     _da_exo_param(getParam<Real>("da_exo")),
     _mu_param(getParam<Real>("mu")),
@@ -389,6 +391,9 @@ RedbackMaterial::computeRedbackTerms()
     * The chemical porosity is the volume ration of B over the total volume V=V_A + V_B + V_AB
     * and the solid ratio is the volume of product A over the solid volume V_A+V_AB
     */
+
+    // Update chemical Arrhenius term
+    _ar_F[_qp] += _chemical_ar_F_factor*_concentration[_qp];
 
     // Step 1: calculate the relative rate of reactions
     omega_rel = _eta2_param * _Kc_param * std::exp(-(_ar_F[_qp] - _ar_R[_qp]) / (1 + _delta[_qp] * _T[_qp]));

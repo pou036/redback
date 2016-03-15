@@ -185,3 +185,16 @@ RedbackMechMaterial2.C
 *.h_backup
 *.C_backup
 stuff
+borehole_highres.i
+borehole_highres_original.i
+test.geo
+bench_no poro_test.i
+borehole_test1.i
+borehole_test_dmg.i
+bench_THMC_CC.i
+bench_THMC_DP.i
+bench_THMC_J2.i
+borehole_test_dmg_2test.i
+Cylinder_hollow_iso.geo
+Cylinder_hollow_refine.geo
+Crack_Cylinder.geo

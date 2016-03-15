@@ -124,6 +124,7 @@ protected:
 
   Real _ref_pe_rate;
   Real _exponent;
+  Real _chemo_mechanical_porosity_coeff;
 
   Real macaulayBracket(Real);
 
@@ -137,6 +138,7 @@ protected:
   MaterialProperty<Real> & _volumetric_strain_rate;
   MaterialProperty<Real> & _total_volumetric_strain;
   MaterialProperty<Real> & _mechanical_porosity;
+  MaterialProperty<Real> & _mass_removal_rate;
   MaterialProperty<Real> & _poromech_kernel;
   MaterialProperty<Real> & _poromech_jac;
   MaterialProperty<Real> & _mod_gruntfest_number;
