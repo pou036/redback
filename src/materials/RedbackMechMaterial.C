@@ -205,13 +205,17 @@ void
 RedbackMechMaterial::initQpStatefulProperties()
 {
   // called only once at the very beginning of the simulation
-  Material::initQpStatefulProperties();
   _total_strain[ _qp ].zero();
   _elastic_strain[ _qp ].zero();
   _stress[ _qp ].zero();
   _plastic_strain[ _qp ].zero();
-  _plastic_strain_old[ _qp ].zero();
   _eqv_plastic_strain[ _qp ] = 0.0;
+  _elasticity_tensor[ _qp ].zero();
+  _Jacobian_mult[_qp].zero();
+  _strain_rate[_qp].zero();
+  _strain_increment[_qp].zero();
+  _rotation_increment[_qp].zero();
+  _dfgrd[_qp].zero();
 
   // Redback properties
   _mises_stress[ _qp ] = 0;
@@ -221,6 +225,13 @@ RedbackMechMaterial::initQpStatefulProperties()
   _volumetric_strain_rate[ _qp ] = 0;
   _total_volumetric_strain[ _qp ] = 0;
   _mechanical_porosity[ _qp ] = 0;
+  _poromech_kernel[ _qp ] = 0;
+  _poromech_jac[ _qp ] = 0;
+  _mod_gruntfest_number[ _qp ] = 0;
+  _mechanical_dissipation_mech[ _qp ] = 0;
+  _mechanical_dissipation_jac_mech[ _qp ] = 0;
+  _damage_kernel[ _qp ] = 0;
+  _damage_kernel_jac[ _qp ] = 0;
 }
 
 void

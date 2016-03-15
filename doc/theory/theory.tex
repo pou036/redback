@@ -92,19 +92,22 @@ The \redback{} application was developed to model multi-physics \textit{Rock mEc
 Dissipative feedBACKs} in a tightly coupled manner. It is based on the Multi-physics Object Oriented Simulation Environment \moose{}\footnote{http://mooseframework.org} \citep{Gaston2009} which proposes a powerful and flexible platform to solve multi-physics problems implicitly and in a tightly coupled manner on unstructured meshes. \moose{} aims at providing a wide range of modules to model various physical phenomena, including rock mechanics, which are as flexible as possible and can be easily coupled together. By comparison, \redback{} is  
 The philosophy behind \redback{} is to focus on a non-dimensional formulation of the problem in order to focus on the physical processes at play
 
-Please cite...
+This document is a work-in-progress and does not go into all details. Real applications have recently been published that explain specifically the mechanical model \citep{Poulet2016a} and the model including the chemical terms \citep{Poulet2016}. Any contribution is much welcome, feel free to contact us.
+
 
 
 \chapter{Governing equations}
 \label{chapter:gov_eqs}
 
+\section{Conventions}
+In this document we assume that stresses are taken positive in tension and pore pressure is positive ($p_f>0$).
 
-
+\section{System of equations}
 The system in its final form is
 \begin{subequations}
 \label{eq:final_system_of_equations_dimensionless}
 \begin{empheq}[box=\widefbox]{align}
-  0 &= \pdiff{\sigma^{\prime}_{ij}}{j} + \pdiff{p_f}{i} + b_i, \\   
+  0 &= \pdiff{\sigma^{\prime}_{ij}}{j} - \pdiff{p_f}{i} + b_i, \\   
   0 &= \pdiff{p_f}{t} + Pe\: v^p_i \pdiff{p_f}{i} -
   Pe\:v^T_i \pdiff{T}{i} - \pdiff{\left[\frac{1}{Le} \pdiff{
   p_f}{i} \right]}{i} \\ \nonumber
@@ -294,7 +297,7 @@ $Pe$ & P\'{e}clet number & $x_{ref}V_{ref}/c_{th}$ & Ratio of temperature advect
 Here is the list of all kernels implemented in \redback{} to solve the system of Eq.~\ref{eq:final_system_of_equations_dimensionless}:
 \begin{align*}
   \\ \\ 
-  0 &= \overbrace{ \pdiff{\sigma^{\prime}_{ij}}{j} + \pdiff{p_f}{i} + b_i }^{\begin{rotate}{10}RedbackStressDivergenceTensor\end{rotate}} , \\ 
+  0 &= \overbrace{ \pdiff{\sigma^{\prime}_{ij}}{j} - \pdiff{p_f}{i} + b_i }^{\begin{rotate}{10}RedbackStressDivergenceTensor\end{rotate}} , \\ 
   \\   
   0 &= \overbrace{ \pdiff{p_f}{t} }^{\begin{rotate}{15}TimeDerivative\end{rotate}} 
        + \overbrace{ Pe\: v^p_i \pdiff{p_f}{i}
