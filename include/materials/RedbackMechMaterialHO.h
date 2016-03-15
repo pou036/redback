@@ -29,6 +29,7 @@ public:
   RedbackMechMaterialHO(const InputParameters & parameters);
 
 protected:
+  virtual void stepInitQpProperties();
   virtual void computeQpStrain(const RankTwoTensor & Fhat);
   virtual void computeQpStress();
   virtual void computeQpElasticityTensor();
@@ -53,9 +54,9 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _curvature;
   MaterialProperty<RankTwoTensor> & _elastic_curvature;
+  //MaterialProperty<RankTwoTensor> & _elastic_curvature_old;
   MaterialProperty<RankTwoTensor> & _total_curvature;
-
-
+  MaterialProperty<RankTwoTensor> & _total_curvature_old;
 
   MaterialProperty<RankTwoTensor> & _symmetric_stress;
   MaterialProperty<RankTwoTensor> & _antisymmetric_stress;
@@ -71,25 +72,23 @@ protected:
   std::vector<Real> _Bijkl_vector;
   ElasticityTensorR4 _Bijkl;
 
-
-private:
-  VariableValue & _wc_x;
-  VariableValue & _wc_y;
-  VariableValue & _wc_z;
-
-  VariableGradient & _grad_wc_x;
-  VariableGradient & _grad_wc_y;
-  VariableGradient & _grad_wc_z;
-
-  VariableGradient & _grad_wc_x_old;
-  VariableGradient & _grad_wc_y_old;
-  VariableGradient & _grad_wc_z_old;
-
   MaterialProperty<RankTwoTensor> & _curvature_increment;
   MaterialProperty<RankTwoTensor> & _plastic_curvature;
   MaterialProperty<RankTwoTensor> & _plastic_curvature_old;
-  MaterialProperty<RankTwoTensor> & _elastic_curvature_old;
-  MaterialProperty<RankTwoTensor> & _total_curvature_old;
+
+
+private:
+  const VariableValue & _wc_x;
+  const VariableValue & _wc_y;
+  const VariableValue & _wc_z;
+
+  const VariableGradient & _grad_wc_x;
+  const VariableGradient & _grad_wc_y;
+  const VariableGradient & _grad_wc_z;
+
+  const VariableGradient & _grad_wc_x_old;
+  const VariableGradient & _grad_wc_y_old;
+  const VariableGradient & _grad_wc_z_old;
 
 
   /// determines the translation from B_ijkl to the Rank-4 tensor

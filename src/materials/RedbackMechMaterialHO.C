@@ -42,7 +42,9 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _antisymmetric_plastic_strain(declareProperty<RankTwoTensor>("antisymmetric_strain")),
     _curvature(declareProperty<RankTwoTensor>("curvature")),
     _elastic_curvature(declareProperty<RankTwoTensor>("elastic_curvature")),
+    //_elastic_curvature_old(declarePropertyOld<RankTwoTensor>("_elastic_curvature")),
     _total_curvature(declareProperty<RankTwoTensor>("total_curvature")),
+    _total_curvature_old(declarePropertyOld<RankTwoTensor>("total_curvature")),
     _symmetric_stress(declareProperty<RankTwoTensor>("symmetric_stress")),
     _antisymmetric_stress(declareProperty<RankTwoTensor>("antisymmetric_stress")),
     _stress_couple(declareProperty<RankTwoTensor>("coupled_stress")),
@@ -52,23 +54,44 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _Jacobian_mult_couple(declareProperty<ElasticityTensorR4>("coupled_Jacobian_mult")),
     _Bijkl_vector(getParam<std::vector<Real> >("B_ijkl")),
     _Bijkl(),
+    _curvature_increment(declareProperty<RankTwoTensor>("curvature_increment")),
+    _plastic_curvature(declareProperty<RankTwoTensor>("plastic_curvature")),
+    _plastic_curvature_old(declarePropertyOld<RankTwoTensor>("plastic_curvature")),
     _wc_x(coupledValue("wc_x")),
     _wc_y(coupledValue("wc_y")),
     _wc_z(coupledValue("wc_z")),
     _grad_wc_x(coupledGradient("wc_x")),
     _grad_wc_y(coupledGradient("wc_y")),
     _grad_wc_z(coupledGradient("wc_z")),
-    _grad_wc_x_old(_fe_problem.isTransient() && _mesh.dimension() == 3 ? coupledGradientOld("wc_x") : _grad_zero),
-    _grad_wc_y_old(_fe_problem.isTransient() && _mesh.dimension() == 3 ? coupledGradientOld("wc_y") : _grad_zero),
+    _grad_wc_x_old(_fe_problem.isTransient() ? coupledGradientOld("wc_x") : _grad_zero),
+    _grad_wc_y_old(_fe_problem.isTransient() ? coupledGradientOld("wc_y") : _grad_zero),
     _grad_wc_z_old(_fe_problem.isTransient() ? coupledGradientOld("wc_z") : _grad_zero),
-    _curvature_increment(declareProperty<RankTwoTensor>("curvature_increment")),
-    _plastic_curvature(declareProperty<RankTwoTensor>("plastic_curvature")),
-    _plastic_curvature_old(declarePropertyOld<RankTwoTensor>("plastic_curvature")),
-    _elastic_curvature_old(declarePropertyOld<RankTwoTensor>("_elastic_curvature")),
-    _total_curvature_old(declarePropertyOld<RankTwoTensor>("total_curvature")),
     _fill_method_bending(getParam<MooseEnum>("fill_method_bending"))
 {
   _Bijkl.fillFromInputVector(_Bijkl_vector, (RankFourTensor::FillMethod)(int)_fill_method_bending);
+}
+
+void
+RedbackMechMaterialHO::stepInitQpProperties()
+{
+  RedbackMechMaterial::stepInitQpProperties();
+  _symmetric_strain[ _qp ].zero();
+  _antisymmetric_strain[ _qp ].zero();
+  _symmetric_plastic_strain[ _qp ].zero();
+  _antisymmetric_plastic_strain[ _qp ].zero();
+  _curvature[ _qp ].zero();
+  _elastic_curvature[ _qp ].zero();
+  _total_curvature[ _qp ].zero();
+  _symmetric_stress[ _qp ].zero();
+  _antisymmetric_stress[ _qp ].zero();
+  _stress_couple[ _qp ].zero();
+  _stress_trace[ _qp ] = 0.0;
+  _macro_rotation[ _qp ].zero();
+  _elastic_flexural_rigidity_tensor[ _qp ].zero();
+  _Jacobian_mult_couple[ _qp ].zero();
+  _curvature_increment[ _qp ].zero();
+  _plastic_curvature[ _qp ].zero();
+
 }
 
 void
@@ -152,12 +175,12 @@ Real DSDE[NSTR*NSTR];
 Real SVARSGP[NSVARSGP];
 Real PROPS[NPROPS];
 
-Real Kbulk = 0;
+Real Kbulk = 10;
 Real Gshear = 10;
 Real GCshear = 20/2; // on divise par 2 car facteur 4 au lieu d'un facteur 2 dans la loi d'elasticite de Ioannis
 Real Radius = 0.05;
-Real mufor = 0; // essai avec le critere le plus simple possible
-Real cfor = 0;
+Real mufor = 1; // essai avec le critere le plus simple possible
+Real cfor = 10;
 Real g_1 = 8/5;
 Real g_2 = 2/5;
 Real g_3 = 8/5;
@@ -296,7 +319,6 @@ _plastic_curvature[_qp](2,2)=SVARSGP[2*NSTR+17];
 _symmetric_plastic_strain[_qp] = (_plastic_strain[_qp] + _plastic_strain[_qp].transpose()) / 2.0;
 _antisymmetric_plastic_strain[_qp] = (_plastic_strain[_qp] - _plastic_strain[_qp].transpose()) / 2.0;
 
-
 Real normL2;
 
 for (unsigned int i = 0; i < 3; ++i)
@@ -348,6 +370,8 @@ _total_volumetric_strain[_qp] = _total_strain[_qp].trace();
 
 
 }
+
+
 
 void RedbackMechMaterialHO::computeQpElasticityTensor()
 {

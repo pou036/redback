@@ -40,7 +40,7 @@ protected:
  //double _d2;
   //const MaterialProperty<Real> _test;// _antisymmetric_strain;
   //const MaterialProperty<Real> & _test;
-  VariableValue & _grad_ux;
+  const VariableValue & _grad_ux;
 
   /// The id of the coupled variable
   //unsigned int _v_num;
