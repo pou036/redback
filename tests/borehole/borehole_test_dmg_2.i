@@ -1,8 +1,8 @@
 [Mesh]
   type = FileMesh
-  file = Cylinder_hollow_iso.msh
+  file = Cylinder_hollow_perturb.msh
   boundary_name = 'bottom top inside outside'
-  boundary_id = '1 0 3 2'
+  boundary_id = '109 110 112 111'
 []
 
 [GlobalParams]
@@ -25,9 +25,29 @@
     scaling = 1E9 # Notice the scaling, to make porepressure's kernels roughly of same magnitude as disp's kernels
     block = 0
   [../]
+  [./damage]
+  [../]
+  [./temperature]
+  [../]
+[]
+
+[Functions]
+  [./temp_ic]
+    type = ParsedFunction
+    value = 'sqrt(x*x+y*y)/0.9 - 1/9' # -sqrt(x*x+y*y)/0.9 + 10/9
+  [../]
+  [./inner_pressure_fct]
+    type = ParsedFunction
+    value = 0.01+1000*t
+  [../]
+  [./inner_displacement]
+    type = ParsedFunction
+    value = 1e-4+10*t
+  [../]
 []
 
 [BCs]
+  active = 'Pressure Temp_borehole Temp_outside plane_strain fixed_outer_x fixed_outer_y'
   [./fixed_outer_x]
     type = PresetBC
     variable = disp_x
@@ -47,10 +67,31 @@
     boundary = 'top bottom'
   [../]
   [./borehole_wall]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = porepressure
-    value = 1e-2
     boundary = inside
+    function = inner_pressure_fct
+  [../]
+  [./Temp_outside]
+    type = DirichletBC
+    variable = temperature
+    boundary = outside
+    value = 1 # 0
+  [../]
+  [./Temp_borehole]
+    type = DirichletBC
+    variable = temperature
+    boundary = inside
+    value = 0 # 1
+  [../]
+  [./Pressure]
+    [./myPressure]
+      function = inner_displacement
+      disp_z = disp_z
+      disp_y = disp_y
+      disp_x = disp_x
+      boundary = inside
+    [../]
   [../]
 []
 
@@ -68,6 +109,31 @@
     type = RedbackPoromechanics
     variable = porepressure
   [../]
+  [./damage_dt]
+    type = TimeDerivative
+    variable = damage
+  [../]
+  [./damage_kernel]
+    type = RedbackDamage
+    variable = damage
+  [../]
+  [./dt_temp]
+    type = TimeDerivative
+    variable = temperature
+  [../]
+  [./diff_temp]
+    type = Diffusion
+    variable = temperature
+  [../]
+  [./mech_dissip]
+    type = RedbackMechDissip
+    variable = temperature
+  [../]
+  [./Thermal_press]
+    type = RedbackThermalPressurization
+    variable = porepressure
+    temperature = temperature
+  [../]
 []
 
 [Materials]
@@ -80,6 +146,10 @@
     pore_pres = porepressure
     total_porosity = 0.1
     phi0 = 0.1
+    pressurization_coefficient = 1e-7
+    temperature = temperature
+    gr = 10
+    ar = 10
   [../]
   [./elastic_material]
     type = RedbackMechMaterialElastic
@@ -91,15 +161,20 @@
     outputs = all
   [../]
   [./plastic_material]
-    type = RedbackMechMaterialJ2
+    type = RedbackMechMaterialDP
     disp_z = disp_z
     disp_y = disp_y
     disp_x = disp_x
     outputs = all
     pore_pres = porepressure
-    yield_stress = '0 0.006 1 0.006'
+    yield_stress = '0 0.006 0.1 0.003' # 0 0.006 1 0.006
     poisson_ratio = 0.25
     youngs_modulus = 100
+    damage = damage
+    damage_coefficient = 1e4
+    damage_method = BrittleDamage
+    temperature = temperature
+    exponent = 10
   [../]
 []
 
@@ -126,7 +201,7 @@
     solve_type = PJFNK
     petsc_options = '-snes_monitor -snes_linesearch_monitor -ksp_monitor'
     petsc_options_iname = '-ksp_type -pc_type  -snes_atol -snes_rtol -snes_max_it -ksp_max_it -ksp_atol -sub_pc_type -sub_pc_factor_shift_type'
-    petsc_options_value = 'gmres        asm        1E-2          1E-10        200                500                  1e-4        lu                      NONZERO'
+    petsc_options_value = 'gmres        asm        1E-2          1E-8        200                500                  1e-4        lu                      NONZERO'
   [../]
   [./manolis]
     type = SMP
@@ -160,10 +235,10 @@
 []
 
 [Outputs]
-  active = 'exodus'
-  execute_on = timestep_end
-  file_base = borehole_test1
-  sync_times = '0.003 0.3'
+  active = ''
+  exodus = true
+  execute_on = 'timestep_end initial'
+  file_base = borehole_test_dmg_1
   [./csv_p]
     file_base = borehole_highres_p
     type = CSV
@@ -188,6 +263,20 @@
     pore_pres = porepressure
     disp_y = disp_y
     disp_x = disp_x
+  [../]
+[]
+
+[ICs]
+  [./random_dmg_ic]
+    variable = damage
+    max = 0.01
+    type = RandomIC
+  [../]
+  [./random_temp_ic]
+    function = temp_ic
+    max = 0.1
+    type = FunctionWithRandomIC
+    variable = temperature
   [../]
 []
 

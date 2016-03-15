@@ -7,7 +7,6 @@ nb_rings = 20; // number of concentric cell rings
 nb_layers_z = 1; // number of vertical layers
 
 Point(1) = {0,0,0,lc}; // Center
-
 Point(2) = {r_in,0,0,lc};
 Point(3) = {r_out,0,0,lc};
 Point(4) = {-r_in,0,0,lc};
@@ -22,9 +21,7 @@ Line(2) = {4,5};
 Line(3) = {6,7};
 Line(4) = {8,9};
 
-
 //Construct the perturbed hole//
-
 alpha = 8; //Frequency
 M = 0.01; //Amplitude
 n = 8; //number of pieces in one period
