@@ -18,7 +18,7 @@ validParams<RedbackMechMaterialDP>()
 {
   InputParameters params = validParams<RedbackMechMaterial>();
   // TODO: deal with sign of _slope_yield_surface properly in DP case
-  params.addParam<Real>("slope_yield_surface", 0, "Slope of yield surface (positive, see documentation)");
+  params.addParam<Real>("slope_yield_surface", 0, "Slope of yield surface (usually negative)");
 
   return params;
 }
