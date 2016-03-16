@@ -1,0 +1,30 @@
+[Tests]
+  [./test_image_subdomain_step1] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'mesh_generation_step1.i'
+    exodiff = '1block_mesh.e'
+    # This test requires VTK because it uses the ImageFunction class
+    vtk = true
+  [../]
+  [./test_image_subdomain_step2] # can't put a dot in that name!
+    type = 'Txtdiff'
+    input = 'mesh_generation_step2.i'
+    txtdiff = 'idfile.txt'
+    # This test requires VTK because it uses the ImageFunction class
+    vtk = true
+  [../]
+  [./test_image_subdomain_step3] # can't put a dot in that name!
+    type = 'RunPy'
+    input = 'remove_duplicates.py'
+    txtdiff = 'idfile_unique.txt'
+    # This test doesn't require VTK but is part of the process of Image Processing
+    vtk = true
+  [../]
+  [./test_image_subdomain_step4] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'mesh_generation_step3.i'
+    exodiff = '2blocks_mesh.e'
+    # This test doesn't require VTK but is part of the process of Image Processing
+    vtk = true
+  [../]
+[]

@@ -112,6 +112,17 @@ traceout*.txt
 !/*/*/*/*/*/*/gold/*.vtu
 !/*/*/*/*/*/*/*/gold/*.vtu
 
+# Allow some extra files for image reader
+!/gold/*.txt
+!/*/gold/*.txt
+!/*/*/gold/*.txt
+!/*/*/*/gold/*.txt
+!/*/*/*/*/gold/*.txt
+!/*/*/*/*/*/gold/*.txt
+!/*/*/*/*/*/*/gold/*.txt
+!/*/*/*/*/*/*/*/gold/*.txt
+
+
 peacock_run_tmp.i
 yaml_dump*
 

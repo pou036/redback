@@ -32,7 +32,7 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  //  VariableValue & _T;
+  //  const VariableValue & _T;
 
   const MaterialProperty<Real> & _Le;
   const MaterialProperty<RealVectorValue> & _gravity_term;

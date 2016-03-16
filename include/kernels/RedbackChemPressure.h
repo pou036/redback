@@ -33,7 +33,7 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  // VariableValue &_temp;
+  // const VariableValue & _temp;
   const MaterialProperty<Real> & _chemical_source_mass;
   const MaterialProperty<Real> & _chemical_source_mass_jac;
 
