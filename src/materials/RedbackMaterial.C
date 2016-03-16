@@ -53,15 +53,17 @@ validParams<RedbackMaterial>()
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
   params.addCoupledVar("inverse_lewis_number_tilde",
                        0.0,
-                       "Varying component of (inverse of) Lewis number, coming "
-                       "from mutli-app for example");
+                       "Varying component of (inverse of) Lewis number, coming from mutli-app for example");
+  params.addCoupledVar("continuation_parameter", 1.0, "The continuation parameter");
+  params.addParam<MooseEnum>("continuation_variable",
+                             RedbackMaterial::continuationMethodEnum() = "Gruntfest", // default value
+                             "The name of the variable multiplied by the continuation_parameter value");
 
-  // params.addCoupledVar("solid_velocity_aux", "Solid velocity (AuxKernel) from
-  // RedbackMechMaterial (if used)");
-  params.addParam<MooseEnum>("density_method",
-                             RedbackMaterial::densityMethodEnum() = "linear",
-                             "The method to describe density evolution with temperature and pore "
-                             "pressure"); // TODO: fluid, solid, mixture?...
+  // params.addCoupledVar("solid_velocity_aux", "Solid velocity (AuxKernel) from RedbackMechMaterial (if used)");
+  params.addParam<MooseEnum>(
+    "density_method",
+    RedbackMaterial::densityMethodEnum() = "linear",
+    "The method to describe density evolution with temperature and pore pressure"); // TODO: fluid, solid, mixture?...
   params.addParam<MooseEnum>("permeability_method",
                              RedbackMaterial::permeabilityMethodEnum() = "KozenyCarman",
                              "The method to describe permeability evolution");
@@ -125,6 +127,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
                                                      // coupled! Check that
                                                      // (TODO)
     _inverse_lewis_number_tilde(coupledValue("inverse_lewis_number_tilde")),
+    _continuation_parameter(coupledScalarValue("continuation_parameter")),
 
     //_disp_x(isCoupled("disp_x") ? coupledValue("disp_x") : _zero),
 
@@ -219,6 +222,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
 
     _mixture_density(declareProperty<Real>("mixture_density")),
 
+    _continuation_method((ContinuationMethod)(int)getParam<MooseEnum>("continuation_variable")),
     _density_method((DensityMethod)(int)getParam<MooseEnum>("density_method")),
     _permeability_method((PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method")),
 
@@ -280,6 +284,12 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
 }
 
 MooseEnum
+RedbackMaterial::continuationMethodEnum()
+{
+  return MooseEnum("Gruntfest Lewis");
+}
+
+MooseEnum
 RedbackMaterial::densityMethodEnum()
 {
   return MooseEnum("linear");
@@ -336,6 +346,18 @@ RedbackMaterial::stepInitQpProperties()
   else
   {
     _ar[ _qp ] = _ar_param;
+  }
+
+  switch (_continuation_method)
+  {
+    case Gruntfest:
+      _gr[ _qp ] *= _continuation_parameter[ 0 ];
+      break;
+    case Lewis:
+      _ref_lewis_nb[ _qp ] *= _continuation_parameter[ 0 ];
+      break;
+    default:
+      mooseError("Continuation method not implemented yet");
   }
 
   _confining_pressure[ _qp ] = _confining_pressure_param;
