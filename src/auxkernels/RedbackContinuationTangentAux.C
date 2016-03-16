@@ -15,8 +15,9 @@
 #include "RedbackContinuationTangentAux.h"
 #include "MooseMesh.h"
 
-template<>
-InputParameters validParams<RedbackContinuationTangentAux>()
+template <>
+InputParameters
+validParams<RedbackContinuationTangentAux>()
 {
   InputParameters params = validParams<AuxNodalScalarKernel>();
   params.addParam<Real>("ds_old", 1.0, "Old continuation increment");
@@ -75,18 +76,24 @@ RedbackContinuationTangentAux::RedbackContinuationTangentAux(const InputParamete
   int sum_5 = (int)isCoupled("sum_var_5") + (int)isCoupled("sum_var_old_5") + (int)isCoupled("sum_var_older_5");
   int sum_6 = (int)isCoupled("sum_var_6") + (int)isCoupled("sum_var_old_6") + (int)isCoupled("sum_var_older_6");
 
-  if (sum_1!=0 && sum_1!=3)
-    mooseError("RedbackContinuationTangentAux requires three inputs for variable 1: sum_var_1, sum_var_old_1, and sum_var_older_1");
-  if (sum_2!=0 && sum_2!=3)
-    mooseError("RedbackContinuationTangentAux requires three inputs for variable 2: sum_var_2, sum_var_old_2, and sum_var_older_2");
-  if (sum_3!=0 && sum_3!=3)
-    mooseError("RedbackContinuationTangentAux requires three inputs for variable 3: sum_var_3, sum_var_old_3, and sum_var_older_3");
-  if (sum_4!=0 && sum_4!=3)
-    mooseError("RedbackContinuationTangentAux requires three inputs for variable 4: sum_var_4, sum_var_old_4, and sum_var_older_4");
-  if (sum_5!=0 && sum_5!=3)
-    mooseError("RedbackContinuationTangentAux requires three inputs for variable 5: sum_var_5, sum_var_old_5, and sum_var_older_5");
-  if (sum_6!=0 && sum_6!=3)
-    mooseError("RedbackContinuationTangentAux requires three inputs for variable 6: sum_var_6, sum_var_old_6, and sum_var_older_6");
+  if (sum_1 != 0 && sum_1 != 3)
+    mooseError("RedbackContinuationTangentAux requires three inputs for variable 1: sum_var_1, sum_var_old_1, and "
+               "sum_var_older_1");
+  if (sum_2 != 0 && sum_2 != 3)
+    mooseError("RedbackContinuationTangentAux requires three inputs for variable 2: sum_var_2, sum_var_old_2, and "
+               "sum_var_older_2");
+  if (sum_3 != 0 && sum_3 != 3)
+    mooseError("RedbackContinuationTangentAux requires three inputs for variable 3: sum_var_3, sum_var_old_3, and "
+               "sum_var_older_3");
+  if (sum_4 != 0 && sum_4 != 3)
+    mooseError("RedbackContinuationTangentAux requires three inputs for variable 4: sum_var_4, sum_var_old_4, and "
+               "sum_var_older_4");
+  if (sum_5 != 0 && sum_5 != 3)
+    mooseError("RedbackContinuationTangentAux requires three inputs for variable 5: sum_var_5, sum_var_old_5, and "
+               "sum_var_older_5");
+  if (sum_6 != 0 && sum_6 != 3)
+    mooseError("RedbackContinuationTangentAux requires three inputs for variable 6: sum_var_6, sum_var_old_6, and "
+               "sum_var_older_6");
 
   _is_var1_coupled = (sum_1 == 3);
   _is_var2_coupled = (sum_2 == 3);
@@ -123,15 +130,15 @@ RedbackContinuationTangentAux::~RedbackContinuationTangentAux()
 void
 RedbackContinuationTangentAux::compute()
 {
-  int nb_nodes  = _subproblem.mesh().getMesh().n_nodes();
+  int nb_nodes = _subproblem.mesh().getMesh().n_nodes();
   std::vector<dof_id_type> all_node_ids(nb_nodes);
 
-  //const libMesh::MeshBase::node_iterator begin = _subproblem.mesh().getMesh().nodes_begin();
-  //const libMesh::MeshBase::node_iterator end = _subproblem.mesh().getMesh().nodes_end();
-  //for (libMesh::MeshBase::node_iterator k = begin; k != end; ++k)
+  // const libMesh::MeshBase::node_iterator begin = _subproblem.mesh().getMesh().nodes_begin();
+  // const libMesh::MeshBase::node_iterator end = _subproblem.mesh().getMesh().nodes_end();
+  // for (libMesh::MeshBase::node_iterator k = begin; k != end; ++k)
   for (int k = 0; k < nb_nodes; ++k)
   {
-    all_node_ids[k] = k;
+    all_node_ids[ k ] = k;
   }
   _subproblem.reinitNodes(all_node_ids, _tid); // compute variables at nodes
 
@@ -151,18 +158,18 @@ RedbackContinuationTangentAux::computeValue()
   for (unsigned int i = 0; i < _sum_var_1.size(); i++)
   {
     // At least variable 1 is involved
-    sum += (_sum_var_1[i] - _sum_var_old_1[i]) * (_sum_var_old_1[i] - _sum_var_older_1[i]);
+    sum += (_sum_var_1[ i ] - _sum_var_old_1[ i ]) * (_sum_var_old_1[ i ] - _sum_var_older_1[ i ]);
     // Other variables could be involved
     if (_is_var2_coupled)
-      sum += (_sum_var_2[i] - _sum_var_old_2[i]) * (_sum_var_old_2[i] - _sum_var_older_2[i]);
+      sum += (_sum_var_2[ i ] - _sum_var_old_2[ i ]) * (_sum_var_old_2[ i ] - _sum_var_older_2[ i ]);
     if (_is_var3_coupled)
-      sum += (_sum_var_3[i] - _sum_var_old_3[i]) * (_sum_var_old_3[i] - _sum_var_older_3[i]);
+      sum += (_sum_var_3[ i ] - _sum_var_old_3[ i ]) * (_sum_var_old_3[ i ] - _sum_var_older_3[ i ]);
     if (_is_var4_coupled)
-      sum += (_sum_var_4[i] - _sum_var_old_4[i]) * (_sum_var_old_4[i] - _sum_var_older_4[i]);
+      sum += (_sum_var_4[ i ] - _sum_var_old_4[ i ]) * (_sum_var_old_4[ i ] - _sum_var_older_4[ i ]);
     if (_is_var5_coupled)
-      sum += (_sum_var_5[i] - _sum_var_old_5[i]) * (_sum_var_old_5[i] - _sum_var_older_5[i]);
+      sum += (_sum_var_5[ i ] - _sum_var_old_5[ i ]) * (_sum_var_old_5[ i ] - _sum_var_older_5[ i ]);
     if (_is_var6_coupled)
-      sum += (_sum_var_6[i] - _sum_var_old_6[i]) * (_sum_var_old_6[i] - _sum_var_older_6[i]);
+      sum += (_sum_var_6[ i ] - _sum_var_old_6[ i ]) * (_sum_var_old_6[ i ] - _sum_var_older_6[ i ]);
   }
   sum = sum / _ds_old_param;
   return sum;

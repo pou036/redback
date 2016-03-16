@@ -22,7 +22,6 @@ protected:
   virtual Real computeValue();
   const VariableValue & _variable_1;
   const VariableValue & _variable_2;
-
 };
 
 #endif // REDBACKDIFFVARSAUX_H

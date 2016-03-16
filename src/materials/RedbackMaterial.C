@@ -55,10 +55,9 @@ validParams<RedbackMaterial>()
                        0.0,
                        "Varying component of (inverse of) Lewis number, coming from mutli-app for example");
   params.addCoupledVar("continuation_parameter", 1.0, "The continuation parameter");
-  params.addParam<MooseEnum>(
-    "continuation_variable",
-    RedbackMaterial::continuationMethodEnum() = "Gruntfest", // default value
-    "The name of the variable multiplied by the continuation_parameter value");
+  params.addParam<MooseEnum>("continuation_variable",
+                             RedbackMaterial::continuationMethodEnum() = "Gruntfest", // default value
+                             "The name of the variable multiplied by the continuation_parameter value");
 
   // params.addCoupledVar("solid_velocity_aux", "Solid velocity (AuxKernel) from RedbackMechMaterial (if used)");
   params.addParam<MooseEnum>(
@@ -352,34 +351,34 @@ RedbackMaterial::stepInitQpProperties()
   switch (_continuation_method)
   {
     case Gruntfest:
-      _gr[_qp] *= _continuation_parameter[0];
+      _gr[ _qp ] *= _continuation_parameter[ 0 ];
       break;
     case Lewis:
-      _ref_lewis_nb[_qp] *= _continuation_parameter[0];
+      _ref_lewis_nb[ _qp ] *= _continuation_parameter[ 0 ];
       break;
     default:
       mooseError("Continuation method not implemented yet");
   }
 
-  _confining_pressure[_qp] = _confining_pressure_param;
-  _biot_coeff[_qp] = _biot_coeff_param;
-  _alpha_1[_qp] = _alpha_1_param;
-  _alpha_2[_qp] = _alpha_2_param;
-  _alpha_3[_qp] = _alpha_3_param;
-  _peclet_number[_qp] = _peclet_number_param;
-  _delta[_qp] = _delta_param;
-  _lewis_number[_qp] = _ref_lewis_nb[_qp];
-  _ar_F[_qp] = _ar_F_param;
-  _ar_R[_qp] = _ar_R_param;
-  _mu[_qp] = _mu_param;
-  _pressurization_coefficient[_qp] = _pressurization_coefficient_param;
-  _solid_compressibility[_qp] = _solid_compressibility_param;
-  _fluid_compressibility[_qp] = _fluid_compressibility_param;
-  _solid_thermal_expansion[_qp] = _solid_thermal_expansion_param;
-  _fluid_thermal_expansion[_qp] = _fluid_thermal_expansion_param;
-  _mixture_density[_qp] = (1 - _phi0_param) * _solid_density_param + _phi0_param * _fluid_density_param;
-  _mixture_gravity_term[_qp] = _mixture_density[_qp] * _gravity_param;
-  _fluid_gravity_term[_qp] = _fluid_density_param * _gravity_param;
+  _confining_pressure[ _qp ] = _confining_pressure_param;
+  _biot_coeff[ _qp ] = _biot_coeff_param;
+  _alpha_1[ _qp ] = _alpha_1_param;
+  _alpha_2[ _qp ] = _alpha_2_param;
+  _alpha_3[ _qp ] = _alpha_3_param;
+  _peclet_number[ _qp ] = _peclet_number_param;
+  _delta[ _qp ] = _delta_param;
+  _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ];
+  _ar_F[ _qp ] = _ar_F_param;
+  _ar_R[ _qp ] = _ar_R_param;
+  _mu[ _qp ] = _mu_param;
+  _pressurization_coefficient[ _qp ] = _pressurization_coefficient_param;
+  _solid_compressibility[ _qp ] = _solid_compressibility_param;
+  _fluid_compressibility[ _qp ] = _fluid_compressibility_param;
+  _solid_thermal_expansion[ _qp ] = _solid_thermal_expansion_param;
+  _fluid_thermal_expansion[ _qp ] = _fluid_thermal_expansion_param;
+  _mixture_density[ _qp ] = (1 - _phi0_param) * _solid_density_param + _phi0_param * _fluid_density_param;
+  _mixture_gravity_term[ _qp ] = _mixture_density[ _qp ] * _gravity_param;
+  _fluid_gravity_term[ _qp ] = _fluid_density_param * _gravity_param;
 }
 
 void

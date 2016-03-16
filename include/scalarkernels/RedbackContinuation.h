@@ -13,12 +13,11 @@
 #ifndef REDBACKCONTINUATION_H
 #define REDBACKCONTINUATION_H
 
-
 #include "ODEKernel.h"
 
 class RedbackContinuation;
 
-template<>
+template <>
 InputParameters validParams<RedbackContinuation>();
 
 class RedbackContinuation : public ODEKernel
@@ -32,7 +31,7 @@ protected:
 
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  //virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  // virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 };
 
 #endif /* REDBACKCONTINUATION_H */

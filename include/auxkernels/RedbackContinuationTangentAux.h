@@ -19,7 +19,7 @@
 
 class RedbackContinuationTangentAux;
 
-template<>
+template <>
 InputParameters validParams<RedbackContinuationTangentAux>();
 
 /**

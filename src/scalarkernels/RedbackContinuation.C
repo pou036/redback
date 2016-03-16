@@ -16,8 +16,9 @@
  * This function defines the valid parameters for
  * this Kernel and their default values
  */
-template<>
-InputParameters validParams<RedbackContinuation>()
+template <>
+InputParameters
+validParams<RedbackContinuation>()
 {
   InputParameters params = validParams<ODEKernel>();
   params.addParam<Real>("ds", 1.0, "Continuation increment");
@@ -41,15 +42,18 @@ RedbackContinuation::RedbackContinuation(const InputParameters & parameters) :
 Real
 RedbackContinuation::computeQpResidual()
 {
-  Real lambda_dot_old_param = (_continuation_parameter_old_param - _continuation_parameter_older_param)/_ds_old_param;
-  return _directional_derivative[0] + lambda_dot_old_param*(_u[_i] - _continuation_parameter_old_param) - _ds_param;
+  Real lambda_dot_old_param =
+    (_continuation_parameter_old_param - _continuation_parameter_older_param) / _ds_old_param;
+  return _directional_derivative[ 0 ] + lambda_dot_old_param * (_u[ _i ] - _continuation_parameter_old_param) -
+         _ds_param;
 }
 
 Real
 RedbackContinuation::computeQpJacobian()
 {
   // dF/dx
-  Real lambda_dot_old_param = (_continuation_parameter_old_param - _continuation_parameter_older_param)/_ds_old_param;
+  Real lambda_dot_old_param =
+    (_continuation_parameter_old_param - _continuation_parameter_older_param) / _ds_old_param;
   // TODO: compute lambda_dot_old_param only once...
   return lambda_dot_old_param;
 }
