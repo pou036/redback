@@ -12,24 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef RedbackMechMaterialHO_H
-#define RedbackMechMaterialHO_H
+#ifndef RedbackMechMaterialHOelastic_H
+#define RedbackMechMaterialHOelastic_H
 
 #include "RedbackMechMaterial.h"
 
 // Forward Declarations
-class RedbackMechMaterialHO;
+class RedbackMechMaterialHOelastic;
 
 template <>
-InputParameters validParams<RedbackMechMaterialHO>();
+InputParameters validParams<RedbackMechMaterialHOelastic>();
 
-class RedbackMechMaterialHO : public RedbackMechMaterial
+class RedbackMechMaterialHOelastic : public RedbackMechMaterial
 {
 public:
-  RedbackMechMaterialHO(const InputParameters & parameters);
+  RedbackMechMaterialHOelastic(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
+  //virtual void stepInitQpProperties();
   virtual void computeQpStrain(const RankTwoTensor & Fhat);
   virtual void computeQpStress();
   virtual void computeQpElasticityTensor();
@@ -56,15 +56,11 @@ protected:
   MaterialProperty<RankTwoTensor> & _elastic_curvature;
   //MaterialProperty<RankTwoTensor> & _elastic_curvature_old;
   MaterialProperty<RankTwoTensor> & _total_curvature;
-  MaterialProperty<RankTwoTensor> & _total_curvature_old;
+  //MaterialProperty<RankTwoTensor> & _total_curvature_old;
 
   MaterialProperty<RankTwoTensor> & _symmetric_stress;
-  MaterialProperty<RankTwoTensor> & _symmetric_stress_old;
   MaterialProperty<RankTwoTensor> & _antisymmetric_stress;
-  MaterialProperty<RankTwoTensor> & _antisymmetric_stress_old;
   MaterialProperty<RankTwoTensor> & _stress_couple;
-  MaterialProperty<RankTwoTensor> & _stress_couple_old;
-
 
   MaterialProperty<Real> & _stress_trace;
 
@@ -73,12 +69,13 @@ protected:
   MaterialProperty<ElasticityTensorR4> & _elastic_flexural_rigidity_tensor;
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult_couple;
 
-  const std::vector<Real> _Bijkl_vector, _Cijkl_vector;
+  std::vector<Real> _Bijkl_vector;
   ElasticityTensorR4 _Bijkl;
 
   MaterialProperty<RankTwoTensor> & _curvature_increment;
   MaterialProperty<RankTwoTensor> & _plastic_curvature;
-  MaterialProperty<RankTwoTensor> & _plastic_curvature_old;
+  //MaterialProperty<RankTwoTensor> & _plastic_curvature_old;
+
 
 private:
   const VariableValue & _wc_x;
@@ -96,8 +93,5 @@ private:
 
   /// determines the translation from B_ijkl to the Rank-4 tensor
   MooseEnum _fill_method_bending;
-  Real _cohesion, _friction_coefficient;
-  Real _shear_modulus, _bulk_modulus, _cosserat_shear_modulus;
-
 };
-#endif // RedbackMechMaterialHO_H
+#endif // RedbackMechMaterialHOelastic_H

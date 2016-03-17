@@ -1,8 +1,6 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 4 # 6
-  ny = 4 # 6
 []
 
 [GlobalParams]
@@ -143,6 +141,13 @@
   [../]
 []
 
+[AuxVariables]
+  [./stress_22]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
 [Functions]
   [./ramp]
     type = ParsedFunction
@@ -204,6 +209,16 @@
     type = MomentBalancing
     variable = wc_z
     component = 2
+  [../]
+[]
+
+[AuxKernels]
+  [./stress_22]
+    type = RankTwoAux
+    variable = stress_22
+    rank_two_tensor = stress
+    index_j = 1
+    index_i = 1
   [../]
 []
 
@@ -309,10 +324,10 @@
     fill_method = general_isotropic
   [../]
   [./Redbackcosserat]
-    type = RedbackMechMaterialHO
+    type = RedbackMechMaterialHOelastic
     block = 0
     B_ijkl = '-0.0333333 0.05 0.05'
-    C_ijkl = '10 10 20'
+    C_ijkl = '3.333333333 10 20'
     fill_method = general_isotropic
     poisson_ratio = -9999
     youngs_modulus = -9999
@@ -331,6 +346,7 @@
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
     petsc_options_value = 'gmres bjacobi 1E-10 1E-10 50 1E-15 1E-10'
+    line_search = basic
   [../]
 []
 
