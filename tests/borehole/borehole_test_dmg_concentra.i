@@ -174,7 +174,7 @@
     temperature = temperature
     gr = 10
     ar = 10
-    chemical_ar_F_factor = -0.1 # 0; needs to be negative
+    chemical_ar_F_factor = -5.0 # -0.1; needs to be negative
     is_chemistry_on = true
     mu = 1e-4 # 0
     da_endo = 1e-3 # 0
@@ -204,6 +204,7 @@
     damage_method = BrittleDamage
     temperature = temperature
     exponent = 10
+    chemo_mechanical_porosity_coeff = 1e10
   [../]
 []
 
@@ -267,7 +268,7 @@
   active = 'csv_p csv_s csv_t'
   exodus = true
   execute_on = 'timestep_end initial'
-  file_base = borehole_test_dmg_1
+  file_base = borehole_test_dmg_concentra
   [./csv_p]
     file_base = borehole_highres_p
     type = CSV
