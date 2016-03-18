@@ -39,6 +39,9 @@ protected:
   const unsigned int _component;
 
   const MaterialProperty<Real> & _fluid_density;
+  const MaterialProperty<Real> & _reynolds_number;
+  const MaterialProperty<Real> & _viscosity_ratio;
+
 
 private:
   //const bool _xdisp_coupled;

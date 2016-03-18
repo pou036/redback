@@ -29,6 +29,9 @@ RedbackFluidStressDivergenceTensors::RedbackFluidStressDivergenceTensors(const I
     _component(getParam<unsigned int>("component")),
     _fluid_density(getMaterialProperty<Real>("NS_fluid_density")),
 
+    _reynolds_number(getMaterialProperty<Real>("Reynolds_number")),
+    _viscosity_ratio(getMaterialProperty<Real>("viscosity_ratio")),
+
     //_vel_fluid_x_coupled(isCoupled("vel_fluid_x")),
     //_vel_fluid_y_coupled(isCoupled("vel_fluid_y")),
     //_vel_fluid_coupled(isCoupled("vel_fluid_z")),
@@ -47,19 +50,16 @@ RedbackFluidStressDivergenceTensors::RedbackFluidStressDivergenceTensors(const I
 Real
 RedbackFluidStressDivergenceTensors::computeQpResidual()
 {
-	 return (_fluid_stress[_qp].row(_component))* _grad_test[_i][_qp] / _fluid_density[_qp]
+	 return (_fluid_stress[_qp].row(_component))* _grad_test[_i][_qp] / (_reynolds_number[_qp]*_fluid_density[_qp])
           + (_grad_pore_pressure[_qp](_component)/_fluid_density[_qp] - _gravity_term[_qp](_component))*_test[_i][_qp];
 }
 
 Real
 RedbackFluidStressDivergenceTensors::computeQpJacobian()
 {
-  return 0;
-  //return _Jacobian_fluid_mult[_qp].elasticJacobian(_component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
-  /*Real result = _Jacobian_fluid_mult[_qp].elasticJacobian(_component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
-  if (_var.number() != _porepressure_var)
-    return result;
-  return result + _phi[_j][_qp]*_grad_test[_i][_qp](_component);*/
+  return  1/_reynolds_number[_qp] * (_grad_phi[_j][_qp]             * _grad_test[_i][_qp] +
+                                 1/3*_grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component) +
+               _viscosity_ratio[_qp]*_grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component));
 }
 
 Real

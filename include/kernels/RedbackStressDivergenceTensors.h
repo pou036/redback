@@ -53,7 +53,6 @@ private:
   const unsigned int _porepressure_var;
 
   const MaterialProperty<RealVectorValue> & _gravity_term;
-  const MaterialProperty<Real> & _fluid_density;
 };
 
 #endif // REDBACKSTRESSDIVERGENCETENSORS_H

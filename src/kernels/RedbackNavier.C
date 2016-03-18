@@ -56,5 +56,6 @@ RedbackNavier::computeQpResidual()
 Real
 RedbackNavier::computeQpJacobian()
 {
-  return 0;
+  return (RealVectorValue(_u_vel[_qp], _v_vel[_qp], _w_vel[_qp]) * _grad_phi[_j][_qp] +
+           _phi[_j][_qp]*_grad_u[_qp](_component)) * _test[_i][_qp];
 }

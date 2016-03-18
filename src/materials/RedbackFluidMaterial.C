@@ -72,6 +72,7 @@ RedbackFluidMaterial::RedbackFluidMaterial(const InputParameters & parameters) :
   _peclet_number(declareProperty<Real>("Peclet_number")),
   _reynolds_number(declareProperty<Real>("Reynolds_number")),
   _froude_number(declareProperty<Real>("Froude_number")),
+  _viscosity_ratio(declareProperty<Real>("viscosity_ratio")),
   _thermal_convective_mass(declareProperty<RealVectorValue>("thermal_convective_mass")),
   _pressure_convective_mass(declareProperty<RealVectorValue>("pressure_convective_mass")),
   _fluid_stress(declareProperty<RankTwoTensor>("fluid_stress")),
@@ -120,6 +121,7 @@ RedbackFluidMaterial::computeRedbackTerms()
   _peclet_number[_qp] = _peclet_number_param;
   _reynolds_number[_qp] = _reynolds_number_param;
   _froude_number[_qp] = _froude_number_param;
+  _viscosity_ratio[_qp] = _viscosity_ratio_param;
 
   Real fluid_density;
   fluid_density = (1 + _fluid_compressibility_param*_pore_pres[_qp] - _fluid_thermal_expansion_param*_T[_qp]);
@@ -133,8 +135,8 @@ RedbackFluidMaterial::computeRedbackTerms()
   _div_fluid_vel[_qp] = _grad_fluid_vel_x[_qp](0) + _grad_fluid_vel_y[_qp](1) + _grad_fluid_vel_z[_qp](2);
   // Fluid stress for Newtonian compressible fluid, in small deformation
   _fluid_stress[_qp].zero();
-  _fluid_stress[_qp].addIa((_viscosity_ratio_param-2/3)*_div_fluid_vel[_qp]/_reynolds_number[_qp]);// - _pore_pres[_qp]);
-  _fluid_stress[_qp] += (grad_v + grad_v.transpose())/_reynolds_number[_qp];
+  _fluid_stress[_qp].addIa((_viscosity_ratio[_qp]-2/3)*_div_fluid_vel[_qp]);// - _pore_pres[_qp]);
+  _fluid_stress[_qp] += (grad_v + grad_v.transpose());
 
   //_Jacobian_fluid_mult[_qp].zero();
 

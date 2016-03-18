@@ -62,6 +62,7 @@ protected:
   MaterialProperty<Real> & _peclet_number;
   MaterialProperty<Real> & _reynolds_number;
   MaterialProperty<Real> & _froude_number;
+  MaterialProperty<Real> & _viscosity_ratio;
   MaterialProperty<RealVectorValue> & _thermal_convective_mass;
   MaterialProperty<RealVectorValue> & _pressure_convective_mass;
   MaterialProperty<RankTwoTensor> & _fluid_stress;
