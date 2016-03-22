@@ -348,15 +348,15 @@ RedbackMaterial::stepInitQpProperties()
   {
     _ar[ _qp ] = _ar_param;
   }
-  pos = find(_init_from_functions__params.begin(), _init_from_functions__params.end(), "confining_pressure")
-      - _init_from_functions__params.begin();
-  if (pos<_num_init_functions)
+  pos = find(_init_from_functions__params.begin(), _init_from_functions__params.end(), "confining_pressure") -
+        _init_from_functions__params.begin();
+  if (pos < _num_init_functions)
   {
-    _confining_pressure[_qp] = _init_functions[pos]->value(_t, _q_point[_qp]);
+    _confining_pressure[ _qp ] = _init_functions[ pos ]->value(_t, _q_point[ _qp ]);
   }
   else
   {
-    _confining_pressure[_qp] = _confining_pressure_param;
+    _confining_pressure[ _qp ] = _confining_pressure_param;
   }
 
   switch (_continuation_method)
