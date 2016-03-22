@@ -47,7 +47,7 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _antisymmetric_plastic_strain(declareProperty<RankTwoTensor>("antisymmetric_strain")),
     _curvature(declareProperty<RankTwoTensor>("curvature")),
     _elastic_curvature(declareProperty<RankTwoTensor>("elastic_curvature")),
-    //_elastic_curvature_old(declarePropertyOld<RankTwoTensor>("_elastic_curvature")),
+    _elastic_curvature_old(declarePropertyOld<RankTwoTensor>("elastic_curvature")),
     _total_curvature(declareProperty<RankTwoTensor>("total_curvature")),
     _total_curvature_old(declarePropertyOld<RankTwoTensor>("total_curvature")),
     _symmetric_stress(declareProperty<RankTwoTensor>("symmetric_stress")),
@@ -60,6 +60,8 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _macro_rotation(declareProperty<RankTwoTensor>("macro_rotation")),
     _elastic_flexural_rigidity_tensor(declareProperty<ElasticityTensorR4>("elastic_flexural_rigidity_tensor")),
     _Jacobian_mult_couple(declareProperty<ElasticityTensorR4>("coupled_Jacobian_mult")),
+    _Jacobian_offdiag_bc(declareProperty<ElasticityTensorR4>("coupled_Jacobian_off")),
+    _Jacobian_offdiag_cb(declareProperty<ElasticityTensorR4>("Jacobian_off")),
     _Bijkl_vector(getParam<std::vector<Real> >("B_ijkl")),
     _Cijkl_vector(getParam<std::vector<Real> >("C_ijkl")),
     _Bijkl(),
@@ -101,8 +103,10 @@ RedbackMechMaterialHO::initQpStatefulProperties()
   _stress_couple[ _qp ].zero();
   _stress_trace[ _qp ] = 0.0;
   _macro_rotation[ _qp ].zero();
-  _elastic_flexural_rigidity_tensor[ _qp ].zero();
-  _Jacobian_mult_couple[ _qp ].zero();
+  _elastic_flexural_rigidity_tensor[ _qp ] = _Bijkl;
+  _Jacobian_mult_couple[ _qp ] = _Bijkl;
+  _Jacobian_offdiag_bc[ _qp ].zero();
+  _Jacobian_offdiag_cb[ _qp ].zero();
   _curvature_increment[ _qp ].zero();
   _plastic_curvature[ _qp ].zero();
 }
@@ -273,6 +277,32 @@ SVARSGP[2*NSTR+15]=_plastic_curvature_old[_qp](2,0);
 SVARSGP[2*NSTR+16]=_plastic_curvature_old[_qp](2,1);
 SVARSGP[2*NSTR+17]=_plastic_curvature_old[_qp](2,2);
 
+for (unsigned i = 0; i < 3; ++i){
+SVARSGP[3*NSTR+i] = 0;
+}
+
+for (unsigned i = 0; i < 3; ++i){
+  SVARSGP[3*NSTR+3+i]=_elastic_strain_old[_qp](i,i);
+}
+SVARSGP[3*NSTR+3+3]=0.5*(_elastic_strain_old[_qp](1,2)+_elastic_strain_old[_qp](2,1));
+SVARSGP[3*NSTR+3+4]=0.5*(_elastic_strain_old[_qp](0,2)+_elastic_strain_old[_qp](2,0));
+SVARSGP[3*NSTR+3+5]=0.5*(_elastic_strain_old[_qp](0,1)+_elastic_strain_old[_qp](1,0));
+SVARSGP[3*NSTR+3+6]=0.5*(_elastic_strain_old[_qp](1,2)-_elastic_strain_old[_qp](2,1));
+SVARSGP[3*NSTR+3+7]=0.5*(_elastic_strain_old[_qp](0,2)-_elastic_strain_old[_qp](2,0));
+SVARSGP[3*NSTR+3+8]=0.5*(_elastic_strain_old[_qp](0,2)-_elastic_strain_old[_qp](2,0));
+SVARSGP[3*NSTR+3+9]=_elastic_curvature_old[_qp](0,0);
+SVARSGP[3*NSTR+3+10]=_elastic_curvature_old[_qp](0,1);
+SVARSGP[3*NSTR+3+11]=_elastic_curvature_old[_qp](0,2);
+SVARSGP[3*NSTR+3+12]=_elastic_curvature_old[_qp](1,0);
+SVARSGP[3*NSTR+3+13]=_elastic_curvature_old[_qp](1,1);
+SVARSGP[3*NSTR+3+14]=_elastic_curvature_old[_qp](1,2);
+SVARSGP[3*NSTR+3+15]=_elastic_curvature_old[_qp](2,0);
+SVARSGP[3*NSTR+3+16]=_elastic_curvature_old[_qp](2,1);
+SVARSGP[3*NSTR+3+17]=_elastic_curvature_old[_qp](2,2);
+
+for (unsigned i = 0; i < NSTR*NSTR; ++i){
+DSDE[i] = 0;
+}
 
 Real verbose = 0;
 Real y_coord = _current_elem->centroid()(1);
@@ -289,6 +319,7 @@ if (verbose)std::cout << " fortran sigma (22) after = " << STRESSF[1] << std::en
 if (verbose)std::cout << " element coords x= " << _current_elem->centroid()(0) << ", y= " << _current_elem->centroid()(1) << ", z= " << _current_elem->centroid()(2) << ", qp=" << _qp << std::endl;
 if (verbose)std::cout << " Flag for convergence (1 = not converging ) = " << NILL << std::endl;
 
+//std::cout << " RF = " << SVARSGP[3*NSTR+1] << std::endl;
 
 
 //usermat_();
@@ -368,6 +399,11 @@ _eqv_plastic_strain[_qp] = std::pow(normL2, 0.5);
 _volumetric_strain[_qp] = _plastic_strain[_qp].trace(); // PLASTIC vol strain
 
 
+//std::cout << " epsilon (11)= " << SVARSGP[3*NSTR+3+0] << std::endl;
+//std::cout << " epsilon (22)= " << SVARSGP[3*NSTR+3+1] << std::endl;
+//std::cout << " svarsgp sigma (22)= " << SVARSGP[1] << std::endl;
+
+
 _elastic_strain[_qp](0,0)=SVARSGP[3*NSTR+3+0];
 _elastic_strain[_qp](1,1)=SVARSGP[3*NSTR+3+1];
 _elastic_strain[_qp](2,2)=SVARSGP[3*NSTR+3+2];
@@ -395,6 +431,36 @@ _total_volumetric_strain[_qp] = _total_strain[_qp].trace();
 _symmetric_stress[_qp] = (_stress[_qp] + _stress[_qp].transpose()) / 2.0;
 _antisymmetric_stress[_qp] = (_stress[_qp] - _stress[_qp].transpose()) / 2.0;
 
+//mise a jour des termes de la matrice tangente
+
+
+for (unsigned int i = 0; i < 3; ++i){
+  for (unsigned int j = 0; j < 3; ++i){
+    for (unsigned int k = 0; j < 3; ++i){
+      for (unsigned int l = 0; j < 3; ++i){
+_Jacobian_mult[_qp](i,j,k,l) = DSDE[NSTR*corsigma(k,l) + corsigma(i,j)];
+}}}}
+
+for (unsigned int i = 0; i < 3; ++i){
+  for (unsigned int j = 0; j < 3; ++i){
+    for (unsigned int k = 0; j < 3; ++i){
+      for (unsigned int l = 0; j < 3; ++i){
+_Jacobian_mult_couple[_qp](i,j,k,l) = DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + cormoment(i,j)+ NSTR / 2];
+}}}}
+
+for (unsigned int i = 0; i < 3; ++i){
+  for (unsigned int j = 0; j < 3; ++i){
+    for (unsigned int k = 0; j < 3; ++i){
+      for (unsigned int l = 0; j < 3; ++i){
+_Jacobian_offdiag_bc[_qp](i,j,k,l) = DSDE[NSTR*corsigma(k,l) + cormoment(i,j)+ NSTR / 2];
+}}}}
+
+for (unsigned int i = 0; i < 3; ++i){
+  for (unsigned int j = 0; j < 3; ++i){
+    for (unsigned int k = 0; j < 3; ++i){
+      for (unsigned int l = 0; j < 3; ++i){
+_Jacobian_offdiag_cb[_qp](i,j,k,l) = DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + corsigma(i,j)];
+}}}}
 
 //std::cout << " fortran DEFORT (1)= " << DEFORT[0] << std::endl;
 //std::cout << " fortran DEFORT (2)= " << DEFORT[1] << std::endl;
@@ -413,14 +479,80 @@ _antisymmetric_stress[_qp] = (_stress[_qp] - _stress[_qp].transpose()) / 2.0;
 
 }
 
+int RedbackMechMaterialHO::corsigma(int num1, int num2){
+  int result;
+
+  if (num1 == 0 && num2 == 0){
+    result = 0;
+  }
+  else if (num1 == 1 && num2 == 1){
+    result = 1;
+  }
+  else if (num1 == 2 && num2 == 2){
+    result = 2;
+  }
+  else if (num1 == 1 && num2 == 2){
+    result = 3;
+  }
+  else if (num1 == 0 && num2 == 2){
+    result = 4;
+  }
+  else if (num1 == 0 && num2 == 1){
+    result = 5;
+  }
+  else if (num1 == 2 && num2 == 1){
+    result = 6;
+  }
+  else if (num1 == 2 && num2 == 0){
+    result = 7;
+  }
+  else if (num1 == 1 && num2 == 0){
+    result = 8;
+  }
+  return result;
+}
+
+int RedbackMechMaterialHO::cormoment(int num1, int num2){
+  int result;
+
+  if (num1 == 0 && num2 == 0){
+    result = 0;
+  }
+  else if (num1 == 0 && num2 == 1){
+    result = 1;
+  }
+  else if (num1 == 0 && num2 == 2){
+    result = 2;
+  }
+  else if (num1 == 1 && num2 == 0){
+    result = 3;
+  }
+  else if (num1 == 1 && num2 == 1){
+    result = 4;
+  }
+  else if (num1 == 1 && num2 == 2){
+    result = 5;
+  }
+  else if (num1 == 2 && num2 == 0){
+    result = 6;
+  }
+  else if (num1 == 2 && num2 == 1){
+    result = 7;
+  }
+  else if (num1 == 2 && num2 == 2){
+    result = 8;
+  }
+
+return result;
+}
 
 
 void RedbackMechMaterialHO::computeQpElasticityTensor()
 {
-  RedbackMechMaterial::computeQpElasticityTensor();
+//  RedbackMechMaterial::computeQpElasticityTensor();
 
-  _elastic_flexural_rigidity_tensor[_qp] = _Bijkl;
-  _Jacobian_mult_couple[_qp] = _Bijkl;
+//  _elastic_flexural_rigidity_tensor[_qp] = _Bijkl;
+//  _Jacobian_mult_couple[_qp] = _Bijkl;
 }
 
 /*

@@ -32,6 +32,8 @@ protected:
   virtual void initQpStatefulProperties();
   virtual void computeQpStrain(const RankTwoTensor & Fhat);
   virtual void computeQpStress();
+  int corsigma(int , int );
+  int cormoment(int , int );
   virtual void computeQpElasticityTensor();
 
   void returnMap(const RankTwoTensor &,
@@ -54,7 +56,7 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _curvature;
   MaterialProperty<RankTwoTensor> & _elastic_curvature;
-  //MaterialProperty<RankTwoTensor> & _elastic_curvature_old;
+  MaterialProperty<RankTwoTensor> & _elastic_curvature_old;
   MaterialProperty<RankTwoTensor> & _total_curvature;
   MaterialProperty<RankTwoTensor> & _total_curvature_old;
 
@@ -72,6 +74,9 @@ protected:
 
   MaterialProperty<ElasticityTensorR4> & _elastic_flexural_rigidity_tensor;
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult_couple;
+  MaterialProperty<ElasticityTensorR4> & _Jacobian_offdiag_bc;
+  MaterialProperty<ElasticityTensorR4> & _Jacobian_offdiag_cb;
+
 
   const std::vector<Real> _Bijkl_vector, _Cijkl_vector;
   ElasticityTensorR4 _Bijkl;
