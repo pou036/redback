@@ -261,6 +261,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
   valid_params.push_back("gr");
   valid_params.push_back("ref_lewis_nb");
   valid_params.push_back("ar");
+  valid_params.push_back("confining_pressure");
   unsigned int pos;
   for (unsigned int i = 0; i < _num_init_functions; i++)
   {
@@ -347,6 +348,16 @@ RedbackMaterial::stepInitQpProperties()
   {
     _ar[ _qp ] = _ar_param;
   }
+  pos = find(_init_from_functions__params.begin(), _init_from_functions__params.end(), "confining_pressure") -
+        _init_from_functions__params.begin();
+  if (pos < _num_init_functions)
+  {
+    _confining_pressure[ _qp ] = _init_functions[ pos ]->value(_t, _q_point[ _qp ]);
+  }
+  else
+  {
+    _confining_pressure[ _qp ] = _confining_pressure_param;
+  }
 
   switch (_continuation_method)
   {
@@ -360,7 +371,6 @@ RedbackMaterial::stepInitQpProperties()
       mooseError("Continuation method not implemented yet");
   }
 
-  _confining_pressure[ _qp ] = _confining_pressure_param;
   _biot_coeff[ _qp ] = _biot_coeff_param;
   _alpha_1[ _qp ] = _alpha_1_param;
   _alpha_2[ _qp ] = _alpha_2_param;
