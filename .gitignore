@@ -209,3 +209,9 @@ borehole_test_dmg_2test.i
 Cylinder_hollow_iso.geo
 Cylinder_hollow_refine.geo
 Crack_Cylinder.geo
+Geomech_ex_01.i
+Geomech_ex_02.i
+Plate_Hole.geo
+Plate_Hole_rectang.geo
+Plate_Hole_square.geo
+Plate_Hole_rectang2D.geo
