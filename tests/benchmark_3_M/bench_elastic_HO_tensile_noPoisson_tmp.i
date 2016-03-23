@@ -182,33 +182,24 @@
     displacements = 'disp_x disp_y disp_z'
   [../]
   [./x_couple]
-    type = CosseratStressDivergenceTensors
+    type = StressDivergenceTensors
     variable = wc_x
     displacements = 'wc_x wc_y wc_z'
-    wc_x  = disp_x
-    wc_y  = disp_y
-    wc_z  = disp_z
     component = 0
     base_name = coupled
   [../]
   [./y_couple]
-    type = CosseratStressDivergenceTensors
+    type = StressDivergenceTensors
     variable = wc_y
     component = 1
     displacements = 'wc_x wc_y wc_z'
-    wc_x  = disp_x
-    wc_y  = disp_y
-    wc_z  = disp_z
     base_name = coupled
   [../]
   [./z_couple]
-    type = CosseratStressDivergenceTensors
+    type = StressDivergenceTensors
     variable = wc_z
     component = 2
     displacements = 'wc_x wc_y wc_z'
-    wc_x  = disp_x
-    wc_y  = disp_y
-    wc_z  = disp_z
     base_name = coupled
   [../]
   [./x_moment]

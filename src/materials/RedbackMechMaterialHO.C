@@ -369,6 +369,7 @@ _returnmap_iter[_qp] = SVARSGP[3*NSTR];
 for (unsigned i = 0; i < 3; ++i){
 _plastic_strain[_qp](i,i) = SVARSGP[2*NSTR+i];
 }
+
 _plastic_strain[_qp](1,2) = SVARSGP[2*NSTR+3]+SVARSGP[2*NSTR+6];
 _plastic_strain[_qp](0,2) = SVARSGP[2*NSTR+4]+SVARSGP[2*NSTR+7];
 _plastic_strain[_qp](0,1) = SVARSGP[2*NSTR+5]+SVARSGP[2*NSTR+8];
@@ -397,7 +398,6 @@ for (unsigned int i = 0; i < 3; ++i)
 _eqv_plastic_strain[_qp] = std::pow(normL2, 0.5);
 
 _volumetric_strain[_qp] = _plastic_strain[_qp].trace(); // PLASTIC vol strain
-
 
 //std::cout << " epsilon (11)= " << SVARSGP[3*NSTR+3+0] << std::endl;
 //std::cout << " epsilon (22)= " << SVARSGP[3*NSTR+3+1] << std::endl;
@@ -431,34 +431,41 @@ _total_volumetric_strain[_qp] = _total_strain[_qp].trace();
 _symmetric_stress[_qp] = (_stress[_qp] + _stress[_qp].transpose()) / 2.0;
 _antisymmetric_stress[_qp] = (_stress[_qp] - _stress[_qp].transpose()) / 2.0;
 
+
 //mise a jour des termes de la matrice tangente
 
 
 for (unsigned int i = 0; i < 3; ++i){
-  for (unsigned int j = 0; j < 3; ++i){
-    for (unsigned int k = 0; j < 3; ++i){
-      for (unsigned int l = 0; j < 3; ++i){
+  for (unsigned int j = 0; j < 3; ++j){
+    for (unsigned int k = 0; k < 3; ++k){
+      for (unsigned int l = 0; l < 3; ++l){
+        int test = NSTR*corsigma(k,l) + corsigma(i,j);
+        std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_mult = "<<DSDE[NSTR*corsigma(k,l) + corsigma(i,j)]<< std::endl;
 _Jacobian_mult[_qp](i,j,k,l) = DSDE[NSTR*corsigma(k,l) + corsigma(i,j)];
+
 }}}}
 
 for (unsigned int i = 0; i < 3; ++i){
-  for (unsigned int j = 0; j < 3; ++i){
-    for (unsigned int k = 0; j < 3; ++i){
-      for (unsigned int l = 0; j < 3; ++i){
+  for (unsigned int j = 0; j < 3; ++j){
+    for (unsigned int k = 0; k < 3; ++k){
+      for (unsigned int l = 0; l < 3; ++l){
+        std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_mult_couple = "<< DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + cormoment(i,j)+ NSTR / 2] << std::endl;
 _Jacobian_mult_couple[_qp](i,j,k,l) = DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + cormoment(i,j)+ NSTR / 2];
 }}}}
 
 for (unsigned int i = 0; i < 3; ++i){
-  for (unsigned int j = 0; j < 3; ++i){
-    for (unsigned int k = 0; j < 3; ++i){
-      for (unsigned int l = 0; j < 3; ++i){
+  for (unsigned int j = 0; j < 3; ++j){
+    for (unsigned int k = 0; k < 3; ++k){
+      for (unsigned int l = 0; l < 3; ++l){
+        std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_offdiag_bc = "<< DSDE[NSTR*corsigma(k,l) + cormoment(i,j)+ NSTR / 2] << std::endl;
 _Jacobian_offdiag_bc[_qp](i,j,k,l) = DSDE[NSTR*corsigma(k,l) + cormoment(i,j)+ NSTR / 2];
 }}}}
 
 for (unsigned int i = 0; i < 3; ++i){
-  for (unsigned int j = 0; j < 3; ++i){
-    for (unsigned int k = 0; j < 3; ++i){
-      for (unsigned int l = 0; j < 3; ++i){
+  for (unsigned int j = 0; j < 3; ++j){
+    for (unsigned int k = 0; k < 3; ++k){
+      for (unsigned int l = 0; l < 3; ++l){
+        std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_offdiag_cb = "<< DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + corsigma(i,j)] << std::endl;
 _Jacobian_offdiag_cb[_qp](i,j,k,l) = DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + corsigma(i,j)];
 }}}}
 

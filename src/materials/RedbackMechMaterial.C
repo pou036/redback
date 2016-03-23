@@ -261,8 +261,8 @@ void
 RedbackMechMaterial::computeQpElasticityTensor()
 {
   // Fill in the matrix stiffness material property
-//  _elasticity_tensor[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
-//  _Jacobian_mult[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
+  _elasticity_tensor[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
+  _Jacobian_mult[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
 }
 
 void
