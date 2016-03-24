@@ -30,6 +30,7 @@ public:
 
 protected:
   //virtual void stepInitQpProperties();
+  virtual void initQpStatefulProperties();
   virtual void computeQpStrain(const RankTwoTensor & Fhat);
   virtual void computeQpStress();
   virtual void computeQpElasticityTensor();
@@ -68,6 +69,8 @@ protected:
 
   MaterialProperty<ElasticityTensorR4> & _elastic_flexural_rigidity_tensor;
   MaterialProperty<ElasticityTensorR4> & _Jacobian_mult_couple;
+  MaterialProperty<ElasticityTensorR4> & _Jacobian_offdiag_bc;
+  MaterialProperty<ElasticityTensorR4> & _Jacobian_offdiag_cb;
 
   std::vector<Real> _Bijkl_vector;
   ElasticityTensorR4 _Bijkl;

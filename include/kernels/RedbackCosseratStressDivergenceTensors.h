@@ -1,0 +1,34 @@
+/****************************************************************/
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+#ifndef RedbackCosseratStressDivergenceTensors_H
+#define RedbackCosseratStressDivergenceTensors_H
+
+#include "StressDivergenceTensors.h"
+
+//Forward Declarations
+class RedbackCosseratStressDivergenceTensors;
+
+template<>
+InputParameters validParams<RedbackCosseratStressDivergenceTensors>();
+
+class RedbackCosseratStressDivergenceTensors : public StressDivergenceTensors
+{
+public:
+  RedbackCosseratStressDivergenceTensors(const InputParameters & parameters);
+
+protected:
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+  const MaterialProperty<ElasticityTensorR4> & _Jacobian_offdiag_bc;
+  const MaterialProperty<ElasticityTensorR4> & _Jacobian_offdiag_cb;
+
+private:
+  const unsigned int _wc_x_var;
+  const unsigned int _wc_y_var;
+  const unsigned int _wc_z_var;
+};
+
+#endif //RedbackCosseratStressDivergenceTensors_H

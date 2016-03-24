@@ -68,6 +68,10 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _curvature_increment(declareProperty<RankTwoTensor>("curvature_increment")),
     _plastic_curvature(declareProperty<RankTwoTensor>("plastic_curvature")),
     _plastic_curvature_old(declarePropertyOld<RankTwoTensor>("plastic_curvature")),
+    _deviatoric_plastic_strain(declareProperty<RankTwoTensor>("deviatoric_plastic_strain")),
+    _deviatoric_stress(declareProperty<RankTwoTensor>("deviatoric_stress")),
+    _volumetric_stress(declareProperty<Real>("volumetric_stress")),
+    _stress_invariant(declareProperty<Real>("stress_invariant")),
     _wc_x(coupledValue("wc_x")),
     _wc_y(coupledValue("wc_y")),
     _wc_z(coupledValue("wc_z")),
@@ -109,6 +113,9 @@ RedbackMechMaterialHO::initQpStatefulProperties()
   _Jacobian_offdiag_cb[ _qp ].zero();
   _curvature_increment[ _qp ].zero();
   _plastic_curvature[ _qp ].zero();
+  _deviatoric_stress[ _qp ].zero();
+  _volumetric_stress[ _qp ] = 0.0;
+  _stress_invariant[ _qp ] = 0.0;
 }
 
 
@@ -171,8 +178,6 @@ RedbackMechMaterialHO::computeQpStress()
   //_antisymmetric_stress[_qp] = (_stress[_qp] - _stress[_qp].transpose()) / 2.0;
   //_stress_couple[_qp] = _elastic_flexural_rigidity_tensor[_qp] * _curvature[_qp];
 
-  // Compute the energy dissipation and the properties declared
-  computeRedbackTerms(_stress[_qp], 0, 0);
 
   //int num = 4;
   //int num2 = display_(&num);
@@ -195,14 +200,20 @@ Real PROPS[NPROPS];
 
 Real Kbulk = _bulk_modulus;
 Real Gshear = _shear_modulus;
-Real GCshear = _cosserat_shear_modulus/2.0; // on divise par 2 car facteur 4 au lieu d'un facteur 2 dans la loi d'elasticite de Ioannis
-Real Radius = 0.05;
+Real GCshear = _cosserat_shear_modulus; // on divise par 2 car facteur 4 au lieu d'un facteur 2 dans la loi d'elasticite de Ioannis
+Real Radius = 0.001;
 Real mufor = _friction_coefficient; // essai avec le critere le plus simple possible
 Real cfor = _cohesion;
-Real g_1 = 8/5;
-Real g_2 = 2/5;
-Real g_3 = 8/5;
-Real g_4 = 2/5;
+Real g_1 = 8./5.;
+Real g_2 = 2./5.;
+Real g_3 = 8./5.;
+Real g_4 = 2./5.;
+
+Real h_1 = 2./3.;
+Real h_2 = -1./6.;
+Real h_3 = 2./3.;
+Real h_4 = -1./6.;
+
 
 PROPS[0]=Kbulk;
 PROPS[1]=Gshear;
@@ -214,12 +225,12 @@ PROPS[5]=cfor;
 DEFORT[0]=_strain_increment[_qp](0,0);
 DEFORT[1]=_strain_increment[_qp](1,1);
 DEFORT[2]=_strain_increment[_qp](2,2);
-DEFORT[3]= 0.5*(_strain_increment[_qp](1,2)+_strain_increment[_qp](2,1));
-DEFORT[4]= 0.5*(_strain_increment[_qp](0,2)+_strain_increment[_qp](2,0));
-DEFORT[5]=0.5*(_strain_increment[_qp](0,1)+_strain_increment[_qp](1,0));
-DEFORT[6]=0.5*(_strain_increment[_qp](1,2)-_strain_increment[_qp](2,1));
-DEFORT[7]=0.5*(_strain_increment[_qp](0,2)-_strain_increment[_qp](2,0));
-DEFORT[8]=0.5*(_strain_increment[_qp](0,2)-_strain_increment[_qp](2,0));
+DEFORT[3]= _strain_increment[_qp](1,2);
+DEFORT[4]= _strain_increment[_qp](0,2);
+DEFORT[5]=_strain_increment[_qp](0,1);
+DEFORT[6]=_strain_increment[_qp](2,1);
+DEFORT[7]=_strain_increment[_qp](2,0);
+DEFORT[8]=_strain_increment[_qp](1,0);
 DEFORT[9]=_curvature_increment[_qp](0,0);
 DEFORT[10]=_curvature_increment[_qp](0,1);
 DEFORT[11]=_curvature_increment[_qp](0,2);
@@ -233,12 +244,12 @@ DEFORT[17]=_curvature_increment[_qp](2,2);
 STRESSF[0]=_stress_old[_qp](0,0);
 STRESSF[1]=_stress_old[_qp](1,1);
 STRESSF[2]=_stress_old[_qp](2,2);
-STRESSF[3]=_symmetric_stress_old[_qp](1,2);
-STRESSF[4]=_symmetric_stress_old[_qp](0,2);
-STRESSF[5]=_symmetric_stress_old[_qp](0,1);
-STRESSF[6]=_antisymmetric_stress_old[_qp](1,2);
-STRESSF[7]=_antisymmetric_stress_old[_qp](0,2);
-STRESSF[8]=_antisymmetric_stress_old[_qp](0,1);
+STRESSF[3]=_stress_old[_qp](1,2);
+STRESSF[4]=_stress_old[_qp](0,2);
+STRESSF[5]=_stress_old[_qp](0,1);
+STRESSF[6]=_stress_old[_qp](2,1);
+STRESSF[7]=_stress_old[_qp](2,0);
+STRESSF[8]=_stress_old[_qp](1,0);
 STRESSF[9]=_stress_couple_old[_qp](0,0);
 STRESSF[10]=_stress_couple_old[_qp](0,1);
 STRESSF[11]=_stress_couple_old[_qp](0,2);
@@ -261,12 +272,12 @@ SVARSGP[i+NSTR] = DEFORT[i];
 for (unsigned i = 0; i < 3; ++i){
   SVARSGP[2*NSTR+i]=_plastic_strain_old[_qp](i,i);
 }
-SVARSGP[2*NSTR+3]=0.5*(_plastic_strain_old[_qp](1,2)+_plastic_strain_old[_qp](2,1));
-SVARSGP[2*NSTR+4]=0.5*(_plastic_strain_old[_qp](0,2)+_plastic_strain_old[_qp](2,0));
-SVARSGP[2*NSTR+5]=0.5*(_plastic_strain_old[_qp](0,1)+_plastic_strain_old[_qp](1,0));
-SVARSGP[2*NSTR+6]=0.5*(_plastic_strain_old[_qp](1,2)-_plastic_strain_old[_qp](2,1));
-SVARSGP[2*NSTR+7]=0.5*(_plastic_strain_old[_qp](0,2)-_plastic_strain_old[_qp](2,0));
-SVARSGP[2*NSTR+8]=0.5*(_plastic_strain_old[_qp](0,2)-_plastic_strain_old[_qp](2,0));
+SVARSGP[2*NSTR+3]=_plastic_strain_old[_qp](1,2);
+SVARSGP[2*NSTR+4]=_plastic_strain_old[_qp](0,2);
+SVARSGP[2*NSTR+5]=_plastic_strain_old[_qp](0,1);
+SVARSGP[2*NSTR+6]=_plastic_strain_old[_qp](2,1);
+SVARSGP[2*NSTR+7]=_plastic_strain_old[_qp](2,0);
+SVARSGP[2*NSTR+8]=_plastic_strain_old[_qp](1,0);
 SVARSGP[2*NSTR+9]=_plastic_curvature_old[_qp](0,0);
 SVARSGP[2*NSTR+10]=_plastic_curvature_old[_qp](0,1);
 SVARSGP[2*NSTR+11]=_plastic_curvature_old[_qp](0,2);
@@ -284,12 +295,12 @@ SVARSGP[3*NSTR+i] = 0;
 for (unsigned i = 0; i < 3; ++i){
   SVARSGP[3*NSTR+3+i]=_elastic_strain_old[_qp](i,i);
 }
-SVARSGP[3*NSTR+3+3]=0.5*(_elastic_strain_old[_qp](1,2)+_elastic_strain_old[_qp](2,1));
-SVARSGP[3*NSTR+3+4]=0.5*(_elastic_strain_old[_qp](0,2)+_elastic_strain_old[_qp](2,0));
-SVARSGP[3*NSTR+3+5]=0.5*(_elastic_strain_old[_qp](0,1)+_elastic_strain_old[_qp](1,0));
-SVARSGP[3*NSTR+3+6]=0.5*(_elastic_strain_old[_qp](1,2)-_elastic_strain_old[_qp](2,1));
-SVARSGP[3*NSTR+3+7]=0.5*(_elastic_strain_old[_qp](0,2)-_elastic_strain_old[_qp](2,0));
-SVARSGP[3*NSTR+3+8]=0.5*(_elastic_strain_old[_qp](0,2)-_elastic_strain_old[_qp](2,0));
+SVARSGP[3*NSTR+3+3]=_elastic_strain_old[_qp](1,2);
+SVARSGP[3*NSTR+3+4]=_elastic_strain_old[_qp](0,2);
+SVARSGP[3*NSTR+3+5]=_elastic_strain_old[_qp](0,1);
+SVARSGP[3*NSTR+3+6]=_elastic_strain_old[_qp](2,1);
+SVARSGP[3*NSTR+3+7]=_elastic_strain_old[_qp](2,0);
+SVARSGP[3*NSTR+3+8]=_elastic_strain_old[_qp](1,0);
 SVARSGP[3*NSTR+3+9]=_elastic_curvature_old[_qp](0,0);
 SVARSGP[3*NSTR+3+10]=_elastic_curvature_old[_qp](0,1);
 SVARSGP[3*NSTR+3+11]=_elastic_curvature_old[_qp](0,2);
@@ -309,18 +320,20 @@ Real y_coord = _current_elem->centroid()(1);
 if (y_coord > 0.45 && y_coord < 0.55 && _qp==0)
   verbose = 1;
 
-if (verbose)
-std::cout << " fortran sigma (22) before = " << STRESSF[1] << std::endl;
+//if (verbose)
+//std::cout << " fortran sigma (22) before = " << STRESSF[1] << std::endl;
 //usermat_(&STRESSF[NSTR],&DEFORT[NSTR],&DSDE[NSTR][NSTR],&NSTR,&PROPS[NPROPS],&NPROPS,&SVARSGP[NSVARSGP],&NSVARSGP,&NILL,&Kbulk);
 usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
 
-if (verbose)std::cout << " fortran sigma (22) after = " << STRESSF[1] << std::endl;
+//if (verbose)std::cout << " fortran sigma (22) after = " << STRESSF[1] << std::endl;
+if (NILL != 0)std::cout << " fortran not converging******************************** " << std::endl;
 
-if (verbose)std::cout << " element coords x= " << _current_elem->centroid()(0) << ", y= " << _current_elem->centroid()(1) << ", z= " << _current_elem->centroid()(2) << ", qp=" << _qp << std::endl;
-if (verbose)std::cout << " Flag for convergence (1 = not converging ) = " << NILL << std::endl;
+//if (verbose)std::cout << " element coords x= " << _current_elem->centroid()(0) << ", y= " << _current_elem->centroid()(1) << ", z= " << _current_elem->centroid()(2) << ", qp=" << _qp << std::endl;
+//if (verbose)std::cout << " Flag for convergence (1 = not converging ) = " << NILL << std::endl;
 
 //std::cout << " RF = " << SVARSGP[3*NSTR+1] << std::endl;
 
+//std::cout << " C (2222)= " << DSDE[19] << std::endl;
 
 //usermat_();
 /*
@@ -348,12 +361,12 @@ std::cout << " Moose moment (32)  = " << _stress_couple[_qp](2,1) << std::endl;
 _stress[_qp](0,0)=STRESSF[0];
 _stress[_qp](1,1)=STRESSF[1];
 _stress[_qp](2,2)=STRESSF[2];
-_stress[_qp](1,2)=STRESSF[3]+STRESSF[6];
-_stress[_qp](0,2)=STRESSF[4]+STRESSF[7];
-_stress[_qp](0,1)=STRESSF[5]+STRESSF[8];
-_stress[_qp](2,1)=STRESSF[3]-STRESSF[6];
-_stress[_qp](2,0)=STRESSF[4]-STRESSF[7];
-_stress[_qp](1,0)=STRESSF[5]-STRESSF[8];
+_stress[_qp](1,2)=STRESSF[3];
+_stress[_qp](0,2)=STRESSF[4];
+_stress[_qp](0,1)=STRESSF[5];
+_stress[_qp](2,1)=STRESSF[6];
+_stress[_qp](2,0)=STRESSF[7];
+_stress[_qp](1,0)=STRESSF[8];
 _stress_couple[_qp](0,0)=STRESSF[9];
 _stress_couple[_qp](0,1)=STRESSF[10];
 _stress_couple[_qp](0,2)=STRESSF[11];
@@ -370,12 +383,12 @@ for (unsigned i = 0; i < 3; ++i){
 _plastic_strain[_qp](i,i) = SVARSGP[2*NSTR+i];
 }
 
-_plastic_strain[_qp](1,2) = SVARSGP[2*NSTR+3]+SVARSGP[2*NSTR+6];
-_plastic_strain[_qp](0,2) = SVARSGP[2*NSTR+4]+SVARSGP[2*NSTR+7];
-_plastic_strain[_qp](0,1) = SVARSGP[2*NSTR+5]+SVARSGP[2*NSTR+8];
-_plastic_strain[_qp](2,1) = SVARSGP[2*NSTR+3]-SVARSGP[2*NSTR+6];
-_plastic_strain[_qp](2,0) = SVARSGP[2*NSTR+4]-SVARSGP[2*NSTR+7];
-_plastic_strain[_qp](1,0) = SVARSGP[2*NSTR+5]-SVARSGP[2*NSTR+8];
+_plastic_strain[_qp](1,2) = SVARSGP[2*NSTR+3];
+_plastic_strain[_qp](0,2) = SVARSGP[2*NSTR+4];
+_plastic_strain[_qp](0,1) = SVARSGP[2*NSTR+5];
+_plastic_strain[_qp](2,1) = SVARSGP[2*NSTR+6];
+_plastic_strain[_qp](2,0) = SVARSGP[2*NSTR+7];
+_plastic_strain[_qp](1,0) = SVARSGP[2*NSTR+8];
 _plastic_curvature[_qp](0,0)=SVARSGP[2*NSTR+9];
 _plastic_curvature[_qp](0,1)=SVARSGP[2*NSTR+10];
 _plastic_curvature[_qp](0,2)=SVARSGP[2*NSTR+11];
@@ -389,11 +402,13 @@ _plastic_curvature[_qp](2,2)=SVARSGP[2*NSTR+17];
 _symmetric_plastic_strain[_qp] = (_plastic_strain[_qp] + _plastic_strain[_qp].transpose()) / 2.0;
 _antisymmetric_plastic_strain[_qp] = (_plastic_strain[_qp] - _plastic_strain[_qp].transpose()) / 2.0;
 
-Real normL2;
+_deviatoric_plastic_strain[_qp] = _plastic_strain[_qp].deviatoric();
 
+Real normL2;
+normL2 = 0.0;
 for (unsigned int i = 0; i < 3; ++i)
   for (unsigned int j = 0; j < 3; ++j)
-    normL2 += g_1 * _antisymmetric_plastic_strain[_qp](i,j) * _antisymmetric_plastic_strain[_qp](i,j) + g_2 * _antisymmetric_plastic_strain[_qp](i,j) * _antisymmetric_plastic_strain[_qp](j,i) + g_3 * _plastic_curvature[_qp](i,j) * _plastic_curvature[_qp](i,j) + g_4 * _plastic_curvature[_qp](i,j) * _plastic_curvature[_qp](j,i);
+    normL2 += g_1 * _deviatoric_plastic_strain[_qp](i,j) * _deviatoric_plastic_strain[_qp](i,j) + g_2 * _deviatoric_plastic_strain[_qp](i,j) * _deviatoric_plastic_strain[_qp](j,i) + ( g_3 * _plastic_curvature[_qp](i,j) * _plastic_curvature[_qp](i,j) + g_4 * _plastic_curvature[_qp](i,j) * _plastic_curvature[_qp](j,i) )  * (std::pow(Radius, 2.0));
 
 _eqv_plastic_strain[_qp] = std::pow(normL2, 0.5);
 
@@ -407,12 +422,12 @@ _volumetric_strain[_qp] = _plastic_strain[_qp].trace(); // PLASTIC vol strain
 _elastic_strain[_qp](0,0)=SVARSGP[3*NSTR+3+0];
 _elastic_strain[_qp](1,1)=SVARSGP[3*NSTR+3+1];
 _elastic_strain[_qp](2,2)=SVARSGP[3*NSTR+3+2];
-_elastic_strain[_qp](1,2)=SVARSGP[3*NSTR+3+3]+SVARSGP[3*NSTR+3+6];
-_elastic_strain[_qp](0,2)=SVARSGP[3*NSTR+3+4]+SVARSGP[3*NSTR+3+7];
-_elastic_strain[_qp](0,1)=SVARSGP[3*NSTR+3+5]+SVARSGP[3*NSTR+3+8];
-_elastic_strain[_qp](2,1)=SVARSGP[3*NSTR+3+3]-SVARSGP[3*NSTR+3+6];
-_elastic_strain[_qp](2,0)=SVARSGP[3*NSTR+3+4]-SVARSGP[3*NSTR+3+7];
-_elastic_strain[_qp](1,0)=SVARSGP[3*NSTR+3+5]-SVARSGP[3*NSTR+3+8];
+_elastic_strain[_qp](1,2)=SVARSGP[3*NSTR+3+3];
+_elastic_strain[_qp](0,2)=SVARSGP[3*NSTR+3+4];
+_elastic_strain[_qp](0,1)=SVARSGP[3*NSTR+3+5];
+_elastic_strain[_qp](2,1)=SVARSGP[3*NSTR+3+6];
+_elastic_strain[_qp](2,0)=SVARSGP[3*NSTR+3+7];
+_elastic_strain[_qp](1,0)=SVARSGP[3*NSTR+3+8];
 _elastic_curvature[_qp](0,0)=SVARSGP[3*NSTR+3+9];
 _elastic_curvature[_qp](0,1)=SVARSGP[3*NSTR+3+10];
 _elastic_curvature[_qp](0,2)=SVARSGP[3*NSTR+3+11];
@@ -431,7 +446,19 @@ _total_volumetric_strain[_qp] = _total_strain[_qp].trace();
 _symmetric_stress[_qp] = (_stress[_qp] + _stress[_qp].transpose()) / 2.0;
 _antisymmetric_stress[_qp] = (_stress[_qp] - _stress[_qp].transpose()) / 2.0;
 
+_volumetric_stress[_qp] = (_stress[_qp].trace())/3;
 
+_deviatoric_stress[_qp] = _stress[_qp].deviatoric();
+
+
+Real normL2_stress;
+normL2_stress=0.0;
+
+for (unsigned int i = 0; i < 3; ++i){
+  for (unsigned int j = 0; j < 3; ++j){
+  normL2_stress += h_1 * _deviatoric_stress[_qp](i,j) * _deviatoric_stress[_qp](i,j) + h_2 * _deviatoric_stress[_qp](i,j) * _deviatoric_stress[_qp](j,i) + ( h_3 * _stress_couple[_qp](i,j) * _stress_couple[_qp](i,j) + h_4 * _stress_couple[_qp](i,j) * _stress_couple[_qp](j,i) ) / (std::pow(Radius, 2.0));
+}}
+_stress_invariant[_qp] = std::pow(normL2_stress, 0.5);
 //mise a jour des termes de la matrice tangente
 
 
@@ -440,16 +467,15 @@ for (unsigned int i = 0; i < 3; ++i){
     for (unsigned int k = 0; k < 3; ++k){
       for (unsigned int l = 0; l < 3; ++l){
         int test = NSTR*corsigma(k,l) + corsigma(i,j);
-        std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_mult = "<<DSDE[NSTR*corsigma(k,l) + corsigma(i,j)]<< std::endl;
+        //std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_mult = "<<DSDE[NSTR*corsigma(k,l) + corsigma(i,j)]<< std::endl;
 _Jacobian_mult[_qp](i,j,k,l) = DSDE[NSTR*corsigma(k,l) + corsigma(i,j)];
-
 }}}}
 
 for (unsigned int i = 0; i < 3; ++i){
   for (unsigned int j = 0; j < 3; ++j){
     for (unsigned int k = 0; k < 3; ++k){
       for (unsigned int l = 0; l < 3; ++l){
-        std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_mult_couple = "<< DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + cormoment(i,j)+ NSTR / 2] << std::endl;
+      //  std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_mult_couple = "<< DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + cormoment(i,j)+ NSTR / 2] << std::endl;
 _Jacobian_mult_couple[_qp](i,j,k,l) = DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + cormoment(i,j)+ NSTR / 2];
 }}}}
 
@@ -457,7 +483,7 @@ for (unsigned int i = 0; i < 3; ++i){
   for (unsigned int j = 0; j < 3; ++j){
     for (unsigned int k = 0; k < 3; ++k){
       for (unsigned int l = 0; l < 3; ++l){
-        std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_offdiag_bc = "<< DSDE[NSTR*corsigma(k,l) + cormoment(i,j)+ NSTR / 2] << std::endl;
+        //std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_offdiag_bc = "<< DSDE[NSTR*corsigma(k,l) + cormoment(i,j)+ NSTR / 2] << std::endl;
 _Jacobian_offdiag_bc[_qp](i,j,k,l) = DSDE[NSTR*corsigma(k,l) + cormoment(i,j)+ NSTR / 2];
 }}}}
 
@@ -465,7 +491,7 @@ for (unsigned int i = 0; i < 3; ++i){
   for (unsigned int j = 0; j < 3; ++j){
     for (unsigned int k = 0; k < 3; ++k){
       for (unsigned int l = 0; l < 3; ++l){
-        std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_offdiag_cb = "<< DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + corsigma(i,j)] << std::endl;
+        //std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_offdiag_cb = "<< DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + corsigma(i,j)] << std::endl;
 _Jacobian_offdiag_cb[_qp](i,j,k,l) = DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + corsigma(i,j)];
 }}}}
 
@@ -483,6 +509,8 @@ _Jacobian_offdiag_cb[_qp](i,j,k,l) = DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + cor
 
 //std::cout << " fortran DSDE (1,1)= " << DSDE[0] << std::endl;
 
+// Compute the energy dissipation and the properties declared
+computeRedbackTerms(_stress[_qp], 0, 0);
 
 }
 
@@ -630,4 +658,19 @@ RedbackMechMaterialHO::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yi
   // TODO: not implemented yet
   p_y = 0;
   q_y = 0;
+}
+
+void
+RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y)
+{
+
+  RankTwoTensor instantaneous_strain_rate;
+  RankTwoTensor instantaneous_curvature_rate;
+
+
+  instantaneous_strain_rate = (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]) / _dt;
+  instantaneous_curvature_rate = (_plastic_curvature[ _qp ] - _plastic_curvature_old[ _qp ]) / _dt;
+
+  _mechanical_dissipation_mech[ _qp ] =  sig.doubleContraction(instantaneous_strain_rate) +
+                                      _stress_couple[_qp].doubleContraction(instantaneous_curvature_rate) ;
 }

@@ -40,6 +40,8 @@
 #include "RedbackMechDissip.h"
 #include "RedbackPoromechanics.h"
 #include "RedbackStressDivergenceTensors.h"
+#include "RedbackCosseratStressDivergenceTensors.h"
+#include "RedbackMomentBalancing.h"
 #include "RedbackThermalConvection.h"
 #include "RedbackThermalDiffusion.h"
 #include "RedbackThermalPressurization.h"
@@ -119,6 +121,8 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackMechDissip);
   registerKernel(RedbackPoromechanics);
   registerKernel(RedbackStressDivergenceTensors);
+  registerKernel(RedbackCosseratStressDivergenceTensors);
+  registerKernel(RedbackMomentBalancing);
   registerKernel(RedbackThermalConvection);
   registerKernel(RedbackThermalDiffusion);
   registerKernel(RedbackThermalPressurization);

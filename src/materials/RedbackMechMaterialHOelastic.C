@@ -52,6 +52,8 @@ RedbackMechMaterialHOelastic::RedbackMechMaterialHOelastic(const InputParameters
     _macro_rotation(declareProperty<RankTwoTensor>("macro_rotation")),
     _elastic_flexural_rigidity_tensor(declareProperty<ElasticityTensorR4>("elastic_flexural_rigidity_tensor")),
     _Jacobian_mult_couple(declareProperty<ElasticityTensorR4>("coupled_Jacobian_mult")),
+    _Jacobian_offdiag_bc(declareProperty<ElasticityTensorR4>("coupled_Jacobian_off")),
+    _Jacobian_offdiag_cb(declareProperty<ElasticityTensorR4>("Jacobian_off")),
     _Bijkl_vector(getParam<std::vector<Real> >("B_ijkl")),
     _Bijkl(),
     _curvature_increment(declareProperty<RankTwoTensor>("curvature_increment")),
@@ -71,9 +73,9 @@ RedbackMechMaterialHOelastic::RedbackMechMaterialHOelastic(const InputParameters
   _Bijkl.fillFromInputVector(_Bijkl_vector, (RankFourTensor::FillMethod)(int)_fill_method_bending);
 }
 
-/*
+
 void
-RedbackMechMaterialHOelastic::stepInitQpProperties()
+RedbackMechMaterialHOelastic::initQpStatefulProperties()
 {
   RedbackMechMaterial::stepInitQpProperties();
   _symmetric_strain[ _qp ].zero();
@@ -89,12 +91,14 @@ RedbackMechMaterialHOelastic::stepInitQpProperties()
   _stress_trace[ _qp ] = 0.0;
   _macro_rotation[ _qp ].zero();
   _elastic_flexural_rigidity_tensor[ _qp ].zero();
-  //_Jacobian_mult_couple[ _qp ].zero();
+  _Jacobian_mult_couple[ _qp ].zero();
+  _Jacobian_offdiag_bc[ _qp ].zero();
+  _Jacobian_offdiag_cb[ _qp ].zero();
   _curvature_increment[ _qp ].zero();
   _plastic_curvature[ _qp ].zero();
 
 }
-*/
+
 
 void
 RedbackMechMaterialHOelastic::computeQpStrain(const RankTwoTensor & Fhat)

@@ -48,6 +48,8 @@ protected:
   Real getFlowIncrement(Real, Real, Real, Real, Real);
   void get_py_qy(Real, Real, Real &, Real &, Real);
   Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real);
+  virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
+
 
   MaterialProperty<RankTwoTensor> & _symmetric_strain;
   MaterialProperty<RankTwoTensor> & _antisymmetric_strain;
@@ -84,6 +86,11 @@ protected:
   MaterialProperty<RankTwoTensor> & _curvature_increment;
   MaterialProperty<RankTwoTensor> & _plastic_curvature;
   MaterialProperty<RankTwoTensor> & _plastic_curvature_old;
+  MaterialProperty<RankTwoTensor> & _deviatoric_plastic_strain;
+
+  MaterialProperty<RankTwoTensor> & _deviatoric_stress;
+  MaterialProperty<Real> & _volumetric_stress;
+  MaterialProperty<Real> & _stress_invariant;
 
 private:
   const VariableValue & _wc_x;
