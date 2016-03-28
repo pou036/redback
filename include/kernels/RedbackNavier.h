@@ -32,10 +32,17 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned int jvar);
+
+  const unsigned int _component;
 
   VariableValue & _fluid_vel_x;
   VariableValue & _fluid_vel_y;
   VariableValue & _fluid_vel_z;
+
+  const unsigned int _vel_fluid_x_var;
+  const unsigned int _vel_fluid_y_var;
+  const unsigned int _vel_fluid_z_var;
 
 private:
   Real _time_factor;

@@ -42,18 +42,17 @@ protected:
   const MaterialProperty<Real> & _reynolds_number;
   const MaterialProperty<Real> & _viscosity_ratio;
 
-
 private:
   //const bool _xdisp_coupled;
   //const bool _ydisp_coupled;
   //const bool _zdisp_coupled;
   //const bool _temp_coupled;
 
-  //const unsigned int _vel_fluid_x_var;
-  //const unsigned int _vel_fluid_y_var;
-  //const unsigned int _vel_fluid_z_var;
+  const unsigned int _vel_fluid_x_var;
+  const unsigned int _vel_fluid_y_var;
+  const unsigned int _vel_fluid_z_var;
   //const unsigned int _temp_var;
-  //const unsigned int _porepressure_var;
+  const unsigned int _porepressure_var;
 
   const MaterialProperty<RealVectorValue> & _gravity_term;
 };

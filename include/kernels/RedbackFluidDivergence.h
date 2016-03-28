@@ -32,11 +32,17 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
+  virtual Real computeQpOffDiagJacobian(unsigned jvar);
 
   const MaterialProperty<Real> & _div_fluid_kernel;
 
 private:
   Real _time_factor;
+
+  // Variable numberings
+  unsigned _x_vel_var_number;
+  unsigned _y_vel_var_number;
+  unsigned _z_vel_var_number;
 };
 
 
