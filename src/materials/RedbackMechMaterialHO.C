@@ -89,6 +89,8 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
   _shear_modulus = _Cijkl_vector[ 1 ];
   _bulk_modulus = _Cijkl_vector[ 0 ] + 2*_shear_modulus/3.0;
   _cosserat_shear_modulus = _Cijkl_vector[ 2 ];
+  _cosserat_radius = std::sqrt(_Bijkl_vector[ 1 ]/(2 * _shear_modulus));
+
 }
 
 void
@@ -201,7 +203,7 @@ Real PROPS[NPROPS];
 Real Kbulk = _bulk_modulus;
 Real Gshear = _shear_modulus;
 Real GCshear = _cosserat_shear_modulus; // on divise par 2 car facteur 4 au lieu d'un facteur 2 dans la loi d'elasticite de Ioannis
-Real Radius = 0.001;
+Real Radius = _cosserat_radius;
 Real mufor = _friction_coefficient; // essai avec le critere le plus simple possible
 Real cfor = _cohesion;
 Real g_1 = 8./5.;
