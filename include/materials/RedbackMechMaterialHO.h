@@ -108,7 +108,7 @@ private:
 
   /// determines the translation from B_ijkl to the Rank-4 tensor
   MooseEnum _fill_method_bending;
-  Real _cohesion, _friction_coefficient;
+  Real _cohesion, _friction_coefficient, _hardening_mech_modulus;
   Real _shear_modulus, _bulk_modulus, _cosserat_shear_modulus, _cosserat_radius;
 
 };

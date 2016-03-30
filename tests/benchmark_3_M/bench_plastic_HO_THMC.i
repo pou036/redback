@@ -1,7 +1,8 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  ny = 100 # 6
+  type = FileMesh
+  file = 3D_shear.msh
+  boundary_name = 'back bottom right top left front'
+  boundary_id = '0 1 2 3 4 5'
 []
 
 [GlobalParams]
@@ -11,6 +12,9 @@
   wc_z = wc_z
   wc_y = wc_y
   wc_x = wc_x
+  pore_pres = pressure
+  temperature = temperature
+  temp = temperature
 []
 
 [Postprocessors]
@@ -139,6 +143,10 @@
   [../]
   [./wc_z]
   [../]
+  [./temperature]
+  [../]
+  [./pressure]
+  [../]
 []
 
 [AuxVariables]
@@ -163,6 +171,12 @@
   [../]
   [./stress_invariant]
     order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./total_porosity]
+    family = MONOMIAL
+  [../]
+  [./mechanical_porosity]
     family = MONOMIAL
   [../]
 []
@@ -231,6 +245,43 @@
     variable = wc_z
     component = 2
   [../]
+  [./dT_dt]
+    type = TimeDerivative
+    variable = temperature
+  [../]
+  [./T_diff]
+    type = RedbackThermalDiffusion
+    variable = temperature
+  [../]
+  [./mech_dissip]
+    type = RedbackMechDissip
+    variable = temperature
+  [../]
+  [./dp_dt]
+    type = TimeDerivative
+    variable = pressure
+  [../]
+  [./diff_p]
+    type = RedbackMassDiffusion
+    variable = pressure
+  [../]
+  [./poromech]
+    type = RedbackPoromechanics
+    variable = pressure
+  [../]
+  [./thermal_press]
+    type = RedbackThermalPressurization
+    variable = pressure
+    temperature = temperature
+  [../]
+  [./chem_press]
+    type = RedbackChemPressure
+    variable = pressure
+  [../]
+  [./chem_endo]
+    type = RedbackChemEndo
+    variable = temperature
+  [../]
 []
 
 [AuxKernels]
@@ -273,6 +324,19 @@
     variable = stress_invariant
     property = stress_invariant
   [../]
+  [./mech_porosity]
+    type = MaterialRealAux
+    variable = mechanical_porosity
+    execute_on = timestep_end
+    property = mechanical_porosity
+  [../]
+  [./total_porosity]
+    type = RedbackTotalPorosityAux
+    variable = total_porosity
+    mechanical_porosity = mechanical_porosity
+    execute_on = timestep_end
+    is_mechanics_on = true
+  [../]
 []
 
 [BCs]
@@ -281,11 +345,11 @@
   [./Periodic]
     [./xperiodic]
       auto_direction = x
-      variable = 'disp_x disp_y disp_z wc_x wc_y wc_z'
+      variable = 'disp_x disp_y disp_z wc_x wc_y wc_z temperature pressure'
     [../]
     [./zperiodic]
       auto_direction = z
-      variable = 'disp_x disp_y disp_z wc_x wc_y wc_z'
+      variable = 'disp_x disp_y disp_z wc_x wc_y wc_z temperature pressure'
     [../]
   [../]
   [./wcx_equals_zero_on_top]
@@ -369,6 +433,18 @@
     boundary = bottom
     postprocessor = antisymmetric_pp
   [../]
+  [./T_bottom]
+    type = DirichletBC
+    variable = temperature
+    boundary = bottom
+    value = 0
+  [../]
+  [./T_top]
+    type = DirichletBC
+    variable = temperature
+    boundary = top
+    value = 1
+  [../]
 []
 
 [Materials]
@@ -389,10 +465,24 @@
     poisson_ratio = -9999
     youngs_modulus = -9999
     damage_method = BreakageMechanics
+    total_porosity = total_porosity
   [../]
   [./redback_mat]
     type = RedbackMaterial
     block = 0
+    solid_thermal_expansion = 1e-1
+    pressurization_coefficient = 1e-3
+    Kc = 1
+    is_chemistry_on = true
+    ar_F = 2
+    mu = 1e-3
+    ar_R = 1
+    ar = 1
+    da_exo = 1
+    phi0 = 0.1
+    total_porosity = total_porosity
+    is_mechanics_on = true
+    Aphi = 1
   [../]
 []
 
@@ -402,7 +492,7 @@
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
-    petsc_options_value = 'gmres bjacobi 1E-10 1E-8 100 1E-10 1E-8'
+    petsc_options_value = 'gmres bjacobi 1E-10 1E-8 200 1E-10 1E-8'
   [../]
 []
 
@@ -410,7 +500,7 @@
   type = Transient
   l_max_its = 100
   solve_type = Newton
-  num_steps = 1
+  num_steps = 10
 []
 
 [Outputs]

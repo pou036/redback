@@ -14,7 +14,8 @@
 template<>
 InputParameters validParams<RedbackCosseratStressDivergenceTensors>()
 {
-  InputParameters params = validParams<StressDivergenceTensors>();
+  //InputParameters params = validParams<StressDivergenceTensors>();
+  InputParameters params = validParams<RedbackStressDivergenceTensorsNew>();
   params.addCoupledVar("wc_x", "The Cosserat rotation about x");
   params.addCoupledVar("wc_y", "The Cosserat rotation about y");
   params.addCoupledVar("wc_z", "The Cosserat rotation about z");
@@ -22,7 +23,8 @@ InputParameters validParams<RedbackCosseratStressDivergenceTensors>()
 }
 
 RedbackCosseratStressDivergenceTensors::RedbackCosseratStressDivergenceTensors(const InputParameters & parameters) :
-    StressDivergenceTensors(parameters),
+    //StressDivergenceTensors(parameters),
+    RedbackStressDivergenceTensorsNew(parameters),
     _Jacobian_offdiag_bc(getMaterialPropertyByName<ElasticityTensorR4>("coupled_Jacobian_off")),
     _Jacobian_offdiag_cb(getMaterialPropertyByName<ElasticityTensorR4>("Jacobian_off")),
     _wc_x_var(coupled("wc_x")),
@@ -70,7 +72,8 @@ RedbackCosseratStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jv
       }
     else
       {
-        result = StressDivergenceTensors::computeQpOffDiagJacobian(jvar);
+        //result = StressDivergenceTensors::computeQpOffDiagJacobian(jvar);
+        result = RedbackStressDivergenceTensorsNew::computeQpOffDiagJacobian(jvar);
       }
 
 

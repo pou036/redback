@@ -1,7 +1,8 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  ny = 100 # 6
+  type = FileMesh
+  file = 3D_shear.msh
+  boundary_name = 'back bottom right top left front'
+  boundary_id = '0 1 2 3 4 5'
 []
 
 [GlobalParams]
@@ -11,6 +12,9 @@
   wc_z = wc_z
   wc_y = wc_y
   wc_x = wc_x
+  pore_pres = pressure
+  temperature = temperature
+  temp = temperature
 []
 
 [Postprocessors]
@@ -33,6 +37,7 @@
     type = SideAverageValue
     variable = antisymmetric_strain_bc
     boundary = bottom
+    execute_on = linear
   [../]
   [./Rotation_wcz_0_9]
     type = PointValue
@@ -124,6 +129,41 @@
     variable = disp_x
     point = '0.5 0.1 0.5'
   [../]
+  [./antisymmetric_2]
+    type = SideAverageValue
+    variable = antisymmetric_strain_tc
+    execute_on = linear
+    boundary = top
+  [../]
+  [./nb_nli]
+    type = NumNonlinearIterations
+  [../]
+  [./nb_li]
+    type = NumLinearIterations
+  [../]
+  [./centre_T]
+    type = PointValue
+    variable = temperature
+    point = '0 0.5 0'
+  [../]
+  [./centre_T_old]
+    type = PointValue
+    variable = temperature
+    execute_on = timestep_begin
+    point = '0 0.5 0'
+  [../]
+  [./centre_P]
+    type = PointValue
+    variable = pressure
+    point = '0 0.5 0'
+  [../]
+  [./dt]
+    type = TimestepSize
+  [../]
+  [./new_timestep]
+    type = FunctionValuePostprocessor
+    function = timestep_function
+  [../]
 []
 
 [Variables]
@@ -138,6 +178,10 @@
   [./wc_y]
   [../]
   [./wc_z]
+  [../]
+  [./temperature]
+  [../]
+  [./pressure]
   [../]
 []
 
@@ -165,9 +209,40 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./total_porosity]
+    family = MONOMIAL
+  [../]
+  [./mechanical_porosity]
+    family = MONOMIAL
+  [../]
+  [./antisymmetric_strain_tc]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+[]
+
+[Functions]
+  [./ramp_top]
+    type = ParsedFunction
+    value = 0.1*t
+  [../]
+  [./ramp_bottom]
+    type = ParsedFunction
+    value = -0.1*t
+  [../]
+  [./timestep_function]
+    #  if((t>252)&(t<251),0.1 ,999))
+    # 
+    # max(dt_min,  min(dt_max, dt*(  min(   1-0.1*(nnli-14),  1-5*((T-T_old)-0.2)   )   )))
+    type = ParsedFunction
+    value = 0.005
+    vals = 'nb_li nb_nli dt centre_T_old centre_T 1e-5 1e-2'
+    vars = 'nli nnli dt T_old T dt_min dt_max'
+  [../]
 []
 
 [Kernels]
+  active = 'T_diff mech_dissip x_couple cz_elastic cy_elastic cx_elastic y_moment z_couple dT_dt x_moment y_couple z_moment dp_dt'
   [./cx_elastic]
     type = RedbackCosseratStressDivergenceTensors
     variable = disp_x
@@ -231,6 +306,43 @@
     variable = wc_z
     component = 2
   [../]
+  [./dT_dt]
+    type = TimeDerivative
+    variable = temperature
+  [../]
+  [./T_diff]
+    type = RedbackThermalDiffusion
+    variable = temperature
+  [../]
+  [./mech_dissip]
+    type = RedbackMechDissip
+    variable = temperature
+  [../]
+  [./dp_dt]
+    type = TimeDerivative
+    variable = pressure
+  [../]
+  [./diff_p]
+    type = RedbackMassDiffusion
+    variable = pressure
+  [../]
+  [./poromech]
+    type = RedbackPoromechanics
+    variable = pressure
+  [../]
+  [./thermal_press]
+    type = RedbackThermalPressurization
+    variable = pressure
+    temperature = temperature
+  [../]
+  [./chem_press]
+    type = RedbackChemPressure
+    variable = pressure
+  [../]
+  [./chem_endo]
+    type = RedbackChemEndo
+    variable = temperature
+  [../]
 []
 
 [AuxKernels]
@@ -240,7 +352,7 @@
     rank_two_tensor = macro_rotation
     index_j = 1
     index_i = 0
-    execute_on = timestep_end
+    execute_on = linear
   [../]
   [./stress_22]
     type = RankTwoAux
@@ -273,19 +385,43 @@
     variable = stress_invariant
     property = stress_invariant
   [../]
+  [./mech_porosity]
+    type = MaterialRealAux
+    variable = mechanical_porosity
+    execute_on = timestep_end
+    property = mechanical_porosity
+  [../]
+  [./total_porosity]
+    type = RedbackTotalPorosityAux
+    variable = total_porosity
+    mechanical_porosity = mechanical_porosity
+    execute_on = timestep_end
+    is_mechanics_on = true
+  [../]
+  [./antisymmetric_top]
+    type = RankTwoAux
+    variable = antisymmetric_strain_tc
+    rank_two_tensor = macro_rotation
+    index_j = 1
+    index_i = 0
+  [../]
 []
 
 [BCs]
   # following is natural BC
-  active = 'Periodic uy_bottom Rotation_wc_z_BC ux_imposed_top wcz_imposed_top wcx_equals_zero_on_top ux_zero_bottom wcy_equals_zero_on_top wc_x_bottom uz_bottom wc_y_bottom'
+  active = 'Periodic uy_bottom ux_imposed_top wcx_equals_zero_on_top ux_zero_bottom T_bottom wcy_equals_zero_on_top wc_x_bottom uz_bottom wc_y_bottom T_top'
   [./Periodic]
     [./xperiodic]
       auto_direction = x
-      variable = 'disp_x disp_y disp_z wc_x wc_y wc_z'
+      variable = 'disp_x disp_y disp_z wc_x wc_y wc_z temperature pressure'
     [../]
     [./zperiodic]
       auto_direction = z
-      variable = 'disp_x disp_y disp_z wc_x wc_y wc_z'
+      variable = 'disp_x disp_y disp_z wc_x wc_y wc_z temperature pressure'
+    [../]
+    [./wcz_periodic]
+      variable = wc_z
+      auto_direction = y
     [../]
   [../]
   [./wcx_equals_zero_on_top]
@@ -325,10 +461,10 @@
     value = 0.0
   [../]
   [./ux_zero_bottom]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = bottom
-    value = 0
+    function = ramp_bottom
   [../]
   [./wc_z_rotationBC]
     type = RedbackRotationBC
@@ -349,13 +485,13 @@
     type = DirichletBC
     variable = wc_z
     boundary = top
-    value = -0.1
+    value = 0.0
   [../]
   [./ux_imposed_top]
-    type = DirichletBC
+    type = FunctionDirichletBC
     variable = disp_x
     boundary = top
-    value = 0.01
+    function = ramp_top
   [../]
   [./wc_z_bottom_zero]
     type = DirichletBC
@@ -368,6 +504,29 @@
     variable = wc_z
     boundary = bottom
     postprocessor = antisymmetric_pp
+  [../]
+  [./T_bottom]
+    type = DirichletBC
+    variable = temperature
+    boundary = bottom
+    value = 0
+  [../]
+  [./T_top]
+    type = DirichletBC
+    variable = temperature
+    boundary = top
+    value = 0
+  [../]
+  [./Rotation_wc_z_TC]
+    type = PostprocessorDirichletBC
+    variable = wc_z
+    boundary = top
+    postprocessor = antisymmetric_2
+  [../]
+  [./delta_T_centre]
+    type = PointValue
+    variable = delta_temp
+    point = '0 0.5 0'
   [../]
 []
 
@@ -384,15 +543,32 @@
     type = RedbackMechMaterialHO
     block = 0
     B_ijkl = '-0.0333333 0.5 0.5'
-    C_ijkl = '3.333333 10 20'
+    C_ijkl = '33.333333 100 200'
     fill_method = general_isotropic
     poisson_ratio = -9999
     youngs_modulus = -9999
     damage_method = BreakageMechanics
+    cohesion = 0.1
+    total_porosity = total_porosity
   [../]
   [./redback_mat]
     type = RedbackMaterial
     block = 0
+    solid_thermal_expansion = 1e-1
+    pressurization_coefficient = 1e-3
+    Kc = 1
+    is_chemistry_on = true
+    ar_F = 2
+    mu = 1e-3
+    ar_R = 1
+    ar = 1
+    da_exo = 1
+    phi0 = 0.1
+    total_porosity = total_porosity
+    is_mechanics_on = true
+    Aphi = 1
+    eta2 = 1e-3
+    gr = 15
   [../]
 []
 
@@ -402,15 +578,21 @@
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
-    petsc_options_value = 'gmres bjacobi 1E-10 1E-8 100 1E-10 1E-8'
+    petsc_options_value = 'gmres bjacobi 1E-10 1E-8 50 1E-10 1E-8'
   [../]
 []
 
 [Executioner]
   type = Transient
+  dt = 0.01
   l_max_its = 100
   solve_type = Newton
-  num_steps = 1
+  num_steps = 2000
+  [./TimeStepper]
+    type = PostprocessorDT
+    dt = 0.01
+    postprocessor = new_timestep
+  [../]
 []
 
 [Outputs]
