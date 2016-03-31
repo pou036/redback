@@ -31,7 +31,7 @@ validParams<ReturnMapIterDT>()
 
 ReturnMapIterDT::ReturnMapIterDT(const InputParameters & parameters) :
     TimeStepper(parameters),
-    PostprocessorInterface(parameters),
+    PostprocessorInterface(this),
     _extreme_value(getPostprocessorValue("postprocessor")),
     _has_initial_dt(isParamValid("dt")),
     _initial_dt(_has_initial_dt ? getParam<Real>("dt") : 0.),
