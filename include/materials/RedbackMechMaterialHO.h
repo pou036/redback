@@ -34,6 +34,12 @@ protected:
   virtual void computeQpStress();
   int corsigma(int , int );
   int cormoment(int , int );
+  void remplSigmaOld(RankTwoTensor & , Real* vect, int );
+  void remplMomentOld(RankTwoTensor &, Real* vect, int );
+  void recupSigmaNew(RankTwoTensor &, Real* vect, int );
+  void recupMomentNew(RankTwoTensor &, Real* vect, int );
+
+
   virtual void computeQpElasticityTensor();
 
   void returnMap(const RankTwoTensor &,
@@ -91,6 +97,9 @@ protected:
   MaterialProperty<RankTwoTensor> & _deviatoric_stress;
   MaterialProperty<Real> & _volumetric_stress;
   MaterialProperty<Real> & _stress_invariant;
+  MaterialProperty<Real> & _hardening_variable;
+  MaterialProperty<Real> & _lagrange_multiplier;
+  MaterialProperty<Real> & _failure_surface;
 
 private:
   const VariableValue & _wc_x;

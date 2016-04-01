@@ -2,7 +2,7 @@
 #ADDITIONAL_LIBS := /usr/local/lib/myLib.dylib
 
 #to compile it and add the path automatically using libtool
-multisurfaceplasticityhard_DIR := /Users/pou036/projects/ioannis/hard_asso_plast
+multisurfaceplasticityhard_DIR := /Users/pou036/projects/ioannis/hard_asso_plast_2
 #multisurfaceplasticityhard_srcfiles  += $(multisurfaceplasticityhard_DIR)/src/​file1.C
 multisurfaceplasticityhard_srcfiles  += $(multisurfaceplasticityhard_DIR)/multisurfaceplasticityhard.f
 

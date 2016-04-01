@@ -7,8 +7,8 @@
 #ifndef RedbackCosseratStressDivergenceTensors_H
 #define RedbackCosseratStressDivergenceTensors_H
 
-//#include "StressDivergenceTensors.h"
-#include "RedbackStressDivergenceTensorsNew.h"
+#include "StressDivergenceTensors.h"
+//#include "RedbackStressDivergenceTensorsNew.h"
 
 //Forward Declarations
 class RedbackCosseratStressDivergenceTensors;
@@ -16,8 +16,8 @@ class RedbackCosseratStressDivergenceTensors;
 template<>
 InputParameters validParams<RedbackCosseratStressDivergenceTensors>();
 
-//class RedbackCosseratStressDivergenceTensors : public StressDivergenceTensors
-class RedbackCosseratStressDivergenceTensors : public RedbackStressDivergenceTensorsNew
+class RedbackCosseratStressDivergenceTensors : public StressDivergenceTensors
+//class RedbackCosseratStressDivergenceTensors : public RedbackStressDivergenceTensorsNew
 {
 public:
   RedbackCosseratStressDivergenceTensors(const InputParameters & parameters);

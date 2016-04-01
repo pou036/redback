@@ -73,6 +73,9 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _deviatoric_stress(declareProperty<RankTwoTensor>("deviatoric_stress")),
     _volumetric_stress(declareProperty<Real>("volumetric_stress")),
     _stress_invariant(declareProperty<Real>("stress_invariant")),
+    _hardening_variable(declareProperty<Real>("hardening_variable")),
+    _lagrange_multiplier(declareProperty<Real>("lagrange_multiplier")),
+    _failure_surface(declareProperty<Real>("failure_surface")),
     _wc_x(coupledValue("wc_x")),
     _wc_y(coupledValue("wc_y")),
     _wc_z(coupledValue("wc_z")),
@@ -121,6 +124,9 @@ RedbackMechMaterialHO::initQpStatefulProperties()
   _deviatoric_stress[ _qp ].zero();
   _volumetric_stress[ _qp ] = 0.0;
   _stress_invariant[ _qp ] = 0.0;
+  _hardening_variable[ _qp ] = 0.0;
+  _lagrange_multiplier[ _qp ] = 0.0;
+  _failure_surface[ _qp ] = 0.0;
 }
 
 
@@ -148,7 +154,7 @@ RedbackMechMaterialHO::computeQpStrain(const RankTwoTensor & Fhat)
                      _grad_disp_z_old[_qp]); // Old Deformation gradient
 
   _strain_increment[_qp]= grad_tensor - old_deformation;
-  _strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp] * (_T[_qp] - _T_old[_qp]));
+  //_strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp] * (_T[_qp] - _T_old[_qp]));
 
   /* Setting up a macro-rotation (antisymmetric part of the strain) tensor to be used in Cosserat BCs*/
   RankTwoTensor mgrad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
@@ -199,6 +205,8 @@ int NSVARSGP = 76;
 
 Real STRESSF[NSTR];
 Real DEFORT[NSTR];
+//Real DEFORT2[NSTR];
+Real DEFORT2[NSTR];
 Real DSDE[NSTR*NSTR];
 Real SVARSGP[NSVARSGP];
 Real PROPS[NPROPS];
@@ -210,6 +218,8 @@ Real Radius = _cosserat_radius;
 Real mufor = _friction_coefficient; // essai avec le critere le plus simple possible
 Real cfor = _cohesion;
 Real Hp = _hardening_mech_modulus;
+int nb_hardening = 1;
+
 Real g_1 = 8./5.;
 Real g_2 = 2./5.;
 Real g_3 = 8./5.;
@@ -230,7 +240,9 @@ PROPS[5]=cfor;
 PROPS[6]=Hp;
 
 
-
+remplSigmaOld(_strain_increment[_qp], DEFORT, 0);
+remplMomentOld(_curvature_increment[_qp], DEFORT, 0);
+/*
 DEFORT[0]=_strain_increment[_qp](0,0);
 DEFORT[1]=_strain_increment[_qp](1,1);
 DEFORT[2]=_strain_increment[_qp](2,2);
@@ -249,7 +261,12 @@ DEFORT[14]=_curvature_increment[_qp](1,2);
 DEFORT[15]=_curvature_increment[_qp](2,0);
 DEFORT[16]=_curvature_increment[_qp](2,1);
 DEFORT[17]=_curvature_increment[_qp](2,2);
+*/
 
+remplSigmaOld(_stress_old[_qp], STRESSF, 0);
+remplMomentOld(_stress_couple_old[_qp], STRESSF, 0);
+
+/*
 STRESSF[0]=_stress_old[_qp](0,0);
 STRESSF[1]=_stress_old[_qp](1,1);
 STRESSF[2]=_stress_old[_qp](2,2);
@@ -268,7 +285,29 @@ STRESSF[14]=_stress_couple_old[_qp](1,2);
 STRESSF[15]=_stress_couple_old[_qp](2,0);
 STRESSF[16]=_stress_couple_old[_qp](2,1);
 STRESSF[17]=_stress_couple_old[_qp](2,2);
+*/
 
+remplSigmaOld(_stress_old[_qp], SVARSGP, 0);
+remplMomentOld(_stress_couple_old[_qp], SVARSGP, 0);
+
+remplSigmaOld(_total_strain_old[_qp], SVARSGP, NSTR);
+remplMomentOld(_total_curvature_old[_qp], SVARSGP, NSTR);
+
+SVARSGP[2*NSTR] = _hardening_variable[_qp];
+
+remplSigmaOld(_plastic_strain_old[_qp], SVARSGP, 2*NSTR + nb_hardening);
+remplMomentOld(_plastic_curvature_old[_qp], SVARSGP, 2*NSTR + nb_hardening);
+
+SVARSGP[3*NSTR + nb_hardening] = 0.0;
+SVARSGP[3*NSTR + 1 + nb_hardening] = _failure_surface[_qp];
+SVARSGP[3*NSTR + 2 + nb_hardening] = _lagrange_multiplier[_qp];
+
+
+remplSigmaOld(_elastic_strain_old[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
+remplMomentOld(_elastic_curvature_old[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
+
+
+/*
 for (unsigned i = 0; i < NSTR; ++i){
 SVARSGP[i] = STRESSF[i];
 }
@@ -279,7 +318,7 @@ SVARSGP[i+NSTR] = DEFORT[i];
 }
 
 
-/*
+
 for (unsigned i = 0; i < 3; ++i){
   SVARSGP[NSTR+i]=_total_strain_old[_qp](i,i);
 }
@@ -298,12 +337,17 @@ SVARSGP[NSTR+14]=_total_curvature_old[_qp](1,2);
 SVARSGP[NSTR+15]=_total_curvature_old[_qp](2,0);
 SVARSGP[NSTR+16]=_total_curvature_old[_qp](2,1);
 SVARSGP[NSTR+17]=_total_curvature_old[_qp](2,2);
+
+
+//if (nb_hardening != 0) {
+  SVARSGP[2*NSTR] = _hardening_variable[_qp];
+//}
+
+SVARSGP[3*NSTR + nb_hardening] = _failure_surface[_qp];
+SVARSGP[3*NSTR+1+ nb_hardening] = _lagrange_multiplier[_qp];
 */
 
-
-SVARSGP[2*NSTR] = 0;
-
-
+/*
 for (unsigned i = 0; i < 3; ++i){
   SVARSGP[2*NSTR+i]=_plastic_strain_old[_qp](i,i);
 }
@@ -322,57 +366,58 @@ SVARSGP[2*NSTR+14]=_plastic_curvature_old[_qp](1,2);
 SVARSGP[2*NSTR+15]=_plastic_curvature_old[_qp](2,0);
 SVARSGP[2*NSTR+16]=_plastic_curvature_old[_qp](2,1);
 SVARSGP[2*NSTR+17]=_plastic_curvature_old[_qp](2,2);
-
+*/
 
 /*
 for (unsigned i = 0; i < 3; ++i){
   SVARSGP[2*NSTR+i+1]=_plastic_strain_old[_qp](i,i);
 }
-SVARSGP[2*NSTR+3+1]=_plastic_strain_old[_qp](1,2);
-SVARSGP[2*NSTR+4+1]=_plastic_strain_old[_qp](0,2);
-SVARSGP[2*NSTR+5+1]=_plastic_strain_old[_qp](0,1);
-SVARSGP[2*NSTR+6+1]=_plastic_strain_old[_qp](2,1);
-SVARSGP[2*NSTR+7+1]=_plastic_strain_old[_qp](2,0);
-SVARSGP[2*NSTR+8+1]=_plastic_strain_old[_qp](1,0);
-SVARSGP[2*NSTR+9+1]=_plastic_curvature_old[_qp](0,0);
-SVARSGP[2*NSTR+10+1]=_plastic_curvature_old[_qp](0,1);
-SVARSGP[2*NSTR+11+1]=_plastic_curvature_old[_qp](0,2);
-SVARSGP[2*NSTR+12+1]=_plastic_curvature_old[_qp](1,0);
-SVARSGP[2*NSTR+13+1]=_plastic_curvature_old[_qp](1,1);
-SVARSGP[2*NSTR+14+1]=_plastic_curvature_old[_qp](1,2);
-SVARSGP[2*NSTR+15+1]=_plastic_curvature_old[_qp](2,0);
-SVARSGP[2*NSTR+16+1]=_plastic_curvature_old[_qp](2,1);
-SVARSGP[2*NSTR+17+1]=_plastic_curvature_old[_qp](2,2);
+SVARSGP[2*NSTR+3+ nb_hardening]=_plastic_strain_old[_qp](1,2);
+SVARSGP[2*NSTR+4+ nb_hardening]=_plastic_strain_old[_qp](0,2);
+SVARSGP[2*NSTR+5+ nb_hardening]=_plastic_strain_old[_qp](0,1);
+SVARSGP[2*NSTR+6+ nb_hardening]=_plastic_strain_old[_qp](2,1);
+SVARSGP[2*NSTR+7+ nb_hardening]=_plastic_strain_old[_qp](2,0);
+SVARSGP[2*NSTR+8+ nb_hardening]=_plastic_strain_old[_qp](1,0);
+SVARSGP[2*NSTR+9+ nb_hardening]=_plastic_curvature_old[_qp](0,0);
+SVARSGP[2*NSTR+10+ nb_hardening]=_plastic_curvature_old[_qp](0,1);
+SVARSGP[2*NSTR+11+ nb_hardening]=_plastic_curvature_old[_qp](0,2);
+SVARSGP[2*NSTR+12+ nb_hardening]=_plastic_curvature_old[_qp](1,0);
+SVARSGP[2*NSTR+13+ nb_hardening]=_plastic_curvature_old[_qp](1,1);
+SVARSGP[2*NSTR+14+ nb_hardening]=_plastic_curvature_old[_qp](1,2);
+SVARSGP[2*NSTR+15+ nb_hardening]=_plastic_curvature_old[_qp](2,0);
+SVARSGP[2*NSTR+16+ nb_hardening]=_plastic_curvature_old[_qp](2,1);
+SVARSGP[2*NSTR+17+ nb_hardening]=_plastic_curvature_old[_qp](2,2);
 
 
 
 for (unsigned i = 0; i < 3; ++i){
-SVARSGP[3*NSTR+i+1] = 0;
+SVARSGP[3*NSTR+i+ nb_hardening] = 0;
 }
 
 for (unsigned i = 0; i < 3; ++i){
-  SVARSGP[3*NSTR+3+i+1]=_elastic_strain_old[_qp](i,i);
+  SVARSGP[3*NSTR+3+i+ nb_hardening]=_elastic_strain_old[_qp](i,i);
 }
-SVARSGP[3*NSTR+3+3+1]=_elastic_strain_old[_qp](1,2);
-SVARSGP[3*NSTR+3+4+1]=_elastic_strain_old[_qp](0,2);
-SVARSGP[3*NSTR+3+5+1]=_elastic_strain_old[_qp](0,1);
-SVARSGP[3*NSTR+3+6+1]=_elastic_strain_old[_qp](2,1);
-SVARSGP[3*NSTR+3+7+1]=_elastic_strain_old[_qp](2,0);
-SVARSGP[3*NSTR+3+8+1]=_elastic_strain_old[_qp](1,0);
-SVARSGP[3*NSTR+3+9+1]=_elastic_curvature_old[_qp](0,0);
-SVARSGP[3*NSTR+3+10+1]=_elastic_curvature_old[_qp](0,1);
-SVARSGP[3*NSTR+3+11+1]=_elastic_curvature_old[_qp](0,2);
-SVARSGP[3*NSTR+3+12+1]=_elastic_curvature_old[_qp](1,0);
-SVARSGP[3*NSTR+3+13+1]=_elastic_curvature_old[_qp](1,1);
-SVARSGP[3*NSTR+3+14+1]=_elastic_curvature_old[_qp](1,2);
-SVARSGP[3*NSTR+3+15+1]=_elastic_curvature_old[_qp](2,0);
-SVARSGP[3*NSTR+3+16+1]=_elastic_curvature_old[_qp](2,1);
-SVARSGP[3*NSTR+3+17+1]=_elastic_curvature_old[_qp](2,2);
+SVARSGP[3*NSTR+3+3+ nb_hardening]=_elastic_strain_old[_qp](1,2);
+SVARSGP[3*NSTR+3+4+ nb_hardening]=_elastic_strain_old[_qp](0,2);
+SVARSGP[3*NSTR+3+5+ nb_hardening]=_elastic_strain_old[_qp](0,1);
+SVARSGP[3*NSTR+3+6+ nb_hardening]=_elastic_strain_old[_qp](2,1);
+SVARSGP[3*NSTR+3+7+ nb_hardening]=_elastic_strain_old[_qp](2,0);
+SVARSGP[3*NSTR+3+8+ nb_hardening]=_elastic_strain_old[_qp](1,0);
+SVARSGP[3*NSTR+3+9+ nb_hardening]=_elastic_curvature_old[_qp](0,0);
+SVARSGP[3*NSTR+3+10+ nb_hardening]=_elastic_curvature_old[_qp](0,1);
+SVARSGP[3*NSTR+3+11+ nb_hardening]=_elastic_curvature_old[_qp](0,2);
+SVARSGP[3*NSTR+3+12+ nb_hardening]=_elastic_curvature_old[_qp](1,0);
+SVARSGP[3*NSTR+3+13+ nb_hardening]=_elastic_curvature_old[_qp](1,1);
+SVARSGP[3*NSTR+3+14+ nb_hardening]=_elastic_curvature_old[_qp](1,2);
+SVARSGP[3*NSTR+3+15+ nb_hardening]=_elastic_curvature_old[_qp](2,0);
+SVARSGP[3*NSTR+3+16+ nb_hardening]=_elastic_curvature_old[_qp](2,1);
+SVARSGP[3*NSTR+3+17+ nb_hardening]=_elastic_curvature_old[_qp](2,2);
 */
+
 //for (unsigned i = 0; i < 3; ++i){
 //SVARSGP[3*NSTR+i] = 0;
 //}
-
+/*
 for (unsigned i = 0; i < 3; ++i){
   SVARSGP[3*NSTR+3+i]=_elastic_strain_old[_qp](i,i);
 }
@@ -391,17 +436,75 @@ SVARSGP[3*NSTR+3+14]=_elastic_curvature_old[_qp](1,2);
 SVARSGP[3*NSTR+3+15]=_elastic_curvature_old[_qp](2,0);
 SVARSGP[3*NSTR+3+16]=_elastic_curvature_old[_qp](2,1);
 SVARSGP[3*NSTR+3+17]=_elastic_curvature_old[_qp](2,2);
-
+*/
 
 for (unsigned i = 0; i < NSTR*NSTR; ++i){
 DSDE[i] = 0;
 }
 
+
+
+
+/*
 Real verbose = 0;
 Real y_coord = _current_elem->centroid()(1);
 if (y_coord > 0.45 && y_coord < 0.55 && _qp==0)
   verbose = 1;
 
+  if (verbose)
+    for (unsigned i = 0; i < NSVARSGP; ++i){
+      std::cout << "DEFORT2[0] =" <<DEFORT2[0] <<std::endl;
+      std::cout << "DEFORT2[1] =" <<DEFORT2[5] <<std::endl;
+      std::cout << "DEFORT2[2] =" <<DEFORT2[10] <<std::endl;
+      std::cout << "DEFORT2[3] =" <<DEFORT2[15] <<std::endl;
+      std::cout << "DEFORT2[4] =" <<DEFORT2[0] <<std::endl;
+      std::cout << "DEFORT2[5] =" <<DEFORT2[5] <<std::endl;
+      std::cout << "DEFORT2[6] =" <<DEFORT2[10] <<std::endl;
+      std::cout << "DEFORT2[7] =" <<DEFORT2[15] <<std::endl;
+      std::cout << "DEFORT2[8] =" <<DEFORT2[0] <<std::endl;
+      std::cout << "DEFORT2[9] =" <<DEFORT2[5] <<std::endl;
+      std::cout << "DEFORT2[10] =" <<DEFORT2[10] <<std::endl;
+      std::cout << "DEFORT2[11] =" <<DEFORT2[15] <<std::endl;
+      std::cout << "DEFORT2[12] =" <<DEFORT2[0] <<std::endl;
+      std::cout << "DEFORT2[13] =" <<DEFORT2[5] <<std::endl;
+      std::cout << "DEFORT2[14] =" <<DEFORT2[10] <<std::endl;
+      std::cout << "DEFORT2[15] =" <<DEFORT2[15] <<std::endl;
+      std::cout << "DEFORT2[16] =" <<DEFORT2[5] <<std::endl;
+      std::cout << "DEFORT2[17] =" <<DEFORT2[10] <<std::endl;
+
+      std::cout << "DEFORT[0] =" <<DEFORT[0] <<std::endl;
+      std::cout << "DEFORT[1] =" <<DEFORT[5] <<std::endl;
+      std::cout << "DEFORT[2] =" <<DEFORT[10] <<std::endl;
+      std::cout << "DEFORT[3] =" <<DEFORT[15] <<std::endl;
+      std::cout << "DEFORT[4] =" <<DEFORT[0] <<std::endl;
+      std::cout << "DEFORT[5] =" <<DEFORT[5] <<std::endl;
+      std::cout << "DEFORT[6] =" <<DEFORT[10] <<std::endl;
+      std::cout << "DEFORT[7] =" <<DEFORT[15] <<std::endl;
+      std::cout << "DEFORT[8] =" <<DEFORT[0] <<std::endl;
+      std::cout << "DEFORT[9] =" <<DEFORT[5] <<std::endl;
+      std::cout << "DEFORT[10] =" <<DEFORT[10] <<std::endl;
+      std::cout << "DEFORT[11] =" <<DEFORT[15] <<std::endl;
+      std::cout << "DEFORT[12] =" <<DEFORT[0] <<std::endl;
+      std::cout << "DEFORT[13] =" <<DEFORT[5] <<std::endl;
+      std::cout << "DEFORT[14] =" <<DEFORT[10] <<std::endl;
+      std::cout << "DEFORT[15] =" <<DEFORT[15] <<std::endl;
+      std::cout << "DEFORT[16] =" <<DEFORT[5] <<std::endl;
+      std::cout << "DEFORT[17] =" <<DEFORT[10] <<std::endl;
+    }
+*/
+
+
+
+
+
+
+/*
+if (verbose)
+  for (unsigned i = 0; i < NSVARSGP; ++i){
+    std::cout << " avant calcul SVARSGP ( " << i << ")"<< SVARSGP[i] << std::endl;
+  }
+
+*/
 //if (verbose)
 //std::cout << " fortran sigma (22) before = " << STRESSF[1] << std::endl;
 //usermat_(&STRESSF[NSTR],&DEFORT[NSTR],&DSDE[NSTR][NSTR],&NSTR,&PROPS[NPROPS],&NPROPS,&SVARSGP[NSVARSGP],&NSVARSGP,&NILL,&Kbulk);
@@ -409,6 +512,14 @@ usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
 
 //if (verbose)std::cout << " fortran sigma (22) after = " << STRESSF[1] << std::endl;
 if (NILL != 0)std::cout << " fortran not converging******************************** " << std::endl;
+
+/*
+if (verbose)
+  for (unsigned i = 0; i < NSVARSGP; ++i){
+    std::cout << " apres calcul SVARSGP ( " << i << ")"<< SVARSGP[i] << std::endl;
+  }
+*/
+
 
 //if (verbose)std::cout << " element coords x= " << _current_elem->centroid()(0) << ", y= " << _current_elem->centroid()(1) << ", z= " << _current_elem->centroid()(2) << ", qp=" << _qp << std::endl;
 //if (verbose)std::cout << " Flag for convergence (1 = not converging ) = " << NILL << std::endl;
@@ -440,6 +551,7 @@ std::cout << " Moose moment (31) = " << _stress_couple[_qp](2,0) << std::endl;
 std::cout << " fortran moment (32)  = " << STRESSF[6] << std::endl;
 std::cout << " Moose moment (32)  = " << _stress_couple[_qp](2,1) << std::endl;
 */
+/*
 _stress[_qp](0,0)=STRESSF[0];
 _stress[_qp](1,1)=STRESSF[1];
 _stress[_qp](2,2)=STRESSF[2];
@@ -458,30 +570,37 @@ _stress_couple[_qp](1,2)=STRESSF[14];
 _stress_couple[_qp](2,0)=STRESSF[15];
 _stress_couple[_qp](2,1)=STRESSF[16];
 _stress_couple[_qp](2,2)=STRESSF[17];
+*/
 
+recupSigmaNew(_stress[_qp], STRESSF, 0);
+recupMomentNew(_stress_couple[_qp], STRESSF, 0);
+
+
+recupSigmaNew(_plastic_strain[_qp], SVARSGP, 2*NSTR + nb_hardening);
+recupMomentNew(_plastic_curvature[_qp], SVARSGP, 2*NSTR + nb_hardening);
 
 /*
 for (unsigned i = 0; i < 3; ++i){
-_plastic_strain[_qp](i,i) = SVARSGP[2*NSTR+i+1];
+_plastic_strain[_qp](i,i) = SVARSGP[2*NSTR+i+ nb_hardening];
 }
 
-_plastic_strain[_qp](1,2) = SVARSGP[2*NSTR+3+1];
-_plastic_strain[_qp](0,2) = SVARSGP[2*NSTR+4+1];
-_plastic_strain[_qp](0,1) = SVARSGP[2*NSTR+5+1];
-_plastic_strain[_qp](2,1) = SVARSGP[2*NSTR+6+1];
-_plastic_strain[_qp](2,0) = SVARSGP[2*NSTR+7+1];
-_plastic_strain[_qp](1,0) = SVARSGP[2*NSTR+8+1];
-_plastic_curvature[_qp](0,0)=SVARSGP[2*NSTR+9+1];
-_plastic_curvature[_qp](0,1)=SVARSGP[2*NSTR+10+1];
-_plastic_curvature[_qp](0,2)=SVARSGP[2*NSTR+11+1];
-_plastic_curvature[_qp](1,0)=SVARSGP[2*NSTR+12+1];
-_plastic_curvature[_qp](1,1)=SVARSGP[2*NSTR+13+1];
-_plastic_curvature[_qp](1,2)=SVARSGP[2*NSTR+14+1];
-_plastic_curvature[_qp](2,0)=SVARSGP[2*NSTR+15+1];
-_plastic_curvature[_qp](2,1)=SVARSGP[2*NSTR+16+1];
-_plastic_curvature[_qp](2,2)=SVARSGP[2*NSTR+17+1];
+_plastic_strain[_qp](1,2) = SVARSGP[2*NSTR+3+ nb_hardening];
+_plastic_strain[_qp](0,2) = SVARSGP[2*NSTR+4+ nb_hardening];
+_plastic_strain[_qp](0,1) = SVARSGP[2*NSTR+5+ nb_hardening];
+_plastic_strain[_qp](2,1) = SVARSGP[2*NSTR+6+ nb_hardening];
+_plastic_strain[_qp](2,0) = SVARSGP[2*NSTR+7+ nb_hardening];
+_plastic_strain[_qp](1,0) = SVARSGP[2*NSTR+8+ nb_hardening];
+_plastic_curvature[_qp](0,0)=SVARSGP[2*NSTR+9+ nb_hardening];
+_plastic_curvature[_qp](0,1)=SVARSGP[2*NSTR+10+ nb_hardening];
+_plastic_curvature[_qp](0,2)=SVARSGP[2*NSTR+11+ nb_hardening];
+_plastic_curvature[_qp](1,0)=SVARSGP[2*NSTR+12+ nb_hardening];
+_plastic_curvature[_qp](1,1)=SVARSGP[2*NSTR+13+ nb_hardening];
+_plastic_curvature[_qp](1,2)=SVARSGP[2*NSTR+14+ nb_hardening];
+_plastic_curvature[_qp](2,0)=SVARSGP[2*NSTR+15+ nb_hardening];
+_plastic_curvature[_qp](2,1)=SVARSGP[2*NSTR+16+ nb_hardening];
+_plastic_curvature[_qp](2,2)=SVARSGP[2*NSTR+17+ nb_hardening];
 */
-
+/*
 for (unsigned i = 0; i < 3; ++i){
 _plastic_strain[_qp](i,i) = SVARSGP[2*NSTR+i];
 }
@@ -501,7 +620,7 @@ _plastic_curvature[_qp](1,2)=SVARSGP[2*NSTR+14];
 _plastic_curvature[_qp](2,0)=SVARSGP[2*NSTR+15];
 _plastic_curvature[_qp](2,1)=SVARSGP[2*NSTR+16];
 _plastic_curvature[_qp](2,2)=SVARSGP[2*NSTR+17];
-
+*/
 
 _symmetric_plastic_strain[_qp] = (_plastic_strain[_qp] + _plastic_strain[_qp].transpose()) / 2.0;
 _antisymmetric_plastic_strain[_qp] = (_plastic_strain[_qp] - _plastic_strain[_qp].transpose()) / 2.0;
@@ -522,28 +641,31 @@ _volumetric_strain[_qp] = _plastic_strain[_qp].trace(); // PLASTIC vol strain
 //std::cout << " epsilon (22)= " << SVARSGP[3*NSTR+3+1] << std::endl;
 //std::cout << " svarsgp sigma (22)= " << SVARSGP[1] << std::endl;
 
+recupSigmaNew(_elastic_strain[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
+recupMomentNew(_elastic_curvature[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
+
 /*
-_elastic_strain[_qp](0,0)=SVARSGP[3*NSTR+3+0+1];
-_elastic_strain[_qp](1,1)=SVARSGP[3*NSTR+3+1+1];
-_elastic_strain[_qp](2,2)=SVARSGP[3*NSTR+3+2+1];
-_elastic_strain[_qp](1,2)=SVARSGP[3*NSTR+3+3+1];
-_elastic_strain[_qp](0,2)=SVARSGP[3*NSTR+3+4+1];
-_elastic_strain[_qp](0,1)=SVARSGP[3*NSTR+3+5+1];
-_elastic_strain[_qp](2,1)=SVARSGP[3*NSTR+3+6+1];
-_elastic_strain[_qp](2,0)=SVARSGP[3*NSTR+3+7+1];
-_elastic_strain[_qp](1,0)=SVARSGP[3*NSTR+3+8+1];
-_elastic_curvature[_qp](0,0)=SVARSGP[3*NSTR+3+9+1];
-_elastic_curvature[_qp](0,1)=SVARSGP[3*NSTR+3+10+1];
-_elastic_curvature[_qp](0,2)=SVARSGP[3*NSTR+3+11+1];
-_elastic_curvature[_qp](1,0)=SVARSGP[3*NSTR+3+12+1];
-_elastic_curvature[_qp](1,1)=SVARSGP[3*NSTR+3+13+1];
-_elastic_curvature[_qp](1,2)=SVARSGP[3*NSTR+3+14+1];
-_elastic_curvature[_qp](2,0)=SVARSGP[3*NSTR+3+15+1];
-_elastic_curvature[_qp](2,1)=SVARSGP[3*NSTR+3+16+1];
-_elastic_curvature[_qp](2,2)=SVARSGP[3*NSTR+3+17+1];
+_elastic_strain[_qp](0,0)=SVARSGP[3*NSTR+3+0+ nb_hardening];
+_elastic_strain[_qp](1,1)=SVARSGP[3*NSTR+3+ nb_hardening+ nb_hardening];
+_elastic_strain[_qp](2,2)=SVARSGP[3*NSTR+3+2+ nb_hardening];
+_elastic_strain[_qp](1,2)=SVARSGP[3*NSTR+3+3+ nb_hardening];
+_elastic_strain[_qp](0,2)=SVARSGP[3*NSTR+3+4+ nb_hardening];
+_elastic_strain[_qp](0,1)=SVARSGP[3*NSTR+3+5+ nb_hardening];
+_elastic_strain[_qp](2,1)=SVARSGP[3*NSTR+3+6+ nb_hardening];
+_elastic_strain[_qp](2,0)=SVARSGP[3*NSTR+3+7+ nb_hardening];
+_elastic_strain[_qp](1,0)=SVARSGP[3*NSTR+3+8+ nb_hardening];
+_elastic_curvature[_qp](0,0)=SVARSGP[3*NSTR+3+9+ nb_hardening];
+_elastic_curvature[_qp](0,1)=SVARSGP[3*NSTR+3+10+ nb_hardening];
+_elastic_curvature[_qp](0,2)=SVARSGP[3*NSTR+3+11+ nb_hardening];
+_elastic_curvature[_qp](1,0)=SVARSGP[3*NSTR+3+12+ nb_hardening];
+_elastic_curvature[_qp](1,1)=SVARSGP[3*NSTR+3+13+ nb_hardening];
+_elastic_curvature[_qp](1,2)=SVARSGP[3*NSTR+3+14+ nb_hardening];
+_elastic_curvature[_qp](2,0)=SVARSGP[3*NSTR+3+15+ nb_hardening];
+_elastic_curvature[_qp](2,1)=SVARSGP[3*NSTR+3+16+ nb_hardening];
+_elastic_curvature[_qp](2,2)=SVARSGP[3*NSTR+3+17+ nb_hardening];
 */
 
-
+/*
 _elastic_strain[_qp](0,0)=SVARSGP[3*NSTR+3+0];
 _elastic_strain[_qp](1,1)=SVARSGP[3*NSTR+3+1];
 _elastic_strain[_qp](2,2)=SVARSGP[3*NSTR+3+2];
@@ -562,6 +684,19 @@ _elastic_curvature[_qp](1,2)=SVARSGP[3*NSTR+3+14];
 _elastic_curvature[_qp](2,0)=SVARSGP[3*NSTR+3+15];
 _elastic_curvature[_qp](2,1)=SVARSGP[3*NSTR+3+16];
 _elastic_curvature[_qp](2,2)=SVARSGP[3*NSTR+3+17];
+*/
+
+
+//if (nb_hardening != 0) {
+  _hardening_variable[_qp] = SVARSGP[2*NSTR];
+//}
+
+
+
+
+_failure_surface[_qp]=SVARSGP[3*NSTR+1+ nb_hardening];
+_lagrange_multiplier[_qp]=SVARSGP[3*NSTR+2+ nb_hardening];
+
 
 
 _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
@@ -707,6 +842,62 @@ int RedbackMechMaterialHO::cormoment(int num1, int num2){
 return result;
 }
 
+void RedbackMechMaterialHO::remplSigmaOld(RankTwoTensor & tens_old,  Real* vect, int  ini){
+  for (unsigned i = 0; i < 3; ++i){
+    vect[ini + i]=tens_old(i,i);
+  }
+  vect[ini +3]=tens_old(1,2);
+  vect[ini+4]=tens_old(0,2);
+  vect[ini+5]=tens_old(0,1);
+  vect[ini+6]=tens_old(2,1);
+  vect[ini+7]=tens_old(2,0);
+  vect[ini+8]=tens_old(1,0);
+}
+
+
+void RedbackMechMaterialHO::remplMomentOld(RankTwoTensor & tens_old, Real* vect, int  ini){
+
+  vect[ini+9]=tens_old(0,0);
+  vect[ini+10]=tens_old(0,1);
+  vect[ini+11]=tens_old(0,2);
+  vect[ini+12]=tens_old(1,0);
+  vect[ini+13]=tens_old(1,1);
+  vect[ini+14]=tens_old(1,2);
+  vect[ini+15]=tens_old(2,0);
+  vect[ini+16]=tens_old(2,1);
+  vect[ini+17]=tens_old(2,2);
+}
+
+
+void RedbackMechMaterialHO::recupSigmaNew(RankTwoTensor & tens_new, Real* vect, int  ini){
+  for (unsigned i = 0; i < 3; ++i){
+  tens_new(i,i) = vect[ini + i];
+  }
+
+  tens_new(1,2) = vect[ini + 3];
+  tens_new(0,2) = vect[ini + 4];
+  tens_new(0,1) = vect[ini + 5];
+  tens_new(2,1) = vect[ini + 6];
+  tens_new(2,0) = vect[ini + 7];
+  tens_new(1,0) = vect[ini + 8];
+
+}
+
+
+void RedbackMechMaterialHO::recupMomentNew(RankTwoTensor & tens_new, Real* vect, int  ini){
+  tens_new(0,0)=vect[ini + 9];
+  tens_new(0,1)=vect[ini + 10];
+  tens_new(0,2)=vect[ini + 11];
+  tens_new(1,0)=vect[ini + 12];
+  tens_new(1,0)=vect[ini + 12];
+  tens_new(1,1)=vect[ini + 13];
+  tens_new(1,2)=vect[ini + 14];
+  tens_new(2,0)=vect[ini + 15];
+  tens_new(2,1)=vect[ini + 16];
+  tens_new(2,2)=vect[ini + 17];
+}
+
+
 
 void RedbackMechMaterialHO::computeQpElasticityTensor()
 {
@@ -789,33 +980,33 @@ RedbackMechMaterialHO::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yi
 void
 RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y)
 {
-  // Update the mechanical dissipation
+  /*// Update the mechanical dissipation
   RankTwoTensor instantaneous_strain_rate;
   RankTwoTensor instantaneous_curvature_rate;
 
   instantaneous_strain_rate = (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]) / _dt;
   instantaneous_curvature_rate = (_plastic_curvature[ _qp ] - _plastic_curvature_old[ _qp ]) / _dt;
 
-  //Real cosserat_exponential = 1;
-//  if (_has_T)
-//  {
+  Real cosserat_exponential = 1;
+  if (_has_T)
+  {
     // Q/(RT) = Ar/(1+delta T*)
-//    cosserat_exponential =
-//    std::exp(-_ar[ _qp ]) * std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
-//  }
+    cosserat_exponential =
+    std::exp(-_ar[ _qp ]) * std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
+  }
 
-//  instantaneous_strain_rate *= cosserat_exponential;
-//  instantaneous_curvature_rate *= cosserat_exponential;
+ instantaneous_strain_rate *= cosserat_exponential;
+  instantaneous_curvature_rate *= cosserat_exponential;
 
-//  _mechanical_dissipation_mech[ _qp ] =  sig.doubleContraction(instantaneous_strain_rate) +
-//                                      _stress_couple[_qp].doubleContraction(instantaneous_curvature_rate) ;
-//  _mechanical_dissipation_mech[ _qp ] *= _gr[ _qp ];
+  _mechanical_dissipation_mech[ _qp ] =  sig.doubleContraction(instantaneous_strain_rate) +
+                                      _stress_couple[_qp].doubleContraction(instantaneous_curvature_rate) ;
+  _mechanical_dissipation_mech[ _qp ] *= _gr[ _qp ];
 
-//  _mechanical_dissipation_jac_mech[ _qp ] = _mechanical_dissipation_mech[ _qp ];
-//  if (_has_T)
-//  {
-//    _mechanical_dissipation_jac_mech[ _qp ] = _mechanical_dissipation_jac_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
-//  }
+  _mechanical_dissipation_jac_mech[ _qp ] = _mechanical_dissipation_mech[ _qp ];
+  if (_has_T)
+  {
+   _mechanical_dissipation_jac_mech[ _qp ] = _mechanical_dissipation_jac_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
+  }
 
   // Update the mechanical porosity
   Real delta_phi_mech_el, delta_phi_mech_pl;
@@ -826,4 +1017,5 @@ RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p
   delta_phi_mech_pl = (1.0 - _total_porosity[ _qp ]) * (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]).trace();
 
   _mechanical_porosity[ _qp ] = delta_phi_mech_el + delta_phi_mech_pl;
+  */
 }
