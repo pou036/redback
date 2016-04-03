@@ -98,6 +98,8 @@ protected:
   MaterialProperty<Real> & _volumetric_stress;
   MaterialProperty<Real> & _stress_invariant;
   MaterialProperty<Real> & _hardening_variable;
+  MaterialProperty<Real> & _hardening_variable_old;
+  MaterialProperty<Real> & _active_surfaces;
   MaterialProperty<Real> & _lagrange_multiplier;
   MaterialProperty<Real> & _failure_surface;
 

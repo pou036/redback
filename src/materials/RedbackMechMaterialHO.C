@@ -74,6 +74,8 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _volumetric_stress(declareProperty<Real>("volumetric_stress")),
     _stress_invariant(declareProperty<Real>("stress_invariant")),
     _hardening_variable(declareProperty<Real>("hardening_variable")),
+    _hardening_variable_old(declarePropertyOld<Real>("hardening_variable")),
+    _active_surfaces(declareProperty<Real>("active_surfaces")),
     _lagrange_multiplier(declareProperty<Real>("lagrange_multiplier")),
     _failure_surface(declareProperty<Real>("failure_surface")),
     _wc_x(coupledValue("wc_x")),
@@ -125,6 +127,7 @@ RedbackMechMaterialHO::initQpStatefulProperties()
   _volumetric_stress[ _qp ] = 0.0;
   _stress_invariant[ _qp ] = 0.0;
   _hardening_variable[ _qp ] = 0.0;
+  _active_surfaces[ _qp ] = 0.0;
   _lagrange_multiplier[ _qp ] = 0.0;
   _failure_surface[ _qp ] = 0.0;
 }
@@ -293,14 +296,19 @@ remplMomentOld(_stress_couple_old[_qp], SVARSGP, 0);
 remplSigmaOld(_total_strain_old[_qp], SVARSGP, NSTR);
 remplMomentOld(_total_curvature_old[_qp], SVARSGP, NSTR);
 
-SVARSGP[2*NSTR] = _hardening_variable[_qp];
+SVARSGP[2*NSTR] = _hardening_variable_old[_qp];
 
 remplSigmaOld(_plastic_strain_old[_qp], SVARSGP, 2*NSTR + nb_hardening);
 remplMomentOld(_plastic_curvature_old[_qp], SVARSGP, 2*NSTR + nb_hardening);
-
-SVARSGP[3*NSTR + nb_hardening] = 0.0;
+/*
+SVARSGP[3*NSTR + nb_hardening] = _active_surfaces[_qp];
 SVARSGP[3*NSTR + 1 + nb_hardening] = _failure_surface[_qp];
 SVARSGP[3*NSTR + 2 + nb_hardening] = _lagrange_multiplier[_qp];
+*/
+
+SVARSGP[3*NSTR + nb_hardening] = 0.0;
+SVARSGP[3*NSTR + 1 + nb_hardening] = 0.0;
+SVARSGP[3*NSTR + 2 + nb_hardening] = 0.0;
 
 
 remplSigmaOld(_elastic_strain_old[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
@@ -693,7 +701,7 @@ _elastic_curvature[_qp](2,2)=SVARSGP[3*NSTR+3+17];
 
 
 
-
+_active_surfaces[_qp]=SVARSGP[3*NSTR+1+ nb_hardening];
 _failure_surface[_qp]=SVARSGP[3*NSTR+1+ nb_hardening];
 _lagrange_multiplier[_qp]=SVARSGP[3*NSTR+2+ nb_hardening];
 
