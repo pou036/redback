@@ -121,6 +121,6 @@ private:
   MooseEnum _fill_method_bending;
   Real _cohesion, _friction_coefficient, _hardening_mech_modulus;
   Real _shear_modulus, _bulk_modulus, _cosserat_shear_modulus, _cosserat_radius;
-
+  Real _plastic_potential_multiplier;
 };
 #endif // RedbackMechMaterialHO_H
