@@ -70,7 +70,7 @@
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
 #include "RedbackTotalPorosityAux.h"
-#include "RedbackPolarStressAux.h"
+#include "RedbackPolarTensorMaterialAux.h"
 
 template <>
 InputParameters
@@ -151,7 +151,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);
   registerAux(RedbackTotalPorosityAux);
-  registerAux(RedbackPolarStressAux);
+  registerAux(RedbackPolarTensorMaterialAux);
 #undef registerObject
 #define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
