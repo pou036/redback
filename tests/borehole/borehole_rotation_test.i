@@ -36,6 +36,14 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./sigma_r_theta]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_strain_r_theta]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Functions]
@@ -157,6 +165,20 @@
     index_j = 1
     index_i = 0
   [../]
+  [./sigma_r_theta]
+    type = RedbackPolarTensorMaterialAux
+    variable = sigma_r_theta
+    rank_two_tensor = stress
+    index_j = 1
+    index_i = 0
+  [../]
+  [./epsilon_r_theta]
+    type = RedbackPolarTensorMaterialAux
+    variable = plastic_strain_r_theta
+    rank_two_tensor = plastic_strain
+    index_j = 1
+    index_i = 0
+  [../]
 []
 
 [Materials]
@@ -257,25 +279,10 @@
 []
 
 [Outputs]
-  active = ''
-  exodus = true
-  execute_on = 'timestep_end initial'
+  execute_on = 'initial timestep_end'
   file_base = borehole_test_dmg_1
-  [./csv_p]
-    file_base = borehole_highres_p
-    type = CSV
-  [../]
-  [./csv_s]
-    file_base = borehole_highres_s
-    type = CSV
-  [../]
-  [./csv_t]
-    file_base = borehole_highres_t
-    type = CSV
-  [../]
-  [./exodus]
+  [./my_exodus]
     type = Exodus
-    elemental_as_nodal = true
   [../]
 []
 
