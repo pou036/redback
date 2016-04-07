@@ -36,10 +36,11 @@ Real
 RedbackTotalPorosityAux::computeValue()
 {
   Real total_porosity;
-  // Moose::out << "RedbackTotalPorosityAux::computeValue() at _qp" << _qp << "\n";
-  total_porosity = _initial_porosity[_qp] + _delta_porosity_chem[_qp];
+  // Moose::out << "RedbackTotalPorosityAux::computeValue() at _qp" << _qp <<
+  // "\n";
+  total_porosity = _initial_porosity[ _qp ] + _delta_porosity_chem[ _qp ];
   if (_is_mechanics_on)
-    total_porosity = total_porosity + _delta_porosity_mech[_qp];
+    total_porosity = total_porosity + _delta_porosity_mech[ _qp ];
   total_porosity = fmin(1.0, fmax(0.0, total_porosity));
   return total_porosity;
 }

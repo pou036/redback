@@ -29,6 +29,16 @@ class RedbackMaterial : public Material
 public:
   RedbackMaterial(const InputParameters & parameters);
 
+  /// Static method for use in validParams for getting the continuation method
+  static MooseEnum continuationMethodEnum();
+
+  // various choices to decide which variable to use for continuation
+  enum ContinuationMethod
+  {
+    Gruntfest,
+    Lewis
+  };
+
   /// Static method for use in validParams for getting the density method
   static MooseEnum densityMethodEnum();
 
@@ -53,13 +63,15 @@ protected:
   virtual void computeRedbackTerms();
 
   bool _has_T;
-  VariableValue & _T;
+  const VariableValue & _T;
   bool _has_pore_pres;
-  VariableValue & _pore_pres; //, & _pore_pres_old;
-  VariableValue & _total_porosity;
-  VariableValue & _inverse_lewis_number_tilde;
+  const VariableValue & _pore_pres; //, & _pore_pres_old;
+  const VariableValue & _total_porosity;
+  const VariableValue & _inverse_lewis_number_tilde;
+  const VariableValue & _continuation_parameter; // Coupled scalar variable value
 
-  // functionality to initialise some parameters from function (overwrites initialisation as float)
+  // functionality to initialise some parameters from function (overwrites
+  // initialisation as float)
   std::vector<std::string> _init_from_functions__params;
   std::vector<FunctionName> _init_from_functions__function_names;
   std::vector<Function *> _init_functions;
@@ -127,6 +139,7 @@ protected:
 
   MaterialProperty<Real> & _mixture_density;
 
+  ContinuationMethod _continuation_method;
   DensityMethod _density_method;
   PermeabilityMethod _permeability_method;
 
@@ -137,13 +150,13 @@ protected:
 
   MaterialProperty<Real> & _pressurization_coefficient;
 
-  VariableGradient & _grad_temp;
-  VariableGradient & _grad_pore_pressure;
+  const VariableGradient & _grad_temp;
+  const VariableGradient & _grad_pore_pressure;
   // VariableSecond& _grad_grad_pore_pressure;
 
-  VariableValue & _dispx_dot;
-  VariableValue & _dispy_dot;
-  VariableValue & _dispz_dot;
+  const VariableValue & _dispx_dot;
+  const VariableValue & _dispy_dot;
+  const VariableValue & _dispz_dot;
   MaterialProperty<RealVectorValue> & _solid_velocity;
 
   Real _T0_param, _P0_param;

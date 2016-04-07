@@ -59,7 +59,7 @@ SpacesInAngles:  false
 SpacesInContainerLiterals: true
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
-SpacesInSquareBrackets: false
+SpacesInSquareBrackets: true
 Standard:        Cpp03
 TabWidth:        8
 UseTab:          Never

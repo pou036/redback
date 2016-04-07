@@ -29,7 +29,7 @@ protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
   //VariableValue & _pore_pres;
-  VariableGradient& _grad_pore_pressure;
+  const VariableGradient& _grad_pore_pressure;
   RealVectorValue _fluid_stress_row;
 
 

@@ -7,7 +7,7 @@ ybase = -5;
 y1 = -0.05; //-0.05; // bottom of middle layer
 y2 = 0.05;  //0.05; // top of middle layer
 ymax = 5;
-/****** MESH ***********/
+/****** MESH ************/
 nb_cells_x = 1; // nb cells in X dir along fault
 
 nb_cells_y_top = 10;
@@ -74,7 +74,7 @@ Recombine Surface {14};
 
 //Physical Line must start from 0
 Physical Line(1) = {12};       // bottom (in Y)
-Physical Line(2) = {8,5,2,13}; // right (in X)
+Physical Line(2) = {8,5,2};    // right (in X)
 Physical Line(3) = {9};        // top (in Y)
 Physical Line(4) = {10,7,4};   // left, 3 top layers (in X)
 Physical Line(6) = {11};       // left, base layer (in X)

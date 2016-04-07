@@ -43,16 +43,17 @@ RedbackMassConvection::RedbackMassConvection(const InputParameters & parameters)
 Real
 RedbackMassConvection::computeQpResidual()
 {
-  return _time_factor * _test[_i][_qp] *
-         (_pressure_convective_mass[_qp] * _grad_u[_qp] -
-          _thermal_convective_mass[_qp] * _grad_temp[_qp]); // scalar product done by "*"
+  return _time_factor * _test[ _i ][ _qp ] *
+         (_pressure_convective_mass[ _qp ] * _grad_u[ _qp ] -
+          _thermal_convective_mass[ _qp ] * _grad_temp[ _qp ]); // scalar product done by "*"
 }
 
 Real
 RedbackMassConvection::computeQpJacobian()
 {
   return 0;
-  // return _time_factor*_test[_i][_qp] * (_convective_mass_jac_vec[_qp] * _grad_phi[_j][_qp]
+  // return _time_factor*_test[_i][_qp] * (_convective_mass_jac_vec[_qp] *
+  // _grad_phi[_j][_qp]
   //  + _convective_mass_jac_real[_qp]* _phi[_j][_qp]);// * _phi[_j][_qp];
 }
 
@@ -61,7 +62,8 @@ RedbackMassConvection::computeQpOffDiagJacobian(unsigned int jvar)
 {
   /*if (jvar == _temp_var)
   {
-    return -_time_factor*_test[_i][_qp] * (_convective_mass_off_diag_vec[_qp] * _grad_phi[_j][_qp] +
+    return -_time_factor*_test[_i][_qp] * (_convective_mass_off_diag_vec[_qp] *
+  _grad_phi[_j][_qp] +
   _convective_mass_off_diag_real[_qp]* _phi[_j][_qp]);// * _phi[_j][_qp]);
   }*/
   return 0;

@@ -35,7 +35,8 @@ RedbackMechMaterialElastic::returnMap(const RankTwoTensor & sig_old,
                                       Real & q_y)
 {
   sig = sig_old + E_ijkl * delta_d;
-  dp = RankTwoTensor(); // Plastic rate of deformation tensor in unrotated configuration
+  dp = RankTwoTensor(); // Plastic rate of deformation tensor in unrotated
+                        // configuration
 }
 
 void

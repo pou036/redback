@@ -36,9 +36,9 @@ protected:
 
   const unsigned int _component;
 
-  VariableValue & _fluid_vel_x;
-  VariableValue & _fluid_vel_y;
-  VariableValue & _fluid_vel_z;
+  const VariableValue & _fluid_vel_x;
+  const VariableValue & _fluid_vel_y;
+  const VariableValue & _fluid_vel_z;
 
   const unsigned int _vel_fluid_x_var;
   const unsigned int _vel_fluid_y_var;

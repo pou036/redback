@@ -18,7 +18,7 @@ validParams<RedbackMechMaterialDP>()
 {
   InputParameters params = validParams<RedbackMechMaterial>();
   // TODO: deal with sign of _slope_yield_surface properly in DP case
-  params.addParam<Real>("slope_yield_surface", 0, "Slope of yield surface (positive, see documentation)");
+  params.addParam<Real>("slope_yield_surface", 0, "Slope of yield surface (usually negative)");
 
   return params;
 }
@@ -225,13 +225,13 @@ RedbackMechMaterialDP::formBrittleDamage()
 
   // Kachanov's original law of Brittle Damage
   exponent_kachanov = 1;
-  kachanov = _mises_stress[_qp] / (1 - _damage[_qp]);
+  kachanov = _mises_stress[ _qp ] / (1 - _damage[ _qp ]);
 
   plastic_damage = _damage_coeff * std::pow(kachanov, exponent_kachanov);
   healing_damage = 0;
 
-  _damage_kernel[_qp] = plastic_damage + healing_damage;
-  _damage_kernel_jac[_qp] = 0;
+  _damage_kernel[ _qp ] = plastic_damage + healing_damage;
+  _damage_kernel_jac[ _qp ] = 0;
 }
 
 void
@@ -254,13 +254,13 @@ RedbackMechMaterialDP::formCreepDamage(Real cohesion)
      * lambda_dot = _mises_stress[_qp] * _mises_strain_rate[_qp] / d_yield_dq;
      * but cohesion in J2 plasticity is the mises stress at yield, so we are
      * going with a much simpler form: */
-    lambda_dot = _mises_strain_rate[_qp] / d_yield_dq;
+    lambda_dot = _mises_strain_rate[ _qp ] / d_yield_dq;
   }
   else
     lambda_dot = 0;
 
   plastic_damage = _damage_coeff * lambda_dot;
   healing_damage = 0;
-  _damage_kernel[_qp] = plastic_damage + healing_damage;
-  _damage_kernel_jac[_qp] = 0;
+  _damage_kernel[ _qp ] = plastic_damage + healing_damage;
+  _damage_kernel_jac[ _qp ] = 0;
 }

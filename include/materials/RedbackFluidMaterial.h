@@ -38,17 +38,17 @@ protected:
   virtual void computeRedbackTerms();
 
   bool _has_T;
-  VariableValue & _T;
+  const VariableValue & _T;
   bool _has_pore_pres;
-  VariableValue & _pore_pres;//, & _pore_pres_old;
+  const VariableValue & _pore_pres;//, & _pore_pres_old;
 
-  VariableValue & _fluid_vel_x;
-  VariableValue & _fluid_vel_y;
-  VariableValue & _fluid_vel_z;
+  const VariableValue & _fluid_vel_x;
+  const VariableValue & _fluid_vel_y;
+  const VariableValue & _fluid_vel_z;
 
-  VariableGradient & _grad_fluid_vel_x;
-  VariableGradient & _grad_fluid_vel_y;
-  VariableGradient & _grad_fluid_vel_z;
+  const VariableGradient & _grad_fluid_vel_x;
+  const VariableGradient & _grad_fluid_vel_y;
+  const VariableGradient & _grad_fluid_vel_z;
 
   RealVectorValue _gravity_param;
 
@@ -71,8 +71,8 @@ protected:
   Real _viscosity_ratio_param;//_bulk_viscosity_param, _dynamic_viscosity_param;
   Real _fluid_density_param, _fluid_compressibility_param, _fluid_thermal_expansion_param;
 
-  VariableGradient& _grad_temp;
-  VariableGradient& _grad_pore_pressure;
+  const VariableGradient& _grad_temp;
+  const VariableGradient& _grad_pore_pressure;
 
   Real _T0_param, _P0_param;
 

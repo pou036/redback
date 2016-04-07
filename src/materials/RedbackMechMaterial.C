@@ -153,7 +153,9 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _T_old(_has_T ? coupledValueOld("temperature") : _zero),
     _has_pore_pres(isCoupled("pore_pres")),
     _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
-    _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be coupled! Check that (TODO)
+    _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be
+                                                     // coupled! Check that
+                                                     // (TODO)
     _has_D(isCoupled("damage")),
     //_damage(_has_D ? coupledValue("damage") : _zero),
     //_damage_old(_has_D ? coupledValueOld("damage") : _zero),
@@ -188,7 +190,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
 
   // Choose fill method, hardcoded.
   MooseEnum fill_method = RankFourTensor::fillMethodEnum();
-  fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic elasticity tensor.
+  fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic
+                                       // elasticity tensor.
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int)fill_method);
 }
 
@@ -202,22 +205,33 @@ void
 RedbackMechMaterial::initQpStatefulProperties()
 {
   // called only once at the very beginning of the simulation
-  Material::initQpStatefulProperties();
-  _total_strain[_qp].zero();
-  _elastic_strain[_qp].zero();
-  _stress[_qp].zero();
-  _plastic_strain[_qp].zero();
-  _plastic_strain_old[_qp].zero();
-  _eqv_plastic_strain[_qp] = 0.0;
+  _total_strain[ _qp ].zero();
+  _elastic_strain[ _qp ].zero();
+  _stress[ _qp ].zero();
+  _plastic_strain[ _qp ].zero();
+  _eqv_plastic_strain[ _qp ] = 0.0;
+  _elasticity_tensor[ _qp ].zero();
+  _Jacobian_mult[ _qp ].zero();
+  _strain_rate[ _qp ].zero();
+  _strain_increment[ _qp ].zero();
+  _rotation_increment[ _qp ].zero();
+  _dfgrd[ _qp ].zero();
 
   // Redback properties
-  _mises_stress[_qp] = 0;
-  _mean_stress[_qp] = 0;
-  _mises_strain_rate[_qp] = 0;
-  _volumetric_strain[_qp] = 0;
-  _volumetric_strain_rate[_qp] = 0;
-  _total_volumetric_strain[_qp] = 0;
-  _mechanical_porosity[_qp] = 0;
+  _mises_stress[ _qp ] = 0;
+  _mean_stress[ _qp ] = 0;
+  _mises_strain_rate[ _qp ] = 0;
+  _volumetric_strain[ _qp ] = 0;
+  _volumetric_strain_rate[ _qp ] = 0;
+  _total_volumetric_strain[ _qp ] = 0;
+  _mechanical_porosity[ _qp ] = 0;
+  _poromech_kernel[ _qp ] = 0;
+  _poromech_jac[ _qp ] = 0;
+  _mod_gruntfest_number[ _qp ] = 0;
+  _mechanical_dissipation_mech[ _qp ] = 0;
+  _mechanical_dissipation_jac_mech[ _qp ] = 0;
+  _damage_kernel[ _qp ] = 0;
+  _damage_kernel_jac[ _qp ] = 0;
 }
 
 void
@@ -241,8 +255,8 @@ void
 RedbackMechMaterial::computeQpElasticityTensor()
 {
   // Fill in the matrix stiffness material property
-  _elasticity_tensor[_qp] = _Cijkl * (1 - _damage[_qp]);
-  _Jacobian_mult[_qp] = _Cijkl * (1 - _damage[_qp]);
+  _elasticity_tensor[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
+  _Jacobian_mult[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
 }
 
 void
@@ -259,27 +273,27 @@ RedbackMechMaterial::computeStrain()
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     // Deformation gradient
-    RankTwoTensor A(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]); // Deformation gradient
-    RankTwoTensor Fbar(_grad_disp_x_old[_qp],
-                       _grad_disp_y_old[_qp],
-                       _grad_disp_z_old[_qp]); // Old Deformation gradient
+    RankTwoTensor A(_grad_disp_x[ _qp ], _grad_disp_y[ _qp ], _grad_disp_z[ _qp ]); // Deformation gradient
+    RankTwoTensor Fbar(_grad_disp_x_old[ _qp ],
+                       _grad_disp_y_old[ _qp ],
+                       _grad_disp_z_old[ _qp ]); // Old Deformation gradient
 
-    _dfgrd[_qp] = A;
-    _dfgrd[_qp].addIa(1.0); // Gauss point deformation gradient
+    _dfgrd[ _qp ] = A;
+    _dfgrd[ _qp ].addIa(1.0); // Gauss point deformation gradient
 
     A -= Fbar; // A = gradU - gradUold
 
     Fbar.addIa(1.0); // Fbar = ( I + gradUold)
 
     // Incremental deformation gradient Fhat = I + A Fbar^-1
-    Fhat[_qp] = A * Fbar.inverse();
-    Fhat[_qp].addIa(1.0);
+    Fhat[ _qp ] = A * Fbar.inverse();
+    Fhat[ _qp ].addIa(1.0);
 
     // Calculate average Fhat for volumetric locking correction
-    ave_Fhat += Fhat[_qp] * _JxW[_qp];
-    volume += _JxW[_qp];
+    ave_Fhat += Fhat[ _qp ] * _JxW[ _qp ];
+    volume += _JxW[ _qp ];
 
-    ave_dfgrd_det += _dfgrd[_qp].det() * _JxW[_qp]; // Average deformation gradient
+    ave_dfgrd_det += _dfgrd[ _qp ].det() * _JxW[ _qp ]; // Average deformation gradient
   }
 
   ave_Fhat /= volume;      // This is needed for volumetric locking correction
@@ -287,13 +301,13 @@ RedbackMechMaterial::computeStrain()
 
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    Real factor(std::pow(ave_Fhat.det() / Fhat[_qp].det(), 1.0 / 3.0));
-    Fhat[_qp] *= factor; // Finalize volumetric locking correction
+    Real factor(std::pow(ave_Fhat.det() / Fhat[ _qp ].det(), 1.0 / 3.0));
+    Fhat[ _qp ] *= factor; // Finalize volumetric locking correction
 
-    computeQpStrain(Fhat[_qp]);
+    computeQpStrain(Fhat[ _qp ]);
 
-    factor = std::pow(ave_dfgrd_det / _dfgrd[_qp].det(), 1.0 / 3.0); // Volumetric locking correction
-    _dfgrd[_qp] *= factor;                                           // Volumetric locking correction
+    factor = std::pow(ave_dfgrd_det / _dfgrd[ _qp ].det(), 1.0 / 3.0); // Volumetric locking correction
+    _dfgrd[ _qp ] *= factor;                                           // Volumetric locking correction
   }
 }
 
@@ -310,49 +324,51 @@ RedbackMechMaterial::computeQpStress()
   Real p_y, q_y; // volumetric (p) and deviatoric (q) projections of yield stress
 
   // Obtain previous plastic rate of deformation tensor
-  dp = _plastic_strain_old[_qp];
+  dp = _plastic_strain_old[ _qp ];
 
   // Solve J2 plastic constitutive equations based on current strain increment
   // Returns current  stress and plastic rate of deformation tensor
-  _returnmap_iter[_qp] = 0;
-  returnMap(_stress_old[_qp], _strain_increment[_qp], _elasticity_tensor[_qp], dp, sig, p_y, q_y);
-  _stress[_qp] = sig;
+  _returnmap_iter[ _qp ] = 0;
+  returnMap(_stress_old[ _qp ], _strain_increment[ _qp ], _elasticity_tensor[ _qp ], dp, sig, p_y, q_y);
+  _stress[ _qp ] = sig;
 
   // Rotate the stress to the current configuration
-  _stress[_qp] = _rotation_increment[_qp] * _stress[_qp] * _rotation_increment[_qp].transpose();
+  _stress[ _qp ] = _rotation_increment[ _qp ] * _stress[ _qp ] * _rotation_increment[ _qp ].transpose();
 
   // Updates current plastic rate of deformation tensor
-  _plastic_strain[_qp] = dp;
+  _plastic_strain[ _qp ] = dp;
 
   // Evaluate and update current equivalent and volumetric plastic strain
-  _eqv_plastic_strain[_qp] = std::pow(2.0 / 3.0, 0.5) * dp.L2norm();
-  _volumetric_strain[_qp] = dp.trace();
+  _eqv_plastic_strain[ _qp ] = std::pow(2.0 / 3.0, 0.5) * dp.L2norm();
+  _volumetric_strain[ _qp ] = dp.trace();
 
   // Calculate elastic strain increment
-  RankTwoTensor delta_ee = _strain_increment[_qp] - (_plastic_strain[_qp] - _plastic_strain_old[_qp]);
+  RankTwoTensor delta_ee = _strain_increment[ _qp ] - (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]);
 
   // Update elastic strain tensor in intermediate configuration
-  _elastic_strain[_qp] = _elastic_strain_old[_qp] + delta_ee;
+  _elastic_strain[ _qp ] = _elastic_strain_old[ _qp ] + delta_ee;
   // thermoelasticity
   //_elastic_strain[_qp].addIa(_solid_thermal_expansion[_qp]*(_T[_qp] -
   //_T0_param));
 
   // Rotate elastic strain tensor to the current configuration
-  _elastic_strain[_qp] = _rotation_increment[_qp] * _elastic_strain[_qp] * _rotation_increment[_qp].transpose();
+  _elastic_strain[ _qp ] =
+    _rotation_increment[ _qp ] * _elastic_strain[ _qp ] * _rotation_increment[ _qp ].transpose();
 
   // Rotate to plastic rate of deformation tensor the current configuration
-  _plastic_strain[_qp] = _rotation_increment[_qp] * _plastic_strain[_qp] * _rotation_increment[_qp].transpose();
+  _plastic_strain[ _qp ] =
+    _rotation_increment[ _qp ] * _plastic_strain[ _qp ] * _rotation_increment[ _qp ].transpose();
 
   // Update strain in intermediate configuration
-  _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
+  _total_strain[ _qp ] = _total_strain_old[ _qp ] + _strain_increment[ _qp ];
   /*RankTwoTensor grad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp],
   _grad_disp_z[_qp]);
   RankTwoTensor total_strain_small_deformation = ( grad_tensor +
   grad_tensor.transpose() )/2.0;*/
 
   // Rotate strain to current configuration
-  _total_strain[_qp] = _rotation_increment[_qp] * _total_strain[_qp] * _rotation_increment[_qp].transpose();
-  _total_volumetric_strain[_qp] = _total_strain[_qp].trace();
+  _total_strain[ _qp ] = _rotation_increment[ _qp ] * _total_strain[ _qp ] * _rotation_increment[ _qp ].transpose();
+  _total_volumetric_strain[ _qp ] = _total_strain[ _qp ].trace();
 
   // Compute the energy dissipation and the properties declared
   computeRedbackTerms(sig, q_y, p_y);
@@ -376,7 +392,7 @@ RedbackMechMaterial::getYieldStress(const Real eqpe)
 
   nsize = _yield_stress_vector.size();
 
-  if (_yield_stress_vector[0] > 0.0 || nsize % 2 > 0) // Error check for input inconsitency
+  if (_yield_stress_vector[ 0 ] > 0.0 || nsize % 2 > 0) // Error check for input inconsitency
     mooseError("Error in yield stress input: Should be a vector with eqv "
                "plastic strain and yield stress pair values.\n");
 
@@ -385,18 +401,18 @@ RedbackMechMaterial::getYieldStress(const Real eqpe)
 
   while (ind < nsize)
   {
-    if (std::abs(eqpe - _yield_stress_vector[ind]) < tol)
-      return _yield_stress_vector[ind + 1];
+    if (std::abs(eqpe - _yield_stress_vector[ ind ]) < tol)
+      return _yield_stress_vector[ ind + 1 ];
 
     if (ind + 2 < nsize)
     {
-      if (eqpe > _yield_stress_vector[ind] && eqpe < _yield_stress_vector[ind + 2])
-        return _yield_stress_vector[ind + 1] +
-               (eqpe - _yield_stress_vector[ind]) / (_yield_stress_vector[ind + 2] - _yield_stress_vector[ind]) *
-                 (_yield_stress_vector[ind + 3] - _yield_stress_vector[ind + 1]);
+      if (eqpe > _yield_stress_vector[ ind ] && eqpe < _yield_stress_vector[ ind + 2 ])
+        return _yield_stress_vector[ ind + 1 ] +
+               (eqpe - _yield_stress_vector[ ind ]) / (_yield_stress_vector[ ind + 2 ] - _yield_stress_vector[ ind ]) *
+                 (_yield_stress_vector[ ind + 3 ] - _yield_stress_vector[ ind + 1 ]);
     }
     else
-      return _yield_stress_vector[nsize - 1];
+      return _yield_stress_vector[ nsize - 1 ];
 
     ind += 2;
   }
@@ -427,8 +443,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   // Material::computeRedbackTerms();
 
   // Compute stresses
-  _mises_stress[_qp] = getSigEqv(sig);
-  _mean_stress[_qp] = sig.trace() / 3.0;
+  _mises_stress[ _qp ] = getSigEqv(sig);
+  _mean_stress[ _qp ] = sig.trace() / 3.0;
 
   // Compute plastic strains
   RankTwoTensor instantaneous_strain_rate, total_volumetric_strain_rate;
@@ -439,24 +455,25 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   }
   else
   {
-    instantaneous_strain_rate = (_plastic_strain[_qp] - _plastic_strain_old[_qp]) / _dt;
+    instantaneous_strain_rate = (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]) / _dt;
   }
-  total_volumetric_strain_rate = (_total_strain[_qp] - _total_strain_old[_qp]) / _dt;
-  _mises_strain_rate[_qp] = std::pow(2.0 / 3.0, 0.5) * instantaneous_strain_rate.L2norm();
-  _volumetric_strain_rate[_qp] = total_volumetric_strain_rate.trace();
-  def_grad = _grad_disp_x[_qp](0) + _grad_disp_y[_qp](1) + _grad_disp_z[_qp](2);
-  def_grad_old = _grad_disp_x_old[_qp](0) + _grad_disp_y_old[_qp](1) + _grad_disp_z_old[_qp](2);
+  total_volumetric_strain_rate = (_total_strain[ _qp ] - _total_strain_old[ _qp ]) / _dt;
+  _mises_strain_rate[ _qp ] = std::pow(2.0 / 3.0, 0.5) * instantaneous_strain_rate.L2norm();
+  _volumetric_strain_rate[ _qp ] = total_volumetric_strain_rate.trace();
+  def_grad = _grad_disp_x[ _qp ](0) + _grad_disp_y[ _qp ](1) + _grad_disp_z[ _qp ](2);
+  def_grad_old = _grad_disp_x_old[ _qp ](0) + _grad_disp_y_old[ _qp ](1) + _grad_disp_z_old[ _qp ](2);
   def_grad_rate = (def_grad - def_grad_old) / _dt;
 
   // Update mechanical porosity (elastic and plastic components)
   // TODO: set T0 properly (once only, at the very beginning). Until then, T = T
   // - T0, P = P - P0
-  delta_phi_mech_el = (1.0 - _total_porosity[_qp]) * (_solid_compressibility[_qp] * (_pore_pres[_qp] - _P0_param) -
-                                                      _solid_thermal_expansion[_qp] * (_T[_qp] - _T0_param) +
-                                                      (_elastic_strain[_qp] - _elastic_strain_old[_qp]).trace());
-  delta_phi_mech_pl = (1.0 - _total_porosity[_qp]) * (_plastic_strain[_qp] - _plastic_strain_old[_qp]).trace();
+  delta_phi_mech_el =
+    (1.0 - _total_porosity[ _qp ]) * (_solid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
+                                      _solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param) +
+                                      (_elastic_strain[ _qp ] - _elastic_strain_old[ _qp ]).trace());
+  delta_phi_mech_pl = (1.0 - _total_porosity[ _qp ]) * (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]).trace();
 
-  _mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
+  _mechanical_porosity[ _qp ] = delta_phi_mech_el + delta_phi_mech_pl;
 
   // formulate the Taylor-Quinney coefficient and Gruntfest numbers for the case
   // of damage
@@ -464,7 +481,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
   if (_has_D)
   {
-    _mechanical_porosity[_qp] += std::pow(_damage[_qp], 3 / 2);
+    _mechanical_porosity[ _qp ] += std::pow(_damage[ _qp ], 3 / 2);
 
     switch (_damage_method)
     {
@@ -487,13 +504,14 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
     form_damage_kernels(q_y);
   }
 
-  gruntfest_number = _gr[_qp] * std::exp(_ar[_qp]);
+  gruntfest_number = _gr[ _qp ] * std::exp(_ar[ _qp ]);
 
   // Compute Mechanical Dissipation.
-  _mechanical_dissipation_mech[_qp] = gruntfest_number * sig.doubleContraction(instantaneous_strain_rate) +
-                                      _damage_dissipation; // The negative sign in damage dissipation is according
-                                                           // to thermodynamics with internal state variables (see
-                                                           // Rosakis et al, 2000)
+  _mechanical_dissipation_mech[ _qp ] = gruntfest_number * sig.doubleContraction(instantaneous_strain_rate) +
+                                        _damage_dissipation; // The negative sign in damage dissipation is
+                                                             // according
+                                                             // to thermodynamics with internal state variables (see
+                                                             // Rosakis et al, 2000)
   /* The following loop can ensure positive mechanical dissipation.
    * if (_mechanical_dissipation_mech[_qp] < 0)
   {
@@ -501,18 +519,18 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   }*/
 
   // Compute Mechanical Dissipation Jacobian
-  _mechanical_dissipation_jac_mech[_qp] =
-    _mechanical_dissipation_mech[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
+  _mechanical_dissipation_jac_mech[ _qp ] =
+    _mechanical_dissipation_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
 
-  _poromech_kernel[_qp] = def_grad_rate * _peclet_number[_qp] / _mixture_compressibility[_qp];
-  _poromech_jac[_qp] = (1 / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]));
+  _poromech_kernel[ _qp ] = def_grad_rate * _peclet_number[ _qp ] / _mixture_compressibility[ _qp ];
+  _poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO:
   // Remove this number from the tests!!!
-  _mod_gruntfest_number[_qp] =
-    gruntfest_number * std::exp(-_ar[_qp]) *
+  _mod_gruntfest_number[ _qp ] =
+    gruntfest_number * std::exp(-_ar[ _qp ]) *
     (std::fabs(getSigEqv(sig) * std::pow(macaulayBracket(getSigEqv(sig) / q_y - 1.0), _exponent)) +
-     std::fabs(_mean_stress[_qp] * std::pow(macaulayBracket(_mean_stress[_qp] - p_y), _exponent)));
+     std::fabs(_mean_stress[ _qp ] * std::pow(macaulayBracket(_mean_stress[ _qp ] - p_y), _exponent)));
 
   return;
 }
@@ -528,7 +546,7 @@ RedbackMechMaterial::computeQpStrain(const RankTwoTensor & Fhat)
 
   // strain rate D from Taylor expansion, Chat = (-1/2(Chat^-1 - I) +
   // 1/4*(Chat^-1 - I)^2 + ...
-  _strain_increment[_qp] = -Cinv_I * 0.5 + Cinv_I * Cinv_I * 0.25;
+  _strain_increment[ _qp ] = -Cinv_I * 0.5 + Cinv_I * Cinv_I * 0.25;
 
   /* This line calculates the thermo-elastic strain in incremental form, as
    * follows :
@@ -540,7 +558,7 @@ RedbackMechMaterial::computeQpStrain(const RankTwoTensor & Fhat)
    * The negative sign is to satisfy the sign convention Redback has adopted
    * (positive fields in extension)
    */
-  _strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp] * (_T[_qp] - _T_old[_qp]));
+  _strain_increment[ _qp ].addIa(-_solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T_old[ _qp ]));
 
   /*RankTwoTensor Chat = Fhat.transpose()*Fhat;
   RankTwoTensor A = Chat;
@@ -550,17 +568,17 @@ RedbackMechMaterial::computeQpStrain(const RankTwoTensor & Fhat)
   B.addIa(-0.75);
   _strain_increment[_qp] = -B*A;*/
 
-  RankTwoTensor D = _strain_increment[_qp] / _dt;
-  _strain_rate[_qp] = D;
+  RankTwoTensor D = _strain_increment[ _qp ] / _dt;
+  _strain_rate[ _qp ] = D;
 
   // Calculate rotation R_incr
   RankTwoTensor invFhat(Fhat.inverse());
 
   std::vector<Real> a(3);
-  a[0] = invFhat(1, 2) - invFhat(2, 1);
-  a[1] = invFhat(2, 0) - invFhat(0, 2);
-  a[2] = invFhat(0, 1) - invFhat(1, 0);
-  Real q = (a[0] * a[0] + a[1] * a[1] + a[2] * a[2]) / 4.0;
+  a[ 0 ] = invFhat(1, 2) - invFhat(2, 1);
+  a[ 1 ] = invFhat(2, 0) - invFhat(0, 2);
+  a[ 2 ] = invFhat(0, 1) - invFhat(1, 0);
+  Real q = (a[ 0 ] * a[ 0 ] + a[ 1 ] * a[ 1 ] + a[ 2 ] * a[ 2 ]) / 4.0;
   Real trFhatinv_1 = invFhat.trace() - 1.0;
   Real p = trFhatinv_1 * trFhatinv_1 / 4.0;
   // Real y = 1.0/((q + p)*(q + p)*(q + p));
@@ -590,15 +608,15 @@ RedbackMechMaterial::computeQpStrain(const RankTwoTensor & Fhat)
   R_incr.addIa(C1);
   for (unsigned int i = 0; i < 3; ++i)
     for (unsigned int j = 0; j < 3; ++j)
-      R_incr(i, j) += C2 * a[i] * a[j];
+      R_incr(i, j) += C2 * a[ i ] * a[ j ];
 
-  R_incr(0, 1) += C3 * a[2];
-  R_incr(0, 2) -= C3 * a[1];
-  R_incr(1, 0) -= C3 * a[2];
-  R_incr(1, 2) += C3 * a[0];
-  R_incr(2, 0) += C3 * a[1];
-  R_incr(2, 1) -= C3 * a[0];
-  _rotation_increment[_qp] = R_incr.transpose();
+  R_incr(0, 1) += C3 * a[ 2 ];
+  R_incr(0, 2) -= C3 * a[ 1 ];
+  R_incr(1, 0) -= C3 * a[ 2 ];
+  R_incr(1, 2) += C3 * a[ 0 ];
+  R_incr(2, 0) += C3 * a[ 1 ];
+  R_incr(2, 1) -= C3 * a[ 0 ];
+  _rotation_increment[ _qp ] = R_incr.transpose();
 }
 
 Real
@@ -628,7 +646,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   // Real volumetric_plastic_strain;
   Real yield_stress, yield_stress_prev;
 
-  tol1 = 1e-10; // TODO: expose to user interface and/or make the tolerance relative
+  tol1 = 1e-10; // TODO: expose to user interface and/or make the tolerance
+                // relative
   tol3 = 1e-6;  // TODO: expose to user interface and/or make the tolerance relative
   err3 = 1.1 * tol3;
   iterisohard = 0;
@@ -644,14 +663,15 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   if (_has_T)
   {
     // E_0/(RT) = Ar/(1+delta T*)
-    _exponential = std::exp(-_ar[_qp]) * std::exp(_ar[_qp] * _delta[_qp] * _T[_qp] / (1 + _delta[_qp] * _T[_qp]));
+    _exponential =
+      std::exp(-_ar[ _qp ]) * std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
   }
 
   // The following expression should be further pursued for a forward
   // physics-based model
-  _exponential = _exponential *
-                 std::exp(-_alpha_1[_qp] * _confining_pressure[_qp] -
-                          _pore_pres[_qp] * _alpha_2[_qp] * (1 + _alpha_3[_qp] * std::log(_confining_pressure[_qp])));
+  _exponential = _exponential * std::exp(-_alpha_1[ _qp ] * _confining_pressure[ _qp ] -
+                                         _pore_pres[ _qp ] * _alpha_2[ _qp ] *
+                                           (1 + _alpha_3[ _qp ] * std::log(_confining_pressure[ _qp ])));
 
   while (err3 > tol3 && iterisohard < maxiterisohard) // Hardness update iteration
   {
@@ -694,7 +714,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
       flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
       if (flow_incr < 0.0) // negative flow increment not allowed
-        mooseError("Constitutive Error-Negative flow increment: Reduce time increment.");
+        mooseError("Constitutive Error-Negative flow increment: Reduce time "
+                   "increment.");
       getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
       flow_tensor *= flow_incr;
       resid = flow_tensor - delta_dp; // Residual
@@ -704,7 +725,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
       mooseError("Constitutive Error-Too many iterations: Reduce time "
                  "increment.\n"); // Convergence failure //TODO: check the
                                   // adaptive time stepping
-    _returnmap_iter[_qp] = iter;
+    _returnmap_iter[ _qp ] = iter;
 
     dpn = dp + delta_dp;
     eqvpstrain = std::pow(2.0 / 3.0, 0.5) * dpn.L2norm();
@@ -725,8 +746,8 @@ void
 RedbackMechMaterial::get_py_qy_damaged(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
 {
   get_py_qy(p, q, p_y, q_y, yield_stress);
-  p_y *= (1 - _damage[_qp]);
-  q_y *= (1 - _damage[_qp]);
+  p_y *= (1 - _damage[ _qp ]);
+  q_y *= (1 - _damage[ _qp ]);
 }
 
 void
@@ -759,15 +780,15 @@ RedbackMechMaterial::formDamageDissipation(RankTwoTensor & sig)
     _youngs_modulus * _poisson_ratio / (1 + _poisson_ratio) / (1 - 2 * _poisson_ratio); // First Lame modulus
   shear_modulus = 0.5 * _youngs_modulus / (1 + _poisson_ratio);                         // Second Lame modulus (shear)
 
-  vol_elastic_strain = _elastic_strain[_qp].trace();
-  dev_elastic_strain = std::pow(2.0 / 3.0, 0.5) * _elastic_strain[_qp].L2norm();
+  vol_elastic_strain = _elastic_strain[ _qp ].trace();
+  dev_elastic_strain = std::pow(2.0 / 3.0, 0.5) * _elastic_strain[ _qp ].L2norm();
 
   Psi0_vol = (2 / 3) * bulk_modulus * std::pow(vol_elastic_strain, 2);
   Psi0_dev = (3 / 2) * shear_modulus * std::pow(dev_elastic_strain, 2);
   Psi0 = Psi0_vol + Psi0_dev;
 
-  damage_potential = (1 - _damage[_qp]) * Psi0;
-  damage_rate = (_damage[_qp] - _damage_old[_qp]) / _dt;
+  damage_potential = (1 - _damage[ _qp ]) * Psi0;
+  damage_rate = (_damage[ _qp ] - _damage_old[ _qp ]) / _dt;
 
   // _damage_dissipation is equal to (- d Psi / d D * D_dot) which in this code
   // is (damage_potential * damage_rate)
