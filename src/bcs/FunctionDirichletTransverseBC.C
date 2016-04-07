@@ -46,10 +46,10 @@ FunctionDirichletTransverseBC::computeQpValue()
   Real x = (*_current_node)(0);
   Real y = (*_current_node)(1);
   Real z = (*_current_node)(2);
-  Real radius = 0.3;
+  Real radius = std::sqrt((x-_center(0))*(x-_center(0))+(y-_center(1))*(y-_center(1))); //assuming the axis is z direction;
   Real new_x = x + _u[_qp];
   Real old_angle = std::acos(x/radius)*(y <0 ? -1: 1);
-  Real new_angle = old_angle + _angular_velocity*_t;
+  Real new_angle = old_angle + _angular_velocity*_func.value(_t, *_current_node)*_t;
 
   Real point_id = _current_node->id();
   /*if ((z>0.1) && (_dir_index==0))
@@ -76,7 +76,7 @@ FunctionDirichletTransverseBC::computeQpValue()
   {
     Real current_x = x + _u_old[_qp];
     Real current_angle = std::acos(current_x/radius)*(y <0 ? -1: 1);
-    Real new_angle = current_angle + _angular_velocity*_dt;
+    Real new_angle = current_angle + _angular_velocity*_func.value(_t, *_current_node)*_dt;
     return radius*std::cos(new_angle) - x;
     //return _center(0) + (x-_center(0))*std::cos(_angular_velocity*_t) - (y-_center(1))*std::sin(_angular_velocity*_t)-x;
 
@@ -104,10 +104,10 @@ FunctionDirichletTransverseBC::computeQpValue()
   {
     Real current_y = y + _u_old[_qp];
     Real current_angle = (x <0 ? libMesh::pi - std::asin(current_y/radius): std::asin(current_y/radius));
-    Real new_angle = current_angle + _angular_velocity*_dt;
+    Real new_angle = current_angle + _angular_velocity*_func.value(_t, *_current_node)*_dt;
     return radius*std::sin(new_angle) - y;
     //return _center(1) + (y-_center(1))*std::cos(_angular_velocity*_t) + (x-_center(0))*std::sin(_angular_velocity*_t)-y;
-    
+
     /*if ((point_id == 2)||(point_id == 3)||(point_id == 17))
       return radius*std::sin(0*2*libMesh::pi/9.0 + _angular_velocity*_t) - radius*std::sin(0*2*libMesh::pi/9.0);
     else if ((point_id == 6)||(point_id == 7)||(point_id == 19))

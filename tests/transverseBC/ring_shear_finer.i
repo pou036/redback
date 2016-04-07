@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = Cylinder_hollow_reg.msh
+  file = Cylinder_hollow_reg_fine.msh
   dim = 2
 []
 
@@ -154,7 +154,7 @@
     center = '0 0 0'
     dir_index = 0
     axis = '0 0 1'
-    angular_velocity = 5
+    angular_velocity = 2
   [../]
   [./central_disp_y]
     type = FunctionDirichletTransverseBC
@@ -164,7 +164,7 @@
     center = '0 0 0'
     dir_index = 1
     axis = '0 0 1'
-    angular_velocity = 5
+    angular_velocity = 2
   [../]
 []
 
@@ -385,7 +385,7 @@
 []
 
 [Postprocessors]
-  active = 'solid_ratio_middle mises_stress_centre strain_rate_middle middle_press Lewis_middle porosity_middle middle_temp dx_point2 dy_point2 r_square_pp'
+  active = 'solid_ratio_middle mises_stress_centre dx_point2 dy_point2 r_square_pp'
   [./middle_temp]
     type = PointValue
     variable = temp
@@ -446,7 +446,7 @@
   # Preconditioned JFNK (default)
   start_time = 0.0
   end_time = 100
-  num_steps = 3
+  num_steps = 20
   dtmax = 1
   dtmin = 1e-7
   type = Transient
