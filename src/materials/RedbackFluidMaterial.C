@@ -87,7 +87,7 @@ RedbackFluidMaterial::RedbackFluidMaterial(const InputParameters & parameters) :
     _pressure_convective_mass(declareProperty<RealVectorValue>("pressure_convective_mass")),
     _fluid_stress(declareProperty<RankTwoTensor>("fluid_stress")),
 
-    //_Jacobian_fluid_mult(declareProperty<ElasticityTensorR4>("Jacobian_fluid_mult")),
+    //_Jacobian_fluid_mult(declareProperty<RankFourTensor>("Jacobian_fluid_mult")),
 
     _viscosity_ratio_param(getParam<Real>("viscosity_ratio")),
     //_bulk_viscosity_param(getParam<Real>("bulk_viscosity")),
