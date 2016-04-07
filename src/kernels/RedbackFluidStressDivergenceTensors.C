@@ -2,15 +2,18 @@
 
 #include "Material.h"
 
-template<>
-InputParameters validParams<RedbackFluidStressDivergenceTensors>()
+template <>
+InputParameters
+validParams<RedbackFluidStressDivergenceTensors>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addRequiredParam<unsigned int>("component", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
+  params.addRequiredParam<unsigned int>(
+    "component",
+    "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addRequiredCoupledVar("fluid_vel_x", "The x-component of fluid velocity");
   params.addRequiredCoupledVar("fluid_vel_y", "The y-component of fluid velocity");
   params.addCoupledVar("fluid_vel_z", 0.0, "The z-component of fluid velocity");
-  //params.addRequiredCoupledVar("temp", 0.0, "The temperature");
+  // params.addRequiredCoupledVar("temp", 0.0, "The temperature");
   params.addRequiredCoupledVar("pore_pres", "The pore fluid pressure");
 
   // Using the displaced mesh will be set in the solid mechanics action input now.
@@ -18,7 +21,6 @@ InputParameters validParams<RedbackFluidStressDivergenceTensors>()
 
   return params;
 }
-
 
 RedbackFluidStressDivergenceTensors::RedbackFluidStressDivergenceTensors(const InputParameters & parameters) :
     Kernel(parameters),
@@ -50,31 +52,35 @@ RedbackFluidStressDivergenceTensors::RedbackFluidStressDivergenceTensors(const I
 Real
 RedbackFluidStressDivergenceTensors::computeQpResidual()
 {
-    return (_fluid_stress[_qp].row(_component))* _grad_test[_i][_qp] / (_reynolds_number[_qp]*_fluid_density[_qp])
-          + (_grad_pore_pressure[_qp](_component)/_fluid_density[_qp] - _gravity_term[_qp](_component))*_test[_i][_qp];
+  return (_fluid_stress[ _qp ].row(_component)) * _grad_test[ _i ][ _qp ] /
+           (_reynolds_number[ _qp ] * _fluid_density[ _qp ]) +
+         (_grad_pore_pressure[ _qp ](_component) / _fluid_density[ _qp ] - _gravity_term[ _qp ](_component)) *
+           _test[ _i ][ _qp ];
 }
 
 Real
 RedbackFluidStressDivergenceTensors::computeQpJacobian()
 {
-  return  1/_reynolds_number[_qp] * (_grad_phi[_j][_qp]             * _grad_test[_i][_qp] +
-                  //                   _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component));
-                                 1/3*_grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component) + //input of div u
-               _viscosity_ratio[_qp]*_grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component));
+  return 1 / _reynolds_number[ _qp ] *
+         (_grad_phi[ _j ][ _qp ] * _grad_test[ _i ][ _qp ] +
+          //                   _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component));
+          1 / 3 * _grad_phi[ _j ][ _qp ](_component)*_grad_test[ _i ][ _qp ](_component) + // input of div u
+          _viscosity_ratio[ _qp ] * _grad_phi[ _j ][ _qp ](_component)*_grad_test[ _i ][ _qp ](_component));
 }
 
 Real
 RedbackFluidStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _vel_fluid_x_var)
-    return 1/_reynolds_number[_qp]*_grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](0);
+    return 1 / _reynolds_number[ _qp ] * _grad_phi[ _j ][ _qp ](_component)*_grad_test[ _i ][ _qp ](0);
   else if (jvar == _vel_fluid_y_var)
-    return 1/_reynolds_number[_qp]*_grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](1);
+    return 1 / _reynolds_number[ _qp ] * _grad_phi[ _j ][ _qp ](_component)*_grad_test[ _i ][ _qp ](1);
   else if (jvar == _vel_fluid_z_var)
-    return 1/_reynolds_number[_qp]*_grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](2);
+    return 1 / _reynolds_number[ _qp ] * _grad_phi[ _j ][ _qp ](_component)*_grad_test[ _i ][ _qp ](2);
   // Porepressure term
   else if (jvar == _porepressure_var)
-    return _grad_phi[_j][_qp](_component)*_test[_i][_qp];
+    return _grad_phi[ _j ][ _qp ](_component)*_test[ _i ][ _qp ];
 
-  else return 0;
+  else
+    return 0;
 }

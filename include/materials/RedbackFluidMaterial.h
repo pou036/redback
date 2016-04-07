@@ -20,17 +20,16 @@
 #include "RankTwoTensor.h"
 #include "ElasticityTensorR4.h"
 
-//Forward Declarations
+// Forward Declarations
 class RedbackFluidMaterial;
 
-template<>
+template <>
 InputParameters validParams<RedbackFluidMaterial>();
 
 class RedbackFluidMaterial : public Material
 {
 public:
   RedbackFluidMaterial(const InputParameters & parameters);
-
 
 protected:
   virtual void stepInitQpProperties();
@@ -40,7 +39,7 @@ protected:
   bool _has_T;
   const VariableValue & _T;
   bool _has_pore_pres;
-  const VariableValue & _pore_pres;//, & _pore_pres_old;
+  const VariableValue & _pore_pres; //, & _pore_pres_old;
 
   const VariableValue & _fluid_vel_x;
   const VariableValue & _fluid_vel_y;
@@ -52,7 +51,7 @@ protected:
 
   RealVectorValue _gravity_param;
 
-  Real _peclet_number_param,_reynolds_number_param,_froude_number_param;
+  Real _peclet_number_param, _reynolds_number_param, _froude_number_param;
 
   MaterialProperty<RealVectorValue> & _gravity_term;
   MaterialProperty<Real> & _fluid_density;
@@ -66,18 +65,17 @@ protected:
   MaterialProperty<RealVectorValue> & _thermal_convective_mass;
   MaterialProperty<RealVectorValue> & _pressure_convective_mass;
   MaterialProperty<RankTwoTensor> & _fluid_stress;
-  //MaterialProperty<ElasticityTensorR4> & _Jacobian_fluid_mult;
+  // MaterialProperty<ElasticityTensorR4> & _Jacobian_fluid_mult;
 
-  Real _viscosity_ratio_param;//_bulk_viscosity_param, _dynamic_viscosity_param;
+  Real _viscosity_ratio_param; //_bulk_viscosity_param, _dynamic_viscosity_param;
   Real _fluid_density_param, _fluid_compressibility_param, _fluid_thermal_expansion_param;
 
-  const VariableGradient& _grad_temp;
-  const VariableGradient& _grad_pore_pressure;
+  const VariableGradient & _grad_temp;
+  const VariableGradient & _grad_pore_pressure;
 
   Real _T0_param, _P0_param;
 
-  //MaterialProperty<Real> & _Re;
-
+  // MaterialProperty<Real> & _Re;
 };
 
-#endif //REDBACKFLUIDMATERIAL_H
+#endif // REDBACKFLUIDMATERIAL_H

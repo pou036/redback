@@ -19,9 +19,8 @@
 
 class RedbackFluidDivergence;
 
-template<>
+template <>
 InputParameters validParams<RedbackFluidDivergence>();
-
 
 class RedbackFluidDivergence : public Kernel
 {
@@ -44,6 +43,5 @@ private:
   unsigned _y_vel_var_number;
   unsigned _z_vel_var_number;
 };
-
 
 #endif /* REDBACKFLUIDDIVERGENCE_H */

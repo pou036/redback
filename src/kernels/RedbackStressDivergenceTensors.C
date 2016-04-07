@@ -42,7 +42,8 @@ RedbackStressDivergenceTensors::RedbackStressDivergenceTensors(const InputParame
     _pore_pres(coupledValue("pore_pres")),
 
     _stress(getMaterialProperty<RankTwoTensor>("stress" + getParam<std::string>("appended_property_name"))),
-    _Jacobian_mult(getMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
+    _Jacobian_mult(
+      getMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
     // _d_stress_dT(getMaterialProperty<RankTwoTensor>("d_stress_dT"+
     // getParam<std::string>("appended_property_name"))),
     _component(getParam<unsigned int>("component")),

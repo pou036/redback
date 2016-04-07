@@ -19,9 +19,8 @@
 
 class RedbackNavier;
 
-template<>
+template <>
 InputParameters validParams<RedbackNavier>();
-
 
 class RedbackNavier : public Kernel
 {
@@ -47,6 +46,5 @@ protected:
 private:
   Real _time_factor;
 };
-
 
 #endif /* REDBACKNAVIER_H */
