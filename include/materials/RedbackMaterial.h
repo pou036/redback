@@ -29,6 +29,16 @@ class RedbackMaterial : public Material
 public:
   RedbackMaterial(const InputParameters & parameters);
 
+  /// Static method for use in validParams for getting the continuation method
+  static MooseEnum continuationMethodEnum();
+
+  // various choices to decide which variable to use for continuation
+  enum ContinuationMethod
+  {
+    Gruntfest,
+    Lewis
+  };
+
   /// Static method for use in validParams for getting the density method
   static MooseEnum densityMethodEnum();
 
@@ -60,6 +70,7 @@ protected:
   const VariableValue & _total_porosity;
   const VariableValue & _inverse_lewis_number_tilde;
   const VariableValue & _concentration;
+  const VariableValue & _continuation_parameter; // Coupled scalar variable value
 
   // functionality to initialise some parameters from function (overwrites
   // initialisation as float)
@@ -130,6 +141,7 @@ protected:
 
   MaterialProperty<Real> & _mixture_density;
 
+  ContinuationMethod _continuation_method;
   DensityMethod _density_method;
   PermeabilityMethod _permeability_method;
 

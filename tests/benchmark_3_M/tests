@@ -17,7 +17,7 @@
   [./test_3_M_CC_anisotropic0] # can't put a dot in that name!
     type = 'CSVDiff'
     input = 'bench_CC_anisotropic0.i' # with value of alpha=0 (to compare with CC)
-    csvdiff = 'bench_CC_out.csv'
+    csvdiff = 'bench_CC_anisotropic0_out.csv'
   [../]
   [./test_3_M_CC_anisotropic1] # can't put a dot in that name!
     type = 'CSVDiff'

@@ -216,11 +216,11 @@ RedbackMechMaterial::initQpStatefulProperties()
   _plastic_strain[ _qp ].zero();
   _eqv_plastic_strain[ _qp ] = 0.0;
   _elasticity_tensor[ _qp ].zero();
-  _Jacobian_mult[_qp].zero();
-  _strain_rate[_qp].zero();
-  _strain_increment[_qp].zero();
-  _rotation_increment[_qp].zero();
-  _dfgrd[_qp].zero();
+  _Jacobian_mult[ _qp ].zero();
+  _strain_rate[ _qp ].zero();
+  _strain_increment[ _qp ].zero();
+  _rotation_increment[ _qp ].zero();
+  _dfgrd[ _qp ].zero();
 
   // Redback properties
   _mises_stress[ _qp ] = 0;
