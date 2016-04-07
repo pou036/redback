@@ -50,6 +50,10 @@
 // Scalar Kernels
 #include "RedbackContinuation.h"
 
+// Dirac Kernels
+#include "FunctionPointSource.h"
+
+
 // Materials
 #include "RedbackFluidMaterial.h"
 #include "ImageProcessing.h"
@@ -134,6 +138,8 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackDamage);
 
   registerScalarKernel(RedbackContinuation);
+
+  registerDiracKernel(FunctionPointSource);
 
   registerMaterial(RedbackFluidMaterial);
   registerMaterial(ImageProcessing);
