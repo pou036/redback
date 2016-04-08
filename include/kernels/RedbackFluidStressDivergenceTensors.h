@@ -2,12 +2,12 @@
 #define REDBACKFLUIDSTRESSDIVERGENCETENSORS_H
 
 #include "Kernel.h"
-//#include "ElasticityTensorR4.h"
+//#include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 
 // Forward Declarations
 class RedbackFluidStressDivergenceTensors;
-// class ElasticityTensorR4;
+// class RankFourTensor;
 class RankTwoTensor;
 
 template <>
@@ -33,7 +33,7 @@ protected:
   RealVectorValue _fluid_stress_row;
 
   const MaterialProperty<RankTwoTensor> & _fluid_stress;
-  // const MaterialProperty<ElasticityTensorR4> & _Jacobian_fluid_mult;
+  // const MaterialProperty<RankFourTensor> & _Jacobian_fluid_mult;
 
   const unsigned int _component;
 
