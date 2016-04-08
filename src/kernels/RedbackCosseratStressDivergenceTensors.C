@@ -7,7 +7,8 @@
 
 #include "RedbackCosseratStressDivergenceTensors.h"
 #include "Material.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
+#include "ElasticityTensorTools.h"
 #include "RankTwoTensor.h"
 #include "MooseMesh.h"
 
@@ -25,8 +26,8 @@ InputParameters validParams<RedbackCosseratStressDivergenceTensors>()
 RedbackCosseratStressDivergenceTensors::RedbackCosseratStressDivergenceTensors(const InputParameters & parameters) :
     StressDivergenceTensors(parameters),
     //RedbackStressDivergenceTensorsNew(parameters),
-    _Jacobian_offdiag_bc(getMaterialPropertyByName<ElasticityTensorR4>("coupled_Jacobian_off")),
-    _Jacobian_offdiag_cb(getMaterialPropertyByName<ElasticityTensorR4>("Jacobian_off")),
+    _Jacobian_offdiag_bc(getMaterialPropertyByName<RankFourTensor>("coupled_Jacobian_off")),
+    _Jacobian_offdiag_cb(getMaterialPropertyByName<RankFourTensor>("Jacobian_off")),
     _wc_x_var(coupled("wc_x")),
     _wc_y_var(coupled("wc_y")),
     _wc_z_var(coupled("wc_z"))
@@ -60,12 +61,16 @@ RedbackCosseratStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jv
 
     if (coupled_component < 3){
       if (_base_name.compare("coupled_") == 0){
-        result = _Jacobian_offdiag_bc[_qp].elasticJacobian(_component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
-     //  std::cout << "Hello from the other siiiiiiide ***********************" << std::endl;
+        result = ElasticityTensorTools::elasticJacobian(_Jacobian_offdiag_bc[_qp], _component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
+
+        //result = _Jacobian_offdiag_bc[_qp].elasticJacobian(_component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
+        //  std::cout << "Hello from the other siiiiiiide ***********************" << std::endl;
         }
         else{
-        result = _Jacobian_mult[_qp].elasticJacobianwc(_component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]);
-        result += _Jacobian_offdiag_cb[_qp].elasticJacobian(_component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
+          result = ElasticityTensorTools::elasticJacobianWC(_Jacobian_mult[_qp], _component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]);
+          //result = _Jacobian_mult[_qp].elasticJacobianwc(_component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]);
+          result += ElasticityTensorTools::elasticJacobian(_Jacobian_offdiag_cb[_qp], _component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
+          //result += _Jacobian_offdiag_cb[_qp].elasticJacobian(_component, coupled_component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
 
       //  std::cout << "Hello from the other siiiiiiide 2" << std::endl;
         }

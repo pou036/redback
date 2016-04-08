@@ -24,8 +24,8 @@ public:
 
 protected:
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
-  const MaterialProperty<ElasticityTensorR4> & _Jacobian_offdiag_bc;
-  const MaterialProperty<ElasticityTensorR4> & _Jacobian_offdiag_cb;
+  const MaterialProperty<RankFourTensor> & _Jacobian_offdiag_bc;
+  const MaterialProperty<RankFourTensor> & _Jacobian_offdiag_cb;
 
 private:
   const unsigned int _wc_x_var;

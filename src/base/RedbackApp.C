@@ -35,9 +35,12 @@
 #include "RedbackChemEndo.h"
 #include "RedbackChemExo.h"
 #include "RedbackChemPressure.h"
+#include "RedbackFluidDivergence.h"
+#include "RedbackFluidStressDivergenceTensors.h"
 #include "RedbackMassConvection.h"
 #include "RedbackMassDiffusion.h"
 #include "RedbackMechDissip.h"
+#include "RedbackNavier.h"
 #include "RedbackPoromechanics.h"
 #include "RedbackStressDivergenceTensors.h"
 #include "RedbackStressDivergenceTensorsNew.h"
@@ -48,7 +51,11 @@
 #include "RedbackThermalPressurization.h"
 #include "RedbackDamage.h"
 
+// Scalar Kernels
+#include "RedbackContinuation.h"
+
 // Materials
+#include "RedbackFluidMaterial.h"
 #include "ImageProcessing.h"
 #include "RedbackMaterial.h"
 #include "RedbackMechMaterialJ2.h"
@@ -66,6 +73,8 @@
 #include "ReturnMapIterDT.h"
 
 // AuxKernels
+#include "RedbackContinuationTangentAux.h"
+#include "RedbackDiffVarsAux.h"
 #include "RedbackTotalPorosityAux.h"
 
 template <>
@@ -117,9 +126,12 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
+  registerKernel(RedbackFluidDivergence);
+  registerKernel(RedbackFluidStressDivergenceTensors);
   registerKernel(RedbackMassConvection);
   registerKernel(RedbackMassDiffusion);
   registerKernel(RedbackMechDissip);
+  registerKernel(RedbackNavier);
   registerKernel(RedbackPoromechanics);
   registerKernel(RedbackStressDivergenceTensors);
   registerKernel(RedbackStressDivergenceTensorsNew);
@@ -130,6 +142,9 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalPressurization);
   registerKernel(RedbackDamage);
 
+  registerScalarKernel(RedbackContinuation);
+
+  registerMaterial(RedbackFluidMaterial);
   registerMaterial(ImageProcessing);
   registerMaterial(RedbackMaterial);
   registerMaterial(RedbackMechMaterialJ2);
@@ -144,6 +159,8 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerExecutioner(ReturnMapIterDT);
 
+  registerAux(RedbackContinuationTangentAux);
+  registerAux(RedbackDiffVarsAux);
   registerAux(RedbackTotalPorosityAux);
 #undef registerObject
 #define registerObject(name) factory.regLegacy<name>(stringifyName(name))

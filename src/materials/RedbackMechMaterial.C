@@ -207,14 +207,11 @@ void
 RedbackMechMaterial::initQpStatefulProperties()
 {
   // called only once at the very beginning of the simulation
-  Material::initQpStatefulProperties();
   _total_strain[ _qp ].zero();
   _elastic_strain[ _qp ].zero();
   _stress[ _qp ].zero();
   _plastic_strain[ _qp ].zero();
   _eqv_plastic_strain[ _qp ] = 0.0;
-  //_elasticity_tensor[ _qp ].zero();
-  //_Jacobian_mult[ _qp ].zero();
   _elasticity_tensor[ _qp ] = _Cijkl;
   _Jacobian_mult[ _qp ] = _Cijkl;
   _strain_rate[ _qp ].zero();
