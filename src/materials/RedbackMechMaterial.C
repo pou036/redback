@@ -103,8 +103,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _stress(declareProperty<RankTwoTensor>("stress")),
     _total_strain(declareProperty<RankTwoTensor>("total_strain")),
     _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
-    _elasticity_tensor(declareProperty<ElasticityTensorR4>("elasticity_tensor")),
-    _Jacobian_mult(declareProperty<ElasticityTensorR4>("Jacobian_mult")),
+    _elasticity_tensor(declareProperty<RankFourTensor>("elasticity_tensor")),
+    _Jacobian_mult(declareProperty<RankFourTensor>("Jacobian_mult")),
     // _d_stress_dT(declareProperty<RankTwoTensor>("d_stress_dT")),
     _Cijkl(getParam<std::vector<Real> >("C_ijkl"), (RankFourTensor::FillMethod)(int)getParam<MooseEnum>("fill_method")),
 

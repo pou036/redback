@@ -15,7 +15,7 @@
 []
 
 [MeshModifiers]
-  active = 'middle_edge_bottom_right middle_edge_bottom_left'
+  active = 'middle_edge_bottom_left middle_edge_bottom_right'
   [./middle_edge_bottom_front]
     type = AddExtraNodeset
     new_boundary = 77
@@ -41,120 +41,114 @@
 [Postprocessors]
   [./disp_y_top]
     type = PointValue
-    point = '0.5 1 0.1'
+    point = '0.5 1 1'
     variable = disp_y
   [../]
   [./disp_x_top]
     type = PointValue
-    point = '0.5 1 0.1'
+    point = '0.5 1 1'
     variable = disp_x
   [../]
   [./wc_z_top]
     type = PointValue
-    point = '0.5 1 0.1'
+    point = '0.5 1 1'
     variable = wc_z
   [../]
   [./antisymmetric_pp]
     type = PointValue
     variable = macro_rot
     execute_on = nonlinear
-    point = '0 0 0.5'
+    point = '0 0 1'
   [../]
   [./Rotation_wcz_0_9]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.9 0.5'
+    point = '0.5 0.9 1'
   [../]
   [./Rotation_wcz_0_8]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.8 0.5'
+    point = '0.5 0.8 1'
   [../]
   [./Rotation_wcz_0_7]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.7 0.5'
+    point = '0.5 0.7 1'
   [../]
   [./Rotation_wcz_0_6]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.6 0.5'
+    point = '0.5 0.6 1'
   [../]
   [./Rotation_wcz_0_5]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.5 0.5'
+    point = '0.5 0.5 1'
   [../]
   [./Rotation_wcz_0_4]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.4 0.5'
+    point = '0.5 0.4 1'
   [../]
   [./Rotation_wcz_0_3]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.3 0.5'
+    point = '0.5 0.3 1'
   [../]
   [./Rotation_wcz_0_2]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.2 0.5'
+    point = '0.5 0.2 1'
   [../]
   [./Rotation_wcz_0_1]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.1 0.5'
+    point = '0.5 0.1 1'
   [../]
   [./Displ_u_x_0_9]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.9 0.5'
+    point = '0.5 0.9 1'
   [../]
   [./Displ_u_x_0_8]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.8 0.5'
+    point = '0.5 0.8 1'
   [../]
   [./Displ_u_x_0_7]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.7 0.5'
+    point = '0.5 0.7 1'
   [../]
   [./Displ_u_x_0_6]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.6 0.5'
+    point = '0.5 0.6 1'
   [../]
   [./Displ_u_x_0_5]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.5 0.5'
+    point = '0.5 0.5 1'
   [../]
   [./Displ_u_x_0_4]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.4 0.5'
+    point = '0.5 0.4 1'
   [../]
   [./Displ_u_x_0_3]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.3 0.5'
+    point = '0.5 0.3 1'
   [../]
   [./Displ_u_x_0_2]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.2 0.5'
+    point = '0.5 0.2 1'
   [../]
   [./Displ_u_x_0_1]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.1 0.5'
-  [../]
-  [./force]
-    type = SideAverageValue
-    variable = stress_22
-    execute_on = linear
-    boundary = top
+    point = '0.5 0.1 1'
   [../]
   [./antisymmetric_top]
     type = PointValue
@@ -167,6 +161,17 @@
   [../]
   [./number_lin]
     type = NumLinearIterations
+  [../]
+  [./normal_force]
+    type = SideAverageValue
+    variable = stress_22
+    execute_on = linear
+    boundary = top
+  [../]
+  [./tangential_force]
+    type = SideAverageValue
+    variable = stress_12
+    boundary = top
   [../]
 []
 
@@ -449,7 +454,7 @@
 
 [BCs]
   # following is natural BC
-  active = 'Periodic uy_bottom ux_shear_top wcx_equals_zero_on_top ux_zero_bottom wcy_equals_zero_on_top wc_x_bottom uz_bottom wc_y_bottom ux_shear_bottom confining_pres'
+  active = 'Periodic wcy_equals_zero_on_top wc_x_bottom ux_shear_top ux_zero_bottom ux_shear_bottom wcx_equals_zero_on_top confining_pres uz_bottom uy_bottom wc_y_bottom'
   [./wcx_equals_zero_on_top]
     type = DirichletBC
     variable = wc_x
@@ -613,14 +618,14 @@
     # 
     type = RedbackMechMaterialHO
     block = 0
-    B_ijkl = '0.0 0.1 0.1'
+    B_ijkl = '0.0 0.4 0.4'
     C_ijkl = '0 5 2.5'
     fill_method = general_isotropic
     poisson_ratio = -9999
     youngs_modulus = -9999
     damage_method = BreakageMechanics
-    cohesion = 0.0001
-    hardening_mech_modulus = -100
+    cohesion = 0.01
+    hardening_mech_modulus = -0.1
     friction_coefficient = 0.5
   [../]
   [./redback_mat]
@@ -635,8 +640,8 @@
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type    -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
-    petsc_options_value = 'gmres          bjacobi     5E-6           1E-8          20                1E-10      1E-8 '
-    line_search = none
+    petsc_options_value = 'gmres          bjacobi     1E-7           1E-8          20                1E-10      1E-8 '
+    line_search = basic
   [../]
   [./debug_jacob]
     type = FDP
@@ -661,7 +666,7 @@
 [Outputs]
   execute_on = 'timestep_end initial'
   exodus = true
-  file_base = bench_elastic_HO_tensile_hard_lock_3
+  file_base = bench_plastic_shearR02
   print_linear_residuals = false
 []
 

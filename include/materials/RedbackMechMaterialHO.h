@@ -80,14 +80,14 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _macro_rotation;
 
-  MaterialProperty<ElasticityTensorR4> & _elastic_flexural_rigidity_tensor;
-  MaterialProperty<ElasticityTensorR4> & _Jacobian_mult_couple;
-  MaterialProperty<ElasticityTensorR4> & _Jacobian_offdiag_bc;
-  MaterialProperty<ElasticityTensorR4> & _Jacobian_offdiag_cb;
+  MaterialProperty<RankFourTensor> & _elastic_flexural_rigidity_tensor;
+  MaterialProperty<RankFourTensor> & _Jacobian_mult_couple;
+  MaterialProperty<RankFourTensor> & _Jacobian_offdiag_bc;
+  MaterialProperty<RankFourTensor> & _Jacobian_offdiag_cb;
 
 
   const std::vector<Real> _Bijkl_vector, _Cijkl_vector;
-  ElasticityTensorR4 _Bijkl;
+  RankFourTensor _Bijkl;
 
   MaterialProperty<RankTwoTensor> & _curvature_increment;
   MaterialProperty<RankTwoTensor> & _plastic_curvature;
