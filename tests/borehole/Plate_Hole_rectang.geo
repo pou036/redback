@@ -1,10 +1,11 @@
+
 /* Plate w/ a hole */
 
 lc0 = 0.03; // mesh characteristic length around circle (smaller = finer mesh)
 lc1 = 0.1; // mesh characteristic length top boundary (smaller = finer mesh)
 lc2 = 0.1; // mesh characteristic length rest of mesh (smaller = finer mesh)
 radius = 0.1; // radius of cylinder
-Ll = 2;
+Ll = 2.0;
 Lw = 1.5;
 nb1 = 20;  //number of slices per quarter
 nb2 = 30;  //number of rings
@@ -47,7 +48,7 @@ Line Loop(15) = {10, -7, -11, -2};
 Ruled Surface(16) = {15};
 Line Loop(17) = {11, -6, -12, -3};
 Ruled Surface(18) = {17};
-Line Loop(19) = {9, 5, -12, 4};
+Line Loop(19) = {-9, -5, 12, -4};
 Ruled Surface(20) = {19};
 
 Transfinite Surface {14,16,18,20};
@@ -58,10 +59,10 @@ Recombine Surface {14,16,18,20};
 }
 Coherence;
 
-Physical Surface(109) = {42, 64, 86, 108};
-Physical Surface(110) = {14, 16, 18, 20};
-Physical Surface(111) = {85, 41, 107, 63};
-Physical Surface(112) = {33, 77};
-Physical Surface(113) = {55, 99};
+Physical Surface(114) = {108, 86, 64, 42};
+Physical Surface(115) = {20, 18, 16, 14};
+Physical Surface(116) = {41, 99, 85, 63};
+Physical Surface(117) = {107, 55};
+Physical Surface(118) = {33, 77};
 
-Physical Volume(0) = {3, 2, 1, 4};
+Physical Volume(0) = {4, 3, 2, 1};

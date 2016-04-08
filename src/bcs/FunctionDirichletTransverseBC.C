@@ -18,7 +18,7 @@ validParams<FunctionDirichletTransverseBC>()
   params.addRequiredParam<RealVectorValue>("axis",
                                            "Axis of rotation, vector to calculate transversal direction for "
                                            "boundary point.");
-  params.addParam<Real>("angular_velocity", 0., "Angular velocity");
+  params.addParam<Real>("angular_velocity", 1., "Angular velocity");
   params.addRequiredParam<unsigned int>("dir_index", "Direction index (0 for X, 1 for Y, 2 for Z)");
   return params;
 }

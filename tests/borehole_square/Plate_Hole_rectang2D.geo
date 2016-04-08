@@ -7,8 +7,8 @@ lc2 = 0.1; // mesh characteristic length rest of mesh (smaller = finer mesh)
 radius = 0.1; // radius of cylinder
 Ll = 2.0;
 Lw = 1.5;
-nb1 = 21;  //number of slices per quarter
-nb2 = 31;  //number of rings
+nb1 = 21;  //number of slices per quarter //MUST be odd
+nb2 = 31;  //number of rings  //MUST be odd
 
 Point(1) = {0,0,0,lc0}; 	// center of the base
 

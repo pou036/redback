@@ -1,8 +1,8 @@
 lc = 0.05;
 R_out = 1.; // radius of outer circle
-R_in = 0.1; // radius of inner circle 
+R_in = 0.3; // radius of inner circle 
 H = 0.1; // height of cylinder
-nb_layers_third_circle = 20; //number of layers in one THIRD OF CIRCLE
+nb_layers_third_circle = 30; //number of layers in one THIRD OF CIRCLE
 nb_rings = 20; // number of concentric cell rings
 nb_layers_z = 1; // number of vertical layers
 
