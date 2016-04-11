@@ -34,11 +34,39 @@ RedbackPolarTensorMaterialAux::RedbackPolarTensorMaterialAux(const InputParamete
 Real
 RedbackPolarTensorMaterialAux::computeValue()
 {
-  Real x = (*_current_node)(0);
-  Real y = (*_current_node)(1);
+  //Real x = (*_current_node)(0); // WRONG
+  //Real y = (*_current_node)(1);
   //Real z = (*_current_node)(2);
 
-  Real theta = std::atan(y/x);//*(y <0 ? -1: 1);
+  RealVectorValue centroid = _current_elem->centroid();
+  Real x = centroid(0);
+  Real y = centroid(1);
+  Real r = std::sqrt(x*x+y*y);
+  Real epsilon = 1e-10; // tolerance on radius to avoid singularity
+  Real theta;
+
+  //Real argument = y/x;
+  //Real theta = std::atan(argument)*(argument <0 ? -1: 1); //(argument < 0 ? libMesh::pi - std::atan(argument): std::atan(argument));
+  if (r < epsilon)
+    theta = 0;
+  else
+  {
+    Real argument = x/r;
+    theta = std::acos(argument)*(y <0 ? -1: 1);
+  }
+
+  /*Real theta;
+  if ((x < 0) && (y < 0))
+  {
+    theta = -(libMesh::pi - std::atan(argument));
+  } else if ((x < 0) && (y > 0))
+  {
+    theta = libMesh::pi + std::atan(argument);
+  } else
+  {
+    theta = std::atan(argument);
+  }*/
+
   Real result; // value returned
 
   if ((_i==0) && (_j==0))
