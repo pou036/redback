@@ -482,16 +482,6 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
   _mechanical_porosity[ _qp ] = delta_phi_mech_el + delta_phi_mech_pl;
 
-  // Begin of the chemical degradation method of Hu and Hueckel 2013 (doi:10.1680/geot.SIP13.P.020)
-  _mass_removal_rate[_qp] = 0;
-  if (_volumetric_strain[_qp] > 0)
-  {
-  _mass_removal_rate[_qp] = _chemo_mechanical_porosity_coeff * _volumetric_strain[_qp];
-  }
-  //End of the chemical degradation method of Hu and Hueckel 2013
-
-  // formulate the Taylor-Quinney coefficient and Gruntfest numbers for the case
-  // of damage
   Real gruntfest_number;
 
   if (_has_D)
@@ -546,6 +536,20 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
     gruntfest_number * std::exp(-_ar[ _qp ]) *
     (std::fabs(getSigEqv(sig) * std::pow(macaulayBracket(getSigEqv(sig) / q_y - 1.0), _exponent)) +
      std::fabs(_mean_stress[ _qp ] * std::pow(macaulayBracket(_mean_stress[ _qp ] - p_y), _exponent)));
+
+   // Begin of the chemical degradation method of Hu and Hueckel 2013 (doi:10.1680/geot.SIP13.P.020)
+   // _mass_removal_rate[_qp] = 0;
+   Real total_energy_input = sig.doubleContraction(instantaneous_strain_rate);
+
+   _mass_removal_rate[_qp] = _chemo_mechanical_porosity_coeff * (1 + total_energy_input);
+   if (_volumetric_strain[_qp] > 0)
+   {
+   _mass_removal_rate[_qp] = _chemo_mechanical_porosity_coeff * _volumetric_strain[_qp];
+   }
+   //End of the chemical degradation method of Hu and Hueckel 2013
+
+   // formulate the Taylor-Quinney coefficient and Gruntfest numbers for the case
+   // of damage
 
   return;
 }
