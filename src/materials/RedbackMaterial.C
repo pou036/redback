@@ -262,6 +262,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
   valid_params.push_back("ref_lewis_nb");
   valid_params.push_back("ar");
   valid_params.push_back("confining_pressure");
+  valid_params.push_back("gravity");
   unsigned int pos;
   for (unsigned int i = 0; i < _num_init_functions; i++)
   {
@@ -357,6 +358,13 @@ RedbackMaterial::stepInitQpProperties()
   else
   {
     _confining_pressure[ _qp ] = _confining_pressure_param;
+  }
+  pos = find(_init_from_functions__params.begin(), _init_from_functions__params.end(), "gravity") -
+        _init_from_functions__params.begin();
+  if (pos < _num_init_functions)
+  {
+    _gravity_param = _init_functions[ pos ]->vectorValue(_t, _q_point[ _qp ]);
+    // TODO: does not need to be (re)set for each _qp...
   }
 
   switch (_continuation_method)
