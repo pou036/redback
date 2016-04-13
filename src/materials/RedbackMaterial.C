@@ -364,7 +364,7 @@ RedbackMaterial::stepInitQpProperties()
   if (pos < _num_init_functions)
   {
     _gravity_param = _init_functions[ pos ]->vectorValue(_t, _q_point[ _qp ]);
-    // TODO: does not need to be (re)set for each _qp...
+    // TODO: does not need to be (re)set for  each _qp...
   }
 
   switch (_continuation_method)
