@@ -18,7 +18,6 @@
 #include "Material.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
-#include "ElasticityTensorR4.h"
 #include "RotationTensor.h"
 //#include "FiniteStrainPlasticMaterial.h"
 
@@ -69,11 +68,11 @@ protected:
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankTwoTensor> & _total_strain;
   MaterialProperty<RankTwoTensor> & _elastic_strain;
-  MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
-  MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+  MaterialProperty<RankFourTensor> & _elasticity_tensor;
+  MaterialProperty<RankFourTensor> & _Jacobian_mult;
 
   /// Individual material information
-  ElasticityTensorR4 _Cijkl;
+  RankFourTensor _Cijkl;
 
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
   // RankTwoTensor _strain_increment;
@@ -192,6 +191,9 @@ protected:
   virtual void form_damage_kernels(Real);
 
   virtual void formDamageDissipation(RankTwoTensor &);
+  virtual void formBrittleDamage();
+  virtual void formCreepDamage(Real);
+
 
   Real _damage_dissipation;
 };

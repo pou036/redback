@@ -194,7 +194,7 @@ RedbackMechMaterialDP::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yi
   q_y = yield_stress + _slope_yield_surface * p_y; // yield deviatoric stress
 }
 
-void
+/*void
 RedbackMechMaterialDP::form_damage_kernels(Real cohesion)
 {
   // update damage evolution law from selected method
@@ -215,8 +215,8 @@ RedbackMechMaterialDP::form_damage_kernels(Real cohesion)
     default:
       mooseError("damage method not implemented yet, use other options");
   }
-}
-
+}*/
+/*
 void
 RedbackMechMaterialDP::formBrittleDamage()
 {
@@ -232,9 +232,9 @@ RedbackMechMaterialDP::formBrittleDamage()
 
   _damage_kernel[ _qp ] = plastic_damage + healing_damage;
   _damage_kernel_jac[ _qp ] = 0;
-}
+}*/
 
-void
+/*void
 RedbackMechMaterialDP::formCreepDamage(Real cohesion)
 {
   Real plastic_damage, healing_damage;
@@ -250,10 +250,12 @@ RedbackMechMaterialDP::formCreepDamage(Real cohesion)
 
   if (d_yield_dq > 0) // ensuring positiveness of the plastic multiplier
   {
+  */
     /* the plastic multiplier could be having this form:
      * lambda_dot = _mises_stress[_qp] * _mises_strain_rate[_qp] / d_yield_dq;
      * but cohesion in J2 plasticity is the mises stress at yield, so we are
      * going with a much simpler form: */
+  /*
     lambda_dot = _mises_strain_rate[ _qp ] / d_yield_dq;
   }
   else
@@ -263,4 +265,4 @@ RedbackMechMaterialDP::formCreepDamage(Real cohesion)
   healing_damage = 0;
   _damage_kernel[ _qp ] = plastic_damage + healing_damage;
   _damage_kernel_jac[ _qp ] = 0;
-}
+}*/
