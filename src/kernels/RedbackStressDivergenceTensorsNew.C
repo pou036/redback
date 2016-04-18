@@ -13,6 +13,7 @@
 #include "RedbackStressDivergenceTensorsNew.h"
 
 #include "Material.h"
+#include "ElasticityTensorTools.h"
 
 template <>
 InputParameters
@@ -48,7 +49,7 @@ RedbackStressDivergenceTensorsNew::RedbackStressDivergenceTensorsNew(const Input
     //_stress(getMaterialProperty<RankTwoTensor>("stress" + getParam<std::string>("appended_property_name"))),
     //_Jacobian_mult(
     //  getMaterialProperty<ElasticityTensorR4>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
-    _Jacobian_mult(getMaterialPropertyByName<ElasticityTensorR4>(_base_name + "Jacobian_mult")),
+    _Jacobian_mult(getMaterialPropertyByName<RankFourTensor>(_base_name + "Jacobian_mult")),
 
     // _d_stress_dT(getMaterialProperty<RankTwoTensor>("d_stress_dT"+
     // getParam<std::string>("appended_property_name"))),
@@ -109,7 +110,7 @@ RedbackStressDivergenceTensorsNew::computeQpResidual()
 Real
 RedbackStressDivergenceTensorsNew::computeQpJacobian()
 {
-  return _Jacobian_mult[ _qp ].elasticJacobian(
+  return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[ _qp ],
     _component, _component, _grad_test[ _i ][ _qp ], _grad_phi[ _j ][ _qp ]);
   /*Real result = _Jacobian_mult[_qp].elasticJacobian(_component, _component,
   _grad_test[_i][_qp], _grad_phi[_j][_qp]);
@@ -147,7 +148,7 @@ RedbackStressDivergenceTensorsNew::computeQpOffDiagJacobian(unsigned int jvar)
   //  porepressure_term = _phi[_j][_qp]*_grad_test[_i][_qp](_component);
 
   if (active)
-    return _Jacobian_mult[ _qp ].elasticJacobian(_component,
+    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[ _qp ],_component,
                                                  coupled_component,
                                                  _grad_test[ _i ][ _qp ],
                                                  _grad_phi[ _j ][ _qp ]) +

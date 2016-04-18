@@ -2,8 +2,9 @@
 #define REDBACKSTRESSDIVERGENCETENSORSNEW_H
 
 #include "Kernel.h"
-#include "ElasticityTensorR4.h"
+//#include "ElasticityTensorR4.h"
 #include "RankTwoTensor.h"
+#include "RankFourTensor.h"
 
 // Forward Declarations
 class RedbackStressDivergenceTensorsNew;
@@ -34,7 +35,7 @@ protected:
   std::string _base_name;
 
   const MaterialProperty<RankTwoTensor> & _stress;
-  const MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+  const MaterialProperty<RankFourTensor> & _Jacobian_mult;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
 
   const unsigned int _component;

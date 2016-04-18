@@ -31,6 +31,7 @@ validParams<RedbackMechMaterialHO>()
   //params.addParam<Real>("cosserat_shear_modulus", 0.0, "Cosserat shear modulus, G_c");
   params.addParam<Real>("cohesion", 1, "Material cohesion value");
   params.addParam<Real>("friction_coefficient", 0, "Friction coefficient");
+  params.addParam<Real>("dilatancy_coefficient", 0, "Dilatancy coefficient");
   params.addParam<Real>("hardening_mech_modulus", 0, " mechanical hardening parameter value");
 
   MooseEnum fm = RankFourTensor::fillMethodEnum();
@@ -90,6 +91,7 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _fill_method_bending(getParam<MooseEnum>("fill_method_bending")),
     _cohesion(getParam<Real>("cohesion")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
+    _dilatancy_coefficient(getParam<Real>("dilatancy_coefficient")),
     _hardening_mech_modulus(getParam<Real>("hardening_mech_modulus"))
 
 {
@@ -230,7 +232,7 @@ PROPS[3]=Radius;
 PROPS[4]=mufor;
 PROPS[5]=cfor;
 PROPS[6]=Hp;
-PROPS[7]=0.0;
+PROPS[7] = _dilatancy_coefficient;
 PROPS[8]=0.0;
 
 //PROPS[8]=_plastic_potential_multiplier;
