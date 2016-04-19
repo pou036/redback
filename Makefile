@@ -31,8 +31,12 @@ APPLICATION_DIR    := $(CURDIR)
 APPLICATION_NAME   := redback
 BUILD_EXEC         := yes
 DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
-include            $(FRAMEWORK_DIR)/app.mk
 
+LIBDIR_EXISTS = =$(shell [ -e /Users/pou036/projects/ioannis/hardFric_nonAsso_Tsoft ] && echo 1 || echo 0 )
+
+ifeq ($(LIBDIR_EXISTS), 1)
+  include            $(FRAMEWORK_DIR)/app.mk
+endif
 ###############################################################################
 # Additional special case targets should be added here
 # ADDITIONAL_LIBS       := /Users/pou036/projects/dynamicLib/
