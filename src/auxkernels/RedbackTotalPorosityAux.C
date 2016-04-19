@@ -33,7 +33,8 @@ RedbackTotalPorosityAux::RedbackTotalPorosityAux(const InputParameters & paramet
     //_has_T(isCoupled("temperature")),
     //_T(_has_T ? coupledValue("temperature") : _zero),
 
-    _mass_removal_rate(_is_mechanics_on ? getMaterialProperty<Real>("mass_removal_rate"): getZeroMaterialProperty<Real>("mass_removal_rate"))
+    _mass_removal_rate(_is_mechanics_on ? getMaterialProperty<Real>("mass_removal_rate")
+                                        : getZeroMaterialProperty<Real>("mass_removal_rate"))
 {
 }
 
@@ -45,7 +46,8 @@ RedbackTotalPorosityAux::computeValue()
   // "\n";
   total_porosity = _initial_porosity[ _qp ] + _delta_porosity_chem[ _qp ];
   if (_is_mechanics_on)
-    total_porosity = _initial_porosity[_qp] + _delta_porosity_chem[_qp] * (1 + _mass_removal_rate[_qp]) + _delta_porosity_mech[_qp];
+    total_porosity = _initial_porosity[ _qp ] + _delta_porosity_chem[ _qp ] * (1 + _mass_removal_rate[ _qp ]) +
+                     _delta_porosity_mech[ _qp ];
 
   total_porosity = fmin(1.0, fmax(0.0, total_porosity));
   return total_porosity;

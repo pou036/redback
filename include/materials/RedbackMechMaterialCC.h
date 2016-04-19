@@ -38,7 +38,6 @@ protected:
   Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real);
 
   virtual void form_damage_kernels(Real);
-
 };
 
 #endif // REDBACKMECHMATERIALCC_H

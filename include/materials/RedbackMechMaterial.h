@@ -194,7 +194,6 @@ protected:
   virtual void formBrittleDamage();
   virtual void formCreepDamage(Real);
 
-
   Real _damage_dissipation;
 };
 
