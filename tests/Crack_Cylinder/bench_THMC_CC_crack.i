@@ -1,21 +1,20 @@
 [Mesh]
   type = FileMesh
-  file = Cylinder_hollow_reg.msh
-  dim = 2
+  file = Crack_in_cylinder.msh
+  boundary_name = 'top bottom outside inside f_top f_bottom f_outside f_inside interface0 interface'
+  boundary_id = '0 1 2 3 4 5 6 7 8 9'
 []
 
 [Variables]
+  active = 'pore_pressure disp_z disp_y disp_x'
   [./disp_x]
-    order = FIRST
-    family = LAGRANGE
+    block = 0
   [../]
   [./disp_y]
-    order = FIRST
-    family = LAGRANGE
+    block = 0
   [../]
   [./disp_z]
-    order = FIRST
-    family = LAGRANGE
+    block = 0
   [../]
   [./temp]
   [../]
@@ -25,77 +24,65 @@
 
 [Materials]
   [./mat_mech]
-    type = RedbackMechMaterialJ2
+    type = RedbackMechMaterialCC
     block = 0
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    exponent = 1
-    youngs_modulus = 1000
-    poisson_ratio = 0.3
-    ref_pe_rate = 1
-    yield_stress = '0. 1 1. 1'
     pore_pres = pore_pressure
-    temperature = temp
+    youngs_modulus = 125
+    poisson_ratio = 0.3
+    slope_yield_surface = 0.6
+    yield_criterion = modified_Cam_Clay
+    yield_stress = '0. 0.001 1 0.001'
     total_porosity = total_porosity
+    damage = chemical_porosity
+    chemo_mechanical_porosity_coeff = 1e3
   [../]
   [./mat_nomech]
     type = RedbackMaterial
     block = 0
-    alpha_2 = 3
-    mu = 1e-3
-    ar = 10
-    gr = 3.632e-4 # 8*exp(-Ar), Ar=10
-    pore_pres = pore_pressure
-    temperature = temp
-    is_mechanics_on = false
-    ref_lewis_nb = 1
-    Kc = 10
-    ar_F = 20
-    ar_R = 10
-    phi0 = 0.1
-    eta1 = 1e3
-    Aphi = 1
-    da_endo = 1e-4
     is_chemistry_on = true
-    disp_z = disp_z
     disp_x = disp_x
     disp_y = disp_y
+    disp_z = disp_z
+    pore_pres = pore_pressure
+    Aphi = 1
+    Kc = 1
+    ar = 10
+    ar_F = 11
+    ar_R = 10
+    da_endo = 1e-5
+    gr = 9.08e-6 # 0.2*exp(-Ar), Ar=10
+    alpha_2 = 3
+    mu = 1e-3
+    phi0 = 0.1
     total_porosity = total_porosity
+    is_mechanics_on = true
   [../]
 []
 
 [Functions]
-  active = 'central_rotation downfunc r_square_fct'
+  active = 'downfunc'
   [./upfunc]
     type = ParsedFunction
     value = t
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -3e-2*t
+    value = 0.54+1e-1*t # 2e-4+1e-2*t
   [../]
   [./spline_IC]
     type = ConstantFunction
   [../]
-  [./central_rotation]
-    type = ParsedFunction
-    value = 1e-2*t
-  [../]
-  [./r_square_fct]
-    type = ParsedFunction
-    value = '(0.3 + dx)*(0.3+dx) + dy*dy'
-    vals = 'dx_point2 dy_point2'
-    vars = 'dx dy'
-  [../]
 []
 
 [BCs]
-  active = 'central_disp_y central_disp_x press_bc low_temp left_disp rigth_disp_y left_disp_y'
+  active = 'press_crack_lips press_inside disp_y_inside disp_x_inside'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
-    boundary = 2
+    boundary = 3
     value = 0
   [../]
   [./right_disp]
@@ -104,72 +91,76 @@
     boundary = 1
     function = downfunc
   [../]
+  [./bottom_temp]
+    type = NeumannBC
+    variable = temp
+    boundary = 0
+    value = -1
+  [../]
+  [./top_temp]
+    type = NeumannBC
+    variable = temp
+    boundary = 2
+    value = -1
+  [../]
   [./left_disp_y]
     type = DirichletBC
-    variable = disp_z
-    boundary = 2
+    variable = disp_y
+    boundary = 3
     value = 0
   [../]
   [./temp_mid_pts]
     type = DirichletBC
     variable = temp
-    boundary = '4 5 6 7'
+    boundary = 4
     value = 0
   [../]
   [./rigth_disp_y]
     type = DirichletBC
     variable = disp_y
-    boundary = 2
+    boundary = 1
     value = 0
   [../]
-  [./press_bc]
-    type = DirichletBC
-    variable = pore_pressure
-    boundary = 2
-    value = 0
-  [../]
-  [./low_temp]
+  [./temp_box]
     type = DirichletBC
     variable = temp
-    boundary = 2
+    boundary = '0 1 2 3'
     value = 0
   [../]
-  [./constant_force_inner_x]
+  [./constant_force_right]
     type = NeumannBC
     variable = disp_x
-    boundary = 3
-    value = -1
+    boundary = 1
+    value = -2
   [../]
-  [./constant_force_inner_y]
-    type = NeumannBC
+  [./disp_y_inside]
+    type = DirichletBC
     variable = disp_y
-    boundary = 3
-    value = -1
+    boundary = inside
+    value = 0
   [../]
-  [./central_disp_x]
-    type = FunctionDirichletTransverseBC
+  [./disp_x_inside]
+    type = DirichletBC
     variable = disp_x
-    boundary = 3
-    function = central_rotation
-    center = '0 0 0'
-    dir_index = 0
-    axis = '0 0 1'
-    angular_velocity = 5
+    boundary = inside
+    value = 0
   [../]
-  [./central_disp_y]
-    type = FunctionDirichletTransverseBC
-    variable = disp_y
-    boundary = 3
-    function = central_rotation
-    center = '0 0 0'
-    dir_index = 1
-    axis = '0 0 1'
-    angular_velocity = 5
+  [./press_crack_lips]
+    type = FunctionDirichletBC
+    variable = pore_pressure
+    boundary = 'interface0 interface'
+    function = downfunc
+  [../]
+  [./press_inside]
+    type = FunctionDirichletBC
+    variable = pore_pressure
+    boundary = inside
+    function = downfunc
   [../]
 []
 
 [AuxVariables]
-  active = 'mech_porosity Mod_Gruntfest_number solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress stress_zz'
+  active = 'mech_porosity Mod_Gruntfest_number solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress chemical_porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -219,7 +210,6 @@
   [./mean_stress]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./total_porosity]
     order = FIRST
@@ -233,27 +223,33 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./strain_rate]
+  [./solid_ratio]
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./solid_ratio]
+  [./chemical_porosity]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
 [Kernels]
+  active = 'td_press poromech chem_press press_diff'
   [./td_temp]
     type = TimeDerivative
     variable = temp
   [../]
-  [./diff_temp]
+  [./temp_diff]
     type = Diffusion
     variable = temp
   [../]
-  [./mh_temp]
+  [./temp_dissip]
     type = RedbackMechDissip
+    variable = temp
+    block = 0
+  [../]
+  [./temp_endo_chem]
+    type = RedbackChemEndo
     variable = temp
   [../]
   [./td_press]
@@ -263,21 +259,22 @@
   [./press_diff]
     type = RedbackMassDiffusion
     variable = pore_pressure
+    block = 0
   [../]
   [./chem_press]
     type = RedbackChemPressure
     variable = pore_pressure
     block = 0
   [../]
-  [./Chem_endo_temp]
-    type = RedbackChemEndo
-    variable = temp
+  [./poromech]
+    type = RedbackPoromechanics
+    variable = pore_pressure
     block = 0
   [../]
 []
 
 [AuxKernels]
-  active = 'mech_porosity volumetric_strain solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress stress_zz strain_rate Gruntfest_Number'
+  active = 'mech_porosity volumetric_strain solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate chemical_porosity volumetric_strain_rate mises_stress mean_stress Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -314,11 +311,13 @@
     type = MaterialRealAux
     variable = mises_stress
     property = mises_stress
+    block = 0
   [../]
   [./mises_strain]
     type = MaterialRealAux
     variable = mises_strain
-    property = mises_strain
+    property = eqv_plastic_strain
+    block = 0
   [../]
   [./mises_strain_rate]
     type = MaterialRealAux
@@ -342,37 +341,43 @@
     type = MaterialRealAux
     variable = volumetric_strain
     property = volumetric_strain
+    block = 0
   [../]
   [./volumetric_strain_rate]
     type = MaterialRealAux
     variable = volumetric_strain_rate
     property = volumetric_strain_rate
+    block = 0
   [../]
   [./total_porosity]
     type = RedbackTotalPorosityAux
     variable = total_porosity
     mechanical_porosity = mech_porosity
+    block = 0
+    is_mechanics_on = true
   [../]
   [./mech_porosity]
     type = MaterialRealAux
     variable = mech_porosity
     execute_on = timestep_end
     property = mechanical_porosity
+    block = 0
   [../]
   [./Lewis_number]
     type = MaterialRealAux
     variable = Lewis_number
     property = lewis_number
   [../]
-  [./strain_rate]
-    type = MaterialRealAux
-    variable = strain_rate
-    property = mises_strain_rate
-  [../]
   [./solid_ratio]
     type = MaterialRealAux
     variable = solid_ratio
     property = solid_ratio
+  [../]
+  [./chemical_porosity]
+    type = MaterialRealAux
+    variable = chemical_porosity
+    execute_on = linear
+    property = chemical_porosity
   [../]
 []
 
@@ -384,94 +389,34 @@
   [../]
 []
 
-[Postprocessors]
-  active = 'solid_ratio_middle mises_stress_centre strain_rate_middle middle_press Lewis_middle porosity_middle middle_temp dx_point2 dy_point2 r_square_pp'
-  [./middle_temp]
-    type = PointValue
-    variable = temp
-    point = '0.51 0 0.25'
-  [../]
-  [./strain]
-    type = StrainRatePoint
-    variable = temp
-    point = '0 0 0'
-  [../]
-  [./middle_press]
-    type = PointValue
-    variable = pore_pressure
-    point = '0.51 0 0.25'
-  [../]
-  [./porosity_middle]
-    type = PointValue
-    variable = total_porosity
-    point = '0.51 0 0.25'
-  [../]
-  [./Lewis_middle]
-    type = PointValue
-    variable = Lewis_number
-    point = '0.51 0 0.25'
-  [../]
-  [./strain_rate_middle]
-    type = PointValue
-    variable = strain_rate
-    point = '0.51 0 0.25'
-  [../]
-  [./solid_ratio_middle]
-    type = PointValue
-    variable = solid_ratio
-    point = '0.51 0 0.25'
-  [../]
-  [./mises_stress_centre]
-    type = PointValue
-    variable = mises_stress
-    point = '0.51 0 0.25'
-  [../]
-  [./dx_point2]
-    type = PointValue
-    variable = disp_x
-    point = '0.3 0 0'
-  [../]
-  [./dy_point2]
-    type = PointValue
-    variable = disp_y
-    point = '0.3 0 0 '
-  [../]
-  [./r_square_pp]
-    type = FunctionValuePostprocessor
-    function = r_square_fct
-  [../]
-[]
-
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
   end_time = 100
-  num_steps = 3
   dtmax = 1
   dtmin = 1e-7
   type = Transient
-  l_max_its = 200
-  nl_max_its = 10
+  l_max_its = 100
+  nl_max_its = 20
   solve_type = PJFNK
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg cp 201'
-  nl_abs_tol = 1e-10 # 1e-10 to begin with
+  nl_abs_tol = 1e-8 # 1e-10 to begin with
   reset_dt = true
   line_search = basic
+  nl_rel_tol = 1e-05
   [./TimeStepper]
     type = ConstantDT
-    dt = 5e-3
+    dt = 1e-4 # 1e-4
   [../]
 []
 
 [Outputs]
-  file_base = ring_shear_out
+  file_base = bench_THMC_CC_out
   output_initial = true
   exodus = true
-  print_linear_residuals = false
   [./console]
     type = Console
-    perf_log = true
   [../]
 []
 
@@ -480,20 +425,22 @@
     disp_z = disp_z
     disp_y = disp_y
     disp_x = disp_x
+    pore_pres = pore_pressure
   [../]
 []
 
 [ICs]
-  [./temp_ic]
+  active = 'press_ic'
+  [./temp_IC]
     variable = temp
-    value = 0
     type = ConstantIC
-    block = 0
+    value = 0
   [../]
   [./press_ic]
     variable = pore_pressure
     type = ConstantIC
-    value = 0
+    value = 0 # 1e-3
+    block = 0
   [../]
 []
 

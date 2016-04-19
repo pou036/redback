@@ -5,6 +5,7 @@
 []
 
 [Variables]
+  active = 'disp_z disp_y disp_x'
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -24,6 +25,7 @@
 []
 
 [Materials]
+  active = 'mat_nomech'
   [./mat_mech]
     type = RedbackMechMaterialJ2
     block = 0
@@ -46,10 +48,6 @@
     mu = 1e-3
     ar = 10
     gr = 3.632e-4 # 8*exp(-Ar), Ar=10
-    pore_pres = pore_pressure
-    temperature = temp
-    is_mechanics_on = false
-    ref_lewis_nb = 1
     Kc = 10
     ar_F = 20
     ar_R = 10
@@ -61,12 +59,12 @@
     disp_z = disp_z
     disp_x = disp_x
     disp_y = disp_y
-    total_porosity = total_porosity
+    total_porosity = 0.1
   [../]
 []
 
 [Functions]
-  active = 'central_rotation downfunc r_square_fct'
+  active = 'central_rotation downfunc r_square'
   [./upfunc]
     type = ParsedFunction
     value = t
@@ -82,16 +80,16 @@
     type = ParsedFunction
     value = 1e-2*t
   [../]
-  [./r_square_fct]
+  [./r_square]
     type = ParsedFunction
-    value = '(0.3 + dx)*(0.3+dx) + dy*dy'
-    vals = 'dx_point2 dy_point2'
-    vars = 'dx dy'
+    value = '(0.3+x2)*(0.3+x2) + y2*y2'
+    vals = 'x_point2 y_point2'
+    vars = 'x2 y2'
   [../]
 []
 
 [BCs]
-  active = 'central_disp_y central_disp_x press_bc low_temp left_disp rigth_disp_y left_disp_y'
+  active = 'central_disp_y central_disp_x left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -168,82 +166,8 @@
   [../]
 []
 
-[AuxVariables]
-  active = 'mech_porosity Mod_Gruntfest_number solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress stress_zz'
-  [./stress_zz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./peeq]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./pe11]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./pe22]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./pe33]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./mises_stress]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./mises_strain]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./mises_strain_rate]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
-  [../]
-  [./Mod_Gruntfest_number]
-    order = CONSTANT
-    family = MONOMIAL
-    block = '0 1'
-  [../]
-  [./volumetric_strain]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./volumetric_strain_rate]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./mean_stress]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
-  [../]
-  [./total_porosity]
-    order = FIRST
-    family = MONOMIAL
-  [../]
-  [./mech_porosity]
-    order = FIRST
-    family = MONOMIAL
-  [../]
-  [./Lewis_number]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./strain_rate]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./solid_ratio]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-[]
-
 [Kernels]
+  active = 'ddx_dt ddy_dt ddz_dt'
   [./td_temp]
     type = TimeDerivative
     variable = temp
@@ -274,105 +198,17 @@
     variable = temp
     block = 0
   [../]
-[]
-
-[AuxKernels]
-  active = 'mech_porosity volumetric_strain solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress stress_zz strain_rate Gruntfest_Number'
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
+  [./ddx_dt]
+    type = TimeDerivative
+    variable = disp_x
   [../]
-  [./pe11]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = pe11
-    index_i = 0
-    index_j = 0
+  [./ddy_dt]
+    type = TimeDerivative
+    variable = disp_y
   [../]
-  [./pe22]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = pe22
-    index_i = 1
-    index_j = 1
-  [../]
-  [./pe33]
-    type = RankTwoAux
-    rank_two_tensor = plastic_strain
-    variable = pe33
-    index_i = 2
-    index_j = 2
-  [../]
-  [./eqv_plastic_strain]
-    type = FiniteStrainPlasticAux
-    variable = peeq
-  [../]
-  [./mises_stress]
-    type = MaterialRealAux
-    variable = mises_stress
-    property = mises_stress
-  [../]
-  [./mises_strain]
-    type = MaterialRealAux
-    variable = mises_strain
-    property = mises_strain
-  [../]
-  [./mises_strain_rate]
-    type = MaterialRealAux
-    variable = mises_strain_rate
-    block = 0
-    property = mises_strain_rate
-  [../]
-  [./Gruntfest_Number]
-    type = MaterialRealAux
-    variable = Mod_Gruntfest_number
-    property = mod_gruntfest_number
-    block = 0
-  [../]
-  [./mean_stress]
-    type = MaterialRealAux
-    variable = mean_stress
-    property = mean_stress
-    block = 0
-  [../]
-  [./volumetric_strain]
-    type = MaterialRealAux
-    variable = volumetric_strain
-    property = volumetric_strain
-  [../]
-  [./volumetric_strain_rate]
-    type = MaterialRealAux
-    variable = volumetric_strain_rate
-    property = volumetric_strain_rate
-  [../]
-  [./total_porosity]
-    type = RedbackTotalPorosityAux
-    variable = total_porosity
-    mechanical_porosity = mech_porosity
-  [../]
-  [./mech_porosity]
-    type = MaterialRealAux
-    variable = mech_porosity
-    execute_on = timestep_end
-    property = mechanical_porosity
-  [../]
-  [./Lewis_number]
-    type = MaterialRealAux
-    variable = Lewis_number
-    property = lewis_number
-  [../]
-  [./strain_rate]
-    type = MaterialRealAux
-    variable = strain_rate
-    property = mises_strain_rate
-  [../]
-  [./solid_ratio]
-    type = MaterialRealAux
-    variable = solid_ratio
-    property = solid_ratio
+  [./ddz_dt]
+    type = TimeDerivative
+    variable = disp_z
   [../]
 []
 
@@ -381,11 +217,12 @@
   [./SMP]
     type = SMP
     full = true
+    line_search = basic
   [../]
 []
 
 [Postprocessors]
-  active = 'solid_ratio_middle mises_stress_centre strain_rate_middle middle_press Lewis_middle porosity_middle middle_temp dx_point2 dy_point2 r_square_pp'
+  active = 'x_point2 y_point2 r_square_pp'
   [./middle_temp]
     type = PointValue
     variable = temp
@@ -426,19 +263,19 @@
     variable = mises_stress
     point = '0.51 0 0.25'
   [../]
-  [./dx_point2]
+  [./x_point2]
     type = PointValue
     variable = disp_x
     point = '0.3 0 0'
   [../]
-  [./dy_point2]
+  [./y_point2]
     type = PointValue
     variable = disp_y
-    point = '0.3 0 0 '
+    point = '0.3 0 0'
   [../]
   [./r_square_pp]
     type = FunctionValuePostprocessor
-    function = r_square_fct
+    function = r_square
   [../]
 []
 
@@ -446,7 +283,7 @@
   # Preconditioned JFNK (default)
   start_time = 0.0
   end_time = 100
-  num_steps = 3
+  num_steps = 30
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -472,28 +309,6 @@
   [./console]
     type = Console
     perf_log = true
-  [../]
-[]
-
-[RedbackMechAction]
-  [./solid]
-    disp_z = disp_z
-    disp_y = disp_y
-    disp_x = disp_x
-  [../]
-[]
-
-[ICs]
-  [./temp_ic]
-    variable = temp
-    value = 0
-    type = ConstantIC
-    block = 0
-  [../]
-  [./press_ic]
-    variable = pore_pressure
-    type = ConstantIC
-    value = 0
   [../]
 []
 

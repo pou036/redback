@@ -1,10 +1,33 @@
-# Footing problem (extruded in 3D)
+# Hole problem
 
 [Mesh]
   type = FileMesh
-  file = ../../meshes/2d_footing_pb_coarse.msh
-  boundary_name = 'bottom right top_no_pressure top_pressure left'
+  file = Plate_Hole_rectang2D.msh
+  boundary_name = 'circle top bottom left right'
   boundary_id = '0 1 2 3 4'
+[]
+
+[MeshModifiers]
+  [./middle_edge_bottom]
+    type = AddExtraNodeset
+    new_boundary = 101
+    coord = '0 -1.5'
+  [../]
+  [./middle_edge_top]
+    type = AddExtraNodeset
+    new_boundary = 102
+    coord = '0 1.5'
+  [../]
+  [./middle_edge_left]
+    type = AddExtraNodeset
+    new_boundary = 103
+    coord = '-2 0 '
+  [../]
+  [./middle_edge_right]
+    type = AddExtraNodeset
+    new_boundary = 104
+    coord = '2 0'
+  [../]
 []
 
 [Variables]
@@ -17,16 +40,15 @@
     order = FIRST
     family = LAGRANGE
   [../]
-  [./temp]
-  [../]
-  [./pore_pressure]
-  [../]
   [./damage]
+  [../]
+  [./pressure]
   [../]
 []
 
 [GlobalParams]
   time_factor = 1
+  pressure = 10
 []
 
 [Materials]
@@ -37,27 +59,22 @@
     disp_y = disp_y
     youngs_modulus = 100
     poisson_ratio = 0.2
-    yield_stress = '0 1 0 1' # 0. 0.01 0.01 0.005 0.1 0.001
-    total_porosity = 0.1
+    yield_stress = '0 5 1 5'
+    total_porosity = 0.
     damage = damage
-    damage_coefficient = 60
+    damage_coefficient = 0.1
+    damage_method = BrittleDamage
   [../]
   [./mat_nomech]
     type = RedbackMaterial
     block = 0
     disp_x = disp_x
     disp_y = disp_y
-    Aphi = 0
-    ar = 0
-    ar_F = 0
-    ar_R = 0
     eta1 = 0
-    gr = 1 # exp(-Ar), Ar=10
     phi0 = 0.1
-    ref_lewis_nb = 1
     total_porosity = 0.1
     Peclet_number = 1e-3
-    solid_density = 0
+    solid_density = 1
     delta = 0
     is_mechanics_on = true
     fluid_density = 0
@@ -71,43 +88,44 @@
   [./confine_x]
     type = PresetBC
     variable = disp_x
-    boundary = 'left right bottom'
+    boundary = '101 102'
     value = 0
   [../]
   [./confine_y]
     type = PresetBC
     variable = disp_y
     value = 0
-    boundary = bottom
-  [../]
-  [./pore_pressure_top]
-    type = PresetBC
-    variable = pore_pressure
-    value = 0
-    boundary = 'top_pressure top_no_pressure'
-  [../]
-  [./top_load]
-    type = FunctionNeumannBC
-    variable = disp_y
-    boundary = top_pressure
-    function = applied_load_fct
+    boundary = '103 104'
   [../]
   [./Pressure]
-    [./top_pressure]
-      function = applied_load_fct
-      disp_y = disp_y
+    [./pressurization_borehole]
       disp_x = disp_x
-      boundary = top_pressure
+      disp_y = disp_y
+      boundary = circle
+      function = pressure_fct
     [../]
+    [./pressurization_ext_horizontal]
+      disp_x = disp_x
+      disp_y = disp_y
+      boundary = 'left right'
+      function = ext_pressure_horizontal_fct
+    [../]
+    [./pressurization_ext_vertical]
+      disp_x = disp_x
+      disp_y = disp_y
+      boundary = 'top bottom'
+      function = ext_pressure_vertical_fct
+    [../]
+  [../]
+  [./top_load]
+    type = NeumannBC
+    variable = disp_y
+    boundary = top
+    value = -10
   [../]
 []
 
 [AuxVariables]
-  active = 'stress_yy mises_strain_rate stress_xz stress_xx stress_xy mises_stress stress_zz eqv_plastic_strain stress_yz'
-  [./total_porosity]
-    order = FIRST
-    family = MONOMIAL
-  [../]
   [./stress_xx]
     order = CONSTANT
     family = MONOMIAL
@@ -116,19 +134,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./stress_xz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./stress_yy]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_yz]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -144,12 +150,30 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./elastic_modulus]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Functions]
-  [./applied_load_fct]
-    type = ConstantFunction
-    value = 10
+  [./ext_pressure_horizontal_fct]
+    type = ParsedFunction
+    value = 1
+  [../]
+  [./ext_pressure_vertical_fct]
+    type = ParsedFunction
+    value = 0.1
+  [../]
+  [./pressure_fct]
+    type = ParsedFunction
+    value = 1*tanh(5e3*t)
+  [../]
+  [./timestep_fct]
+    type = ParsedFunction
+    value = 'min( 1e-4 , max( 1e-7,    dt*max(1.5 - 100*(dmg - dmg_old), 0.1)) )'
+    vals = 'max_damage max_damage_old dt_old'
+    vars = 'dmg dmg_old dt'
   [../]
 []
 
@@ -165,7 +189,7 @@
 []
 
 [AuxKernels]
-  active = 'stress_yy mises_strain_rate stress_xz stress_xx stress_xy mises_stress stress_zz eqv_plastic_strain stress_yz'
+  active = 'elastic_mod mises_strain_rate stress_yy stress_xx stress_xy mises_stress eqv_plastic_strain'
   [./total_porosity]
     type = RedbackTotalPorosityAux
     variable = total_porosity
@@ -185,33 +209,12 @@
     index_i = 0
     index_j = 1
   [../]
-  [./stress_xz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_xz
-    index_i = 0
-    index_j = 2
-  [../]
   [./stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     variable = stress_yy
     index_i = 1
     index_j = 1
-  [../]
-  [./stress_yz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_yz
-    index_i = 1
-    index_j = 2
-  [../]
-  [./stress_zz]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    variable = stress_zz
-    index_i = 2
-    index_j = 2
   [../]
   [./eqv_plastic_strain]
     type = MaterialRealAux
@@ -228,6 +231,15 @@
     variable = mises_strain_rate
     property = mises_strain_rate
   [../]
+  [./elastic_mod]
+    type = RankFourAux
+    variable = elastic_modulus
+    rank_four_tensor = elasticity_tensor
+    index_l = 0
+    index_j = 0
+    index_k = 0
+    index_i = 0
+  [../]
 []
 
 [Postprocessors]
@@ -236,25 +248,48 @@
   # point = '0 0 0'
   # variable = pore_pressure
   # [../]
-  [./stress_xx]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_xx
+  # [./stress_xx]
+  # type = PointValue
+  # point = '0 1 0'
+  # variable = stress_xx
+  # [../]
+  # [./stress_yy]
+  # type = PointValue
+  # point = '0 1 0'
+  # variable = stress_yy
+  # [../]
+  # [./ydisp]
+  # type = PointValue
+  # variable = disp_y
+  # point = '0 1 0'
+  # [../]
+  [./max_damage]
+    type = NodalMaxValue
+    variable = damage
+    execute_on = timestep_end
   [../]
-  [./stress_yy]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_yy
+  [./dt_old]
+    type = TimestepSize
+    execute_on = timestep_begin
   [../]
-  [./stress_zz]
-    type = PointValue
-    point = '0 0 0'
-    variable = stress_zz
+  [./max_damage_old]
+    type = NodalMaxValue
+    variable = damage
+    execute_on = timestep_begin
   [../]
-  [./ydisp]
+  [./timestep]
+    type = FunctionValuePostprocessor
+    function = timestep_fct
+  [../]
+  [./diff_dmg]
+    type = DifferencePostprocessor
+    value1 = max_damage
+    value2 = max_damage_old
+  [../]
+  [./Mises_stress_injection]
     type = PointValue
-    variable = disp_y
-    point = '0 0 0'
+    variable = mises_stress
+    point = '1 0 0'
   [../]
 []
 
@@ -265,7 +300,7 @@
     #
     petsc_options = '-snes_monitor -snes_linesearch_monitor -ksp_monitor'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it -sub_pc_type -sub_pc_factor_shift_type'
-    petsc_options_value = 'gmres asm 1E0 1E-10 200 500 lu NONZERO'
+    petsc_options_value = 'gmres asm 1E-4 1E-10 200 500 lu NONZERO'
     type = SMP
     full = true
   [../]
@@ -273,9 +308,9 @@
 
 [Executioner]
   type = Transient
-  num_steps = 10
+  num_steps = 50
   solve_type = PJFNK
-  end_time = 10
+  end_time = 100
   dt = 1e-4
   petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -ksp_gmres_restart'
   petsc_options_value = 'gmres asm lu 201'
@@ -283,16 +318,23 @@
   nl_rel_step_tol = 1e-10
   nl_rel_tol = 1e-06
   nl_abs_step_tol = 1e-10
+  max_xfem_update = 1234567890
+  [./TimeStepper]
+    type = PostprocessorDT
+    dt = 1e-6
+    postprocessor = timestep
+  [../]
 []
 
 [Outputs]
-  file_base = bench_J2_footing_2D_damage_out
+  file_base = borehole_dmg_rectan_2D
   [./my_console]
     output_linear = true
     type = Console
     output_nonlinear = true
   [../]
   [./my_exodus]
+    file_base = borehole_dmg_rectan_2D
     scalar_as_nodal = true
     type = Exodus
     elemental_as_nodal = true
@@ -303,6 +345,7 @@
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
+    use_displaced_mesh = true
   [../]
 []
 

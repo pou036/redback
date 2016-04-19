@@ -257,7 +257,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 500
+  num_steps = 10
   solve_type = Newton
   end_time = 10
   dt = 1e-4
