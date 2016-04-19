@@ -273,7 +273,7 @@
 
 [Executioner]
   type = Transient
-  num_steps = 500
+  num_steps = 10
   solve_type = PJFNK
   end_time = 10
   dt = 1e-4
@@ -286,7 +286,7 @@
 []
 
 [Outputs]
-  file_base = footing_2D_damage_J2
+  file_base = bench_J2_footing_2D_damage_out
   [./my_console]
     output_linear = true
     type = Console
@@ -294,7 +294,6 @@
   [../]
   [./my_exodus]
     scalar_as_nodal = true
-    file_base = footing_2D_J2
     type = Exodus
     elemental_as_nodal = true
   [../]
