@@ -2,7 +2,7 @@
 
 [Mesh]
   type = FileMesh
-  file = ../../meshes/2d_footing_pb.msh
+  file = ../../meshes/2d_footing_pb_coarse.msh
   boundary_name = 'bottom right top_no_pressure top_pressure left'
   boundary_id = '0 1 2 3 4'
 []
@@ -262,7 +262,7 @@
   [./SMP]
     # petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     # petsc_options_value = 'bcgs bjacobi 1E-14 1E-10 10000'
-    #
+    # 
     petsc_options = '-snes_monitor -snes_linesearch_monitor -ksp_monitor'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it -sub_pc_type -sub_pc_factor_shift_type'
     petsc_options_value = 'gmres asm 1E0 1E-10 200 500 lu NONZERO'

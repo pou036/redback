@@ -78,6 +78,7 @@ validParams<RedbackMechMaterial>()
 
   // For the damage mechanics functionality
   params.addParam<Real>("damage_coefficient", 0.0, "The fraction of energies used in damage flow law (e.g. E_D/E_D0)");
+  params.addParam<Real>("damage_exponent", 0.0, "The damage exponent in the incremental flow law of plasticity");
   params.addParam<Real>(
     "healing_coefficient", 0.0, "The fraction of energies used in healing flow law (e.g. E_H/E_H0)");
   params.addParam<MooseEnum>("damage_method",
@@ -150,6 +151,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _damage_kernel(declareProperty<Real>("damage_kernel")),
     _damage_kernel_jac(declareProperty<Real>("damage_kernel_jacobian")),
     _damage_coeff(getParam<Real>("damage_coefficient")),
+    _dmg_exponent(getParam<Real>("damage_exponent")),
     _healing_coeff(getParam<Real>("healing_coefficient")),
 
     // Get coupled variables (T & P & porosity & damage)
@@ -679,6 +681,10 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   // calculate the term _exponential = -Q_{mech}/(RT) with Q_{mech} = E_0 + p'c
   // V_{ref} + p_f V_{act}
   _exponential = 1;
+  if (_has_D)
+    {
+      _exponential *= std::pow(1-_damage[_qp], -_dmg_exponent);
+    }
   if (_has_T)
   {
     // E_0/(RT) = Ar/(1+delta T*)
