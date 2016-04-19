@@ -124,6 +124,7 @@ protected:
 
   Real _ref_pe_rate;
   Real _exponent;
+  Real _chemo_mechanical_porosity_coeff;
 
   Real macaulayBracket(Real);
 
@@ -137,6 +138,7 @@ protected:
   MaterialProperty<Real> & _volumetric_strain_rate;
   MaterialProperty<Real> & _total_volumetric_strain;
   MaterialProperty<Real> & _mechanical_porosity;
+  MaterialProperty<Real> & _mass_removal_rate;
   MaterialProperty<Real> & _poromech_kernel;
   MaterialProperty<Real> & _poromech_jac;
   MaterialProperty<Real> & _mod_gruntfest_number;
@@ -144,7 +146,7 @@ protected:
   MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
   MaterialProperty<Real> & _damage_kernel;
   MaterialProperty<Real> & _damage_kernel_jac;
-  Real _damage_coeff, _healing_coeff;
+  Real _damage_coeff, _dmg_exponent, _healing_coeff;
 
   Real _exponential;
   // const VariableValue & _dispx_dot;
@@ -189,6 +191,8 @@ protected:
   virtual void form_damage_kernels(Real);
 
   virtual void formDamageDissipation(RankTwoTensor &);
+  virtual void formBrittleDamage();
+  virtual void formCreepDamage(Real);
 
   Real _damage_dissipation;
 };

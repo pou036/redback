@@ -196,3 +196,26 @@ RedbackMechMaterial2.C
 *.h_backup
 *.C_backup
 stuff
+borehole_highres.i
+borehole_highres_original.i
+test.geo
+bench_no poro_test.i
+borehole_test1.i
+borehole_test_dmg.i
+bench_THMC_CC.i
+bench_THMC_DP.i
+bench_THMC_J2.i
+borehole_test_dmg_2test.i
+Cylinder_hollow_iso.geo
+Cylinder_hollow_refine.geo
+Crack_Cylinder.geo
+Geomech_ex_01.i
+Geomech_ex_02.i
+Plate_Hole.geo
+Plate_Hole_rectang.geo
+Plate_Hole_square.geo
+Plate_Hole_rectang2D.geo
+borehole_dmg_rectan_3D.i
+borehole_test_dmg_rectang_anisotropic.i
+borehole_test_dmg_concentra_rectang_anisotropic.i
+borehole_test_dmg_concentra_rectang.i
