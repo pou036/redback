@@ -777,7 +777,7 @@ RedbackMechMaterial::formDamageDissipation(RankTwoTensor & sig)
   Real damage_potential, damage_rate;
 
   bulk_modulus =
-    _youngs_modulus * _poisson_ratio / (1 + _poisson_ratio) / (1 - 2 * _poisson_ratio); // First Lame modulus
+  _youngs_modulus * _poisson_ratio / (1 + _poisson_ratio) / (1 - 2 * _poisson_ratio); // First Lame modulus
   shear_modulus = 0.5 * _youngs_modulus / (1 + _poisson_ratio);                         // Second Lame modulus (shear)
 
   vol_elastic_strain = _elastic_strain[ _qp ].trace();
