@@ -2,7 +2,7 @@
 #ADDITIONAL_LIBS := /usr/local/lib/myLib.dylib
 
 #to compile it and add the path automatically using libtool
-multisurfaceplasticityhard_DIR := $(HOME)/projects/cosserat_dynlib/hardFric_nonAsso_Tsoft#Working version: /Users/manolis/projects/cosserat_dynlib/hardFric_nonAsso_Tsoft
+multisurfaceplasticityhard_DIR := $(HOME)/projects/cosserat_dynlib/hardFric_nonAsso_Tsoft
 #multisurfaceplasticityhard_srcfiles  += $(multisurfaceplasticityhard_DIR)/src/​file1.C
 multisurfaceplasticityhard_srcfiles  += $(multisurfaceplasticityhard_DIR)/multisurfaceplasticityhard.f
 
