@@ -50,6 +50,9 @@
 #include "RedbackThermalDiffusion.h"
 #include "RedbackThermalPressurization.h"
 #include "RedbackDamage.h"
+#include "RedbackInertialForce.h"
+#include "RedbackDynamicMomentBalancing.h"
+#include "RedbackCosseratDynamicStressDivergenceTensors2.h"
 
 // Scalar Kernels
 #include "RedbackContinuation.h"
@@ -141,6 +144,9 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalDiffusion);
   registerKernel(RedbackThermalPressurization);
   registerKernel(RedbackDamage);
+  registerKernel(RedbackInertialForce);
+  registerKernel(RedbackDynamicMomentBalancing);
+  registerKernel(RedbackCosseratDynamicStressDivergenceTensors2);
 
   registerScalarKernel(RedbackContinuation);
 
