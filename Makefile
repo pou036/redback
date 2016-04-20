@@ -32,8 +32,8 @@ APPLICATION_NAME   := redback
 BUILD_EXEC         := yes
 DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 
-LIBDIR = $(shell dirname `pwd`)/cosserat_dynlib
-LIBDIR_EXISTS = =$(shell [ -e LIBDIR ] && echo 1 || echo 0 )
+LIBDIR := $(HOME)/projects/cosserat_dynlib
+LIBDIR_EXISTS = $(shell [ -e $(LIBDIR) ] && echo 1 || echo 0 )
 
 ifeq ($(LIBDIR_EXISTS), 1)
   include            $(FRAMEWORK_DIR)/app.mk
