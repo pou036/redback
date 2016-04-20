@@ -56,5 +56,6 @@
   input = 'bench_elastic_HO_shear.i'
   exodiff = 'bench_elastic_HO_shear.e'
   abs_zero = 1e-9
+  heavy = true
 [../]
 []
