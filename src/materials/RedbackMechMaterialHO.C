@@ -79,6 +79,8 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _active_surfaces(declareProperty<Real>("active_surfaces")),
     _lagrange_multiplier(declareProperty<Real>("lagrange_multiplier")),
     _failure_surface(declareProperty<Real>("failure_surface")),
+    _stress_older(declarePropertyOlder<RankTwoTensor>("stress")),
+    _stress_couple_older(declarePropertyOlder<RankTwoTensor>("coupled_stress")),
     _wc_x(coupledValue("wc_x")),
     _wc_y(coupledValue("wc_y")),
     _wc_z(coupledValue("wc_z")),
@@ -93,7 +95,6 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _dilatancy_coefficient(getParam<Real>("dilatancy_coefficient")),
     _hardening_mech_modulus(getParam<Real>("hardening_mech_modulus"))
-
 {
   _Bijkl.fillFromInputVector(_Bijkl_vector, (RankFourTensor::FillMethod)(int)_fill_method_bending);
   _shear_modulus = _Cijkl_vector[ 1 ];

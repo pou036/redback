@@ -6,7 +6,8 @@
 /****************************************************************/
 #include "RedbackCosseratDynamicStressDivergenceTensors2.h"
 #include "Material.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
+#include "ElasticityTensorTools.h"
 #include "RankTwoTensor.h"
 #include "MooseMesh.h"
 
@@ -42,7 +43,8 @@ RedbackCosseratDynamicStressDivergenceTensors2::computeQpOffDiagJacobian(unsigne
     coupled_component = 2;
 
   if (coupled_component < 3)
-    return _Jacobian_mult[_qp].elasticJacobianwc(_component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]*(1+_alpha+_zeta/_dt));
+    return //_Jacobian_mult[_qp].elasticJacobianwc(_component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]*(1+_alpha+_zeta/_dt));
+    ElasticityTensorTools::elasticJacobianWC(_Jacobian_mult[_qp], _component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]*(1+_alpha+_zeta/_dt));
   else;
 
   return StressDivergenceTensors::computeQpOffDiagJacobian(jvar);

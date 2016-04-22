@@ -7,7 +7,8 @@
 #include "RedbackDynamicMomentBalancing.h"
 
 #include "Material.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
+#include "ElasticityTensorTools.h"
 #include "RankTwoTensor.h"
 
 template<>
@@ -57,7 +58,8 @@ RedbackDynamicMomentBalancing::computeQpResidual()
 Real
 RedbackDynamicMomentBalancing::computeQpJacobian()
 {
-  return _Jacobian_mult[_qp].momentJacobianwc(_component, _component, _test[_i][_qp], _phi[_j][_qp]*(1+_alpha+_zeta/_dt));
+  return //_Jacobian_mult[_qp].momentJacobianwc(_component, _component, _test[_i][_qp], _phi[_j][_qp]*(1+_alpha+_zeta/_dt));
+  ElasticityTensorTools::momentJacobianWC(_Jacobian_mult[_qp], _component, _component, _test[_i][_qp], _phi[_j][_qp]*(1+_alpha+_zeta/_dt));
 }
 
 Real
@@ -74,8 +76,8 @@ RedbackDynamicMomentBalancing::computeQpOffDiagJacobian(unsigned int jvar)
     coupled_component = 2;
 
   if (coupled_component < 3)
-    return _Jacobian_mult[_qp].momentJacobian(_component, coupled_component, _test[_i][_qp], _grad_phi[_j][_qp]*(1+_alpha+_zeta/_dt));
-
+    return //_Jacobian_mult[_qp].momentJacobian(_component, coupled_component, _test[_i][_qp], _grad_phi[_j][_qp]*(1+_alpha+_zeta/_dt));
+ElasticityTensorTools::momentJacobian(_Jacobian_mult[_qp], _component, coupled_component, _test[_i][_qp],  _grad_phi[_j][_qp]*(1+_alpha+_zeta/_dt));
   // What does 2D look like here?
   if (jvar == _wc_x_var)
     coupled_component = 0;
@@ -85,7 +87,7 @@ RedbackDynamicMomentBalancing::computeQpOffDiagJacobian(unsigned int jvar)
     coupled_component = 2;
 
   if (coupled_component < 3)
-    return _Jacobian_mult[_qp].momentJacobianwc(_component, coupled_component, _test[_i][_qp], _phi[_j][_qp]*(1+_alpha+_zeta/_dt));
-
+    return //_Jacobian_mult[_qp].momentJacobianwc(_component, coupled_component, _test[_i][_qp], _phi[_j][_qp]*(1+_alpha+_zeta/_dt));
+ElasticityTensorTools::momentJacobianWC(_Jacobian_mult[_qp], _component, coupled_component, _test[_i][_qp], _phi[_j][_qp]*(1+_alpha+_zeta/_dt));
   return 0;
 }

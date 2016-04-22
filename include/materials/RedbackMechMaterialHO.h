@@ -102,6 +102,8 @@ protected:
   MaterialProperty<Real> & _active_surfaces;
   MaterialProperty<Real> & _lagrange_multiplier;
   MaterialProperty<Real> & _failure_surface;
+  MaterialProperty<RankTwoTensor> & _stress_older;
+  MaterialProperty<RankTwoTensor> & _stress_couple_older;
 
 private:
   const VariableValue & _wc_x;

@@ -77,6 +77,11 @@ protected:
 
   MaterialProperty<RankTwoTensor> & _curvature_increment;
   MaterialProperty<RankTwoTensor> & _plastic_curvature;
+  MaterialProperty<RankTwoTensor> & _stress_old;
+  MaterialProperty<RankTwoTensor> & _stress_older;
+  MaterialProperty<RankTwoTensor> & _stress_couple_old;
+  MaterialProperty<RankTwoTensor> & _stress_couple_older;
+
   //MaterialProperty<RankTwoTensor> & _plastic_curvature_old;
 
 
