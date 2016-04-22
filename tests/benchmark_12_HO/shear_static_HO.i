@@ -11,9 +11,6 @@
   wc_z = wc_z
   wc_y = wc_y
   wc_x = wc_x
-  beta = 0.25
-  alpha = 0
-  gamma = 0.5
 []
 
 [Postprocessors]
@@ -235,30 +232,6 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./vel_x]
-  [../]
-  [./vel_y]
-  [../]
-  [./vel_z]
-  [../]
-  [./accel_x]
-  [../]
-  [./accel_y]
-  [../]
-  [./accel_z]
-  [../]
-  [./vel_wc_x]
-  [../]
-  [./vel_wc_y]
-  [../]
-  [./vel_wc_z]
-  [../]
-  [./accel_wc_x]
-  [../]
-  [./accel_wc_y]
-  [../]
-  [./accel_wc_z]
-  [../]
 []
 
 [Functions]
@@ -278,65 +251,26 @@
 
 [Kernels]
   active = 'T_diff cx_elastic cz_elastic cy_elastic x_couple thermal_press y_moment z_couple dT_dt dissip x_moment y_couple z_moment p_diff dp_dt'
-  [./inertia_x]
-    type = RedbackInertialForce
-    variable = disp_x
-    velocity = vel_x
-    acceleration = accel_x
-  [../]
-  [./inertia_y]
-    type = RedbackInertialForce
-    variable = disp_y
-    velocity = vel_y
-    acceleration = accel_y
-  [../]
-  [./inertia_z]
-    type = RedbackInertialForce
-    variable = disp_z
-    velocity = vel_z
-    acceleration = accel_z
-  [../]
-  [./inertia_wc_x]
-    type = RedbackInertialForce
-    variable = wc_x
-    velocity = vel_wc_x
-    acceleration = accel_wc_x
-    microinertia = 0.01
-  [../]
-  [./inertia_wc_y]
-    type = RedbackInertialForce
-    variable = wc_y
-    velocity = vel_wc_y
-    acceleration = accel_wc_y
-    microinertia = 0.01
-  [../]
-  [./inertia_wc_z]
-    type = RedbackInertialForce
-    variable = wc_z
-    velocity = vel_wc_z
-    acceleration = accel_wc_z
-    microinertia = 0.01
-  [../]
   [./cx_elastic]
-    type = RedbackCosseratDynamicStressDivergenceTensors2
+    type = RedbackCosseratStressDivergenceTensors
     variable = disp_x
     displacements = 'disp_x disp_y disp_z'
     component = 0
   [../]
   [./cy_elastic]
-    type = RedbackCosseratDynamicStressDivergenceTensors2
+    type = RedbackCosseratStressDivergenceTensors
     variable = disp_y
     displacements = 'disp_x disp_y disp_z'
     component = 1
   [../]
   [./cz_elastic]
-    type = RedbackCosseratDynamicStressDivergenceTensors2
+    type = RedbackCosseratStressDivergenceTensors
     variable = disp_z
     component = 2
     displacements = 'disp_x disp_y disp_z'
   [../]
   [./x_couple]
-    type = RedbackCosseratDynamicStressDivergenceTensors2
+    type = RedbackCosseratStressDivergenceTensors
     variable = wc_x
     displacements = 'wc_x wc_y wc_z'
     wc_x = disp_x
@@ -346,7 +280,7 @@
     base_name = coupled
   [../]
   [./y_couple]
-    type = RedbackCosseratDynamicStressDivergenceTensors2
+    type = RedbackCosseratStressDivergenceTensors
     variable = wc_y
     component = 1
     displacements = 'wc_x wc_y wc_z'
@@ -356,7 +290,7 @@
     base_name = coupled
   [../]
   [./z_couple]
-    type = RedbackCosseratDynamicStressDivergenceTensors2
+    type = RedbackCosseratStressDivergenceTensors
     variable = wc_z
     component = 2
     displacements = 'wc_x wc_y wc_z'
@@ -364,21 +298,19 @@
     wc_y = disp_y
     wc_z = disp_z
     base_name = coupled
-    alpha = 0.1
   [../]
   [./x_moment]
-    type = RedbackDynamicMomentBalancing
+    type = MomentBalancing
     variable = wc_x
     component = 0
   [../]
   [./y_moment]
-    type = RedbackDynamicMomentBalancing
+    type = MomentBalancing
     variable = wc_y
     component = 1
-    alpha = 0.1
   [../]
   [./z_moment]
-    type = RedbackDynamicMomentBalancing
+    type = MomentBalancing
     variable = wc_z
     component = 2
   [../]
@@ -455,96 +387,6 @@
     type = MaterialRealAux
     variable = plastic_strain
     property = lagrange_multiplier
-  [../]
-  [./accel_x]
-    type = NewmarkAccelAux
-    variable = accel_x
-    displacement = disp_x
-    velocity = vel_x
-    beta = 0.25
-    execute_on = timestep_end
-  [../]
-  [./vel_x]
-    type = NewmarkVelAux
-    variable = vel_x
-    acceleration = accel_x
-    gamma = 0.5
-    execute_on = timestep_end
-  [../]
-  [./accel_y]
-    type = NewmarkAccelAux
-    variable = accel_y
-    displacement = disp_y
-    velocity = vel_y
-    beta = 0.25
-    execute_on = timestep_end
-  [../]
-  [./vel_y]
-    type = NewmarkVelAux
-    variable = vel_y
-    acceleration = accel_y
-    gamma = 0.5
-    execute_on = timestep_end
-  [../]
-  [./accel_z]
-    type = NewmarkAccelAux
-    variable = accel_z
-    displacement = disp_z
-    velocity = vel_z
-    beta = 0.25
-    execute_on = timestep_end
-  [../]
-  [./vel_z]
-    type = NewmarkVelAux
-    variable = vel_z
-    acceleration = accel_z
-    gamma = 0.5
-    execute_on = timestep_end
-  [../]
-  [./accel_wc_x]
-    type = NewmarkAccelAux
-    variable = accel_wc_x
-    displacement = wc_x
-    velocity = vel_wc_x
-    beta = 0.25
-    execute_on = timestep_end
-  [../]
-  [./vel_wc_x]
-    type = NewmarkVelAux
-    variable = vel_wc_x
-    acceleration = accel_wc_x
-    gamma = 0.5
-    execute_on = timestep_end
-  [../]
-  [./accel_wc_y]
-    type = NewmarkAccelAux
-    variable = accel_wc_y
-    displacement = wc_y
-    velocity = vel_wc_y
-    beta = 0.25
-    execute_on = timestep_end
-  [../]
-  [./vel_wc_y]
-    type = NewmarkVelAux
-    variable = vel_wc_y
-    acceleration = accel_wc_y
-    gamma = 0.5
-    execute_on = timestep_end
-  [../]
-  [./accel_wc_z]
-    type = NewmarkAccelAux
-    variable = accel_wc_z
-    displacement = wc_z
-    velocity = vel_wc_z
-    beta = 0.25
-    execute_on = timestep_end
-  [../]
-  [./vel_wc_z]
-    type = NewmarkVelAux
-    variable = vel_wc_z
-    acceleration = accel_wc_z
-    gamma = 0.5
-    execute_on = timestep_end
   [../]
   [./plastic_xx]
     type = RankTwoAux
@@ -807,4 +649,3 @@
   file_base = shear_dynamic_HO
   print_linear_residuals = false
 []
-
