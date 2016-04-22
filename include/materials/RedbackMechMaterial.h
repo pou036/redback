@@ -146,7 +146,7 @@ protected:
   MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
   MaterialProperty<Real> & _damage_kernel;
   MaterialProperty<Real> & _damage_kernel_jac;
-  Real _damage_coeff, _healing_coeff;
+  Real _damage_coeff, _dmg_exponent, _healing_coeff;
 
   Real _exponential;
   // const VariableValue & _dispx_dot;
@@ -193,7 +193,6 @@ protected:
   virtual void formDamageDissipation(RankTwoTensor &);
   virtual void formBrittleDamage();
   virtual void formCreepDamage(Real);
-
 
   Real _damage_dissipation;
 };

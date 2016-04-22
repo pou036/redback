@@ -60,7 +60,6 @@ validParams<RedbackMaterial>()
                              "The name of the variable multiplied by the continuation_parameter value");
   params.addCoupledVar("concentration", 0.0, "The concentration of species");
 
-
   // params.addCoupledVar("solid_velocity_aux", "Solid velocity (AuxKernel) from RedbackMechMaterial (if used)");
   params.addParam<MooseEnum>(
     "density_method",
@@ -72,7 +71,8 @@ validParams<RedbackMaterial>()
 
   params.addParam<Real>("ar_F", 0.0, "Arrhenius number for the forward reaction.");
   params.addParam<Real>("ar_R", 0.0, "Arrhenius number for the reverse reaction.");
-  params.addParam<Real>("chemical_ar_F_factor", 0.0, "Mutliplying factor of concentration for Arrhenius of the forward reaction.");
+  params.addParam<Real>(
+    "chemical_ar_F_factor", 0.0, "Mutliplying factor of concentration for Arrhenius of the forward reaction.");
   params.addParam<Real>("da_endo", 0, "Damkoehler number for the endothermic reaction.");
   params.addParam<Real>("da_exo", 0, "Damkoehler number for the exothermic reaction.");
   params.addParam<Real>("mu", 0, "Chemical pressurization coefficient.");
@@ -460,7 +460,7 @@ RedbackMaterial::computeRedbackTerms()
     */
 
     // Update chemical Arrhenius term
-    _ar_F[_qp] += _chemical_ar_F_factor*_concentration[_qp];
+    _ar_F[ _qp ] += _chemical_ar_F_factor * _concentration[ _qp ];
 
     // Step 1: calculate the relative rate of reactions
     omega_rel = _eta2_param * _Kc_param * std::exp(-(_ar_F[ _qp ] - _ar_R[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));

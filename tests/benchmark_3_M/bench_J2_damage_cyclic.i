@@ -1,15 +1,15 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 5
-  ny = 5
+  nx = 3
+  ny = 3
   xmin = -1.5
   xmax = 1.5
   ymin = -1
 []
 
 [Variables]
-  active = 'disp_z disp_y disp_x damage'
+  active = 'damage disp_z disp_y disp_x'
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -63,7 +63,7 @@
 []
 
 [Functions]
-  active = 'downfunc cyclic_loading'
+  active = 'cyclic_loading downfunc'
   [./upfunc]
     type = ParsedFunction
     value = t
@@ -77,12 +77,12 @@
   [../]
   [./cyclic_loading]
     type = ParsedFunction
-    value = if(t<0.1,-1,0)
+    value = 10*sin(100*t) # if(t<0.1,-1,0)
   [../]
 []
 
 [BCs]
-  active = 'left_disp rigth_disp_y left_disp_y cyclic_loading_right'
+  active = 'left_disp rigth_disp_y cyclic_loading_right left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -146,7 +146,7 @@
 []
 
 [AuxVariables]
-  active = 'mech_porosity Mod_Gruntfest_number total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
+  active = 'mech_porosity Mod_Gruntfest_number total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress Elastic_mod_1111'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -206,6 +206,10 @@
     order = FIRST
     family = MONOMIAL
   [../]
+  [./Elastic_mod_1111]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Kernels]
@@ -220,7 +224,7 @@
 []
 
 [AuxKernels]
-  active = 'mech_porosity volumetric_strain total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress Gruntfest_Number'
+  active = 'mech_porosity volumetric_strain total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress Gruntfest_Number elastic_modulus'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -302,6 +306,15 @@
     execute_on = timestep_end
     property = mechanical_porosity
   [../]
+  [./elastic_modulus]
+    type = RankFourAux
+    variable = Elastic_mod_1111
+    rank_four_tensor = elasticity_tensor
+    index_l = 0
+    index_j = 0
+    index_k = 0
+    index_i = 0
+  [../]
 []
 
 [Postprocessors]
@@ -354,7 +367,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 0.25
+  end_time = 0.018
   dtmax = 1
   dtmin = 1e-7
   type = Transient

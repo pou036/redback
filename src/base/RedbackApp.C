@@ -53,7 +53,6 @@
 // Dirac Kernels
 #include "FunctionPointSource.h"
 
-
 // Materials
 #include "RedbackFluidMaterial.h"
 #include "ImageProcessing.h"

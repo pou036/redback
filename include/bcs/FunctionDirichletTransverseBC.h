@@ -32,7 +32,7 @@ protected:
   virtual Real computeQpValue();
 
   const VariableValue & _u_old;
-  
+
   /// Function being used for evaluation of this BC
   Function & _func;
 

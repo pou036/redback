@@ -82,8 +82,8 @@ protected:
   Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param;
   Real _confining_pressure_param, _biot_coeff_param, _alpha_1_param, _alpha_2_param, _alpha_3_param,
     _peclet_number_param; //_ar_c_param, _da_param, _mu_param,
-  Real _ar_F_param, _ar_R_param, _chemical_ar_F_factor, _da_endo_param, _da_exo_param, _mu_param, _Kc_param, _eta1_param, _eta2_param,
-    _Aphi_param, _pressurization_coefficient_param;
+  Real _ar_F_param, _ar_R_param, _chemical_ar_F_factor, _da_endo_param, _da_exo_param, _mu_param, _Kc_param,
+    _eta1_param, _eta2_param, _Aphi_param, _pressurization_coefficient_param;
   Real _solid_compressibility_param, _fluid_compressibility_param, _solid_thermal_expansion_param,
     _fluid_thermal_expansion_param, _solid_density_param, _fluid_density_param;
   bool _is_mechanics_on, _is_chemistry_on, _are_convective_terms_on;

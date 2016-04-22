@@ -16,11 +16,11 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-//Forward Declarations
+// Forward Declarations
 class FunctionPointSource;
 class Function;
 
-template<>
+template <>
 InputParameters validParams<FunctionPointSource>();
 
 /**
@@ -37,10 +37,10 @@ public:
 protected:
   Real f();
 
-  //Real _value;
+  // Real _value;
   Function & _func;
   std::vector<Real> _point_param;
   Point _p;
 };
 
-#endif //FUNCTIONPOINTSOURCE_H
+#endif // FUNCTIONPOINTSOURCE_H
