@@ -610,7 +610,7 @@
     block = 0
     solid_thermal_expansion = 1e-2
     da_exo = 1
-    phi0 = 0.0
+    phi0 = 0.1
     ref_lewis_nb = 0.1
     gr = 0.178571428571
     pressurization_coefficient = 1
@@ -659,4 +659,3 @@
   file_base = shear_dynamic_HO
   print_linear_residuals = false
 []
-
