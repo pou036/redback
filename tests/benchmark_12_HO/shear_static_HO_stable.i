@@ -253,7 +253,7 @@
   [../]
   [./tangent_hyperbolic]
     type = ParsedFunction
-    value = -0.666666*tanh(t)
+    value = -0.666666*tanh(0.1*t)
   [../]
 []
 
@@ -601,7 +601,7 @@
     damage_method = BreakageMechanics
     cohesion = 0.01
     friction_coefficient = -0.5
-    hardening_mech_modulus = 0.05
+    hardening_mech_modulus = 0.012
   [../]
   [./redback_mat]
     type = RedbackMaterial
@@ -624,7 +624,7 @@
     type = GenericConstantMaterial
     block = 0
     prop_names = density
-    prop_values = 2.5E-6
+    prop_values = 2.5e-6
   [../]
 []
 
@@ -661,4 +661,3 @@
   file_base = shear_dynamic_HO
   print_linear_residuals = false
 []
-
