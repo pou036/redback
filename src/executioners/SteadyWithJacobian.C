@@ -19,6 +19,8 @@
 #include "MooseApp.h"
 #include "NonlinearSystem.h"
 
+#include "Conversion.h"
+
 // libMesh includes
 #include "libmesh/equation_systems.h"
 
@@ -106,6 +108,11 @@ SteadyWithJacobian::execute()
 
     // The system has been solved - now we change the flags sent to Petsc and to output the Jacobian.
 
+    _console <<  std::scientific << COLOR_GREEN
+            << "\n +++ Steady state solution found - outputting Jacobian +++ \n"
+	        << COLOR_DEFAULT
+	        << std::endl;
+
     // update Petsc flags
 #ifdef LIBMESH_HAVE_PETSC
   /**
@@ -122,6 +129,10 @@ SteadyWithJacobian::execute()
 
   thePetscOptions.inames.push_back("-mat_fd_type");
   thePetscOptions.values.push_back("ds");
+
+
+  // change solve type to Newton
+  _problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>("NEWTON");
 
   _problem.solve();
 
