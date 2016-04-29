@@ -104,6 +104,33 @@ SteadyWithJacobian::execute()
       break;
     }
 
+    // The system has been solved - now we change the flags sent to Petsc and to output the Jacobian.
+
+    // update Petsc flags
+#ifdef LIBMESH_HAVE_PETSC
+  /**
+   * Retrieve a writable reference the PETSc options (used by PetscSupport)
+   */
+  Moose::PetscSupport::PetscOptions &  thePetscOptions  =  _problem.getPetscOptions();
+
+  // '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds'
+
+  thePetscOptions.flags.push_back("-snes_test_display");
+
+  thePetscOptions.inames.push_back("-snes_type");
+  thePetscOptions.values.push_back("test");
+
+  thePetscOptions.inames.push_back("-mat_fd_type");
+  thePetscOptions.values.push_back("ds");
+
+  _problem.solve();
+
+#else
+  _console << "Aborting as unable to modify Petsc options\n";
+  break;
+
+#endif //LIBMESH_HAVE_PETSC
+
     _problem.onTimestepEnd();
     _problem.execute(EXEC_TIMESTEP_END);
 
