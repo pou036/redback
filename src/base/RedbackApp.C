@@ -66,6 +66,9 @@
 // MeshModifiers
 #include "ElementFileSubdomain.h"
 
+// Executioners
+#include "SteadyWithJacobian.h"
+
 // Timesteppers
 #include "ReturnMapIterDT.h"
 
@@ -150,6 +153,10 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialElastic);
 
   registerMeshModifier(ElementFileSubdomain);
+
+
+  std::cout << "Hey I'm doing it!!!" << std::endl;
+  registerExecutioner(SteadyWithJacobian);
 
   registerExecutioner(ReturnMapIterDT);
 
