@@ -37,6 +37,7 @@ validParams<RedbackMechMaterialHO>()
   MooseEnum fm = RankFourTensor::fillMethodEnum();
   fm = "general_isotropic";
   params.addParam<MooseEnum>("fill_method_bending", fm, "The fill method for the 'bending' tensor.");
+  params.addParam<std::string>("plasticity_type", "Name that allows to switch for different subroutines for the return map algorithm");
 
   return params;
 }
@@ -81,6 +82,7 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _failure_surface(declareProperty<Real>("failure_surface")),
     _stress_older(declarePropertyOlder<RankTwoTensor>("stress")),
     _stress_couple_older(declarePropertyOlder<RankTwoTensor>("coupled_stress")),
+    _plasticity_type(isParamValid("plasticity_type") ? getParam<std::string>("plasticity_type") + "_" : ""),
     _wc_x(coupledValue("wc_x")),
     _wc_y(coupledValue("wc_y")),
     _wc_z(coupledValue("wc_z")),
@@ -274,14 +276,19 @@ for (unsigned i = 0; i < NSTR*NSTR; ++i){
 DSDE[i] = 0;
 }
 
-/*
-Real verbose = 0;
-Real y_coord = _current_elem->centroid()(1);
-if (y_coord > 0.45 && y_coord < 0.55 && _qp==0)
-  verbose = 1;
-*/
+if (_plasticity_type.compare("druckerPrager3D_frictionHard") == 0){
+  usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+}
+else if (_plasticity_type.compare("druckerPrager3D_frictionHard_adim") == 0){
+  usermat1_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+}
+else if (_plasticity_type.compare("druckerPrager3D_cohesionHard") == 0){
+  usermat2_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+}
+else{
+  std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
+}
 
-usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
 
 Real verbose = 0;
 Real y_coord = _current_elem->centroid()(1);

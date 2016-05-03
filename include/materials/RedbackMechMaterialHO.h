@@ -104,6 +104,7 @@ protected:
   MaterialProperty<Real> & _failure_surface;
   MaterialProperty<RankTwoTensor> & _stress_older;
   MaterialProperty<RankTwoTensor> & _stress_couple_older;
+  std::string _plasticity_type;
 
 private:
   const VariableValue & _wc_x;
