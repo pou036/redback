@@ -14,7 +14,7 @@
 template<>
 InputParameters validParams<RedbackDynamicMomentBalancing>()
 {
-  InputParameters params = validParams<MomentBalancing>();
+  InputParameters params = validParams<RedbackMomentBalancing>();
   params.addClassDescription("Residual due to stress related Rayleigh damping and HHT time integration terms ");
   params.addParam<Real>("zeta", 0, "zeta parameter for the Rayleigh damping");
   params.addParam<Real>("alpha", 0, "alpha parameter for HHT time integration");
@@ -22,7 +22,7 @@ InputParameters validParams<RedbackDynamicMomentBalancing>()
 }
 
 RedbackDynamicMomentBalancing::RedbackDynamicMomentBalancing(const InputParameters & parameters) :
-MomentBalancing(parameters),
+RedbackMomentBalancing(parameters),
 _stress_older(getMaterialPropertyOlderByName<RankTwoTensor>("stress")),
 _stress_old(getMaterialPropertyOldByName<RankTwoTensor>("stress")),
 _zeta(getParam<Real>("zeta")),

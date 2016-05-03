@@ -6,13 +6,13 @@
 /****************************************************************/
 #ifndef RedbackDynamicMomentBalancing_H
 #define RedbackDynamicMomentBalancing_H
-#include "MomentBalancing.h"
+#include "RedbackMomentBalancing.h"
 
 
 //template<>
 //InputParameters validParams<RedbackDynamicMomentBalancing>();
 
-class RedbackDynamicMomentBalancing : public MomentBalancing
+class RedbackDynamicMomentBalancing : public RedbackMomentBalancing
 {
 public:
   RedbackDynamicMomentBalancing(const InputParameters & parameters);
