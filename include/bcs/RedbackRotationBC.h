@@ -16,6 +16,8 @@
 #define REDBACKROTATIONBC_H
 
 #include "NodalBC.h"
+#include "MaterialPropertyInterface.h"
+
 
 //Forward Declarations
 class RedbackRotationBC;
@@ -23,27 +25,28 @@ class RedbackRotationBC;
 template<>
 InputParameters validParams<RedbackRotationBC>();
 
-/**
- * Implements a simple coupled boundary condition where u=alpha*grad(v) on the boundary.
- */
-class RedbackRotationBC : public NodalBC
+class RedbackRotationBC : public NodalBC,
+public MaterialPropertyInterface
+
 {
 public:
   RedbackRotationBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
-  //virtual Real computeQpOffDiagJacobian(unsigned int jvar);
- //VariableGradient & _some_var_1;
- //VariableGradient & _some_var_2;
- //double _d1;
- //double _d2;
-  //const MaterialProperty<Real> _test;// _antisymmetric_strain;
-  //const MaterialProperty<Real> & _test;
-  const VariableValue & _grad_ux;
 
-  /// The id of the coupled variable
-  //unsigned int _v_num;
+  const VariableValue & _disp_x;
+  const VariableValue & _disp_y;
+  const VariableValue & _disp_z;
+
+  const VariableGradient & _grad_ux;
+  const VariableGradient & _grad_uy;
+  const VariableGradient & _grad_uz;
+
+  Real _comp_1;
+  Real _comp_2;
+  Real _scalar;
+
 };
 
 #endif //RedbackRotationBC_H

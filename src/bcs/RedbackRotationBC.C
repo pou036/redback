@@ -13,46 +13,54 @@
 /****************************************************************/
 
 #include "RedbackRotationBC.h"
+#include "MooseMesh.h"
+
 
 template<>
 InputParameters validParams<RedbackRotationBC>()
 {
   InputParameters params = validParams<NodalBC>();
-  params.addRequiredCoupledVar("grad_ux", "The gradient of this variable will be used to calculate the 1st term of macro-rotation");
-  //params.addRequiredCoupledVar("some_var_1", "The gradient of this variable will be used to calculate the 1st term of macro-rotation");
-  //params.addRequiredCoupledVar("some_var_2", "The gradient of this variable will be used to calculate the 2nd term of macro-rotation");
-  //params.addParam<double>("dir1", 0, "direction of the first derivative");
-  //params.addParam<double>("dir2", 0, "direction of the second derivative");
-  //params.addRequiredCoupledVar("antisymmetric_strain_xz", "...");
-  //params.addRequiredCoupledVar("antisymmetric_strain_yz", "...");
-  //params.addParam<Real>("alpha", 1, "factor before the antisymmetric strain");
+  params += validParams<MaterialPropertyInterface>();
+
+  params.addRequiredCoupledVar("disp_x", "displacement in x");
+  params.addCoupledVar("disp_y", "displacement in y"); // only required in 2D and 3D
+  params.addCoupledVar("disp_z", "displacement in z"); // only required in 3D
+
+  params.addRequiredParam<Real>("comp_1", "first component of the macro-rotation tensor");
+  params.addRequiredParam<Real>("comp_2", "second component of the macro-rotation tensor");
+  params.addRequiredParam<Real>("scalar", "scalar that multiplies the macro-rotation");
+
   return params;
 }
 
 RedbackRotationBC::RedbackRotationBC(const InputParameters & parameters) :
     NodalBC(parameters),
-    _grad_ux(coupledValue("grad_ux"))
-      //_some_var_1(coupledGradient("some_var_1")),
-      //_some_var_2(coupledGradient("some_var_2")),
-      //_d1(getParam<double>("dir1")),
-      //_d2(getParam<double>("dir2"))
-    //_v(coupledValue("v")),
-    //_v_num(coupled("v")),
-    //_grad_v(coupledGradient("v")),
-    //_alpha(getParam<Real>("alpha"))
+    MaterialPropertyInterface(this),
+
+
+    // Coupled variables
+    _disp_x(coupledValue("disp_x")),
+    _disp_y(_mesh.dimension() >= 2 ? coupledValue("disp_y") : _zero),
+    _disp_z(_mesh.dimension() == 3 ? coupledValue("disp_z") : _zero),
+
+    // Gradient of Coupled variables
+    _grad_ux(coupledGradient("disp_x")),
+    _grad_uy(_mesh.dimension() >= 2 ? coupledGradient("disp_y") : _grad_zero),
+    _grad_uz(_mesh.dimension() == 3 ? coupledGradient("disp_z") : _grad_zero),
+
+    // Required parameters
+    _comp_1(getParam<Real>("comp_1")),
+    _comp_2(getParam<Real>("comp_2")),
+    _scalar(getParam<Real>("scalar"))
 {}
 
 Real
 RedbackRotationBC::computeQpResidual()
 {
-  return _u[_qp];//-0.5*(_grad_ux[_qp])//-0.5*(_some_var_1[_qp](_d1)-_some_var_2[_qp](_d2));// - _antisymmetric_strain_ij[_qp];
-}
+  RealTensorValue grad_tensor_u(_grad_ux[_qp], _grad_uy[_qp], _grad_uz[_qp]);
+  RealTensorValue macro_rot;
 
-//Real
-//RedbackRotationBC::computeQpOffDiagJacobian(unsigned int jvar)
-//{
-//  if (jvar == _v_num)
-//    return -1.0;
-//  else
-//    return 0.;
-//}
+  macro_rot = (grad_tensor_u - grad_tensor_u.transpose()) / 2.0;
+
+  return _u[_qp] - _scalar * macro_rot(_comp_1,_comp_2);
+}
