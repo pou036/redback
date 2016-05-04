@@ -23,6 +23,20 @@
 
 // libMesh includes
 #include "libmesh/equation_systems.h"
+#include "libmesh/sparse_matrix.h"
+
+
+
+
+#ifdef LIBMESH_HAVE_PETSC
+#include <petsc/private/snesimpl.h>
+
+
+#include "libmesh/petsc_matrix.h"
+
+
+
+#endif
 
 template<>
 InputParameters validParams<SteadyWithJacobian>()
@@ -118,23 +132,204 @@ SteadyWithJacobian::execute()
   /**
    * Retrieve a writable reference the PETSc options (used by PetscSupport)
    */
-  Moose::PetscSupport::PetscOptions &  thePetscOptions  =  _problem.getPetscOptions();
 
-  // '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds'
+    bool doOriginalMethod = false;
+    if(doOriginalMethod){
+    	Moose::PetscSupport::PetscOptions &  thePetscOptions  =  _problem.getPetscOptions();
 
-  thePetscOptions.flags.push_back("-snes_test_display");
+    	// '-snes_type', 'test', '-snes_test_display', '-mat_fd_type', 'ds'
 
-  thePetscOptions.inames.push_back("-snes_type");
-  thePetscOptions.values.push_back("test");
+    	thePetscOptions.flags.push_back("-snes_test_display");
 
-  thePetscOptions.inames.push_back("-mat_fd_type");
-  thePetscOptions.values.push_back("ds");
+    	thePetscOptions.inames.push_back("-snes_type");
+    	thePetscOptions.values.push_back("test");
+
+    	thePetscOptions.inames.push_back("-mat_fd_type");
+    	thePetscOptions.values.push_back("ds");
 
 
-  // change solve type to Newton
-  _problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>("NEWTON");
+    	// change solve type to Newton
+    	_problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>("NEWTON");
 
-  _problem.solve();
+    	_problem.solve();
+
+    	// Petsc will exit at this point after the jacobian is be dumped to std out
+    } else if(false){
+
+    	Moose::PetscSupport::PetscOptions &  thePetscOptions  =  _problem.getPetscOptions();
+    	thePetscOptions.inames.push_back("-mat_fd_type");
+    	thePetscOptions.values.push_back("ds");
+
+    	// change solve type to Newton
+    	_problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>("NEWTON");
+
+    	//_problem.solve();  // solve releases the jacobian on exit?
+
+        Moose::PetscSupport::petscSetOptions(_problem); // Make sure the PETSc options are setup for this app
+        Moose::setSolverDefaults(_problem);
+
+        // Setup the output system for printing linear/nonlinear iteration information
+        _problem.initPetscOutput();
+
+        _problem.possiblyRebuildGeomSearchPatches();
+
+
+    	std::cout << "Got here A " << std::endl ;
+
+    	// attempt to get jacobian directly (reproduce snestest.c routines)
+
+    	NonlinearSystem & nl =  _problem.getNonlinearSystem();
+
+    	//nl.init();
+    	nl.solve();
+
+        nl.update();
+
+    	//PetscNonlinearSolver<Number> *petsc_solver = dynamic_cast<PetscNonlinearSolver<Number> *>(nl.sys().nonlinear_solver.get());
+
+    	//std::cout << "petsc_solver " << petsc_solver << std::endl ;
+
+    	//SNES snes = petsc_solver->snes();
+
+    	PetscNonlinearSolver<Real> & petsc_solver = static_cast<PetscNonlinearSolver<Real> &>(*nl.sys().nonlinear_solver);
+
+    	SNES snes = petsc_solver.snes();
+
+    	std::cout << "snes " << snes << std::endl ;
+
+
+    	std::cout << "Got here B " << std::endl ;
+
+    	// snestest.c
+    	Mat            A = snes->jacobian,B;
+    	Vec            x = snes->vec_sol,f = snes->vec_func,f1 = snes->vec_sol_update;
+    	PetscInt       i;
+    	PetscReal      nrm,gnorm;
+    	//SNES_Test      *neP = (SNES_Test*)snes->data;
+    	PetscErrorCode (*objective)(SNES,Vec,PetscReal*,void*);
+    	void           *ctx;
+    	PetscReal      fnorm,f1norm,dnorm;
+
+    	if (A != snes->jacobian_pre){
+    		//SETERRQ(PETSC_COMM_SELF,PETSC_ERR_ARG_WRONG,"Cannot test with alternative preconditioner");
+
+    	      _console << "Aborting as cannot output Petsc jacobian with alternative preconditioner\n";
+    	      break;
+    	}
+
+    	std::cout << "A " << A << std::endl ;  // this is not being populated
+    	std::cout << "x " << x << std::endl ;
+    	std::cout << "f " << f << std::endl ;
+    	std::cout << "f1 " << f1 << std::endl ;
+    	std::cout << "Got here C " << std::endl ;
+
+    	/* evaluate the function at this point because SNESComputeJacobianDefaultColor() assumes that the function has been evaluated and put into snes->vec_func */
+    	/*
+    	 * This is failing - could not this line in snestest.c for version 2.3.3
+    	 *
+    	SNESComputeFunction(snes,x,f);
+    	if (snes->domainerror) {
+    	    PetscPrintf(PetscObjectComm((PetscObject)snes),"Domain error at user-defined state\n");
+    	    snes->domainerror = PETSC_FALSE;
+    	    continue;
+    	}
+    	*/
+    	PetscInt                 m,n,M,N;
+        MatGetSize(A,&M,&N);
+        std::cout << M << " " << N << std::endl;
+
+    	std::cout << "Got here D " << std::endl ;
+
+    	// user defined jacobian
+    	SNESComputeJacobian(snes,x,A,A);
+
+    	// finite difference jacobian
+    	/*
+
+    	//PetscInt                 m,n,M,N;
+    	 MatCreate(PetscObjectComm((PetscObject)A),&B);
+         MatGetSize(A,&M,&N);
+    	 MatGetLocalSize(A,&m,&n);
+    	 MatSetSizes(B,m,n,M,N);
+    	 MatSetType(B,((PetscObject)A)->type_name);
+    	 MatSetUp(B);
+    	 MatSetOption(B,MAT_NEW_NONZERO_ALLOCATION_ERR,PETSC_FALSE);
+
+    	 SNESGetFunction(snes,NULL,NULL,&functx);
+    	 SNESComputeJacobianDefault(snes,x,B,B,functx);
+    	 */
+
+    	MPI_Comm    comm;
+    	PetscViewer viewer;
+    	//PetscPrintf(PetscObjectComm((PetscObject)snes),"Hand-coded Jacobian (%s)\n",loc[i]);
+    	PetscObjectGetComm((PetscObject)A,&comm);
+    	PetscViewerASCIIGetStdout(comm,&viewer);
+    	MatView(A,viewer);
+
+
+
+
+
+    } else {
+
+
+    	Moose::PetscSupport::PetscOptions &  thePetscOptions  =  _problem.getPetscOptions();
+    	thePetscOptions.inames.push_back("-mat_fd_type");
+    	thePetscOptions.values.push_back("ds");
+
+    	// change solve type to Newton
+    	_problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>("NEWTON");
+
+    	_problem.solve();  // solve releases the jacobian on exit?
+
+    	/*
+    	Moose::PetscSupport::petscSetOptions(_problem); // Make sure the PETSc options are setup for this app
+    	Moose::setSolverDefaults(_problem);
+
+    	// Setup the output system for printing linear/nonlinear iteration information
+    	_problem.initPetscOutput();
+
+    	_problem.possiblyRebuildGeomSearchPatches();
+
+
+    	std::cout << "Got here A " << std::endl ;
+    	*/
+
+    	// attempt to get jacobian directly
+
+    	NonlinearSystem & nl =  _problem.getNonlinearSystem();
+    	nl.sys().assembly(false,true);
+
+
+    	std::cout << "System type" << nl.sys().system_type() << std::endl;
+
+
+    	nl.sys().matrix->close();
+
+    	nl.sys().matrix->print();
+
+    	//SparseMatrix<Number>
+
+    	/*
+    	PetscMatrix<Number> theJacobian(nl.comm());
+
+
+    	std::cout << "Setting solution " << std::endl ;
+
+    	nl.setSolution(*(nl.sys().current_local_solution.get()));
+    	std::cout << "Computing jacobian " << std::endl ;
+    	//nl.computeJacobian( theJacobian);
+
+    	std::cout << nl.sys().current_local_solution.get() << std::endl;
+
+    	_problem.computeJacobian(nl.sys(),*(nl.sys().current_local_solution.get()),theJacobian);
+
+*/
+
+    }
+
+
+
 
 #else
   _console << "Aborting as unable to modify Petsc options\n";
