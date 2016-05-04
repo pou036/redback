@@ -150,9 +150,8 @@ RedbackMechMaterialHO::computeQpStrain(const RankTwoTensor & Fhat)
       for (unsigned k = 0; k < LIBMESH_DIM; ++k)
         {
         grad_tensor(i, j) += PermutationTensor::eps(i, j, k) * wc_vector(k);
-        //Real tmp = grad_tensor(i, j);
-        //std::cout << "grad_tensor(" << i <<", " << j << " = " << tmp << std::endl;
       }
+
   _symmetric_strain[_qp] = (grad_tensor + grad_tensor.transpose()) / 2.0;
   _antisymmetric_strain[_qp] = (grad_tensor - grad_tensor.transpose()) / 2.0;
   _total_strain[_qp] = grad_tensor;
@@ -168,10 +167,6 @@ RedbackMechMaterialHO::computeQpStrain(const RankTwoTensor & Fhat)
   RankTwoTensor mgrad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
   _macro_rotation[_qp] = (mgrad_tensor - mgrad_tensor.transpose()) / 2.0;
 
-  /*Real tmp = _antisymmetric_strain[_qp](0,1) ;
-  if (std::abs(tmp) > 1e-50)
-    std::cout << "_antisymmetric_strain[" << _qp<<"](0,1) = " << tmp << std::endl;
-*/
   _rotation_increment[_qp].zero();
   _rotation_increment[_qp].addIa(1);
 
@@ -190,12 +185,12 @@ RedbackMechMaterialHO::computeQpStress()
 {
   //RedbackMechMaterial::computeQpStress();
 
-  _plastic_potential_multiplier = 1;
-  if (_has_T)
-  {
+  //_plastic_potential_multiplier = 1;
+  //if (_has_T)
+  //{
     // Q/(RT) = Ar/(1+delta T*)
-    _plastic_potential_multiplier = std::exp(-_ar[ _qp ]) * std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
-  }
+  //  _plastic_potential_multiplier = std::exp(-_ar[ _qp ]) * std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
+  //}
 
 int NPROPS = 9;
 int NSTR = 18;
@@ -208,13 +203,6 @@ Real DSDE[NSTR*NSTR];
 Real SVARSGP[NSVARSGP];
 Real PROPS[NPROPS];
 
-Real Kbulk = _bulk_modulus;
-Real Gshear = _shear_modulus;
-Real GCshear = _cosserat_shear_modulus;
-Real Radius = _cosserat_radius;
-Real mufor = _friction_coefficient;
-Real cfor = _cohesion;
-Real Hp = _hardening_mech_modulus;
 int nb_hardening = 1;
 
 Real g_1 = 8./5.;
@@ -228,18 +216,15 @@ Real h_3 = 2./3.;
 Real h_4 = -1./6.;
 
 
-PROPS[0]=Kbulk;
-PROPS[1]=Gshear;
-PROPS[2]=GCshear;
-PROPS[3]=Radius;
-PROPS[4]=mufor;
-PROPS[5]=cfor;
-PROPS[6]=Hp;
+PROPS[0]=_bulk_modulus;
+PROPS[1]=_shear_modulus;
+PROPS[2]=_cosserat_shear_modulus;
+PROPS[3]=_cosserat_radius;
+PROPS[4]=_friction_coefficient;
+PROPS[5]=_cohesion;
+PROPS[6]=_hardening_mech_modulus;
 PROPS[7] = _dilatancy_coefficient;
 PROPS[8]=0.0;
-
-//PROPS[8]=_plastic_potential_multiplier;
-
 
 
 remplSigmaOld(_strain_increment[_qp], DEFORT, 0);
@@ -255,10 +240,11 @@ remplMomentOld(_stress_couple_old[_qp], SVARSGP, 0);
 remplSigmaOld(_total_strain_old[_qp], SVARSGP, NSTR);
 remplMomentOld(_total_curvature_old[_qp], SVARSGP, NSTR);
 
-//if (nb_hardening != 0) {
-  SVARSGP[2*NSTR] = _hardening_variable_old[_qp];
-//}
-
+if (nb_hardening != 0) {
+  for (unsigned int i = 0; i < nb_hardening; i++) {
+    SVARSGP[2*NSTR+i] = _hardening_variable_old[_qp];
+  }
+}
 
 remplSigmaOld(_plastic_strain_old[_qp], SVARSGP, 2*NSTR + nb_hardening);
 remplMomentOld(_plastic_curvature_old[_qp], SVARSGP, 2*NSTR + nb_hardening);
@@ -270,7 +256,6 @@ SVARSGP[3*NSTR + 2 + nb_hardening] = 0.0;
 
 remplSigmaOld(_elastic_strain_old[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
 remplMomentOld(_elastic_curvature_old[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
-
 
 for (unsigned i = 0; i < NSTR*NSTR; ++i){
 DSDE[i] = 0;
@@ -289,7 +274,6 @@ else{
   std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
 }
 
-
 Real verbose = 0;
 Real y_coord = _current_elem->centroid()(1);
 Real x_coord = _current_elem->centroid()(0);
@@ -305,10 +289,8 @@ recupMomentNew(_stress_couple[_qp], STRESSF, 0);
 recupSigmaNew(_plastic_strain[_qp], SVARSGP, 2*NSTR + nb_hardening);
 recupMomentNew(_plastic_curvature[_qp], SVARSGP, 2*NSTR + nb_hardening);
 
-
 _symmetric_plastic_strain[_qp] = (_plastic_strain[_qp] + _plastic_strain[_qp].transpose()) / 2.0;
 _antisymmetric_plastic_strain[_qp] = (_plastic_strain[_qp] - _plastic_strain[_qp].transpose()) / 2.0;
-
 _deviatoric_plastic_strain[_qp] = _plastic_strain[_qp].deviatoric();
 
 Real normL2;
@@ -318,10 +300,9 @@ for (unsigned int i = 0; i < 3; ++i)
     normL2 += g_1 * _deviatoric_plastic_strain[_qp](i,j) * _deviatoric_plastic_strain[_qp](i,j)
             + g_2 * _deviatoric_plastic_strain[_qp](i,j) * _deviatoric_plastic_strain[_qp](j,i)
             + ( g_3 * _plastic_curvature[_qp](i,j) * _plastic_curvature[_qp](i,j)
-              + g_4 * _plastic_curvature[_qp](i,j) * _plastic_curvature[_qp](j,i) )  * (std::pow(Radius, 2.0));
+              + g_4 * _plastic_curvature[_qp](i,j) * _plastic_curvature[_qp](j,i) )  * (std::pow(_cosserat_radius, 2.0));
 
 _eqv_plastic_strain[_qp] = std::pow(normL2, 0.5);
-
 _volumetric_strain[_qp] = _plastic_strain[_qp].trace(); // PLASTIC vol strain
 
 
@@ -329,30 +310,23 @@ recupSigmaNew(_elastic_strain[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
 recupMomentNew(_elastic_curvature[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
 
 
-//if (nb_hardening != 0) {
-  _hardening_variable[_qp] = SVARSGP[2*NSTR];
-//}
-
-
+if (nb_hardening != 0) {
+  for (unsigned int i = 0; i < nb_hardening; i++) {
+    _hardening_variable[_qp] = SVARSGP[2*NSTR+i];
+  }
+}
 
 _active_surfaces[_qp]=SVARSGP[3*NSTR+1+ nb_hardening];
 _failure_surface[_qp]=SVARSGP[3*NSTR+1+ nb_hardening];
 _lagrange_multiplier[_qp]=SVARSGP[3*NSTR+2+ nb_hardening];
 
-
-
 _total_strain[_qp] = _total_strain_old[_qp] + _strain_increment[_qp];
 _total_curvature[_qp] = _total_curvature_old[_qp] + _curvature_increment[_qp];
-
 _total_volumetric_strain[_qp] = _total_strain[_qp].trace();
-
 _symmetric_stress[_qp] = (_stress[_qp] + _stress[_qp].transpose()) / 2.0;
 _antisymmetric_stress[_qp] = (_stress[_qp] - _stress[_qp].transpose()) / 2.0;
-
 _volumetric_stress[_qp] = (_stress[_qp].trace())/3;
-
 _deviatoric_stress[_qp] = _stress[_qp].deviatoric();
-
 
 Real normL2_stress;
 normL2_stress=0.0;
@@ -362,7 +336,7 @@ for (unsigned int i = 0; i < 3; ++i){
   normL2_stress += h_1 * _deviatoric_stress[_qp](i,j) * _deviatoric_stress[_qp](i,j)
                 + h_2 * _deviatoric_stress[_qp](i,j) * _deviatoric_stress[_qp](j,i)
                 + ( h_3 * _stress_couple[_qp](i,j) * _stress_couple[_qp](i,j)
-                + h_4 * _stress_couple[_qp](i,j) * _stress_couple[_qp](j,i) ) / (std::pow(Radius, 2.0));
+                + h_4 * _stress_couple[_qp](i,j) * _stress_couple[_qp](j,i) ) / (std::pow(_cosserat_radius, 2.0));
 }}
 _stress_invariant[_qp] = std::pow(normL2_stress, 0.5);
 //mise a jour des termes de la matrice tangente
@@ -375,32 +349,10 @@ for (unsigned int i = 0; i < 3; ++i){
         int test = NSTR*corsigma(k,l) + corsigma(i,j);
         //std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_mult = "<<DSDE[NSTR*corsigma(k,l) + corsigma(i,j)]<< std::endl;
 _Jacobian_mult[_qp](i,j,k,l) = DSDE[NSTR*corsigma(k,l) + corsigma(i,j)];
-}}}}
-
-for (unsigned int i = 0; i < 3; ++i){
-  for (unsigned int j = 0; j < 3; ++j){
-    for (unsigned int k = 0; k < 3; ++k){
-      for (unsigned int l = 0; l < 3; ++l){
-      //  std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_mult_couple = "<< DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + cormoment(i,j)+ NSTR / 2] << std::endl;
 _Jacobian_mult_couple[_qp](i,j,k,l) = DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + cormoment(i,j)+ NSTR / 2];
-}}}}
-
-for (unsigned int i = 0; i < 3; ++i){
-  for (unsigned int j = 0; j < 3; ++j){
-    for (unsigned int k = 0; k < 3; ++k){
-      for (unsigned int l = 0; l < 3; ++l){
-        //std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_offdiag_bc = "<< DSDE[NSTR*corsigma(k,l) + cormoment(i,j)+ NSTR / 2] << std::endl;
 _Jacobian_offdiag_bc[_qp](i,j,k,l) = DSDE[NSTR*corsigma(k,l) + cormoment(i,j)+ NSTR / 2];
-}}}}
-
-for (unsigned int i = 0; i < 3; ++i){
-  for (unsigned int j = 0; j < 3; ++j){
-    for (unsigned int k = 0; k < 3; ++k){
-      for (unsigned int l = 0; l < 3; ++l){
-        //std::cout << " i="<<i<<", j="<<j<<", k="<<k<<", l="<<l<<", _Jacobian_offdiag_cb = "<< DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + corsigma(i,j)] << std::endl;
 _Jacobian_offdiag_cb[_qp](i,j,k,l) = DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + corsigma(i,j)];
 }}}}
-
 
 // Compute the energy dissipation and the properties declared
 computeRedbackTerms(_stress[_qp], 0, 0);
