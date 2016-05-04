@@ -106,6 +106,13 @@ protected:
   MaterialProperty<RankTwoTensor> & _stress_couple_older;
   std::string _plasticity_type;
 
+  /// Minimum fraction of applied strain that may be applied during adaptive stepsizing
+  Real _min_stepsize;
+  /// Number of time division due to the non convergence of the routine for the return-map
+  MaterialProperty<Real> & _iter;
+
+
+
 private:
   const VariableValue & _wc_x;
   const VariableValue & _wc_y;

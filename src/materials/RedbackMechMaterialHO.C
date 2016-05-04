@@ -38,6 +38,7 @@ validParams<RedbackMechMaterialHO>()
   fm = "general_isotropic";
   params.addParam<MooseEnum>("fill_method_bending", fm, "The fill method for the 'bending' tensor.");
   params.addParam<std::string>("plasticity_type", "Name that allows to switch for different subroutines for the return map algorithm");
+  params.addRangeCheckedParam<Real>("min_stepsize", 0.01, "min_stepsize>0 & min_stepsize<=1", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the minimum fraction of applied strain increment that may be applied before the algorithm gives up entirely");
 
   return params;
 }
@@ -83,6 +84,8 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _stress_older(declarePropertyOlder<RankTwoTensor>("stress")),
     _stress_couple_older(declarePropertyOlder<RankTwoTensor>("coupled_stress")),
     _plasticity_type(isParamValid("plasticity_type") ? getParam<std::string>("plasticity_type") + "_" : ""),
+    _min_stepsize(getParam<Real>("min_stepsize")),
+    _iter(declareProperty<Real>("plastic_local_iterations")), // this is really an unsigned int, but for visualisation i convert it to Real
     _wc_x(coupledValue("wc_x")),
     _wc_y(coupledValue("wc_y")),
     _wc_z(coupledValue("wc_z")),
@@ -135,6 +138,8 @@ RedbackMechMaterialHO::initQpStatefulProperties()
   _active_surfaces[ _qp ] = 0.0;
   _lagrange_multiplier[ _qp ] = 0.0;
   _failure_surface[ _qp ] = 0.0;
+  _iter[_qp] = 0.0; // this is really an unsigned int, but for visualisation i convert it to Real
+
 }
 
 
@@ -229,57 +234,134 @@ PROPS[8]=0.0;
 
 remplSigmaOld(_strain_increment[_qp], DEFORT, 0);
 remplMomentOld(_curvature_increment[_qp], DEFORT, 0);
-
 remplSigmaOld(_stress_old[_qp], STRESSF, 0);
 remplMomentOld(_stress_couple_old[_qp], STRESSF, 0);
-
-
 remplSigmaOld(_stress_old[_qp], SVARSGP, 0);
 remplMomentOld(_stress_couple_old[_qp], SVARSGP, 0);
-
 remplSigmaOld(_total_strain_old[_qp], SVARSGP, NSTR);
 remplMomentOld(_total_curvature_old[_qp], SVARSGP, NSTR);
-
 if (nb_hardening != 0) {
   for (unsigned int i = 0; i < nb_hardening; i++) {
     SVARSGP[2*NSTR+i] = _hardening_variable_old[_qp];
   }
 }
-
 remplSigmaOld(_plastic_strain_old[_qp], SVARSGP, 2*NSTR + nb_hardening);
 remplMomentOld(_plastic_curvature_old[_qp], SVARSGP, 2*NSTR + nb_hardening);
-
 SVARSGP[3*NSTR + nb_hardening] = 0.0;
 SVARSGP[3*NSTR + 1 + nb_hardening] = 0.0;
 SVARSGP[3*NSTR + 2 + nb_hardening] = 0.0;
-
-
 remplSigmaOld(_elastic_strain_old[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
 remplMomentOld(_elastic_curvature_old[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
-
 for (unsigned i = 0; i < NSTR*NSTR; ++i){
 DSDE[i] = 0;
 }
 
-if (_plasticity_type.compare("druckerPrager3D_frictionHard") == 0){
-  usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
-}
-else if (_plasticity_type.compare("druckerPrager3D_frictionHard_adim") == 0){
-  usermat1_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
-}
-else if (_plasticity_type.compare("druckerPrager3D_cohesionHard") == 0){
-  usermat2_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
-}
-else{
-  std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
+bool return_successful = false;
+Real step_size = 1.0;
+Real time_simulated = 0.0;
+unsigned int num_consecutive_successes = 0;
+_iter[_qp] = 0;
+
+// Following is necessary because I want strain_increment to be "const"
+// but I also want to be able to subdivide an initial_stress
+RankTwoTensor this_strain_increment = _strain_increment[_qp];
+RankTwoTensor this_curvature_increment = _curvature_increment[_qp];
+
+while (time_simulated < 1.0 && step_size >= _min_stepsize)
+{
+
+  if (_plasticity_type.compare("druckerPrager3D_frictionHard_") == 0){
+    usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+  }
+  else if (_plasticity_type.compare("druckerPrager3D_frictionHard_adim_") == 0){
+    usermat1_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+  }
+  else if (_plasticity_type.compare("druckerPrager3D_cohesionHard_") == 0){
+    usermat2_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+  }
+  else{
+    std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
+  }
+/*
+  Real verbose = 0;
+  Real y_coord = _current_elem->centroid()(1);
+  Real x_coord = _current_elem->centroid()(0);
+  if (y_coord > 0.45 && y_coord < 0.55 && x_coord > 0.45 && x_coord < 0.55  && _qp==0)
+    verbose = 1;
+  if (verbose == 1 && NILL != 0)std::cout << " fortran not converging******************************** " << std::endl;
+*/
+
+  return_successful = (NILL==0);
+  _iter[_qp] += 1;
+
+  if (return_successful)
+  {
+    num_consecutive_successes += 1;
+    time_simulated += step_size;
+
+    if (time_simulated < 1.0)  // this condition is just for optimization: if time_simulated=1 then the "good" quantities are no longer needed
+    {
+      recupSigmaNew(_stress[_qp], STRESSF, 0);
+      recupMomentNew(_stress_couple[_qp], STRESSF, 0);
+      recupSigmaNew(_plastic_strain[_qp], SVARSGP, 2*NSTR + nb_hardening);
+      recupMomentNew(_plastic_curvature[_qp], SVARSGP, 2*NSTR + nb_hardening);
+      recupSigmaNew(_elastic_strain[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
+      recupMomentNew(_elastic_curvature[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
+      if (nb_hardening != 0) {
+        for (unsigned int i = 0; i < nb_hardening; i++) {
+          _hardening_variable[_qp] = SVARSGP[2*NSTR+i];
+        }
+      }
+      _active_surfaces[_qp]=SVARSGP[3*NSTR+1+ nb_hardening];
+      _failure_surface[_qp]=SVARSGP[3*NSTR+1+ nb_hardening];
+      _lagrange_multiplier[_qp]=SVARSGP[3*NSTR+2+ nb_hardening];
+
+      if (num_consecutive_successes >= 2)
+        step_size *= 1.2;
+    }
+    step_size = std::min(step_size, 1.0 - time_simulated); // avoid overshoots
+  }
+  else
+  {
+    Moose::out << "the stepsize begins to be reduced " << _iter[_qp] << std::endl;
+    step_size *= 0.5;
+    num_consecutive_successes = 0;
+    remplSigmaOld(_stress_old[_qp], STRESSF, 0);
+    remplMomentOld(_stress_couple_old[_qp], STRESSF, 0);
+    remplSigmaOld(_stress_old[_qp], SVARSGP, 0);
+    remplMomentOld(_stress_couple_old[_qp], SVARSGP, 0);
+    remplSigmaOld(_total_strain_old[_qp], SVARSGP, NSTR);
+    remplMomentOld(_total_curvature_old[_qp], SVARSGP, NSTR);
+    if (nb_hardening != 0) {
+      for (unsigned int i = 0; i < nb_hardening; i++) {
+        SVARSGP[2*NSTR+i] = _hardening_variable_old[_qp];
+      }
+    }
+    remplSigmaOld(_plastic_strain_old[_qp], SVARSGP, 2*NSTR + nb_hardening);
+    remplMomentOld(_plastic_curvature_old[_qp], SVARSGP, 2*NSTR + nb_hardening);
+    SVARSGP[3*NSTR + nb_hardening] = 0.0;
+    SVARSGP[3*NSTR + 1 + nb_hardening] = 0.0;
+    SVARSGP[3*NSTR + 2 + nb_hardening] = 0.0;
+    remplSigmaOld(_elastic_strain_old[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
+    remplMomentOld(_elastic_curvature_old[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
+    for (unsigned i = 0; i < NSTR*NSTR; ++i){
+    DSDE[i] = 0;
+    }
+
+    _strain_increment[_qp] = step_size*this_strain_increment;
+    _curvature_increment[_qp] = step_size*this_curvature_increment;
+
+    remplSigmaOld(_strain_increment[_qp], DEFORT, 0);
+    remplMomentOld(_curvature_increment[_qp], DEFORT, 0);
+  }
 }
 
-Real verbose = 0;
-Real y_coord = _current_elem->centroid()(1);
-Real x_coord = _current_elem->centroid()(0);
-if (y_coord > 0.45 && y_coord < 0.55 && x_coord > 0.45 && x_coord < 0.55  && _qp==0)
-  verbose = 1;
-if (verbose == 1 && NILL != 0)std::cout << " fortran not converging******************************** " << std::endl;
+if (!return_successful)
+{    Moose::out << "After reducing the stepsize to " << step_size
+               << " with original strain increment with L2norm "
+               << this_strain_increment.L2norm() << " the returnMap algorithm failed\n";
+    mooseError("Exiting\n");
+}
 
 
 recupSigmaNew(_stress[_qp], STRESSF, 0);
@@ -315,7 +397,6 @@ if (nb_hardening != 0) {
     _hardening_variable[_qp] = SVARSGP[2*NSTR+i];
   }
 }
-
 _active_surfaces[_qp]=SVARSGP[3*NSTR+1+ nb_hardening];
 _failure_surface[_qp]=SVARSGP[3*NSTR+1+ nb_hardening];
 _lagrange_multiplier[_qp]=SVARSGP[3*NSTR+2+ nb_hardening];
