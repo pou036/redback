@@ -19,48 +19,41 @@
 template<>
 InputParameters validParams<RedbackRotationBC>()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = validParams<IntegratedBC>();
   params += validParams<MaterialPropertyInterface>();
-
-  params.addRequiredCoupledVar("disp_x", "displacement in x");
-  params.addCoupledVar("disp_y", "displacement in y"); // only required in 2D and 3D
-  params.addCoupledVar("disp_z", "displacement in z"); // only required in 3D
-
-  params.addRequiredParam<Real>("comp_1", "first component of the macro-rotation tensor");
-  params.addRequiredParam<Real>("comp_2", "second component of the macro-rotation tensor");
-  params.addRequiredParam<Real>("scalar", "scalar that multiplies the macro-rotation");
+  params.addCoupledVar("disp_y", "the disp in y");
+  params.addCoupledVar("disp_z", "the disp in z");
+  params.addCoupledVar("wc_x", "The Cosserat rotation about x");
+  params.addCoupledVar("wc_y", "The Cosserat rotation about y");
+  params.addCoupledVar("wc_z", "The Cosserat rotation about z");
+  params.addRequiredParam<unsigned int>("component1", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
+  params.addRequiredParam<unsigned int>("component2", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
+  params.addRequiredParam<unsigned int>("value", "value of the stress imposed");
 
   return params;
 }
 
 RedbackRotationBC::RedbackRotationBC(const InputParameters & parameters) :
-    NodalBC(parameters),
-    MaterialPropertyInterface(this),
+    IntegratedBC(parameters),
+    _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "stress")),
+    _component1(getParam<unsigned int>("component1")),
+    _component2(getParam<unsigned int>("component2")),
+    _ndisp(coupledComponents("displacements")),
 
-
-    // Coupled variables
-    _disp_x(coupledValue("disp_x")),
-    _disp_y(_mesh.dimension() >= 2 ? coupledValue("disp_y") : _zero),
-    _disp_z(_mesh.dimension() == 3 ? coupledValue("disp_z") : _zero),
-
-    // Gradient of Coupled variables
-    _grad_ux(coupledGradient("disp_x")),
-    _grad_uy(_mesh.dimension() >= 2 ? coupledGradient("disp_y") : _grad_zero),
-    _grad_uz(_mesh.dimension() == 3 ? coupledGradient("disp_z") : _grad_zero),
-
-    // Required parameters
-    _comp_1(getParam<Real>("comp_1")),
-    _comp_2(getParam<Real>("comp_2")),
-    _scalar(getParam<Real>("scalar"))
-{}
+{
+  if (_ndisp)
+  {
+    for (unsigned int i = 0; i < _ndisp; ++i)
+    {
+      _disp[i] = &coupledValue("displacements", i);
+      _disp_var[i] = coupled("displacements", i);
+    }
+  }
+}
 
 Real
 RedbackRotationBC::computeQpResidual()
 {
-  RealTensorValue grad_tensor_u(_grad_ux[_qp], _grad_uy[_qp], _grad_uz[_qp]);
-  RealTensorValue macro_rot;
 
-  macro_rot = (grad_tensor_u - grad_tensor_u.transpose()) / 2.0;
-
-  return _u[_qp] - _scalar * macro_rot(_comp_1,_comp_2);
+  return -_test[_i][_qp]*_stress[_qp](i,j);
 }
