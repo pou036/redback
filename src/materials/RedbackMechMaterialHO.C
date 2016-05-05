@@ -301,8 +301,8 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
 
     if (time_simulated < 1.0)  // this condition is just for optimization: if time_simulated=1 then the "good" quantities are no longer needed
     {
-      recupSigmaNew(_stress[_qp], STRESSF, 0);
-      recupMomentNew(_stress_couple[_qp], STRESSF, 0);
+      recupSigmaNew(_stress[_qp], SVARSGP, 0);
+      recupMomentNew(_stress_couple[_qp], SVARSGP, 0);
       recupSigmaNew(_plastic_strain[_qp], SVARSGP, 2*NSTR + nb_hardening);
       recupMomentNew(_plastic_curvature[_qp], SVARSGP, 2*NSTR + nb_hardening);
       recupSigmaNew(_elastic_strain[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
@@ -397,7 +397,7 @@ if (nb_hardening != 0) {
     _hardening_variable[_qp] = SVARSGP[2*NSTR+i];
   }
 }
-_active_surfaces[_qp]=SVARSGP[3*NSTR+1+ nb_hardening];
+_active_surfaces[_qp]=SVARSGP[3*NSTR+ nb_hardening];
 _failure_surface[_qp]=SVARSGP[3*NSTR+1+ nb_hardening];
 _lagrange_multiplier[_qp]=SVARSGP[3*NSTR+2+ nb_hardening];
 
