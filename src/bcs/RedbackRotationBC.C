@@ -21,39 +21,38 @@ InputParameters validParams<RedbackRotationBC>()
 {
   InputParameters params = validParams<IntegratedBC>();
   params += validParams<MaterialPropertyInterface>();
-  params.addCoupledVar("disp_y", "the disp in y");
-  params.addCoupledVar("disp_z", "the disp in z");
-  params.addCoupledVar("wc_x", "The Cosserat rotation about x");
-  params.addCoupledVar("wc_y", "The Cosserat rotation about y");
-  params.addCoupledVar("wc_z", "The Cosserat rotation about z");
+//  params.addCoupledVar("disp_y", "the disp in y");
+//  params.addCoupledVar("disp_z", "the disp in z");
+//  params.addCoupledVar("wc_x", "The Cosserat rotation about x");
+//  params.addCoupledVar("wc_y", "The Cosserat rotation about y");
+//  params.addCoupledVar("wc_z", "The Cosserat rotation about z");
   params.addRequiredParam<unsigned int>("component1", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addRequiredParam<unsigned int>("component2", "An integer corresponding to the direction the variable this kernel acts in. (0 for x, 1 for y, 2 for z)");
-  params.addRequiredParam<unsigned int>("value", "value of the stress imposed");
+//  params.addRequiredParam<unsigned int>("value", "value of the stress imposed");
 
   return params;
 }
 
 RedbackRotationBC::RedbackRotationBC(const InputParameters & parameters) :
     IntegratedBC(parameters),
-    _stress(getMaterialPropertyByName<RankTwoTensor>(_base_name + "stress")),
+//    _stress(getMaterialPropertyByName<RankTwoTensor>("stress")),
     _component1(getParam<unsigned int>("component1")),
-    _component2(getParam<unsigned int>("component2")),
-    _ndisp(coupledComponents("displacements")),
+    _component2(getParam<unsigned int>("component2"))
+//    _ndisp(coupledComponents("displacements")),
 
 {
-  if (_ndisp)
-  {
-    for (unsigned int i = 0; i < _ndisp; ++i)
-    {
-      _disp[i] = &coupledValue("displacements", i);
-      _disp_var[i] = coupled("displacements", i);
-    }
-  }
+//  if (_ndisp)
+//  {
+//    for (unsigned int i = 0; i < _ndisp; ++i)
+//    {
+//      _disp[i] = &coupledValue("displacements", i);
+//      _disp_var[i] = coupled("displacements", i);
+//    }
+//  }
 }
 
 Real
 RedbackRotationBC::computeQpResidual()
 {
-
-  return -_test[_i][_qp]*_stress[_qp](i,j);
+  return -_test[_i][_qp];//*_stress[_qp](i,j)
 }

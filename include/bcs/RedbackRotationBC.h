@@ -15,9 +15,7 @@
 #ifndef REDBACKROTATIONBC_H
 #define REDBACKROTATIONBC_H
 
-#include "NodalBC.h"
-#include "MaterialPropertyInterface.h"
-
+#include "IntegratedBC.h"
 
 //Forward Declarations
 class RedbackRotationBC;
@@ -25,8 +23,7 @@ class RedbackRotationBC;
 template<>
 InputParameters validParams<RedbackRotationBC>();
 
-class RedbackRotationBC : public NodalBC,
-public MaterialPropertyInterface
+class RedbackRotationBC : public IntegratedBC
 
 {
 public:
@@ -35,17 +32,21 @@ public:
 protected:
   virtual Real computeQpResidual();
 
-  const VariableValue & _disp_x;
-  const VariableValue & _disp_y;
-  const VariableValue & _disp_z;
+//  const VariableValue & _disp_x;
+//  const VariableValue & _disp_y;
+//  const VariableValue & _disp_z;
+//  const VariableValue & _wc_x;
+//  const VariableValue & _wc_y;
+//  const VariableValue & _wc_z;
 
-  const VariableGradient & _grad_ux;
-  const VariableGradient & _grad_uy;
-  const VariableGradient & _grad_uz;
 
-  Real _comp_1;
-  Real _comp_2;
-  Real _scalar;
+//  const VariableGradient & _grad_ux;
+//  const VariableGradient & _grad_uy;
+//  const VariableGradient & _grad_uz;
+
+  Real _component1;
+  Real _component2;
+//  Real _scalar;
 
 };
 
