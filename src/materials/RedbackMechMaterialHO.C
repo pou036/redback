@@ -33,11 +33,11 @@ validParams<RedbackMechMaterialHO>()
   params.addParam<Real>("friction_coefficient", 0, "Friction coefficient");
   params.addParam<Real>("dilatancy_coefficient", 0, "Dilatancy coefficient");
   params.addParam<Real>("hardening_mech_modulus", 0, " mechanical hardening parameter value");
-
   MooseEnum fm = RankFourTensor::fillMethodEnum();
   fm = "general_isotropic";
   params.addParam<MooseEnum>("fill_method_bending", fm, "The fill method for the 'bending' tensor.");
   params.addParam<std::string>("plasticity_type", "Name that allows to switch for different subroutines for the return map algorithm");
+  params.addParam<bool>("ignore_failures", false, "The return-map algorithm will return with the best admissible stresses and internal parameters that it can, even if they don't fully correspond to the applied strain increment.  To speed computations, this flag can be set to true, the max_NR_iterations set small, and the min_stepsize large.");
   params.addRangeCheckedParam<Real>("min_stepsize", 0.01, "min_stepsize>0 & min_stepsize<=1", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the minimum fraction of applied strain increment that may be applied before the algorithm gives up entirely");
 
   return params;
@@ -86,6 +86,7 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _plasticity_type(isParamValid("plasticity_type") ? getParam<std::string>("plasticity_type") + "_" : ""),
     _min_stepsize(getParam<Real>("min_stepsize")),
     _iter(declareProperty<Real>("plastic_local_iterations")), // this is really an unsigned int, but for visualisation i convert it to Real
+    _ignore_failures(getParam<bool>("ignore_failures")),
     _wc_x(coupledValue("wc_x")),
     _wc_y(coupledValue("wc_y")),
     _wc_z(coupledValue("wc_z")),
@@ -357,10 +358,16 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
 }
 
 if (!return_successful)
-{    Moose::out << "After reducing the stepsize to " << step_size
+{    if (_ignore_failures)
+    {    Moose::out << "Failed to converge with the return map ";
+    }
+    else
+    {
+    Moose::out << "After reducing the stepsize to " << step_size
                << " with original strain increment with L2norm "
                << this_strain_increment.L2norm() << " the returnMap algorithm failed\n";
     mooseError("Exiting\n");
+  }
 }
 
 

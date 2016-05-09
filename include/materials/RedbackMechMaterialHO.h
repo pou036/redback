@@ -110,7 +110,8 @@ protected:
   Real _min_stepsize;
   /// Number of time division due to the non convergence of the routine for the return-map
   MaterialProperty<Real> & _iter;
-
+  /// Even if the returnMap fails, return the best values found for stress and internal parameters
+  bool _ignore_failures;
 
 
 private:
