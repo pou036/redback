@@ -30,6 +30,7 @@
 #include "RedbackRandomFunction.h"
 
 // Initial conditions
+#include "FunctionNormalDistributionIC.h"
 #include "FunctionWithRandomIC.h"
 #include "FunctionTimesRandomIC.h"
 
@@ -122,6 +123,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerFunction(RedbackRandomFunction);
 
+  registerInitialCondition(FunctionNormalDistributionIC);
   registerInitialCondition(FunctionWithRandomIC);
   registerInitialCondition(FunctionTimesRandomIC);
 
