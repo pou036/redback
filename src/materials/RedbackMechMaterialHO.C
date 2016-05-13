@@ -12,7 +12,10 @@
 
 #include "Function.h"
 #include "RedbackMechMaterialHO.h"
+#include "MooseException.h"
 #include "multisurfaceplasticityhard.h"
+#include "NonlinearSystem.h"
+#include "FEProblem.h"
 
 /**
  * RedbackMechMaterialHO handles a high order material.
@@ -202,12 +205,30 @@ int NPROPS = 9;
 int NSTR = 18;
 int NILL = 1;
 int NSVARSGP = 76;
+int NPROPS2 = 9;
+int NSTR2 = 18;
+int NILL2 = 1;
+int NSVARSGP2 = 76;
+
 
 Real STRESSF[NSTR];
 Real DEFORT[NSTR];
 Real DSDE[NSTR*NSTR];
 Real SVARSGP[NSVARSGP];
 Real PROPS[NPROPS];
+
+Real STRESSF2[NSTR2];
+Real DEFORT2[NSTR2];
+Real DSDE2[NSTR2*NSTR2];
+Real SVARSGP2[NSVARSGP2];
+Real PROPS2[NPROPS2];
+
+Real STRESSF3[NSTR2];
+Real DEFORT3[NSTR2] ;
+Real DSDE3[NSTR2*NSTR2] ;
+Real SVARSGP3[NSVARSGP2] ;
+Real PROPS3[NPROPS2] ;
+
 
 int nb_hardening = 1;
 
@@ -232,6 +253,17 @@ PROPS[6]=_hardening_mech_modulus;
 PROPS[7] = _dilatancy_coefficient;
 PROPS[8]=0.0;
 
+PROPS2[0]=_bulk_modulus;
+PROPS2[1]=_shear_modulus;
+PROPS2[2]=_cosserat_shear_modulus;
+PROPS2[3]=_cosserat_radius;
+PROPS2[4]=_friction_coefficient;
+PROPS2[5]=_cohesion;
+PROPS2[6]=_hardening_mech_modulus;
+PROPS2[7] = _dilatancy_coefficient;
+PROPS2[8]=0.0;
+
+
 
 remplSigmaOld(_strain_increment[_qp], DEFORT, 0);
 remplMomentOld(_curvature_increment[_qp], DEFORT, 0);
@@ -254,8 +286,34 @@ SVARSGP[3*NSTR + 2 + nb_hardening] = 0.0;
 remplSigmaOld(_elastic_strain_old[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
 remplMomentOld(_elastic_curvature_old[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
 for (unsigned i = 0; i < NSTR*NSTR; ++i){
-DSDE[i] = 0;
+DSDE[i] = 0.0;
 }
+
+
+remplSigmaOld(_strain_increment[_qp], DEFORT2, 0);
+remplMomentOld(_curvature_increment[_qp], DEFORT2, 0);
+remplSigmaOld(_stress_old[_qp], STRESSF2, 0);
+remplMomentOld(_stress_couple_old[_qp], STRESSF2, 0);
+remplSigmaOld(_stress_old[_qp], SVARSGP2, 0);
+remplMomentOld(_stress_couple_old[_qp], SVARSGP2, 0);
+remplSigmaOld(_total_strain_old[_qp], SVARSGP2, NSTR);
+remplMomentOld(_total_curvature_old[_qp], SVARSGP2, NSTR);
+if (nb_hardening != 0) {
+  for (unsigned int i = 0; i < nb_hardening; i++) {
+    SVARSGP2[2*NSTR+i] = _hardening_variable_old[_qp];
+  }
+}
+remplSigmaOld(_plastic_strain_old[_qp], SVARSGP2, 2*NSTR2 + nb_hardening);
+remplMomentOld(_plastic_curvature_old[_qp], SVARSGP2, 2*NSTR2 + nb_hardening);
+SVARSGP2[3*NSTR2 + nb_hardening] = 0.0;
+SVARSGP2[3*NSTR2 + 1 + nb_hardening] = 0.0;
+SVARSGP2[3*NSTR2 + 2 + nb_hardening] = 0.0;
+remplSigmaOld(_elastic_strain_old[_qp], SVARSGP2, 3*NSTR2+3+ nb_hardening);
+remplMomentOld(_elastic_curvature_old[_qp], SVARSGP2, 3*NSTR2+3+ nb_hardening);
+for (unsigned i = 0; i < NSTR2*NSTR2; ++i){
+DSDE2[i] = 0.0;
+}
+
 
 bool return_successful = false;
 Real step_size = 1.0;
@@ -268,6 +326,205 @@ _iter[_qp] = 0;
 RankTwoTensor this_strain_increment = _strain_increment[_qp];
 RankTwoTensor this_curvature_increment = _curvature_increment[_qp];
 
+if (_plasticity_type.compare("druckerPrager3D_frictionHard_") == 0){
+
+  usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+ int iter_rout=0;
+ return_successful = (NILL==0);
+ if (!return_successful){
+   std::cout <<"number of iterations is "<< iter_rout << std::endl;
+   mooseError("Exiting\n");
+ }
+
+for (unsigned int k = 0; k < 10 ; k++) {
+  int NSTR3 = NSTR2;
+  int NPROPS3 = NPROPS2;
+  int NSVARSGP3 = NSVARSGP2;
+  int NILL3 = NILL2;
+
+  for (unsigned i = 0; i < NSTR3; ++i){
+    STRESSF3[i] = STRESSF2[i];
+    DEFORT3[i] = DEFORT2[i];
+  }
+  for (unsigned i = 0; i < NSTR3*NSTR3; ++i){
+    DSDE3[i] = DSDE2[i];
+  }
+  for (unsigned i = 0; i < NSVARSGP3; ++i){
+    SVARSGP3[i] = SVARSGP2[i];
+  }
+  for (unsigned i = 0; i < NPROPS3; ++i){
+    PROPS3[i] = PROPS2[i];
+  }
+
+  usermat_(STRESSF3,DEFORT3,DSDE3,&NSTR3,PROPS3,&NPROPS3,SVARSGP3,&NSVARSGP3,&NILL3);
+  return_successful = (NILL3==0);
+   if (!return_successful){
+     std::cout <<"number of iterations is "<< iter_rout << std::endl;
+     mooseError("Exiting\n");
+   }
+ iter_rout+=1;
+ }
+}
+else if (_plasticity_type.compare("druckerPrager3D_frictionHard_adim_") == 0){
+  usermat1_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+}
+else if (_plasticity_type.compare("druckerPrager3D_cohesionHard_") == 0){
+  usermat2_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+}
+else{
+  std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
+}
+
+NonlinearSystem & system = _fe_problem.getNonlinearSystem();
+int nl_it = system._current_nl_its;
+
+std::vector<unsigned int> l_it_vector = system._current_l_its;
+int l_it = system._current_l_its.size();
+
+int element_id = _current_elem->id();
+//if ((_t_step == 4) && (_dt > 0.03)&& (nl_it > 1))
+
+return_successful = (NILL==0);
+
+/*
+if((element_id==25) && (nl_it==50) && (_t_step==6) && (_qp==7))
+{
+  Real y_coord = _current_elem->centroid()(1);
+  Real x_coord = _current_elem->centroid()(0);
+
+  std::cout << "return successful ? "<< return_successful  <<std::endl;
+  std::cout << "coordinates x of the point is "<< x_coord  <<std::endl;
+  std::cout << "coordinates y of the point is "<< y_coord  <<std::endl;
+  std::cout << "index inside the element is  "<< _qp  <<std::endl;
+  std::cout << "element Id is  "<< element_id  <<std::endl;
+  std::cout << "non linear iteration is "<< nl_it  <<std::endl;
+  std::cout << " linear iteration is "<< l_it  <<std::endl;
+
+  std::cout << "time step is "<< _t_step  <<std::endl;
+
+  std::cout << "strain increment 11 is "<< DEFORT[0]  <<std::endl;
+  std::cout << "strain increment 22 is "<< DEFORT[1]  <<std::endl;
+  std::cout << "strain increment 33 is "<< DEFORT[2]  <<std::endl;
+  std::cout << "strain increment 23 is "<< DEFORT[3]  <<std::endl;
+  std::cout << "strain increment 13 is "<< DEFORT[4]  <<std::endl;
+  std::cout << "strain increment 12 is "<< DEFORT[5]  <<std::endl;
+  std::cout << "strain increment 32 is "<< DEFORT[6]  <<std::endl;
+  std::cout << "strain increment 31 is "<< DEFORT[7]  <<std::endl;
+  std::cout << "strain increment 21 is "<< DEFORT[8]  <<std::endl;
+
+  std::cout << "curvature increment 11 is "<< DEFORT[9]  <<std::endl;
+  std::cout << "curvature increment 12 is "<< DEFORT[10]  <<std::endl;
+  std::cout << "curvature increment 13 is "<< DEFORT[11]  <<std::endl;
+  std::cout << "curvature increment 21 is "<< DEFORT[12]  <<std::endl;
+  std::cout << "curvature increment 22 is "<< DEFORT[13]  <<std::endl;
+  std::cout << "curvature increment 23 is "<< DEFORT[14]  <<std::endl;
+  std::cout << "curvature increment 31 is "<< DEFORT[15]  <<std::endl;
+  std::cout << "curvature increment 32 is "<< DEFORT[16]  <<std::endl;
+  std::cout << "curvature increment 33 is "<< DEFORT[17]  <<std::endl;
+
+  std::cout << "stress 11 is "<< _stress_old[_qp](0,0)  <<std::endl;
+  std::cout << "stress 22 is "<< _stress_old[_qp](1,1)  <<std::endl;
+  std::cout << "stress 33 is "<< _stress_old[_qp](2,2) <<std::endl;
+  std::cout << "stress 23 is "<< _stress_old[_qp](1,2) <<std::endl;
+  std::cout << "stress 13 is "<< _stress_old[_qp](0,2)  <<std::endl;
+  std::cout << "stress 12 is "<< _stress_old[_qp](0,1) <<std::endl;
+  std::cout << "stress 32 is "<< _stress_old[_qp](2,1) <<std::endl;
+  std::cout << "stress 31 is "<< _stress_old[_qp](2,0) <<std::endl;
+  std::cout << "stress 21 is "<< _stress_old[_qp](1,0) <<std::endl;
+
+  std::cout << "couple stress 11 is "<< _stress_couple_old[_qp](0,0)  <<std::endl;
+  std::cout << "couple stress 12 is "<< _stress_couple_old[_qp](0,1) <<std::endl;
+  std::cout << "couple stress 13 is "<< _stress_couple_old[_qp](0,2) <<std::endl;
+  std::cout << "couple stress 21 is "<< _stress_couple_old[_qp](1,0) <<std::endl;
+  std::cout << "couple stress 22 is "<< _stress_couple_old[_qp](1,1)  <<std::endl;
+  std::cout << "couple stress 23 is "<< _stress_couple_old[_qp](1,2)  <<std::endl;
+  std::cout << "couple stress 31 is "<< _stress_couple_old[_qp](2,0)  <<std::endl;
+  std::cout << "couple stress 32 is "<< _stress_couple_old[_qp](2,1) <<std::endl;
+  std::cout << "couple stress 33 is "<< _stress_couple_old[_qp](2,2) <<std::endl;
+
+  std::cout << "hardening variable is "<< _hardening_variable_old[_qp] <<std::endl;
+}
+*/
+
+if (!return_successful)
+{
+  Moose::out << "Failed to converge with the return map ******************************************************************************** ";
+
+Real y_coord = _current_elem->centroid()(1);
+Real x_coord = _current_elem->centroid()(0);
+
+std::cout << "coordinates x of the point is "<< x_coord  <<std::endl;
+std::cout << "coordinates y of the point is "<< y_coord  <<std::endl;
+std::cout << "index inside the element is  "<< _qp  <<std::endl;
+std::cout << "element Id is  "<< element_id  <<std::endl;
+std::cout << "non linear iteration is "<< nl_it  <<std::endl;
+
+std::cout << "time step is "<< _t_step  <<std::endl;
+
+
+for (unsigned int i = 0; i < NSTR2 ; ++i)
+{
+  std::cout <<"DEFORT input" << i << " = " << DEFORT2[i] <<std::endl;
+}
+for (unsigned int i = 0; i < NSTR2 ; ++i)
+{
+  std::cout <<"STRESS input" << i << " = " << STRESSF2[i] <<std::endl;
+}
+
+for (unsigned int i = 0; i < NSVARSGP2 ; ++i)
+{
+  std::cout <<"SVARSGP input" << i << " = " << SVARSGP2[i] <<std::endl;
+}
+for (unsigned int i = 0; i < NSTR2*NSTR2 ; ++i)
+{
+  std::cout <<"DSDE input" << i << " = " << DSDE2[i] <<std::endl;
+}
+for (unsigned int i = 0; i < NPROPS2 ; ++i)
+{
+  std::cout <<"PROPS input" << i << " = " << PROPS2[i] <<std::endl;
+}
+
+std::cout <<"NSTR input = " << NSTR2 <<std::endl;
+std::cout <<"NPROPS input = " << NPROPS2 <<std::endl;
+std::cout <<"NSVARSGP input = " << NSVARSGP2 <<std::endl;
+std::cout <<"NILL input = " << NILL2 <<std::endl;
+
+//output de la routine
+
+for (unsigned int i = 0; i < NSTR ; ++i)
+{
+  std::cout <<"DEFORT output" << i << " = " << DEFORT[i] <<std::endl;
+}
+for (unsigned int i = 0; i < NSTR ; ++i)
+{
+  std::cout <<"STRESS output" << i << " = " << STRESSF[i] <<std::endl;
+}
+
+for (unsigned int i = 0; i < NSVARSGP ; ++i)
+{
+  std::cout <<"SVARSGP output" << i << " = " << SVARSGP[i] <<std::endl;
+}
+for (unsigned int i = 0; i < NSTR*NSTR ; ++i)
+{
+  std::cout <<"DSDE output" << i << " = " << DSDE[i] <<std::endl;
+}
+for (unsigned int i = 0; i < NPROPS ; ++i)
+{
+  std::cout <<"PROPS output" << i << " = " << PROPS[i] <<std::endl;
+}
+
+std::cout <<"NSTR output = " << NSTR <<std::endl;
+std::cout <<"NPROPS output = " << NPROPS <<std::endl;
+std::cout <<"NSVARSGP output = " << NSVARSGP <<std::endl;
+std::cout <<"NILL output = " << NILL <<std::endl;
+
+  //throw MooseException("MooseException due to the non convergence of the subroutine");
+  mooseError("Exiting\n");
+//_fe_problem.restoreSolutions();
+}
+
+
+/*
 while (time_simulated < 1.0 && step_size >= _min_stepsize)
 {
 
@@ -283,14 +540,14 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
   else{
     std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
   }
-/*
-  Real verbose = 0;
-  Real y_coord = _current_elem->centroid()(1);
-  Real x_coord = _current_elem->centroid()(0);
-  if (y_coord > 0.45 && y_coord < 0.55 && x_coord > 0.45 && x_coord < 0.55  && _qp==0)
-    verbose = 1;
-  if (verbose == 1 && NILL != 0)std::cout << " fortran not converging******************************** " << std::endl;
-*/
+
+  //Real verbose = 0;
+  //Real y_coord = _current_elem->centroid()(1);
+  //Real x_coord = _current_elem->centroid()(0);
+  //if (y_coord > 0.45 && y_coord < 0.55 && x_coord > 0.45 && x_coord < 0.55  && _qp==0)
+  //  verbose = 1;
+  //if (verbose == 1 && NILL != 0)std::cout << " fortran not converging******************************** " << std::endl;
+
 
   return_successful = (NILL==0);
   _iter[_qp] += 1;
@@ -324,7 +581,7 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
   }
   else
   {
-    Moose::out << "the stepsize begins to be reduced " << _iter[_qp] << std::endl;
+    //Moose::out << "the stepsize begins to be reduced " << _iter[_qp] << std::endl;
     step_size *= 0.5;
     num_consecutive_successes = 0;
     remplSigmaOld(_stress_old[_qp], STRESSF, 0);
@@ -358,18 +615,20 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
 }
 
 if (!return_successful)
-{    if (_ignore_failures)
-    {    Moose::out << "Failed to converge with the return map ";
+{  Moose::out << "Failed to converge with the return map ******************************************************************************** ";
+
+  if (_ignore_failures)
+    {    //Moose::out << "Failed to converge with the return map ******************************************************************************** ";
     }
     else
     {
     Moose::out << "After reducing the stepsize to " << step_size
-               << " with original strain increment with L2norm "
-               << this_strain_increment.L2norm() << " the returnMap algorithm failed\n";
+              << " with original strain increment with L2norm "
+              << this_strain_increment.L2norm() << " the returnMap algorithm failed\n";
     mooseError("Exiting\n");
   }
 }
-
+*/
 
 recupSigmaNew(_stress[_qp], STRESSF, 0);
 recupMomentNew(_stress_couple[_qp], STRESSF, 0);
