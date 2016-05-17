@@ -54,6 +54,8 @@ protected:
 
   Real _mean;
   Real _stddev;
+  Real _min;
+  Real _max;
 };
 
 #endif // FUNCTIONNORMALDISTRIBUTIONIC_H
