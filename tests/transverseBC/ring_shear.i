@@ -25,15 +25,13 @@
 
 [Materials]
   [./mat_mech]
-    type = RedbackMechMaterialJ2
+    type = RedbackMechMaterialElastic
     block = 0
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    exponent = 1
     youngs_modulus = 1000
     poisson_ratio = 0.3
-    ref_pe_rate = 1
     yield_stress = '0. 1 1. 1'
     pore_pres = pore_pressure
     temperature = temp
@@ -66,7 +64,7 @@
 []
 
 [Functions]
-  active = 'central_rotation downfunc r_square_fct'
+  active = 'central_rotation r_square_fct downfunc observed_rotation'
   [./upfunc]
     type = ParsedFunction
     value = t
@@ -84,7 +82,13 @@
   [../]
   [./r_square_fct]
     type = ParsedFunction
-    value = '(0.3 + dx)*(0.3+dx) + dy*dy'
+    value = 'sqrt((0.3+dx - 0)^2 + (dy - 0)^2)' # no spaces
+    vals = 'dx_point2 dy_point2'
+    vars = 'dx dy'
+  [../]
+  [./observed_rotation]
+    type = ParsedFunction
+    value = 'atan(dy/(0.3+dx)) * 180/pi'
     vals = 'dx_point2 dy_point2'
     vars = 'dx dy'
   [../]
@@ -169,7 +173,7 @@
 []
 
 [AuxVariables]
-  active = 'mech_porosity Mod_Gruntfest_number solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress stress_zz'
+  active = 'mech_porosity total_porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -277,7 +281,7 @@
 []
 
 [AuxKernels]
-  active = 'mech_porosity volumetric_strain solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress mean_stress stress_zz strain_rate Gruntfest_Number'
+  active = 'mech_porosity total_porosity'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -385,7 +389,7 @@
 []
 
 [Postprocessors]
-  active = 'solid_ratio_middle mises_stress_centre strain_rate_middle middle_press Lewis_middle porosity_middle middle_temp dx_point2 dy_point2 r_square_pp'
+  active = 'internal_radius_pp dy_point2 dx_point2 rotation_observed_pp'
   [./middle_temp]
     type = PointValue
     variable = temp
@@ -436,9 +440,13 @@
     variable = disp_y
     point = '0.3 0 0 '
   [../]
-  [./r_square_pp]
+  [./internal_radius_pp]
     type = FunctionValuePostprocessor
     function = r_square_fct
+  [../]
+  [./rotation_observed_pp]
+    type = FunctionValuePostprocessor
+    function = observed_rotation
   [../]
 []
 
@@ -460,7 +468,7 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 5e-3
+    dt = 1
   [../]
 []
 
@@ -469,6 +477,7 @@
   output_initial = true
   exodus = true
   print_linear_residuals = false
+  csv = true
   [./console]
     type = Console
     perf_log = true
