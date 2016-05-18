@@ -33,7 +33,9 @@
 
 
 #include "libmesh/petsc_matrix.h"
+//#include <Eigen/Eigenvalues>
 
+#include <slepceps.h>
 
 
 #endif
@@ -157,14 +159,14 @@ SteadyWithJacobian::execute()
     } else {
 
 
-    	Moose::PetscSupport::PetscOptions &  thePetscOptions  =  _problem.getPetscOptions();
-    	thePetscOptions.inames.push_back("-mat_fd_type");
-    	thePetscOptions.values.push_back("ds");
+    	//Moose::PetscSupport::PetscOptions &  thePetscOptions  =  _problem.getPetscOptions();
+    	//thePetscOptions.inames.push_back("-mat_fd_type");
+    	//thePetscOptions.values.push_back("ds");
 
-    	// change solve type to Newton and solve again
+    	// change solve type to Newton (to guarantee jacobian is built) and solve again
     	_problem.solverParams()._type = Moose::stringToEnum<Moose::SolveType>("NEWTON");
 
-    	_problem.solve();  // solve releases the jacobian on exit?
+    	_problem.solve();
 
 
     	// attempt to get jacobian directly
@@ -184,6 +186,124 @@ SteadyWithJacobian::execute()
     		// print to "jacobian.txt"
     		std::ofstream fout("jacobian.txt");
     		nl.sys().matrix->print(fout,true);
+    	}
+
+
+    	bool doFindEigenValues = true;
+    	if(doFindEigenValues){
+
+
+    	// run eigen solver
+#ifndef LIBMESH_HAVE_SLEPC
+
+    		_console << "Error!! Calculation of eigenvalues requires libMesh to be compiled with SLEPc eigen solvers support!\n";
+    		break;
+
+      #else
+
+            std::cout << "Before petMat " <<std::endl;
+    	//	Eigen::EigenSolver<  > myEigenSolver(nl.sys().matrix);
+
+        PetscMatrix<Number>* petMat  = dynamic_cast< PetscMatrix<Number>*  >( nl.sys().matrix ); // explicit copy - slow but safe
+
+
+        std::cout << "After petMat " <<std::endl;
+        if(petMat){
+
+            std::cout << "Got petMat " <<std::endl;
+        Mat A = petMat->mat();
+
+          EPS        eps; /* eigen value solver context */ // need slepc for this
+          //Mat         A, B;      /*  matrices of Ax=kBx   */
+          Vec         xr, xi;    /*  eigenvector, x       */
+          PetscScalar kr, ki;    /*  eigenvalue, k        */
+
+          std::cout << "After defs " <<std::endl;
+
+          MatCreateVecs(A,NULL,&xr);
+          MatCreateVecs(A,NULL,&xi);
+          std::cout << "After MatCreateVecs " <<std::endl;
+
+          EPSCreate(PETSC_COMM_WORLD, &eps); // PETSC_COMM_WORLD ???
+
+          std::cout << "After EPSCreate " <<std::endl;
+
+          EPSSetOperators(eps, A, NULL);
+
+          std::cout << "After EPSSetOperators " <<std::endl;
+          EPSSetProblemType(eps, EPS_NHEP); // are they hermitian? > assuming they are not
+
+          std::cout << "After EPSSetProblemType " <<std::endl;
+          EPSSetFromOptions(eps);
+
+          std::cout << "After EPSSetFromOptions " <<std::endl;
+          EPSSolve(eps);
+          std::cout << "After EPSSolve " <<std::endl;
+
+          if(true){
+        	  // report on solve
+        	PetscInt       Istart,Iend,nev,maxit,its;
+        	PetscReal      tol;
+        	EPSType        type;
+            EPSGetIterationNumber(eps,&its);
+            PetscPrintf(PETSC_COMM_WORLD," Number of iterations of the method: %D\n",its);
+            EPSGetType(eps,&type);
+            PetscPrintf(PETSC_COMM_WORLD," Solution method: %s\n\n",type);
+            EPSGetDimensions(eps,&nev,NULL,NULL);
+            PetscPrintf(PETSC_COMM_WORLD," Number of requested eigenvalues: %D\n",nev);
+            EPSGetTolerances(eps,&tol,&maxit);
+            PetscPrintf(PETSC_COMM_WORLD," Stopping condition: tol=%.4g, maxit=%D\n",(double)tol,maxit);
+          }
+
+          PetscInt nconv;
+          EPSGetConverged(eps, &nconv);
+          std::cout << "After EPSGetConverged " <<std::endl;
+          std::cout << "nconv " << nconv <<std::endl;
+          PetscInt m, n;
+          MatGetSize(A,&m, &n);
+          std::cout << "A size " << m << " " << n <<std::endl;
+          for (int i=0; i<nconv; i++) {
+        	  EPSGetEigenpair(eps, i, &kr, &ki, xr, xi);
+
+
+        	  // compute error
+        	  PetscReal      re,im,error;
+
+        	  EPSComputeError(eps,i,EPS_ERROR_RELATIVE,&error);
+
+        	  // display eigen values
+#if defined(PETSC_USE_COMPLEX)
+        	  re = PetscRealPart(kr);
+        	  im = PetscImaginaryPart(kr);
+#else
+        	  re = kr;
+        	  im = ki;
+#endif
+        	  if (im!=0.0) {
+        		  PetscPrintf(PETSC_COMM_WORLD," %9f%+9fi %12g\n",(double)re,(double)im,(double)error);
+        	  } else {
+        		  PetscPrintf(PETSC_COMM_WORLD,"   %12f       %12g\n",(double)re,(double)error);
+        	  }
+
+        	  // display eigen vector
+        	  VecView(xr,PETSC_VIEWER_STDOUT_WORLD);
+
+
+
+          }
+
+
+          // cleanum
+          std::cout << "After EPSGetEigenpair " <<std::endl;
+          EPSDestroy(&eps);
+        }
+        //
+
+
+
+
+#endif
+
     	}
 
     }
