@@ -125,7 +125,7 @@ SteadyWithJacobian::execute()
     // The system has been solved - now we change the flags sent to Petsc and to output the Jacobian.
 
     _console <<  std::scientific << COLOR_GREEN
-            << "\n +++ Steady state solution found - outputting Jacobian +++ \n"
+            << "\n +++ Steady state solution found - calculating Jacobian +++ \n"
 	        << COLOR_DEFAULT
 	        << std::endl;
 
@@ -155,10 +155,10 @@ SteadyWithJacobian::execute()
 
     	_problem.solve();
 
-    	// Petsc will exit at this point after the jacobian is be dumped to std out
+    	// At this point Petsc should dump the jacobian std out in the PETSc format and then exit.
     } else {
 
-
+        // Needed? The following options set methods used for the finite difference calculation of the jacobian.
     	//Moose::PetscSupport::PetscOptions &  thePetscOptions  =  _problem.getPetscOptions();
     	//thePetscOptions.inames.push_back("-mat_fd_type");
     	//thePetscOptions.values.push_back("ds");
@@ -182,63 +182,47 @@ SteadyWithJacobian::execute()
     	bool doPrintToScreen = false;
     	if(doPrintToScreen){
     	  nl.sys().matrix->print(std::cout,true);
-    	} else {
-    		// print to "jacobian.txt"
+    	}
+
+    	bool doDumpToFile = false;
+    	if (doDumpToFile){
+    		//
     		std::ofstream fout("jacobian.txt");
     		nl.sys().matrix->print(fout,true);
     	}
 
 
     	bool doFindEigenValues = true;
-    	if(doFindEigenValues){
+    	if(doFindEigenValues){ // run eigen solver
 
 
-    	// run eigen solver
-#ifndef LIBMESH_HAVE_SLEPC
 
-    		_console << "Error!! Calculation of eigenvalues requires libMesh to be compiled with SLEPc eigen solvers support!\n";
-    		break;
+#ifdef LIBMESH_HAVE_SLEPC
 
-      #else
-
-            std::cout << "Before petMat " <<std::endl;
-    	//	Eigen::EigenSolver<  > myEigenSolver(nl.sys().matrix);
-
+    	// get reference to petsc matrix holder
         PetscMatrix<Number>* petMat  = dynamic_cast< PetscMatrix<Number>*  >( nl.sys().matrix ); // explicit copy - slow but safe
 
-
-        std::cout << "After petMat " <<std::endl;
         if(petMat){
 
-            std::cout << "Got petMat " <<std::endl;
-        Mat A = petMat->mat();
+          // extract the actual petsc matrix
+          Mat A = petMat->mat();   /* Ax = kx */
 
           EPS        eps; /* eigen value solver context */ // need slepc for this
-          //Mat         A, B;      /*  matrices of Ax=kBx   */
-          Vec         xr, xi;    /*  eigenvector, x       */
-          PetscScalar kr, ki;    /*  eigenvalue, k        */
-
-          std::cout << "After defs " <<std::endl;
+          Vec         xr, xi;    /*  eigenvector, x (real and imag) */
+          PetscScalar kr, ki;    /*  eigenvalue, k (real and imag)  */
 
           MatCreateVecs(A,NULL,&xr);
           MatCreateVecs(A,NULL,&xi);
-          std::cout << "After MatCreateVecs " <<std::endl;
 
-          EPSCreate(PETSC_COMM_WORLD, &eps); // PETSC_COMM_WORLD ???
-
-          std::cout << "After EPSCreate " <<std::endl;
+          EPSCreate(PETSC_COMM_WORLD, &eps); // PETSC_COMM_WORLD ??? > seems ok but might be a better option.
 
           EPSSetOperators(eps, A, NULL);
 
-          std::cout << "After EPSSetOperators " <<std::endl;
-          EPSSetProblemType(eps, EPS_NHEP); // are they hermitian? > assuming they are not
+          EPSSetProblemType(eps, EPS_NHEP); // are they hermitian? > assuming they are not (unlikely given bcs)
 
-          std::cout << "After EPSSetProblemType " <<std::endl;
-          EPSSetFromOptions(eps);
+          EPSSetFromOptions(eps); // sets from command line - can be used to return more eigen vectors
 
-          std::cout << "After EPSSetFromOptions " <<std::endl;
           EPSSolve(eps);
-          std::cout << "After EPSSolve " <<std::endl;
 
           if(true){
         	  // report on solve
@@ -257,19 +241,19 @@ SteadyWithJacobian::execute()
 
           PetscInt nconv;
           EPSGetConverged(eps, &nconv);
-          std::cout << "After EPSGetConverged " <<std::endl;
-          std::cout << "nconv " << nconv <<std::endl;
           PetscInt m, n;
           MatGetSize(A,&m, &n);
-          std::cout << "A size " << m << " " << n <<std::endl;
+
           for (int i=0; i<nconv; i++) {
+
+      	      PetscReal      re,im,error;
+
         	  EPSGetEigenpair(eps, i, &kr, &ki, xr, xi);
 
-
         	  // compute error
-        	  PetscReal      re,im,error;
-
-        	  EPSComputeError(eps,i,EPS_ERROR_RELATIVE,&error);
+        	  if(true){
+        	    EPSComputeError(eps,i,EPS_ERROR_RELATIVE,&error);
+        	  }
 
         	  // display eigen values
 #if defined(PETSC_USE_COMPLEX)
@@ -288,21 +272,21 @@ SteadyWithJacobian::execute()
         	  // display eigen vector
         	  VecView(xr,PETSC_VIEWER_STDOUT_WORLD);
 
-
-
           }
 
 
-          // cleanum
-          std::cout << "After EPSGetEigenpair " <<std::endl;
+          // clean up
           EPSDestroy(&eps);
         }
-        //
 
+#else
+        // need slepc to run eigen solver (can still calculate from "jacobian.txt" though if it has been created)
+        _console <<  std::scientific << COLOR_RED
+		<< "Error!! Calculation of eigenvalues requires libMesh to be compiled with SLEPc eigen solver support!\n";
+        << COLOR_DEFAULT
+        break;
 
-
-
-#endif
+#endif  // LIBMESH_HAVE_SLEPC
 
     	}
 
