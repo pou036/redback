@@ -141,17 +141,21 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _volumetric_strain(declareProperty<Real>("volumetric_strain")),
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
-    _mechanical_porosity(declareProperty<Real>("mechanical_porosity")),
-    _mass_removal_rate(declareProperty<Real>("mass_removal_rate")),
 
-    _poromech_kernel(declareProperty<Real>("poromechanics_kernel")),
-    _poromech_jac(declareProperty<Real>("poromechanics_jacobian")),
-    _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
-    _mechanical_dissipation_mech(declareProperty<Real>("mechanical_dissipation_mech")),
-    _mechanical_dissipation_jac_mech(declareProperty<Real>("mechanical_dissipation_jacobian_mech")),
+	// optional fields
+    _mechanical_porosity(*this,"mechanical_porosity"),
+    _mass_removal_rate(*this,"mass_removal_rate"),
 
-    _damage_kernel(declareProperty<Real>("damage_kernel")),
-    _damage_kernel_jac(declareProperty<Real>("damage_kernel_jacobian")),
+    _poromech_kernel(*this,"poromechanics_kernel"),
+    _poromech_jac(*this,"poromechanics_jacobian"),
+    _mod_gruntfest_number(*this,"mod_gruntfest_number"),
+    _mechanical_dissipation_mech(*this,"mechanical_dissipation_mech"),
+    _mechanical_dissipation_jac_mech(*this,"mechanical_dissipation_jacobian_mech"),
+
+    _damage_kernel(*this,"damage_kernel"),
+    _damage_kernel_jac(*this,"damage_kernel_jacobian" ),
+
+	// scalar values
     _damage_coeff(getParam<Real>("damage_coefficient")),
     _dmg_exponent(getParam<Real>("damage_exponent")),
     _healing_coeff(getParam<Real>("healing_coefficient")),

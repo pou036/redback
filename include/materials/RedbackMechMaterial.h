@@ -140,15 +140,15 @@ protected:
   MaterialProperty<Real> & _volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;
   MaterialProperty<Real> & _total_volumetric_strain;
-  MaterialProperty<Real> & _mechanical_porosity;
-  MaterialProperty<Real> & _mass_removal_rate;
-  MaterialProperty<Real> & _poromech_kernel;
-  MaterialProperty<Real> & _poromech_jac;
-  MaterialProperty<Real> & _mod_gruntfest_number;
-  MaterialProperty<Real> & _mechanical_dissipation_mech;
-  MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
-  MaterialProperty<Real> & _damage_kernel;
-  MaterialProperty<Real> & _damage_kernel_jac;
+  OptionalMaterialProperty<Real> _mechanical_porosity;
+  OptionalMaterialProperty<Real> _mass_removal_rate;
+  OptionalMaterialProperty<Real> _poromech_kernel;
+  OptionalMaterialProperty<Real> _poromech_jac;
+  OptionalMaterialProperty<Real> _mod_gruntfest_number;
+  OptionalMaterialProperty<Real> _mechanical_dissipation_mech;
+  OptionalMaterialProperty<Real> _mechanical_dissipation_jac_mech;
+  OptionalMaterialProperty<Real> _damage_kernel;
+  OptionalMaterialProperty<Real> _damage_kernel_jac;
   Real _damage_coeff, _dmg_exponent, _healing_coeff;
 
   Real _exponential;
