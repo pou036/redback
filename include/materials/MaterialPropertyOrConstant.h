@@ -23,7 +23,7 @@
 
 #include "MaterialProperty.h"
 
-
+// helper functions
 namespace{
 
   template<class Type> Type GetParamIfRealZeroOtherwise(Material& theMaterial, std::string& name);
@@ -40,8 +40,11 @@ namespace{
 
 }
 
+/////////////////////////////
 
-// used to declare an property that may either be a field or a constant in space
+// MaterialPropertyOrConstant
+
+/// used to declare an property that may either be a field or a constant in space
 template<class Type>
 class MaterialPropertyOrConstant
 {
@@ -49,6 +52,7 @@ class MaterialPropertyOrConstant
 public:
 
 	MaterialPropertyOrConstant(Material& theMaterial, std::string name):
+		_name(name),
 		_constantValue( GetParamIfRealZeroOtherwise<Type>(theMaterial,name) )
 	{
 
@@ -61,39 +65,62 @@ public:
 
   /**
    * Get element i out of the array or the constant value if field is not set
-   */
-	const Type & operator[](const unsigned int i) const{
+   *
+   **/
+	const Type & operator[](const unsigned int i) const{  // constant to prevent accidental assignment
 
 	  if(_fieldPtr){
 		  return (*_fieldPtr)[i];
 	  }
 	  return _constantValue;
-   }
+	}
+
 
 	/**
-	 * Get element i out of the array or the constant value if the field is not set
-	 */
-	/*Type & operator[](const unsigned int i) {
+	 * Set the whole field to a constant value
+	 *
+	 **/
+	void SetConstantValue(const unsigned int i, const Type& value){
 
-	  if(_fieldPtr){
-		  return (*_fieldPtr)[i];
-	  }
-	  // This is dangerous - may want to throw a warning here.
-	  return _constantValue;
-   }*/
+		if(_fieldPtr){
+			(*_fieldPtr)[i] = value;
+		} else {
+			_constantValue = value;
+		}
+
+	}
+
+
+	/**
+	 * Set the value of an element of the field - throw an error if spatially constant
+	 *
+	 **/
+	void SetValue(const unsigned int i, const Type& value){
+
+		if(_fieldPtr){
+			(*_fieldPtr)[i] = value;
+		} else {
+			  mooseError("Attempting to vary value of constant field " + _name + ".");
+		}
+
+	}
+
 
 private:
-
+  std::string _name;
   Type _constantValue;
   MaterialProperty<Type>* _fieldPtr;
 
 };
 
 
+/////////////////////////////
 
-// used to declare an optional material property
-// i.e. one that may not be needed for some simulation,
-// but should an error if not declared and requested
+// OptionalMaterialProperty
+
+// used to define an optional material property
+// i.e. one that may not be needed for some simulations,
+// but should throw an error if required and not explicitly declared
 template<class Type>
 class OptionalMaterialProperty
 {
@@ -112,7 +139,7 @@ public:
 	}
 
   /**
-   * Get element i out of the array or the constant value if field is not set
+   * Get element i out of the array or throw an error if the field is not set
    */
 	Type & operator[](const unsigned int i) {
 
@@ -121,9 +148,22 @@ public:
 	  }
 
 	  // error - attempting to access the field when it hasn't been set.
-	    mooseError("Attempting to access uninitialized optional field" + _name);
+	  mooseError("Attempting to access uninitialized optional field" + _name);
 
-   }
+	}
+
+	bool IsActive(){ return _fieldPtr != nullptr; }
+
+   /**
+    *  Set if the field is active, but don't freak out if it is not.
+    */
+	void SetIfActive(const unsigned int i, const Type& value) {
+
+		if(_fieldPtr){
+			(*_fieldPtr)[i] = value;
+		}
+
+	}
 
 private:
 

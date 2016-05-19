@@ -18,6 +18,8 @@
 //#include "FiniteStrainPlasticMaterial.h"
 #include "Material.h"
 
+#include "MaterialPropertyOrConstant.h"
+
 // Forward Declarations
 class RedbackMaterial;
 

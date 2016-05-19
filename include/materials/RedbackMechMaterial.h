@@ -140,7 +140,7 @@ protected:
   MaterialProperty<Real> & _volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;
   MaterialProperty<Real> & _total_volumetric_strain;
-  OptionalMaterialProperty<Real> _mechanical_porosity;
+  MaterialProperty<Real> & _mechanical_porosity;
   OptionalMaterialProperty<Real> _mass_removal_rate;
   OptionalMaterialProperty<Real> _poromech_kernel;
   OptionalMaterialProperty<Real> _poromech_jac;

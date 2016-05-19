@@ -141,11 +141,10 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _volumetric_strain(declareProperty<Real>("volumetric_strain")),
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
+	_mechanical_porosity(declareProperty<Real>("mechanical_porosity")),
 
 	// optional fields
-    _mechanical_porosity(*this,"mechanical_porosity"),
     _mass_removal_rate(*this,"mass_removal_rate"),
-
     _poromech_kernel(*this,"poromechanics_kernel"),
     _poromech_jac(*this,"poromechanics_jacobian"),
     _mod_gruntfest_number(*this,"mod_gruntfest_number"),
@@ -238,14 +237,16 @@ RedbackMechMaterial::initQpStatefulProperties()
   _volumetric_strain_rate[ _qp ] = 0;
   _total_volumetric_strain[ _qp ] = 0;
   _mechanical_porosity[ _qp ] = 0;
-  _poromech_kernel[ _qp ] = 0;
-  _poromech_jac[ _qp ] = 0;
-  _mod_gruntfest_number[ _qp ] = 0;
-  _mechanical_dissipation_mech[ _qp ] = 0;
-  _mechanical_dissipation_jac_mech[ _qp ] = 0;
-  _damage_kernel[ _qp ] = 0;
-  _damage_kernel_jac[ _qp ] = 0;
-  _mass_removal_rate[ _qp ] = 0;
+
+  // optional properties
+  _poromech_kernel.SetIfActive( _qp, 0);
+  _poromech_jac.SetIfActive( _qp, 0);
+  _mod_gruntfest_number.SetIfActive( _qp, 0);
+  _mechanical_dissipation_mech.SetIfActive( _qp, 0);
+  _mechanical_dissipation_jac_mech.SetIfActive( _qp, 0);
+  _damage_kernel.SetIfActive( _qp, 0);
+  _damage_kernel_jac.SetIfActive( _qp, 0);
+  _mass_removal_rate.SetIfActive( _qp, 0);
 }
 
 void
@@ -519,7 +520,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   gruntfest_number = _gr[ _qp ] * std::exp(_ar[ _qp ]);
 
   // Compute Mechanical Dissipation.
-  _mechanical_dissipation_mech[ _qp ] = gruntfest_number * sig.doubleContraction(instantaneous_strain_rate) +
+  if( _mechanical_dissipation_mech.IsActive() ) _mechanical_dissipation_mech[ _qp ] = gruntfest_number * sig.doubleContraction(instantaneous_strain_rate) +
                                         _damage_dissipation; // The negative sign in damage dissipation is
                                                              // according
                                                              // to thermodynamics with internal state variables (see
@@ -531,27 +532,31 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   }*/
 
   // Compute Mechanical Dissipation Jacobian
-  _mechanical_dissipation_jac_mech[ _qp ] =
+  if( _mechanical_dissipation_jac_mech.IsActive() ) _mechanical_dissipation_jac_mech[ _qp ] =
     _mechanical_dissipation_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
 
-  _poromech_kernel[ _qp ] = def_grad_rate * _peclet_number[ _qp ] / _mixture_compressibility[ _qp ];
-  _poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
+  if(_poromech_kernel.IsActive() ) _poromech_kernel[ _qp ] = def_grad_rate * _peclet_number[ _qp ] / _mixture_compressibility[ _qp ];
+  if(_poromech_jac.IsActive() ) _poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO:
   // Remove this number from the tests!!!
-  _mod_gruntfest_number[ _qp ] =
-    gruntfest_number * std::exp(-_ar[ _qp ]) *
-    (std::fabs(getSigEqv(sig) * std::pow(macaulayBracket(getSigEqv(sig) / q_y - 1.0), _exponent)) +
-     std::fabs(_mean_stress[ _qp ] * std::pow(macaulayBracket(_mean_stress[ _qp ] - p_y), _exponent)));
+  if(_mod_gruntfest_number.IsActive() ){
+	  _mod_gruntfest_number[ _qp ] =
+			  gruntfest_number * std::exp(-_ar[ _qp ]) *
+			  (std::fabs(getSigEqv(sig) * std::pow(macaulayBracket(getSigEqv(sig) / q_y - 1.0), _exponent)) +
+					  std::fabs(_mean_stress[ _qp ] * std::pow(macaulayBracket(_mean_stress[ _qp ] - p_y), _exponent)));
+  }
 
+  if(_mass_removal_rate.IsActive() ){
   // Begin of the chemical degradation method of Hu and Hueckel 2013 (doi:10.1680/geot.SIP13.P.020)
   // _mass_removal_rate[_qp] = 0;
-  Real total_energy_input = sig.doubleContraction(instantaneous_strain_rate);
+    Real total_energy_input = sig.doubleContraction(instantaneous_strain_rate);
 
-  _mass_removal_rate[ _qp ] = _chemo_mechanical_porosity_coeff * (1 + total_energy_input);
-  if (_volumetric_strain[ _qp ] > 0)
-  {
-    _mass_removal_rate[ _qp ] = _chemo_mechanical_porosity_coeff * _volumetric_strain[ _qp ];
+    _mass_removal_rate[ _qp ] = _chemo_mechanical_porosity_coeff * (1 + total_energy_input);
+    if (_volumetric_strain[ _qp ] > 0)
+    {
+      _mass_removal_rate[ _qp ] = _chemo_mechanical_porosity_coeff * _volumetric_strain[ _qp ];
+    }
   }
   // End of the chemical degradation method of Hu and Hueckel 2013
 
