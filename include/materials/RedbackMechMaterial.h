@@ -21,6 +21,9 @@
 #include "RotationTensor.h"
 //#include "FiniteStrainPlasticMaterial.h"
 
+
+#include "MaterialPropertyOrConstant.h"
+
 // Forward Declarations
 class RedbackMechMaterial;
 
