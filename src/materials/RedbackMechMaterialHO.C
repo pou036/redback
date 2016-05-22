@@ -93,6 +93,9 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _wc_x(coupledValue("wc_x")),
     _wc_y(coupledValue("wc_y")),
     _wc_z(coupledValue("wc_z")),
+    _wc_x_old(coupledValueOld("wc_x")),
+    _wc_y_old(coupledValueOld("wc_y")),
+    _wc_z_old(coupledValueOld("wc_z")),
     _grad_wc_x(coupledGradient("wc_x")),
     _grad_wc_y(coupledGradient("wc_y")),
     _grad_wc_z(coupledGradient("wc_z")),
@@ -130,11 +133,12 @@ RedbackMechMaterialHO::initQpStatefulProperties()
   _stress_trace[ _qp ] = 0.0;
   _macro_rotation[ _qp ].zero();
   _elastic_flexural_rigidity_tensor[ _qp ] = _Bijkl;
-  _Jacobian_mult_couple[ _qp ] = _Bijkl;
+  _Jacobian_mult_couple[ _qp ].zero();
   _Jacobian_offdiag_bc[ _qp ].zero();
   _Jacobian_offdiag_cb[ _qp ].zero();
   _curvature_increment[ _qp ].zero();
   _plastic_curvature[ _qp ].zero();
+  _deviatoric_plastic_strain[ _qp ].zero();
   _deviatoric_stress[ _qp ].zero();
   _volumetric_stress[ _qp ] = 0.0;
   _stress_invariant[ _qp ] = 0.0;
@@ -154,12 +158,11 @@ RedbackMechMaterialHO::computeQpStrain(const RankTwoTensor & Fhat)
   RankTwoTensor grad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
   RealVectorValue wc_vector(_wc_x[_qp], _wc_y[_qp], _wc_z[_qp]);
 
-  for (unsigned i = 0; i < LIBMESH_DIM; ++i)
-    for (unsigned j = 0; j < LIBMESH_DIM; ++j)
-      for (unsigned k = 0; k < LIBMESH_DIM; ++k)
-        {
+  for (unsigned i = 0; i < LIBMESH_DIM; ++i){
+    for (unsigned j = 0; j < LIBMESH_DIM; ++j){
+      for (unsigned k = 0; k < LIBMESH_DIM; ++k){
         grad_tensor(i, j) += PermutationTensor::eps(i, j, k) * wc_vector(k);
-      }
+      }}}
 
   _symmetric_strain[_qp] = (grad_tensor + grad_tensor.transpose()) / 2.0;
   _antisymmetric_strain[_qp] = (grad_tensor - grad_tensor.transpose()) / 2.0;
@@ -168,6 +171,13 @@ RedbackMechMaterialHO::computeQpStrain(const RankTwoTensor & Fhat)
   RankTwoTensor old_deformation(_grad_disp_x_old[_qp],
                      _grad_disp_y_old[_qp],
                      _grad_disp_z_old[_qp]); // Old Deformation gradient
+  RealVectorValue wc_vector_old(_wc_x_old[_qp], _wc_y_old[_qp], _wc_z_old[_qp]);
+
+   for (unsigned i = 0; i < LIBMESH_DIM; ++i){
+    for (unsigned j = 0; j < LIBMESH_DIM; ++j){
+     for (unsigned k = 0; k < LIBMESH_DIM; ++k){
+       old_deformation(i, j) += PermutationTensor::eps(i, j, k) * wc_vector_old(k);
+     }}}
 
   _strain_increment[_qp]= grad_tensor - old_deformation;
   _strain_increment[_qp].addIa(-_solid_thermal_expansion[_qp] * (_T[_qp] - _T_old[_qp]));
@@ -213,19 +223,19 @@ int NSVARSGP2 = 76;
 
 Real STRESSF[NSTR];
 Real DEFORT[NSTR];
-Real DSDE[NSTR*NSTR];
+Real DSDE[NSTR * NSTR];
 Real SVARSGP[NSVARSGP];
 Real PROPS[NPROPS];
 
 Real STRESSF2[NSTR2];
 Real DEFORT2[NSTR2];
-Real DSDE2[NSTR2*NSTR2];
+Real DSDE2[NSTR2 * NSTR2];
 Real SVARSGP2[NSVARSGP2];
 Real PROPS2[NPROPS2];
 
 Real STRESSF3[NSTR2];
 Real DEFORT3[NSTR2] ;
-Real DSDE3[NSTR2*NSTR2] ;
+Real DSDE3[NSTR2 * NSTR2] ;
 Real SVARSGP3[NSVARSGP2] ;
 Real PROPS3[NPROPS2] ;
 
@@ -280,14 +290,14 @@ if (nb_hardening != 0) {
 }
 remplSigmaOld(_plastic_strain_old[_qp], SVARSGP, 2*NSTR + nb_hardening);
 remplMomentOld(_plastic_curvature_old[_qp], SVARSGP, 2*NSTR + nb_hardening);
-SVARSGP[3*NSTR + nb_hardening] = 0.0;
+SVARSGP[3*NSTR + nb_hardening] = 1;
 SVARSGP[3*NSTR + 1 + nb_hardening] = 0.0;
 SVARSGP[3*NSTR + 2 + nb_hardening] = 0.0;
 remplSigmaOld(_elastic_strain_old[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
 remplMomentOld(_elastic_curvature_old[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
-for (unsigned i = 0; i < NSTR*NSTR; ++i){
-DSDE[i] = 0.0;
-}
+for (unsigned int i = 0; i < NSTR*NSTR; ++i){
+   DSDE[i] = 0.0;
+  }
 
 
 remplSigmaOld(_strain_increment[_qp], DEFORT2, 0);
@@ -305,21 +315,29 @@ if (nb_hardening != 0) {
 }
 remplSigmaOld(_plastic_strain_old[_qp], SVARSGP2, 2*NSTR2 + nb_hardening);
 remplMomentOld(_plastic_curvature_old[_qp], SVARSGP2, 2*NSTR2 + nb_hardening);
-SVARSGP2[3*NSTR2 + nb_hardening] = 0.0;
+SVARSGP2[3*NSTR2 + nb_hardening] = 0;
 SVARSGP2[3*NSTR2 + 1 + nb_hardening] = 0.0;
 SVARSGP2[3*NSTR2 + 2 + nb_hardening] = 0.0;
 remplSigmaOld(_elastic_strain_old[_qp], SVARSGP2, 3*NSTR2+3+ nb_hardening);
 remplMomentOld(_elastic_curvature_old[_qp], SVARSGP2, 3*NSTR2+3+ nb_hardening);
-for (unsigned i = 0; i < NSTR2*NSTR2; ++i){
-DSDE2[i] = 0.0;
-}
-
-
+for (unsigned int i = 0; i < NSTR*NSTR; ++i){
+   DSDE2[i] = 0.0;
+  }
 bool return_successful = false;
 Real step_size = 1.0;
 Real time_simulated = 0.0;
 unsigned int num_consecutive_successes = 0;
 _iter[_qp] = 0;
+
+NonlinearSystem & system = _fe_problem.getNonlinearSystem();
+int nl_it = system._current_nl_its;
+
+std::vector<unsigned int> l_it_vector = system._current_l_its;
+int l_it = system._current_l_its.size();
+
+int element_id = _current_elem->id();
+//if ((_t_step == 4) && (_dt > 0.03)&& (nl_it > 1))
+
 
 // Following is necessary because I want strain_increment to be "const"
 // but I also want to be able to subdivide an initial_stress
@@ -331,58 +349,81 @@ if (_plasticity_type.compare("druckerPrager3D_frictionHard_") == 0){
   usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
  int iter_rout=0;
  return_successful = (NILL==0);
- if (!return_successful){
-   std::cout <<"number of iterations is "<< iter_rout << std::endl;
-   mooseError("Exiting\n");
- }
+ //if (!return_successful){
+  // std::cout <<"number of iterations is "<< iter_rout << std::endl;
+  // mooseError("Exiting\n");
+ //}
+}
+/*
+ if(_t_step == 6 && element_id==13 && _qp == 3 && nl_it==0){
+  for (unsigned int k = 0; k < 1000000 ; k++) {
+    if (k%10000==0)
+      std::cout << k << std::endl;
+    int NSTR3 = NSTR2;
+    int NPROPS3 = NPROPS2;
+    int NSVARSGP3 = NSVARSGP2;
+    int NILL3 = NILL2;
 
-for (unsigned int k = 0; k < 10 ; k++) {
-  int NSTR3 = NSTR2;
-  int NPROPS3 = NPROPS2;
-  int NSVARSGP3 = NSVARSGP2;
-  int NILL3 = NILL2;
+    for (unsigned i = 0; i < NSTR3; ++i){
+      STRESSF3[i] = STRESSF2[i];
+      DEFORT3[i] = DEFORT2[i];
+    }
+    for (unsigned i = 0; i < NSTR3*NSTR3; ++i){
+      DSDE3[i] = DSDE2[i];
+    }
+    for (unsigned i = 0; i < NSVARSGP3; ++i){
+      SVARSGP3[i] = SVARSGP2[i];
+    }
+    for (unsigned i = 0; i < NPROPS3; ++i){
+      PROPS3[i] = PROPS2[i];
+    }
 
-  for (unsigned i = 0; i < NSTR3; ++i){
-    STRESSF3[i] = STRESSF2[i];
-    DEFORT3[i] = DEFORT2[i];
-  }
-  for (unsigned i = 0; i < NSTR3*NSTR3; ++i){
-    DSDE3[i] = DSDE2[i];
-  }
-  for (unsigned i = 0; i < NSVARSGP3; ++i){
-    SVARSGP3[i] = SVARSGP2[i];
-  }
-  for (unsigned i = 0; i < NPROPS3; ++i){
-    PROPS3[i] = PROPS2[i];
-  }
+    usermat_(STRESSF3,DEFORT3,DSDE3,&NSTR3,PROPS3,&NPROPS3,SVARSGP3,&NSVARSGP3,&NILL3);
+    return_successful = (NILL3==0);
+     if (!return_successful){
+       for (unsigned int i = 0; i < NSTR2 ; ++i)
+       {
+         std::cout <<"DEFORT input" << i << " = " << DEFORT2[i] <<std::endl;
+       }
+       for (unsigned int i = 0; i < NSTR2 ; ++i)
+       {
+         std::cout <<"STRESS input" << i << " = " << STRESSF2[i] <<std::endl;
+       }
 
-  usermat_(STRESSF3,DEFORT3,DSDE3,&NSTR3,PROPS3,&NPROPS3,SVARSGP3,&NSVARSGP3,&NILL3);
-  return_successful = (NILL3==0);
-   if (!return_successful){
-     std::cout <<"number of iterations is "<< iter_rout << std::endl;
-     mooseError("Exiting\n");
+       for (unsigned int i = 0; i < NSVARSGP2 ; ++i)
+       {
+         std::cout <<"SVARSGP input" << i << " = " << SVARSGP2[i] <<std::endl;
+       }
+       for (unsigned int i = 0; i < NSTR2*NSTR2 ; ++i)
+       {
+         std::cout <<"DSDE input" << i << " = " << DSDE2[i] <<std::endl;
+       }
+       for (unsigned int i = 0; i < NPROPS2 ; ++i)
+       {
+         std::cout <<"PROPS input" << i << " = " << PROPS2[i] <<std::endl;
+       }
+
+       std::cout <<"NSTR input = " << NSTR2 <<std::endl;
+       std::cout <<"NPROPS input = " << NPROPS2 <<std::endl;
+       std::cout <<"NSVARSGP input = " << NSVARSGP2 <<std::endl;
+       std::cout <<"NILL input = " << NILL2 <<std::endl;
+       std::cout <<"number of iterations is "<< iter_rout << std::endl;
+       mooseError("Exiting\n");
+     }
+    iter_rout+=1;
+    }
    }
- iter_rout+=1;
- }
-}
-else if (_plasticity_type.compare("druckerPrager3D_frictionHard_adim_") == 0){
-  usermat1_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
-}
-else if (_plasticity_type.compare("druckerPrager3D_cohesionHard_") == 0){
-  usermat2_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
-}
+  }
+//else if (_plasticity_type.compare("druckerPrager3D_frictionHard_adim_") == 0){
+//  usermat1_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+//}
+//else if (_plasticity_type.compare("druckerPrager3D_cohesionHard_") == 0){
+//  usermat2_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+//}
 else{
   std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
 }
-
-NonlinearSystem & system = _fe_problem.getNonlinearSystem();
-int nl_it = system._current_nl_its;
-
-std::vector<unsigned int> l_it_vector = system._current_l_its;
-int l_it = system._current_l_its.size();
-
-int element_id = _current_elem->id();
-//if ((_t_step == 4) && (_dt > 0.03)&& (nl_it > 1))
+*/
 
 return_successful = (NILL==0);
 
@@ -460,37 +501,50 @@ std::cout << "element Id is  "<< element_id  <<std::endl;
 std::cout << "non linear iteration is "<< nl_it  <<std::endl;
 
 std::cout << "time step is "<< _t_step  <<std::endl;
+//std::cout << "scientific:\n" << std::scientific;
+std::cout <<" NSTR " << NSTR2 <<std::endl;
+std::cout <<" NPROPS " << NPROPS2 <<std::endl;
+std::cout <<" NILL " << NILL2 <<std::endl;
+std::cout <<" NSVARSGP " << NSVARSGP2 <<std::endl;
 
-
+ for (unsigned int i = 0; i < NSTR2 ; ++i)
+ {  char sprintf1 [50];
+   std::sprintf(sprintf1," STRESS (%u) = %13.6e", i+1, STRESSF2[i]);
+   std::cout << sprintf1 <<std::endl;
+   //std::cout <<" STRESS " << i+1 << " = " << STRESSF2[i] <<std::endl;
+ }
 for (unsigned int i = 0; i < NSTR2 ; ++i)
-{
-  std::cout <<"DEFORT input" << i << " = " << DEFORT2[i] <<std::endl;
-}
-for (unsigned int i = 0; i < NSTR2 ; ++i)
-{
-  std::cout <<"STRESS input" << i << " = " << STRESSF2[i] <<std::endl;
+{char sprintf2 [50];
+  std::sprintf(sprintf2," DE (%u) = %13.6e", i+1, DEFORT2[i]);
+  std::cout << sprintf2 <<std::endl;
+  //std::cout <<" DE " << i+1 << " = " << DEFORT2[i] <<std::endl;
 }
 
 for (unsigned int i = 0; i < NSVARSGP2 ; ++i)
 {
-  std::cout <<"SVARSGP input" << i << " = " << SVARSGP2[i] <<std::endl;
-}
-for (unsigned int i = 0; i < NSTR2*NSTR2 ; ++i)
-{
-  std::cout <<"DSDE input" << i << " = " << DSDE2[i] <<std::endl;
+  char sprintf3 [50];
+    std::sprintf(sprintf3," SVARSGP (%u) = %13.6e", i+1, SVARSGP2[i]);
+    std::cout << sprintf3 <<std::endl;
+  //std::cout <<" SVARSGP " << i+1 << " = " << SVARSGP2[i] <<std::endl;
 }
 for (unsigned int i = 0; i < NPROPS2 ; ++i)
-{
-  std::cout <<"PROPS input" << i << " = " << PROPS2[i] <<std::endl;
+{  char sprintf4 [50];
+    std::sprintf(sprintf4," PROPS (%u) = %13.6e", i+1, PROPS2[i]);
+    std::cout << sprintf4 <<std::endl;
+//  std::cout <<" PROPS " << i+1 << " = " << PROPS2[i] <<std::endl;
+}
+for (unsigned int i = 0; i < NSTR2 ; ++i){
+for (unsigned int j = 0; j < NSTR2 ; ++j){
+  char sprintf5 [50];
+      std::sprintf(sprintf5," DSDE ( %u , %u) = %13.6e", i+1,j+1, DSDE2[i*NSTR2 + j]);
+      std::cout << sprintf5 <<std::endl;
+
+//  std::cout <<" DSDE (" << i+1<<" , " << j+1<< ") = " << DSDE2[i*NSTR2+j] <<std::endl;
+}
 }
 
-std::cout <<"NSTR input = " << NSTR2 <<std::endl;
-std::cout <<"NPROPS input = " << NPROPS2 <<std::endl;
-std::cout <<"NSVARSGP input = " << NSVARSGP2 <<std::endl;
-std::cout <<"NILL input = " << NILL2 <<std::endl;
-
 //output de la routine
-
+/*
 for (unsigned int i = 0; i < NSTR ; ++i)
 {
   std::cout <<"DEFORT output" << i << " = " << DEFORT[i] <<std::endl;
@@ -517,7 +571,7 @@ std::cout <<"NSTR output = " << NSTR <<std::endl;
 std::cout <<"NPROPS output = " << NPROPS <<std::endl;
 std::cout <<"NSVARSGP output = " << NSVARSGP <<std::endl;
 std::cout <<"NILL output = " << NILL <<std::endl;
-
+*/
   //throw MooseException("MooseException due to the non convergence of the subroutine");
   mooseError("Exiting\n");
 //_fe_problem.restoreSolutions();
@@ -787,7 +841,6 @@ void RedbackMechMaterialHO::remplSigmaOld(RankTwoTensor & tens_old,  Real* vect,
 
 
 void RedbackMechMaterialHO::remplMomentOld(RankTwoTensor & tens_old, Real* vect, int  ini){
-
   vect[ini+9]=tens_old(0,0);
   vect[ini+10]=tens_old(0,1);
   vect[ini+11]=tens_old(0,2);

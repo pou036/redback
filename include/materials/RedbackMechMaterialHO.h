@@ -119,6 +119,11 @@ private:
   const VariableValue & _wc_y;
   const VariableValue & _wc_z;
 
+  const VariableValue & _wc_x_old;
+  const VariableValue & _wc_y_old;
+  const VariableValue & _wc_z_old;
+
+
   const VariableGradient & _grad_wc_x;
   const VariableGradient & _grad_wc_y;
   const VariableGradient & _grad_wc_z;

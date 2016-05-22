@@ -37,9 +37,9 @@ app_LIBS += $(multisurfaceplasticityhard_LIB)
 #command in the case of a Fortran file 77
 $(multisurfaceplasticityhard_LIB): $(multisurfaceplasticityhard_objects)
 								@echo "Linking Library "$@"..."
-								@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=link --quiet \
+								@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=link \
 								$(libmesh_F77) $(libmesh_FFLAGS) -o $@ $(multisurfaceplasticityhard_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(multisurfaceplasticityhard_DIR)
-								@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(multisurfaceplasticityhard_LIB) $(multisurfaceplasticityhard_DIR)
+								@$(libmesh_LIBTOOL) --mode=install install -c $(multisurfaceplasticityhard_LIB) $(multisurfaceplasticityhard_DIR)
 
 
 $(app_EXEC): $(multisurfaceplasticityhard_LIB)
