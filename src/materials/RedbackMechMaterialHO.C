@@ -204,7 +204,7 @@ RedbackMechMaterialHO::computeQpStress()
 {
   //RedbackMechMaterial::computeQpStress();
 
-  //_plastic_potential_multiplier = 1;
+  _plastic_potential_multiplier = 1;
   //if (_has_T)
   //{
     // Q/(RT) = Ar/(1+delta T*)

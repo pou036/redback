@@ -319,6 +319,9 @@
     wc_z = disp_z
     component = 0
     base_name = coupled
+    disp_z = wc_y
+    disp_y = wc_y
+    disp_x = wc_x
   [../]
   [./y_couple]
     type = RedbackCosseratStressDivergenceTensors
@@ -329,6 +332,9 @@
     wc_y = disp_y
     wc_z = disp_z
     base_name = coupled
+    disp_z = wc_z
+    disp_y = wc_y
+    disp_x = wc_x
   [../]
   [./z_couple]
     type = RedbackCosseratStressDivergenceTensors
@@ -339,6 +345,9 @@
     wc_y = disp_y
     wc_z = disp_z
     base_name = coupled
+    disp_z = wc_z
+    disp_y = wc_y
+    disp_x = wc_x
   [../]
   [./x_moment]
     type = MomentBalancing

@@ -498,7 +498,7 @@
 
 [BCs]
   # following is natural BC
-  active = 'Periodic wcy_equals_zero_on_top wc_x_bottom ux_shear_bottom wcx_equals_zero_on_top confining_pres uz_bottom uy_bottom ux_zero_top wc_y_bottom'
+  active = 'Periodic wcy_equals_zero_on_top wc_x_bottom ux_shear_bottom wcx_equals_zero_on_top confining_pres uz_bottom uy_bottom ux_zero_top wc_y_bottomwcz_imposed_top wc_z_bottom_zero'
   [./wcx_equals_zero_on_top]
     type = DirichletBC
     variable = wc_x
@@ -595,10 +595,6 @@
       variable = 'disp_x disp_y disp_z wc_x wc_y wc_z'
       auto_direction = z
     [../]
-    [./y_direction]
-      variable = wc_z
-      auto_direction = y
-    [../]
   [../]
   [./u_x_right_left]
     type = DirichletBC
@@ -669,7 +665,7 @@
     # 0 2.6549E3 2.6549E3
     type = RedbackMechMaterialHO
     block = 0
-    B_ijkl = '0 6.6372E2 6.6372E2'
+    B_ijkl = '0 2.6549E3 2.6549E3'
     C_ijkl = '4.6640E6 1.3274E7 6.6372E6'
     fill_method = general_isotropic
     poisson_ratio = -9999
@@ -710,7 +706,7 @@
 
 [Executioner]
   type = Transient
-  dt = 0.05
+  dt = 0.5
   solve_type = NEWTON
   num_steps = 100000
   nl_abs_tol = 1e-8
@@ -721,6 +717,6 @@
 [Outputs]
   execute_on = 'timestep_end initial'
   exodus = true
-  file_base = plastic_shear_m0_dt005_msh40
+  file_base = plastic_shear_m0_dt1_msh40
   print_linear_residuals = false
 []

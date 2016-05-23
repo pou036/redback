@@ -498,7 +498,7 @@
 
 [BCs]
   # following is natural BC
-  active = 'Periodic wcy_equals_zero_on_top wc_x_bottom ux_shear_bottom wcx_equals_zero_on_top confining_pres uz_bottom uy_bottom ux_zero_top wc_y_bottom'
+  active = 'Periodic wcy_equals_zero_on_top wc_x_bottom ux_shear_bottom wcx_equals_zero_on_top confining_pres uz_bottom uy_bottom ux_zero_top wc_y_bottom wcz_imposed_top wc_z_bottom_zero'
   [./wcx_equals_zero_on_top]
     type = DirichletBC
     variable = wc_x
@@ -594,10 +594,6 @@
     [./z_direction]
       variable = 'disp_x disp_y disp_z wc_x wc_y wc_z'
       auto_direction = z
-    [../]
-    [./y_direction]
-      variable = wc_z
-      auto_direction = y
     [../]
   [../]
   [./u_x_right_left]
@@ -710,7 +706,7 @@
 
 [Executioner]
   type = Transient
-  dt = 0.05
+  dt = 0.5
   solve_type = NEWTON
   num_steps = 100000
   nl_abs_tol = 1e-8
@@ -721,6 +717,6 @@
 [Outputs]
   execute_on = 'timestep_end initial'
   exodus = true
-  file_base = plastic_shear_m0_dt005_msh40
+  file_base = plastic_shear_m0_dt1_msh40
   print_linear_residuals = false
 []

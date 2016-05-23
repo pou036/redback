@@ -1,10 +1,10 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  ny = 40
-  xmax = 0.04
-  ymax = 0.04
-  zmax = 0.04
+  ny = 20
+  xmax = 1000
+  ymax = 1000
+  zmax = 1000
 []
 
 [GlobalParams]
@@ -17,120 +17,118 @@
 []
 
 [Postprocessors]
-  active = 'tangential_force disp_y_top normal_force number_nonlin dt number_lin disp_x_bottom wc_z_top'
+  active = 'force tangential_force Rotation_wcz_0_7 Rotation_wcz_0_6 Rotation_wcz_0_5 Rotation_wcz_0_4 Rotation_wcz_0_3 Rotation_wcz_0_2 Rotation_wcz_0_1 Rotation_wcz_0_9 Rotation_wcz_0_8 Displ_u_x_0_8 Displ_u_x_0_9 Displ_u_x_0_1 Displ_u_x_0_2 Displ_u_x_0_3 Displ_u_x_0_4 Displ_u_x_0_5 Displ_u_x_0_6 Displ_u_x_0_7 stress_11 disp_y_top plastic_inv_center disp_x_top temperature_center pressure_center wc_z_top'
   [./disp_y_top]
     type = PointValue
-    point = '0.04 0.04 0.04'
+    point = '0.5 1 0.1'
     variable = disp_y
+  [../]
+  [./disp_x_top]
+    type = PointValue
+    point = '0.5 1 0.1'
+    variable = disp_x
   [../]
   [./wc_z_top]
     type = PointValue
-    point = '0.04 0.04 0.04'
+    point = '0.5 1 0.1'
     variable = wc_z
+  [../]
+  [./antisymmetric_pp]
+    type = SideAverageValue
+    variable = antisymmetric_strain_bc
+    boundary = bottom
   [../]
   [./Rotation_wcz_0_9]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.9 1'
+    point = '0.5 0.9 0.5'
   [../]
   [./Rotation_wcz_0_8]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.8 1'
+    point = '0.5 0.8 0.5'
   [../]
   [./Rotation_wcz_0_7]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.7 1'
+    point = '0.5 0.7 0.5'
   [../]
   [./Rotation_wcz_0_6]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.6 1'
+    point = '0.5 0.6 0.5'
   [../]
   [./Rotation_wcz_0_5]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.5 1'
+    point = '0.5 0.5 0.5'
   [../]
   [./Rotation_wcz_0_4]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.4 1'
+    point = '0.5 0.4 0.5'
   [../]
   [./Rotation_wcz_0_3]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.3 1'
+    point = '0.5 0.3 0.5'
   [../]
   [./Rotation_wcz_0_2]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.2 1'
+    point = '0.5 0.2 0.5'
   [../]
   [./Rotation_wcz_0_1]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.1 1'
+    point = '0.5 0.1 0.5'
   [../]
   [./Displ_u_x_0_9]
     type = PointValue
     variable = wc_z
-    point = '0.5 0.9 1'
+    point = '0.5 0.9 0.5'
   [../]
   [./Displ_u_x_0_8]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.8 1'
+    point = '0.5 0.8 0.5'
   [../]
   [./Displ_u_x_0_7]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.7 1'
+    point = '0.5 0.7 0.5'
   [../]
   [./Displ_u_x_0_6]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.6 1'
+    point = '0.5 0.6 0.5'
   [../]
   [./Displ_u_x_0_5]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.5 1'
+    point = '0.5 0.5 0.5'
   [../]
   [./Displ_u_x_0_4]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.4 1'
+    point = '0.5 0.4 0.5'
   [../]
   [./Displ_u_x_0_3]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.3 1'
+    point = '0.5 0.3 0.5'
   [../]
   [./Displ_u_x_0_2]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.2 1'
+    point = '0.5 0.2 0.5'
   [../]
   [./Displ_u_x_0_1]
     type = PointValue
     variable = disp_x
-    point = '0.5 0.1 1'
+    point = '0.5 0.1 0.5'
   [../]
-  [./antisymmetric_top]
-    type = SideAverageValue
-    variable = macro_rot
-    execute_on = linear
-    boundary = top
-  [../]
-  [./number_nonlin]
-    type = NumNonlinearIterations
-  [../]
-  [./number_lin]
-    type = NumLinearIterations
-  [../]
-  [./normal_force]
+  [./force]
     type = SideAverageValue
     variable = stress_22
     execute_on = linear
@@ -141,19 +139,25 @@
     variable = stress_12
     boundary = top
   [../]
-  [./antisymmetric_bottom]
-    type = SideAverageValue
-    variable = macro_rot
-    execute_on = linear
-    boundary = bottom
-  [../]
-  [./disp_x_bottom]
+  [./plastic_inv_center]
     type = PointValue
-    variable = disp_x
-    point = '0.04 0 0.04'
+    variable = plastic_strain
+    point = '1 0.5 1'
   [../]
-  [./dt]
-    type = TimestepSize
+  [./temperature_center]
+    type = PointValue
+    variable = temperature
+    point = '1 0.5 1'
+  [../]
+  [./pressure_center]
+    type = PointValue
+    variable = pressure
+    point = '1 0.5 1'
+  [../]
+  [./stress_11]
+    type = PointValue
+    variable = stress_11
+    point = '1 0.5 1'
   [../]
 []
 
@@ -169,6 +173,10 @@
   [./wc_y]
   [../]
   [./wc_z]
+  [../]
+  [./temperature]
+  [../]
+  [./pressure]
   [../]
 []
 
@@ -232,62 +240,20 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./plastic_cur_23]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./plastic_cur_31]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./plastic_cur_33]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./plast_cur_11]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./plastic_cur_22]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./plastic_cur_12]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./couple_stress_32]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./couple_stress_23]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./elastic_curvature_23]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./elastic_curvature_32]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [Functions]
-  active = 'ramp_neg ramp'
-  [./ramp]
-    # -0.0005*t
+  [./ramp_top]
     type = ParsedFunction
-    value = 0.0001*t
+    value = t
   [../]
-  [./ramp_neg]
+  [./ramp_bottom]
     type = ParsedFunction
-    value = -0.0005*t
+    value = -t
   [../]
-  [./perturb]
+  [./tangent_hyperbolic]
     type = ParsedFunction
-    value = 0.001*sin(pi*y/(0.04))
+    value = -0.666666*tanh(1000*t)
   [../]
 []
 
@@ -297,18 +263,24 @@
     variable = disp_x
     displacements = 'disp_x disp_y disp_z'
     component = 0
+    temp = temperature
+    pore_pres = pressure
   [../]
   [./cy_elastic]
     type = RedbackCosseratStressDivergenceTensors
     variable = disp_y
     displacements = 'disp_x disp_y disp_z'
     component = 1
+    temp = temperature
+    pore_pres = pressure
   [../]
   [./cz_elastic]
     type = RedbackCosseratStressDivergenceTensors
     variable = disp_z
     component = 2
     displacements = 'disp_x disp_y disp_z'
+    temp = temperature
+    pore_pres = pressure
   [../]
   [./x_couple]
     type = RedbackCosseratStressDivergenceTensors
@@ -319,7 +291,7 @@
     wc_z = disp_z
     component = 0
     base_name = coupled
-    disp_z = wc_y
+    disp_z = wc_z
     disp_y = wc_y
     disp_x = wc_x
   [../]
@@ -363,6 +335,31 @@
     type = MomentBalancing
     variable = wc_z
     component = 2
+  [../]
+  [./dT_dt]
+    type = TimeDerivative
+    variable = temperature
+  [../]
+  [./T_diff]
+    type = RedbackThermalDiffusion
+    variable = temperature
+  [../]
+  [./dissip]
+    type = RedbackMechDissip
+    variable = temperature
+  [../]
+  [./dp_dt]
+    type = TimeDerivative
+    variable = pressure
+  [../]
+  [./p_diff]
+    type = RedbackMassDiffusion
+    variable = pressure
+  [../]
+  [./thermal_press]
+    type = RedbackThermalPressurization
+    variable = pressure
+    temperature = temperature
   [../]
 []
 
@@ -412,7 +409,6 @@
     type = MaterialRealAux
     variable = lagrange
     property = lagrange_multiplier
-    execute_on = timestep_end
   [../]
   [./plastic_xx]
     type = RankTwoAux
@@ -439,9 +435,8 @@
     type = RankTwoAux
     variable = macro_rot
     rank_two_tensor = macro_rotation
-    index_j = 1
-    index_i = 0
-    execute_on = linear
+    index_j = 0
+    index_i = 1
   [../]
   [./stress_11]
     type = RankTwoAux
@@ -464,41 +459,25 @@
     index_j = 1
     index_i = 2
   [../]
-  [./couple_stress_23]
-    type = RankTwoAux
-    variable = couple_stress_23
-    rank_two_tensor = coupled_stress
-    index_j = 2
-    index_i = 1
-    execute_on = nonlinear
-  [../]
-  [./couple_stress_32]
-    type = RankTwoAux
-    variable = couple_stress_32
-    rank_two_tensor = coupled_stress
-    index_j = 1
-    index_i = 2
-    execute_on = nonlinear
-  [../]
-  [./elastic_curvature_32]
-    type = RankTwoAux
-    variable = elastic_curvature_32
-    rank_two_tensor = elastic_curvature
-    index_j = 1
-    index_i = 2
-  [../]
-  [./elastic_curvature_23]
-    type = RankTwoAux
-    variable = elastic_curvature_23
-    rank_two_tensor = elastic_curvature
-    index_j = 2
-    index_i = 1
-  [../]
 []
 
 [BCs]
   # following is natural BC
-  active = 'Periodic wcy_equals_zero_on_top wc_x_bottom ux_shear_bottom wcx_equals_zero_on_top confining_pres uz_bottom uy_bottom ux_zero_top wc_y_bottom'
+  active = 'Periodic uy_bottom ux_imposed_top confining_stress wcx_equals_zero_on_top ux_zero_bottom wc_x_bottom uz_bottom wc_y_bottom'
+  [./Periodic]
+    [./xperiodic]
+      auto_direction = x
+      variable = 'disp_x disp_y disp_z wc_x wc_y wc_z temperature pressure'
+    [../]
+    [./zperiodic]
+      auto_direction = z
+      variable = 'disp_x disp_y disp_z wc_x wc_y wc_z temperature pressure'
+    [../]
+    [./wcz_periodic]
+      variable = wc_z
+      auto_direction = y
+    [../]
+  [../]
   [./wcx_equals_zero_on_top]
     type = DirichletBC
     variable = wc_x
@@ -515,7 +494,7 @@
     type = DirichletBC
     variable = disp_y
     boundary = bottom
-    value = 0
+    value = 0.0
   [../]
   [./uz_bottom]
     type = DirichletBC
@@ -539,7 +518,7 @@
     type = FunctionDirichletBC
     variable = disp_x
     boundary = bottom
-    function = ramp
+    function = ramp_bottom
   [../]
   [./wc_z_rotationBC]
     type = RedbackRotationBC
@@ -560,7 +539,13 @@
     type = DirichletBC
     variable = wc_z
     boundary = top
-    value = 0
+    value = 0.0
+  [../]
+  [./ux_imposed_top]
+    type = FunctionDirichletBC
+    variable = disp_x
+    boundary = top
+    function = ramp_top
   [../]
   [./wc_z_bottom_zero]
     type = DirichletBC
@@ -568,91 +553,40 @@
     boundary = bottom
     value = 0
   [../]
-  [./uy_ramp_top]
-    type = FunctionDirichletBC
-    variable = disp_y
-    boundary = top
-    function = ramp
-  [../]
-  [./u_z_face]
-    type = DirichletBC
-    variable = disp_z
-    boundary = front
-    value = 0
-  [../]
-  [./uz_back]
-    type = DirichletBC
-    variable = disp_z
-    boundary = back
-    value = 0
-  [../]
-  [./Periodic]
-    [./x_direction]
-      variable = 'disp_x disp_y disp_z wc_x wc_y wc_z'
-      auto_direction = x
-    [../]
-    [./z_direction]
-      variable = 'disp_x disp_y disp_z wc_x wc_y wc_z'
-      auto_direction = z
-    [../]
-    [./y_direction]
-      variable = wc_z
-      auto_direction = y
-    [../]
-  [../]
-  [./u_x_right_left]
-    type = DirichletBC
-    variable = disp_x
-    boundary = right
-    value = 0
-  [../]
-  [./ux_nodes_zero]
-    type = DirichletBC
-    variable = disp_x
-    boundary = '77 78'
-    value = 0
-  [../]
-  [./uy_nodes_zero]
-    type = DirichletBC
-    variable = disp_z
-    boundary = '79 80'
-    value = 0
-  [../]
-  [./ux_shear_bottom]
-    type = FunctionDirichletBC
-    variable = disp_x
-    boundary = bottom
-    function = ramp
-  [../]
-  [./Rotation_wcz_top]
+  [./Rotation_wc_z_BC]
     type = PostprocessorDirichletBC
     variable = wc_z
-    boundary = top
+    boundary = bottom
     postprocessor = antisymmetric_pp
   [../]
-  [./confining_pres]
-    type = NeumannBC
-    variable = disp_y
-    boundary = top
-    value = -1E5
-  [../]
-  [./Rotation_wc_z_bottom]
-    type = PostprocessorDirichletBC
-    variable = wc_z
-    boundary = bottom
-    postprocessor = antisymmetric_bottom
-  [../]
-  [./rotation_wcz_top]
-    type = PostprocessorDirichletBC
-    variable = wc_z
-    boundary = top
-    postprocessor = antisymmetric_top
-  [../]
-  [./ux_zero_top]
+  [./T_bottom]
     type = DirichletBC
-    variable = disp_x
+    variable = temperature
+    boundary = bottom
+    value = 0
+  [../]
+  [./T_top]
+    type = DirichletBC
+    variable = temperature
     boundary = top
     value = 0
+  [../]
+  [./Rotation_wc_z_TC]
+    type = PostprocessorDirichletBC
+    variable = wc_z
+    boundary = top
+    postprocessor = antisymmetric_2
+  [../]
+  [./delta_T_centre]
+    type = PointValue
+    variable = delta_temp
+    point = '0 0.5 0'
+  [../]
+  [./confining_stress]
+    type = FunctionNeumannBC
+    variable = disp_y
+    boundary = top
+    function = tangent_hyperbolic
   [../]
 []
 
@@ -666,25 +600,38 @@
     fill_method = general_isotropic
   [../]
   [./Redbackcosserat]
-    # 0 2.6549E3 2.6549E3
     type = RedbackMechMaterialHO
     block = 0
-    B_ijkl = '0 6.6372E2 6.6372E2'
-    C_ijkl = '4.6640E6 1.3274E7 6.6372E6'
+    B_ijkl = '0.0 25 25'
+    C_ijkl = '66.666667 50 25'
     fill_method = general_isotropic
     poisson_ratio = -9999
     youngs_modulus = -9999
     damage_method = BreakageMechanics
-    cohesion = 1E5
-    hardening_mech_modulus = -10
-    friction_coefficient = 0.4
-    min_stepsize = 1e-8
+    cohesion = 0.01
+    friction_coefficient = 0.5
+    hardening_mech_modulus = 0.012
+    pore_pres = pressure
+    temperature = temperature
     plasticity_type = druckerPrager3D_frictionHard
-    ignore_failures = true
   [../]
   [./redback_mat]
     type = RedbackMaterial
     block = 0
+    solid_thermal_expansion = 1e-2
+    da_exo = 1
+    phi0 = 0.1
+    ref_lewis_nb = 0.1
+    gr = 0.178571428571
+    pressurization_coefficient = 1
+    pore_pres = pressure
+    temperature = temperature
+  [../]
+  [./density]
+    type = GenericConstantMaterial
+    block = 0
+    prop_names = density
+    prop_values = 2.5E-6
   [../]
 []
 
@@ -694,8 +641,8 @@
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type    -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
-    petsc_options_value = 'gmres          bjacobi     1E-10          1E-8          20                1E-12      1E-10 '
-    line_search = basic
+    petsc_options_value = 'gmres          bjacobi     1E-6           1E-8          20                1E-8      1E-6 '
+    line_search = none
   [../]
   [./debug_jacob]
     type = FDP
@@ -710,17 +657,15 @@
 
 [Executioner]
   type = Transient
-  dt = 0.05
-  solve_type = NEWTON
-  num_steps = 100000
-  nl_abs_tol = 1e-8
-  l_tol = 1e-10
-  nl_rel_tol = 1e-04
+  l_max_its = 100
+  solve_type = Newton
+  num_steps = 2000
 []
 
 [Outputs]
   execute_on = 'timestep_end initial'
   exodus = true
-  file_base = plastic_shear_m0_dt005_msh40
+  file_base = shear_dynamic_HO
   print_linear_residuals = false
 []
+

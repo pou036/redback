@@ -1,10 +1,8 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  ny = 40
-  xmax = 0.04
-  ymax = 0.04
-  zmax = 0.04
+  nx = 1
+  ny = 20
 []
 
 [GlobalParams]
@@ -16,17 +14,51 @@
   wc_x = wc_x
 []
 
+[MeshModifiers]
+  active = 'middle_edge_bottom_left middle_edge_bottom_right'
+  [./middle_edge_bottom_front]
+    type = AddExtraNodeset
+    new_boundary = 77
+    coord = '0.5 0 1'
+  [../]
+  [./middle_edge_bottom_back]
+    type = AddExtraNodeset
+    new_boundary = 78
+    coord = '0.5 0 0'
+  [../]
+  [./middle_edge_bottom_right]
+    type = AddExtraNodeset
+    new_boundary = 79
+    coord = '1 0 0'
+  [../]
+  [./middle_edge_bottom_left]
+    type = AddExtraNodeset
+    new_boundary = 80
+    coord = '0 0 0'
+  [../]
+[]
+
 [Postprocessors]
-  active = 'tangential_force disp_y_top normal_force number_nonlin dt number_lin disp_x_bottom wc_z_top'
   [./disp_y_top]
     type = PointValue
-    point = '0.04 0.04 0.04'
+    point = '0.5 1 1'
     variable = disp_y
+  [../]
+  [./disp_x_top]
+    type = PointValue
+    point = '0.5 1 1'
+    variable = disp_x
   [../]
   [./wc_z_top]
     type = PointValue
-    point = '0.04 0.04 0.04'
+    point = '0.5 1 1'
     variable = wc_z
+  [../]
+  [./antisymmetric_pp]
+    type = PointValue
+    variable = macro_rot
+    execute_on = nonlinear
+    point = '0 0 1'
   [../]
   [./Rotation_wcz_0_9]
     type = PointValue
@@ -119,10 +151,10 @@
     point = '0.5 0.1 1'
   [../]
   [./antisymmetric_top]
-    type = SideAverageValue
+    type = PointValue
     variable = macro_rot
-    execute_on = linear
-    boundary = top
+    execute_on = nonlinear
+    point = '0 1 0.5'
   [../]
   [./number_nonlin]
     type = NumNonlinearIterations
@@ -141,20 +173,6 @@
     variable = stress_12
     boundary = top
   [../]
-  [./antisymmetric_bottom]
-    type = SideAverageValue
-    variable = macro_rot
-    execute_on = linear
-    boundary = bottom
-  [../]
-  [./disp_x_bottom]
-    type = PointValue
-    variable = disp_x
-    point = '0.04 0 0.04'
-  [../]
-  [./dt]
-    type = TimestepSize
-  [../]
 []
 
 [Variables]
@@ -169,6 +187,10 @@
   [./wc_y]
   [../]
   [./wc_z]
+  [../]
+  [./temperature]
+  [../]
+  [./pressure]
   [../]
 []
 
@@ -256,38 +278,17 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./couple_stress_32]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./couple_stress_23]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./elastic_curvature_23]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./elastic_curvature_32]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
 []
 
 [Functions]
-  active = 'ramp_neg ramp'
   [./ramp]
     # -0.0005*t
     type = ParsedFunction
-    value = 0.0001*t
+    value = 0.0005*t
   [../]
   [./ramp_neg]
     type = ParsedFunction
     value = -0.0005*t
-  [../]
-  [./perturb]
-    type = ParsedFunction
-    value = 0.001*sin(pi*y/(0.04))
   [../]
 []
 
@@ -319,9 +320,6 @@
     wc_z = disp_z
     component = 0
     base_name = coupled
-    disp_z = wc_y
-    disp_y = wc_y
-    disp_x = wc_x
   [../]
   [./y_couple]
     type = RedbackCosseratStressDivergenceTensors
@@ -332,9 +330,6 @@
     wc_y = disp_y
     wc_z = disp_z
     base_name = coupled
-    disp_z = wc_z
-    disp_y = wc_y
-    disp_x = wc_x
   [../]
   [./z_couple]
     type = RedbackCosseratStressDivergenceTensors
@@ -345,9 +340,6 @@
     wc_y = disp_y
     wc_z = disp_z
     base_name = coupled
-    disp_z = wc_z
-    disp_y = wc_y
-    disp_x = wc_x
   [../]
   [./x_moment]
     type = MomentBalancing
@@ -363,6 +355,31 @@
     type = MomentBalancing
     variable = wc_z
     component = 2
+  [../]
+  [./dissip]
+    type = RedbackMechDissip
+    variable = temperature
+  [../]
+  [./T_diff]
+    type = RedbackThermalDiffusion
+    variable = temperature
+  [../]
+  [./dT_dt]
+    type = TimeDerivative
+    variable = temperature
+  [../]
+  [./diff_p]
+    type = RedbackMassDiffusion
+    variable = pressure
+  [../]
+  [./dp_dt]
+    type = TimeDerivative
+    variable = pressure
+  [../]
+  [./thermal_press]
+    type = RedbackThermalPressurization
+    variable = pressure
+    temperature = temperature
   [../]
 []
 
@@ -410,9 +427,8 @@
   [../]
   [./lagrange_mult]
     type = MaterialRealAux
-    variable = lagrange
+    variable = plastic_strain
     property = lagrange_multiplier
-    execute_on = timestep_end
   [../]
   [./plastic_xx]
     type = RankTwoAux
@@ -439,9 +455,8 @@
     type = RankTwoAux
     variable = macro_rot
     rank_two_tensor = macro_rotation
-    index_j = 1
-    index_i = 0
-    execute_on = linear
+    index_j = 0
+    index_i = 1
   [../]
   [./stress_11]
     type = RankTwoAux
@@ -464,41 +479,11 @@
     index_j = 1
     index_i = 2
   [../]
-  [./couple_stress_23]
-    type = RankTwoAux
-    variable = couple_stress_23
-    rank_two_tensor = coupled_stress
-    index_j = 2
-    index_i = 1
-    execute_on = nonlinear
-  [../]
-  [./couple_stress_32]
-    type = RankTwoAux
-    variable = couple_stress_32
-    rank_two_tensor = coupled_stress
-    index_j = 1
-    index_i = 2
-    execute_on = nonlinear
-  [../]
-  [./elastic_curvature_32]
-    type = RankTwoAux
-    variable = elastic_curvature_32
-    rank_two_tensor = elastic_curvature
-    index_j = 1
-    index_i = 2
-  [../]
-  [./elastic_curvature_23]
-    type = RankTwoAux
-    variable = elastic_curvature_23
-    rank_two_tensor = elastic_curvature
-    index_j = 2
-    index_i = 1
-  [../]
 []
 
 [BCs]
   # following is natural BC
-  active = 'Periodic wcy_equals_zero_on_top wc_x_bottom ux_shear_bottom wcx_equals_zero_on_top confining_pres uz_bottom uy_bottom ux_zero_top wc_y_bottom'
+  active = 'Periodic wcy_equals_zero_on_top wc_x_bottom ux_shear_top ux_shear_bottom wcx_equals_zero_on_top confining_pres uz_bottom uy_bottom wc_y_bottom'
   [./wcx_equals_zero_on_top]
     type = DirichletBC
     variable = wc_x
@@ -515,7 +500,7 @@
     type = DirichletBC
     variable = disp_y
     boundary = bottom
-    value = 0
+    value = 0.0
   [../]
   [./uz_bottom]
     type = DirichletBC
@@ -536,10 +521,10 @@
     value = 0.0
   [../]
   [./ux_zero_bottom]
-    type = FunctionDirichletBC
+    type = DirichletBC
     variable = disp_x
     boundary = bottom
-    function = ramp
+    value = 0.
   [../]
   [./wc_z_rotationBC]
     type = RedbackRotationBC
@@ -568,6 +553,12 @@
     boundary = bottom
     value = 0
   [../]
+  [./Rotation_wc_z_BC]
+    type = PostprocessorDirichletBC
+    variable = wc_z
+    boundary = bottom
+    postprocessor = antisymmetric_pp
+  [../]
   [./uy_ramp_top]
     type = FunctionDirichletBC
     variable = disp_y
@@ -595,10 +586,12 @@
       variable = 'disp_x disp_y disp_z wc_x wc_y wc_z'
       auto_direction = z
     [../]
-    [./y_direction]
-      variable = wc_z
-      auto_direction = y
-    [../]
+  [../]
+  [./ux_shear_top]
+    type = FunctionDirichletBC
+    variable = disp_x
+    boundary = top
+    function = ramp
   [../]
   [./u_x_right_left]
     type = DirichletBC
@@ -622,7 +615,7 @@
     type = FunctionDirichletBC
     variable = disp_x
     boundary = bottom
-    function = ramp
+    function = ramp_neg
   [../]
   [./Rotation_wcz_top]
     type = PostprocessorDirichletBC
@@ -634,25 +627,7 @@
     type = NeumannBC
     variable = disp_y
     boundary = top
-    value = -1E5
-  [../]
-  [./Rotation_wc_z_bottom]
-    type = PostprocessorDirichletBC
-    variable = wc_z
-    boundary = bottom
-    postprocessor = antisymmetric_bottom
-  [../]
-  [./rotation_wcz_top]
-    type = PostprocessorDirichletBC
-    variable = wc_z
-    boundary = top
-    postprocessor = antisymmetric_top
-  [../]
-  [./ux_zero_top]
-    type = DirichletBC
-    variable = disp_x
-    boundary = top
-    value = 0
+    value = 1
   [../]
 []
 
@@ -666,25 +641,28 @@
     fill_method = general_isotropic
   [../]
   [./Redbackcosserat]
-    # 0 2.6549E3 2.6549E3
+    # 0.0 0.076923 0.076923
+    #
+    # 5.76923333 3.84615 1.9230769
+    #
     type = RedbackMechMaterialHO
     block = 0
-    B_ijkl = '0 6.6372E2 6.6372E2'
-    C_ijkl = '4.6640E6 1.3274E7 6.6372E6'
+    B_ijkl = '0.0 0.0025 0.0025'
+    C_ijkl = '8.33333 12.5 6.125'
     fill_method = general_isotropic
     poisson_ratio = -9999
     youngs_modulus = -9999
     damage_method = BreakageMechanics
-    cohesion = 1E5
-    hardening_mech_modulus = -10
-    friction_coefficient = 0.4
-    min_stepsize = 1e-8
-    plasticity_type = druckerPrager3D_frictionHard
-    ignore_failures = true
+    cohesion = 0.01
+    hardening_mech_modulus = 0.014
+    friction_coefficient = 0.5
   [../]
   [./redback_mat]
     type = RedbackMaterial
     block = 0
+    ref_lewis_nb = 10
+    pressurization_coefficient = 1
+    gr = 0.17857
   [../]
 []
 
@@ -694,7 +672,7 @@
     type = SMP
     full = true
     petsc_options_iname = '-ksp_type -pc_type    -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
-    petsc_options_value = 'gmres          bjacobi     1E-10          1E-8          20                1E-12      1E-10 '
+    petsc_options_value = 'gmres          bjacobi     1E-7           1E-8          20                1E-10      1E-8 '
     line_search = basic
   [../]
   [./debug_jacob]
@@ -710,9 +688,8 @@
 
 [Executioner]
   type = Transient
-  dt = 0.05
   solve_type = NEWTON
-  num_steps = 100000
+  num_steps = 500
   nl_abs_tol = 1e-8
   l_tol = 1e-10
   nl_rel_tol = 1e-04
@@ -721,6 +698,6 @@
 [Outputs]
   execute_on = 'timestep_end initial'
   exodus = true
-  file_base = plastic_shear_m0_dt005_msh40
+  file_base = bench_plastic_shearR02
   print_linear_residuals = false
 []
