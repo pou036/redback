@@ -51,6 +51,14 @@ validParams<RedbackMaterial>()
   params.addCoupledVar("disp_y", 0.0, "The y displacement");
   params.addCoupledVar("disp_z", 0.0, "The z displacement");
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
+
+  // pore collapse
+
+  params.addParam<Real>("pore_collapse_threshold", 0.0, "The volumetric strain at which pore collapse is initiated.");
+  params.addParam<Real>("pore_collapse_coefficient", 0.0, "The scaling factor controlling the degree of pore collapse.");
+
+  //
+
   params.addCoupledVar("inverse_lewis_number_tilde",
                        0.0,
                        "Varying component of (inverse of) Lewis number, coming from mutli-app for example");
@@ -129,6 +137,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be
                                                      // coupled! Check that
                                                      // (TODO)
+
     _inverse_lewis_number_tilde(coupledValue("inverse_lewis_number_tilde")),
     _concentration(coupledValue("concentration")),
     _continuation_parameter(coupledScalarValue("continuation_parameter")),
@@ -187,6 +196,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _delta(declareProperty<Real>("delta")),
 
     _initial_porosity(declareProperty<Real>("initial_porosity")),
+	_pore_collapse_threshold_strain( declareProperty<Real>("pore_collapse_threshold") ),
     //_porosity(declareProperty<Real>("porosity")),
     _lewis_number(declareProperty<Real>("lewis_number")),
     _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
@@ -226,6 +236,12 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _fluid_thermal_expansion(declareProperty<Real>("fluid_thermal_expansion")),
 
     _mixture_density(declareProperty<Real>("mixture_density")),
+
+	// pore collapse
+	_initial_distension(declareProperty<Real>("initial_distension")),
+	_distension(declareProperty<Real>("distension")),
+	_pore_collapse_threshold(getParam<Real>("pore_collapse_threshold")),
+	_pore_collapse_coefficient(getParam<Real>("pore_collapse_coefficient")),
 
     _continuation_method((ContinuationMethod)(int)getParam<MooseEnum>("continuation_variable")),
     _density_method((DensityMethod)(int)getParam<MooseEnum>("density_method")),
@@ -402,6 +418,10 @@ RedbackMaterial::stepInitQpProperties()
   _mixture_density[ _qp ] = (1 - _phi0_param) * _solid_density_param + _phi0_param * _fluid_density_param;
   _mixture_gravity_term[ _qp ] = _mixture_density[ _qp ] * _gravity_param;
   _fluid_gravity_term[ _qp ] = _fluid_density_param * _gravity_param;
+
+  // pore collapse - assume that initial distension is equivalent to initial porosity for time being
+  _initial_distension[ _qp ] = 1.0 - 1.0/_initial_porosity[ _qp ];
+
 }
 
 void

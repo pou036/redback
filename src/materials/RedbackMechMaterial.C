@@ -172,6 +172,13 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
 
     _damage_method((DamageMethod)(int)getParam<MooseEnum>("damage_method")),
 
+    // pore collapse
+    _initial_porosity(getMaterialProperty<Real>("initial_porosity")),
+	_initial_distension(getMaterialProperty<Real>("initial_distension")),
+	_distension(getMaterialProperty<Real>("distension")),
+	_pore_collapse_threshold(getParam<Real>("pore_collapse_threshold")),
+	_pore_collapse_coefficient(getParam<Real>("pore_collapse_coefficient")),
+
     // Get some material properties from RedbackMaterial
     _gr(getMaterialProperty<Real>("gr")),
     _lewis_number(getMaterialProperty<Real>("lewis_number")),
@@ -473,6 +480,31 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   def_grad_old = _grad_disp_x_old[ _qp ](0) + _grad_disp_y_old[ _qp ](1) + _grad_disp_z_old[ _qp ](2);
   def_grad_rate = (def_grad - def_grad_old) / _dt;
 
+
+  // update distension
+  // (nb it is assumed that contributions to the mechanical porosity from heat and pore pressure are in addition to
+  // the changes due to pore collapse captured by the distension
+
+  Real delta_phi_pore_collapse;
+
+  Real init_dist = _initial_distension[ _qp ];
+  Real dist = init_dist;
+  Real dist_old = _distension[ _qp ];
+
+  if( _total_volumetric_strain[ _qp ] <  _pore_collapse_threshold){
+	  dist*= std::exp( _pore_collapse_coefficient* ( _total_volumetric_strain[ _qp ]- _pore_collapse_threshold ) )
+  }
+  if(dist < 1) dist = 1;
+  if(dist < dist_old){  // can only decrease
+	  _distension[ _qp ] =  dist ;
+  } else {
+	  dist = dist_old;
+  }
+  Real phi_star = 1.0 - 1.0/dist;
+  delta_phi_pore_collapse = _initial_porosity[ _qp ] - phi_star;
+
+
+
   // Update mechanical porosity (elastic and plastic components)
   // TODO: set T0 properly (once only, at the very beginning). Until then, T = T
   // - T0, P = P - P0
@@ -482,8 +514,11 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
                                       (_elastic_strain[ _qp ] - _elastic_strain_old[ _qp ]).trace());
   delta_phi_mech_pl = (1.0 - _total_porosity[ _qp ]) * (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]).trace();
 
-  _mechanical_porosity[ _qp ] = delta_phi_mech_el + delta_phi_mech_pl;
+  _mechanical_porosity[ _qp ] = delta_phi_pore_collapse + delta_phi_mech_el + delta_phi_mech_pl;
 
+
+
+  //
   Real gruntfest_number;
 
   if (_has_D)
