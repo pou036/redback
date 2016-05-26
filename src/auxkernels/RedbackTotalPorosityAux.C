@@ -29,7 +29,6 @@ RedbackTotalPorosityAux::RedbackTotalPorosityAux(const InputParameters & paramet
     _delta_porosity_mech(_is_mechanics_on ? coupledValue("mechanical_porosity") : _zero),
     _delta_porosity_chem(getMaterialProperty<Real>("chemical_porosity")),
     _initial_porosity(getMaterialProperty<Real>("initial_porosity")),
-    _distension( getMaterialProperty<Real>("distension")  ),
 
     //_has_T(isCoupled("temperature")),
     //_T(_has_T ? coupledValue("temperature") : _zero),

@@ -196,7 +196,6 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _delta(declareProperty<Real>("delta")),
 
     _initial_porosity(declareProperty<Real>("initial_porosity")),
-	_pore_collapse_threshold_strain( declareProperty<Real>("pore_collapse_threshold") ),
     //_porosity(declareProperty<Real>("porosity")),
     _lewis_number(declareProperty<Real>("lewis_number")),
     _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),

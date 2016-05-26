@@ -148,15 +148,6 @@ protected:
   MaterialProperty<Real> & _damage_kernel_jac;
   Real _damage_coeff, _dmg_exponent, _healing_coeff;
 
-  // pore collapse
-  MaterialProperty<Real> & _initial_porosity;
-  MaterialProperty<Real> & _initial_distension;
-  MaterialProperty<Real> & _distension;
-  Real & _pore_collapse_threshold;
-  Real & _pore_collapse_coefficient;
-
-
-
   Real _exponential;
   // const VariableValue & _dispx_dot;
   // const VariableValue & _dispy_dot;
@@ -176,6 +167,13 @@ protected:
   const VariableValue & _damage_old;
 
   DamageMethod _damage_method;
+
+  // pore collapse
+  const MaterialProperty<Real> & _initial_porosity;
+  const MaterialProperty<Real> & _initial_distension;
+  MaterialProperty<Real> & _distension;
+  Real _pore_collapse_threshold;
+  Real _pore_collapse_coefficient;
 
   // Reading material properties from RedbackMaterial
   const MaterialProperty<Real> & _gr;

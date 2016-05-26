@@ -168,14 +168,14 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     //_damage(_has_D ? coupledValue("damage") : _zero),
     //_damage_old(_has_D ? coupledValueOld("damage") : _zero),
     _damage(coupledValue("damage")),
-    _damage_old(coupledValueOld("damage")),
 
+    _damage_old(coupledValueOld("damage")),
     _damage_method((DamageMethod)(int)getParam<MooseEnum>("damage_method")),
 
     // pore collapse
     _initial_porosity(getMaterialProperty<Real>("initial_porosity")),
 	_initial_distension(getMaterialProperty<Real>("initial_distension")),
-	_distension(getMaterialProperty<Real>("distension")),
+	_distension(declareProperty<Real>("distension")),
 	_pore_collapse_threshold(getParam<Real>("pore_collapse_threshold")),
 	_pore_collapse_coefficient(getParam<Real>("pore_collapse_coefficient")),
 
@@ -492,7 +492,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   Real dist_old = _distension[ _qp ];
 
   if( _total_volumetric_strain[ _qp ] <  _pore_collapse_threshold){
-	  dist*= std::exp( _pore_collapse_coefficient* ( _total_volumetric_strain[ _qp ]- _pore_collapse_threshold ) )
+	  dist*= std::exp( _pore_collapse_coefficient* ( _total_volumetric_strain[ _qp ]- _pore_collapse_threshold ) );
   }
   if(dist < 1) dist = 1;
   if(dist < dist_old){  // can only decrease

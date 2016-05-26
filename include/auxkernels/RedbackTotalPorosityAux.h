@@ -32,8 +32,6 @@ private:
   const MaterialProperty<Real> & _mass_removal_rate;
 
 
-  const MaterialProperty<Real> & _distension;
-
 };
 
 #endif // REDBACKTOTALPOROSITYAUX_H
