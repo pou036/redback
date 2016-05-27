@@ -1,0 +1,13 @@
+/Users/pou036/projects/redback/redback-opt -i biaxial_mech_msh20_lh02_dt005.i --n-threads=16 --no-color Outputs/csv=true
+/Users/pou036/projects/redback/redback-opt -i biaxial_mech_msh20_lh02_dt01.i --n-threads=16 --no-color Outputs/csv=true
+/Users/pou036/projects/redback/redback-opt -i biaxial_mech_msh20_lh02_dt01_hard0.i --n-threads=16 --no-color Outputs/csv=true
+/Users/pou036/projects/redback/redback-opt -i biaxial_mech_msh20_lh02_dt01_hard1.i --n-threads=16 --no-color Outputs/csv=true
+/Users/pou036/projects/redback/redback-opt -i biaxial_mech_msh20_lh02_dt01_hard15.i --n-threads=16 --no-color Outputs/csv=true
+/Users/pou036/projects/redback/redback-opt -i biaxial_mech_msh20_lh02_dt01_hard5.i --n-threads=16 --no-color Outputs/csv=true
+/Users/pou036/projects/redback/redback-opt -i biaxial_mech_msh20_lh08_dt01.i --n-threads=16 --no-color Outputs/csv=true
+/Users/pou036/projects/redback/redback-opt -i biaxial_mech_msh20_lh1_dt01.i --n-threads=16 --no-color Outputs/csv=true
+/Users/pou036/projects/redback/redback-opt -i biaxial_mech_msh30_lh05_dt01.i --n-threads=16 --no-color Outputs/csv=true
+/Users/pou036/projects/redback/redback-opt -i biaxial_pres_msh20_lh02_dt01_hard0.i --n-threads=16 --no-color Outputs/csv=true
+/Users/pou036/projects/redback/redback-opt -i biaxial_pres_msh20_lh02_dt01_hard1.i --n-threads=16 --no-color Outputs/csv=true
+/Users/pou036/projects/redback/redback-opt -i biaxial_temp_msh20_lh02_dt01_hard0.i --n-threads=16 --no-color Outputs/csv=true
+/Users/pou036/projects/redback/redback-opt -i biaxial_temp_msh20_lh02_dt01_hard1.i --n-threads=16 --no-color Outputs/csv=true

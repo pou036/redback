@@ -239,19 +239,49 @@ Real DSDE3[NSTR2 * NSTR2] ;
 Real SVARSGP3[NSVARSGP2] ;
 Real PROPS3[NPROPS2] ;
 
-
 int nb_hardening = 1;
 
-Real g_1 = 8./5.;
-Real g_2 = 2./5.;
-Real g_3 = 8./5.;
-Real g_4 = 2./5.;
+Real g_1 = 1./3.;
+Real g_2 = 1./3.;
+Real g_3 = 2./3.;
+Real g_4 = 0.;
+Real h_1 = 1./4.;
+Real h_2 = 1./4.;
+Real h_3 = 1./2.;
+Real h_4 = 0.;
 
-Real h_1 = 2./3.;
-Real h_2 = -1./6.;
-Real h_3 = 2./3.;
-Real h_4 = -1./6.;
-
+/*
+if (_plasticity_type.compare("DruckerPrager_cohesion3D_") == 0 || _plasticity_type.compare("DruckerPrager_friction3D_") == 0 ){
+  Real g_1 = 8./5.;
+  Real g_2 = 2./5.;
+  Real g_3 = 8./5.;
+  Real g_4 = 2./5.;
+  Real h_1 = 2./3.;
+  Real h_2 = -1./6.;
+  Real h_3 = 2./3.;
+  Real h_4 = -1./6.;}
+else if (_plasticity_type.compare("DruckerPrager_cohesion2D_") == 0 || _plasticity_type.compare("DruckerPrager_friction2D_") == 0 ){
+  Real g_1 = 3./2.;
+  Real g_2 = 1./2.;
+  Real g_3 = 1.;
+  Real g_4 = 0.;
+  Real h_1 = 3./4.;
+  Real h_2 = -1./4.;
+  Real h_3 = 1.;
+  Real h_4 = 0.;}
+else if (_plasticity_type.compare("DeBorst_2D_") == 0 ){
+  Real g_1 = 1./3.;
+  Real g_2 = 1./3.;
+  Real g_3 = 2./3.;
+  Real g_4 = 0.;
+  Real h_1 = 1./4.;
+  Real h_2 = 1./4.;
+  Real h_3 = 1./2.;
+  Real h_4 = 0.;}
+else {
+  std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
+}
+*/
 
 PROPS[0]=_bulk_modulus;
 PROPS[1]=_shear_modulus;
@@ -343,7 +373,7 @@ int element_id = _current_elem->id();
 // but I also want to be able to subdivide an initial_stress
 RankTwoTensor this_strain_increment = _strain_increment[_qp];
 RankTwoTensor this_curvature_increment = _curvature_increment[_qp];
-
+/*
 if (_plasticity_type.compare("druckerPrager3D_frictionHard_") == 0){
 
   usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
@@ -354,7 +384,7 @@ if (_plasticity_type.compare("druckerPrager3D_frictionHard_") == 0){
   // mooseError("Exiting\n");
  //}
 }
-/*
+
  if(_t_step == 6 && element_id==13 && _qp == 3 && nl_it==0){
   for (unsigned int k = 0; k < 1000000 ; k++) {
     if (k%10000==0)
@@ -414,78 +444,20 @@ if (_plasticity_type.compare("druckerPrager3D_frictionHard_") == 0){
     }
    }
   }
-//else if (_plasticity_type.compare("druckerPrager3D_frictionHard_adim_") == 0){
-//  usermat1_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
-//}
-//else if (_plasticity_type.compare("druckerPrager3D_cohesionHard_") == 0){
-//  usermat2_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
-//}
+
+else if (_plasticity_type.compare("druckerPrager3D_frictionHard_adim_") == 0){
+  usermat1_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+}
+else if (_plasticity_type.compare("druckerPrager3D_cohesionHard_") == 0){
+  usermat2_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+}
 else{
   std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
 }
-*/
+
 
 return_successful = (NILL==0);
 
-/*
-if((element_id==25) && (nl_it==50) && (_t_step==6) && (_qp==7))
-{
-  Real y_coord = _current_elem->centroid()(1);
-  Real x_coord = _current_elem->centroid()(0);
-
-  std::cout << "return successful ? "<< return_successful  <<std::endl;
-  std::cout << "coordinates x of the point is "<< x_coord  <<std::endl;
-  std::cout << "coordinates y of the point is "<< y_coord  <<std::endl;
-  std::cout << "index inside the element is  "<< _qp  <<std::endl;
-  std::cout << "element Id is  "<< element_id  <<std::endl;
-  std::cout << "non linear iteration is "<< nl_it  <<std::endl;
-  std::cout << " linear iteration is "<< l_it  <<std::endl;
-
-  std::cout << "time step is "<< _t_step  <<std::endl;
-
-  std::cout << "strain increment 11 is "<< DEFORT[0]  <<std::endl;
-  std::cout << "strain increment 22 is "<< DEFORT[1]  <<std::endl;
-  std::cout << "strain increment 33 is "<< DEFORT[2]  <<std::endl;
-  std::cout << "strain increment 23 is "<< DEFORT[3]  <<std::endl;
-  std::cout << "strain increment 13 is "<< DEFORT[4]  <<std::endl;
-  std::cout << "strain increment 12 is "<< DEFORT[5]  <<std::endl;
-  std::cout << "strain increment 32 is "<< DEFORT[6]  <<std::endl;
-  std::cout << "strain increment 31 is "<< DEFORT[7]  <<std::endl;
-  std::cout << "strain increment 21 is "<< DEFORT[8]  <<std::endl;
-
-  std::cout << "curvature increment 11 is "<< DEFORT[9]  <<std::endl;
-  std::cout << "curvature increment 12 is "<< DEFORT[10]  <<std::endl;
-  std::cout << "curvature increment 13 is "<< DEFORT[11]  <<std::endl;
-  std::cout << "curvature increment 21 is "<< DEFORT[12]  <<std::endl;
-  std::cout << "curvature increment 22 is "<< DEFORT[13]  <<std::endl;
-  std::cout << "curvature increment 23 is "<< DEFORT[14]  <<std::endl;
-  std::cout << "curvature increment 31 is "<< DEFORT[15]  <<std::endl;
-  std::cout << "curvature increment 32 is "<< DEFORT[16]  <<std::endl;
-  std::cout << "curvature increment 33 is "<< DEFORT[17]  <<std::endl;
-
-  std::cout << "stress 11 is "<< _stress_old[_qp](0,0)  <<std::endl;
-  std::cout << "stress 22 is "<< _stress_old[_qp](1,1)  <<std::endl;
-  std::cout << "stress 33 is "<< _stress_old[_qp](2,2) <<std::endl;
-  std::cout << "stress 23 is "<< _stress_old[_qp](1,2) <<std::endl;
-  std::cout << "stress 13 is "<< _stress_old[_qp](0,2)  <<std::endl;
-  std::cout << "stress 12 is "<< _stress_old[_qp](0,1) <<std::endl;
-  std::cout << "stress 32 is "<< _stress_old[_qp](2,1) <<std::endl;
-  std::cout << "stress 31 is "<< _stress_old[_qp](2,0) <<std::endl;
-  std::cout << "stress 21 is "<< _stress_old[_qp](1,0) <<std::endl;
-
-  std::cout << "couple stress 11 is "<< _stress_couple_old[_qp](0,0)  <<std::endl;
-  std::cout << "couple stress 12 is "<< _stress_couple_old[_qp](0,1) <<std::endl;
-  std::cout << "couple stress 13 is "<< _stress_couple_old[_qp](0,2) <<std::endl;
-  std::cout << "couple stress 21 is "<< _stress_couple_old[_qp](1,0) <<std::endl;
-  std::cout << "couple stress 22 is "<< _stress_couple_old[_qp](1,1)  <<std::endl;
-  std::cout << "couple stress 23 is "<< _stress_couple_old[_qp](1,2)  <<std::endl;
-  std::cout << "couple stress 31 is "<< _stress_couple_old[_qp](2,0)  <<std::endl;
-  std::cout << "couple stress 32 is "<< _stress_couple_old[_qp](2,1) <<std::endl;
-  std::cout << "couple stress 33 is "<< _stress_couple_old[_qp](2,2) <<std::endl;
-
-  std::cout << "hardening variable is "<< _hardening_variable_old[_qp] <<std::endl;
-}
-*/
 
 if (!return_successful)
 {
@@ -501,7 +473,6 @@ std::cout << "element Id is  "<< element_id  <<std::endl;
 std::cout << "non linear iteration is "<< nl_it  <<std::endl;
 
 std::cout << "time step is "<< _t_step  <<std::endl;
-//std::cout << "scientific:\n" << std::scientific;
 std::cout <<" NSTR " << NSTR2 <<std::endl;
 std::cout <<" NPROPS " << NPROPS2 <<std::endl;
 std::cout <<" NILL " << NILL2 <<std::endl;
@@ -511,13 +482,11 @@ std::cout <<" NSVARSGP " << NSVARSGP2 <<std::endl;
  {  char sprintf1 [50];
    std::sprintf(sprintf1," STRESS (%u) = %13.6e", i+1, STRESSF2[i]);
    std::cout << sprintf1 <<std::endl;
-   //std::cout <<" STRESS " << i+1 << " = " << STRESSF2[i] <<std::endl;
  }
 for (unsigned int i = 0; i < NSTR2 ; ++i)
 {char sprintf2 [50];
   std::sprintf(sprintf2," DE (%u) = %13.6e", i+1, DEFORT2[i]);
   std::cout << sprintf2 <<std::endl;
-  //std::cout <<" DE " << i+1 << " = " << DEFORT2[i] <<std::endl;
 }
 
 for (unsigned int i = 0; i < NSVARSGP2 ; ++i)
@@ -525,71 +494,41 @@ for (unsigned int i = 0; i < NSVARSGP2 ; ++i)
   char sprintf3 [50];
     std::sprintf(sprintf3," SVARSGP (%u) = %13.6e", i+1, SVARSGP2[i]);
     std::cout << sprintf3 <<std::endl;
-  //std::cout <<" SVARSGP " << i+1 << " = " << SVARSGP2[i] <<std::endl;
 }
 for (unsigned int i = 0; i < NPROPS2 ; ++i)
 {  char sprintf4 [50];
     std::sprintf(sprintf4," PROPS (%u) = %13.6e", i+1, PROPS2[i]);
     std::cout << sprintf4 <<std::endl;
-//  std::cout <<" PROPS " << i+1 << " = " << PROPS2[i] <<std::endl;
-}
-for (unsigned int i = 0; i < NSTR2 ; ++i){
-for (unsigned int j = 0; j < NSTR2 ; ++j){
-  char sprintf5 [50];
-      std::sprintf(sprintf5," DSDE ( %u , %u) = %13.6e", i+1,j+1, DSDE2[i*NSTR2 + j]);
-      std::cout << sprintf5 <<std::endl;
-
-//  std::cout <<" DSDE (" << i+1<<" , " << j+1<< ") = " << DSDE2[i*NSTR2+j] <<std::endl;
-}
 }
 
-//output de la routine
-/*
-for (unsigned int i = 0; i < NSTR ; ++i)
-{
-  std::cout <<"DEFORT output" << i << " = " << DEFORT[i] <<std::endl;
-}
-for (unsigned int i = 0; i < NSTR ; ++i)
-{
-  std::cout <<"STRESS output" << i << " = " << STRESSF[i] <<std::endl;
-}
+//for (unsigned int i = 0; i < NSTR2 ; ++i){
+//for (unsigned int j = 0; j < NSTR2 ; ++j){
+//  char sprintf5 [50];
+//      std::sprintf(sprintf5," DSDE ( %u , %u) = %13.6e", i+1,j+1, DSDE2[i*NSTR2 + j]);
+//      std::cout << sprintf5 <<std::endl;
+//}}
 
-for (unsigned int i = 0; i < NSVARSGP ; ++i)
-{
-  std::cout <<"SVARSGP output" << i << " = " << SVARSGP[i] <<std::endl;
-}
-for (unsigned int i = 0; i < NSTR*NSTR ; ++i)
-{
-  std::cout <<"DSDE output" << i << " = " << DSDE[i] <<std::endl;
-}
-for (unsigned int i = 0; i < NPROPS ; ++i)
-{
-  std::cout <<"PROPS output" << i << " = " << PROPS[i] <<std::endl;
-}
-
-std::cout <<"NSTR output = " << NSTR <<std::endl;
-std::cout <<"NPROPS output = " << NPROPS <<std::endl;
-std::cout <<"NSVARSGP output = " << NSVARSGP <<std::endl;
-std::cout <<"NILL output = " << NILL <<std::endl;
-*/
   //throw MooseException("MooseException due to the non convergence of the subroutine");
-  mooseError("Exiting\n");
-//_fe_problem.restoreSolutions();
+  //mooseError("Exiting\n");
 }
-
-
-/*
+*/
 while (time_simulated < 1.0 && step_size >= _min_stepsize)
 {
 
-  if (_plasticity_type.compare("druckerPrager3D_frictionHard_") == 0){
-    usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
-  }
-  else if (_plasticity_type.compare("druckerPrager3D_frictionHard_adim_") == 0){
+  if (_plasticity_type.compare("DruckerPrager_friction3D_") == 0){
     usermat1_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
   }
-  else if (_plasticity_type.compare("druckerPrager3D_cohesionHard_") == 0){
+  else if (_plasticity_type.compare("DruckerPrager_friction2D_") == 0){
     usermat2_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+  }
+  else if (_plasticity_type.compare("DeBorst_2D_") == 0){
+    usermat3_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+  }
+  else if (_plasticity_type.compare("DruckerPrager_cohesion3D_") == 0){
+    usermat4_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+  }
+  else if (_plasticity_type.compare("DruckerPrager_cohesion2D_") == 0){
+    usermat5_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
   }
   else{
     std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
@@ -635,7 +574,7 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
   }
   else
   {
-    //Moose::out << "the stepsize begins to be reduced " << _iter[_qp] << std::endl;
+    Moose::out << "the stepsize begins to be reduced " << _iter[_qp] << std::endl;
     step_size *= 0.5;
     num_consecutive_successes = 0;
     remplSigmaOld(_stress_old[_qp], STRESSF, 0);
@@ -682,7 +621,7 @@ if (!return_successful)
     mooseError("Exiting\n");
   }
 }
-*/
+
 
 recupSigmaNew(_stress[_qp], STRESSF, 0);
 recupMomentNew(_stress_couple[_qp], STRESSF, 0);

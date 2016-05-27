@@ -1,16 +1,16 @@
 /***********************************************/
 /* Parameters  */
 xmin = 0;
-xmax = 1;
+xmax = 60;
 ymin = 0;
-ymax =1;
+ymax =120;
 zmin = 0;
-zmax = 1;
+zmax = 60;
 /****** MESH ***********/
-nb_cells_x = 1; // nb cells in X dir along fault
+nb_cells_x = 5; // nb cells in X dir along fault
 
-nb_cells_y = 30;
-progress_coeff = 30; // progression coefficient (for denser regular mesh towards top)
+nb_cells_y = 10;
+progress_coeff = 1; // progression coefficient (for denser regular mesh towards top)
 
 nb_cells_z = 1;
 /***********************************************/

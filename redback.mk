@@ -2,9 +2,9 @@
 #ADDITIONAL_LIBS := /usr/local/lib/myLib.dylib
 
 #to compile it and add the path automatically using libtool
-multisurfaceplasticityhard_DIR := $(HOME)/projects/cosserat_dynlib/druckerPrager3D_frictionHard
+multisurfaceplasticityhard_DIR := $(HOME)/projects/cosserat_dynlib/DruckerPrager_friction3D
 #multisurfaceplasticityhard_srcfiles  += $(multisurfaceplasticityhard_DIR)/src/​file1.C
-multisurfaceplasticityhard_srcfiles  += $(multisurfaceplasticityhard_DIR)/druckerPrager3D_frictionHard.f
+multisurfaceplasticityhard_srcfiles  += $(multisurfaceplasticityhard_DIR)/DruckerPrager_friction3D.f
 
 #multisurfaceplasticityhard_objects   := $(patsubst %.f90, %.$(obj-suffix), $(multisurfaceplasticityhard_srcfiles))
 multisurfaceplasticityhard_objects   := $(patsubst %.f, %.$(obj-suffix), $(multisurfaceplasticityhard_srcfiles))
@@ -55,10 +55,10 @@ clean​multisurfaceplasticityhard:
 
 
 
-#to compile it and add the path automatically using libtool
-multisurfaceplasticityhard1_DIR := $(HOME)/projects/cosserat_dynlib/druckerPrager3d_frictionHard_adim
+#to compile it and add the path automatically using libtool for the second library
+multisurfaceplasticityhard1_DIR := $(HOME)/projects/cosserat_dynlib/DruckerPrager_friction2D
 
-multisurfaceplasticityhard1_srcfiles  += $(multisurfaceplasticityhard1_DIR)/druckerPrager3d_frictionHard_adim.f
+multisurfaceplasticityhard1_srcfiles  += $(multisurfaceplasticityhard1_DIR)/DruckerPrager_friction2D.f
 
 multisurfaceplasticityhard1_objects   := $(patsubst %.f, %.$(obj-suffix), $(multisurfaceplasticityhard1_srcfiles))
 multisurfaceplasticityhard1_deps      := $(patsubst %.$(obj-suffix), %.$(obj-suffix).d, $(multisurfaceplasticityhard1_objects))
@@ -85,3 +85,95 @@ clean​multisurfaceplasticityhard1:
 			@rm -f $(multisurfaceplasticityhard1_DIR)/libmultisurfaceplasticityhard1-$(METHOD)*.dylib
 			@rm -f $(multisurfaceplasticityhard1_DIR)/libmultisurfaceplasticityhard1-$(METHOD)*.so
 			@rm -f $(multisurfaceplasticityhard1_DIR)/libmultisurfaceplasticityhard1-$(METHOD)*.a
+
+
+#to compile it and add the path automatically using libtool for the third library
+multisurfaceplasticityhard2_DIR := $(HOME)/projects/cosserat_dynlib/DeBorst_2D
+multisurfaceplasticityhard2_srcfiles  += $(multisurfaceplasticityhard2_DIR)/DeBorst_2D.f
+
+multisurfaceplasticityhard2_objects   := $(patsubst %.f, %.$(obj-suffix), $(multisurfaceplasticityhard2_srcfiles))
+multisurfaceplasticityhard2_deps      := $(patsubst %.$(obj-suffix), %.$(obj-suffix).d, $(multisurfaceplasticityhard2_objects))
+multisurfaceplasticityhard2_LIB       := $(multisurfaceplasticityhard2_DIR)/libmultisurfaceplasticityhard2-$(METHOD).la
+
+app_INCLUDES += -I$(multisurfaceplasticityhard2_DIR)
+app_LIBS += $(multisurfaceplasticityhard2_LIB)
+
+#command in the case of a Fortran file 77
+$(multisurfaceplasticityhard2_LIB): $(multisurfaceplasticityhard2_objects)
+							@echo "Linking Library "$@"..."
+							@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=link --quiet \
+							$(libmesh_F77) $(libmesh_FFLAGS) -o $@ $(multisurfaceplasticityhard2_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(multisurfaceplasticityhard2_DIR)
+							@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(multisurfaceplasticityhard2_LIB) $(multisurfaceplasticityhard2_DIR)
+
+
+$(app_EXEC): $(multisurfaceplasticityhard2_LIB)
+-include $(multisurfaceplasticityhard2_deps)
+
+clean​multisurfaceplasticityhard2:
+			@rm -f $(multisurfaceplasticityhard2_objects)
+			@rm -f $(multisurfaceplasticityhard2_deps)
+			@rm -f $(multisurfaceplasticityhard2_LIB)
+			@rm -f $(multisurfaceplasticityhard2_DIR)/libmultisurfaceplasticityhard2-$(METHOD)*.dylib
+			@rm -f $(multisurfaceplasticityhard2_DIR)/libmultisurfaceplasticityhard2-$(METHOD)*.so
+			@rm -f $(multisurfaceplasticityhard2_DIR)/libmultisurfaceplasticityhard2-$(METHOD)*.a
+
+#to compile it and add the path automatically using libtool for the fourth library
+multisurfaceplasticityhard3_DIR := $(HOME)/projects/cosserat_dynlib/DruckerPrager_cohesion3D
+multisurfaceplasticityhard3_srcfiles  += $(multisurfaceplasticityhard3_DIR)/DruckerPrager_cohesion3D.f
+
+multisurfaceplasticityhard3_objects   := $(patsubst %.f, %.$(obj-suffix), $(multisurfaceplasticityhard3_srcfiles))
+multisurfaceplasticityhard3_deps      := $(patsubst %.$(obj-suffix), %.$(obj-suffix).d, $(multisurfaceplasticityhard3_objects))
+multisurfaceplasticityhard3_LIB       := $(multisurfaceplasticityhard3_DIR)/libmultisurfaceplasticityhard3-$(METHOD).la
+
+app_INCLUDES += -I$(multisurfaceplasticityhard3_DIR)
+app_LIBS += $(multisurfaceplasticityhard3_LIB)
+
+#command in the case of a Fortran file 77
+$(multisurfaceplasticityhard3_LIB): $(multisurfaceplasticityhard3_objects)
+							@echo "Linking Library "$@"..."
+							@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=link --quiet \
+							$(libmesh_F77) $(libmesh_FFLAGS) -o $@ $(multisurfaceplasticityhard3_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(multisurfaceplasticityhard3_DIR)
+							@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(multisurfaceplasticityhard3_LIB) $(multisurfaceplasticityhard3_DIR)
+
+
+$(app_EXEC): $(multisurfaceplasticityhard3_LIB)
+-include $(multisurfaceplasticityhard3_deps)
+
+clean​multisurfaceplasticityhard3:
+			@rm -f $(multisurfaceplasticityhard3_objects)
+			@rm -f $(multisurfaceplasticityhard3_deps)
+			@rm -f $(multisurfaceplasticityhard3_LIB)
+			@rm -f $(multisurfaceplasticityhard3_DIR)/libmultisurfaceplasticityhard3-$(METHOD)*.dylib
+			@rm -f $(multisurfaceplasticityhard3_DIR)/libmultisurfaceplasticityhard3-$(METHOD)*.so
+			@rm -f $(multisurfaceplasticityhard3_DIR)/libmultisurfaceplasticityhard3-$(METHOD)*.a
+
+
+			#to compile it and add the path automatically using libtool for the fifth library
+multisurfaceplasticityhard4_DIR := $(HOME)/projects/cosserat_dynlib/DruckerPrager_cohesion2D
+multisurfaceplasticityhard4_srcfiles  += $(multisurfaceplasticityhard4_DIR)/DruckerPrager_cohesion2D.f
+
+multisurfaceplasticityhard4_objects   := $(patsubst %.f, %.$(obj-suffix), $(multisurfaceplasticityhard4_srcfiles))
+multisurfaceplasticityhard4_deps      := $(patsubst %.$(obj-suffix), %.$(obj-suffix).d, $(multisurfaceplasticityhard4_objects))
+multisurfaceplasticityhard4_LIB       := $(multisurfaceplasticityhard4_DIR)/libmultisurfaceplasticityhard4-$(METHOD).la
+
+app_INCLUDES += -I$(multisurfaceplasticityhard4_DIR)
+app_LIBS += $(multisurfaceplasticityhard4_LIB)
+
+#command in the case of a Fortran file 77
+$(multisurfaceplasticityhard4_LIB): $(multisurfaceplasticityhard4_objects)
+							@echo "Linking Library "$@"..."
+							@$(libmesh_LIBTOOL) --tag=F77 $(LIBTOOLFLAGS) --mode=link --quiet \
+							$(libmesh_F77) $(libmesh_FFLAGS) -o $@ $(multisurfaceplasticityhard4_objects) $(libmesh_LDFLAGS) $(EXTERNAL_FLAGS) -rpath $(multisurfaceplasticityhard4_DIR)
+							@$(libmesh_LIBTOOL) --mode=install --quiet install -c $(multisurfaceplasticityhard4_LIB) $(multisurfaceplasticityhard4_DIR)
+
+
+$(app_EXEC): $(multisurfaceplasticityhard4_LIB)
+-include $(multisurfaceplasticityhard4_deps)
+
+clean​multisurfaceplasticityhard4:
+			@rm -f $(multisurfaceplasticityhard4_objects)
+			@rm -f $(multisurfaceplasticityhard4_deps)
+			@rm -f $(multisurfaceplasticityhard4_LIB)
+			@rm -f $(multisurfaceplasticityhard4_DIR)/libmultisurfaceplasticityhard4-$(METHOD)*.dylib
+			@rm -f $(multisurfaceplasticityhard4_DIR)/libmultisurfaceplasticityhard4-$(METHOD)*.so
+			@rm -f $(multisurfaceplasticityhard4_DIR)/libmultisurfaceplasticityhard4-$(METHOD)*.a
