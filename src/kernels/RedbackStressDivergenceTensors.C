@@ -145,10 +145,11 @@ RedbackStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
   //  porepressure_term = _phi[_j][_qp]*_grad_test[_i][_qp](_component);
 
   if (active)
-    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp],_component,
-                                                 coupled_component,
-                                                 _grad_test[ _i ][ _qp ],
-                                                 _grad_phi[ _j ][ _qp ]) +
+    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[ _qp ],
+                                                  _component,
+                                                  coupled_component,
+                                                  _grad_test[ _i ][ _qp ],
+                                                  _grad_phi[ _j ][ _qp ]) +
            porepressure_term; // (porepressure_term = 0 here)
 
   if (_temp_coupled && jvar == _temp_var)

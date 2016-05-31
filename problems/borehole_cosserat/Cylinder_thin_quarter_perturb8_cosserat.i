@@ -1,8 +1,8 @@
 [Mesh]
   type = FileMesh
-  file = Cylinder_thin_quarter_perturb_3D_8.msh
-  boundary_name = 'bottom top inside outside'
-  boundary_id = '109 110 112 111'
+  file = Cylinder_hollow_3D_quarter.msh
+  boundary_name = 'bottom top inside outside left right'
+  boundary_id = '0 1 2 3 4 5'
 []
 
 [GlobalParams]
@@ -15,7 +15,7 @@
 []
 
 [Variables]
-  active = 'disp_x disp_y disp_z wc_x wc_y wc_z porepressure '
+  active = 'disp_y disp_x porepressure wc_z wc_y wc_x disp_z'
   [./disp_x]
   [../]
   [./disp_y]
@@ -78,26 +78,29 @@
   [./inner_pressure_fct]
     # 1e-2
     type = ParsedFunction
-    value = 1e-3 # 1e-3+4e-2*t
+    value = 1e-3+2e-2*t # 1e-3+4e-2*t
   [../]
   [./timestep_function]
     # if(t>0.0225, 5e-5, 5e-4)
     # 1e-3
-    #
+    # 
     # if (t<0.13,1e-3,  dt*max(0.2, 1-0.1*(n-30)))
+    # 
+    # if(t>0.03, 5e-5, 5e-4)
+    # 
     type = ParsedFunction
-    value = 1e-3 # if(t>0.0169, 1e-7, if(t>0.0168, 2e-6,1e-4))
+    value = 'if(t>0.06, 1e-4, 1e-3)' # if(t>0.0169, 1e-7, if(t>0.0168, 2e-6,1e-4))
     vals = 'nnli old_timestep'
     vars = 'n dt'
   [../]
   [./outer_pressure_fct]
     type = ParsedFunction
-    value = 0 # 1e-3
+    value = 1e-3 # 1e-3
   [../]
 []
 
 [Kernels]
-  active = 'x_couple cz_elastic cy_elastic cx_elastic y_moment z_couple x_moment y_couple z_moment dp_dt mass_diff'
+  active = 'y_moment cz_elastic cy_elastic cx_elastic z_couple x_couple x_moment y_couple z_moment dp_dt mass_diff'
   [./dp_dt]
     type = TimeDerivative
     variable = porepressure
@@ -144,7 +147,6 @@
     variable = disp_x
     displacements = 'disp_x disp_y disp_z'
     component = 0
-    temp = temperature
     pore_pres = porepressure
   [../]
   [./cy_elastic]
@@ -152,7 +154,6 @@
     variable = disp_y
     displacements = 'disp_x disp_y disp_z'
     component = 1
-    temp = temperature
     pore_pres = porepressure
   [../]
   [./cz_elastic]
@@ -160,7 +161,6 @@
     variable = disp_z
     component = 2
     displacements = 'disp_x disp_y disp_z'
-    temp = temperature
     pore_pres = porepressure
   [../]
   [./x_couple]
@@ -266,23 +266,20 @@
     type = MaterialRealAux
     variable = mech_dissip
     property = mechanical_dissipation_mech
+    execute_on = timestep_end
   [../]
 []
 
 [BCs]
-  active = 'Pressure fixed_outer_x fixed_outer_y'
+  active = 'Pressure fixed_outer_x fixed_outer_y wcz_left_right'
   [./Pressure]
     [./press_inner]
       function = inner_pressure_fct
-      boundary = 0
-      disp_y = disp_y
-      disp_x = disp_x
+      boundary = 2
     [../]
     [./press_outer]
       function = outer_pressure_fct
-      boundary = 2
-      disp_y = disp_y
-      disp_x = disp_x
+      boundary = 3
     [../]
   [../]
   [./Temp_borehole]
@@ -300,13 +297,13 @@
   [./fixed_outer_x]
     type = PresetBC
     variable = disp_x
-    boundary = 3
+    boundary = 4
     value = 0
   [../]
   [./fixed_outer_y]
     type = PresetBC
     variable = disp_y
-    boundary = 1
+    boundary = 5
     value = 0
   [../]
   [./confine_x]
@@ -321,10 +318,16 @@
     boundary = '103 104'
     value = 0
   [../]
+  [./wcz_left_right]
+    type = DirichletBC
+    variable = wc_z
+    boundary = '4 5'
+    value = 0
+  [../]
 []
 
 [Materials]
-  active = 'no_mech plastic_material'
+  active = 'no_mech Redbackcosserat'
   [./no_mech]
     type = RedbackMaterial
     disp_y = disp_y
@@ -365,16 +368,17 @@
   [./Redbackcosserat]
     type = RedbackMechMaterialHO
     block = 0
-    B_ijkl = '0.0 9.6616E-4  9.6616E-4'
+    B_ijkl = '0.0 9.6616E-2  9.6616E-2'
     C_ijkl = '1.8634E1 4.3478E1 2.1739E1'
     fill_method = general_isotropic
     poisson_ratio = -9999
     youngs_modulus = -9999
     damage_method = BreakageMechanics
-    cohesion = 0.006
+    cohesion = 0.001
     hardening_mech_modulus = -0.1
     pore_pres = porepressure
-    plasticity_type = DruckerPrager_cohesion3D
+    plasticity_type = DruckerPrager_friction3D
+    friction_coefficient = 0.3
   [../]
 []
 
@@ -410,6 +414,7 @@
   [./avg_dissip]
     type = ElementAverageValue
     variable = mech_dissip
+    block = 0
   [../]
   [./Num_elements]
     type = NumElems
@@ -479,3 +484,14 @@
   file_base = Cylinder_thin_quarter_perturb8
   interval = 10
 []
+
+[ICs]
+  [./random_variable]
+    max = 1e-7
+    variable = wc_z
+    boundary = 2
+    type = RandomIC
+    block = 0
+  [../]
+[]
+

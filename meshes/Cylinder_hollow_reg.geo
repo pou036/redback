@@ -1,10 +1,10 @@
 lc = 0.05;
 R_out = 1.; // radius of outer circle
 R_in = 0.3; // radius of inner circle 
-H = 0.5; // height of cylinder
-nb_layers_third_circle = 5; //number of layers in one THIRD OF CIRCLE
-nb_rings = 4; // number of concentric cell rings
-nb_layers_z = 4; // number of vertical layers
+H = 0.1; // height of cylinder
+nb_layers_third_circle = 30; //number of layers in one THIRD OF CIRCLE
+nb_rings = 20; // number of concentric cell rings
+nb_layers_z = 1; // number of vertical layers
 
 Point(1) = {0,0,0,lc}; // Center
 
@@ -19,7 +19,7 @@ Line(8) = {4,5};
 Line(9) = {5,2};
 Line Loop(10) = {6,7,8,9};
 
-Transfinite Line{6,8} = nb_rings+1;// Using Progression 1;
+Transfinite Line{-6,8} = nb_rings+1 Using Progression 0.8;
 Transfinite Line {7,9} = nb_layers_z+1;
 
 Ruled Surface(11) = {10};

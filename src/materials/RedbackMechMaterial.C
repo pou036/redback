@@ -72,12 +72,16 @@ validParams<RedbackMechMaterial>()
                         "parameter for rate dependent "
                         "plasticity (Overstress model)");
   params.addParam<Real>("exponent", 1.0, "Exponent for rate dependent plasticity (Perzyna)");
+  params.addParam<Real>(
+    "chemo_mechanical_porosity_coeff", 1.0, "The coefficient of volumetric plastic strain in chemical porosity");
+
   params.addCoupledVar("pore_pres", 0.0, "Dimensionless pore pressure");
-  params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
-  params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
+  //params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
+  //params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
 
   // For the damage mechanics functionality
   params.addParam<Real>("damage_coefficient", 0.0, "The fraction of energies used in damage flow law (e.g. E_D/E_D0)");
+  params.addParam<Real>("damage_exponent", 0.0, "The damage exponent in the incremental flow law of plasticity");
   params.addParam<Real>(
     "healing_coefficient", 0.0, "The fraction of energies used in healing flow law (e.g. E_H/E_H0)");
   params.addParam<MooseEnum>("damage_method",
@@ -127,10 +131,11 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
     _ref_pe_rate(getParam<Real>("ref_pe_rate")),
     _exponent(getParam<Real>("exponent")),
+    _chemo_mechanical_porosity_coeff(getParam<Real>("chemo_mechanical_porosity_coeff")),
 
     // Redback
-    _youngs_modulus(getParam<Real>("youngs_modulus")),
-    _poisson_ratio(getParam<Real>("poisson_ratio")),
+    //_youngs_modulus(getParam<Real>("youngs_modulus")),
+    //_poisson_ratio(getParam<Real>("poisson_ratio")),
     _mises_stress(declareProperty<Real>("mises_stress")),
     _mean_stress(declareProperty<Real>("mean_stress")),
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
@@ -138,6 +143,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
     _mechanical_porosity(declareProperty<Real>("mechanical_porosity")),
+    _mass_removal_rate(declareProperty<Real>("mass_removal_rate")),
+
     _poromech_kernel(declareProperty<Real>("poromechanics_kernel")),
     _poromech_jac(declareProperty<Real>("poromechanics_jacobian")),
     _mod_gruntfest_number(declareProperty<Real>("mod_gruntfest_number")),
@@ -147,6 +154,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _damage_kernel(declareProperty<Real>("damage_kernel")),
     _damage_kernel_jac(declareProperty<Real>("damage_kernel_jacobian")),
     _damage_coeff(getParam<Real>("damage_coefficient")),
+    _dmg_exponent(getParam<Real>("damage_exponent")),
     _healing_coeff(getParam<Real>("healing_coefficient")),
 
     // Get coupled variables (T & P & porosity & damage)
@@ -235,6 +243,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _damage_kernel[ _qp ] = 0;
   _damage_kernel_jac[ _qp ] = 0;
   _returnmap_iter[ _qp ] = 0;
+  _mass_removal_rate[ _qp ] = 0;
 }
 
 void
@@ -478,8 +487,6 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
   _mechanical_porosity[ _qp ] = delta_phi_mech_el + delta_phi_mech_pl;
 
-  // formulate the Taylor-Quinney coefficient and Gruntfest numbers for the case
-  // of damage
   Real gruntfest_number;
 
   if (_has_D)
@@ -534,6 +541,20 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
     gruntfest_number * std::exp(-_ar[ _qp ]) *
     (std::fabs(getSigEqv(sig) * std::pow(macaulayBracket(getSigEqv(sig) / q_y - 1.0), _exponent)) +
      std::fabs(_mean_stress[ _qp ] * std::pow(macaulayBracket(_mean_stress[ _qp ] - p_y), _exponent)));
+
+  // Begin of the chemical degradation method of Hu and Hueckel 2013 (doi:10.1680/geot.SIP13.P.020)
+  // _mass_removal_rate[_qp] = 0;
+  Real total_energy_input = sig.doubleContraction(instantaneous_strain_rate);
+
+  _mass_removal_rate[ _qp ] = _chemo_mechanical_porosity_coeff * (1 + total_energy_input);
+  if (_volumetric_strain[ _qp ] > 0)
+  {
+    _mass_removal_rate[ _qp ] = _chemo_mechanical_porosity_coeff * _volumetric_strain[ _qp ];
+  }
+  // End of the chemical degradation method of Hu and Hueckel 2013
+
+  // formulate the Taylor-Quinney coefficient and Gruntfest numbers for the case
+  // of damage
 
   return;
 }
@@ -663,6 +684,10 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   // calculate the term _exponential = -Q_{mech}/(RT) with Q_{mech} = E_0 + p'c
   // V_{ref} + p_f V_{act}
   _exponential = 1;
+  if (_has_D)
+  {
+    _exponential *= std::pow(1 - _damage[ _qp ], -_dmg_exponent);
+  }
   if (_has_T)
   {
     // E_0/(RT) = Ar/(1+delta T*)
@@ -753,11 +778,11 @@ RedbackMechMaterial::get_py_qy_damaged(Real p, Real q, Real & p_y, Real & q_y, R
   q_y *= (1 - _damage[ _qp ]);
 }
 
-void
+/*void
 RedbackMechMaterial::form_damage_kernels(Real cohesion)
 {
   mooseError("form_damage_kernels must be overwritten in children class");
-}
+}*/
 
 void
 RedbackMechMaterial::formDamageDissipation(RankTwoTensor & sig)
@@ -775,19 +800,18 @@ RedbackMechMaterial::formDamageDissipation(RankTwoTensor & sig)
    * =  (1-D) * Psi0
    */
 
-  Real bulk_modulus, shear_modulus, vol_elastic_strain, dev_elastic_strain;
+  Real lambda, mu, vol_elastic_strain, dev_elastic_strain;
   Real Psi0, Psi0_vol, Psi0_dev;
   Real damage_potential, damage_rate;
 
-  bulk_modulus =
-    _youngs_modulus * _poisson_ratio / (1 + _poisson_ratio) / (1 - 2 * _poisson_ratio); // First Lame modulus
-  shear_modulus = 0.5 * _youngs_modulus / (1 + _poisson_ratio);                         // Second Lame modulus (shear)
+  lambda = _Cijkl(0,0,1,1); // first Lamé coefficient
+  mu = _Cijkl(0,1,0,1); // second Lamé coefficient
 
   vol_elastic_strain = _elastic_strain[ _qp ].trace();
   dev_elastic_strain = std::pow(2.0 / 3.0, 0.5) * _elastic_strain[ _qp ].L2norm();
 
-  Psi0_vol = (2 / 3) * bulk_modulus * std::pow(vol_elastic_strain, 2);
-  Psi0_dev = (3 / 2) * shear_modulus * std::pow(dev_elastic_strain, 2);
+  Psi0_vol = (2 / 3) * lambda * std::pow(vol_elastic_strain, 2);
+  Psi0_dev = (3 / 2) * mu * std::pow(dev_elastic_strain, 2);
   Psi0 = Psi0_vol + Psi0_dev;
 
   damage_potential = (1 - _damage[ _qp ]) * Psi0;
@@ -796,4 +820,75 @@ RedbackMechMaterial::formDamageDissipation(RankTwoTensor & sig)
   // _damage_dissipation is equal to (- d Psi / d D * D_dot) which in this code
   // is (damage_potential * damage_rate)
   _damage_dissipation = damage_potential * damage_rate;
+}
+
+void
+RedbackMechMaterial::form_damage_kernels(Real cohesion)
+{
+  // update damage evolution law from selected method
+  switch (_damage_method)
+  {
+    case BrittleDamage:
+      formBrittleDamage();
+      break;
+    case CreepDamage:
+      formCreepDamage(cohesion);
+      break;
+    case BreakageMechanics:
+      mooseError("damage method not implemented yet, use other options");
+      break;
+    case DamageHealing:
+      mooseError("damage method not implemented yet, use other options");
+      break;
+    default:
+      mooseError("damage method not implemented yet, use other options");
+  }
+}
+
+void
+RedbackMechMaterial::formBrittleDamage()
+{
+  Real plastic_damage, healing_damage;
+  Real kachanov, exponent_kachanov;
+
+  // Kachanov's original law of Brittle Damage
+  exponent_kachanov = 1;
+  kachanov = _mises_stress[ _qp ] / (1 - _damage[ _qp ]);
+
+  plastic_damage = _damage_coeff * std::pow(kachanov, exponent_kachanov);
+  healing_damage = 0;
+
+  _damage_kernel[ _qp ] = plastic_damage + healing_damage;
+  _damage_kernel_jac[ _qp ] = 0;
+}
+
+void
+RedbackMechMaterial::formCreepDamage(Real cohesion)
+{
+  Real plastic_damage, healing_damage;
+  Real lambda_dot;
+  Real d_yield_dq; // The derivative of the yield surface with respect to the
+                   // deviatoric stress q
+
+  // Damage evolution law for creep damage
+  // J2 plastic potential with evolving cohesion for the damage evolution law
+  // (remember that cohesion is q_y which is updated as q_y * (1-D) in the
+  // get_py_qy_damaged function)
+  d_yield_dq = 1 / std::pow(cohesion, 2);
+
+  if (d_yield_dq > 0) // ensuring positiveness of the plastic multiplier
+  {
+    /* the plastic multiplier could be having this form:
+     * lambda_dot = _mises_stress[_qp] * _mises_strain_rate[_qp] / d_yield_dq;
+     * but cohesion in J2 plasticity is the mises stress at yield, so we are
+     * going with a much simpler form: */
+    lambda_dot = _mises_strain_rate[ _qp ] / d_yield_dq;
+  }
+  else
+    lambda_dot = 0;
+
+  plastic_damage = _damage_coeff * lambda_dot;
+  healing_damage = 0;
+  _damage_kernel[ _qp ] = plastic_damage + healing_damage;
+  _damage_kernel_jac[ _qp ] = 0;
 }

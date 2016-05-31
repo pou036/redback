@@ -42,8 +42,8 @@
     disp_z = disp_z
     temperature = temp
     exponent = 1
-    youngs_modulus = 1000
-    poisson_ratio = 0.3
+    fill_method = symmetric_isotropic
+    C_ijkl = '576.923076923 384.615384615' # young = 1000, poisson = 0.3
     ref_pe_rate = 1
     slope_yield_surface = -0.6
     yield_criterion = Drucker_Prager
@@ -145,7 +145,7 @@
 []
 
 [AuxVariables]
-  active = 'mech_porosity Mod_Gruntfest_number total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
+  active = 'mech_porosity Mod_Gruntfest_number total_porosity mises_strain mises_strain_rate mises_stress volumetric_strain mean_stress'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -228,7 +228,7 @@
 []
 
 [AuxKernels]
-  active = 'mech_porosity volumetric_strain total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress Gruntfest_Number'
+  active = 'mech_porosity volumetric_strain total_porosity mises_strain mises_strain_rate mises_stress mean_stress Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -313,6 +313,7 @@
 []
 
 [Postprocessors]
+  active = 'volumetric_strain mises_strain mises_strain_rate mises_stress mean_stress temp_middle'
   [./mises_stress]
     type = PointValue
     variable = mises_stress

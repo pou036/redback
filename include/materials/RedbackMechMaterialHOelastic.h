@@ -73,7 +73,7 @@ protected:
   MaterialProperty<RankFourTensor> & _Jacobian_offdiag_cb;
 
   std::vector<Real> _Bijkl_vector;
-  ElasticityTensorR4 _Bijkl;
+  RankFourTensor _Bijkl;
 
   MaterialProperty<RankTwoTensor> & _curvature_increment;
   MaterialProperty<RankTwoTensor> & _plastic_curvature;

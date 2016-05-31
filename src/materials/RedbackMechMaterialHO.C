@@ -240,48 +240,47 @@ Real SVARSGP3[NSVARSGP2] ;
 Real PROPS3[NPROPS2] ;
 
 int nb_hardening = 1;
+Real g_1;
+Real g_2;
+Real g_3;
+Real g_4;
+Real h_1;
+Real h_2;
+Real h_3;
+Real h_4;
 
-Real g_1 = 1./3.;
-Real g_2 = 1./3.;
-Real g_3 = 2./3.;
-Real g_4 = 0.;
-Real h_1 = 1./4.;
-Real h_2 = 1./4.;
-Real h_3 = 1./2.;
-Real h_4 = 0.;
 
-/*
+
 if (_plasticity_type.compare("DruckerPrager_cohesion3D_") == 0 || _plasticity_type.compare("DruckerPrager_friction3D_") == 0 ){
-  Real g_1 = 8./5.;
-  Real g_2 = 2./5.;
-  Real g_3 = 8./5.;
-  Real g_4 = 2./5.;
-  Real h_1 = 2./3.;
-  Real h_2 = -1./6.;
-  Real h_3 = 2./3.;
-  Real h_4 = -1./6.;}
+   g_1 = 8./5.;
+   g_2 = 2./5.;
+   g_3 = 8./5.;
+   g_4 = 2./5.;
+   h_1 = 2./3.;
+   h_2 = -1./6.;
+   h_3 = 2./3.;
+   h_4 = -1./6.;}
 else if (_plasticity_type.compare("DruckerPrager_cohesion2D_") == 0 || _plasticity_type.compare("DruckerPrager_friction2D_") == 0 ){
-  Real g_1 = 3./2.;
-  Real g_2 = 1./2.;
-  Real g_3 = 1.;
-  Real g_4 = 0.;
-  Real h_1 = 3./4.;
-  Real h_2 = -1./4.;
-  Real h_3 = 1.;
-  Real h_4 = 0.;}
+   g_1 = 3./2.;
+   g_2 = 1./2.;
+   g_3 = 1.;
+   g_4 = 0.;
+   h_1 = 3./4.;
+   h_2 = -1./4.;
+   h_3 = 1.;
+   h_4 = 0.;}
 else if (_plasticity_type.compare("DeBorst_2D_") == 0 ){
-  Real g_1 = 1./3.;
-  Real g_2 = 1./3.;
-  Real g_3 = 2./3.;
-  Real g_4 = 0.;
-  Real h_1 = 1./4.;
-  Real h_2 = 1./4.;
-  Real h_3 = 1./2.;
-  Real h_4 = 0.;}
+   g_1 = 1./3.;
+   g_2 = 1./3.;
+   g_3 = 2./3.;
+   g_4 = 0.;
+   h_1 = 1./4.;
+   h_2 = 1./4.;
+   h_3 = 1./2.;
+   h_4 = 0.;}
 else {
   std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
 }
-*/
 
 PROPS[0]=_bulk_modulus;
 PROPS[1]=_shear_modulus;
@@ -302,8 +301,6 @@ PROPS2[5]=_cohesion;
 PROPS2[6]=_hardening_mech_modulus;
 PROPS2[7] = _dilatancy_coefficient;
 PROPS2[8]=0.0;
-
-
 
 remplSigmaOld(_strain_increment[_qp], DEFORT, 0);
 remplMomentOld(_curvature_increment[_qp], DEFORT, 0);

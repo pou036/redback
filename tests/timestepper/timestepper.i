@@ -58,8 +58,8 @@
     yield_stress = '0. 1 1. 1'
     exponent = 1
     ref_pe_rate = 1
-    youngs_modulus = 10
-    poisson_ratio = 0.3
+    fill_method = symmetric_isotropic
+    C_ijkl = '5.76923076923 3.84615384615' # young = 10, poisson = 0.3
     slope_yield_surface = 0.3
     total_porosity = total_porosity
   [../]
@@ -382,4 +382,3 @@
     disp_x = disp_x
   [../]
 []
-

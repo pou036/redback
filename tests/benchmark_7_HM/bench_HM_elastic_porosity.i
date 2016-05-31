@@ -72,8 +72,8 @@
     disp_y = disp_y
     pore_pres = pore_pressure
     exponent = 0
-    youngs_modulus = 3e5
-    poisson_ratio = 0.25
+    fill_method = symmetric_isotropic
+    C_ijkl = '120000.0 120000.0' # young = 3e5, poisson = 0.25
     ref_pe_rate = 0
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
@@ -334,4 +334,3 @@
     pore_pres = pore_pressure
   [../]
 []
-

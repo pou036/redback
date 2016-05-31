@@ -1,6 +1,7 @@
 #include "RedbackFluidStressDivergenceTensors.h"
 
 #include "Material.h"
+#include "ElasticityTensorTools.h"
 
 template <>
 InputParameters
@@ -27,7 +28,7 @@ RedbackFluidStressDivergenceTensors::RedbackFluidStressDivergenceTensors(const I
     //_pore_pres(coupledValue("pore_pres")),
     _grad_pore_pressure(coupledGradient("pore_pres")),
     _fluid_stress(getMaterialProperty<RankTwoTensor>("fluid_stress")),
-    //_Jacobian_fluid_mult(getMaterialProperty<ElasticityTensorR4>("Jacobian_fluid_mult")),
+    //_Jacobian_fluid_mult(getMaterialProperty<RankFourTensor>("Jacobian_fluid_mult")),
     _component(getParam<unsigned int>("component")),
     _fluid_density(getMaterialProperty<Real>("NS_fluid_density")),
 

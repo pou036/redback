@@ -32,12 +32,12 @@
     disp_x = disp_x
     disp_z = 0
     temperature = temp
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
+    #C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     yield_stress = '0. 1 1. 1'
     exponent = 1
     ref_pe_rate = 1
-    youngs_modulus = 1000
-    poisson_ratio = 0.3
+    fill_method = symmetric_isotropic
+    C_ijkl = '576.923076923 384.615384615' # young = 1000, poisson = 0.3
     total_porosity = total_porosity
   [../]
   [./mat1]
@@ -198,4 +198,3 @@
     disp_x = disp_x
   [../]
 []
-

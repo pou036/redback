@@ -45,8 +45,8 @@
     pore_pres = pore_pressure
     temperature = temp
     exponent = 3
-    youngs_modulus = 1000
-    poisson_ratio = 0.3
+    fill_method = symmetric_isotropic
+    C_ijkl = '576.923076923 384.615384615' # young = 1000, poisson = 0.3
     ref_pe_rate = 1
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
@@ -473,4 +473,3 @@
     value = 0
   [../]
 []
-

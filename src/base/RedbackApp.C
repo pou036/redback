@@ -57,6 +57,9 @@
 // Scalar Kernels
 #include "RedbackContinuation.h"
 
+// Dirac Kernels
+#include "FunctionPointSource.h"
+
 // Materials
 #include "RedbackFluidMaterial.h"
 #include "ImageProcessing.h"
@@ -79,6 +82,7 @@
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
 #include "RedbackTotalPorosityAux.h"
+#include "RedbackPolarTensorMaterialAux.h"
 
 template <>
 InputParameters
@@ -150,6 +154,8 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerScalarKernel(RedbackContinuation);
 
+  registerDiracKernel(FunctionPointSource);
+
   registerMaterial(RedbackFluidMaterial);
   registerMaterial(ImageProcessing);
   registerMaterial(RedbackMaterial);
@@ -168,6 +174,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);
   registerAux(RedbackTotalPorosityAux);
+  registerAux(RedbackPolarTensorMaterialAux);
 #undef registerObject
 #define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
