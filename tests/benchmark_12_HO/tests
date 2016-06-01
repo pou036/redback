@@ -3,5 +3,7 @@
     type = 'CSVDiff'
     input = 'shear_elastic.i'
     csvdiff = 'bench_elastic_HO_shear.csv'
+    # This test requires the Cosserat dynamic library
+    cosserat_dynlib = true
   [../]
 []
