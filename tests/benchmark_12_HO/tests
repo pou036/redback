@@ -1,0 +1,7 @@
+[Tests]
+  [./test_HO_shear_elastic] # can't put a dot in that name!
+    type = 'CSVDiff'
+    input = 'shear_elastic.i'
+    csvdiff = 'bench_elastic_HO_shear.csv'
+  [../]
+[]

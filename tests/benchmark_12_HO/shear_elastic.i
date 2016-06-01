@@ -1,7 +1,7 @@
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  ny = 500 # 6
+  ny = 20 # 6
 []
 
 [GlobalParams]
@@ -14,6 +14,7 @@
 []
 
 [Postprocessors]
+  active = 'Rotation_wcz_0_7 Rotation_wcz_0_6 Rotation_wcz_0_5 Rotation_wcz_0_4 Rotation_wcz_0_3 Rotation_wcz_0_2 Rotation_wcz_0_1 Rotation_wcz_0_9 Rotation_wcz_0_8 Displ_u_x_0_8 Displ_u_x_0_9 Displ_u_x_0_1 Displ_u_x_0_2 Displ_u_x_0_3 Displ_u_x_0_4 Displ_u_x_0_5 Displ_u_x_0_6 Displ_u_x_0_7 disp_y_top disp_x_top wc_z_top'
   [./disp_y_top]
     type = PointValue
     point = '0.5 1 0.1'
@@ -280,7 +281,7 @@
 
 [BCs]
   # following is natural BC
-  active = 'Periodic uy_bottom Rotation_wc_z_BC ux_imposed_top wcz_imposed_top wcx_equals_zero_on_top ux_zero_bottom wcy_equals_zero_on_top wc_x_bottom uz_bottom wc_y_bottom'
+  active = 'Periodic uy_bottom ux_imposed_top wcz_imposed_top wcx_equals_zero_on_top ux_zero_bottom wcy_equals_zero_on_top wc_x_bottom uz_bottom wc_y_bottom'
   [./Periodic]
     [./xperiodic]
       auto_direction = x
@@ -419,7 +420,7 @@
 [Outputs]
   execute_on = 'timestep_end initial'
   exodus = true
-  file_base = bench_plastic_HO_shear
+  csv = true
+  file_base = bench_elastic_HO_shear
   print_linear_residuals = false
 []
-
