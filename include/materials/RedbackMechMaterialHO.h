@@ -12,8 +12,12 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+
 #ifndef RedbackMechMaterialHO_H
 #define RedbackMechMaterialHO_H
+
+
+#ifdef HORB_LIBDIR_EXISTS
 
 #include "RedbackMechMaterial.h"
 
@@ -139,4 +143,9 @@ private:
   Real _shear_modulus, _bulk_modulus, _cosserat_shear_modulus, _cosserat_radius;
   Real _plastic_potential_multiplier;
 };
+
+
+
+#endif // HORB_LIBDIR_EXISTS
+
 #endif // RedbackMechMaterialHO_H

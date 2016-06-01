@@ -10,6 +10,7 @@
     input = 'bench_TM_DP.i'
     exodiff = 'bench_TM_DP_out.e'
     rel_err = 1e-5
+    abs_zero = 1e-9
   [../]
     [./test_6_TM_CC] # can't put a dot in that name!
     type = 'Exodiff'

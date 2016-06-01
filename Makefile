@@ -32,12 +32,14 @@ APPLICATION_NAME   := redback
 BUILD_EXEC         := yes
 DEP_APPS           := $(shell $(FRAMEWORK_DIR)/scripts/find_dep_apps.py $(APPLICATION_NAME))
 
-LIBDIR := $(HOME)/projects/cosserat_dynlib
-LIBDIR_EXISTS = $(shell [ -e $(LIBDIR) ] && echo 1 || echo 0 )
-
-ifeq ($(LIBDIR_EXISTS), 1)
-  include            $(FRAMEWORK_DIR)/app.mk
-endif
+include $(FRAMEWORK_DIR)/app.mk
 ###############################################################################
 # Additional special case targets should be added here
 # ADDITIONAL_LIBS       := /Users/pou036/projects/dynamicLib/
+
+HORB_LIBDIR := $(HOME)/projects/cosserat_dynlib
+HORB_LIBDIR_EXISTS = $(shell [ -e $(HORB_LIBDIR) ] && echo 1 || echo 0 )
+
+ifeq ($(HORB_LIBDIR_EXISTS), 1)
+  EXTERNAL_FLAGS += -DHORB_EXISTS
+endif

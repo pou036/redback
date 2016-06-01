@@ -10,6 +10,9 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+
+#ifdef HORB_LIBDIR_EXISTS
+
 #include "Function.h"
 #include "RedbackMechMaterialHOelastic.h"
 #include "multisurfaceplasticityhard.h"
@@ -462,3 +465,6 @@ RedbackMechMaterialHOelastic::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, 
   p_y = 0;
   q_y = 0;
 }
+
+
+#endif // HORB_LIBDIR_EXISTS

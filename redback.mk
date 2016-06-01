@@ -1,6 +1,9 @@
 #to create a library by copying after compile in the user files
 #ADDITIONAL_LIBS := /usr/local/lib/myLib.dylib
 
+
+
+ifeq ($(HORB_LIBDIR_EXISTS), 1)
 #to compile it and add the path automatically using libtool
 multisurfaceplasticityhard_DIR := $(HOME)/projects/cosserat_dynlib/DruckerPrager_friction3D
 #multisurfaceplasticityhard_srcfiles  += $(multisurfaceplasticityhard_DIR)/src/​file1.C
@@ -13,6 +16,7 @@ multisurfaceplasticityhard_LIB       := $(multisurfaceplasticityhard_DIR)/libmul
 
 app_INCLUDES += -I$(multisurfaceplasticityhard_DIR)
 app_LIBS += $(multisurfaceplasticityhard_LIB)
+
 
 #command in the case of a C++ file
 #$(multisurfaceplasticityhard_LIB): $(multisurfaceplasticityhard_objects)
@@ -44,6 +48,7 @@ $(multisurfaceplasticityhard_LIB): $(multisurfaceplasticityhard_objects)
 
 $(app_EXEC): $(multisurfaceplasticityhard_LIB)
 -include $(multisurfaceplasticityhard_deps)
+
 
 clean​multisurfaceplasticityhard:
 			@rm -f $(multisurfaceplasticityhard_objects)
@@ -177,3 +182,6 @@ clean​multisurfaceplasticityhard4:
 			@rm -f $(multisurfaceplasticityhard4_DIR)/libmultisurfaceplasticityhard4-$(METHOD)*.dylib
 			@rm -f $(multisurfaceplasticityhard4_DIR)/libmultisurfaceplasticityhard4-$(METHOD)*.so
 			@rm -f $(multisurfaceplasticityhard4_DIR)/libmultisurfaceplasticityhard4-$(METHOD)*.a
+			
+			
+endif  #HORB_LIBDIR_EXISTS

@@ -15,6 +15,8 @@
 #ifndef RedbackMechMaterialHOelastic_H
 #define RedbackMechMaterialHOelastic_H
 
+#ifdef HORB_LIBDIR_EXISTS
+
 #include "RedbackMechMaterial.h"
 
 // Forward Declarations
@@ -102,4 +104,8 @@ private:
   /// determines the translation from B_ijkl to the Rank-4 tensor
   MooseEnum _fill_method_bending;
 };
+
+
+#endif // HORB_LIBDIR_EXISTS
+
 #endif // RedbackMechMaterialHOelastic_H

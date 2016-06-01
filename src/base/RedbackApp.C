@@ -69,8 +69,12 @@
 #include "RedbackMechMaterialCC.h"
 #include "RedbackMechMaterialCCanisotropic.h"
 #include "RedbackMechMaterialElastic.h"
+
+
+#ifdef HORB_LIBDIR_EXISTS
 #include "RedbackMechMaterialHO.h"
 #include "RedbackMechMaterialHOelastic.h"
+#endif // HORB_LIBDIR_EXISTS
 
 // MeshModifiers
 #include "ElementFileSubdomain.h"
@@ -164,8 +168,11 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialCC);
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
+
+#ifdef HORB_LIBDIR_EXISTS
   registerMaterial(RedbackMechMaterialHO);
   registerMaterial(RedbackMechMaterialHOelastic);
+#endif // HORB_LIBDIR_EXISTS
 
   registerMeshModifier(ElementFileSubdomain);
 

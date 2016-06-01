@@ -10,6 +10,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
+#ifdef HORB_LIBDIR_EXISTS
+
 #include "Function.h"
 #include "RedbackMechMaterialHO.h"
 #include "MooseException.h"
@@ -930,3 +932,6 @@ RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p
   _mechanical_porosity[ _qp ] = delta_phi_mech_el + delta_phi_mech_pl;
 
 }
+
+
+#endif // HORB_LIBDIR_EXISTS
