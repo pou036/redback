@@ -52,11 +52,6 @@ validParams<RedbackMaterial>()
   params.addCoupledVar("disp_z", 0.0, "The z displacement");
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
 
-  // pore collapse
-
-  params.addParam<Real>("pore_collapse_threshold", 0.0, "The volumetric strain at which pore collapse is initiated.");
-  params.addParam<Real>("pore_collapse_coefficient", 0.0, "The scaling factor controlling the degree of pore collapse.");
-
   //
 
   params.addCoupledVar("inverse_lewis_number_tilde",
@@ -239,8 +234,6 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
 	// pore collapse
 	_initial_distension(declareProperty<Real>("initial_distension")),
 	_distension(declareProperty<Real>("distension")),
-	_pore_collapse_threshold(getParam<Real>("pore_collapse_threshold")),
-	_pore_collapse_coefficient(getParam<Real>("pore_collapse_coefficient")),
 
     _continuation_method((ContinuationMethod)(int)getParam<MooseEnum>("continuation_variable")),
     _density_method((DensityMethod)(int)getParam<MooseEnum>("density_method")),
@@ -419,7 +412,10 @@ RedbackMaterial::stepInitQpProperties()
   _fluid_gravity_term[ _qp ] = _fluid_density_param * _gravity_param;
 
   // pore collapse - assume that initial distension is equivalent to initial porosity for time being
-  _initial_distension[ _qp ] = 1.0 - 1.0/_initial_porosity[ _qp ];
+  _initial_distension[ _qp ] = 1.0 / ( 1.0 - _phi0_param + 1e-64);
+  if(_distension[ _qp ] < 0.5){ // unlikely value - how to initialize?
+	  _distension[ _qp ] = 1.0 / ( 1.0 - _phi0_param + 1e-64);
+  }
 
 }
 

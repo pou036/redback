@@ -144,8 +144,6 @@ protected:
   // pore collapse
   MaterialProperty<Real> & _initial_distension;  // alpha_o = 1 - 1/(1-\phi_o)
   MaterialProperty<Real> & _distension;  // alpha = 1 - 1/(1-\phi*)
-  Real _pore_collapse_threshold; // volumetric strain at which pore collapse is triggered
-  Real _pore_collapse_coefficient; // k_{collapse}: alpha = alpha_o exp[ K(e_{v} - e_{collapse}]
 
   //
 

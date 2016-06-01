@@ -90,6 +90,11 @@ validParams<RedbackMechMaterial>()
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
 
+  // pore collapse
+  params.addParam<Real>("pore_collapse_threshold", -1.0, "The volumetric strain at which pore collapse is initiated.");
+  params.addParam<Real>("pore_collapse_coefficient", 0.0, "The scaling factor controlling the degree of pore collapse.");
+
+
   return params;
 }
 
@@ -271,8 +276,9 @@ void
 RedbackMechMaterial::computeQpElasticityTensor()
 {
   // Fill in the matrix stiffness material property
-  _elasticity_tensor[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
-  _Jacobian_mult[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
+  Real mod = (1 - _damage[ _qp ])*(_initial_distension[ _qp]/_distension[ _qp] );
+  _elasticity_tensor[ _qp ] = _Cijkl * mod;
+  _Jacobian_mult[ _qp ] = _Cijkl * mod;
 }
 
 void
@@ -490,18 +496,36 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   Real init_dist = _initial_distension[ _qp ];
   Real dist = init_dist;
   Real dist_old = _distension[ _qp ];
+  if(dist_old == 0){
+	  dist_old = init_dist;
+	  _distension[ _qp ] = dist_old;
+  }
+
+
+  //std::cout << "init_dist " << init_dist <<std::endl;
+  //std::cout << "dist_old " << dist_old <<std::endl;
+  //std::cout << "dist " << dist <<std::endl;
 
   if( _total_volumetric_strain[ _qp ] <  _pore_collapse_threshold){
 	  dist*= std::exp( _pore_collapse_coefficient* ( _total_volumetric_strain[ _qp ]- _pore_collapse_threshold ) );
   }
-  if(dist < 1) dist = 1;
+
   if(dist < dist_old){  // can only decrease
+	  if(dist < 1) dist = 1;
 	  _distension[ _qp ] =  dist ;
   } else {
 	  dist = dist_old;
   }
+
+  //std::cout << "dist2 " << dist <<std::endl;
+
+  if(dist < 1) dist = 1;
+
   Real phi_star = 1.0 - 1.0/dist;
-  delta_phi_pore_collapse = _initial_porosity[ _qp ] - phi_star;
+
+  //std::cout << "phi_star " << phi_star <<std::endl;
+
+  delta_phi_pore_collapse = phi_star - _initial_porosity[ _qp ] ;
 
 
 
@@ -729,9 +753,10 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
   // The following expression should be further pursued for a forward
   // physics-based model
-  _exponential = _exponential * std::exp(-_alpha_1[ _qp ] * _confining_pressure[ _qp ] -
-                                         _pore_pres[ _qp ] * _alpha_2[ _qp ] *
-                                           (1 + _alpha_3[ _qp ] * std::log(_confining_pressure[ _qp ])));
+  _exponential = _exponential * std::exp(-_alpha_1[ _qp ] * _confining_pressure[ _qp ]
+                                         - _pore_pres[ _qp ] * _alpha_2[ _qp ]
+                                         - _alpha_3[ _qp ] * (_initial_distension[_qp] - _distension[_qp]) );
+                                          //  (1 + _alpha_3[ _qp ] * std::log(_confining_pressure[ _qp ])));
 
   while (err3 > tol3 && iterisohard < maxiterisohard) // Hardness update iteration
   {
@@ -781,10 +806,13 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
       resid = flow_tensor - delta_dp; // Residual
       err1 = resid.L2norm();
     }
-    if (iter >= maxiter) // Convergence failure
-      mooseError("Constitutive Error-Too many iterations: Reduce time "
-                 "increment.\n"); // Convergence failure //TODO: check the
+    if (iter >= maxiter){ // Convergence failure
+     // mooseError("Constitutive Error-Too many iterations: Reduce time "
+     //            "increment.\n"); // Convergence failure //TODO: check the
                                   // adaptive time stepping
+
+    	throw MooseException("RedbackMechMaterial::returnMap: Constitutive Error-Too many iterations: Reduce time increment.");
+    }
     _returnmap_iter[ _qp ] = iter;
 
     dpn = dp + delta_dp;

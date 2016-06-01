@@ -172,8 +172,9 @@ protected:
   const MaterialProperty<Real> & _initial_porosity;
   const MaterialProperty<Real> & _initial_distension;
   MaterialProperty<Real> & _distension;
-  Real _pore_collapse_threshold;
-  Real _pore_collapse_coefficient;
+  Real _pore_collapse_threshold; // volumetric strain at which pore collapse is triggered
+  Real _pore_collapse_coefficient; // k_{collapse}: alpha = alpha_o exp[ K(e_{v} - e_{collapse}]
+
 
   // Reading material properties from RedbackMaterial
   const MaterialProperty<Real> & _gr;
