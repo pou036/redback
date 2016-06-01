@@ -10,7 +10,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifdef HORB_LIBDIR_EXISTS
+#ifdef COSSERAT_DYNLIB_EXISTS
 
 #include "Function.h"
 #include "RedbackMechMaterialHO.h"
@@ -934,4 +934,4 @@ RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p
 }
 
 
-#endif // HORB_LIBDIR_EXISTS
+#endif // COSSERAT_DYNLIB_EXISTS
