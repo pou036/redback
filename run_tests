@@ -19,6 +19,11 @@ path_tool.activate_module('TestHarness')
 from TestHarness import TestHarness
 from Tester import Tester
 
+# Tests for optional components can be added here
+# eg
+# if(test for COSSERAT_DYNLIB):
+#     os.environ["HAS_COSSERAT_DYNLIB"] = "1"
+
 # Run the tests!
 #TestHarness.buildAndRun(sys.argv, app_name, MOOSE_DIR)
 if '--store-timing' in sys.argv:
@@ -27,4 +32,5 @@ else:
   harness = TestHarness(sys.argv, app_name, MOOSE_DIR)
 
 harness.factory.loadPlugins([os.path.join(os.getcwd(), 'python/TestHarness')], 'testers', Tester)
+
 harness.findAndRunTests()

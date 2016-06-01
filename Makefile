@@ -37,9 +37,9 @@ include $(FRAMEWORK_DIR)/app.mk
 # Additional special case targets should be added here
 # ADDITIONAL_LIBS       := /Users/pou036/projects/dynamicLib/
 
-HORB_LIBDIR := $(HOME)/projects/cosserat_dynlib
-HORB_LIBDIR_EXISTS = $(shell [ -e $(HORB_LIBDIR) ] && echo 1 || echo 0 )
+COSSERAT_DYNLIB_DIR := $(HOME)/projects/cosserat_dynlib
+COSSERAT_DYNLIB_DIR_EXISTS = $(shell [ -e $(COSSERAT_DYNLIB_DIR) ] && echo 1 || echo 0 )
 
-ifeq ($(HORB_LIBDIR_EXISTS), 1)
-  EXTERNAL_FLAGS += -DHORB_EXISTS
+ifeq ($(COSSERAT_DYNLIB_DIR_EXISTS), 1)
+  EXTERNAL_FLAGS += -DCOSSERAT_DYNLIB_EXISTS
 endif
