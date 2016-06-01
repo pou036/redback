@@ -1,3 +1,13 @@
+######################## LOCAL VARIABLES ######################################
+
+# Use the following files to set local makefile variables
+
+# Make.local.username
+-include Make.local.$(shell whoami)
+
+# Make.local.hostname
+-include Make.local.$(shell hostname|sed s/[0-9,\-]//g )
+
 ###############################################################################
 ################### MOOSE Application Standard Makefile #######################
 ###############################################################################
@@ -37,7 +47,7 @@ include $(FRAMEWORK_DIR)/app.mk
 # Additional special case targets should be added here
 # ADDITIONAL_LIBS       := /Users/pou036/projects/dynamicLib/
 
-COSSERAT_DYNLIB_DIR := $(HOME)/projects/cosserat_dynlib
+COSSERAT_DYNLIB_DIR ?= $(HOME)/projects/cosserat_dynlib
 COSSERAT_DYNLIB_DIR_EXISTS = $(shell [ -e $(COSSERAT_DYNLIB_DIR) ] && echo 1 || echo 0 )
 
 ifeq ($(COSSERAT_DYNLIB_DIR_EXISTS), 1)
