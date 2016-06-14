@@ -481,10 +481,14 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   }
   total_volumetric_strain_rate = (_total_strain[ _qp ] - _total_strain_old[ _qp ]) / _dt;
   _mises_strain_rate[ _qp ] = std::pow(2.0 / 3.0, 0.5) * instantaneous_strain_rate.L2norm();
-  _volumetric_strain_rate[ _qp ] = total_volumetric_strain_rate.trace();
+  //_volumetric_strain_rate[ _qp ] = total_volumetric_strain_rate.trace();
+
   def_grad = _grad_disp_x[ _qp ](0) + _grad_disp_y[ _qp ](1) + _grad_disp_z[ _qp ](2);
   def_grad_old = _grad_disp_x_old[ _qp ](0) + _grad_disp_y_old[ _qp ](1) + _grad_disp_z_old[ _qp ](2);
   def_grad_rate = (def_grad - def_grad_old) / _dt;
+
+  _volumetric_strain_rate[ _qp ] = def_grad_rate; // fixme changed from above
+  _total_volumetric_strain[ _qp ] = def_grad; //fixme definintely changed
 
 
   // update distension
@@ -502,11 +506,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   }
 
 
-  //std::cout << "init_dist " << init_dist <<std::endl;
-  //std::cout << "dist_old " << dist_old <<std::endl;
-  //std::cout << "dist " << dist <<std::endl;
-
-  if( _total_volumetric_strain[ _qp ] <  _pore_collapse_threshold){
+  if( def_grad <  _pore_collapse_threshold){
 	  dist*= std::exp( _pore_collapse_coefficient* ( _total_volumetric_strain[ _qp ]- _pore_collapse_threshold ) );
   }
 
@@ -589,7 +589,24 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
     _mechanical_dissipation_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
 
   _poromech_kernel[ _qp ] = def_grad_rate * _peclet_number[ _qp ] / _mixture_compressibility[ _qp ];
+
   _poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
+
+
+  if(_poromech_kernel[ _qp ] > 0.0){
+
+	 // std::cout << " ******** " << std::endl;
+	//std::cout << "dt "<< _dt << std::endl;
+     // std::cout << "def_grad_old "<< def_grad_old << std::endl;
+	 // std::cout << "def_grad "<< def_grad << std::endl;
+	 // std::cout << "_total_strain[ _qp ].trace() " << _total_strain[ _qp ].trace() << std::endl;
+	 // std::cout << "_total_strain_old[ _qp ].trace() " << _total_strain_old[ _qp ].trace() << std::endl;
+	 // std::cout << std::endl;
+	// std::cout << "def_grad_rate "<< def_grad_rate << std::endl;
+	// std::cout << "_volumetric_strain_rate[ _qp ] " << _volumetric_strain_rate[ _qp ] << std::endl;
+	// std::cout << "_poromech_kernel[ _qp ] " << _poromech_kernel[ _qp ] << std::endl;
+
+  }
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO:
   // Remove this number from the tests!!!
@@ -914,13 +931,26 @@ RedbackMechMaterial::formBrittleDamage()
 
   // Kachanov's original law of Brittle Damage
   exponent_kachanov = 1;
-  kachanov = _mises_stress[ _qp ] / (1 - _damage[ _qp ]);
 
-  plastic_damage = _damage_coeff * std::pow(kachanov, exponent_kachanov);
+  Real damage_transition = 0.95;
+  Real damage_cutoff = 1.0;
+  Real dd = std::min<Real>( std::max<Real>(0.0,_damage[ _qp ] ), damage_transition ) ;
+  kachanov = _mises_stress[ _qp ] / (1 - dd);
+
+  plastic_damage = std::max<Real>(0.0, _damage_coeff * std::pow(kachanov, exponent_kachanov) );
   healing_damage = 0;
 
+  Real dk_jac = 0.0;
+
+  if(_damage[ _qp ] >= damage_transition){
+	  plastic_damage = plastic_damage*(damage_cutoff - _damage[ _qp ])/(damage_cutoff-damage_transition); // exponential tail
+
+	  dk_jac = - plastic_damage/(damage_cutoff-damage_transition);
+  }
+
   _damage_kernel[ _qp ] = plastic_damage + healing_damage;
-  _damage_kernel_jac[ _qp ] = 0;
+  _damage_kernel_jac[ _qp ] = dk_jac;
+
 }
 
 void
