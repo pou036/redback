@@ -45,6 +45,8 @@ validParams<RedbackMaterial>()
   params.addParam<bool>("is_mechanics_on", false, "is mechanics on?");
   params.addParam<bool>("is_chemistry_on", false, "is chemistry on?");
   params.addParam<bool>("are_convective_terms_on", false, "are convective terms on?");
+  params.addParam<bool>("quasistatic_formulation", false, "quasistatic formulation of mechanics?");
+
   params.addCoupledVar("temperature", 0.0, "Dimensionless temperature");
   params.addCoupledVar("pore_pres", 0.0, "Dimensionless pore pressure");
   params.addCoupledVar("disp_x", 0.0, "The x displacement");
@@ -170,6 +172,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _is_mechanics_on(getParam<bool>("is_mechanics_on")),
     _is_chemistry_on(getParam<bool>("is_chemistry_on")),
     _are_convective_terms_on(getParam<bool>("are_convective_terms_on")),
+    _quasistatic_formulation(getParam<bool>("quasistatic_formulation")),
 
     _gravity_param(getParam<RealVectorValue>("gravity")),
     _mixture_gravity_term(declareProperty<RealVectorValue>("mixture_gravity_term")), // rho_mixture * g
@@ -407,6 +410,11 @@ RedbackMaterial::stepInitQpProperties()
 void
 RedbackMaterial::computeQpProperties()
 {
+  if (_quasistatic_formulation)
+  {
+    _dt = 1;
+  }
+
   // Set our variables
   stepInitQpProperties();
 

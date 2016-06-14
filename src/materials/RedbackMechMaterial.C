@@ -89,6 +89,7 @@ validParams<RedbackMechMaterial>()
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
+  params.addParam<bool>("quasistatic_formulation", false, "quasistatic formulation of mechanics?");
 
   return params;
 }
@@ -187,7 +188,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _peclet_number(getMaterialProperty<Real>("Peclet_number")),
     _returnmap_iter(declareProperty<Real>("returnmap_iter")),
     _T0_param(getParam<Real>("temperature_reference")),
-    _P0_param(getParam<Real>("pressure_reference"))
+    _P0_param(getParam<Real>("pressure_reference")),
+    _quasistatic_formulation(getParam<bool>("quasistatic_formulation"))
 {
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
@@ -246,6 +248,11 @@ RedbackMechMaterial::initQpStatefulProperties()
 void
 RedbackMechMaterial::computeProperties()
 {
+  if (_quasistatic_formulation)
+  {
+    _dt = 1;
+  }
+
   computeStrain();
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
@@ -695,8 +702,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   // The following expression should be further pursued for a forward
   // physics-based model
   _exponential = _exponential * std::exp(-_alpha_1[ _qp ] * _confining_pressure[ _qp ] -
-                                         _pore_pres[ _qp ] * _alpha_2[ _qp ] *
-                                           (1 + _alpha_3[ _qp ] * std::log(_confining_pressure[ _qp ])));
+                                         _pore_pres[ _qp ] * _alpha_2[ _qp ]); //*
+//                                           (1 + _alpha_3[ _qp ] * std::log(_confining_pressure[ _qp ])));
 
   while (err3 > tol3 && iterisohard < maxiterisohard) // Hardness update iteration
   {

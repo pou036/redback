@@ -195,6 +195,9 @@ protected:
   virtual void formCreepDamage(Real);
 
   Real _damage_dissipation;
+
+  bool _quasistatic_formulation;
+
 };
 
 #endif // REDBACKMECHMATERIAL_H

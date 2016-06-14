@@ -86,7 +86,7 @@ protected:
     _eta1_param, _eta2_param, _Aphi_param, _pressurization_coefficient_param;
   Real _solid_compressibility_param, _fluid_compressibility_param, _solid_thermal_expansion_param,
     _fluid_thermal_expansion_param, _solid_density_param, _fluid_density_param;
-  bool _is_mechanics_on, _is_chemistry_on, _are_convective_terms_on;
+  bool _is_mechanics_on, _is_chemistry_on, _are_convective_terms_on, _quasistatic_formulation;
 
   RealVectorValue _gravity_param;
 
