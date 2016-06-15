@@ -18,6 +18,8 @@
 //#include "FiniteStrainPlasticMaterial.h"
 #include "Material.h"
 
+#include "RedbackElementParameters.h"
+
 // Forward Declarations
 class RedbackMaterial_UO;
 
@@ -162,6 +164,9 @@ protected:
   MaterialProperty<RealVectorValue> & _solid_velocity;
 
   Real _T0_param, _P0_param;
+
+  const RedbackElementParameters* _redback_element_parameters;
+
 };
 
 #endif // RedbackMaterial_UO_H

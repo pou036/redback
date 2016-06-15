@@ -16,7 +16,7 @@ template<>
 InputParameters validParams<RedbackElementParameters>();
 
 /**
- * This user object is used as a common location for redback material parameters
+ * This user object provides a common location to store redback material parameters
  */
 class RedbackElementParameters : public DiscreteElementUserObject
 {

@@ -21,6 +21,8 @@
 #include "RotationTensor.h"
 //#include "FiniteStrainPlasticMaterial.h"
 
+#include "RedbackElementParameters.h"
+
 // Forward Declarations
 class RedbackMechMaterial_UO;
 
@@ -170,6 +172,8 @@ protected:
 
   // Reading material properties from RedbackMaterial
 
+  const RedbackElementParameters* _redback_element_parameters;
+
   const MaterialProperty<Real> & _gr;
   const MaterialProperty<Real> & _lewis_number;
   const MaterialProperty<Real> & _ar;
@@ -183,6 +187,7 @@ protected:
   const MaterialProperty<Real> & _solid_compressibility;
   const MaterialProperty<Real> & _mixture_compressibility;
   const MaterialProperty<Real> & _peclet_number;
+
 
   MaterialProperty<Real> & _returnmap_iter;
 

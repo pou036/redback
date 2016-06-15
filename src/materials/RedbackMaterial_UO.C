@@ -13,6 +13,8 @@
 #include "Function.h"
 #include "RedbackMaterial_UO.h"
 
+#include "RedbackElementParameters.h"
+
 template <>
 InputParameters
 validParams<RedbackMaterial_UO>()
@@ -113,6 +115,9 @@ validParams<RedbackMaterial_UO>()
 
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
+
+  params.addRequiredParam<UserObjectName>("redback_element_parameters","Common redback element parameters");
+
 
   return params;
 }
@@ -251,6 +256,10 @@ RedbackMaterial_UO::RedbackMaterial_UO(const InputParameters & parameters) :
     _P0_param(getParam<Real>("pressure_reference"))
 
 {
+
+	UserObjectName rep_uo_name = getParam<UserObjectName>("redback_element_parameters");
+	_redback_element_parameters = &getUserObjectByName<RedbackElementParameters>( rep_uo_name);
+
   // Find functions to initialise parameters from
   unsigned int num_param_names = _init_from_functions__params.size();
   unsigned int num_fct_names = _init_from_functions__function_names.size();

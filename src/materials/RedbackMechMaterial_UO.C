@@ -90,6 +90,8 @@ validParams<RedbackMechMaterial_UO>()
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
 
+  params.addRequiredParam<UserObjectName>("redback_element_parameters","Common redback element parameters");
+
   return params;
 }
 
@@ -189,6 +191,10 @@ RedbackMechMaterial_UO::RedbackMechMaterial_UO(const InputParameters & parameter
     _T0_param(getParam<Real>("temperature_reference")),
     _P0_param(getParam<Real>("pressure_reference"))
 {
+
+  UserObjectName rep_uo_name = getParam<UserObjectName>("redback_element_parameters");
+  _redback_element_parameters = &getUserObjectByName<RedbackElementParameters>( rep_uo_name);
+
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
   Real l1 = E * nu / (1 + nu) / (1 - 2 * nu); // First Lame modulus
@@ -201,6 +207,9 @@ RedbackMechMaterial_UO::RedbackMechMaterial_UO(const InputParameters & parameter
   fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic
                                        // elasticity tensor.
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int)fill_method);
+
+
+
 }
 
 MooseEnum
