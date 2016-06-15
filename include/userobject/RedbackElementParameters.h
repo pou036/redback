@@ -41,7 +41,7 @@ public:
 
 protected:
 
-  std::map< int ,const RedbackMaterialUserObject* > _userObjectMap;
+  std::map< int ,const RedbackMaterialParameterUserObject* > _userObjectMap;
 
 };
 

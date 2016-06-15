@@ -90,7 +90,7 @@ validParams<RedbackMechMaterial_UO>()
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
 
-  params.addRequiredParam<UserObjectName>("redback_element_parameters","Common redback element parameters");
+  params.addRequiredParam<UserObjectName>("redback_material_parameters","Element parameters common to redback materials and kernels");
 
   return params;
 }
@@ -192,8 +192,8 @@ RedbackMechMaterial_UO::RedbackMechMaterial_UO(const InputParameters & parameter
     _P0_param(getParam<Real>("pressure_reference"))
 {
 
-  UserObjectName rep_uo_name = getParam<UserObjectName>("redback_element_parameters");
-  _redback_element_parameters = &getUserObjectByName<RedbackElementParameters>( rep_uo_name);
+  UserObjectName rep_uo_name = getParam<UserObjectName>("redback_material_parameters");
+  _common_redback_material_parameters = &getUserObjectByName<RedbackElementParameters>( rep_uo_name);
 
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;

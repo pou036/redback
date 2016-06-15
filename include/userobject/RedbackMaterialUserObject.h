@@ -9,22 +9,52 @@
 
 #include "DiscreteElementUserObject.h"
 
-class RedbackMaterialUserObject;
+class RedbackMaterialParameterUserObject;
 
 template<>
-InputParameters validParams<RedbackMaterialUserObject>();
+InputParameters validParams<RedbackMaterialParameterUserObject>();
 
 /**
- * This user object is used as a common location for redback material parameters
+ * This user object provides a base class for user objects representing material parameters
  */
-class RedbackMaterialUserObject : public DiscreteElementUserObject
+class RedbackMaterialParameterUserObject : public DiscreteElementUserObject
 {
 public:
-	RedbackMaterialUserObject(const InputParameters & parameters);
+	RedbackMaterialParameterUserObject(const InputParameters & parameters);
+
+	virtual Real value(Real qp) const;
+
+	virtual Real derivative(Real qp) const;
+
+	virtual std::string activeModelName(Real qp) const = 0;
 
 protected:
 
 };
+
+////////////////
+
+class RedbackMaterialConstant;
+
+template<>
+InputParameters validParams<RedbackMaterialConstant>();
+
+// User object representing a parameter that is a spatial and temporal constant
+class RedbackMaterialConstant : public RedbackMaterialParameterUserObject
+{
+public:
+	RedbackMaterialConstant(const InputParameters & parameters);
+
+	virtual Real value(Real qp) const {return _value;};
+
+	virtual Real derivative(Real qp) const {return 0;};
+
+	virtual std::string activeModelName(Real qp) const {return "Redback_Material_Constant";};
+
+protected:
+	Real _value; // the value of the constant
+};
+
 
 
 

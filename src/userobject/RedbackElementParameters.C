@@ -39,7 +39,7 @@ DiscreteElementUserObject(parameters)
 	        = isParamValid("user_objects") ? getParam<std::vector<UserObjectName> >("user_objects") : std::vector<UserObjectName>(0);
 
 	for(unsigned int i=0; i<paramTypes.size(); ++i){
-		_userObjectMap[  paramTypes.get(i) ] = &getUserObjectByName<RedbackMaterialUserObject>( user_object_names[i]);
+		_userObjectMap[  paramTypes.get(i) ] = &getUserObjectByName<RedbackMaterialParameterUserObject>( user_object_names[i]);
 	}
 
 }

@@ -165,7 +165,7 @@ protected:
 
   Real _T0_param, _P0_param;
 
-  const RedbackElementParameters* _redback_element_parameters;
+  const RedbackElementParameters* _common_redback_material_parameters;
 
 };
 

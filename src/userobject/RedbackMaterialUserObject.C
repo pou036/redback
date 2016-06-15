@@ -8,5 +8,39 @@
 #include "RedbackMaterialUserObject.h"
 
 
+template <>
+InputParameters
+validParams<RedbackMaterialParameterUserObject>()
+{
+  InputParameters params = validParams<DiscreteElementUserObject>();
 
+  return params;
+}
+
+RedbackMaterialParameterUserObject::RedbackMaterialParameterUserObject(const InputParameters& parameters) :
+DiscreteElementUserObject(parameters)
+{
+ /* empty */
+}
+
+/////
+
+
+template <>
+InputParameters
+validParams<RedbackMaterialConstant>()
+{
+  InputParameters params = validParams<RedbackMaterialParameterUserObject>();
+
+  params.addParam<Real>("value", 0.0, "Value of material parameter.");
+
+  return params;
+}
+
+RedbackMaterialConstant::RedbackMaterialConstant(const InputParameters& parameters) :
+		RedbackMaterialParameterUserObject(parameters),
+		_value(getParam<Real>("value"))
+{
+	/* empty */
+}
 

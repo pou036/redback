@@ -172,7 +172,7 @@ protected:
 
   // Reading material properties from RedbackMaterial
 
-  const RedbackElementParameters* _redback_element_parameters;
+  const RedbackElementParameters* _common_redback_material_parameters;
 
   const MaterialProperty<Real> & _gr;
   const MaterialProperty<Real> & _lewis_number;
