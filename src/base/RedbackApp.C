@@ -57,6 +57,7 @@
 #include "RedbackFluidMaterial.h"
 #include "ImageProcessing.h"
 #include "RedbackMaterial.h"
+#include "RedbackMaterial_UO.h"
 #include "RedbackMechMaterialJ2.h"
 #include "RedbackMechMaterialDP.h"
 #include "RedbackMechMaterialCC.h"
@@ -143,6 +144,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackFluidMaterial);
   registerMaterial(ImageProcessing);
   registerMaterial(RedbackMaterial);
+  registerMaterial(RedbackMaterial_UO);
   registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialDP);
   registerMaterial(RedbackMechMaterialCC);
