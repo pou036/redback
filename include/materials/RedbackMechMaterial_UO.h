@@ -169,6 +169,7 @@ protected:
   DamageMethod _damage_method;
 
   // Reading material properties from RedbackMaterial
+
   const MaterialProperty<Real> & _gr;
   const MaterialProperty<Real> & _lewis_number;
   const MaterialProperty<Real> & _ar;
@@ -182,6 +183,7 @@ protected:
   const MaterialProperty<Real> & _solid_compressibility;
   const MaterialProperty<Real> & _mixture_compressibility;
   const MaterialProperty<Real> & _peclet_number;
+
   MaterialProperty<Real> & _returnmap_iter;
 
   Real _T0_param, _P0_param;
