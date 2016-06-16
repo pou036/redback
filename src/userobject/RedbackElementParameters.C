@@ -16,9 +16,15 @@ validParams<RedbackElementParameters>()
   InputParameters params = validParams<DiscreteElementUserObject>();
 
   MultiMooseEnum paramEnum = MultiMooseEnum::withNamesFrom( RedbackElementParameters::GetRedbackElementParametersEnum() );
+  /*
   params.addParam<MultiMooseEnum>("parameters", paramEnum,
                                           "List of supported redback material parameters.");
   params.addParam<std::vector< UserObjectName > >("user_objects", "List of names of user objects defining the corresponding user parameters.");
+  */
+
+  for(const RedbackParameters::RedbackParam& param : RedbackParameters::ParameterList){
+	  params.addParam< UserObjectName >(param.str,param.description);
+  }
 
   return params;
 }
@@ -29,6 +35,7 @@ RedbackElementParameters::RedbackElementParameters(const InputParameters& parame
 DiscreteElementUserObject(parameters)
 {
 
+	/*
 	MultiMooseEnum paramTypes = getParam<MultiMooseEnum>("parameters");
 	std::vector< UserObjectName > user_object_names
 	        = isParamValid("user_objects") ? getParam<std::vector<UserObjectName> >("user_objects") : std::vector<UserObjectName>(0);
@@ -37,14 +44,28 @@ DiscreteElementUserObject(parameters)
 	if( paramTypes.size() != user_object_names.size() ){
         mooseError("Error! RedbackElementParameters: Number of user objects " + std::to_string( user_object_names.size() ) + " does not match number of parameters " + std::to_string( paramTypes.size() ));
 	}
+	*/
 
+	// Get active params
+	typedef std::pair< std::string, UserObjectName > StringObjectPair;
+	std::vector< StringObjectPair  > activeParams;
 
-	for(unsigned int i=0; i<paramTypes.size(); ++i){
-		_userObjectMap[  paramTypes.get(i) ] = &getUserObjectByName<RedbackMaterialParameterUserObject>( user_object_names[i]);
+	for(const RedbackParameters::RedbackParam& param :  RedbackParameters::ParameterList){
+      if( isParamValid( param.str ) ){
+
+    	  UserObjectName uoName = getParam< UserObjectName >( param.str );
+    	  activeParams.push_back( StringObjectPair( param.str , uoName  ) );
+
+      }
+	}
+
+	for(const StringObjectPair& paramObject : activeParams ){
+		 MooseEnum indx = RedbackElementParameterEnum( paramObject.first  );
+		_userObjectMap[  (int) indx ] = &getUserObjectByName<RedbackMaterialParameterUserObject>( paramObject.second );
 	}
 
 
-
+    // insert default values for params that have not been defined
 	for( const std::pair<std::string, Real >& keyValue : RedbackParameters::DefaultValues  ){
 	  const std::string& paramStr = keyValue.first;
 	  const Real& val = keyValue.second;
@@ -52,12 +73,10 @@ DiscreteElementUserObject(parameters)
 	  MooseEnum indx = RedbackElementParameterEnum( paramStr  );
 	  if( !HasParameterObject( (int) indx ) ){
 
-		_default_objects[  (int) indx ] = std::make_shared<RedbackMaterialConstant>(parameters,val); // nb somewhat dodgy - using parameters from this class to initialize the constant fields
+		_default_objects[  (int) indx ] = std::make_shared<RedbackMaterialConstant>(parameters,val); // nb slightly dodgy - using parameters from this class to initialize the constant fields
 		_userObjectMap[  (int) indx ] = &( *_default_objects[ (int) indx ] );
 	  }
 	}
-
-
 
 
 }
@@ -66,11 +85,11 @@ DiscreteElementUserObject(parameters)
 MooseEnum
 RedbackElementParameters::GetRedbackElementParametersEnum()
 {
-  return MooseEnum(RedbackParameters::ElementEnumStrings);
+  return MooseEnum(RedbackParameters::ElementEnumString);
 }
 
 MooseEnum RedbackElementParameters::RedbackElementParameterEnum(const std::string& parameterName)
 {
-		return MooseEnum( RedbackParameters::ElementEnumStrings, parameterName) ;
-	}
+		return MooseEnum( RedbackParameters::ElementEnumString, parameterName) ;
+}
 

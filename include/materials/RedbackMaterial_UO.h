@@ -108,6 +108,7 @@ protected:
 
    */
 
+  // these (I think) should remain as a material property...
   Real _solid_density_param, _fluid_density_param;
 
   /*
@@ -134,7 +135,7 @@ protected:
   */
 
   // the container that holds all of the redback material parameters
-  // NB "common" in the sense that it is shared by more than one entity
+  // NB it is "common" in the sense that it is shared by more than one entity
   const RedbackElementParameters* _common_redback_material_parameters;
 
   // the individual user objects that define the parameters used by the solver

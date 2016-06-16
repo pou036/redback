@@ -173,6 +173,7 @@ protected:
   // Reading material properties from RedbackMaterial
 
   // these properties will be replaced
+  /*
   const MaterialProperty<Real> & _gr;
   const MaterialProperty<Real> & _ar;
   const MaterialProperty<Real> & _confining_pressure;
@@ -184,25 +185,26 @@ protected:
   const MaterialProperty<Real> & _solid_thermal_expansion;
   const MaterialProperty<Real> & _solid_compressibility;
   const MaterialProperty<Real> & _peclet_number;
+  */
 
   // pointer to the common material parameters
   const RedbackElementParameters* _common_redback_material_parameters;
 
   // ultimately the following parameters will be extracted from the common parameters above
   // - ultimately this class will be completely overhauled - need to apply changes to redback material first
-  /*
-  const RedbackMaterialParameterUserObject* _gr;
-  const RedbackMaterialParameterUserObject* _ar;
-  const RedbackMaterialParameterUserObject* _confining_pressure;
-  const RedbackMaterialParameterUserObject* _alpha_1;
-  const RedbackMaterialParameterUserObject* _alpha_2;
-  const RedbackMaterialParameterUserObject* _alpha_3;
 
-  const RedbackMaterialParameterUserObject* _delta;
-  const RedbackMaterialParameterUserObject* _solid_thermal_expansion;
-  const RedbackMaterialParameterUserObject* _solid_compressibility;
-  const RedbackMaterialParameterUserObject* _peclet_number;
-  */
+  const RedbackMaterialParameterUserObject* _gr_uo;
+  const RedbackMaterialParameterUserObject* _ar_uo;
+  const RedbackMaterialParameterUserObject* _confining_pressure_uo;
+  const RedbackMaterialParameterUserObject* _alpha_1_uo;
+  const RedbackMaterialParameterUserObject* _alpha_2_uo;
+  const RedbackMaterialParameterUserObject* _alpha_3_uo;
+
+  const RedbackMaterialParameterUserObject* _delta_uo;
+  const RedbackMaterialParameterUserObject* _solid_thermal_expansion_uo;
+  const RedbackMaterialParameterUserObject* _solid_compressibility_uo;
+  const RedbackMaterialParameterUserObject* _peclet_number_uo;
+
 
   const MaterialProperty<Real> & _mixture_compressibility;
 

@@ -175,6 +175,7 @@ RedbackMechMaterial_UO::RedbackMechMaterial_UO(const InputParameters & parameter
     _damage_method((DamageMethod)(int)getParam<MooseEnum>("damage_method")),
 
     // Get some material properties from RedbackMaterial
+	/*
     _gr(getMaterialProperty<Real>("gr")),
     _ar(getMaterialProperty<Real>("ar")),
     _confining_pressure(getMaterialProperty<Real>("confining_pressure")),
@@ -185,6 +186,7 @@ RedbackMechMaterial_UO::RedbackMechMaterial_UO(const InputParameters & parameter
     _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion")),
     _solid_compressibility(getMaterialProperty<Real>("solid_compressibility")),
     _peclet_number(getMaterialProperty<Real>("Peclet_number")),
+    */
 
 	_mixture_compressibility(getMaterialProperty<Real>("mixture_compressibility")),
 	_lewis_number(getMaterialProperty<Real>("lewis_number")),
@@ -195,9 +197,27 @@ RedbackMechMaterial_UO::RedbackMechMaterial_UO(const InputParameters & parameter
 	_P0_param(getParam<Real>("pressure_reference"))
 {
 
+  // common redback material parameters
   UserObjectName rep_uo_name = getParam<UserObjectName>("redback_material_parameters");
   _common_redback_material_parameters = &getUserObjectByName<RedbackElementParameters>( rep_uo_name);
 
+  // extract pointers to active parameters
+  _ar_uo = _common_redback_material_parameters->GetRequiredParameterObject(RedbackParameters::ar.str);
+  _gr_uo = _common_redback_material_parameters->GetRequiredParameterObject(RedbackParameters::gr.str);
+  _confining_pressure_uo = _common_redback_material_parameters->GetRequiredParameterObject(RedbackParameters::confiningPressure.str);
+  _alpha_1_uo = _common_redback_material_parameters->GetRequiredParameterObject(RedbackParameters::alpha1.str);
+  _alpha_2_uo = _common_redback_material_parameters->GetRequiredParameterObject(RedbackParameters::alpha2.str);
+  _alpha_3_uo = _common_redback_material_parameters->GetRequiredParameterObject(RedbackParameters::alpha3.str);
+
+  _delta_uo= _common_redback_material_parameters->GetRequiredParameterObject(RedbackParameters::delta.str);
+
+  _solid_thermal_expansion_uo = _common_redback_material_parameters->GetRequiredParameterObject(RedbackParameters::solidThermalExpansion.str);
+  _solid_compressibility_uo = _common_redback_material_parameters->GetRequiredParameterObject(RedbackParameters::solidCompressiblity.str);
+
+  _peclet_number_uo = _common_redback_material_parameters->GetRequiredParameterObject(RedbackParameters::PecletNumber.str);
+
+
+// ultimately these should be set by the elastic component
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
   Real l1 = E * nu / (1 + nu) / (1 - 2 * nu); // First Lame modulus
@@ -488,9 +508,19 @@ RedbackMechMaterial_UO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real 
   // Update mechanical porosity (elastic and plastic components)
   // TODO: set T0 properly (once only, at the very beginning). Until then, T = T
   // - T0, P = P - P0
+
+  const RedbackMaterialParameterUserObject& solid_compressibility = *_solid_compressibility_uo;
+  const RedbackMaterialParameterUserObject& solid_thermal_expansion = *_solid_thermal_expansion_uo;
+  const RedbackMaterialParameterUserObject& ar = *_ar_uo;
+  const RedbackMaterialParameterUserObject& gr = *_gr_uo;
+
+  const RedbackMaterialParameterUserObject& delta = *_delta_uo;
+
+  const RedbackMaterialParameterUserObject& peclet_number = *_peclet_number_uo;
+
   delta_phi_mech_el =
-    (1.0 - _total_porosity[ _qp ]) * (_solid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
-                                      _solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param) +
+    (1.0 - _total_porosity[ _qp ]) * (solid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
+                                      solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param) +
                                       (_elastic_strain[ _qp ] - _elastic_strain_old[ _qp ]).trace());
   delta_phi_mech_pl = (1.0 - _total_porosity[ _qp ]) * (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]).trace();
 
@@ -523,7 +553,7 @@ RedbackMechMaterial_UO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real 
     form_damage_kernels(q_y);
   }
 
-  gruntfest_number = _gr[ _qp ] * std::exp(_ar[ _qp ]);
+  gruntfest_number = gr[ _qp ] * std::exp(ar[ _qp ]);
 
   // Compute Mechanical Dissipation.
   _mechanical_dissipation_mech[ _qp ] = gruntfest_number * sig.doubleContraction(instantaneous_strain_rate) +
@@ -539,15 +569,15 @@ RedbackMechMaterial_UO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real 
 
   // Compute Mechanical Dissipation Jacobian
   _mechanical_dissipation_jac_mech[ _qp ] =
-    _mechanical_dissipation_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
+    _mechanical_dissipation_mech[ _qp ] / (1 + delta[ _qp ] * _T[ _qp ]) / (1 + delta[ _qp ] * _T[ _qp ]);
 
-  _poromech_kernel[ _qp ] = def_grad_rate * _peclet_number[ _qp ] / _mixture_compressibility[ _qp ];
-  _poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
+  _poromech_kernel[ _qp ] = def_grad_rate * peclet_number[ _qp ] / _mixture_compressibility[ _qp ];
+  _poromech_jac[ _qp ] = (1 / (1 + delta[ _qp ] * _T[ _qp ]) / (1 + delta[ _qp ] * _T[ _qp ]));
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO:
   // Remove this number from the tests!!!
   _mod_gruntfest_number[ _qp ] =
-    gruntfest_number * std::exp(-_ar[ _qp ]) *
+    gruntfest_number * std::exp(-ar[ _qp ]) *
     (std::fabs(getSigEqv(sig) * std::pow(macaulayBracket(getSigEqv(sig) / q_y - 1.0), _exponent)) +
      std::fabs(_mean_stress[ _qp ] * std::pow(macaulayBracket(_mean_stress[ _qp ] - p_y), _exponent)));
 
@@ -571,6 +601,9 @@ RedbackMechMaterial_UO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real 
 void
 RedbackMechMaterial_UO::computeQpStrain(const RankTwoTensor & Fhat)
 {
+
+  const RedbackMaterialParameterUserObject& solid_thermal_expansion = *_solid_thermal_expansion_uo;
+
   // Cinv - I = A A^T - A - A^T;
   RankTwoTensor A; // A = I - Fhatinv
   A.addIa(1.0);
@@ -591,7 +624,7 @@ RedbackMechMaterial_UO::computeQpStrain(const RankTwoTensor & Fhat)
    * The negative sign is to satisfy the sign convention Redback has adopted
    * (positive fields in extension)
    */
-  _strain_increment[ _qp ].addIa(-_solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T_old[ _qp ]));
+  _strain_increment[ _qp ].addIa(-solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T_old[ _qp ]));
 
   /*RankTwoTensor Chat = Fhat.transpose()*Fhat;
   RankTwoTensor A = Chat;
@@ -699,16 +732,24 @@ RedbackMechMaterial_UO::returnMap(const RankTwoTensor & sig_old,
   }
   if (_has_T)
   {
+
+	const RedbackMaterialParameterUserObject& ar = *_ar_uo;
+	const RedbackMaterialParameterUserObject& delta = *_delta_uo;
     // E_0/(RT) = Ar/(1+delta T*)
     _exponential =
-      std::exp(-_ar[ _qp ]) * std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
+      std::exp(-ar[ _qp ]) * std::exp(ar[ _qp ] * delta[ _qp ] * _T[ _qp ] / (1 + delta[ _qp ] * _T[ _qp ]));
   }
 
   // The following expression should be further pursued for a forward
   // physics-based model
-  _exponential = _exponential * std::exp(-_alpha_1[ _qp ] * _confining_pressure[ _qp ] -
-                                         _pore_pres[ _qp ] * _alpha_2[ _qp ] *
-                                           (1 + _alpha_3[ _qp ] * std::log(_confining_pressure[ _qp ])));
+
+  const RedbackMaterialParameterUserObject& alpha_1 = *_alpha_1_uo;
+  const RedbackMaterialParameterUserObject& alpha_2 = *_alpha_2_uo;
+  const RedbackMaterialParameterUserObject& alpha_3 = *_alpha_3_uo;
+  const RedbackMaterialParameterUserObject& confining_pressure = *_confining_pressure_uo;
+  _exponential = _exponential * std::exp(-alpha_1[ _qp ] * confining_pressure[ _qp ] -
+                                         _pore_pres[ _qp ] * alpha_2[ _qp ] *
+                                           (1 + alpha_3[ _qp ] * std::log( confining_pressure[ _qp ] + 1e-64 )));
 
   while (err3 > tol3 && iterisohard < maxiterisohard) // Hardness update iteration
   {

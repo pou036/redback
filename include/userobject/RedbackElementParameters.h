@@ -12,29 +12,58 @@
 
 namespace RedbackParameters{
 
-  //struct RedbackParam{
-	//  std::string str;
-	//  int index;
-  //};
+  struct RedbackParam{
+	  std::string str;
+	  std::string description;
+	 // int index;
+  };
   //const RedbackParam ar{"ar",0};
 
-  const std::string arStr = "ar";
-  const std::string grStr = "gr";
-  const std::string confiningPressureStr = "confining_pressure";
-  const std::string alpha1Str = "alpha_1";
-  const std::string alpha2Str = "alpha_2";
-  const std::string alpha3Str = "alpha_3";
-  const std::string deltaStr = "delta";
-  const std::string initialPorosityStr = "initial_porosity";
-  const std::string PecletNumberStr = "Peclet_number";
-  const std::string biotCoefficientStr = "biot_coefficient";
-  const std::string refLewisNumberStr = "ref_lewis_number";
-  const std::string solidCompressiblityStr = "solid_compressibility";
-  const std::string fluidCompressiblityStr = "fluid_compressibility";
-  const std::string solidThermalExpansionStr = "solid_thermal_expansion";
-  const std::string fluidThermalExpansionStr = "fluid_thermal_expansion";
+  const RedbackParam ar{"ar","Arrhenius number."};
+  const RedbackParam gr{"gr","Gruntfest number."};
+  const RedbackParam confiningPressure{"confining_pressure","Normalised confining pressure"};
+  const RedbackParam alpha1{"alpha_1","First parameter for activation "
+                                         "volume, alpha_1 V_{ref} / (R T_{ref}) "
+                                         "in the redback paper"};
+  const RedbackParam alpha2{"alpha_2", "Second parameter for activation "
+                                          "volume, alpha_2 V_{ref} / (R T_{ref}) "
+                                          "in the redback paper"};
+  const RedbackParam alpha3{"alpha_3","Third parameter for activation volume, alpha_3 in the redback paper"};
+  const RedbackParam delta{"delta","Kamenetskii coefficient."};
+  const RedbackParam initialPorosity{"initial_porosity","Initial porosity value."};
+  const RedbackParam PecletNumber{"Peclet_number","Peclet number"};
+  const RedbackParam biotCoefficient{"biot_coefficient","Biot coefficient"};
+  const RedbackParam refLewisNumber{"ref_lewis_number", "Reference Lewis number."};
+  const RedbackParam solidCompressiblity{"solid_compressibility","solid compressibility (beta^{(s)} in 1/Pa)"};
+  const RedbackParam fluidCompressiblity{"fluid_compressibility",
+                                            "fluid compressibility (beta^{(f)} in 1/Pa)"};
+  const RedbackParam solidThermalExpansion{"solid_thermal_expansion","solid expansion (lambda^{(s)} in 1/K)"};
+  const RedbackParam fluidThermalExpansion{"fluid_thermal_expansion","fluid expansion (lambda^{(f)} in 1/K)"};
 
-  const std::string ElementEnumStrings
+  const std::vector<const RedbackParam> ParameterList{
+	  ar,
+	  gr,
+	  confiningPressure,
+	  alpha1,alpha2,alpha3,
+	  delta,
+	  initialPorosity,
+	  PecletNumber,
+	  biotCoefficient,refLewisNumber,
+	  solidCompressiblity,
+	  fluidCompressiblity,solidThermalExpansion,
+	  fluidThermalExpansion
+  };
+
+  inline
+  std::string JoinStrings(const std::vector<const RedbackParam>& paramVector , const std::string& separator = " "){
+	  std::string rv = "";
+
+	  for(const RedbackParam& param: paramVector ) rv += param.str + separator;
+	  return rv;
+  }
+
+  const std::string ElementEnumString = JoinStrings(ParameterList);
+  /*
     = arStr             + " " +
 	  grStr              + " " +
 	  confiningPressureStr + " " +
@@ -50,20 +79,21 @@ namespace RedbackParameters{
 	  fluidCompressiblityStr  + " " +
 	  solidThermalExpansionStr  + " " +
 	  fluidThermalExpansionStr;
+	  */
 
   // Default values
-  // - only add parameters that must be initialized here.
+  // - only add parameters that *must* be initialized here.
   const std::map< std::string, Real > DefaultValues{
-  		{arStr, 0.0},
-  		{grStr, 1.0},
-  		{alpha1Str, 0.0},
-  		{alpha2Str, 0.0},
-  		{alpha3Str, 0.0},
-  		{deltaStr, 0.0},
-		{solidCompressiblityStr, 1.0},
-		{fluidCompressiblityStr, 0.0},
-		{solidThermalExpansionStr, 0.0},
-		{fluidThermalExpansionStr, 0.0}
+  		{ar.str, 0.0},
+  		{gr.str, 1.0},
+  		{alpha1.str, 0.0},
+  		{alpha2.str, 0.0},
+  		{alpha3.str, 0.0},
+  		{delta.str, 0.0},
+		{solidCompressiblity.str, 1.0},
+		{fluidCompressiblity.str, 0.0},
+		{solidThermalExpansion.str, 0.0},
+		{fluidThermalExpansion.str, 0.0}
   };
 
 }
@@ -85,10 +115,9 @@ public:
 
 
 	// Has parameters
-
 	bool HasParameterObject(const std::string& parameterName) const{
 
-		MooseEnum parameterEnum( RedbackParameters::ElementEnumStrings , parameterName) ;
+		MooseEnum parameterEnum( RedbackParameters::ElementEnumString , parameterName) ;
 		return HasParameterObject((int)parameterEnum);
 	};
 
@@ -136,8 +165,6 @@ public:
 		// should not get here
 		return 0;
 	}
-
-
 
 protected:
 
