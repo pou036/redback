@@ -172,10 +172,8 @@ protected:
 
   // Reading material properties from RedbackMaterial
 
-  const RedbackElementParameters* _common_redback_material_parameters;
-
+  // these properties will be replaced
   const MaterialProperty<Real> & _gr;
-  const MaterialProperty<Real> & _lewis_number;
   const MaterialProperty<Real> & _ar;
   const MaterialProperty<Real> & _confining_pressure;
   const MaterialProperty<Real> & _alpha_1;
@@ -185,11 +183,33 @@ protected:
   const MaterialProperty<Real> & _delta;
   const MaterialProperty<Real> & _solid_thermal_expansion;
   const MaterialProperty<Real> & _solid_compressibility;
-  const MaterialProperty<Real> & _mixture_compressibility;
   const MaterialProperty<Real> & _peclet_number;
 
+  // pointer to the common material parameters
+  const RedbackElementParameters* _common_redback_material_parameters;
 
-  MaterialProperty<Real> & _returnmap_iter;
+  // ultimately the following parameters will be extracted from the common parameters above
+  // - ultimately this class will be completely overhauled - need to apply changes to redback material first
+  /*
+  const RedbackMaterialParameterUserObject* _gr;
+  const RedbackMaterialParameterUserObject* _ar;
+  const RedbackMaterialParameterUserObject* _confining_pressure;
+  const RedbackMaterialParameterUserObject* _alpha_1;
+  const RedbackMaterialParameterUserObject* _alpha_2;
+  const RedbackMaterialParameterUserObject* _alpha_3;
+
+  const RedbackMaterialParameterUserObject* _delta;
+  const RedbackMaterialParameterUserObject* _solid_thermal_expansion;
+  const RedbackMaterialParameterUserObject* _solid_compressibility;
+  const RedbackMaterialParameterUserObject* _peclet_number;
+  */
+
+  const MaterialProperty<Real> & _mixture_compressibility;
+
+  const MaterialProperty<Real> & _lewis_number;
+
+
+  MaterialProperty<Real> & _returnmap_iter;  // needed?
 
   Real _T0_param, _P0_param;
 

@@ -22,11 +22,13 @@ class RedbackMaterialParameterUserObject : public DiscreteElementUserObject
 public:
 	RedbackMaterialParameterUserObject(const InputParameters & parameters);
 
-	virtual Real value(Real qp) const;
+	virtual Real value(unsigned int qp) const;
 
-	virtual Real derivative(Real qp) const;
+	Real operator[](unsigned int qp) const{ return value(qp);}
 
-	virtual std::string activeModelName(Real qp) const = 0;
+	virtual Real derivative(unsigned int qp) const;
+
+	virtual std::string activeModelName(unsigned int qp) const = 0;
 
 protected:
 
@@ -45,11 +47,11 @@ class RedbackMaterialConstant : public RedbackMaterialParameterUserObject
 public:
 	RedbackMaterialConstant(const InputParameters & parameters);
 
-	virtual Real value(Real qp) const {return _value;};
+	virtual Real value(unsigned int qp) const {return _value;};
 
-	virtual Real derivative(Real qp) const {return 0;};
+	virtual Real derivative(unsigned int qp) const {return 0;};
 
-	virtual std::string activeModelName(Real qp) const {return "Redback_Material_Constant";};
+	virtual std::string activeModelName(unsigned int qp) const {return "Redback_Material_Constant";};
 
 protected:
 	Real _value; // the value of the constant

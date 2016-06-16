@@ -176,7 +176,6 @@ RedbackMechMaterial_UO::RedbackMechMaterial_UO(const InputParameters & parameter
 
     // Get some material properties from RedbackMaterial
     _gr(getMaterialProperty<Real>("gr")),
-    _lewis_number(getMaterialProperty<Real>("lewis_number")),
     _ar(getMaterialProperty<Real>("ar")),
     _confining_pressure(getMaterialProperty<Real>("confining_pressure")),
     _alpha_1(getMaterialProperty<Real>("alpha_1")),
@@ -185,11 +184,15 @@ RedbackMechMaterial_UO::RedbackMechMaterial_UO(const InputParameters & parameter
     _delta(getMaterialProperty<Real>("delta")),
     _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion")),
     _solid_compressibility(getMaterialProperty<Real>("solid_compressibility")),
-    _mixture_compressibility(getMaterialProperty<Real>("mixture_compressibility")),
     _peclet_number(getMaterialProperty<Real>("Peclet_number")),
+
+	_mixture_compressibility(getMaterialProperty<Real>("mixture_compressibility")),
+	_lewis_number(getMaterialProperty<Real>("lewis_number")),
+
     _returnmap_iter(declareProperty<Real>("returnmap_iter")),
+
     _T0_param(getParam<Real>("temperature_reference")),
-    _P0_param(getParam<Real>("pressure_reference"))
+	_P0_param(getParam<Real>("pressure_reference"))
 {
 
   UserObjectName rep_uo_name = getParam<UserObjectName>("redback_material_parameters");

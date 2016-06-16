@@ -27,6 +27,7 @@ validParams<RedbackMaterial_UO>()
                                               "The corresponding names of the functions to be used for the parameters "
                                               "to be initialised as functions.");
   params.addRangeCheckedParam<Real>("phi0", 0.0, "phi0>=0 & phi0<1", "initial porosity value.");
+  /*
   params.addRangeCheckedParam<Real>("gr", 1.0, "gr>=0", "Gruntfest number.");
   params.addParam<Real>("ref_lewis_nb", 1.0, "Reference Lewis number.");
   params.addParam<Real>("ar", 0.0, "Arrhenius number.");
@@ -43,7 +44,9 @@ validParams<RedbackMaterial_UO>()
                         "in the redback paper");
   params.addParam<Real>("alpha_3", 0.0, "Third parameter for activation volume, alpha_3 in the redback paper");
   params.addParam<Real>("confining_pressure", 1, "Normalised confining pressure");
+
   params.addParam<Real>("biot_coefficient", 1.0, "Biot coefficient");
+    */
   params.addParam<bool>("is_mechanics_on", false, "is mechanics on?");
   params.addParam<bool>("is_chemistry_on", false, "is chemistry on?");
   params.addParam<bool>("are_convective_terms_on", false, "are convective terms on?");
@@ -90,6 +93,7 @@ validParams<RedbackMaterial_UO>()
   params.addParam<Real>("pressurization_coefficient", 0, "Pressurization coefficient (Lambda).");
   params.addParam<Real>("Peclet_number", 1, "Peclet number");
 
+  /*
   params.addParam<Real>("solid_compressibility",
                         1,
                         "solid compressibility (beta^{(s)} in "
@@ -104,8 +108,10 @@ validParams<RedbackMaterial_UO>()
   params.addParam<Real>("fluid_thermal_expansion",
                         0,
                         "fluid expansion (lambda^{(f)} in 1/K)");              // _fluid_thermal_expansion_param
+                        */
   params.addParam<Real>("solid_density", 2.5, "normalised solid density (-)"); // solid_density_param
   params.addParam<Real>("fluid_density", 1, "normalised fluid density (-)");   // fluid_density_param
+
 
   params.addParam<RealVectorValue>("gravity",
                                    RealVectorValue(),
@@ -116,7 +122,7 @@ validParams<RedbackMaterial_UO>()
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
 
-  params.addRequiredParam<UserObjectName>("redback_material_parameters","Common redback element parameters");
+  params.addRequiredParam<UserObjectName>("redback_material_parameters","User object holding common redback material parameters");
 
 
   return params;
@@ -129,7 +135,6 @@ RedbackMaterial_UO::RedbackMaterial_UO(const InputParameters & parameters) :
 
     _has_pore_pres(isCoupled("pore_pres")),
     _pore_pres(_has_pore_pres ? coupledValue("pore_pres") : _zero),
-    //_pore_pres_old(_has_pore_pres ? coupledValueOld("pore_pres") : _zero),
 
     _total_porosity(coupledValue("total_porosity")), // total_porosity MUST be
                                                      // coupled! Check that
@@ -138,10 +143,11 @@ RedbackMaterial_UO::RedbackMaterial_UO(const InputParameters & parameters) :
     _concentration(coupledValue("concentration")),
     _continuation_parameter(coupledScalarValue("continuation_parameter")),
 
-    //_disp_x(isCoupled("disp_x") ? coupledValue("disp_x") : _zero),
-
+	/*
     _init_from_functions__params(getParam<std::vector<std::string> >("init_from_functions__params")),
     _init_from_functions__function_names(getParam<std::vector<FunctionName> >("init_from_functions__function_names")),
+    */
+	/*
     _phi0_param(getParam<Real>("phi0")),
     _gr_param(getParam<Real>("gr")),
     _ref_lewis_nb_param(getParam<Real>("ref_lewis_nb")),
@@ -153,6 +159,7 @@ RedbackMaterial_UO::RedbackMaterial_UO(const InputParameters & parameters) :
     _alpha_2_param(getParam<Real>("alpha_2")),
     _alpha_3_param(getParam<Real>("alpha_3")),
     _peclet_number_param(getParam<Real>("Peclet_number")),
+    */
     _ar_F_param(getParam<Real>("ar_F")),
     _ar_R_param(getParam<Real>("ar_R")),
     _chemical_ar_F_factor(getParam<Real>("chemical_ar_F_factor")),
@@ -165,22 +172,21 @@ RedbackMaterial_UO::RedbackMaterial_UO(const InputParameters & parameters) :
     _Aphi_param(getParam<Real>("Aphi")),
     _pressurization_coefficient_param(getParam<Real>("pressurization_coefficient")),
 
+	/*
     _solid_compressibility_param(getParam<Real>("solid_compressibility")),
     _fluid_compressibility_param(getParam<Real>("fluid_compressibility")),
     _solid_thermal_expansion_param(getParam<Real>("solid_thermal_expansion")),
     _fluid_thermal_expansion_param(getParam<Real>("fluid_thermal_expansion")),
-    _solid_density_param(getParam<Real>("solid_density")),
-    _fluid_density_param(getParam<Real>("fluid_density")),
-
-    _is_mechanics_on(getParam<bool>("is_mechanics_on")),
-    _is_chemistry_on(getParam<bool>("is_chemistry_on")),
-    _are_convective_terms_on(getParam<bool>("are_convective_terms_on")),
+    */
 
     _gravity_param(getParam<RealVectorValue>("gravity")),
     _mixture_gravity_term(declareProperty<RealVectorValue>("mixture_gravity_term")), // rho_mixture * g
     _fluid_gravity_term(declareProperty<RealVectorValue>("fluid_gravity_term")),     // rho_fluid * g
 
-    _gr(declareProperty<Real>("gr")),
+    _solid_density_param(getParam<Real>("solid_density")),
+    _fluid_density_param(getParam<Real>("fluid_density")),
+
+    /*_gr(declareProperty<Real>("gr")),
     _ref_lewis_nb(declareProperty<Real>("ref_lewis_nb")),
     _ar(declareProperty<Real>("ar")),
     _confining_pressure(declareProperty<Real>("confining_pressure")),
@@ -192,7 +198,12 @@ RedbackMaterial_UO::RedbackMaterial_UO(const InputParameters & parameters) :
     _delta(declareProperty<Real>("delta")),
 
     _initial_porosity(declareProperty<Real>("initial_porosity")),
-    //_porosity(declareProperty<Real>("porosity")),
+    */
+
+    _is_mechanics_on(getParam<bool>("is_mechanics_on")),
+    _is_chemistry_on(getParam<bool>("is_chemistry_on")),
+    _are_convective_terms_on(getParam<bool>("are_convective_terms_on")),
+
     _lewis_number(declareProperty<Real>("lewis_number")),
     _mixture_compressibility(declareProperty<Real>("mixture_compressibility")),
 
@@ -214,21 +225,16 @@ RedbackMaterial_UO::RedbackMaterial_UO(const InputParameters & parameters) :
 
     _thermal_convective_mass(declareProperty<RealVectorValue>("thermal_convective_mass")),
     _pressure_convective_mass(declareProperty<RealVectorValue>("pressure_convective_mass")),
-    //_convective_mass_jac_vec(declareProperty<RealVectorValue>("convective_mass_jacobian_vector")),
-    //_convective_mass_jac_real(declareProperty<Real>("convective_mass_jacobian_real")),
-    //_convective_mass_off_diag_vec(declareProperty<RealVectorValue>("convective_mass_off_diagonal_vector")),
-    //_convective_mass_off_diag_real(declareProperty<Real>("convective_mass_off_diagonal_real")),
 
     _mixture_convective_energy(declareProperty<RealVectorValue>("mixture_convective_energy")),
-    //_mixture_convective_energy_jac(declareProperty<Real>("mixture_convective_energy_jacobian")),
-    //_mixture_convective_energy_off_jac(declareProperty<Real>("mixture_convective_energy_off_jacobian")),
 
-    //_solid_velocity(declareProperty<RealVectorValue>("solid_velocity")),
     _fluid_velocity(declareProperty<RealVectorValue>("fluid_velocity")),
+	/*
     _solid_compressibility(declareProperty<Real>("solid_compressibility")),
     _fluid_compressibility(declareProperty<Real>("fluid_compressibility")),
     _solid_thermal_expansion(declareProperty<Real>("solid_thermal_expansion")),
     _fluid_thermal_expansion(declareProperty<Real>("fluid_thermal_expansion")),
+    */
 
     _mixture_density(declareProperty<Real>("mixture_density")),
 
@@ -257,10 +263,37 @@ RedbackMaterial_UO::RedbackMaterial_UO(const InputParameters & parameters) :
 
 {
 
+	// common redback material parameters
 	UserObjectName rep_uo_name = getParam<UserObjectName>("redback_material_parameters");
 	_common_redback_material_parameters = &getUserObjectByName<RedbackElementParameters>( rep_uo_name);
 
-  // Find functions to initialise parameters from
+	// extract pointers to active parameters
+	_gr = _common_redback_material_parameters->GetParameterObject("gr");
+	_ar = _common_redback_material_parameters->GetParameterObject("ar");
+	_confining_pressure = _common_redback_material_parameters->GetParameterObject("confining_pressure");
+	_alpha_1 = _common_redback_material_parameters->GetParameterObject("alpha_1");
+	_alpha_2 = _common_redback_material_parameters->GetParameterObject("alpha_2");
+	_alpha_3 = _common_redback_material_parameters->GetParameterObject("alpha_3");
+
+	_delta = _common_redback_material_parameters->GetParameterObject("delta");
+	_initial_porosity = _common_redback_material_parameters->GetParameterObject("initial_porosity");
+	_peclet_number = _common_redback_material_parameters->GetParameterObject("Peclet_number");
+
+	_biot_coeff = _common_redback_material_parameters->GetParameterObject("biot_coefficient");
+
+	_solid_compressibility = _common_redback_material_parameters->GetParameterObject("solid_compressibility");
+	_fluid_compressibility = _common_redback_material_parameters->GetParameterObject("fluid_compressibility");
+	_solid_thermal_expansion = _common_redback_material_parameters->GetParameterObject("solid_thermal_expansion");
+	_fluid_thermal_expansion = _common_redback_material_parameters->GetParameterObject("fluid_thermal_expansion");
+
+	_ref_lewis_nb = _common_redback_material_parameters->GetParameterObject("ref_lewis_number");
+
+	// check that required parameters have been set
+
+
+
+  // Find functions to initialise parameters from **** > now should be done by the user objects
+	/*
   unsigned int num_param_names = _init_from_functions__params.size();
   unsigned int num_fct_names = _init_from_functions__function_names.size();
 
@@ -297,6 +330,9 @@ RedbackMaterial_UO::RedbackMaterial_UO(const InputParameters & parameters) :
     }
     _init_functions[ i ] = &getFunctionByName(_init_from_functions__function_names[ i ]);
   }
+
+  */
+
 }
 
 MooseEnum
@@ -322,7 +358,7 @@ RedbackMaterial_UO::stepInitQpProperties()
 {
   // TODO: Variable initialisation we'd like done only once (one off)
   // but can't figure out how so doing it at every step...
-  _initial_porosity[ _qp ] = _phi0_param;
+ // _initial_porosity[ _qp ] = _phi0_param;
   //_porosity[_qp] = _phi0_param; // _total_porosity now coming from AuxKernel
   //(coupled to this material in .i)
   _chemical_porosity[ _qp ] = 0;
@@ -331,6 +367,7 @@ RedbackMaterial_UO::stepInitQpProperties()
   _solid_velocity[ _qp ] = RealVectorValue(_dispx_dot[ _qp ], _dispy_dot[ _qp ], _dispz_dot[ _qp ]);
   _fluid_velocity[ _qp ] = RealVectorValue();
 
+  /*
   // Variable initialisation (called at each step)
   unsigned int pos; // position index (to find a string in vector of strings)
   pos = find(_init_from_functions__params.begin(), _init_from_functions__params.end(), "gr") -
@@ -380,7 +417,10 @@ RedbackMaterial_UO::stepInitQpProperties()
     _gravity_param = _init_functions[ pos ]->vectorValue(_t, _q_point[ _qp ]);
     // TODO: does not need to be (re)set for  each _qp...
   }
+  */
 
+  /// **** warning - not sure about this one - is it ok to be controlled by the user object??
+  /*
   switch (_continuation_method)
   {
     case Gruntfest:
@@ -392,25 +432,31 @@ RedbackMaterial_UO::stepInitQpProperties()
     default:
       mooseError("Continuation method not implemented yet");
   }
+  */
 
+  /*
   _biot_coeff[ _qp ] = _biot_coeff_param;
-  _alpha_1[ _qp ] = _alpha_1_param;
-  _alpha_2[ _qp ] = _alpha_2_param;
-  _alpha_3[ _qp ] = _alpha_3_param;
+  alpha_1[ _qp ] = _alpha_1_param;
+  alpha_2[ _qp ] = _alpha_2_param;
+  alpha_3[ _qp ] = _alpha_3_param;
   _peclet_number[ _qp ] = _peclet_number_param;
   _delta[ _qp ] = _delta_param;
-  _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ];
+  */
+
+  _lewis_number[ _qp ] = (*_ref_lewis_nb)[ _qp ];
   _ar_F[ _qp ] = _ar_F_param;
   _ar_R[ _qp ] = _ar_R_param;
   _mu[ _qp ] = _mu_param;
   _pressurization_coefficient[ _qp ] = _pressurization_coefficient_param;
+  /*
   _solid_compressibility[ _qp ] = _solid_compressibility_param;
   _fluid_compressibility[ _qp ] = _fluid_compressibility_param;
   _solid_thermal_expansion[ _qp ] = _solid_thermal_expansion_param;
   _fluid_thermal_expansion[ _qp ] = _fluid_thermal_expansion_param;
-  _mixture_density[ _qp ] = (1 - _phi0_param) * _solid_density_param + _phi0_param * _fluid_density_param;
+  */
+  _mixture_density[ _qp ] = (1 - (*_initial_porosity)[ _qp ] ) * _solid_density_param + (*_initial_porosity)[ _qp ] * _fluid_density_param;
   _mixture_gravity_term[ _qp ] = _mixture_density[ _qp ] * _gravity_param;
-  _fluid_gravity_term[ _qp ] = _fluid_density_param * _gravity_param;
+  _fluid_gravity_term[ _qp ] = _fluid_density_param* _gravity_param;
 }
 
 void
@@ -432,11 +478,15 @@ RedbackMaterial_UO::computeRedbackTerms()
   Real omega_rel, temporary, phi_prime, s_prime;
   Real beta_star_m, one_minus_phi_beta_star_s, phi_beta_star_f;
 
+  // (done to avoid ugly (*_ar)[ _qp ] calls)
+  const RedbackMaterialParameterUserObject& Ar = *_ar;
+  const RedbackMaterialParameterUserObject& delta = *_delta;
+
   // TODO: put flags for all properties depending on activated variables.
 
   // TODO: do not compute these when mechanics is on (5 fields overwritten)
   _exponential =
-    std::exp(-_ar[ _qp ]) * std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
+    std::exp(-Ar[ _qp ]) * std::exp(Ar[ _qp ] * delta[ _qp ] * _T[ _qp ] / (1 + delta[ _qp ] * _T[ _qp ]));
   // Compute Mises strain
   _mises_strain[ _qp ] = _exponential * _dt;
   // Compute Mises strain rate
@@ -444,16 +494,24 @@ RedbackMaterial_UO::computeRedbackTerms()
 
   if (!_is_mechanics_on)
   {
+
+	const RedbackMaterialParameterUserObject& Gr = *_gr;
+	const RedbackMaterialParameterUserObject& alpha_1 = *_alpha_1;
+	const RedbackMaterialParameterUserObject& alpha_2 = *_alpha_2;
+	const RedbackMaterialParameterUserObject& alpha_3 = *_alpha_3;
+
+	const RedbackMaterialParameterUserObject& confining_pressure = *_confining_pressure;
+
     // Compute Mechanical Dissipation
     _mechanical_dissipation_no_mech[ _qp ] =
-      _gr[ _qp ] * std::exp(_ar[ _qp ]) *
-      std::exp(-_alpha_1[ _qp ] * _confining_pressure[ _qp ] -
-               _pore_pres[ _qp ] * _alpha_2[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_confining_pressure[ _qp ]))) *
-      std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
+      Gr[ _qp ] * std::exp(Ar[ _qp ]) *
+      std::exp(-alpha_1[ _qp ] * confining_pressure[ _qp ] -
+               _pore_pres[ _qp ] * alpha_2[ _qp ] * (1 + alpha_3[ _qp ] * std::log(confining_pressure[ _qp ]))) *
+      std::exp(Ar[ _qp ] * delta[ _qp ] * _T[ _qp ] / (1 + delta[ _qp ] * _T[ _qp ]));
 
     // Compute Mechanical Dissipation Jacobian
-    _mechanical_dissipation_jac_no_mech[ _qp ] = _mechanical_dissipation_no_mech[ _qp ] * _ar[ _qp ] * _delta[ _qp ] /
-                                                 (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
+    _mechanical_dissipation_jac_no_mech[ _qp ] = _mechanical_dissipation_no_mech[ _qp ] * Ar[ _qp ] * delta[ _qp ] /
+                                                 (1 + delta[ _qp ] * _T[ _qp ]) / (1 + delta[ _qp ] * _T[ _qp ]);
   }
 
   if (_is_chemistry_on)
@@ -468,66 +526,70 @@ RedbackMaterial_UO::computeRedbackTerms()
     * V_A+V_AB
     */
 
+
+	const RedbackMaterialParameterUserObject& initial_porosity = *_initial_porosity;
+	const RedbackMaterialParameterUserObject& ref_lewis_nb = *_ref_lewis_nb;
+
     // Update chemical Arrhenius term
     _ar_F[ _qp ] += _chemical_ar_F_factor * _concentration[ _qp ];
 
     // Step 1: calculate the relative rate of reactions
-    omega_rel = _eta2_param * _Kc_param * std::exp(-(_ar_F[ _qp ] - _ar_R[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
+    omega_rel = _eta2_param * _Kc_param * std::exp(-(_ar_F[ _qp ] - _ar_R[ _qp ]) / (1 + delta[ _qp ] * _T[ _qp ]));
 
     // Step 2: calculate the solid ratio
     _solid_ratio[ _qp ] = omega_rel / (1 + omega_rel);
 
     // Step 3: calculate the chemical porosity and update the total porosity
     _chemical_porosity[ _qp ] =
-      _Aphi_param * (1 - _phi0_param) * _solid_ratio[ _qp ] / (_solid_ratio[ _qp ] + _eta1_param);
+      _Aphi_param * (1 - initial_porosity[ _qp ] ) * _solid_ratio[ _qp ] / (_solid_ratio[ _qp ] + _eta1_param);
     //_porosity[_qp] =  _phi0_param + _chemical_porosity[_qp];
     // _total_porosity will be updated through the AuxKernel (at next iteration)
 
     // Step 4: calculate the partial derivatives for the jacobian
-    temporary = _eta2_param * _Kc_param * (_ar_F[ _qp ] - _ar_R[ _qp ]) * _delta[ _qp ] *
-                std::exp((_ar_F[ _qp ] - _ar_R[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ])) /
-                std::pow(1 + _delta[ _qp ] * _T[ _qp ], 2);
+    temporary = _eta2_param * _Kc_param * (_ar_F[ _qp ] - _ar_R[ _qp ]) * delta[ _qp ] *
+                std::exp((_ar_F[ _qp ] - _ar_R[ _qp ]) / (1 + delta[ _qp ] * _T[ _qp ])) /
+                std::pow(1 + delta[ _qp ] * _T[ _qp ], 2);
 
-    phi_prime = -temporary * _Aphi_param * _eta1_param * (1 - _phi0_param) /
-                std::pow(_eta1_param * std::exp(_ar_R[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ])) +
-                           (1 + _eta1_param) * std::exp(_ar_F[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ])) * _eta2_param *
+    phi_prime = -temporary * _Aphi_param * _eta1_param * (1 - initial_porosity[ _qp ]) /
+                std::pow(_eta1_param * std::exp(_ar_R[ _qp ] / (1 + delta[ _qp ] * _T[ _qp ])) +
+                           (1 + _eta1_param) * std::exp(_ar_F[ _qp ] / (1 + delta[ _qp ] * _T[ _qp ])) * _eta2_param *
                              _Kc_param,
                          2);
 
     s_prime =
-      -temporary / std::pow(std::exp(_ar_R[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ])) +
-                              std::exp(_ar_F[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ])) * _eta2_param * _Kc_param,
+      -temporary / std::pow(std::exp(_ar_R[ _qp ] / (1 + delta[ _qp ] * _T[ _qp ])) +
+                              std::exp(_ar_F[ _qp ] / (1 + delta[ _qp ] * _T[ _qp ])) * _eta2_param * _Kc_param,
                             2);
 
     // Compute Endothermic Chemical Energy
     _chemical_endothermic_energy[ _qp ] =
       _da_endo_param * (1 - _total_porosity[ _qp ]) * (1 - _solid_ratio[ _qp ]) *
-      std::exp((_ar_F[ _qp ] * _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
+      std::exp((_ar_F[ _qp ] * delta[ _qp ] * _T[ _qp ]) / (1 + delta[ _qp ] * _T[ _qp ]));
 
     // Compute Endothermic Chemical Energy Jacobian
     _chemical_endothermic_energy_jac[ _qp ] =
-      _da_endo_param * std::exp((_ar_F[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ])) *
-      (_ar_F[ _qp ] * _delta[ _qp ] * (1 - _total_porosity[ _qp ]) * (1 - _solid_ratio[ _qp ]) /
-         std::pow(1 + _delta[ _qp ] * _T[ _qp ], 2) -
+      _da_endo_param * std::exp((_ar_F[ _qp ]) / (1 + delta[ _qp ] * _T[ _qp ])) *
+      (_ar_F[ _qp ] * delta[ _qp ] * (1 - _total_porosity[ _qp ]) * (1 - _solid_ratio[ _qp ]) /
+         std::pow(1 + delta[ _qp ] * _T[ _qp ], 2) -
        (1 - _solid_ratio[ _qp ]) * phi_prime - (1 - _total_porosity[ _qp ]) * s_prime);
 
     // Compute Exothermic Chemical Energy
     _chemical_exothermic_energy[ _qp ] =
       _da_exo_param * (1 - _total_porosity[ _qp ]) * _solid_ratio[ _qp ] * _chemical_porosity[ _qp ] *
-      std::exp((_ar_R[ _qp ] * _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
+      std::exp((_ar_R[ _qp ] * delta[ _qp ] * _T[ _qp ]) / (1 + delta[ _qp ] * _T[ _qp ]));
 
     // Compute Exothermic Chemical Energy Jacobian
     _chemical_exothermic_energy_jac[ _qp ] =
-      _da_exo_param * std::exp(_ar_R[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ])) *
-      (_solid_ratio[ _qp ] * (_ar_R[ _qp ] * _delta[ _qp ] * _chemical_porosity[ _qp ] * (1 - _total_porosity[ _qp ]) /
-                                std::pow(1 + _delta[ _qp ] * _T[ _qp ], 2) +
+      _da_exo_param * std::exp(_ar_R[ _qp ] / (1 + delta[ _qp ] * _T[ _qp ])) *
+      (_solid_ratio[ _qp ] * (_ar_R[ _qp ] * delta[ _qp ] * _chemical_porosity[ _qp ] * (1 - _total_porosity[ _qp ]) /
+                                std::pow(1 + delta[ _qp ] * _T[ _qp ], 2) +
                               (1 - _total_porosity[ _qp ] - _chemical_porosity[ _qp ]) * phi_prime) +
        _chemical_porosity[ _qp ] * (1 - _total_porosity[ _qp ]) * s_prime);
 
     // Compute Chemical Source/Sink Term for the mass (pore pressure) equation
     _chemical_source_mass[ _qp ] =
       _mu[ _qp ] * (1 - _total_porosity[ _qp ]) * (1 - _solid_ratio[ _qp ]) *
-      std::exp((_ar_F[ _qp ] * _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
+      std::exp((_ar_F[ _qp ] * delta[ _qp ] * _T[ _qp ]) / (1 + delta[ _qp ] * _T[ _qp ]));
 
     // Compute Jacobian of Chemical Source/Sink Term for the mass (pore
     // pressure) equation. The corresponding variable
@@ -541,19 +603,23 @@ RedbackMaterial_UO::computeRedbackTerms()
                                );*/
 
     // Update Lewis number
-    _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
-                           std::pow(_phi0_param / _total_porosity[ _qp ], 3);
+    _lewis_number[ _qp ] = ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - initial_porosity[ _qp ]), 2) *
+                           std::pow(initial_porosity[ _qp ] / _total_porosity[ _qp ], 3);
     Real inverse_lewis_number =
       1 / _lewis_number[ _qp ] + _inverse_lewis_number_tilde[ _qp ]; // to include modification from
                                                                      // multi-app for example
     _lewis_number[ _qp ] = 1 / inverse_lewis_number;
   }
 
+
   // Forming the compressibilities of the phases
-  one_minus_phi_beta_star_s = (1 - _total_porosity[ _qp ]) * _solid_compressibility[ _qp ]; // normalized
+  const RedbackMaterialParameterUserObject& solid_compressibility = *_solid_compressibility;
+  const RedbackMaterialParameterUserObject& fluid_compressibility = *_fluid_compressibility;
+
+  one_minus_phi_beta_star_s = (1 - _total_porosity[ _qp ]) * solid_compressibility[ _qp ]; // normalized
   // compressibility of
   // the solid phase
-  phi_beta_star_f = _total_porosity[ _qp ] * _fluid_compressibility[ _qp ]; // normalized compressibility of the fluid
+  phi_beta_star_f = _total_porosity[ _qp ] * fluid_compressibility[ _qp ]; // normalized compressibility of the fluid
                                                                             // phase
   beta_star_m = one_minus_phi_beta_star_s + phi_beta_star_f; // normalized compressibility of the mixture
   _mixture_compressibility[ _qp ] = beta_star_m;
@@ -565,15 +631,19 @@ RedbackMaterial_UO::computeRedbackTerms()
     Real lambda_m_star, one_minus_phi_lambda_s, phi_lambda_f;
     RealVectorValue mixture_velocity, normalized_gravity;
 
+
+    const RedbackMaterialParameterUserObject& solid_thermal_expansion = *_solid_thermal_expansion;
+    const RedbackMaterialParameterUserObject& fluid_thermal_expansion = *_fluid_thermal_expansion;
+
     // Forming the partial densities and gravity terms
     switch (_density_method)
     {
       case linear:
         // Linear approximation of the EOS (Equation Of State)
-        solid_density = _solid_density_param * (1 + _solid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
-                                                _solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param));
-        fluid_density = _fluid_density_param * (1 + _fluid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
-                                                _fluid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param));
+        solid_density = _solid_density_param * (1 + solid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
+                                                solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param));
+        fluid_density = _fluid_density_param * (1 + fluid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
+                                                fluid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param));
         break;
       default:
         mooseError("density method not implemented yet, use linear");
@@ -588,18 +658,21 @@ RedbackMaterial_UO::computeRedbackTerms()
 
     // Forming the thermal expansions of the phases
     one_minus_phi_lambda_s =
-      (1 - _total_porosity[ _qp ]) * _solid_thermal_expansion[ _qp ];        // normalized thermal expansion
+      (1 - _total_porosity[ _qp ]) * solid_thermal_expansion[ _qp ];        // normalized thermal expansion
                                                                              // coefficient of the solid phase
-    phi_lambda_f = _total_porosity[ _qp ] * _fluid_thermal_expansion[ _qp ]; // normalized thermal
+    phi_lambda_f = _total_porosity[ _qp ] * fluid_thermal_expansion[ _qp ]; // normalized thermal
                                                                              // expansion coefficient of
                                                                              // the fluid phase
     lambda_m_star = one_minus_phi_lambda_s + phi_lambda_f; // normalized compressibility of the mixture
 
     // Forming the velocities through mechanics and Darcy's flow law
+
+    const RedbackMaterialParameterUserObject& peclet_number = *_peclet_number;
+
     _fluid_velocity[ _qp ] =
       _solid_velocity[ _qp ] -
       beta_star_m * (_grad_pore_pressure[ _qp ] - fluid_density * normalized_gravity) /
-        (_peclet_number[ _qp ] * _lewis_number[ _qp ] * _total_porosity[ _qp ]); // solving Darcy's flux
+        (peclet_number[ _qp ] * _lewis_number[ _qp ] * _total_porosity[ _qp ]); // solving Darcy's flux
                                                                                  // for the fluid velocity
     mixture_velocity =
       (solid_density / _mixture_density[ _qp ]) * _solid_velocity[ _qp ] +
@@ -607,14 +680,14 @@ RedbackMaterial_UO::computeRedbackTerms()
 
     // Forming the kernels and their jacobians
     _pressure_convective_mass[ _qp ] =
-      _peclet_number[ _qp ] *
+      peclet_number[ _qp ] *
       ((one_minus_phi_beta_star_s / beta_star_m) * _solid_velocity[ _qp ] +
        (phi_beta_star_f / beta_star_m) * _fluid_velocity[ _qp ]); // convective term multiplying
                                                                   // the pressure flux in the mass
                                                                   // equation. TODO: disable for
                                                                   // incompressible case
     _thermal_convective_mass[ _qp ] =
-      _peclet_number[ _qp ] *
+      peclet_number[ _qp ] *
       ((one_minus_phi_lambda_s / beta_star_m) * _solid_velocity[ _qp ] +
        (phi_lambda_f / beta_star_m) * _fluid_velocity[ _qp ]); // convective term multiplying the thermal
                                                                // flux in the mass equation
@@ -631,7 +704,7 @@ RedbackMaterial_UO::computeRedbackTerms()
     //-(_fluid_thermal_expansion[_qp]*fluid_density*normalized_gravity/_lewis_number[_qp])*(_fluid_compressibility[_qp]*_grad_pore_pressure[_qp]
     //- _fluid_thermal_expansion[_qp]*_grad_temp[_qp]);
 
-    _mixture_convective_energy[ _qp ] = _peclet_number[ _qp ] * mixture_velocity; // convective term multiplying
+    _mixture_convective_energy[ _qp ] = peclet_number[ _qp ] * mixture_velocity; // convective term multiplying
                                                                                   // the thermal flux in the
                                                                                   // energy equation
     //_mixture_convective_energy_jac[_qp] =

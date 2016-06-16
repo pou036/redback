@@ -24,14 +24,23 @@ public:
 
 	RedbackElementParameters(const InputParameters & parameters);
 
-	bool HasParameterObject(const std::string& parameterName){
+	bool HasParameterObject(const std::string& parameterName) const{
 		MooseEnum parameterEnum(GetRedbackElementParametersEnum() , parameterName) ;
 		return HasParameterObject((int)parameterEnum);
 	};
 
-	bool HasParameterObject(int parameterEnum){
+	bool HasParameterObject(int parameterEnum) const{
 		return _userObjectMap.find(parameterEnum) != _userObjectMap.end();
 	};
+
+	const RedbackMaterialParameterUserObject* GetParameterObject (const std::string& parameterName) const{
+		MooseEnum parameterEnum(GetRedbackElementParametersEnum() , parameterName) ;
+		return GetParameterObject((int)parameterEnum);
+	}
+
+	const RedbackMaterialParameterUserObject* GetParameterObject (int parameterEnum) const{
+		return _userObjectMap.at(parameterEnum);
+	}
 
 	/**
 	 * Returns available elemental parameters for Redback
