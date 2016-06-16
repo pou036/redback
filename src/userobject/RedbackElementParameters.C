@@ -10,8 +10,9 @@
 namespace {
 
   const std::string RedbackElementParametersEnumString
-    = "ar gr delta alpha_1 alpha_2 alpha_3";
-
+    = "ar gr confining_pressure alpha_1 alpha_2 alpha_3 "
+      "delta initial_porosity Peclet_number biot_coefficient "
+      "solid_compressibility fluid_compressibility solid_thermal_expansion fluid_thermal_expansion";
 }
 
 template <>
@@ -37,6 +38,12 @@ DiscreteElementUserObject(parameters)
 	MultiMooseEnum paramTypes = getParam<MultiMooseEnum>("parameters");
 	std::vector< UserObjectName > user_object_names
 	        = isParamValid("user_objects") ? getParam<std::vector<UserObjectName> >("user_objects") : std::vector<UserObjectName>(0);
+
+	// sanity check
+	if( paramTypes.size() != user_object_names.size() ){
+        mooseError("Error! RedbackElementParameters: Number of user objects " + std::to_string( user_object_names.size() ) + " does not match number of parameters " + std::to_string( paramTypes.size() ));
+	}
+
 
 	for(unsigned int i=0; i<paramTypes.size(); ++i){
 		_userObjectMap[  paramTypes.get(i) ] = &getUserObjectByName<RedbackMaterialParameterUserObject>( user_object_names[i]);
