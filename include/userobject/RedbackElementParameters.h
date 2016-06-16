@@ -10,6 +10,15 @@
 
 #include "RedbackMaterialUserObject.h"
 
+namespace RedbackParameters{
+
+  const std::string ElementEnumStrings
+    = "ar gr confining_pressure alpha_1 alpha_2 alpha_3 "
+      "delta initial_porosity Peclet_number biot_coefficient ref_lewis_number "
+      "solid_compressibility fluid_compressibility solid_thermal_expansion fluid_thermal_expansion";
+}
+
+
 class RedbackElementParameters;
 
 template<>
@@ -28,7 +37,8 @@ public:
 	// Has parameters
 
 	bool HasParameterObject(const std::string& parameterName) const{
-		MooseEnum parameterEnum(GetRedbackElementParametersEnum() , parameterName) ;
+
+		MooseEnum parameterEnum( RedbackParameters::ElementEnumStrings , parameterName) ;
 		return HasParameterObject((int)parameterEnum);
 	};
 
@@ -39,7 +49,7 @@ public:
 	// Get parameters
 
 	const RedbackMaterialParameterUserObject* GetParameterObject (const std::string& parameterName) const{
-		MooseEnum parameterEnum(GetRedbackElementParametersEnum() , parameterName) ;
+		MooseEnum parameterEnum( RedbackParameters::ElementEnumStrings, parameterName) ;
 		return GetParameterObject((int)parameterEnum);
 	}
 
@@ -49,8 +59,9 @@ public:
 
 	const RedbackMaterialParameterUserObject* GetIfHasParameterObject (const std::string& parameterName) const{
 
-		if( HasParameterObject( parameterName) )
-			   return GetParameterObject (parameterName);
+		if( HasParameterObject( parameterName) ){
+			return GetParameterObject (parameterName);
+		}
 
 		return 0; // return null ptr
 	}

@@ -22,11 +22,11 @@ class RedbackMaterialParameterUserObject : public DiscreteElementUserObject
 public:
 	RedbackMaterialParameterUserObject(const InputParameters & parameters);
 
-	virtual Real value(unsigned int qp) const;
+	virtual Real value(unsigned int qp) const = 0;
 
 	Real operator[](unsigned int qp) const{ return value(qp);}
 
-	virtual Real derivative(unsigned int qp) const;
+	virtual Real derivative(unsigned int qp) const = 0;
 
 	virtual std::string activeModelName(unsigned int qp) const = 0;
 

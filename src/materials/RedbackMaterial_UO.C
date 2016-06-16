@@ -268,14 +268,19 @@ RedbackMaterial_UO::RedbackMaterial_UO(const InputParameters & parameters) :
 	_common_redback_material_parameters = &getUserObjectByName<RedbackElementParameters>( rep_uo_name);
 
 	// extract pointers to active parameters
-	_gr_uo = _common_redback_material_parameters->GetIfHasParameterObject("gr");
 	_ar_uo = _common_redback_material_parameters->GetRequiredParameterObject("ar");
-	_confining_pressure_uo = _common_redback_material_parameters->GetIfHasParameterObject("confining_pressure");
-	_alpha_1_uo = _common_redback_material_parameters->GetIfHasParameterObject("alpha_1");
-	_alpha_2_uo = _common_redback_material_parameters->GetIfHasParameterObject("alpha_2");
-	_alpha_3_uo = _common_redback_material_parameters->GetIfHasParameterObject("alpha_3");
+	_delta_uo = _common_redback_material_parameters->GetRequiredParameterObject("delta");
 
-	_delta_uo = _common_redback_material_parameters->GetIfHasParameterObject("delta");
+	if (!_is_mechanics_on){
+	  _gr_uo = _common_redback_material_parameters->GetRequiredParameterObject("gr");
+	  _alpha_1_uo = _common_redback_material_parameters->GetRequiredParameterObject("alpha_1");
+	  _alpha_2_uo = _common_redback_material_parameters->GetRequiredParameterObject("alpha_2");
+	  _alpha_3_uo = _common_redback_material_parameters->GetRequiredParameterObject("alpha_3");
+
+	  _confining_pressure_uo = _common_redback_material_parameters->GetRequiredParameterObject("confining_pressure");
+	}
+
+
 	_initial_porosity_uo = _common_redback_material_parameters->GetIfHasParameterObject("initial_porosity");
 	_peclet_number_uo = _common_redback_material_parameters->GetIfHasParameterObject("Peclet_number");
 
@@ -287,7 +292,6 @@ RedbackMaterial_UO::RedbackMaterial_UO(const InputParameters & parameters) :
 	_fluid_thermal_expansion_uo = _common_redback_material_parameters->GetIfHasParameterObject("fluid_thermal_expansion");
 
 	_ref_lewis_nb_uo = _common_redback_material_parameters->GetIfHasParameterObject("ref_lewis_number");
-
 
 
 
@@ -491,6 +495,8 @@ RedbackMaterial_UO::computeRedbackTerms()
   // Compute Mises strain rate
   _mises_strain_rate[ _qp ] = _exponential;
 
+  //std::cout << "computeRedbackTerms A " << std::endl;
+
   if (!_is_mechanics_on)
   {
 
@@ -500,6 +506,7 @@ RedbackMaterial_UO::computeRedbackTerms()
 	const RedbackMaterialParameterUserObject& alpha_3 = *_alpha_3_uo;
 
 	const RedbackMaterialParameterUserObject& confining_pressure = *_confining_pressure_uo;
+
 
     // Compute Mechanical Dissipation
     _mechanical_dissipation_no_mech[ _qp ] =
@@ -512,6 +519,9 @@ RedbackMaterial_UO::computeRedbackTerms()
     _mechanical_dissipation_jac_no_mech[ _qp ] = _mechanical_dissipation_no_mech[ _qp ] * Ar[ _qp ] * delta[ _qp ] /
                                                  (1 + delta[ _qp ] * _T[ _qp ]) / (1 + delta[ _qp ] * _T[ _qp ]);
   }
+
+
+  //std::cout << "computeRedbackTerms B " << std::endl;
 
   if (_is_chemistry_on)
   {
@@ -611,6 +621,8 @@ RedbackMaterial_UO::computeRedbackTerms()
   }
 
 
+ // std::cout << "computeRedbackTerms C " << std::endl;
+
   // Forming the compressibilities of the phases
   const RedbackMaterialParameterUserObject& solid_compressibility = *_solid_compressibility_uo;
   const RedbackMaterialParameterUserObject& fluid_compressibility = *_fluid_compressibility_uo;
@@ -622,6 +634,9 @@ RedbackMaterial_UO::computeRedbackTerms()
                                                                             // phase
   beta_star_m = one_minus_phi_beta_star_s + phi_beta_star_f; // normalized compressibility of the mixture
   _mixture_compressibility[ _qp ] = beta_star_m;
+
+
+  //std::cout << "computeRedbackTerms D " << std::endl;
 
   // convective terms
   if (_are_convective_terms_on)

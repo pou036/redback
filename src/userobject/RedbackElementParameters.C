@@ -7,13 +7,7 @@
 #include "MooseEnum.h"
 
 
-namespace {
 
-  const std::string RedbackElementParametersEnumString
-    = "ar gr confining_pressure alpha_1 alpha_2 alpha_3 "
-      "delta initial_porosity Peclet_number biot_coefficient "
-      "solid_compressibility fluid_compressibility solid_thermal_expansion fluid_thermal_expansion";
-}
 
 template <>
 InputParameters
@@ -55,6 +49,6 @@ DiscreteElementUserObject(parameters)
 MooseEnum
 RedbackElementParameters::GetRedbackElementParametersEnum()
 {
-  return MooseEnum(RedbackElementParametersEnumString);
+  return MooseEnum(RedbackParameters::ElementEnumStrings);
 }
 
