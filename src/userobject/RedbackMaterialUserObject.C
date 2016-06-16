@@ -44,3 +44,11 @@ RedbackMaterialConstant::RedbackMaterialConstant(const InputParameters& paramete
 	/* empty */
 }
 
+
+RedbackMaterialConstant::RedbackMaterialConstant(Real val) :
+		RedbackMaterialParameterUserObject( validParams<RedbackMaterialParameterUserObject>()  ),
+		_value(val)
+{
+	/* empty */
+}
+

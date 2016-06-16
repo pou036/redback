@@ -46,6 +46,7 @@ class RedbackMaterialConstant : public RedbackMaterialParameterUserObject
 {
 public:
 	RedbackMaterialConstant(const InputParameters & parameters);
+	RedbackMaterialConstant(Real value);
 
 	virtual Real value(unsigned int qp) const {return _value;};
 
