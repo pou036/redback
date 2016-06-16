@@ -58,12 +58,12 @@ namespace RedbackParameters{
   		{grStr, 1.0},
   		{alpha1Str, 0.0},
   		{alpha2Str, 0.0},
-  		{alpha3Str, 0.0},/*
+  		{alpha3Str, 0.0},
   		{deltaStr, 0.0},
 		{solidCompressiblityStr, 1.0},
 		{fluidCompressiblityStr, 0.0},
 		{solidThermalExpansionStr, 0.0},
-		{fluidThermalExpansionStr, 0.0}*/
+		{fluidThermalExpansionStr, 0.0}
   };
 
 }

@@ -118,8 +118,8 @@
 
   [./redback_material_parameters_uo]
     type = RedbackElementParameters
-    parameters = 'ar delta gr alpha_1 alpha_2 alpha_3 confining_pressure solid_compressibility fluid_compressibility initial_porosity ref_lewis_number'
-    user_objects = 'ar_uo delta_uo gr_uo alpha_1_uo alpha_2_uo alpha_3_uo confining_pressure_uo solid_compressibility_uo fluid_compressibility_uo initial_porosity_uo ref_lewis_nb_uo'
+    parameters = 'ar delta gr alpha_2 confining_pressure initial_porosity ref_lewis_number'
+    user_objects = 'ar_uo delta_uo gr_uo alpha_2_uo confining_pressure_uo initial_porosity_uo ref_lewis_nb_uo'
   [../]
   
 []
