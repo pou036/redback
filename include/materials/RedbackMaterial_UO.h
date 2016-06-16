@@ -138,25 +138,25 @@ protected:
   const RedbackElementParameters* _common_redback_material_parameters;
 
   // the individual user objects that define the parameters used by the solver
-  const RedbackMaterialParameterUserObject*  _gr;
-  const RedbackMaterialParameterUserObject*  _ar;
-  const RedbackMaterialParameterUserObject*  _confining_pressure;
-  const RedbackMaterialParameterUserObject*  _alpha_1;
-  const RedbackMaterialParameterUserObject*  _alpha_2;
-  const RedbackMaterialParameterUserObject*  _alpha_3;
+  const RedbackMaterialParameterUserObject*  _gr_uo;
+  const RedbackMaterialParameterUserObject*  _ar_uo;
+  const RedbackMaterialParameterUserObject*  _confining_pressure_uo;
+  const RedbackMaterialParameterUserObject*  _alpha_1_uo;
+  const RedbackMaterialParameterUserObject*  _alpha_2_uo;
+  const RedbackMaterialParameterUserObject*  _alpha_3_uo;
 
-  const RedbackMaterialParameterUserObject*  _delta;
-  const RedbackMaterialParameterUserObject*  _initial_porosity;
-  const RedbackMaterialParameterUserObject*  _peclet_number;
+  const RedbackMaterialParameterUserObject*  _delta_uo;
+  const RedbackMaterialParameterUserObject*  _initial_porosity_uo;
+  const RedbackMaterialParameterUserObject*  _peclet_number_uo;
 
-  const RedbackMaterialParameterUserObject*  _biot_coeff;
+  const RedbackMaterialParameterUserObject*  _biot_coeff_uo;
 
-  const RedbackMaterialParameterUserObject*  _solid_compressibility;   // \bar(\beta_s)/\sigma_{ref}
-  const RedbackMaterialParameterUserObject*  _fluid_compressibility;   // \bar(\beta_f)/\sigma_{ref}
-  const RedbackMaterialParameterUserObject*  _solid_thermal_expansion; // \bar(\lambda_s)/ \delta T_ref
-  const RedbackMaterialParameterUserObject*  _fluid_thermal_expansion; // \bar(\lambda_f)/delta T_ref
+  const RedbackMaterialParameterUserObject*  _solid_compressibility_uo;   // \bar(\beta_s)/\sigma_{ref}
+  const RedbackMaterialParameterUserObject*  _fluid_compressibility_uo;   // \bar(\beta_f)/\sigma_{ref}
+  const RedbackMaterialParameterUserObject*  _solid_thermal_expansion_uo; // \bar(\lambda_s)/ \delta T_ref
+  const RedbackMaterialParameterUserObject*  _fluid_thermal_expansion_uo; // \bar(\lambda_f)/delta T_ref
 
-  const RedbackMaterialParameterUserObject*  _ref_lewis_nb;
+  const RedbackMaterialParameterUserObject*  _ref_lewis_nb_uo;
 
   // Idealy terms should be defined based on what is in the common container
   bool _is_mechanics_on, _is_chemistry_on, _are_convective_terms_on;

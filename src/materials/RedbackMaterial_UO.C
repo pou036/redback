@@ -268,25 +268,25 @@ RedbackMaterial_UO::RedbackMaterial_UO(const InputParameters & parameters) :
 	_common_redback_material_parameters = &getUserObjectByName<RedbackElementParameters>( rep_uo_name);
 
 	// extract pointers to active parameters
-	_gr = _common_redback_material_parameters->GetParameterObject("gr");
-	_ar = _common_redback_material_parameters->GetParameterObject("ar");
-	_confining_pressure = _common_redback_material_parameters->GetParameterObject("confining_pressure");
-	_alpha_1 = _common_redback_material_parameters->GetParameterObject("alpha_1");
-	_alpha_2 = _common_redback_material_parameters->GetParameterObject("alpha_2");
-	_alpha_3 = _common_redback_material_parameters->GetParameterObject("alpha_3");
+	_gr_uo = _common_redback_material_parameters->GetParameterObject("gr");
+	_ar_uo = _common_redback_material_parameters->GetParameterObject("ar");
+	_confining_pressure_uo = _common_redback_material_parameters->GetParameterObject("confining_pressure");
+	_alpha_1_uo = _common_redback_material_parameters->GetParameterObject("alpha_1");
+	_alpha_2_uo = _common_redback_material_parameters->GetParameterObject("alpha_2");
+	_alpha_3_uo = _common_redback_material_parameters->GetParameterObject("alpha_3");
 
-	_delta = _common_redback_material_parameters->GetParameterObject("delta");
-	_initial_porosity = _common_redback_material_parameters->GetParameterObject("initial_porosity");
-	_peclet_number = _common_redback_material_parameters->GetParameterObject("Peclet_number");
+	_delta_uo = _common_redback_material_parameters->GetParameterObject("delta");
+	_initial_porosity_uo = _common_redback_material_parameters->GetParameterObject("initial_porosity");
+	_peclet_number_uo = _common_redback_material_parameters->GetParameterObject("Peclet_number");
 
-	_biot_coeff = _common_redback_material_parameters->GetParameterObject("biot_coefficient");
+	_biot_coeff_uo = _common_redback_material_parameters->GetParameterObject("biot_coefficient");
 
-	_solid_compressibility = _common_redback_material_parameters->GetParameterObject("solid_compressibility");
-	_fluid_compressibility = _common_redback_material_parameters->GetParameterObject("fluid_compressibility");
-	_solid_thermal_expansion = _common_redback_material_parameters->GetParameterObject("solid_thermal_expansion");
-	_fluid_thermal_expansion = _common_redback_material_parameters->GetParameterObject("fluid_thermal_expansion");
+	_solid_compressibility_uo = _common_redback_material_parameters->GetParameterObject("solid_compressibility");
+	_fluid_compressibility_uo = _common_redback_material_parameters->GetParameterObject("fluid_compressibility");
+	_solid_thermal_expansion_uo = _common_redback_material_parameters->GetParameterObject("solid_thermal_expansion");
+	_fluid_thermal_expansion_uo = _common_redback_material_parameters->GetParameterObject("fluid_thermal_expansion");
 
-	_ref_lewis_nb = _common_redback_material_parameters->GetParameterObject("ref_lewis_number");
+	_ref_lewis_nb_uo = _common_redback_material_parameters->GetParameterObject("ref_lewis_number");
 
 	// check that required parameters have been set
 
@@ -443,7 +443,7 @@ RedbackMaterial_UO::stepInitQpProperties()
   _delta[ _qp ] = _delta_param;
   */
 
-  _lewis_number[ _qp ] = (*_ref_lewis_nb)[ _qp ];
+  _lewis_number[ _qp ] = (*_ref_lewis_nb_uo)[ _qp ];
   _ar_F[ _qp ] = _ar_F_param;
   _ar_R[ _qp ] = _ar_R_param;
   _mu[ _qp ] = _mu_param;
@@ -454,7 +454,7 @@ RedbackMaterial_UO::stepInitQpProperties()
   _solid_thermal_expansion[ _qp ] = _solid_thermal_expansion_param;
   _fluid_thermal_expansion[ _qp ] = _fluid_thermal_expansion_param;
   */
-  _mixture_density[ _qp ] = (1 - (*_initial_porosity)[ _qp ] ) * _solid_density_param + (*_initial_porosity)[ _qp ] * _fluid_density_param;
+  _mixture_density[ _qp ] = (1 - (*_initial_porosity_uo)[ _qp ] ) * _solid_density_param + (*_initial_porosity_uo)[ _qp ] * _fluid_density_param;
   _mixture_gravity_term[ _qp ] = _mixture_density[ _qp ] * _gravity_param;
   _fluid_gravity_term[ _qp ] = _fluid_density_param* _gravity_param;
 }
@@ -479,8 +479,8 @@ RedbackMaterial_UO::computeRedbackTerms()
   Real beta_star_m, one_minus_phi_beta_star_s, phi_beta_star_f;
 
   // (done to avoid ugly (*_ar)[ _qp ] calls)
-  const RedbackMaterialParameterUserObject& Ar = *_ar;
-  const RedbackMaterialParameterUserObject& delta = *_delta;
+  const RedbackMaterialParameterUserObject& Ar = *_ar_uo;
+  const RedbackMaterialParameterUserObject& delta = *_delta_uo;
 
   // TODO: put flags for all properties depending on activated variables.
 
@@ -495,12 +495,12 @@ RedbackMaterial_UO::computeRedbackTerms()
   if (!_is_mechanics_on)
   {
 
-	const RedbackMaterialParameterUserObject& Gr = *_gr;
-	const RedbackMaterialParameterUserObject& alpha_1 = *_alpha_1;
-	const RedbackMaterialParameterUserObject& alpha_2 = *_alpha_2;
-	const RedbackMaterialParameterUserObject& alpha_3 = *_alpha_3;
+	const RedbackMaterialParameterUserObject& Gr = *_gr_uo;
+	const RedbackMaterialParameterUserObject& alpha_1 = *_alpha_1_uo;
+	const RedbackMaterialParameterUserObject& alpha_2 = *_alpha_2_uo;
+	const RedbackMaterialParameterUserObject& alpha_3 = *_alpha_3_uo;
 
-	const RedbackMaterialParameterUserObject& confining_pressure = *_confining_pressure;
+	const RedbackMaterialParameterUserObject& confining_pressure = *_confining_pressure_uo;
 
     // Compute Mechanical Dissipation
     _mechanical_dissipation_no_mech[ _qp ] =
@@ -527,8 +527,8 @@ RedbackMaterial_UO::computeRedbackTerms()
     */
 
 
-	const RedbackMaterialParameterUserObject& initial_porosity = *_initial_porosity;
-	const RedbackMaterialParameterUserObject& ref_lewis_nb = *_ref_lewis_nb;
+	const RedbackMaterialParameterUserObject& initial_porosity = *_initial_porosity_uo;
+	const RedbackMaterialParameterUserObject& ref_lewis_nb = *_ref_lewis_nb_uo;
 
     // Update chemical Arrhenius term
     _ar_F[ _qp ] += _chemical_ar_F_factor * _concentration[ _qp ];
@@ -613,8 +613,8 @@ RedbackMaterial_UO::computeRedbackTerms()
 
 
   // Forming the compressibilities of the phases
-  const RedbackMaterialParameterUserObject& solid_compressibility = *_solid_compressibility;
-  const RedbackMaterialParameterUserObject& fluid_compressibility = *_fluid_compressibility;
+  const RedbackMaterialParameterUserObject& solid_compressibility = *_solid_compressibility_uo;
+  const RedbackMaterialParameterUserObject& fluid_compressibility = *_fluid_compressibility_uo;
 
   one_minus_phi_beta_star_s = (1 - _total_porosity[ _qp ]) * solid_compressibility[ _qp ]; // normalized
   // compressibility of
@@ -632,8 +632,8 @@ RedbackMaterial_UO::computeRedbackTerms()
     RealVectorValue mixture_velocity, normalized_gravity;
 
 
-    const RedbackMaterialParameterUserObject& solid_thermal_expansion = *_solid_thermal_expansion;
-    const RedbackMaterialParameterUserObject& fluid_thermal_expansion = *_fluid_thermal_expansion;
+    const RedbackMaterialParameterUserObject& solid_thermal_expansion = *_solid_thermal_expansion_uo;
+    const RedbackMaterialParameterUserObject& fluid_thermal_expansion = *_fluid_thermal_expansion_uo;
 
     // Forming the partial densities and gravity terms
     switch (_density_method)
@@ -667,7 +667,7 @@ RedbackMaterial_UO::computeRedbackTerms()
 
     // Forming the velocities through mechanics and Darcy's flow law
 
-    const RedbackMaterialParameterUserObject& peclet_number = *_peclet_number;
+    const RedbackMaterialParameterUserObject& peclet_number = *_peclet_number_uo;
 
     _fluid_velocity[ _qp ] =
       _solid_velocity[ _qp ] -
