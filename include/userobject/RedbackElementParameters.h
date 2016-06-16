@@ -50,6 +50,22 @@ namespace RedbackParameters{
 	  fluidCompressiblityStr  + " " +
 	  solidThermalExpansionStr  + " " +
 	  fluidThermalExpansionStr;
+
+  // Default values
+  // - only add parameters that must be initialized here.
+  const std::map< std::string, Real > DefaultValues{
+  		{arStr, 0.0},
+  		{grStr, 1.0},
+  		{alpha1Str, 0.0},
+  		{alpha2Str, 0.0},
+  		{alpha3Str, 0.0},/*
+  		{deltaStr, 0.0},
+		{solidCompressiblityStr, 1.0},
+		{fluidCompressiblityStr, 0.0},
+		{solidThermalExpansionStr, 0.0},
+		{fluidThermalExpansionStr, 0.0}*/
+  };
+
 }
 
 

@@ -26,8 +26,8 @@ validParams<RedbackMaterial_UO>()
   params.addParam<std::vector<FunctionName> >("init_from_functions__function_names",
                                               "The corresponding names of the functions to be used for the parameters "
                                               "to be initialised as functions.");
-  params.addRangeCheckedParam<Real>("phi0", 0.0, "phi0>=0 & phi0<1", "initial porosity value.");
   /*
+  params.addRangeCheckedParam<Real>("phi0", 0.0, "phi0>=0 & phi0<1", "initial porosity value.");
   params.addRangeCheckedParam<Real>("gr", 1.0, "gr>=0", "Gruntfest number.");
   params.addParam<Real>("ref_lewis_nb", 1.0, "Reference Lewis number.");
   params.addParam<Real>("ar", 0.0, "Arrhenius number.");
@@ -91,9 +91,9 @@ validParams<RedbackMaterial_UO>()
                                     "chemistry contributing to porosity (see "
                                     "documentation)");
   params.addParam<Real>("pressurization_coefficient", 0, "Pressurization coefficient (Lambda).");
-  params.addParam<Real>("Peclet_number", 1, "Peclet number");
 
   /*
+  params.addParam<Real>("Peclet_number", 1, "Peclet number");
   params.addParam<Real>("solid_compressibility",
                         1,
                         "solid compressibility (beta^{(s)} in "

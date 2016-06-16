@@ -45,8 +45,8 @@ RedbackMaterialConstant::RedbackMaterialConstant(const InputParameters& paramete
 }
 
 
-RedbackMaterialConstant::RedbackMaterialConstant(Real val) :
-		RedbackMaterialParameterUserObject( validParams<RedbackMaterialParameterUserObject>()  ),
+RedbackMaterialConstant::RedbackMaterialConstant(const InputParameters&  params, Real val) :
+		RedbackMaterialParameterUserObject( params  ),
 		_value(val)
 {
 	/* empty */

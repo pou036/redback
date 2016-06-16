@@ -43,26 +43,20 @@ DiscreteElementUserObject(parameters)
 		_userObjectMap[  paramTypes.get(i) ] = &getUserObjectByName<RedbackMaterialParameterUserObject>( user_object_names[i]);
 	}
 
-	// Could set default values (constants) earlier ...
-	std::vector<std::pair<std::string, Real > > defaultValues{
-		{RedbackParameters::arStr, 0.0},
-		{RedbackParameters::grStr, 1.0},
-		{RedbackParameters::alpha1Str, 0.0},
-		{RedbackParameters::alpha2Str, 0.0},
-		{RedbackParameters::alpha3Str, 0.0}
-	};
 
-	for( const std::pair<std::string, Real >& keyValue : defaultValues  ){
+
+	for( const std::pair<std::string, Real >& keyValue : RedbackParameters::DefaultValues  ){
 	  const std::string& paramStr = keyValue.first;
 	  const Real& val = keyValue.second;
 
 	  MooseEnum indx = RedbackElementParameterEnum( paramStr  );
 	  if( !HasParameterObject( (int) indx ) ){
 
-		_default_objects[  (int) indx ] = std::make_shared<RedbackMaterialConstant>(val);
+		_default_objects[  (int) indx ] = std::make_shared<RedbackMaterialConstant>(parameters,val); // nb somewhat dodgy - using parameters from this class to initialize the constant fields
 		_userObjectMap[  (int) indx ] = &( *_default_objects[ (int) indx ] );
 	  }
 	}
+
 
 
 
