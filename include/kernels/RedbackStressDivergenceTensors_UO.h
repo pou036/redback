@@ -1,29 +1,31 @@
-#ifndef REDBACKSTRESSDIVERGENCETENSORS_H
-#define REDBACKSTRESSDIVERGENCETENSORS_H
+#ifndef RedbackStressDivergenceTensors_UO_H
+#define RedbackStressDivergenceTensors_UO_H
 
 #include "Kernel.h"
 #include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 
+#include "RedbackElementParameters.h"
+
 // Forward Declarations
-class RedbackStressDivergenceTensors;
+class RedbackStressDivergenceTensors_UO;
 class RankFourTensor;
 class RankTwoTensor;
 
 template <>
-InputParameters validParams<RedbackStressDivergenceTensors>();
+InputParameters validParams<RedbackStressDivergenceTensors_UO>();
 
 /**
- * RedbackStressDivergenceTensors mostly copies from StressDivergence.  There
+ * RedbackStressDivergenceTensors_UO mostly copies from StressDivergence.  There
  * are small changes to use
  * RankFourTensor and RankTwoTensors instead of SymmElasticityTensors and
  * SymmTensors.  This is done
  * to allow for more mathematical transparency.
  */
-class RedbackStressDivergenceTensors : public Kernel
+class RedbackStressDivergenceTensors_UO : public Kernel
 {
 public:
-  RedbackStressDivergenceTensors(const InputParameters & parameters);
+  RedbackStressDivergenceTensors_UO(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
@@ -39,7 +41,12 @@ protected:
 
   const unsigned int _component;
 
-  const MaterialProperty<Real> & _biot_coeff;
+  //const MaterialProperty<Real> & _biot_coeff;
+
+  // the container that holds all of the redback material parameters
+  // NB it is "common" in the sense that it is shared by more than one entity
+  const RedbackElementParameters* _common_redback_material_parameters;
+  const RedbackMaterialParameterUserObject*  _biot_coeff_uo;
 
 private:
   const bool _xdisp_coupled;
@@ -57,4 +64,4 @@ private:
   const MaterialProperty<RealVectorValue> & _gravity_term;
 };
 
-#endif // REDBACKSTRESSDIVERGENCETENSORS_H
+#endif // RedbackStressDivergenceTensors_UO_H

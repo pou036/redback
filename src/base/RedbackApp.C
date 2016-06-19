@@ -22,6 +22,7 @@
 // Actions
 #include "RedbackAction.h"
 #include "RedbackMechAction.h"
+#include "RedbackMechAction_UO.h"
 
 // Boundary conditions
 #include "FunctionDirichletTransverseBC.h"
@@ -42,6 +43,7 @@
 #include "RedbackNavier.h"
 #include "RedbackPoromechanics.h"
 #include "RedbackStressDivergenceTensors.h"
+#include "RedbackStressDivergenceTensors_UO.h"
 #include "RedbackThermalConvection.h"
 #include "RedbackThermalDiffusion.h"
 #include "RedbackThermalPressurization.h"
@@ -63,6 +65,7 @@
 #include "RedbackMechMaterialCC.h"
 #include "RedbackMechMaterialCCanisotropic.h"
 #include "RedbackMechMaterialElastic.h"
+#include "RedbackMechMaterialElastic_UO.h"
 
 // MeshModifiers
 #include "ElementFileSubdomain.h"
@@ -139,6 +142,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackNavier);
   registerKernel(RedbackPoromechanics);
   registerKernel(RedbackStressDivergenceTensors);
+  registerKernel(RedbackStressDivergenceTensors_UO);
   registerKernel(RedbackThermalConvection);
   registerKernel(RedbackThermalDiffusion);
   registerKernel(RedbackThermalPressurization);
@@ -157,6 +161,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialCC);
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
+  registerMaterial(RedbackMechMaterial_Elastic_UO);
 
   registerMeshModifier(ElementFileSubdomain);
 
@@ -185,6 +190,8 @@ RedbackApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 #define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
   syntax.registerActionSyntax("RedbackMechAction", "RedbackMechAction/*");
   registerAction(RedbackMechAction, "add_kernel");
+  syntax.registerActionSyntax("RedbackMechAction_UO", "RedbackMechAction_UO/*");
+  registerAction(RedbackMechAction_UO, "add_kernel");
 // syntax.registerActionSyntax("RedbackAction", "RedbackAction/*");
 // registerAction(RedbackMechAction, "add_aux_variable");
 #undef registerAction

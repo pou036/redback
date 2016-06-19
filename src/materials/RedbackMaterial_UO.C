@@ -284,7 +284,7 @@ RedbackMaterial_UO::RedbackMaterial_UO(const InputParameters & parameters) :
 	_initial_porosity_uo = _common_redback_material_parameters->GetIfHasParameterObject("initial_porosity");
 	_peclet_number_uo = _common_redback_material_parameters->GetIfHasParameterObject("Peclet_number");
 
-	_biot_coeff_uo = _common_redback_material_parameters->GetIfHasParameterObject("biot_coefficient");
+	//_biot_coeff_uo = _common_redback_material_parameters->GetIfHasParameterObject("biot_coefficient");
 
 	_solid_compressibility_uo = _common_redback_material_parameters->GetIfHasParameterObject("solid_compressibility");
 	_fluid_compressibility_uo = _common_redback_material_parameters->GetIfHasParameterObject("fluid_compressibility");

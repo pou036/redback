@@ -150,7 +150,7 @@ protected:
   const RedbackMaterialParameterUserObject*  _initial_porosity_uo;
   const RedbackMaterialParameterUserObject*  _peclet_number_uo;
 
-  const RedbackMaterialParameterUserObject*  _biot_coeff_uo;
+  //const RedbackMaterialParameterUserObject*  _biot_coeff_uo;
 
   const RedbackMaterialParameterUserObject*  _solid_compressibility_uo;   // \bar(\beta_s)/\sigma_{ref}
   const RedbackMaterialParameterUserObject*  _fluid_compressibility_uo;   // \bar(\beta_f)/\sigma_{ref}

@@ -93,7 +93,8 @@ namespace RedbackParameters{
 		{solidCompressiblity.str, 1.0},
 		{fluidCompressiblity.str, 0.0},
 		{solidThermalExpansion.str, 0.0},
-		{fluidThermalExpansion.str, 0.0}
+		{fluidThermalExpansion.str, 0.0},
+		{PecletNumber.str,1.0}
   };
 
 }
