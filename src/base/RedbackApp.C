@@ -37,6 +37,7 @@
 #include "RedbackChemPressure.h"
 #include "RedbackFluidDivergence.h"
 #include "RedbackFluidStressDivergenceTensors.h"
+#include "RedbackFluidStressDivergenceTensors_UO.h"
 #include "RedbackMassConvection.h"
 #include "RedbackMassDiffusion.h"
 #include "RedbackMechDissip.h"
@@ -57,6 +58,7 @@
 
 // Materials
 #include "RedbackFluidMaterial.h"
+#include "RedbackFluidMaterial_UO.h"
 #include "ImageProcessing.h"
 #include "RedbackMaterial.h"
 #include "RedbackMaterial_UO.h"
@@ -140,6 +142,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackChemPressure);
   registerKernel(RedbackFluidDivergence);
   registerKernel(RedbackFluidStressDivergenceTensors);
+  registerKernel(RedbackFluidStressDivergenceTensors_UO);
   registerKernel(RedbackMassConvection);
   registerKernel(RedbackMassDiffusion);
   registerKernel(RedbackMechDissip);
@@ -157,6 +160,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerDiracKernel(FunctionPointSource);
 
   registerMaterial(RedbackFluidMaterial);
+  registerMaterial(RedbackFluidMaterial_UO);
   registerMaterial(ImageProcessing);
   registerMaterial(RedbackMaterial);
   registerMaterial(RedbackMaterial_UO);

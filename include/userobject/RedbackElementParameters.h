@@ -12,12 +12,14 @@
 
 namespace RedbackParameters{
 
+
+  // Parameter String and descriptions
+
   struct RedbackParam{
 	  std::string str;
 	  std::string description;
 	 // int index;
   };
-  //const RedbackParam ar{"ar",0};
 
   const RedbackParam ar{"ar","Arrhenius number."};
   const RedbackParam gr{"gr","Gruntfest number."};
@@ -40,6 +42,9 @@ namespace RedbackParameters{
   const RedbackParam solidThermalExpansion{"solid_thermal_expansion","solid expansion (lambda^{(s)} in 1/K)"};
   const RedbackParam fluidThermalExpansion{"fluid_thermal_expansion","fluid expansion (lambda^{(f)} in 1/K)"};
 
+  const RedbackParam ReynoldsNumber{"Reynolds_number","Reynolds number"};
+  const RedbackParam FroudeNumber{"Froude_number","Froude number"};
+
   const std::vector<const RedbackParam> ParameterList{
 	  ar,
 	  gr,
@@ -47,13 +52,14 @@ namespace RedbackParameters{
 	  alpha1,alpha2,alpha3,
 	  delta,
 	  initialPorosity,
-	  PecletNumber,
+	  PecletNumber, ReynoldsNumber, FroudeNumber,
 	  biotCoefficient,refLewisNumber,
 	  solidCompressiblity,
 	  fluidCompressiblity,solidThermalExpansion,
 	  fluidThermalExpansion
   };
 
+  // helper function used to construct enum string
   inline
   std::string JoinStrings(const std::vector<const RedbackParam>& paramVector , const std::string& separator = " "){
 	  std::string rv = "";
@@ -62,24 +68,9 @@ namespace RedbackParameters{
 	  return rv;
   }
 
+  // string used to construct moose enums
   const std::string ElementEnumString = JoinStrings(ParameterList);
-  /*
-    = arStr             + " " +
-	  grStr              + " " +
-	  confiningPressureStr + " " +
-	  alpha1Str          + " " +
-	  alpha2Str          + " " +
-	  alpha3Str          + " " +
-	  deltaStr           + " " +
-	  initialPorosityStr + " " +
-	  PecletNumberStr    + " " +
-	  biotCoefficientStr + " " +
-	  refLewisNumberStr  + " " +
-	  solidCompressiblityStr  + " " +
-	  fluidCompressiblityStr  + " " +
-	  solidThermalExpansionStr  + " " +
-	  fluidThermalExpansionStr;
-	  */
+
 
   // Default values
   // - only add parameters that *must* be initialized here.
@@ -90,11 +81,12 @@ namespace RedbackParameters{
   		{alpha2.str, 0.0},
   		{alpha3.str, 0.0},
   		{delta.str, 0.0},
-		{solidCompressiblity.str, 1.0},
-		{fluidCompressiblity.str, 0.0},
+		{solidCompressiblity.str, 1.0},  // TINY may work better here
+		{fluidCompressiblity.str, 1.0},  // TINY may work better here
 		{solidThermalExpansion.str, 0.0},
 		{fluidThermalExpansion.str, 0.0},
-		{PecletNumber.str,1.0}
+		{PecletNumber.str,1.0},
+		{FroudeNumber.str,1.0}
   };
 
 }
