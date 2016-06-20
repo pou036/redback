@@ -22,7 +22,8 @@ validParams<FunctionLogNormalDistributionIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<Real>("mean", "Mean value of lognormal distribution function (NOT, of the log10 of it!)");
-  params.addRequiredParam<Real>("standard_deviation", "Standard deviation of the log10 of the lognormal distribution function");
+  params.addRequiredParam<Real>("standard_deviation",
+                                "Standard deviation of the log10 of the lognormal distribution function");
   params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");
   params.addParam<Real>("minimum", -1e99, "minimum value (if you want to cap the range of available values)");
   params.addParam<Real>("maximum", 1e99, "minimum value (if you want to cap the range of available values)");

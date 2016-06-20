@@ -18,7 +18,7 @@
 // Forward Declarations
 class RedbackRandomFunction;
 
-template<>
+template <>
 InputParameters validParams<RedbackRandomFunction>();
 
 /**
@@ -27,18 +27,14 @@ InputParameters validParams<RedbackRandomFunction>();
 class RedbackRandomFunction : public Function
 {
 public:
-
   RedbackRandomFunction(const InputParameters & parameters);
 
   virtual Real value(Real t, const Point & p);
 
 protected:
-
   Real _min;
   Real _max;
   Real _range;
-
 };
 
-#endif //REDBACKRANDOMFUNCTION
-
+#endif // REDBACKRANDOMFUNCTION

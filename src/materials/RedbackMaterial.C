@@ -538,8 +538,7 @@ RedbackMaterial::computeRedbackTerms()
   if (_inverse_lewis_number_tilde[ _qp ] != 0)
   {
     // to include modifications from multi-app for example
-    Real inverse_lewis_number =
-      1 / _lewis_number[ _qp ] + _inverse_lewis_number_tilde[ _qp ];
+    Real inverse_lewis_number = 1 / _lewis_number[ _qp ] + _inverse_lewis_number_tilde[ _qp ];
     _lewis_number[ _qp ] = 1 / inverse_lewis_number;
   }
 
