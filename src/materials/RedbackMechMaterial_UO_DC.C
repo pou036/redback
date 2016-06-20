@@ -12,11 +12,11 @@
 
 #include "Function.h"
 #include "libmesh/quadrature.h"
-#include "RedbackMechMaterial_UO.h"
+#include "RedbackMechMaterial_UO_DC.h"
 #include "MooseMesh.h"
 
 /**
-RedbackMechMaterial_UO integrates the rate dependent plasticity model of Perzyna
+RedbackMechMaterial_UO_DC integrates the rate dependent plasticity model of Perzyna
 (Overstress model) in a
 finite strain framework using return mapping algorithm. Ideally this material
 should inherit from both
@@ -36,7 +36,7 @@ plastic strain has to be specified by the user.
 
 template <>
 InputParameters
-validParams<RedbackMechMaterial_UO>()
+validParams<RedbackMechMaterial_UO_DC>()
 {
   InputParameters params = validParams<Material>();
 
@@ -83,7 +83,7 @@ validParams<RedbackMechMaterial_UO>()
   params.addParam<Real>(
     "healing_coefficient", 0.0, "The fraction of energies used in healing flow law (e.g. E_H/E_H0)");
   params.addParam<MooseEnum>("damage_method",
-                             RedbackMechMaterial_UO::damageMethodEnum() = "CreepDamage",
+                             RedbackMechMaterial_UO_DC::damageMethodEnum() = "CreepDamage",
                              "The method to describe damage evolution");
 
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
@@ -95,7 +95,7 @@ validParams<RedbackMechMaterial_UO>()
   return params;
 }
 
-RedbackMechMaterial_UO::RedbackMechMaterial_UO(const InputParameters & parameters) :
+RedbackMechMaterial_UO_DC::RedbackMechMaterial_UO_DC(const InputParameters & parameters) :
     Material(parameters),
     // Copy-paste from TensorMechanicsMaterial.C
     _grad_disp_x(coupledGradient("disp_x")),
@@ -236,13 +236,13 @@ RedbackMechMaterial_UO::RedbackMechMaterial_UO(const InputParameters & parameter
 }
 
 MooseEnum
-RedbackMechMaterial_UO::damageMethodEnum()
+RedbackMechMaterial_UO_DC::damageMethodEnum()
 {
   return MooseEnum("BrittleDamage CreepDamage BreakageMechanics DamageHealing FromMultiApp");
 }
 
 void
-RedbackMechMaterial_UO::initQpStatefulProperties()
+RedbackMechMaterial_UO_DC::initQpStatefulProperties()
 {
   // called only once at the very beginning of the simulation
   _total_strain[ _qp ].zero();
@@ -276,32 +276,34 @@ RedbackMechMaterial_UO::initQpStatefulProperties()
 }
 
 void
-RedbackMechMaterial_UO::computeProperties()
+RedbackMechMaterial_UO_DC::computeProperties()
 {
-  computeStrain();
+  // computeStrain();
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
     stepInitQpProperties();
     computeQpElasticityTensor();
+    // this applies damage rule to elasticity tensor - do externally? - or add a user function
     computeQpStress();
   }
 }
 
 void
-RedbackMechMaterial_UO::stepInitQpProperties()
+RedbackMechMaterial_UO_DC::stepInitQpProperties()
 {
 }
 
 void
-RedbackMechMaterial_UO::computeQpElasticityTensor()
+RedbackMechMaterial_UO_DC::computeQpElasticityTensor()
 {
   // Fill in the matrix stiffness material property
   _elasticity_tensor[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
   _Jacobian_mult[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
 }
 
+/*
 void
-RedbackMechMaterial_UO::computeStrain()
+RedbackMechMaterial_UO_DC::computeStrain()
 {
   // Method from Rashid, 1993
   std::vector<RankTwoTensor> Fhat;
@@ -351,15 +353,16 @@ RedbackMechMaterial_UO::computeStrain()
     _dfgrd[ _qp ] *= factor;                                           // Volumetric locking correction
   }
 }
+*/
 
 void
-RedbackMechMaterial_UO::computeQpStrain()
+RedbackMechMaterial_UO_DC::computeQpStrain()
 {
   mooseError("Wrong computeQpStrain called in FiniteStrainMaterial");
 }
 
 void
-RedbackMechMaterial_UO::computeQpStress()
+RedbackMechMaterial_UO_DC::computeQpStress()
 {
   RankTwoTensor dp, sig;
   Real p_y, q_y; // volumetric (p) and deviatoric (q) projections of yield stress
@@ -414,7 +417,7 @@ RedbackMechMaterial_UO::computeQpStress()
 
 // Delta Function
 Real
-RedbackMechMaterial_UO::deltaFunc(const unsigned int i, const unsigned int j)
+RedbackMechMaterial_UO_DC::deltaFunc(const unsigned int i, const unsigned int j)
 {
   if (i == j)
     return 1.0;
@@ -424,7 +427,7 @@ RedbackMechMaterial_UO::deltaFunc(const unsigned int i, const unsigned int j)
 
 // Obtain yield stress for a given equivalent plastic strain (input)
 Real
-RedbackMechMaterial_UO::getYieldStress(const Real eqpe)
+RedbackMechMaterial_UO_DC::getYieldStress(const Real eqpe)
 {
   unsigned nsize;
 
@@ -459,7 +462,7 @@ RedbackMechMaterial_UO::getYieldStress(const Real eqpe)
 }
 
 Real
-RedbackMechMaterial_UO::macaulayBracket(Real val)
+RedbackMechMaterial_UO_DC::macaulayBracket(Real val)
 {
   if (val > 0.0)
     return val;
@@ -468,7 +471,7 @@ RedbackMechMaterial_UO::macaulayBracket(Real val)
 }
 
 void
-RedbackMechMaterial_UO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y)
+RedbackMechMaterial_UO_DC::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y)
 {
   Real delta_phi_mech_el, delta_phi_mech_pl; // elastic and plastic
                                              // delta_porosity components for
@@ -596,7 +599,7 @@ RedbackMechMaterial_UO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real 
 }
 
 void
-RedbackMechMaterial_UO::computeQpStrain(const RankTwoTensor & Fhat)
+RedbackMechMaterial_UO_DC::computeQpStrain(const RankTwoTensor & Fhat)
 {
 
   const RedbackMaterialParameterUserObject& solid_thermal_expansion = *_solid_thermal_expansion_uo;
@@ -683,13 +686,13 @@ RedbackMechMaterial_UO::computeQpStrain(const RankTwoTensor & Fhat)
 }
 
 Real
-RedbackMechMaterial_UO::getSigEqv(const RankTwoTensor & stress)
+RedbackMechMaterial_UO_DC::getSigEqv(const RankTwoTensor & stress)
 {
   return std::pow(3 * stress.secondInvariant(), 0.5);
 }
 
 void
-RedbackMechMaterial_UO::returnMap(const RankTwoTensor & sig_old,
+RedbackMechMaterial_UO_DC::returnMap(const RankTwoTensor & sig_old,
                                const RankTwoTensor & delta_d,
                                const RankFourTensor & E_ijkl,
                                RankTwoTensor & dp,
@@ -818,7 +821,7 @@ RedbackMechMaterial_UO::returnMap(const RankTwoTensor & sig_old,
 }
 
 void
-RedbackMechMaterial_UO::get_py_qy_damaged(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterial_UO_DC::get_py_qy_damaged(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
 {
   get_py_qy(p, q, p_y, q_y, yield_stress);
   p_y *= (1 - _damage[ _qp ]);
@@ -826,13 +829,13 @@ RedbackMechMaterial_UO::get_py_qy_damaged(Real p, Real q, Real & p_y, Real & q_y
 }
 
 /*void
-RedbackMechMaterial_UO::form_damage_kernels(Real cohesion)
+RedbackMechMaterial_UO_DC::form_damage_kernels(Real cohesion)
 {
   mooseError("form_damage_kernels must be overwritten in children class");
 }*/
 
 void
-RedbackMechMaterial_UO::formDamageDissipation(RankTwoTensor & sig)
+RedbackMechMaterial_UO_DC::formDamageDissipation(RankTwoTensor & sig)
 {
   /* The damage potential is being formed in this function. We start by
    * postulating a helmholtz free energy of the form:
@@ -871,7 +874,7 @@ RedbackMechMaterial_UO::formDamageDissipation(RankTwoTensor & sig)
 }
 
 void
-RedbackMechMaterial_UO::form_damage_kernels(Real cohesion)
+RedbackMechMaterial_UO_DC::form_damage_kernels(Real cohesion)
 {
   // update damage evolution law from selected method
   switch (_damage_method)
@@ -894,7 +897,7 @@ RedbackMechMaterial_UO::form_damage_kernels(Real cohesion)
 }
 
 void
-RedbackMechMaterial_UO::formBrittleDamage()
+RedbackMechMaterial_UO_DC::formBrittleDamage()
 {
   Real plastic_damage, healing_damage;
   Real kachanov, exponent_kachanov;
@@ -911,7 +914,7 @@ RedbackMechMaterial_UO::formBrittleDamage()
 }
 
 void
-RedbackMechMaterial_UO::formCreepDamage(Real cohesion)
+RedbackMechMaterial_UO_DC::formCreepDamage(Real cohesion)
 {
   Real plastic_damage, healing_damage;
   Real lambda_dot;
