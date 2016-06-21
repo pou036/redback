@@ -540,10 +540,10 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
      std::fabs(_mean_stress[ _qp ] * std::pow(macaulayBracket(_mean_stress[ _qp ] - p_y), _exponent)));
 
   // Begin of the chemical degradation method of Hu and Hueckel 2013 (doi:10.1680/geot.SIP13.P.020)
-  // _mass_removal_rate[_qp] = 0;
+  _mass_removal_rate[_qp] = 0;
   Real total_energy_input = sig.doubleContraction(instantaneous_strain_rate);
 
-  _mass_removal_rate[ _qp ] = _chemo_mechanical_porosity_coeff * (1 + total_energy_input);
+  // _mass_removal_rate[ _qp ] = _chemo_mechanical_porosity_coeff * (1 + total_energy_input);
   if (_volumetric_strain[ _qp ] > 0)
   {
     _mass_removal_rate[ _qp ] = _chemo_mechanical_porosity_coeff * _volumetric_strain[ _qp ];
