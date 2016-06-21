@@ -74,8 +74,8 @@ validParams<RedbackMechMaterial_UO_DC>()
     "chemo_mechanical_porosity_coeff", 1.0, "The coefficient of volumetric plastic strain in chemical porosity");
 
   params.addCoupledVar("pore_pres", 0.0, "Dimensionless pore pressure");
-  params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
-  params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
+ // params.addRequiredParam<Real>("youngs_modulus", "Youngs modulus.");
+ //  params.addRequiredParam<Real>("poisson_ratio", "Poisson ratio.");
 
   // For the damage mechanics functionality
   params.addParam<Real>("damage_coefficient", 0.0, "The fraction of energies used in damage flow law (e.g. E_D/E_D0)");
@@ -107,18 +107,18 @@ RedbackMechMaterial_UO_DC::RedbackMechMaterial_UO_DC(const InputParameters & par
     _stress(declareProperty<RankTwoTensor>("stress")),
     _total_strain(declareProperty<RankTwoTensor>("total_strain")),
     _elastic_strain(declareProperty<RankTwoTensor>("elastic_strain")),
-    _elasticity_tensor(declareProperty<RankFourTensor>("elasticity_tensor")),
+    _elasticity_tensor(getMaterialPropertyByName<RankFourTensor>("elasticity_tensor")),
     _Jacobian_mult(declareProperty<RankFourTensor>("Jacobian_mult")),
     // _d_stress_dT(declareProperty<RankTwoTensor>("d_stress_dT")),
-    _Cijkl(),
+   // _Cijkl(),
 
     // Copy-paste from FiniteStrainMaterial.C
-    _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),
-    _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
+    _strain_rate(getMaterialPropertyByName<RankTwoTensor>("strain_rate")),
+    _strain_increment(getMaterialPropertyByName<RankTwoTensor>("strain_increment")),
     _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
     _elastic_strain_old(declarePropertyOld<RankTwoTensor>("elastic_strain")),
     _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
-    _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment")),
+    _rotation_increment(getMaterialPropertyByName<RankTwoTensor>("rotation_increment")),
     _dfgrd(declareProperty<RankTwoTensor>("deformation gradient")),
 
     // Copy-paste from FiniteStrainPlasticMaterial.C
@@ -134,8 +134,8 @@ RedbackMechMaterial_UO_DC::RedbackMechMaterial_UO_DC(const InputParameters & par
     _chemo_mechanical_porosity_coeff(getParam<Real>("chemo_mechanical_porosity_coeff")),
 
     // Redback
-    _youngs_modulus(getParam<Real>("youngs_modulus")),
-    _poisson_ratio(getParam<Real>("poisson_ratio")),
+   // _youngs_modulus(getParam<Real>("youngs_modulus")),
+   // _poisson_ratio(getParam<Real>("poisson_ratio")),
     _mises_stress(declareProperty<Real>("mises_stress")),
     _mean_stress(declareProperty<Real>("mean_stress")),
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
@@ -217,9 +217,10 @@ RedbackMechMaterial_UO_DC::RedbackMechMaterial_UO_DC(const InputParameters & par
   _peclet_number_uo = _common_redback_material_parameters->GetRequiredParameterObject(RedbackParameters::PecletNumber.str);
 
 
-// ultimately these should be set by the elastic component
-  Real E = _youngs_modulus;
-  Real nu = _poisson_ratio;
+// these should be set by the elastic component
+  /*
+//  Real E = _youngs_modulus;
+//  Real nu = _poisson_ratio;
   Real l1 = E * nu / (1 + nu) / (1 - 2 * nu); // First Lame modulus
   Real l2 = 0.5 * E / (1 + nu);               // Second Lame modulus (shear)
   Real input_array[] = { l1, l2 };
@@ -231,7 +232,7 @@ RedbackMechMaterial_UO_DC::RedbackMechMaterial_UO_DC(const InputParameters & par
                                        // elasticity tensor.
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int)fill_method);
 
-
+*/
 
 }
 
@@ -250,11 +251,11 @@ RedbackMechMaterial_UO_DC::initQpStatefulProperties()
   _stress[ _qp ].zero();
   _plastic_strain[ _qp ].zero();
   _eqv_plastic_strain[ _qp ] = 0.0;
-  _elasticity_tensor[ _qp ].zero();
+  //_elasticity_tensor[ _qp ].zero();
   _Jacobian_mult[ _qp ].zero();
-  _strain_rate[ _qp ].zero();
-  _strain_increment[ _qp ].zero();
-  _rotation_increment[ _qp ].zero();
+ // _strain_rate[ _qp ].zero();
+ // _strain_increment[ _qp ].zero();
+ // _rotation_increment[ _qp ].zero();
   _dfgrd[ _qp ].zero();
 
   // Redback properties
@@ -281,9 +282,8 @@ RedbackMechMaterial_UO_DC::computeProperties()
   // computeStrain();
   for (_qp = 0; _qp < _qrule->n_points(); ++_qp)
   {
-    stepInitQpProperties();
-    computeQpElasticityTensor();
-    // this applies damage rule to elasticity tensor - do externally? - or add a user function
+   // stepInitQpProperties();
+    computeQpElasticityTensor();  // this applies damage rule to elasticity tensor - do externally? - or add a user function
     computeQpStress();
   }
 }
@@ -297,8 +297,8 @@ void
 RedbackMechMaterial_UO_DC::computeQpElasticityTensor()
 {
   // Fill in the matrix stiffness material property
-  _elasticity_tensor[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
-  _Jacobian_mult[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
+  //_elasticity_tensor[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
+  _Jacobian_mult[ _qp ] = _elasticity_tensor[ _qp ]; // _Cijkl  * (1 - _damage[ _qp ]);
 }
 
 /*
@@ -358,7 +358,7 @@ RedbackMechMaterial_UO_DC::computeStrain()
 void
 RedbackMechMaterial_UO_DC::computeQpStrain()
 {
-  mooseError("Wrong computeQpStrain called in FiniteStrainMaterial");
+  mooseError("Wrong computeQpStrain called in RedbackMechMaterial_UO_DC");
 }
 
 void
@@ -602,6 +602,9 @@ void
 RedbackMechMaterial_UO_DC::computeQpStrain(const RankTwoTensor & Fhat)
 {
 
+	// this should no longer be needed
+/*
+
   const RedbackMaterialParameterUserObject& solid_thermal_expansion = *_solid_thermal_expansion_uo;
 
   // Cinv - I = A A^T - A - A^T;
@@ -614,7 +617,7 @@ RedbackMechMaterial_UO_DC::computeQpStrain(const RankTwoTensor & Fhat)
   // 1/4*(Chat^-1 - I)^2 + ...
   _strain_increment[ _qp ] = -Cinv_I * 0.5 + Cinv_I * Cinv_I * 0.25;
 
-  /* This line calculates the thermo-elastic strain in incremental form, as
+  * This line calculates the thermo-elastic strain in incremental form, as
    * follows :
    * thermal_strain = _solid_thermal_expansion * (T - T0)
    * thermal_strain_increment = thermal_strain - thermal_strain_old
@@ -623,16 +626,10 @@ RedbackMechMaterial_UO_DC::computeQpStrain(const RankTwoTensor & Fhat)
    *                          = _solid_thermal_expansion * (T - T_old)
    * The negative sign is to satisfy the sign convention Redback has adopted
    * (positive fields in extension)
-   */
+   *
   _strain_increment[ _qp ].addIa(-solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T_old[ _qp ]));
 
-  /*RankTwoTensor Chat = Fhat.transpose()*Fhat;
-  RankTwoTensor A = Chat;
-  A.addIa(-1.0);
 
-  RankTwoTensor B = Chat*0.25;
-  B.addIa(-0.75);
-  _strain_increment[_qp] = -B*A;*/
 
   RankTwoTensor D = _strain_increment[ _qp ] / _dt;
   _strain_rate[ _qp ] = D;
@@ -647,12 +644,7 @@ RedbackMechMaterial_UO_DC::computeQpStrain(const RankTwoTensor & Fhat)
   Real q = (a[ 0 ] * a[ 0 ] + a[ 1 ] * a[ 1 ] + a[ 2 ] * a[ 2 ]) / 4.0;
   Real trFhatinv_1 = invFhat.trace() - 1.0;
   Real p = trFhatinv_1 * trFhatinv_1 / 4.0;
-  // Real y = 1.0/((q + p)*(q + p)*(q + p));
 
-  /*Real C1 = std::sqrt(p * (1 + (p*(q+q+(q+p))) * (1-(q+p)) * y));
-  Real C2 = 0.125 + q * 0.03125 * (p*p - 12*(p-1)) / (p*p);
-  Real C3 = 0.5 * std::sqrt( (p*q*(3-q) + p*p*p + q*q)*y );
-  */
 
   Real C1 = std::sqrt(p + 3.0 * p * p * (1.0 - (p + q)) / ((p + q) * (p + q)) -
                       2.0 * p * p * p * (1 - (p + q)) / ((p + q) * (p + q) * (p + q))); // cos theta_a
@@ -683,6 +675,7 @@ RedbackMechMaterial_UO_DC::computeQpStrain(const RankTwoTensor & Fhat)
   R_incr(2, 0) += C3 * a[ 1 ];
   R_incr(2, 1) -= C3 * a[ 0 ];
   _rotation_increment[ _qp ] = R_incr.transpose();
+  */
 }
 
 Real
@@ -854,9 +847,21 @@ RedbackMechMaterial_UO_DC::formDamageDissipation(RankTwoTensor & sig)
   Real Psi0, Psi0_vol, Psi0_dev;
   Real damage_potential, damage_rate;
 
+  /*
   bulk_modulus =
     _youngs_modulus * _poisson_ratio / (1 + _poisson_ratio) / (1 - 2 * _poisson_ratio); // First Lame modulus
-  shear_modulus = 0.5 * _youngs_modulus / (1 + _poisson_ratio);                         // Second Lame modulus (shear)
+  shear_modulus = 0.5 * _youngs_modulus / (1 + _poisson_ratio);   // Second Lame modulus (shear)
+
+  */
+
+  // fixme - not clear if we should be using the original _Cijkl here - do we need the moduli before damage is applied?
+  // also this assumes linear isotropic (& 2D) material
+  shear_modulus = _elasticity_tensor[ _qp ](0,1,0,1);  // 1d?? / anisotropic??
+  bulk_modulus = _elasticity_tensor[ _qp ](0,0,0,0) - (4.0/3.0)*shear_modulus;
+
+  //std::cout  << "shear_modulus " << shear_modulus << std::endl;
+  //std::cout  << "bulk_modulus " << bulk_modulus << std::endl;
+
 
   vol_elastic_strain = _elastic_strain[ _qp ].trace();
   dev_elastic_strain = std::pow(2.0 / 3.0, 0.5) * _elastic_strain[ _qp ].L2norm();

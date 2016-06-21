@@ -64,6 +64,7 @@
 #include "RedbackMaterial_UO.h"
 #include "RedbackMechMaterialJ2.h"
 #include "RedbackMechMaterialJ2_UO.h"
+#include "RedbackMechMaterialJ2_UO_DC.h"
 #include "RedbackMechMaterialDP.h"
 #include "RedbackMechMaterialDP_UO.h"
 #include "RedbackMechMaterialCC.h"
@@ -166,6 +167,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMaterial_UO);
   registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialJ2_UO);
+  registerMaterial(RedbackMechMaterialJ2_UO_DC);
   registerMaterial(RedbackMechMaterialDP);
   registerMaterial(RedbackMechMaterialDP_UO);
   registerMaterial(RedbackMechMaterialCC);

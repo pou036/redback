@@ -70,11 +70,11 @@ protected:
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankTwoTensor> & _total_strain;
   MaterialProperty<RankTwoTensor> & _elastic_strain;
-  MaterialProperty<RankFourTensor> & _elasticity_tensor;
+  const MaterialProperty<RankFourTensor> & _elasticity_tensor; // now supplied by elasticity tensor material
   MaterialProperty<RankFourTensor> & _Jacobian_mult;
 
   /// Individual material information
-  RankFourTensor _Cijkl;
+ // RankFourTensor _Cijkl;  // should now be supplied by elasticity tensor
 
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
   // RankTwoTensor _strain_increment;
@@ -85,12 +85,12 @@ protected:
   // const VariableValue & _T;
 
   // Copy-paste from FiniteStrainMaterial.h
-  MaterialProperty<RankTwoTensor> & _strain_rate;
-  MaterialProperty<RankTwoTensor> & _strain_increment;
+  const MaterialProperty<RankTwoTensor> & _strain_rate;
+  const MaterialProperty<RankTwoTensor> & _strain_increment;
   MaterialProperty<RankTwoTensor> & _total_strain_old;
   MaterialProperty<RankTwoTensor> & _elastic_strain_old;
   MaterialProperty<RankTwoTensor> & _stress_old;
-  MaterialProperty<RankTwoTensor> & _rotation_increment;
+  const MaterialProperty<RankTwoTensor> & _rotation_increment;
   MaterialProperty<RankTwoTensor> & _dfgrd;
 
   // Copy-paste from FiniteStrainPlasticMaterial.h
@@ -131,8 +131,8 @@ protected:
   Real macaulayBracket(Real);
 
   // Redback specific
-  Real _youngs_modulus;
-  Real _poisson_ratio;
+//  Real _youngs_modulus;
+//  Real _poisson_ratio;
   MaterialProperty<Real> & _mises_stress;
   MaterialProperty<Real> & _mean_stress;
   MaterialProperty<Real> & _mises_strain_rate;

@@ -1,0 +1,125 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
+/*                                                              */
+/*              (c) 2014 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
+#include "RedbackMechMaterialJ2_UO_DC.h"
+
+template <>
+InputParameters
+validParams<RedbackMechMaterialJ2_UO_DC>()
+{
+  InputParameters params = validParams<RedbackMechMaterial_UO_DC>();
+  return params;
+}
+
+RedbackMechMaterialJ2_UO_DC::RedbackMechMaterialJ2_UO_DC(const InputParameters & parameters) :
+		  RedbackMechMaterial_UO_DC(parameters)
+{
+}
+
+/**
+ * Get unitary flow tensor in deviatoric direction, J2 plasticity. It only has a
+ * deviatoric part
+ */
+void
+RedbackMechMaterialJ2_UO_DC::getFlowTensor(
+  const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor_dev)
+{
+  RankTwoTensor sig_dev;
+  Real val;
+
+  sig_dev = sig.deviatoric();
+  val = 0.0;
+  if (q > 1e-8)
+    val = 3.0 / (2.0 * q);
+  flow_tensor_dev = sig_dev * val;
+  // flow_tensor_dev /= flow_tensor_dev.L2norm();
+  // TODO: norm is actually sqrt(3/2)
+}
+
+Real
+RedbackMechMaterialJ2_UO_DC::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real yield_stress)
+{
+  return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) * _exponential;
+}
+
+/**
+ * Derivative of getFlowIncrement with respect to equivalent stress, only has
+ * deviatoric component in J2 plasiticity
+ */
+Real
+RedbackMechMaterialJ2_UO_DC::getDerivativeFlowIncrement(const RankTwoTensor & sig, Real yield_stress)
+{
+  // Derivative of getFlowIncrement with respect to equivalent stress
+  return _ref_pe_rate * _dt * _exponent *
+         std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
+}
+
+// Jacobian for stress update algorithm
+void
+RedbackMechMaterialJ2_UO_DC::getJac(const RankTwoTensor & sig,
+                              const RankFourTensor & E_ijkl,
+                              Real flow_incr_dev,
+                              Real q,
+                              Real p,
+                              Real p_y,
+                              Real q_y,
+                              Real yield_stress,
+                              RankFourTensor & dresid_dsig)
+{
+  unsigned i, j, k, l;
+  RankTwoTensor sig_dev, flow_dirn_dev, fij;
+  RankTwoTensor dfi_dft;
+  RankFourTensor dft_dsig, dfd_dft, dfd_dsig, dfi_dsig;
+  Real sig_eqv;
+  Real f1, f2, f3;
+  Real dfi_dseqv_dev;
+
+  sig_dev = sig.deviatoric();
+  sig_eqv = getSigEqv(sig);
+
+  getFlowTensor(sig, q, p, yield_stress, flow_dirn_dev);
+  dfi_dseqv_dev = getDerivativeFlowIncrement(sig, yield_stress);
+
+  for (i = 0; i < 3; ++i)
+    for (j = 0; j < 3; ++j)
+      for (k = 0; k < 3; ++k)
+        for (l = 0; l < 3; ++l)
+          dfi_dsig(i, j, k, l) = flow_dirn_dev(i, j) * flow_dirn_dev(k, l) * dfi_dseqv_dev; // d_flow_increment/d_sig
+
+  f1 = 0.0;
+  f2 = 0.0;
+  f3 = 0.0;
+
+  if (sig_eqv > 1e-8)
+  {
+    f1 = 3.0 / (2.0 * sig_eqv);
+    f2 = f1 / 3.0;
+    f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0));
+  }
+
+  for (i = 0; i < 3; ++i)
+    for (j = 0; j < 3; ++j)
+      for (k = 0; k < 3; ++k)
+        for (l = 0; l < 3; ++l)
+          dft_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) - f2 * deltaFunc(i, j) * deltaFunc(k, l) -
+                                 f3 * sig_dev(i, j) * sig_dev(k, l); // d_flow_dirn/d_sig - 2nd part
+
+  dfd_dsig = dft_dsig;                                                  // d_flow_dirn/d_sig
+  dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr_dev + dfi_dsig; // Jacobian
+}
+
+void
+RedbackMechMaterialJ2_UO_DC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+{
+  p_y = p;
+  q_y = yield_stress;
+}
