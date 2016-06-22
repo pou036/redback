@@ -44,7 +44,7 @@
     displacements = 'disp_x disp_y'
   [../]
   [./mat_mech]
-    type = RedbackMechMaterialDP_UO_DC
+    type = RedbackMechMaterialCC_UO_DC
     block = 0
     disp_x = disp_x
     disp_y = disp_y
@@ -54,7 +54,7 @@
    # poisson_ratio = 0.3
     ref_pe_rate = 1
     slope_yield_surface = -0.6
-    yield_criterion = Drucker_Prager
+    yield_criterion = modified_Cam_Clay
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
     
@@ -90,7 +90,7 @@
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -3e-2*t
+    value = -0.1*t
   [../]
   [./spline_IC]
     type = ConstantFunction
@@ -98,7 +98,7 @@
 []
 
 [BCs]
-  active = 'constant_force_right left_disp rigth_disp_y left_disp_y'
+  active = 'right_disp left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -156,7 +156,7 @@
 []
 
 [AuxVariables]
-  active = 'mech_porosity Mod_Gruntfest_number total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
+  active = 'mech_porosity Mod_Gruntfest_number total_porosity returnmap_iter mises_strain mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -208,6 +208,11 @@
     family = MONOMIAL
     block = 0
   [../]
+  [./returnmap_iter]
+    order = CONSTANT
+    family = MONOMIAL
+    block = 0
+  [../]
   [./total_porosity]
     order = FIRST
     family = MONOMIAL
@@ -219,7 +224,7 @@
 []
 
 [AuxKernels]
-  active = 'mech_porosity volumetric_strain total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress Gruntfest_Number'
+  active = 'mech_porosity volumetric_strain total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress returnmap_iter Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -290,6 +295,12 @@
     variable = volumetric_strain_rate
     property = volumetric_strain_rate
   [../]
+  [./returnmap_iter]
+    type = MaterialRealAux
+    variable = returnmap_iter
+    property = returnmap_iter
+    block = 0
+  [../]
   [./total_porosity]
     type = RedbackTotalPorosityAux_UO
     variable = total_porosity
@@ -353,7 +364,7 @@
 []
 
 [Postprocessors]
-  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress'
+  active = 'volumetric_strain mises_strain mises_strain_rate max_returnmap_iter volumetric_strain_rate mises_stress mean_stress'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
@@ -389,6 +400,10 @@
     variable = volumetric_strain_rate
     point = '0 0 0'
   [../]
+  [./max_returnmap_iter]
+    type = ElementExtremeValue
+    variable = returnmap_iter
+  [../]
 []
 
 [Preconditioning]
@@ -402,7 +417,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 0.005
+  end_time = 0.006
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -415,21 +430,29 @@
   reset_dt = true
   line_search = basic
   [./TimeStepper]
-    type = ConstantDT
+    type = ReturnMapIterDT
     dt = 1e-3
+    min_iter = 10
+    ratio = 0.5
+    max_iter = 20
+    dt_max = 1e-3
+    postprocessor = max_returnmap_iter
+    dt_min = 1e-5
   [../]
 []
 
 [Outputs]
-  file_base = bench_DP_out_uo_dc
+  file_base = bench_CC_out_UO_DC
   output_initial = true
   exodus = true
+  csv = true
   print_linear_residuals = true
   [./console]
     type = Console
     perf_log = true
   [../]
 []
+
 
 [RedbackMechAction_UO]
   [./solid]
@@ -439,5 +462,4 @@
     
     redback_material_parameters = redback_material_parameters_uo
   [../]
-[]
 

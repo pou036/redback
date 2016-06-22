@@ -493,12 +493,13 @@ RedbackMechMaterial_UO_DC::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Re
   if (_dt == 0)
   {
     instantaneous_strain_rate.zero();
+    total_volumetric_strain_rate.zero();
   }
   else
   {
     instantaneous_strain_rate = (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]) / _dt;
+    total_volumetric_strain_rate = (_total_strain[ _qp ] - _total_strain_old[ _qp ]) / _dt;
   }
-  total_volumetric_strain_rate = (_total_strain[ _qp ] - _total_strain_old[ _qp ]) / _dt;
   _mises_strain_rate[ _qp ] = std::pow(2.0 / 3.0, 0.5) * instantaneous_strain_rate.L2norm();
   _volumetric_strain_rate[ _qp ] = total_volumetric_strain_rate.trace();
   def_grad = _grad_disp_x[ _qp ](0) + _grad_disp_y[ _qp ](1) + _grad_disp_z[ _qp ](2);
