@@ -10,6 +10,8 @@
 
 #include "RedbackMaterialUserObject.h"
 
+#include "TensorMechanicsPlasticModel.h"
+
 namespace RedbackParameters{
 
 
@@ -159,6 +161,10 @@ public:
 		return 0;
 	}
 
+	const TensorMechanicsPlasticModel* GetPlasticModel() const{
+		return _plastic_model;
+	}
+
 protected:
 
   std::map< int ,const RedbackMaterialParameterUserObject* > _userObjectMap;
@@ -166,6 +172,7 @@ protected:
   std::map < int , std::shared_ptr< RedbackMaterialConstant> > _default_objects;
    // used to set default values - map allows us to check which default values have been set
 
+  const TensorMechanicsPlasticModel*  _plastic_model;
 };
 
 

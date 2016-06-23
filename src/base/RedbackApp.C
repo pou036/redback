@@ -77,6 +77,9 @@
 #include "RedbackMechMaterialElastic.h"
 #include "RedbackMechMaterialElastic_UO.h"
 
+
+#include "RedbackMechMaterial_UO_DC_YSUO.h"
+
 // MeshModifiers
 #include "ElementFileSubdomain.h"
 
@@ -168,6 +171,10 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(ImageProcessing);
   registerMaterial(RedbackMaterial);
   registerMaterial(RedbackMaterial_UO);
+
+
+  registerMaterial(RedbackMechMaterial_UO_DC_YSUO);
+
   registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialJ2_UO);
   registerMaterial(RedbackMechMaterialJ2_UO_DC);

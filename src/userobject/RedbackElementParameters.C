@@ -26,6 +26,8 @@ validParams<RedbackElementParameters>()
 	  params.addParam< UserObjectName >(param.str,param.description);
   }
 
+  params.addParam< UserObjectName >("plastic_model","User object defining the plastic response of the material");
+
   return params;
 }
 
@@ -77,6 +79,13 @@ DiscreteElementUserObject(parameters)
 		_userObjectMap[  (int) indx ] = &( *_default_objects[ (int) indx ] );
 	  }
 	}
+
+
+	// plastic model  define here or in material??
+	 if( isParamValid("plastic_model") ){
+   	      UserObjectName pmName = getParam< UserObjectName >( "plastic_model" );
+		 _plastic_model = &getUserObjectByName<TensorMechanicsPlasticModel>( pmName );
+	 }
 
 
 }
