@@ -847,8 +847,11 @@ RedbackMechMaterial_UO_DC_YSUO::formCreepDamage(Real cohesion)
  */
 void
 RedbackMechMaterial_UO_DC_YSUO::getFlowTensor(
-  const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor_dev)
+  const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor)
 {
+
+
+	/*
   RankTwoTensor sig_dev;
   Real val;
 
@@ -859,6 +862,15 @@ RedbackMechMaterial_UO_DC_YSUO::getFlowTensor(
   flow_tensor_dev = sig_dev * val;
   // flow_tensor_dev /= flow_tensor_dev.L2norm();
   // TODO: norm is actually sqrt(3/2)
+
+  */
+
+  std::vector<RankTwoTensor> df_dstress;
+  _plastic_model->dyieldFunction_dstressV(sig, yield_stress, df_dstress);
+
+  flow_tensor = df_dstress[0]; // Only dealing with one yield surface
+  flow_tensor /= std::pow(2.0 / 3.0, 0.5) * flow_tensor.L2norm();
+  // returning sqrt(3/2)*norm as was done before...
 }
 
 Real
