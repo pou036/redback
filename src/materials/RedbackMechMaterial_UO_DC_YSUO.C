@@ -684,11 +684,40 @@ RedbackMechMaterial_UO_DC_YSUO::returnMap(const RankTwoTensor & sig_old,
     yield_stress_prev = yield_stress;
     yield_stress = getYieldStress(eqvpstrain);
     err3 = std::abs(yield_stress - yield_stress_prev);
+
+    /*
+    std::cout << "resid "  << std::endl;
+    for(int i = 0; i < 2; ++i){
+  	  for(int j =0; j < 2; ++j){
+
+  		  std::cout << resid(i,j) << " " ;
+  	  }
+  	  std::cout << std::endl;
+    }
+    */
+
+    /*
+    std::cout << "dr_dsig "  << std::endl;
+       for(int i = 0; i < 2; ++i){
+     	  for(int j =0; j < 2; ++j){
+     	       for(int k = 0; k  < 2; ++k){
+     	     	  for(int l =0; l < 2; ++l){
+     		        std::cout << dr_dsig(i,j,k,l) << " " ;
+     		       //std::cout <<   E_ijkl(i,j,k,l) << " " ;
+     	     	  }
+     	       }
+     	  }
+     	  std::cout << std::endl;
+       }
+       */
+
   }
 
   if (iterisohard >= maxiterisohard)
     mooseError("Constitutive Error-Too many iterations in Hardness "
                "Update:Reduce time increment.\n"); // Convergence failure
+
+
 
   dp = dpn; // Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
@@ -876,7 +905,19 @@ RedbackMechMaterial_UO_DC_YSUO::getFlowTensor(
 Real
 RedbackMechMaterial_UO_DC_YSUO::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real yield_stress)
 {
-  return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) * _exponential;
+	// J2
+  // return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) * _exponential;
+
+	Real flow_incr_vol = _ref_pe_rate * _dt * std::pow(macaulayBracket(p - p_y), _exponent) * _exponential;
+
+	// TODO: q_yield_stress can be 0, we should handle that case properly...
+	Real flow_incr_dev =
+			_ref_pe_rate * _dt *
+			std::pow(macaulayBracket((q_y > 0 ? 1 : -1) * (sig_eqv / q_y - 1.0)), _exponent) *
+			_exponential;
+	//(q_yield_stress > 0 ? 1:-1) is the sign function
+	return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
+
 }
 
 /**
@@ -884,11 +925,28 @@ RedbackMechMaterial_UO_DC_YSUO::getFlowIncrement(Real sig_eqv, Real p, Real q_y,
  * deviatoric component in J2 plasticity
  */
 Real
-RedbackMechMaterial_UO_DC_YSUO::getDerivativeFlowIncrement(const RankTwoTensor & sig, Real yield_stress)
+RedbackMechMaterial_UO_DC_YSUO::getDerivativeFlowIncrement(Real pressure, Real sig_eqv, Real q_yield_stress, Real p_yield_stress)
 {
   // Derivative of getFlowIncrement with respect to equivalent stress
-  return _ref_pe_rate * _dt * _exponent *
-         std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
+ // return _ref_pe_rate * _dt * _exponent *
+ //        std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
+
+
+	  Real delta_lambda_p =
+	    _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
+	  Real delta_lambda_q =
+	    _ref_pe_rate * _dt *
+	    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * (sig_eqv / q_yield_stress - 1.0)), _exponent) *
+	    _exponential;
+	  Real delta_lambda = (std::pow(delta_lambda_p * delta_lambda_p + delta_lambda_q * delta_lambda_q, 0.5));
+	  Real der_flow_incr_dev =
+	    _ref_pe_rate * _dt * _exponent *
+	    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * (sig_eqv / q_yield_stress - 1.0)), _exponent - 1.0) *
+	    _exponential / q_yield_stress;
+	  Real der_flow_incr_vol = _ref_pe_rate * _dt * _exponent *
+	                           std::pow(macaulayBracket(pressure - p_yield_stress), _exponent - 1.0) * _exponential;
+	  return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
+
 }
 
 // Jacobian for stress update algorithm
@@ -915,7 +973,7 @@ RedbackMechMaterial_UO_DC_YSUO::getJac(const RankTwoTensor & sig,
   sig_eqv = getSigEqv(sig);
 
   getFlowTensor(sig, q, p, yield_stress, flow_dirn);
-  dfi_dseqv_dev = getDerivativeFlowIncrement(sig, yield_stress);
+  dfi_dseqv_dev = getDerivativeFlowIncrement(p,q, q_y,p_y);
 
 
   for (i = 0; i < 3; ++i)
@@ -980,6 +1038,10 @@ RedbackMechMaterial_UO_DC_YSUO::get_py_qy(const RankTwoTensor & trial_stress,
 
 	p_y = returned_stress.trace() / 3.0;
     q_y = getSigEqv(returned_stress);
+
+    if(p_y < 1e-64){
+    	p_y = 1e99; // assume p_y has not been set by plastic model and set to a large value
+    }
 
     // orig j2
 	//p_y = p;

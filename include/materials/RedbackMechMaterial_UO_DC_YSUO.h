@@ -213,15 +213,14 @@ protected:
    // now we will try to derive these from the plastic model
    void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
    void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
-   Real getFlowIncrement(Real, Real, Real, Real, Real);
-   //void get_py_qy(Real, Real, Real &, Real &, Real);
 
+
+   //void get_py_qy(Real, Real, Real &, Real &, Real);
   //virtual void get_py_qy_damaged(Real, Real, Real &, Real &, Real);
 
    virtual void get_py_qy_damaged(const RankTwoTensor & trial_stress,
 		                          const RankFourTensor & E_ijkl,
 						          Real & p_y, Real & q_y, Real yield_stress);
-
 
    virtual void get_py_qy(const RankTwoTensor & trial_stress,
 		                 const RankFourTensor & E_ijkl,
@@ -236,8 +235,9 @@ protected:
   virtual void formBrittleDamage();
   virtual void formCreepDamage(Real);
 
-  // J2 only?
-  virtual Real getDerivativeFlowIncrement(const RankTwoTensor & sig, Real yield_stress);
+  // Redback flow increment and derivative
+  Real getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real yield_stress);
+  Real getDerivativeFlowIncrement(Real pressure, Real sig_eqv, Real q_yield_stress, Real p_yield_stress);
 
 };
 
