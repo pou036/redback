@@ -895,7 +895,7 @@ RedbackMechMaterial_UO_DC_YSUO::getDerivativeFlowIncrement(const RankTwoTensor &
 void
 RedbackMechMaterial_UO_DC_YSUO::getJac(const RankTwoTensor & sig,
                               const RankFourTensor & E_ijkl,
-                              Real flow_incr_dev,
+                              Real flow_incr,
                               Real q,
                               Real p,
                               Real p_y,
@@ -904,25 +904,27 @@ RedbackMechMaterial_UO_DC_YSUO::getJac(const RankTwoTensor & sig,
                               RankFourTensor & dresid_dsig)
 {
   unsigned i, j, k, l;
-  RankTwoTensor sig_dev, flow_dirn_dev, fij;
+  RankTwoTensor sig_dev, flow_dirn, fij;
   RankTwoTensor dfi_dft;
-  RankFourTensor dft_dsig, dfd_dft, dfd_dsig, dfi_dsig;
+  RankFourTensor dft_dsig, dfd_dft,  dfi_dsig; // dfd_dsig
   Real sig_eqv;
-  Real f1, f2, f3;
+  //Real f1, f2, f3;
   Real dfi_dseqv_dev;
 
   sig_dev = sig.deviatoric();
   sig_eqv = getSigEqv(sig);
 
-  getFlowTensor(sig, q, p, yield_stress, flow_dirn_dev);
+  getFlowTensor(sig, q, p, yield_stress, flow_dirn);
   dfi_dseqv_dev = getDerivativeFlowIncrement(sig, yield_stress);
+
 
   for (i = 0; i < 3; ++i)
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dfi_dsig(i, j, k, l) = flow_dirn_dev(i, j) * flow_dirn_dev(k, l) * dfi_dseqv_dev; // d_flow_increment/d_sig
+          dfi_dsig(i, j, k, l) = flow_dirn(i, j) * flow_dirn(k, l) * dfi_dseqv_dev; // d_flow_increment/d_sig
 
+  /*
   f1 = 0.0;
   f2 = 0.0;
   f3 = 0.0;
@@ -941,8 +943,16 @@ RedbackMechMaterial_UO_DC_YSUO::getJac(const RankTwoTensor & sig,
           dft_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) - f2 * deltaFunc(i, j) * deltaFunc(k, l) -
                                  f3 * sig_dev(i, j) * sig_dev(k, l); // d_flow_dirn/d_sig - 2nd part
 
+
+  dft_dsig = dflowPotential_dstress(sig, yield_stress);
   dfd_dsig = dft_dsig;                                                  // d_flow_dirn/d_sig
-  dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr_dev + dfi_dsig; // Jacobian
+  */
+
+  std::vector<RankFourTensor> dfd_dsigs;  /// nb we assume only 1 yield surface
+  _plastic_model->dflowPotential_dstressV(sig, yield_stress,dfd_dsigs);
+
+
+  dresid_dsig = E_ijkl.invSymm() + dfd_dsigs[0] * flow_incr + dfi_dsig; // Jacobian
 }
 
 void
