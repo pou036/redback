@@ -68,7 +68,11 @@ RedbackMechMaterialDP_UO_DC::getFlowTensor(
   if (q > 1e-8)
     val = 3.0 / (2.0 * q);
   flow_tensor = sig_dev * val;
-  flow_tensor.addIa(-_slope_yield_surface * (p > 0 ? 1 : -1) / 3.0); //(p > 0 ? 1:-1) is the sign function
+
+  // fixme  flow_tensor.addIa(-_slope_yield_surface * (p > 0 ? 1 : -1) / 3.0);
+  // with negative yield surface is the original method
+
+  flow_tensor.addIa(_slope_yield_surface * (p > 0 ? 1 : -1) / 3.0); //(p > 0 ? 1:-1) is the sign function
   flow_tensor /= std::pow(2.0 / 3.0, 0.5) * flow_tensor.L2norm();
   // flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm(); // TODO:
   // debugging, returning a tensor of norm sqrt(3/2) to match the J2 case
@@ -183,6 +187,11 @@ RedbackMechMaterialDP_UO_DC::getJac(const RankTwoTensor & sig,
   // should be activated or not. Currently we are using the non-unitary flow
   // vector
 
+ // std::cout << "sig_eqv " << sig_eqv  << std::endl;
+ // std::cout << "dft_dsig1(0,0,0,0 ) " << dft_dsig1(0,0,0,0 ) << std::endl;
+
+ // exit(0);
+
   dfd_dsig = dft_dsig1;                                             // d_flow_dirn/d_sig
   dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr + dfi_dsig; // Jacobian
 }
@@ -192,4 +201,15 @@ RedbackMechMaterialDP_UO_DC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, R
 {
   p_y = getPressureProjection(p /*p*/, q /*q*/, yield_stress /*yield stress*/);
   q_y = yield_stress + _slope_yield_surface * p_y; // yield deviatoric stress
+
+
+  /*std::cout << "p " << p<< std::endl;
+      std::cout << "q " << q << std::endl;
+
+  std::cout << "p_y" << p_y<< std::endl;
+      std::cout << "q_y" << q_y << std::endl;
+      std::cout << "yield_stress " << yield_stress << std::endl;
+   if(q > q_y)  exit(0);
+   */
+
 }

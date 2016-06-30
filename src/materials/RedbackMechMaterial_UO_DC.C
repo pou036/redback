@@ -717,6 +717,10 @@ RedbackMechMaterial_UO_DC::returnMap(const RankTwoTensor & sig_old,
   eqvpstrain = std::pow(2.0 / 3.0, 0.5) * dp.L2norm();
   yield_stress = getYieldStress(eqvpstrain);
 
+
+//  std::cout << "eqvpstrain " << eqvpstrain << std::endl;
+//  std::cout << "yield_stress " << yield_stress << std::endl;
+
   // calculate the term _exponential = -Q_{mech}/(RT) with Q_{mech} = E_0 + p'c
   // V_{ref} + p_f V_{act}
   _exponential = 1;
@@ -806,9 +810,23 @@ RedbackMechMaterial_UO_DC::returnMap(const RankTwoTensor & sig_old,
     err3 = std::abs(yield_stress - yield_stress_prev);
   }
 
+
   if (iterisohard >= maxiterisohard)
     mooseError("Constitutive Error-Too many iterations in Hardness "
                "Update:Reduce time increment.\n"); // Convergence failure
+
+  /*
+     std::cout << "dpn(0,0) " << dpn(0,0) << std::endl;
+     std::cout << "dpn(1,0) " << dpn(1,0) << std::endl;
+     std::cout << "sig(0,0) " << sig(0,0) << std::endl;
+     std::cout << "sig_new(0,0) " << sig_new(0,0) << std::endl;
+     std::cout << "sig_new(1,0) " << sig_new(1,0) << std::endl;
+   if(sig_new(0,0) > 1e-64  ){
+     exit(0);
+   }
+
+   */
+
 
   dp = dpn; // Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
