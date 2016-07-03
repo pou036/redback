@@ -70,9 +70,9 @@ RedbackMechMaterialDP_UO_DC::getFlowTensor(
   flow_tensor = sig_dev * val;
 
   // fixme  flow_tensor.addIa(-_slope_yield_surface * (p > 0 ? 1 : -1) / 3.0);
-  // with negative yield surface is the original method
+  // with negative slope yield surface is the original method
 
-  flow_tensor.addIa(_slope_yield_surface * (p > 0 ? 1 : -1) / 3.0); //(p > 0 ? 1:-1) is the sign function
+  flow_tensor.addIa(-_slope_yield_surface * (p > 0 ? 1 : -1) / 3.0); //(p > 0 ? 1:-1) is the sign function
   flow_tensor /= std::pow(2.0 / 3.0, 0.5) * flow_tensor.L2norm();
   // flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm(); // TODO:
   // debugging, returning a tensor of norm sqrt(3/2) to match the J2 case
