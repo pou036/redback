@@ -220,11 +220,11 @@ protected:
 
    virtual void get_py_qy_damaged(const RankTwoTensor & trial_stress,
 		                          const RankFourTensor & E_ijkl,
-						          Real & p_y, Real & q_y, Real yield_stress);
+						          Real & p_y, Real & q_y, Real equivPlasticStrain);
 
    virtual void get_py_qy(const RankTwoTensor & trial_stress,
 		                 const RankFourTensor & E_ijkl,
-						 Real & p_y, Real & q_y, Real yield_stress);
+						 Real & p_y, Real & q_y, Real equivPlasticStrain);
 
   ////
 
@@ -236,7 +236,7 @@ protected:
   virtual void formCreepDamage(Real);
 
   // Redback flow increment and derivative
-  Real getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real yield_stress);
+  Real getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real equivPlasticStrain);
   Real getDerivativeFlowIncrement(Real pressure, Real sig_eqv, Real q_yield_stress, Real p_yield_stress);
 
 };

@@ -72,7 +72,7 @@ RedbackMechMaterialDP_UO_DC::getFlowTensor(
   // fixme  flow_tensor.addIa(-_slope_yield_surface * (p > 0 ? 1 : -1) / 3.0);
   // with negative slope yield surface is the original method
 
-  flow_tensor.addIa(-_slope_yield_surface * (p > 0 ? 1 : -1) / 3.0); //(p > 0 ? 1:-1) is the sign function
+  flow_tensor.addIa(_slope_yield_surface * (p > 0 ? 1 : -1) / 3.0); //(p > 0 ? 1:-1) is the sign function
   flow_tensor /= std::pow(2.0 / 3.0, 0.5) * flow_tensor.L2norm();
   // flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm(); // TODO:
   // debugging, returning a tensor of norm sqrt(3/2) to match the J2 case
@@ -161,6 +161,8 @@ RedbackMechMaterialDP_UO_DC::getJac(const RankTwoTensor & sig,
 
   Real flow_tensor_norm = flow_dirn.L2norm();
 
+
+  //std::cout << "flow_tensor_norm " << flow_tensor_norm << std::endl;
   // This loop calculates the second term. Read REDBACK's documentation
   // (same as J2 plasticity case)
   f1 = 0.0;

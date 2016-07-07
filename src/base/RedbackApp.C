@@ -97,6 +97,7 @@
 // User objects
 #include "RedbackElementParameters.h"
 #include "RedbackMaterialUserObject.h"
+#include "TensorMechanicsPlasticModifiedCamClay.h"
 
 
 template <>
@@ -205,6 +206,7 @@ RedbackApp::registerObjects(Factory & factory)
   // material parameter objects
   registerUserObject(RedbackElementParameters);
   registerUserObject(RedbackMaterialConstant);
+  registerUserObject(TensorMechanicsPlasticModifiedCamClay);
 
 #undef registerObject
 #define registerObject(name) factory.regLegacy<name>(stringifyName(name))
