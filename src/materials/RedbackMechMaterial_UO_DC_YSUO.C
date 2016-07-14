@@ -299,7 +299,7 @@ void
 RedbackMechMaterial_UO_DC_YSUO::computeQpElasticityTensor()
 {
   // Fill in the matrix stiffness material property
-  //_elasticity_tensor[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);
+  //_elasticity_tensor[ _qp ] = _Cijkl * (1 - _damage[ _qp ]);  // this should already be handled by elastic update
   _Jacobian_mult[ _qp ] = _elasticity_tensor[ _qp ]; // _Cijkl  * (1 - _damage[ _qp ]);
 }
 
@@ -667,6 +667,9 @@ RedbackMechMaterial_UO_DC_YSUO::returnMap(const RankTwoTensor & sig_old,
       q = getSigEqv(sig_new);
       get_py_qy_damaged(sig_new, E_ijkl, p_y, q_y, eqvpstrain);
 
+
+      //std::cout << " p q py qy " << p << " " << q << " " << p_y << " "<< q_y << std::endl;
+
       flow_incr = getFlowIncrement(q, p, q_y, p_y, eqvpstrain);
       if (flow_incr < 0.0) // negative flow increment not allowed
         mooseError("Constitutive Error-Negative flow increment: Reduce time "
@@ -681,6 +684,9 @@ RedbackMechMaterial_UO_DC_YSUO::returnMap(const RankTwoTensor & sig_old,
                  "increment.\n"); // Convergence failure //TODO: check the
                                   // adaptive time stepping
     _returnmap_iter[ _qp ] = iter;
+
+   // std::cout << "****" << std::endl;
+    //std::cout << " p q py qy " << p << " " << q << " " << p_y << " "<< q_y << std::endl;
 
     dpn = dp + delta_dp;
     eqvpstrain = std::pow(2.0 / 3.0, 0.5) * dpn.L2norm();
