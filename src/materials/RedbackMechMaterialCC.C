@@ -51,7 +51,7 @@ RedbackMechMaterialCC::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, 
 }
 
 /**
- * Compute the flow incrmement for modified Cam-clay
+ * Compute the flow increment for modified Cam-clay
  * pc ... pre-consolidation pressure (pc = -getYieldStress(eqvpstrain))
  */
 Real

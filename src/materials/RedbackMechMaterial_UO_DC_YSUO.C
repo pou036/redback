@@ -887,12 +887,16 @@ RedbackMechMaterial_UO_DC_YSUO::getFlowTensor(
   const RankTwoTensor & sig, Real q, Real p, Real eqvpstrain, RankTwoTensor & flow_tensor)
 {
 
+	if(_plastic_model){
+		std::vector<RankTwoTensor> df_dstress;
+		_plastic_model->dyieldFunction_dstressV(sig, eqvpstrain, df_dstress);
 
-  std::vector<RankTwoTensor> df_dstress;
-  _plastic_model->dyieldFunction_dstressV(sig, eqvpstrain, df_dstress);
+		flow_tensor = df_dstress[0]; // Only dealing with one yield surface
+		flow_tensor /= std::pow(2.0 / 3.0, 0.5) * flow_tensor.L2norm();
 
-  flow_tensor = df_dstress[0]; // Only dealing with one yield surface
-  flow_tensor /= std::pow(2.0 / 3.0, 0.5) * flow_tensor.L2norm();
+	} else {
+		flow_tensor = RankTwoTensor();
+	}
 
   // nb returning sqrt(3/2)*norm as was done before...
 
@@ -902,19 +906,22 @@ RedbackMechMaterial_UO_DC_YSUO::getFlowTensor(
 Real
 RedbackMechMaterial_UO_DC_YSUO::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real equivPlasticStrain)
 {
-	// J2
-  // return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) * _exponential;
+	if(_plastic_model){
+		// J2
+		// return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) * _exponential;
 
-	Real flow_incr_vol = _ref_pe_rate * _dt * std::pow(macaulayBracket(p - p_y), _exponent) * _exponential;
+		Real flow_incr_vol = _ref_pe_rate * _dt * std::pow(macaulayBracket(p - p_y), _exponent) * _exponential;
 
-	// TODO: q_yield_stress can be 0, we should handle that case properly...
-	Real flow_incr_dev =
-			_ref_pe_rate * _dt *
-			std::pow(macaulayBracket((q_y > 0 ? 1 : -1) * (sig_eqv / q_y - 1.0)), _exponent) *
-			_exponential;
-	//(q_yield_stress > 0 ? 1:-1) is the sign function
-	return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
+		// TODO: q_yield_stress can be 0, we should handle that case properly...
+		Real flow_incr_dev =
+				_ref_pe_rate * _dt *
+				std::pow(macaulayBracket((q_y > 0 ? 1 : -1) * (sig_eqv/q_y  - 1.0)), _exponent) *_exponential; // DP way..?
+		//std::pow(macaulayBracket(std::fabs (sig_eqv  - q_y)), _exponent) *_exponential; // cam clay way
+		//(q_yield_stress > 0 ? 1:-1) is the sign function
+		return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
+	}
 
+	return 0.0;
 }
 
 /**
@@ -992,8 +999,9 @@ RedbackMechMaterial_UO_DC_YSUO::getJac(const RankTwoTensor & sig,
   std::vector<RankFourTensor> dfd_dsigs;  /// nb we assume only 1 yield surface
   _plastic_model->dflowPotential_dstressV(sig, equivPlasticStrain,dfd_dsigs);
   // commented out for debug
-  dresid_dsig = E_ijkl.invSymm()  + dfd_dsigs[0] * flow_incr/0.57735 + dfi_dsig; // Jacobian
-  // nb 0.5773 term is to match other model - not clear that it is correct
+  dresid_dsig = E_ijkl.invSymm()  + dfd_dsigs[0] * flow_incr + dfi_dsig; // Jacobian
+  // nb 0.5773 term below is to match DP model - not clear that it is correct
+  //dresid_dsig = E_ijkl.invSymm()  + dfd_dsigs[0] * flow_incr/0.57735 + dfi_dsig; // Jacobian
 
 
   /*
@@ -1007,7 +1015,7 @@ RedbackMechMaterial_UO_DC_YSUO::getJac(const RankTwoTensor & sig,
   {
     f1 = 3.0 / (2.0 * sig_eqv);
     f2 = f1 / 3.0;
-    f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0));
+    f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0));  // out by sqrt3??
   }
   for (i = 0; i < 3; ++i)
     for (j = 0; j < 3; ++j)
@@ -1019,6 +1027,32 @@ RedbackMechMaterial_UO_DC_YSUO::getJac(const RankTwoTensor & sig,
         std::cout << std::endl;
         }
         */
+
+  // this is what was calculated in the CC model
+
+  // This loop calculates the second term. Read REDBACK's documentation
+  // (same as J2 plasticity case)
+  Real f1 = 0.0;
+  Real f2 = 0.0;
+  Real _slope_yield_surface = 0.6;
+
+  if (sig_eqv > 1e-8)
+  {
+    f1 = 3.0 / (_slope_yield_surface * _slope_yield_surface);
+    f2 = 2.0 / 9.0 - 1.0 / (_slope_yield_surface * _slope_yield_surface);
+  }
+  for (i = 0; i < 3; ++i)
+    for (j = 0; j < 3; ++j)
+      for (k = 0; k < 3; ++k)
+        for (l = 0; l < 3; ++l){
+        	//dft_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) -
+            ///                     f2 * deltaFunc(i, j) * deltaFunc(k,l);  // originam
+        	dft_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) +
+        	                                 f2 * deltaFunc(i, j) * deltaFunc(k, l);  // what I think it should be
+        	std::cout << "i j k l " << i << " " << j << " " << k << " " << l << std::endl;
+        	std::cout <<  dfd_dsigs[0](i, j, k, l) << " " << dft_dsig(i, j, k, l) << " " << dfd_dsigs[0](i, j, k, l)/( dft_dsig(i, j, k, l) + 1e-64);
+        	        std::cout << std::endl;
+        }
 
 /*
   dresid_dsig = E_ijkl.invSymm() + dft_dsig * flow_incr + dfi_dsig;
@@ -1044,17 +1078,25 @@ RedbackMechMaterial_UO_DC_YSUO::get_py_qy(const RankTwoTensor & trial_stress,
 	std::vector<Real> yf(1); // In case (C): the yield function at (returned_stress, returned_intnl).  Otherwise: the yield function at (trial_stress, intnl_old)
 	bool trial_stress_inadmissible; // Should be set to false if the trial_stress is admissible, and true if the trial_stress is inadmissible.  This can be used by the calling prorgram
 
-	bool success = _plastic_model->returnMap(trial_stress, intnl_old, E_ijkl,
+
+	if(_plastic_model){
+	  bool success = _plastic_model->returnMap(trial_stress, intnl_old, E_ijkl,
                                             ep_plastic_tolerance, returned_stress, returned_intnl,
                                             dpm, delta_dp, yf,
                                             trial_stress_inadmissible);
 
-	//Real returned_yield = returned_intnl;
+	  //Real returned_yield = returned_intnl;
 
 
-	if(!success ){
+	  if(!success ){
 		  mooseError("Return map failed to find yield surface in RedbackMechMaterial_UO_DC_YSUO");
 
+	  }
+
+	} else {
+		// no plastic model defined - assume elastic
+		trial_stress_inadmissible = false;
+		yf[0] = 0;
 	}
 
 	if(trial_stress_inadmissible){
