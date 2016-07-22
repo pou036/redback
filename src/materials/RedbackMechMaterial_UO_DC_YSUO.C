@@ -350,14 +350,13 @@ RedbackMechMaterial_UO_DC_YSUO::computeQpStress()
     _rotation_increment[ _qp ] * _plastic_strain[ _qp ] * _rotation_increment[ _qp ].transpose();
 
   // Update strain in intermediate configuration
-  _total_strain[ _qp ] = _total_strain_old[ _qp ] + _strain_increment[ _qp ];
-  /*RankTwoTensor grad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp],
-  _grad_disp_z[_qp]);
-  RankTwoTensor total_strain_small_deformation = ( grad_tensor +
-  grad_tensor.transpose() )/2.0;*/
-
-  // Rotate strain to current configuration
-  _total_strain[ _qp ] = _rotation_increment[ _qp ] * _total_strain[ _qp ] * _rotation_increment[ _qp ].transpose();
+  // Already taken care of by strain update??
+  /*
+   * _total_strain[ _qp ] = _total_strain_old[ _qp ] + _strain_increment[ _qp ];
+   *
+   * // Rotate strain to current configuration
+   * _total_strain[ _qp ] = _rotation_increment[ _qp ] * _total_strain[ _qp ] * _rotation_increment[ _qp ].transpose();
+   */
   _total_volumetric_strain[ _qp ] = _total_strain[ _qp ].trace();
 
   // Compute the energy dissipation and the properties declared
@@ -469,9 +468,9 @@ RedbackMechMaterial_UO_DC_YSUO::computeRedbackTerms(RankTwoTensor & sig, Real q_
   const RedbackMaterialParameterUserObject& peclet_number = *_peclet_number_uo;
 
   delta_phi_mech_el =
-    (1.0 - _total_porosity[ _qp ]) * (solid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
-                                      solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param) +
-                                      (_elastic_strain[ _qp ] - _elastic_strain_old[ _qp ]).trace());
+    (1.0 - _total_porosity[ _qp ]) * (solid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param)
+                                  //  -  solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param)   // this should now be handled by the thermal eigenstrain
+                                    +  (_elastic_strain[ _qp ] - _elastic_strain_old[ _qp ]).trace());
   delta_phi_mech_pl = (1.0 - _total_porosity[ _qp ]) * (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]).trace();
 
   _mechanical_porosity[ _qp ] = delta_phi_mech_el + delta_phi_mech_pl;
@@ -552,6 +551,16 @@ void
 RedbackMechMaterial_UO_DC_YSUO::computeQpStrain(const RankTwoTensor & Fhat)
 {
 // no longer required
+
+	/*
+	// debug - adding thermal terms to strain increment so see if we recover original model - should not be here though
+	const RedbackMaterialParameterUserObject& solid_thermal_expansion = *_solid_thermal_expansion_uo;
+	// very naughty - just while we try to recover old behavior FIXME!!!FIXME!!!
+	MaterialProperty<RankTwoTensor>* nonConst = const_cast<MaterialProperty<RankTwoTensor>* >( &_strain_increment );
+	MaterialProperty<RankTwoTensor>& nonConstRef = *nonConst;
+	nonConstRef[_qp].addIa(-solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T_old[ _qp ]));
+	*/
+
 }
 
 Real
