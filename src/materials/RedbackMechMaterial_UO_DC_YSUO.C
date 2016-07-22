@@ -1038,7 +1038,7 @@ RedbackMechMaterial_UO_DC_YSUO::getJac(const RankTwoTensor & sig,
         */
 
   // this is what was calculated in the CC model
-
+/*
   // This loop calculates the second term. Read REDBACK's documentation
   // (same as J2 plasticity case)
   Real f1 = 0.0;
@@ -1062,6 +1062,7 @@ RedbackMechMaterial_UO_DC_YSUO::getJac(const RankTwoTensor & sig,
         	std::cout <<  dfd_dsigs[0](i, j, k, l) << " " << dft_dsig(i, j, k, l) << " " << dfd_dsigs[0](i, j, k, l)/( dft_dsig(i, j, k, l) + 1e-64);
         	        std::cout << std::endl;
         }
+        */
 
 /*
   dresid_dsig = E_ijkl.invSymm() + dft_dsig * flow_incr + dfi_dsig;
