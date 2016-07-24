@@ -18,6 +18,7 @@
 
 // Modules
 #include "TensorMechanicsApp.h"
+#include "RedbackDGAdvection.h"
 
 // Actions
 #include "RedbackAction.h"
@@ -46,6 +47,7 @@
 #include "RedbackThermalDiffusion.h"
 #include "RedbackThermalPressurization.h"
 #include "RedbackDamage.h"
+#include "RedbackConservativeAdvection.h"
 
 // Scalar Kernels
 #include "RedbackContinuation.h"
@@ -136,9 +138,14 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalPressurization);
   registerKernel(RedbackDamage);
 
+  registerKernel(RedbackConservativeAdvection);
+
   registerScalarKernel(RedbackContinuation);
 
   registerDiracKernel(FunctionPointSource);
+
+
+  registerDGKernel(RedbackDGAdvection);
 
   registerMaterial(RedbackFluidMaterial);
   registerMaterial(ImageProcessing);
