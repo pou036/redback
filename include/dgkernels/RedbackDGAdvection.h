@@ -18,6 +18,10 @@ protected:
   virtual Real computeQpJacobian(Moose::DGJacobianType type);
 
   RealVectorValue _velocity;
+
+  const VariableValue & _vel_x;
+  const VariableValue & _vel_y;
+  const VariableValue & _vel_z;
 };
 
 
@@ -39,10 +43,12 @@ protected:
   virtual Real computeQpResidual();
 
 private:
-  /**
-   * Multiplier on the boundary.
-   */
+
   RealVectorValue _velocity;
+
+  const VariableValue & _vel_x;
+  const VariableValue & _vel_y;
+  const VariableValue & _vel_z;
 
 };
 

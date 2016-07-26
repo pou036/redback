@@ -20,6 +20,10 @@ protected:
   virtual Real computeQpJacobian();
 
   RealVectorValue _velocity;
+
+  const VariableValue & _vel_x;
+  const VariableValue & _vel_y;
+  const VariableValue & _vel_z;
 };
 
 #endif // RedbackConservativeAdvection_H
