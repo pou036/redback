@@ -119,6 +119,8 @@ RedbackApp::registerObjects(Factory & factory)
 #define registerObject(name) factory.reg<name>(stringifyName(name))
   registerBoundaryCondition(FunctionDirichletTransverseBC);
 
+  registerBoundaryCondition(RedbackDGAdvectionBC);
+
   registerInitialCondition(FunctionWithRandomIC);
   registerInitialCondition(FunctionTimesRandomIC);
 

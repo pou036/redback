@@ -75,3 +75,40 @@ RedbackDGAdvection::computeQpJacobian(Moose::DGJacobianType type)
   }
   return r;
 }
+
+
+
+
+///////////////
+//#include "RedbackDGAdvectionBC.h"
+
+template<>
+
+InputParameters validParams<RedbackDGAdvectionBC>()
+
+{
+
+  InputParameters params = validParams<IntegratedBC>();
+
+  params.addRequiredParam<RealVectorValue>("velocity", "Velocity vector");
+  return params;
+
+  return params;
+
+}
+
+RedbackDGAdvectionBC::RedbackDGAdvectionBC(const InputParameters& parameters):
+  IntegratedBC(parameters),
+  _velocity(getParam<RealVectorValue>("velocity"))
+{}
+
+Real
+RedbackDGAdvectionBC::computeQpResidual()
+{
+
+  Real vN = _velocity * _normals[_qp];
+  Real r = vN * _u[_qp] * _test[_i][_qp];
+
+   return r;
+
+}

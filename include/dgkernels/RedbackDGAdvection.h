@@ -20,4 +20,30 @@ protected:
   RealVectorValue _velocity;
 };
 
+
+/////
+
+#include "IntegratedBC.h"
+
+class RedbackDGAdvectionBC : public IntegratedBC
+{
+public:
+
+  /**
+   * Factory constructor, takes parameters so that all derived classes can be built using the same
+   * constructor.
+   */
+	RedbackDGAdvectionBC(const InputParameters & parameters);
+
+protected:
+  virtual Real computeQpResidual();
+
+private:
+  /**
+   * Multiplier on the boundary.
+   */
+  RealVectorValue _velocity;
+
+};
+
 #endif //RedbackDGAdvection_H
