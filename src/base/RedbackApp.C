@@ -49,6 +49,9 @@
 #include "RedbackDamage.h"
 #include "RedbackConservativeAdvection.h"
 
+
+#include "RedbackEulerianStrain.h"
+
 // Scalar Kernels
 #include "RedbackContinuation.h"
 
@@ -157,6 +160,9 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialCC);
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
+
+
+  registerMaterial(RedbackEulerianStrain);
 
   registerMeshModifier(ElementFileSubdomain);
 
