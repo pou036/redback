@@ -44,21 +44,6 @@ protected:
   std::vector<const VariableGradient *> _grad_eta_old;
 
 
-
-  /*
-  const VariableValue & _eta_x;
-  const VariableValue & _eta_y;
-  const VariableValue & _eta_z;
-
-  const VariableValue & _grad_eta_x;
-  const VariableValue & _grad_eta_y;
-  const VariableValue & _grad_eta_z;
-
-  const VariableValue & _grad_eta_x_old;
-  const VariableValue & _grad_eta_y_old;
-  const VariableValue & _grad_eta_z_old;
-  */
-
 private:
  /* const VariableValue & _vel_x;
   const VariableValue & _vel_y;
