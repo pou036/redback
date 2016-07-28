@@ -19,11 +19,16 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
-  RealVectorValue _velocity;
+  //RealVectorValue _velocity;
 
-  const VariableValue & _vel_x;
-  const VariableValue & _vel_y;
-  const VariableValue & _vel_z;
+  //const VariableValue & _vel_x;
+  //const VariableValue & _vel_y;
+  //const VariableValue & _vel_z;
+
+
+  unsigned int _nvel;
+  std::vector<const VariableValue *> _vel;
+  std::vector<const VariableGradient *> _grad_vel;
 };
 
 #endif // RedbackConservativeAdvection_H
