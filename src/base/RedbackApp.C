@@ -47,8 +47,11 @@
 #include "RedbackThermalDiffusion.h"
 #include "RedbackThermalPressurization.h"
 #include "RedbackDamage.h"
+
 #include "RedbackConservativeAdvection.h"
 
+#include "RedbackEulerianConvection.h"
+#include "RedbackEulerianMomentumTimeDerivative.h"
 
 #include "RedbackEulerianStrain.h"
 
@@ -143,12 +146,14 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalPressurization);
   registerKernel(RedbackDamage);
 
+  registerKernel(RedbackEulerianMomentumTimeDerivative);
+  registerKernel(RedbackEulerianConvection);
+
   registerKernel(RedbackConservativeAdvection);
 
   registerScalarKernel(RedbackContinuation);
 
   registerDiracKernel(FunctionPointSource);
-
 
   registerDGKernel(RedbackDGAdvection);
 
