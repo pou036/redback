@@ -226,6 +226,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _fluid_thermal_expansion(declareProperty<Real>("fluid_thermal_expansion")),
 
     _mixture_density(declareProperty<Real>("mixture_density")),
+    _sand_production_rate(declareProperty<Real>("sand_production_rate")),
 
     _continuation_method((ContinuationMethod)(int)getParam<MooseEnum>("continuation_variable")),
     _density_method((DensityMethod)(int)getParam<MooseEnum>("density_method")),
@@ -530,7 +531,7 @@ RedbackMaterial::computeRedbackTerms()
                                - (1 - _solid_ratio[_qp]) * phi_prime
                                - (1 - _total_porosity[_qp]) * s_prime
                                );*/
-
+  }
     // Update Lewis number
     _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
                            std::pow(_phi0_param / _total_porosity[ _qp ], 3);
@@ -538,16 +539,24 @@ RedbackMaterial::computeRedbackTerms()
       1 / _lewis_number[ _qp ] + _inverse_lewis_number_tilde[ _qp ]; // to include modification from
                                                                      // multi-app for example
     _lewis_number[ _qp ] = 1 / inverse_lewis_number;
-  }
 
   // Forming the compressibilities of the phases
   one_minus_phi_beta_star_s = (1 - _total_porosity[ _qp ]) * _solid_compressibility[ _qp ]; // normalized
-  // compressibility of
-  // the solid phase
+// compressibility of
+// the solid phase
   phi_beta_star_f = _total_porosity[ _qp ] * _fluid_compressibility[ _qp ]; // normalized compressibility of the fluid
                                                                             // phase
   beta_star_m = one_minus_phi_beta_star_s + phi_beta_star_f; // normalized compressibility of the mixture
   _mixture_compressibility[ _qp ] = beta_star_m;
+
+  //Calculating the elements for the sand production model of Papamichos et al 2001.
+  //Actual calculation in RedbackSandProductionAux.C AuxKernel
+  Real fluid_density = _fluid_density_param * (1 + _fluid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
+          _fluid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param));
+  RealVectorValue flux = beta_star_m * (_grad_pore_pressure[ _qp ] - fluid_density * _gravity_param) /
+          (_peclet_number[ _qp ] * _lewis_number[ _qp ]);
+  Real norm_flux = flux.norm_sq();
+  _sand_production_rate[_qp] = (1-_total_porosity[ _qp ]) * norm_flux;
 
   // convective terms
   if (_are_convective_terms_on)

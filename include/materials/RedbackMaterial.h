@@ -140,6 +140,7 @@ protected:
   MaterialProperty<Real> & _fluid_thermal_expansion; // \bar(\lambda_f)/delta T_ref
 
   MaterialProperty<Real> & _mixture_density;
+  MaterialProperty<Real> & _sand_production_rate;
 
   ContinuationMethod _continuation_method;
   DensityMethod _density_method;
