@@ -532,14 +532,17 @@ RedbackMaterial::computeRedbackTerms()
                                - (1 - _total_porosity[_qp]) * s_prime
                                );*/
   }
+
   // Update Lewis number
   _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
                          std::pow(_phi0_param / _total_porosity[ _qp ], 3);
-  Real inverse_lewis_number =
-    1 / _lewis_number[ _qp ] + _inverse_lewis_number_tilde[ _qp ]; // to include modification from
+  if (_inverse_lewis_number_tilde[ _qp ] != 0)
+  {
+    Real inverse_lewis_number =
+      1 / _lewis_number[ _qp ] + _inverse_lewis_number_tilde[ _qp ]; // to include modification from
                                                                    // multi-app for example
-  _lewis_number[ _qp ] = 1 / inverse_lewis_number;
-
+    _lewis_number[ _qp ] = 1 / inverse_lewis_number;
+  }
   // Forming the compressibilities of the phases
   one_minus_phi_beta_star_s = (1 - _total_porosity[ _qp ]) * _solid_compressibility[ _qp ]; // normalized
 // compressibility of
