@@ -16,11 +16,11 @@
     csvdiff = 'gravity_rho_g_h.csv'
     rel_err = 1e-5
   [../]
-  [./test_gravity_poromechanics] # can't put a dot in that name!
-    # Testing geostatic gradient rho * g * h with pore pressure
-    type = 'CSVDiff'
-    input = 'gravity_poro_stress.i'
-    csvdiff = 'gravity_poro_stress.csv'
-    rel_err = 1e-5
-  [../]
+#  [./test_gravity_poromechanics] # can't put a dot in that name!
+#    # Testing geostatic gradient rho * g * h with pore pressure
+#    type = 'CSVDiff'
+#    input = 'gravity_poro_stress.i'
+#    csvdiff = 'gravity_poro_stress.csv'
+#    rel_err = 1e-5
+#  [../]
 []
