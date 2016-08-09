@@ -26,7 +26,12 @@
 // Boundary conditions
 #include "FunctionDirichletTransverseBC.h"
 
+// Functions
+#include "RedbackRandomFunction.h"
+
 // Initial conditions
+#include "FunctionNormalDistributionIC.h"
+#include "FunctionLogNormalDistributionIC.h"
 #include "FunctionWithRandomIC.h"
 #include "FunctionTimesRandomIC.h"
 
@@ -74,6 +79,7 @@
 #include "RedbackDiffVarsAux.h"
 #include "RedbackTotalPorosityAux.h"
 #include "RedbackPolarTensorMaterialAux.h"
+#include "RedbackSandProductionAux.h"
 
 template <>
 InputParameters
@@ -117,6 +123,10 @@ RedbackApp::registerObjects(Factory & factory)
 #define registerObject(name) factory.reg<name>(stringifyName(name))
   registerBoundaryCondition(FunctionDirichletTransverseBC);
 
+  registerFunction(RedbackRandomFunction);
+
+  registerInitialCondition(FunctionNormalDistributionIC);
+  registerInitialCondition(FunctionLogNormalDistributionIC);
   registerInitialCondition(FunctionWithRandomIC);
   registerInitialCondition(FunctionTimesRandomIC);
 
@@ -157,6 +167,8 @@ RedbackApp::registerObjects(Factory & factory)
   registerAux(RedbackDiffVarsAux);
   registerAux(RedbackTotalPorosityAux);
   registerAux(RedbackPolarTensorMaterialAux);
+  registerAux(RedbackSandProductionAux);
+
 #undef registerObject
 #define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }

@@ -1,8 +1,8 @@
 [Tests]
   [./ring_shear] # can't put a dot in that name!
-    type = 'Exodiff'
+    type = 'CSVDiff'
     input = 'ring_shear.i'
-    exodiff = 'ring_shear_out.e'
-    rel_err = 1e-3
+    csvdiff = 'ring_shear_out.csv'
+    rel_err = 1e-5
   [../]
 []

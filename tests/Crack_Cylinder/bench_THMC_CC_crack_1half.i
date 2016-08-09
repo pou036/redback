@@ -1,18 +1,16 @@
 [Mesh]
   type = FileMesh
-  file = Crack_in_cylinder_half_2D.msh
-  dim = 2
-  boundary_name = 'inside outside crack_lip sym_axis'
-  boundary_id = '0 1 2 3'
-  displacements = 'disp_x disp_y'
+  file = Crack_in_cylinder_half.msh
+  boundary_name = 'top bottom outside inside f_top f_bottom f_outside f_inside interface0 middle'
+  boundary_id = '0 1 2 3 4 5 6 7 8 9'
 []
 
 [MeshModifiers]
-  active = 'up_point_outside'
+  active = 'left_point_inside left_point_outside up_point_outside up_point_inside'
   [./up_point_outside]
     type = AddExtraNodeset
     new_boundary = 102
-    coord = '0 1'
+    coord = '0 1 0'
   [../]
   [./down_point_outside]
     type = AddExtraNodeset
@@ -42,10 +40,14 @@
 []
 
 [Variables]
+  active = 'pore_pressure disp_z disp_y disp_x'
   [./disp_x]
     block = 0
   [../]
   [./disp_y]
+    block = 0
+  [../]
+  [./disp_z]
     block = 0
   [../]
   [./temp]
@@ -60,6 +62,7 @@
     block = 0
     disp_x = disp_x
     disp_y = disp_y
+    disp_z = disp_z
     pore_pres = pore_pressure
     youngs_modulus = 125
     poisson_ratio = 0.3 # 0.3
@@ -68,7 +71,7 @@
     yield_stress = '0. 0.001 1 0.001'
     total_porosity = total_porosity
     damage = chemical_porosity
-    chemo_mechanical_porosity_coeff = 1e3 # 1e3
+    chemo_mechanical_porosity_coeff = 1e3
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -76,7 +79,9 @@
     is_chemistry_on = true
     disp_x = disp_x
     disp_y = disp_y
+    disp_z = disp_z
     pore_pres = pore_pressure
+    Aphi = 1
     Kc = 1
     ar = 10
     ar_F = 11
@@ -109,19 +114,13 @@
     value = 0
   [../]
   [./time_step_func]
-<<<<<<< HEAD
-    # if(t<1e-3, 1e-4, 1e-3)
     type = ParsedFunction
-    value = 'if(t<1e-3, t, 1e-3)' # if(t<0.0002, 2e-5, 1e-4)
-=======
-    type = ParsedFunction
-    value = 'if(t<1e-3, 1e-4, 1e-3)' # if(t<0.0002, 2e-5, 1e-4)
->>>>>>> 4efae6bf74589a95783a2d8e2276c1eedf280343
+    value = 'if(t<0.0002, 2e-5, 1e-4)'
   [../]
 []
 
 [BCs]
-  active = 'Pressure constrain_y constrain_x'
+  active = 'Pressure constrain_y constrain_x Plain_strain'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
@@ -191,18 +190,21 @@
   [./Pressure]
     [./press_lip]
       function = downfunc1
+      disp_z = disp_z
       disp_y = disp_y
       disp_x = disp_x
-      boundary = crack_lip
+      boundary = interface0
     [../]
     [./press_inside]
       function = downfunc
+      disp_z = disp_z
       disp_y = disp_y
       disp_x = disp_x
       boundary = inside
     [../]
     [./press_outside]
       function = func_outside
+      disp_z = disp_z
       disp_y = disp_y
       disp_x = disp_x
       boundary = outside
@@ -217,7 +219,7 @@
   [./constrain_y]
     type = DirichletBC
     variable = disp_y
-    boundary = sym_axis
+    boundary = middle
     value = 0
   [../]
   [./Plain_strain]
@@ -229,7 +231,7 @@
 []
 
 [AuxVariables]
-  active = 'mech_porosity plastic_strain_r_theta plastic_strain_theta_theta stress_r_theta chemical_porosity plastic_strain_r_r mises_strain_rate Mod_Gruntfest_number total_porosity mises_stress stress_theta_theta solid_ratio mises_strain Lewis_number mean_stress volumetric_strain stress_r_r volumetric_strain_rate'
+  active = 'mech_porosity Mod_Gruntfest_number solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress chemical_porosity stress_r_r stress_r_theta stress_theta_theta plastic_strain_r_r plastic_strain_r_theta plastic_strain_theta_theta'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -331,11 +333,10 @@
 []
 
 [Kernels]
-  active = 'td_press td_temp temp_endo_chem chem_press press_diff'
+  active = 'td_press chem_press press_diff'
   [./td_temp]
     type = TimeDerivative
     variable = temp
-    block = 0
   [../]
   [./temp_diff]
     type = Diffusion
@@ -349,7 +350,6 @@
   [./temp_endo_chem]
     type = RedbackChemEndo
     variable = temp
-    block = 0
   [../]
   [./td_press]
     type = TimeDerivative
@@ -373,7 +373,7 @@
 []
 
 [AuxKernels]
-  active = 'mech_porosity plastic_strain_r_theta plastic_strain_theta_theta stress_r_theta chemical_porosity plastic_strain_r_r mises_strain_rate total_porosity mises_stress stress_theta_theta solid_ratio mises_strain Lewis_number mean_stress volumetric_strain stress_r_r volumetric_strain_rate Gruntfest_Number'
+  active = 'mech_porosity volumetric_strain solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate chemical_porosity volumetric_strain_rate mises_stress mean_stress Gruntfest_Number plastic_strain_r_r plastic_strain_r_theta plastic_strain_theta_theta stress_r_r stress_r_theta stress_theta_theta'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -528,10 +528,16 @@
 []
 
 [Postprocessors]
+  active = 'disp_x strain_rr_tip new_timestep'
+  [./disp_x]
+    type = PointValue
+    variable = disp_x
+    point = '-0.05 0 0'
+  [../]
   [./disp_y]
     type = PointValue
     variable = disp_y
-    point = '0 0.05 0'
+    point = '0.05 0 0.1'
   [../]
   [./strain_rr_tip]
     type = PointValue
@@ -541,26 +547,6 @@
   [./new_timestep]
     type = FunctionValuePostprocessor
     function = time_step_func
-  [../]
-  [./disp_x_left]
-    type = PointValue
-    variable = disp_x
-    point = '-0.05 0 0'
-  [../]
-  [./disp_x_right]
-    type = PointValue
-    variable = disp_x
-    point = '0.05 0 0'
-  [../]
-  [./strain_rr_top]
-    type = PointValue
-    variable = plastic_strain_r_r
-    point = '0 0.05 0'
-  [../]
-  [./strain_rr_right]
-    type = PointValue
-    variable = plastic_strain_r_r
-    point = '0.05 0 0'
   [../]
 []
 
@@ -596,11 +582,7 @@
 []
 
 [Outputs]
-<<<<<<< HEAD
-  file_base = CHM_half_2D_test2
-=======
-  file_base = CHM_half_2D_test1
->>>>>>> 4efae6bf74589a95783a2d8e2276c1eedf280343
+  file_base = bench_THMC_CC_out_1half
   output_initial = true
   exodus = true
   [./console]
@@ -610,6 +592,7 @@
 
 [RedbackMechAction]
   [./solid]
+    disp_z = disp_z
     disp_y = disp_y
     disp_x = disp_x
     pore_pres = pore_pressure

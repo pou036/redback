@@ -109,14 +109,9 @@
     value = 0
   [../]
   [./time_step_func]
-<<<<<<< HEAD
     # if(t<1e-3, 1e-4, 1e-3)
     type = ParsedFunction
     value = 'if(t<1e-3, t, 1e-3)' # if(t<0.0002, 2e-5, 1e-4)
-=======
-    type = ParsedFunction
-    value = 'if(t<1e-3, 1e-4, 1e-3)' # if(t<0.0002, 2e-5, 1e-4)
->>>>>>> 4efae6bf74589a95783a2d8e2276c1eedf280343
   [../]
 []
 
@@ -596,11 +591,7 @@
 []
 
 [Outputs]
-<<<<<<< HEAD
-  file_base = CHM_half_2D_test2
-=======
-  file_base = CHM_half_2D_test1
->>>>>>> 4efae6bf74589a95783a2d8e2276c1eedf280343
+  file_base = CHM_half_2D_test3
   output_initial = true
   exodus = true
   [./console]

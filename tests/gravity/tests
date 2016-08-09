@@ -3,11 +3,19 @@
     type = 'Exodiff'
     input = 'gravity_horizontal.i'
     exodiff = 'gravity_horizontal.e'
+    # The custom comparison file allows variations in the number of
+    # linear and nonlinear iterations, which can vary between versions
+    # of PETSc.
+    # custom_cmp = 'gravity_horizontal.cmp'
   [../]
   [./test_gravity_vertical] # can't put a dot in that name!
     type = 'Exodiff'
     input = 'gravity_vertical.i'
     exodiff = 'gravity_vertical.e'
+    # The custom comparison file allows variations in the number of
+    # linear and nonlinear iterations, which can vary between versions
+    # of PETSc.
+    # custom_cmp = 'gravity_vertical.cmp'
   [../]
   [./test_rho_g_h] # can't put a dot in that name!
     # Testing geostatic gradient rho * g * h only
@@ -16,11 +24,11 @@
     csvdiff = 'gravity_rho_g_h.csv'
     rel_err = 1e-5
   [../]
-  [./test_gravity_poromechanics] # can't put a dot in that name!
-    # Testing geostatic gradient rho * g * h with pore pressure
-    type = 'CSVDiff'
-    input = 'gravity_poro_stress.i'
-    csvdiff = 'gravity_poro_stress.csv'
-    rel_err = 1e-5
-  [../]
+#  [./test_gravity_poromechanics] # can't put a dot in that name!
+#    # Testing geostatic gradient rho * g * h with pore pressure
+#    type = 'CSVDiff'
+#    input = 'gravity_poro_stress.i'
+#    csvdiff = 'gravity_poro_stress.csv'
+#    rel_err = 1e-5
+#  [../]
 []
