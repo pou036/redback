@@ -51,6 +51,7 @@
 #include "RedbackThermalDiffusion.h"
 #include "RedbackThermalPressurization.h"
 #include "RedbackDamage.h"
+#include "RedbackSolidProduction.h"
 
 // Scalar Kernels
 #include "RedbackContinuation.h"
@@ -145,6 +146,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalDiffusion);
   registerKernel(RedbackThermalPressurization);
   registerKernel(RedbackDamage);
+  registerKernel(RedbackSolidProduction);
 
   registerScalarKernel(RedbackContinuation);
 
