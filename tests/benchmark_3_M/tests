@@ -39,4 +39,15 @@
     input = 'bench_elastic_3.i'
     exodiff = 'bench_elastic_3.e'
   [../]
+  #[./test_3_M_J2_damage_cyclic] # can't put a dot in that name! DISABLED MOMENTARILY, TODO
+  #  type = 'Exodiff'
+  #  input = 'bench_J2_damage_cyclic.i'
+  #  exodiff = 'bench_J2_dmg_cycl_out.e'
+  #[../]
+  [./test_3_M_J2_2D_footing] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'bench_J2_2D_footing_damage.i'
+    exodiff = 'bench_J2_footing_2D_damage_out.e'
+    heavy = true
+  [../]
 []

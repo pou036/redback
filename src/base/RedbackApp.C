@@ -26,7 +26,12 @@
 // Boundary conditions
 #include "FunctionDirichletTransverseBC.h"
 
+// Functions
+#include "RedbackRandomFunction.h"
+
 // Initial conditions
+#include "FunctionNormalDistributionIC.h"
+#include "FunctionLogNormalDistributionIC.h"
 #include "FunctionWithRandomIC.h"
 #include "FunctionTimesRandomIC.h"
 
@@ -50,6 +55,9 @@
 // Scalar Kernels
 #include "RedbackContinuation.h"
 
+// Dirac Kernels
+#include "FunctionPointSource.h"
+
 // Materials
 #include "RedbackFluidMaterial.h"
 #include "ImageProcessing.h"
@@ -70,6 +78,7 @@
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
 #include "RedbackTotalPorosityAux.h"
+#include "RedbackPolarTensorMaterialAux.h"
 
 template <>
 InputParameters
@@ -113,6 +122,10 @@ RedbackApp::registerObjects(Factory & factory)
 #define registerObject(name) factory.reg<name>(stringifyName(name))
   registerBoundaryCondition(FunctionDirichletTransverseBC);
 
+  registerFunction(RedbackRandomFunction);
+
+  registerInitialCondition(FunctionNormalDistributionIC);
+  registerInitialCondition(FunctionLogNormalDistributionIC);
   registerInitialCondition(FunctionWithRandomIC);
   registerInitialCondition(FunctionTimesRandomIC);
 
@@ -134,6 +147,8 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerScalarKernel(RedbackContinuation);
 
+  registerDiracKernel(FunctionPointSource);
+
   registerMaterial(RedbackFluidMaterial);
   registerMaterial(ImageProcessing);
   registerMaterial(RedbackMaterial);
@@ -150,6 +165,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);
   registerAux(RedbackTotalPorosityAux);
+  registerAux(RedbackPolarTensorMaterialAux);
 #undef registerObject
 #define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }

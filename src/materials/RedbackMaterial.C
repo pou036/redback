@@ -58,6 +58,7 @@ validParams<RedbackMaterial>()
   params.addParam<MooseEnum>("continuation_variable",
                              RedbackMaterial::continuationMethodEnum() = "Gruntfest", // default value
                              "The name of the variable multiplied by the continuation_parameter value");
+  params.addCoupledVar("concentration", 0.0, "The concentration of species");
 
   // params.addCoupledVar("solid_velocity_aux", "Solid velocity (AuxKernel) from RedbackMechMaterial (if used)");
   params.addParam<MooseEnum>(
@@ -70,6 +71,8 @@ validParams<RedbackMaterial>()
 
   params.addParam<Real>("ar_F", 0.0, "Arrhenius number for the forward reaction.");
   params.addParam<Real>("ar_R", 0.0, "Arrhenius number for the reverse reaction.");
+  params.addParam<Real>(
+    "chemical_ar_F_factor", 0.0, "Mutliplying factor of concentration for Arrhenius of the forward reaction.");
   params.addParam<Real>("da_endo", 0, "Damkoehler number for the endothermic reaction.");
   params.addParam<Real>("da_exo", 0, "Damkoehler number for the exothermic reaction.");
   params.addParam<Real>("mu", 0, "Chemical pressurization coefficient.");
@@ -127,6 +130,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
                                                      // coupled! Check that
                                                      // (TODO)
     _inverse_lewis_number_tilde(coupledValue("inverse_lewis_number_tilde")),
+    _concentration(coupledValue("concentration")),
     _continuation_parameter(coupledScalarValue("continuation_parameter")),
 
     //_disp_x(isCoupled("disp_x") ? coupledValue("disp_x") : _zero),
@@ -146,6 +150,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _peclet_number_param(getParam<Real>("Peclet_number")),
     _ar_F_param(getParam<Real>("ar_F")),
     _ar_R_param(getParam<Real>("ar_R")),
+    _chemical_ar_F_factor(getParam<Real>("chemical_ar_F_factor")),
     _da_endo_param(getParam<Real>("da_endo")),
     _da_exo_param(getParam<Real>("da_exo")),
     _mu_param(getParam<Real>("mu")),
@@ -454,6 +459,9 @@ RedbackMaterial::computeRedbackTerms()
     * V_A+V_AB
     */
 
+    // Update chemical Arrhenius term
+    _ar_F[ _qp ] += _chemical_ar_F_factor * _concentration[ _qp ];
+
     // Step 1: calculate the relative rate of reactions
     omega_rel = _eta2_param * _Kc_param * std::exp(-(_ar_F[ _qp ] - _ar_R[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
 
@@ -526,9 +534,11 @@ RedbackMaterial::computeRedbackTerms()
     // Update Lewis number
     _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
                            std::pow(_phi0_param / _total_porosity[ _qp ], 3);
-    Real inverse_lewis_number =
-      1 / _lewis_number[ _qp ] + _inverse_lewis_number_tilde[ _qp ]; // to include modification from
-                                                                     // multi-app for example
+  }
+  if (_inverse_lewis_number_tilde[ _qp ] != 0)
+  {
+    // to include modifications from multi-app for example
+    Real inverse_lewis_number = 1 / _lewis_number[ _qp ] + _inverse_lewis_number_tilde[ _qp ];
     _lewis_number[ _qp ] = 1 / inverse_lewis_number;
   }
 
