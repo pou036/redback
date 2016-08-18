@@ -90,7 +90,7 @@ validParams<RedbackMechMaterial>()
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
 
-  params.addCoupledVar("initial_grain_size", 0.0, "The initial grain size");
+  params.addCoupledVar("gs_initial_grain_size", 0.0, "The initial grain size");
   params.addParam<Real>("gs_reduction_constant", 1.0, "Grain size reduction constant ()");
   params.addParam<Real>("gs_Arrhenius_growth", 1.0, "TODO");
   params.addParam<Real>("gs_exponent", 1.0, "TODO");
