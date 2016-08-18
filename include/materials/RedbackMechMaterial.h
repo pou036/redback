@@ -147,6 +147,7 @@ protected:
   MaterialProperty<Real> & _damage_kernel;
   MaterialProperty<Real> & _damage_kernel_jac;
   Real _damage_coeff, _dmg_exponent, _healing_coeff;
+  MaterialProperty<Real> & _grain_size;
 
   Real _exponential;
   // const VariableValue & _dispx_dot;
@@ -195,6 +196,10 @@ protected:
   virtual void formCreepDamage(Real);
 
   Real _damage_dissipation;
+
+  const VariableValue & _initial_grain_size;
+  Real _gs_reduction_constant_param, _gs_ar_growth_param, _gs_exponent_param, _gs_steady_state_constant_param, _gs_growth_constant_param;
+
 };
 
 #endif // REDBACKMECHMATERIAL_H

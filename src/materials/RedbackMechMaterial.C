@@ -90,6 +90,13 @@ validParams<RedbackMechMaterial>()
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
 
+  params.addCoupledVar("initial_grain_size", 0.0, "The initial grain size");
+  params.addParam<Real>("gs_reduction_constant", 1.0, "Grain size reduction constant ()");
+  params.addParam<Real>("gs_Arrhenius_growth", 1.0, "TODO");
+  params.addParam<Real>("gs_exponent", 1.0, "TODO");
+  params.addParam<Real>("gs_steady_state_constant", 1.0, "TODO");
+  params.addParam<Real>("gs_growth_constant", 1.0, "TODO");
+
   return params;
 }
 
@@ -155,6 +162,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _dmg_exponent(getParam<Real>("damage_exponent")),
     _healing_coeff(getParam<Real>("healing_coefficient")),
 
+    _grain_size(declareProperty<Real>("grain_size")),
+
     // Get coupled variables (T & P & porosity & damage)
     _has_T(isCoupled("temperature")),
     _T(_has_T ? coupledValue("temperature") : _zero),
@@ -187,7 +196,14 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _peclet_number(getMaterialProperty<Real>("Peclet_number")),
     _returnmap_iter(declareProperty<Real>("returnmap_iter")),
     _T0_param(getParam<Real>("temperature_reference")),
-    _P0_param(getParam<Real>("pressure_reference"))
+    _P0_param(getParam<Real>("pressure_reference")),
+
+    _initial_grain_size(coupledValue("gs_initial_grain_size")),
+    _gs_reduction_constant_param(getParam<Real>("gs_reduction_constant")),
+    _gs_ar_growth_param(getParam<Real>("gs_Arrhenius_growth")),
+    _gs_exponent_param(getParam<Real>("gs_exponent")),
+    _gs_steady_state_constant_param(getParam<Real>("gs_steady_state_constant")),
+    _gs_growth_constant_param(getParam<Real>("gs_growth_constant"))
 {
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
@@ -240,6 +256,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mechanical_dissipation_jac_mech[ _qp ] = 0;
   _damage_kernel[ _qp ] = 0;
   _damage_kernel_jac[ _qp ] = 0;
+  _grain_size[ _qp ] = 72.3;//_initial_grain_size[ _qp ];
   _mass_removal_rate[ _qp ] = 0;
 }
 
@@ -691,6 +708,32 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
     _exponential =
       std::exp(-_ar[ _qp ]) * std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
   }
+//%%%%%%%%%%%%%%%%%%%%%%%%%%% PSEUDO ALGORITHM FOR GRAIN SIZE SENSITIVE CREEP STARTED ON THE 10th OF AUGUST 2016 %%%%%%%%%%%%%%%
+
+  bool has_grain_size = _initial_grain_size[ _qp ] != 0;
+  if (has_grain_size && _has_T) // TODO: rewrite in such a way that we can run grain size without temperature
+  {
+    Real grain_reduction = _gs_reduction_constant_param * _mises_stress[ _qp ] * _mises_strain_rate[ _qp ] * std::pow(_grain_size[ _qp ],2) * _dt;
+    Real grain_growth = _gs_growth_constant_param * std::pow(_grain_size[ _qp ], 1 -_gs_exponent_param) * std::exp(- _gs_ar_growth_param/(1 + _T[_qp])) * _dt;
+
+    Real steady_state_stress_exponent = (_exponent + 1)/ (_gs_exponent_param + 1);
+    Real ar_ss = (_gs_ar_growth_param - _ar[_qp])/(_gs_exponent_param + 1); //TODO: the expression needs to be checked for normalisation
+
+    Real steady_state_grain_size = _gs_steady_state_constant_param * std::pow(_mises_stress[ _qp ], steady_state_stress_exponent)* std::exp(- ar_ss/(1 + _T[_qp]));
+    // TODO: _gs_steady_state_constant_param is actually a formula
+
+    if (_grain_size[ _qp ] < steady_state_grain_size)
+      _grain_size[ _qp ] = fmin(grain_growth, steady_state_grain_size);
+    else if (_grain_size[ _qp ] > steady_state_grain_size)
+      _grain_size[ _qp ] = fmax(steady_state_grain_size, grain_reduction);
+    else
+      _grain_size[ _qp ] = steady_state_grain_size;
+
+    _exponential *= std::pow(_grain_size[ _qp ], -_gs_exponent_param);
+  }
+
+//%%%%%%%%%%%%%%%%%%%%%%%%%%% PSEUDO ALGORITHM FOR GRAIN SIZE SENSITIVE CREEP ENDED ON THE 10th OF AUGUST 2016 %%%%%%%%%%%%%%%
+
 
   // The following expression should be further pursued for a forward
   // physics-based model
