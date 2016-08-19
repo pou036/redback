@@ -91,11 +91,27 @@ validParams<RedbackMechMaterial>()
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
 
   params.addCoupledVar("gs_initial_grain_size", 0.0, "The initial grain size");
-  params.addParam<Real>("gs_reduction_constant", 1.0, "Grain size reduction constant ()");
-  params.addParam<Real>("gs_Arrhenius_growth", 1.0, "TODO");
-  params.addParam<Real>("gs_exponent", 1.0, "TODO");
-  params.addParam<Real>("gs_steady_state_constant", 1.0, "TODO");
-  params.addParam<Real>("gs_growth_constant", 1.0, "TODO");
+
+  ////////// James changes 19_08_16 //////////
+  //params.addParam<Real>("gs_reduction_constant", 1.0, "Grain size reduction constant ()");
+  params.addParam<Real>("gs_beta", 1.0, "Dissipated Power term (beta)"); // TODO: it is a formaula that includes stess & strain ratio
+
+  params.addParam<Real>("gs_lamda", 0.1, "Microstructural energy storage constant (lamda)");
+  params.addParam<Real>("gs_geometric_constant", 1.0, "Geometric constant (c)"); // value should be pi, don't know how to enter pi value
+  params.addParam<Real>("gs_gamma_constant", 1.0, "Grainboundary energy constant (gamma)"); // Assumed from Covey-Crump (1997)
+
+
+
+
+  params.addParam<Real>("gs_Arrhenius_growth", 175, "Arrhenius growth (Qg)"); // Assumed from Covey-Crump (1997)
+  params.addParam<Real>("gs_exponent", 3.0, "Grain growth constant (p)"); // Assumed from Covey-Crump (1997)
+
+  params.addParam<Real>("gs_steady_state_constant", 1.0, "Steady state preexponent (kappa)"); // TODO: This should be a formula that calls terms that have been defined
+  params.addParam<Real>("gs_steady_state_exponent", 2511.9, "Steady state exponent (m')"); // TODO: formula, calucaltion includes gs_exponent & stress exponent (from dis flow law?)
+  params.addParam<Real>("gs_growth_constant", 2511.9, "Grain growth constant (Kg)");
+  params.addParam<Real>("gs_steady_state_Arrhenius", 1.0, "Steady state Arrhenius (Q')"); // TODO: formula, calucaltion includes gs_Arrhenius_growth,  Arrhenius from dis flow law & gs_exponent
+
+  params.addParam<Real>("gs_growth_constant", 2511.9, "Grain growth constant (Kg)"); // Assumed from Covey-Crump (1997)
 
   return params;
 }
