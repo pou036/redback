@@ -92,25 +92,14 @@ validParams<RedbackMechMaterial>()
 
   params.addCoupledVar("gs_initial_grain_size", 0.0, "The initial grain size");
 
-  ////////// James changes 19_08_16 //////////
   //// REDUCTION ////
-  //params.addParam<Real>("gs_reduction_constant", 1.0, "Grain size reduction constant ()"); //MANOLIS' CATCH ALL TERM: specific terms below
-  params.addParam<Real>("gs_beta", 1.0, "Dissipated Power term (beta)"); // TODO: it is a formaula that includes stess & strain ratio
-  params.addParam<Real>("gs_lamda", 0.1, "Microstructural energy storage constant (lamda)"); // Assumed from eperimental work that 0.9 converted to heat
-  params.addParam<Real>("gs_geometric_constant", 1.0, "Geometric constant (c)"); // value should be pi, don't know how to enter pi value
-  params.addParam<Real>("gs_gamma_constant", 1.0, "Grainboundary energy constant (gamma)"); // Assumed from Covey-Crump (1997)
+  params.addParam<Real>("gs_lambda", 0.1, "Microstructural energy storage constant (lambda)"); // Assumed from eperimental work that 0.9 converted to heat
+  params.addParam<Real>("gs_gamma", 1.0, "Grain boundary energy constant (gamma)"); // Assumed from Covey-Crump (1997)
 
   //// GROWTH ////
   params.addParam<Real>("gs_Arrhenius_growth", 175.0, "Arrhenius growth (Qg)"); // Assumed from Covey-Crump (1997)
   params.addParam<Real>("gs_exponent", 3.0, "Grain growth constant (p)"); // Assumed from Covey-Crump (1997)
   params.addParam<Real>("gs_growth_constant", 2511.9, "Grain growth constant (Kg)"); // Assumed from Covey-Crump (1997)
-
-  //// STEADY STATE ////
-  params.addParam<Real>("gs_steady_state_constant", 1.0, "Steady state preexponent (kappa)"); // TODO: This should be a formula that calls terms that have been defined
-  params.addParam<Real>("gs_steady_state_exponent", 2511.9, "Steady state exponent (m')"); // TODO: formula, calucaltion includes gs_exponent & stress exponent (from dis flow law?)
-  params.addParam<Real>("gs_steady_state_Arrhenius", 1.0, "Steady state Arrhenius (Q')"); // TODO: formula, calucaltion includes gs_Arrhenius_growth,  Arrhenius from dis flow law & gs_exponent
-
-
 
   return params;
 }
@@ -214,11 +203,12 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _P0_param(getParam<Real>("pressure_reference")),
 
     _initial_grain_size(coupledValue("gs_initial_grain_size")),
-    _gs_reduction_constant_param(getParam<Real>("gs_reduction_constant")),
+    //_gs_reduction_constant_param(getParam<Real>("gs_reduction_constant")),
     _gs_ar_growth_param(getParam<Real>("gs_Arrhenius_growth")),
     _gs_exponent_param(getParam<Real>("gs_exponent")),
-    _gs_steady_state_constant_param(getParam<Real>("gs_steady_state_constant")),
-    _gs_growth_constant_param(getParam<Real>("gs_growth_constant"))
+    _gs_growth_constant_param(getParam<Real>("gs_growth_constant")),
+    _gs_lambda_param(getParam<Real>("gs_lambda")),
+    _gs_gamma_param(getParam<Real>("gs_gamma"))
 {
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
@@ -271,7 +261,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mechanical_dissipation_jac_mech[ _qp ] = 0;
   _damage_kernel[ _qp ] = 0;
   _damage_kernel_jac[ _qp ] = 0;
-  _grain_size[ _qp ] = 72.3;//_initial_grain_size[ _qp ];
+  _grain_size[ _qp ] = _initial_grain_size[ _qp ];
   _mass_removal_rate[ _qp ] = 0;
 }
 
@@ -723,19 +713,22 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
     _exponential =
       std::exp(-_ar[ _qp ]) * std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
   }
-//%%%%%%%%%%%%%%%%%%%%%%%%%%% PSEUDO ALGORITHM FOR GRAIN SIZE SENSITIVE CREEP STARTED ON THE 10th OF AUGUST 2016 %%%%%%%%%%%%%%%
+//%%%%%%%%%%%%%%%%%%%%%%%%%%% PSEUDO ALGORITHM FOR GRAIN SIZE evolution %%%%%%%%%%%%%%%
 
   bool has_grain_size = _initial_grain_size[ _qp ] != 0;
   if (has_grain_size && _has_T) // TODO: rewrite in such a way that we can run grain size without temperature
   {
-    Real grain_reduction = _gs_reduction_constant_param * _mises_stress[ _qp ] * _mises_strain_rate[ _qp ] * std::pow(_grain_size[ _qp ],2) * _dt;
+    Real beta = 7.2; // TODO, beta = eps_dot_dis / (eps_dot_dis + sps_dot_dif)
+    // TODO: all temperatures need to be put to full dimensions first. (All formulas are wrong)
+    // All expressions need to be checked for normalisation
+    Real pi = 3.14159265358979323846;
+    Real grain_reduction = beta * _gs_lambda_param/(pi*_gs_gamma_param) * _mises_stress[ _qp ] * _mises_strain_rate[ _qp ] * std::pow(_grain_size[ _qp ],2) * _dt;
     Real grain_growth = _gs_growth_constant_param * std::pow(_grain_size[ _qp ], 1 -_gs_exponent_param) * std::exp(- _gs_ar_growth_param/(1 + _T[_qp])) * _dt;
 
-    Real steady_state_stress_exponent = (_exponent + 1)/ (_gs_exponent_param + 1);
-    Real ar_ss = (_gs_ar_growth_param - _ar[_qp])/(_gs_exponent_param + 1); //TODO: the expression needs to be checked for normalisation
-
-    Real steady_state_grain_size = _gs_steady_state_constant_param * std::pow(_mises_stress[ _qp ], steady_state_stress_exponent)* std::exp(- ar_ss/(1 + _T[_qp]));
-    // TODO: _gs_steady_state_constant_param is actually a formula
+    Real m_prime = (_exponent + 1)/ (_gs_exponent_param + 1);
+    Real ar_ss = (_gs_ar_growth_param - _ar[_qp])/(_gs_exponent_param + 1); // Q_prime
+    Real eps_0 = 7.8; // TODO
+    Real steady_state_grain_size = std::pow(pi * _gs_gamma_param * _gs_growth_constant_param / (_gs_lambda_param * _gs_exponent_param * eps_0), 1/(_gs_exponent_param + 1)) * std::pow(_mises_stress[ _qp ], m_prime)* std::exp(- ar_ss/(1 + _T[_qp]));
 
     if (_grain_size[ _qp ] < steady_state_grain_size)
       _grain_size[ _qp ] = fmin(grain_growth, steady_state_grain_size);
@@ -746,8 +739,6 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
     _exponential *= std::pow(_grain_size[ _qp ], -_gs_exponent_param);
   }
-
-//%%%%%%%%%%%%%%%%%%%%%%%%%%% PSEUDO ALGORITHM FOR GRAIN SIZE SENSITIVE CREEP ENDED ON THE 10th OF AUGUST 2016 %%%%%%%%%%%%%%%
 
 
   // The following expression should be further pursued for a forward

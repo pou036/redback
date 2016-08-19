@@ -198,7 +198,8 @@ protected:
   Real _damage_dissipation;
 
   const VariableValue & _initial_grain_size;
-  Real _gs_reduction_constant_param, _gs_ar_growth_param, _gs_exponent_param, _gs_steady_state_constant_param, _gs_growth_constant_param;
+  Real _gs_ar_growth_param, _gs_exponent_param, _gs_steady_state_constant_param, _gs_growth_constant_param;
+  Real _gs_lambda_param, _gs_gamma_param;
 
 };
 
