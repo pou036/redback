@@ -6,11 +6,30 @@
   file = gold/1block_mesh.e
 []
 
+#paragraph that needs to be paste in all three steps of the simulation
+[Functions]
+  [./image_func]
+    type = ImageFunction
+    threshold = 90
+    file_suffix = png
+    file_base = stack/test_0
+    file_range = '0 3'
+  [../]
+[]
+
 [MeshModifiers]
+  #differentiate the block 2 (pores) from the block 0 (grains)
   [./subdomain]
     type = ElementFileSubdomain
     subdomain_ids = 2
     file = gold/idfile_unique.txt
+  [../]
+  #creates the interface boundary
+  [./edge]
+    type = SideSetsBetweenSubdomains
+    master_block = 0
+    new_boundary = 10
+    paired_block = 2
   [../]
 []
 
@@ -18,25 +37,6 @@
   [./u]
     order = FIRST
     family = LAGRANGE
-  [../]
-[]
-
-[Kernels]
-  [./td]
-    type = TimeDerivative
-    variable = u
-  [../]
-[]
-
-[Functions]
-  [./image_func]
-    type = ImageFunction
-    threshold = 90
-    upper_value = 1
-    lower_value = 0
-    file_suffix = png
-    file_base = stack/test_0
-    file_range = '0 3'
   [../]
 []
 
@@ -48,15 +48,16 @@
   [../]
 []
 
+[Problem]
+  type = FEProblem
+  solve = false
+[]
+
 [Executioner]
-  type = Transient
-  num_steps = 1
-  dt = 0.00001
-  solve_type = PJFNK
+  type = Steady
 []
 
 [Outputs]
   file_base = 2blocks_mesh
   exodus = true
 []
-

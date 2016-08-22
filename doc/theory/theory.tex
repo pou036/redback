@@ -24,6 +24,8 @@
 \usepackage{epstopdf}
 \usepackage{url}
 
+\usepackage{longtable}
+
 \DeclareCaptionFont{white}{\color{white}}
 \DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
 
@@ -100,7 +102,8 @@ This document is a work-in-progress and does not go into all details. Real appli
 \label{chapter:gov_eqs}
 
 \section{Conventions}
-In this document we assume that stresses are taken positive in tension and pore pressure is positive ($p_f>0$).
+In this document we assume that stresses are taken positive in tension and pore pressure is positive ($p_f>0$). Index notation is used. The indices used are $i$, $j$, $k$, $l$. All other letters or character-strings appearing as indices belong to the symbol used and are not subject to the index notation rules. 
+\redback{} is using a set of equations that are written for a biphasic material, namely a solid and a fluid phase irrespective of the processes involved, e.g. chemical reactions that produce different kinds of solids and fluids. 
 
 \section{System of equations}
 The system in its final form is
@@ -108,13 +111,13 @@ The system in its final form is
 \label{eq:final_system_of_equations_dimensionless}
 \begin{empheq}[box=\widefbox]{align}
   0 &= \pdiff{\sigma^{\prime}_{ij}}{j} - \pdiff{p_f}{i} + b_i, \\   
-  0 &= \pdiff{p_f}{t} + Pe\: v^p_i \pdiff{p_f}{i} -
-  Pe\:v^T_i \pdiff{T}{i} - \pdiff{\left[\frac{1}{Le} \pdiff{
+  0 &= \pdiff{p_f}{t} + Pe\: \bar{v}_i^{\beta} \pdiff{p_f}{i} -
+  Pe\:\bar{v}^{\Lambda}_i \pdiff{T}{i} - \pdiff{\left[\frac{1}{Le} \pdiff{
   p_f}{i} \right]}{i} \\ \nonumber
-  ~ & \qquad\qquad - \Lambda \pdiff{T}{t} +
+  ~ & \qquad\qquad - \Lambda_m \pdiff{T}{t} +
   \frac{Pe\:\dot{\epsilon_V}}{\bar{\beta}^*} -\frac{1}{Le_{chem}}
   \omega_F, \\
-  0 &= \pdiff{T}{t} + Pe\:\bar{v_i}\pdiff{T}{i} - \pd_{ii}^2 T - Gr
+  0 &= \pdiff{T}{t} + Pe\:\bar{v}^{m}_i\pdiff{T}{i} - \pd_{ii}^2 T - Gr
   \: \sigma_{ij}^{pl}\dot{\epsilon}_{ij}^{\,pl}  \\ \nonumber
   ~ & \qquad\qquad + Da_{endo}\: (1 - s)(1 - \phi)e^{\frac{Ar_F\:\delta T}{1+\delta T}} \\ \nonumber
   ~ & \qquad\qquad - Da_{exo}\:\: s  (1 - \phi)\Delta \phi_{chem} e^{\frac{Ar_R\:\delta T}{1+\delta T}}.
@@ -123,28 +126,27 @@ The system in its final form is
 
 All dimensionless groups are defined in Tab.~\ref{tab:dimensionless_nbs} and
 \begin{align*}
-  \bar{\beta} &= (1-\phi)\beta_s + \phi\beta_f, \\
-  \bar{\beta}^* &= \bar{\beta}\:\sigma_{ref}, \\
-  v_i^p &= (1-\phi)\frac{\beta_s}{\bar{\beta}} v_i^s + 
+  \bar{\beta}\;\;\:&= (1-\phi)\beta_s + \phi\beta_f, \\
+  \bar{\beta}^* \;\: &= \bar{\beta}\:\sigma_{ref}, \\
+  \bar{v}_i^{\beta} \;\: &= (1-\phi)\frac{\beta_s}{\bar{\beta}} v_i^s + 
     \phi\frac{\beta_f}{\bar{\beta}}v_i^f, \\
-  v^T_i &= (1-\phi)\frac{\bar{\lambda}_s}{\bar{\beta}} v_i^s + 
-    \phi\frac{\bar{\lambda}_f}{\bar{\beta}} v_i^f,\\
-  \bar{v_i} &= \frac{\rho_s}{\bar{\rho}} v_i^s + \frac{\rho_f}{\bar{\rho}} v_i^f, \\
-  \omega_F &= (1-\phi)(1-s)\exp\left(\frac{Ar_F \: \delta T}{1 + \delta T}
+  \bar{v}^{\Lambda}_i \:\: &= (1-\phi) \Lambda_s v_i^s + 
+    \phi \Lambda_f v_i^f,\\
+  \bar{v}^{m}_i \:\: &= (1-\phi) \frac{\rho_s}{\bar{\rho}} v_i^s + \phi \frac{\rho_f}{\bar{\rho}} v_i^f, \\
+  \omega_F^{*} \: &= \frac{\omega_F M_{AB} e^{Ar}}{\rho_{AB} k_F} = (1-\phi)(1-s)\exp\left(\frac{Ar_F \: \delta T}{1 + \delta T}
   \right), \\
-  \omega_R &= (1-\phi)\:s\:\Delta \phi_{chem}\exp\left(\frac{Ar_R \: \delta
-  T}{1 + \delta T} \right), \\
-  \dot{\epsilon}^{pl}_{ij} &= \dot \epsilon_0 \: \exp\left( \frac{Ar \: \delta
+  \dot{\epsilon}^{vp}_{ij} \; &= \dot \epsilon_0 \: \exp\left( \frac{Ar \: \delta
   T}{1 + \delta T}\right) \sqrt{ \left\langle\frac{q -
   q_Y}{\sigma_{ref}}\right\rangle^{2m} + \left\langle\frac{p
   - p_Y}{\sigma_{ref}}\right\rangle^{2m}} \frac{\partial f}{\partial
     \sigma_{ij}}.
 \end{align*}
 
+% \omega_R \;\: &= (1-\phi)\:s\:\Delta \phi_{chem}\exp\left(\frac{Ar_R \: \delta T}{1 + \delta T} \right), \\
 All symbols are defined in Tab.~\ref{tab:symbols}.
 
 The total porosity $\phi$ is expressed as the sum of its initial value, $\phi_0$,
-and the newly created interconnected pore volume. Pore volume can be created
+and the newly created interconnected pore volume. For simplicity reasons, all porosity is assumed to be interconnected (or at least up to the point this document was written). Pore volume can be created
 by mechanical ($\Delta\phi_{mech}$) and chemical ($\Delta \phi_{chem}$)
 processes such that the total porosity reads
 \begin{eqnarray}
@@ -153,7 +155,7 @@ processes such that the total porosity reads
 \end{eqnarray}
 where $V_B$ is the volume occupied by fluid $B$.  The evolution of mechanical
 porosity contains two components, a plastic part $\Delta
-\phi^{pl}_{mech}=\epsilon^{pl}_V$, with $\epsilon^{pl}_V$ the volumetric plastic strain, and an
+\phi^{vp}_{mech}=\epsilon^{pl}_V$, with $\epsilon^{pl}_V$ the volumetric plastic strain, and an
 elastic one $\Delta \phi^{e}_{mech}=(1-\phi)\left( \beta_s \Delta p_f -
 \lambda_s \Delta T \right)$
 where $\beta_s$ and $\lambda_s$ are compressibility and
@@ -184,30 +186,38 @@ Thermally activated chemical reactions are allowed to take place and
 in this work we concentrate on (de-)hydration reactions of the form
 \begin{equation}
   \label{eq:reaction}
-  \nu_1 AB_{s} 
-  \overset{\omega_F}{\underset{\omega_R}{\rightleftharpoons}} \nu_2 A_{s} + \nu_3 B_{f},
+  \zeta_1 AB_{s} 
+  \overset{\omega_F}{\underset{\omega_R}{\rightleftharpoons}} \zeta_2 A_{s} + \zeta_3 B_{f},
 \end{equation} 
-where the subscripts $s$ and $f$ refer to solid and fluid phases and $\nu_i$
+where the subscripts $s$ and $f$ refer to solid and fluid phases and $\zeta_i$
 $(i=1,2,3)$ are stoichiometric coefficients.  The reaction
 equation~\eqref{eq:reaction} states that the solid $A$ can release/bind the
 component $B$ into/from the fluid phase which increases/reduces the pore pressure.
 
+\begin{figure}
+  \centering
+  \includegraphics[width=1\textwidth]{figures/Reversible.png}
+ % \includegraphics[width=0.45\textwidth]{figures/Reaction_rate.pdf}
+  \caption{(a) Schematic explanation of the activation enthalpies of the forward and reverse reactions, and the enthalpy of the reaction. (b) Evolution of the reaction rates of the reactants (black curve) and the products (blue curve) towards the equilibrium rate.}
+  \label{fig:Reversible}
+\end{figure}
+
 The kinetics of the decomposition reaction~\eqref{eq:reaction} are assumed
 to follow a standard Arrhenius dependency on temperature 
 \citep{Poulet2014}. As a result, the rates of the forward, $\omega_F$, and
-reverse reaction, $\omega_R$ (let $\nu_1=\nu_2=\nu_3=1$) can
+reverse reaction, $\omega_R$ (let $\zeta_1=\zeta_2=\zeta_3=1$) can
 be expressed as \citep{Alevizos2014}
 \begin{subequations}
 \label{eq:reaction_rates_txt}
 \begin{align}
-  \omega_F &=  \frac{\rho_{AB}}{M_{AB}} (1 - \phi)(1 - s)  k_F e^{-Q_F/RT}, \\
+  \omega_F &=  \frac{\rho_{AB}}{M_{AB}} (1 - \phi)(1 - s)  k_F e^{-\Delta H_{act}^F/RT}, \\
   \omega_R &=  \frac{\rho_{A} \rho_{B}}{M_A M_B} (1 - \phi) s \Delta\phi_{chem}
-  k_R e^{-Q_R/RT},
+  k_R e^{-\Delta H_{act}^R/RT},
 \end{align}
 \end{subequations}
 where $\rho_i$ and $M_i$ $(i = A, B, AB)$ are the densities and molar masses of
 the respective constituent,
-$k_F,k_R$, $Q_F,Q_R$ are the pre-exponential factors and activation enthalpies
+$k_F,k_R$, $\Delta H_{act}^F,\Delta H_{act}^R$ are the pre-exponential factors and activation enthalpies
 of the forward and reverse reaction,
 $\phi$ is porosity and $\Delta\phi_{chem}$ denotes change in porosity due to 
 chemical processes. We define the solid ratio
@@ -222,10 +232,10 @@ reaction rate is
 \begin{equation}
  \label{eq:reaction_rate_total}
 \omega = \left[(1 - s) - s  \Delta \phi_{chem} \frac{\rho_{A}
-\rho_{B}}{\rho^2_{AB}} \frac{M^2_{AB}}{M_A M_B} K^{-1}_c e^{\Delta h/RT}
-\right] (1 - \phi) \frac{\rho_{AB}}{M_{AB}} k_F e^{-Q_F/RT}
+\rho_{B}}{\rho^2_{AB}} \frac{M^2_{AB}}{M_A M_B} K^{-1}_c e^{\Delta H_{r}/RT}
+\right] (1 - \phi) \frac{\rho_{AB}}{M_{AB}} k_F e^{-\Delta H_{act}^F/RT}
 \end{equation}
-where $K_c = k_F/k_R$ and $\Delta h = Q_R - Q_F$.  The expressions for the
+where $K_c = k_F/k_R$ and $\Delta H_{r} = \Delta H_{act}^R - \Delta H_{act}^F$.  The expressions for the
 dependency of the porosity $\phi$ and solid ratio $s$ on the reaction kinetics
 are described in detail in \cite{Alevizos2014} and briefly summarized here.
 
@@ -235,18 +245,18 @@ species involved
 \label{eq:js}
 \begin{align}
   \omega_{AB} &= - \left[ \frac{\rho_{AB}}{M_{AB}} (1 - \phi)(1 - s)
-  \right]^{\nu_1} k_F \exp(-Q_F/RT), \\
-  \omega_A &= \left[ \frac{\rho_{A}}{M_A} (1 - \phi) s \right]^{\nu_2} k_A \exp(-Q_R/RT), \\
-  \omega_B &= \left[ \Delta\phi_{chem} \frac{\rho_{B}}{M_B} \right]^{\nu_3} k_B
-  \exp(-Q_R/RT),
+  \right]^{\zeta_1} k_F \exp(-\Delta H_{act}^F/RT), \\
+  \omega_A &= \left[ \frac{\rho_{A}}{M_A} (1 - \phi) s \right]^{\zeta_2} k_A \exp(-\Delta H_{act}^R/RT), \\
+  \omega_B &= \left[ \Delta\phi_{chem} \frac{\rho_{B}}{M_B} \right]^{\zeta_3} k_B
+  \exp(-\Delta H_{act}^R/RT),
 \end{align}
 \end{subequations}
 and those rates are linked by the stoichiometry of the considered reaction~\eqref{eq:reaction} as
 \begin{equation}
   \label{eq:j_equal}
-	-\frac{\omega_{AB}}{\nu_1} = \frac{\omega_A}{\nu_2} = \frac{\omega_B}{\nu_3}.
+	-\frac{\omega_{AB}}{\zeta_1} = \frac{\omega_A}{\zeta_2} = \frac{\omega_B}{\zeta_3}.
 \end{equation}
-From Eqs.~(\ref{eq:js}-\ref{eq:j_equal}) and for $\nu_1=\nu_2=\nu_3=1$ we
+From Eqs.~(\ref{eq:js}-\ref{eq:j_equal}) and for $\zeta_1=\zeta_2=\zeta_3=1$ we
 derive the poro-chemical model
 \begin{subequations}
 \label{eq:s_phi_chem}
@@ -254,7 +264,7 @@ derive the poro-chemical model
   \Delta \phi_{chem} &= A_{\phi} \frac{1-\phi_0}{1 + \frac{\rho_{B}}{\rho_{A}} \frac{M_{A}}{M_{B}} \frac{1}{s}}, \\
   s &= \frac {\omega_{rel}} {1+\omega_{rel}},\\
   \omega_{rel} &= \frac{\rho_{AB}}{\rho_{A}} \frac{M_{A}}{M_{AB}} K_c \exp
-  \left( \frac{\Delta h}{RT} \right),
+  \left( \frac{\Delta H_{r}}{RT} \right),
 \end{align}
 \end{subequations}
 where
@@ -272,19 +282,19 @@ thus set $A_{\phi} = 1$.
 such that $T^{\star} = (T-T_{ref})/(\delta T_{ref})$}
 \label{tab:dimensionless_nbs}
 %\begin{tabular}{@{} l p{0.18\textwidth} l p{0.52\textwidth} @{}}
-\begin{tabular}{| L{1cm} | L{2.5cm} | L{6cm} | L{5cm} |}
+\begin{tabular}{| L{1.2cm} | L{2.2cm} | L{6cm} | L{5cm} |}
 \hline\noalign{\smallskip}
 Group & Name & Definition & Interpretation \\
-\noalign{\smallskip}\hline\noalign{\smallskip}
-$Gr$ & Gruntfest number & $\frac{\chi\sigma_{ref}\dot{\epsilon}_{ref} x^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of mechanical rate converted into heat over rate of diffusive processes \\
-$Da_{endo}$ & Endothermic Damk\"{o}hler number & $\frac{A_{endo} h_{endo} \rho_{AB} x^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of endothermic reaction rate over rate of diffusive processes \\
-$Da_{exo}$ & Exothermic Damk\"{o}hler number & $\frac{A_{exo} h_{exo} \rho_{AB} x^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of exothermic reaction rate over rate of diffusive processes \\
-$Ar$ & Arrhenius number & $Q_{mech}/(R T_{ref})$ & Ratio of activation energy over thermal energy \\
-$Ar_F$ & Forward Arrhenius number & $Q_F/(R T_{ref})$ & Ratio of activation energy of forward reaction over thermal energy \\
-$Ar_R$ & Reverse Arrhenius number & $Q_R/(R T_{ref})$ & Ratio of activation energy of reverse activation energy over thermal energy \\
-$Le$ & Lewis number & $c_{th}/c_{hy}=\frac{\mu_f\:c_{th}\:\beta^*_m}{k \: \sigma_{ref}}$ & Ratio of thermal over mass diffusivities \\
-$Le_{chem}$ & Chemical Lewis number & $\frac{c_{th}\sigma_{ref}\beta_m }{x^2_{ref} A_{endo}}\frac{\rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_{B}} \left( \frac{\rho_B}{\rho_f} - \frac{\rho_B}{\rho_s}\right)e^{-Ar_F}$ & Ratio of thermal over chemical diffusivity of forward reaction \\
-$\bar{\Lambda}$ & Thermal pressurisation coefficient & $\frac{\lambda_m}{\beta_m}\frac{\delta \:T_{ref}}{\sigma_{ref}}$ & Normalised thermal pressurisation coefficient, with $\lambda_m$ and $\beta_m$ the mixture thermal expansion and compressibility \\
+\noalign{\smallskip}\hline\hline\noalign{\smallskip}
+$Gr$ & Gruntfest number & $\frac{\chi\sigma_{ref}\dot{\epsilon}_{ref} x^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of mechanical rate converted into heat over rate of diffusive processes \\ \hline
+$Da_{endo}$ & Endothermic Damk\"{o}hler number & $\frac{A_{endo} h_{endo} \rho_{AB} x^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of endothermic reaction rate over rate of diffusive processes \\ \hline
+$Da_{exo}$ & Exothermic Damk\"{o}hler number & $\frac{A_{exo} h_{exo} \rho_{AB} x^2_{ref}}{\alpha \delta T_{ref}}$ & ratio of exothermic reaction rate over rate of diffusive processes \\ \hline
+$Ar$ & Arrhenius number & $\Delta H_{mech}/(R T_{ref})$ & Ratio of activation enthalpy over thermal energy \\ \hline
+$Ar_F$ & Forward Arrhenius number & $\Delta H_{act}^F/(R T_{ref})$ & Ratio of activation enthalpy of forward reaction over thermal energy \\ \hline
+$Ar_R$ & Reverse Arrhenius number & $\Delta H_{act}^R/(R T_{ref})$ & Ratio of activation enthalpy of reverse activation energy over thermal energy \\ \hline
+$Le$ & Lewis number & $c_{th}/c_{hy}=\frac{\mu_f\:c_{th}\:\beta^*_m}{\kappa \: \sigma_{ref}}$ & Ratio of thermal over mass diffusivities \\ \hline
+$Le_{chem}$ & Chemical Lewis number & $\frac{c_{th}\sigma_{ref}\beta_m }{x^2_{ref} A_{endo}}\frac{\rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_{B}} \left( \frac{\rho_B}{\rho_f} - \frac{\rho_B}{\rho_s}\right)e^{-Ar_F}$ & Ratio of thermal over chemical diffusivity of forward reaction \\ \hline
+$\bar{\Lambda}_a$ & Thermal pressurisation coefficient of $a$ & $\frac{\lambda_a}{\beta_m}\frac{\delta \:T_{ref}}{\sigma_{ref}}$ & Normalised thermal pressurisation coefficient, with $\lambda_a$ the thermal expansion of $a$ and $\beta_m$ the mixture's compressibility \\ \hline
 $Pe$ & P\'{e}clet number & $x_{ref}V_{ref}/c_{th}$ & Ratio of temperature advection rate over diffusion rate \\
 \noalign{\smallskip}\hline
 \end{tabular}
@@ -899,7 +909,7 @@ In order to deal with dimensionless parameters we introduce the following normal
   \end{align}
 \end{subequations}
 
-Dividing Eq.~\ref{eq:mixture_mass_balance3} by $\beta_m$ and switching to the normalised variables we get
+where $c_{th} = \alpha / \left( \rho C_p \right)_m$ is the thermal diffusivity of the mixture. Dividing Eq.~\ref{eq:mixture_mass_balance3} by $\beta_m$ and switching to the normalised variables we get
 
 \begin{multline}
   \label{eq:mixture_mass_balance4}
@@ -942,14 +952,14 @@ with
 The filtration vector $\phi(V^{(2)}_k -V^{(1)}_k)$ can be expressed using Darcy's law as
 \begin{equation}
   \label{eq:darcy}
-  \phi(V^{(2)}_k -V^{(1)}_k) = -\frac{k}{\mu_f} \left(\frac{\partial p_f}{\partial x_k} - \rho_f\:g\:\vec{e}_z \right)
+  \phi(V^{(2)}_k -V^{(1)}_k) = -\frac{\kappa}{\mu_f} \left(\frac{\partial p_f}{\partial x_k} - \rho_f\:g\:\vec{e}_z \right)
 \end{equation}
 
 In its normalised form it becomes 
 \begin{equation}
   \label{eq:darcy_normalised}
   \phi(V^{*(2)}_k -V^{*(1)}_k)
-  = -\frac{k}{\mu_f} \frac{\sigma_{ref}}{x_{ref}\:V_{ref}}\left(\frac{\partial p^*}{\partial x^*_k} - \frac{x_{ref}}{\sigma_{ref}}\rho_f\:g\:\vec{e}_z \right)
+  = -\frac{\kappa}{\mu_f} \frac{\sigma_{ref}}{x_{ref}\:V_{ref}}\left(\frac{\partial p^*}{\partial x^*_k} - \frac{x_{ref}}{\sigma_{ref}}\rho_f\:g\:\vec{e}_z \right)
 \end{equation}
 
 The mass balance equation then becomes
@@ -959,23 +969,23 @@ The mass balance equation then becomes
   - \Lambda \frac{\partial T^*}{\partial t^*} 
   + Pe \:\vec{v}^p \frac{\partial p^*}{\partial x^*_k} 
   - Pe \:\vec{v}^T \frac{\partial T*}{\partial x^*_k} \\
-  + \frac{\partial}{\partial x^*_k} \left[ \underbrace{\frac{k \: \sigma_{ref}}{\mu_f\:c_{th}\:\beta^*_m}}_{1/Le} \left( \frac{\partial p^*}{\partial x^*_k} - \underbrace{\rho_f \frac{x_{ref}}{\sigma_{ref}}g}_{(\rho_f\:g)^*}\: \vec{e}_z  \right) \right]
+  + \frac{\partial}{\partial x^*_k} \left[ \underbrace{\frac{\kappa \: \sigma_{ref}}{\mu_f\:c_{th}\:\beta^*_m}}_{1/Le} \left( \frac{\partial p^*}{\partial x^*_k} - \underbrace{\rho_f \frac{x_{ref}}{\sigma_{ref}}g}_{(\rho_f\:g)^*}\: \vec{e}_z  \right) \right]
   + \frac{Pe}{\beta^*_m} \dot{\epsilon}^*_V  
   = \frac{x^2_{ref}}{\beta_m\:\sigma_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1
 \end{multline}
 
-with the Lewis number defined as $Le = \frac{\mu_f\:c_{th}\:\beta^*_m}{k \: \sigma_{ref}}$ and the normalised gravity term $(\rho_f\:g)^*=\rho_f \frac{x_{ref}}{\sigma_{ref}}g$.
+with the Lewis number defined as $Le = \frac{\mu_f\:c_{th}\:\beta^*_m}{\kappa \: \sigma_{ref}}$ and the normalised gravity term $(\rho_f\:g)^*=\rho_f \frac{x_{ref}}{\sigma_{ref}}g$.
 
 Following \citep[][appendix A]{Alevizos2014}
-$j_1 = \omega_F.M_B$, $\omega_F=\frac{\rho_1}{M_{AB}}k_F exp{-Q_F/RT}$ and $\rho_1=(1-\phi)(1-s)\rho_{AB}$, so the volumetric source term $j1$ can be written as
+$j_1 = \omega_F.M_B$, $\omega_F=\frac{\rho_1}{M_{AB}}k_F exp{-\Delta H_{act}^F/RT}$ and $\rho_1=(1-\phi)(1-s)\rho_{AB}$, so the volumetric source term $j_1$ can be written as
 \begin{equation}
   \label{eq:j1_a}
-  j_1 =\rho_{AB}\frac{M_B}{M_{AB}}(1-\phi)(1-s) k_F exp{(-Q_F/RT)}
+  j_1 =\rho_{AB}\frac{M_B}{M_{AB}}(1-\phi)(1-s) k_F exp{(-\Delta H_{act}^F/RT)}
 \end{equation}
 The RHS term of Eq.~\ref{eq:mixture_mass_balance6} can then be written as
 \begin{multline}
   \label{eq:mixture_mass_balance_rhs}
-  \frac{x^2_{ref}}{\beta_m\:\sigma_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1 = \frac{x^2_{ref}}{\beta_m\:\sigma_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)\rho_{AB}\frac{M_B}{M_{AB}}(1-\phi)(1-s) k_F exp{(-Q_F/RT)} \\
+  \frac{x^2_{ref}}{\beta_m\:\sigma_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)j_1 = \frac{x^2_{ref}}{\beta_m\:\sigma_{ref}\:c_{th}} \left(\frac{1}{\rho_f} - \frac{1}{\rho_s}\right)\rho_{AB}\frac{M_B}{M_{AB}}(1-\phi)(1-s) k_F exp{(-\Delta H_{act}^F/RT)} \\
   = \underbrace{\frac{x^2_{ref}k_F }{\beta_m\:\sigma_{ref}\:c_{th}} \frac{\rho_{AB}}{\rho_B}\frac{M_B}{M_{AB}}\left(\frac{\rho_B}{\rho_f} - \frac{\rho_B}{\rho_s}\right)e^{-Ar_F}}_{1/Le_{chem}} \underbrace{(1-\phi)(1-s) \exp{\left( \frac{Ar_F \:\delta T^*}{1+\delta T^*} \right)}}_{\omega^*_F }
 \end{multline}
 
@@ -986,25 +996,25 @@ We then arrive to the full mass balance equation Eq.~\ref{eq:final_system_of_equ
 The local form of the energy balance equation reads as follows:
 \begin{equation}
   \label{eq:energy_balance}
-  (\rho C_p)_m \frac{D^{(m)}T}{Dt} = \kappa \nabla^2 T + \chi \sigma_{ij}.\dot{\epsilon}^{p}_{ij} - \Delta H (\omega_F - \omega_R)
+  (\rho C_p)_m \frac{D^{(m)}T}{Dt} = \alpha \nabla^2 T + \chi \sigma_{ij}.\dot{\epsilon}^{p}_{ij} - \Delta H (\omega_F - \omega_R)
 \end{equation}
-with $\chi$ the Taylor-Quinney coefficient and $\Delta H=\Delta E=E_F-E_R$ the reaction's specific enthalpy.
+with $\chi$ the Taylor-Quinney coefficient and {\color{red} $\Delta H_{r}=\Delta \mathfrak{E} = \mathfrak{E}_F - \mathfrak{E}_R$ the reaction's specific enthalpy}.
 The definitions of the reaction rates $\omega_F$ and $\omega_R$ are (from Eq.~\ref{eq:reaction_rate_total})
 \begin{subequations}
  \label{eq:reaction_rates}
  \begin{align}
- \omega_F &= k_F (1 - s)(1 - \phi)\frac{\rho_{AB}}{M_{AB}}  e^{-Q_F/RT} \\
- \omega_R &= k_R \:s  (1 - \phi)  \Delta \phi_{chem} \frac{\rho_{A} \rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_A M_B}  e^{-Q_R/RT}
+ \omega_F &= k_F (1 - s)(1 - \phi)\frac{\rho_{AB}}{M_{AB}}  e^{-\Delta H_{act}^F/RT} \\
+ \omega_R &= k_R \:s  (1 - \phi)  \Delta \phi_{chem} \frac{\rho_{A} \rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_A M_B}  e^{-\Delta H_{act}^R/RT}
   \end{align}
 \end{subequations}
 
 Using the normalised variable we get
 \begin{multline}
   \label{eq:energy_balance1}
-  \frac{\delta T_{ref}\:c_{th}}{x^2_{ref}}(\rho C_p)_m \frac{\partial T^*}{\partial t^*} + \frac{\delta T_{ref}\:v_{ref}}{x_{ref}}(\rho C_p)_m \:\bar{v}.\frac{\partial T^*}{\partial x^*} \\ 
-  - \frac{\kappa\:\delta T_{ref}}{x^2_{ref}} \nabla^2 T - \frac{\sigma_{ref}\:c_{th}}{x^2_{ref}} \chi \sigma^*_{ij}.\dot{\epsilon}^{*(p)}_{ij} \\
-  - \Delta H.k_F (1 - s)(1 - \phi)\frac{\rho_{AB}}{M_{AB}}  e^{-Q_F/RT} \\
-  + \Delta H. k_R \:s  (1 - \phi)  \Delta \phi_{chem} \frac{\rho_{A} \rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_A M_B}  e^{-Q_R/RT} = 0
+  \frac{\delta T_{ref}\:c_{th}}{x^2_{ref}}(\rho C_p)_m \frac{\partial T^*}{\partial t^*} + \frac{\delta T_{ref}\:v_{ref}}{x_{ref}}(\rho C_p)_m \:\bar{v}\:\frac{\partial T^*}{\partial x^*} \\ 
+  - \frac{\alpha\:\delta T_{ref}}{x^2_{ref}} \nabla^2 T - \frac{\sigma_{ref}\:c_{th}}{x^2_{ref}} \chi \sigma^*_{ij}\:\dot{\epsilon}^{*(p)}_{ij} \\
+  - \Delta H_{r}\:k_F (1 - s)(1 - \phi)\frac{\rho_{AB}}{M_{AB}}  e^{-\Delta H_{act}^F/RT} \\
+  + \Delta H_{r}\:k_R \:s  (1 - \phi)  \Delta \phi_{chem} \frac{\rho_{A} \rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_A M_B}  e^{-\Delta H_{act}^R/RT} = 0
 \end{multline}
 
 Note that the reference strain rate is also rescaled so 
@@ -1015,9 +1025,9 @@ Note that the reference strain rate is also rescaled so
 This leads to 
 \begin{multline}
   \label{eq:energy_balance2}
-  \frac{\partial T^*}{\partial t^*} + \overbrace{\frac{x_{ref}\:v_{ref}}{c_{th}}}^{Pe}\:\bar{v}.\frac{\partial T^*}{\partial x^*} - \overbrace{\frac{\kappa}{(\rho C_p)_m}}^{c_{th}}\frac{1}{c_{th}} \nabla^2 T - \overbrace{\frac{\sigma_{ref}}{\delta T_{ref}(\rho C_p)_m} \chi}^{Gr} \sigma^*_{ij}.\dot{\epsilon}^{*(p)}_{ij} \\
-  - \underbrace{\frac{\Delta H\:x^2_{ref} k_F }{\delta T_{ref}\:\kappa}\frac{\rho_{AB}}{M_{AB}}e^{-Ar_F}}_{Da_{endo}} (1 - s)(1 - \phi)e^{\frac{Ar_F\:\delta T^*}{1+\delta T^*}} \\
-   + \underbrace{\frac{\Delta H x^2_{ref} k_R}{\delta T_{ref}\kappa} \frac{\rho_{A} \rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_A M_B} e^{-Ar_R}}_{Da_{exo}}\:s  (1 - \phi)\Delta \phi_{chem} e^{\frac{Ar_R\:\delta T^*}{1+\delta T^*}}= 0
+  \frac{\partial T^*}{\partial t^*} + \overbrace{\frac{x_{ref}\:v_{ref}}{c_{th}}}^{Pe}\:\bar{v}\:\frac{\partial T^*}{\partial x^*} - \overbrace{\frac{\alpha}{(\rho C_p)_m}}^{c_{th}}\frac{1}{c_{th}} \nabla^2 T - \overbrace{\frac{\sigma_{ref}}{\delta T_{ref}(\rho C_p)_m} \chi}^{Gr} \sigma^*_{ij}\:\dot{\epsilon}^{*(p)}_{ij} \\
+  - \underbrace{\frac{\Delta H_{r}\:x^2_{ref} k_F }{\delta T_{ref}\:\alpha}\frac{\rho_{AB}}{M_{AB}}e^{-Ar_F}}_{Da_{endo}} (1 - s)(1 - \phi)e^{\frac{Ar_F\:\delta T^*}{1+\delta T^*}} \\
+   + \underbrace{\frac{\Delta H_{r}\:x^2_{ref} k_R}{\delta T_{ref}\alpha} \frac{\rho_{A} \rho_{B}}{\rho_{AB}} \frac{M_{AB}}{M_A M_B} e^{-Ar_R}}_{Da_{exo}}\:s  (1 - \phi)\Delta \phi_{chem} e^{\frac{Ar_R\:\delta T^*}{1+\delta T^*}}= 0
 \end{multline}
 and finally to Eq.~\ref{eq:final_system_of_equations_dimensionless}c
 
@@ -1150,13 +1160,29 @@ For the off-diagonal term with respect to pore pressure we get
 \chapter{Symbols}
 Tab.~\ref{tab:symbols} lists some of the main symbols used in this document.
 
-\begin{table}
-\caption{List of main symbols}
-\label{tab:symbols}
-\begin{tabular}{lll}
-\hline\noalign{\smallskip}
-Symbol & Name & Unit of Measure \\
-\noalign{\smallskip}\hline\noalign{\smallskip}
+{\footnotesize
+\begin{longtable}{ l l l }
+\caption{List of main symbols} \label{tab:symbols} \\
+\hline \multicolumn{1}{l}{Symbol} & \multicolumn{1}{l}{Name} & \multicolumn{1}{l}{Unit of measure} \\ \hline 
+\endfirsthead
+
+\multicolumn{3}{c}%
+{{\thetable{} -- continued from previous page}} \\
+\hline \multicolumn{1}{l}{Symbol} & \multicolumn{1}{l}{Name} & \multicolumn{1}{l}{Unit of measure}  \\ \hline 
+\endhead
+
+\hline\hline \multicolumn{3}{r}{{Continued on next page}} \\ \hline\hline
+\endfoot
+
+\hline \hline
+\endlastfoot
+
+%\small
+%\begin{tabular}{l c l c l c l}
+%\hline\noalign{\smallskip}
+%\hline
+%Symbol & Name & Unit of Measure \\ \hline
+%\noalign{\smallskip}\hline\noalign{\smallskip}
 % Dimensionless groups
 $Ar$ & Arrhenius number & - \\
 $Ar_F$ & Forward Arrhenius number & - \\
@@ -1175,17 +1201,21 @@ $.^{\star}$, [$t^{\star}$, $x^{\star}$, $T^{\star}$, $\Delta p^{\star}$, $\sigma
 
 \hline
 % Greek symbols
+$\alpha$ & Thermal conductivity & $ kg.m.K^{-1}.s^{-3}$ \\
 $\beta$, [$\beta_s$, $\beta_f$] & Compressibility [solid, fluid phase] & $Pa^{-1}$ \\
-$\Delta h$ & Enthalpy of the reaction & $J.mol^{-1}$ \\
+$\delta$ & Numerical rescaling parameter & - \\
+$\delta_{ij}$ & Kronecker delta & - \\
+$\Delta H$, [$\Delta H_r$,$\Delta H^{F}_{act}$, & Change of specific enthalpy [enthalpy of reaction, \\ $\;\;\;\;\;\;\;\;$ $\Delta H^{R}_{act}$, $\Delta H_{mech}$] & activation enthalpy of forward, reverse reaction] & $J.mol^{-1}$ \\
 $\epsilon_{ij}$ & Strain tensor & - \\
-$\dot \epsilon_0$ & Reference strain rate & $s^{-1}$ \\
-$\dot \epsilon^{p}_{d}$ & Deviatoric plastic strain rate & $s^{-1}$ \\
-$\dot \epsilon^{p}_{v}$ & Volumetric plastic strain rate & $s^{-1}$ \\
+$\dot{\epsilon}_{ij}$ & Strain rate tensor & $s^{-1}$ \\
+$\dot{\epsilon}$, [$\dot \epsilon_0$, $\dot \epsilon^{vp}_{d}$, $\dot \epsilon^{vp}_{v}$] & Strain rate [reference, deviatoric visco-plastic, \\ & volumetric visco-plastic] & $s^{-1}$ \\
+$\zeta$, [$\zeta_{1}$, $\zeta_{2}$, $\zeta_{3}$] & Stoichiometric coefficients \\ & [of species AB, A, B] from Eq.~\ref{eq:reaction}& - \\
+$\kappa$ & Permeability & $m^2$ \\
 $\lambda$, [$\lambda_s$, $\lambda_f$] & Thermal expansion coefficient [solid, fluid phase] & $K^{-1}$ \\
 $\mu_f$ & Fluid viscosity & $Pa.s$ \\
-$\nu$, [$\nu_{1}$, $\nu_{2}$, $\nu_{3}$] & Stochiometric coefficients \\ & [of species AB, A, B] from Eq.~\ref{eq:reaction}& - \\
+$\nu$ & Poisson's ratio & - \\
 $\dot\Pi$ & Plastic multiplier (scalar) & $s^{-1}$ \\
-$\rho$, [$\rho_{AB}$, $\rho_{A}$, $\rho_{B}$, $\rho_{s}$, $\rho_{f}$] & Density [of species AB, A, B, solid, fluid] & $kg.m^{-3}$ \\
+$\rho$, [$\rho_{AB}$, $\rho_{A}$, $\rho_{B}$, $\rho_{s}$,  & Density [of species AB, A, B, solid, fluid, \\ $\;\;\;\;$ $\rho_{f}$, $\rho_{1}$, $\rho_{2}$] & solid phase, fluid phase] & $kg.m^{-3}$ \\
 $\sigma_{ij}$, [$\sigma'_{ij}$] & Stress tensor [effective stress] & $Pa$ \\
 $\phi$, [$\phi_0$, $\Delta\phi_{chem}$, $\Delta\phi_{mech}$] & Porosity [initial, chemical component, \\ & mechanical component] & - \\
 $\chi$ & Taylor-Quinney coefficient & - \\
@@ -1196,31 +1226,36 @@ $\omega$, [$\omega_{AB}$, $\omega_{A}$, $\omega_{B}$, $\omega_{F}$, $\omega_{R}$
 $A_{\phi}$ & Interconnected porosity coefficient & - \\
 $C^e_{ijkl}$ & Elasticity tensor & $Pa$ \\
 $C_p$ & Specific heat capacity & $m^2.K^{-1}.s^{-2}$ \\
-$E$ & Activation energy & $J.mol^{-1}$ \\
-$K_c$ & Ratio of forward over reverse pre-exponential constants & - \\
+$E$ & Young's modulus & $Pa$ \\
+$\mathfrak{E}$ & Activation energy & $J.mol^{-1}$ \\
+$G$ & Shear modulus & $Pa$ \\
+$K$ & Bulk modulus & $Pa$ \\
+$K_c$ & Relative pre-exponential factor & - \\
 $M$, [$M_{AB}$, $M_{A}$, $M_{B}$] & Molar mass [of species AB, A, B] & $kg.mol^{-1}$ \\
-$Q$, [$Q_{F}$, $Q_{R}$, $Q_{mech}$] & Activation enthalpy [forward chemical reaction, \\ 
-     & reverse, of micro-mechanical processes] & $J.mol^{-1}$ \\
+%$Q$, [$Q_{F}$, $Q_{R}$, $\Delta H_{mech}$] & Activation enthalpy [forward chemical reaction, \\ 
+%     & reverse, of micro-mechanical processes] & $J.mol^{-1}$ \\
 $R$ & Universal gas constant & $J.K^{-1}.mol^{-1}$ \\
 $T$ & Temperature & $K$ \\
-$V$, [$V_{s}$, $V_{f}$, $V_{A}$, $V_{B}$, $V_{AB}$, $V_{act}$] & Volume [of solid phase, fluid phase, \\ & component A, B, AB, activation volume] & $m^3$ \\
+$V$, [$V_{s}$, $V_{f}$, $V_{A}$, $V_{B}$, & Volume [of solid phase, fluid phase, \\ $\;\;\;\;\;$ $V_{AB}$, $V_{act}$] & component A, B, AB, activation volume] & $m^3$ \\
 
 \hline
 % Latin symbols - Lower case
+$b_{i}$ & Body force vector & $m^{2}.s^{-1}$ \\
 $c_{th}$ & Thermal diffusivity & $m^{2}.s^{-1}$ \\
-$k$, [$k_{F}$, $k_{A}$, $k_{B}$] & Pre-exponential factor [of forward chemical  \\ & reaction, for species A, B] & $s^{-1}$\\
-$k_{\pi}$ & Permeability & $m^2$ \\
-$s^{-1}$ \\
+$j$, [$j_1$, $j_2$] & Mass production rate per unit volume [solid, \\ & fluid phase] & $kg.m^{-3}.s^{-1}$ \\
+$k$, [$k_{F}$, $k_{R}$, $k_{A}$, $k_{B}$] & Pre-exponential factor [of forward, reverse \\ & chemical reaction, for species A, B] & $s^{-1}$\\
+$m$ & Visco-plasticity power law exponent & - \\
 $p$, [$p_Y$] & Volumetric mean stress [value at yield] & $Pa$ \\
 $p_f$ & Pore fluid pressure & $Pa$ \\
 $q$, [$q_Y$] & Equivalent stress [value at yield] & $Pa$ \\
 $f$ & Yield function & $\mathbb{R}^9 \longrightarrow \mathbb{R}$ \\
-$s$ & solid ratio & - \\
-$v$, [$v^s$, $v^f$] & Velocity [solid, fluid phase] & $m.s^{-1}$ \\
+$s$ & partial solid ratio & - \\
+$v_i$, [$v_i^s$, $v_i^f$, $\bar{v}_i^{m}$, $\bar{v}_i^{\beta}$, $\bar{v}_i^{\Lambda}$] & Velocity vector [solid, fluid phase, average velocity \\ & of the mixture with respect to mass (barycentric), \\ & compressibility, thermal pressurisation ] & $m.s^{-1}$ \\
 
-\noalign{\smallskip}\hline
-\end{tabular}
-\end{table}
+%\noalign{\smallskip}\hline
+%\end{tabular}
+\end{longtable}
+}
 
 
 %\addcontentsline{toc}{chapter}{\numberline{}Bibliography}

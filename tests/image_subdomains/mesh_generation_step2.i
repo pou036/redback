@@ -6,6 +6,17 @@
   file = gold/1block_mesh.e
 []
 
+#paragraph that needs to be paste in all three steps of the simulation
+[Functions]
+  [./image_func]
+    type = ImageFunction
+    threshold = 90
+    file_suffix = png
+    file_base = stack/test_0
+    file_range = '0 3'
+  [../]
+[]
+
 [Variables]
   [./u]
     order = FIRST
@@ -17,18 +28,6 @@
   [./td]
     type = TimeDerivative
     variable = u
-  [../]
-[]
-
-[Functions]
-  [./image_func]
-    type = ImageFunction
-    threshold = 90
-    upper_value = 1
-    lower_value = 0
-    file_suffix = png
-    file_base = stack/test_0
-    file_range = '0 3'
   [../]
 []
 
@@ -54,4 +53,3 @@
   dt = 0.00001
   solve_type = PJFNK
 []
-

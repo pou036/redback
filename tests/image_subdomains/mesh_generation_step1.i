@@ -3,14 +3,33 @@
 
 [Mesh]
   type = GeneratedMesh
+  #dimension of your mesh
   dim = 3
-  uniform_refine = 3
+  #choose the element type of your mesh (triangle,tetrahedra,hexagone...)
   elem_type = HEX
+  #level of refinement, mesh resolution of 5 in x is equal to nx*2^5
+  #the more levels of refinement you have the more you can coarsen the mesh
+  uniform_refine = 3
+  nx = 1
+  ny = 1
+  nz = 1
+[]
+
+#paragraph that needs to be paste in all three steps of the simulation
+[Functions]
+  [./image_func]
+    type = ImageFunction
+    threshold = 90
+    file_suffix = png
+    file_base = stack/test_0
+    file_range = '0 3'
+  [../]
 []
 
 [Adaptivity]
+  #the number of adaptivity steps has to be equal or inferior to the level of refinement
   max_h_level = 3
-  initial_steps = 3
+  initial_steps = 1
   initial_marker = marker
   [./Indicators]
     [./indicator]
@@ -22,8 +41,9 @@
     [./marker]
       type = ErrorFractionMarker
       indicator = indicator
-      coarsen = 0.6
-      refine = 0.8
+      # in percentage. 0 means no refinement/coarsening
+      coarsen = 0.3
+      refine = 0.3
     [../]
   [../]
 []
@@ -35,25 +55,6 @@
   [../]
 []
 
-[Kernels]
-  [./td]
-    type = TimeDerivative
-    variable = u
-  [../]
-[]
-
-[Functions]
-  [./image_func]
-    type = ImageFunction
-    threshold = 90
-    upper_value = 1
-    lower_value = 0
-    file_suffix = png
-    file_base = stack/test_0
-    file_range = '0 3'
-  [../]
-[]
-
 [ICs]
   [./u_ic]
     type = FunctionIC
@@ -62,15 +63,16 @@
   [../]
 []
 
+[Problem]
+  type = FEProblem
+  solve = false
+[]
+
 [Executioner]
-  type = Transient
-  num_steps = 1
-  dt = 0.00001
-  solve_type = PJFNK
+  type = Steady
 []
 
 [Outputs]
   file_base = 1block_mesh
   exodus = true
 []
-
