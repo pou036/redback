@@ -23,6 +23,10 @@
 \usepackage{hyperref}
 \usepackage{epstopdf}
 \usepackage{url}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows}
+%\usepackage{ragged2e} % use for full justification eg.{\justifying\emph{Text I would....}\par}
+
 
 \DeclareCaptionFont{white}{\color{white}}
 \DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
@@ -69,7 +73,8 @@
 	\vfill
 	Collaborators (in chronological order):\par
 	Martin Paesold (UWA) \par
-	Mustafa Sari (UNSW)
+	Mustafa Sari (UNSW) \par
+	James Gilgannon (Universit\"{a}t Bern)
 
 	\vfill
 
@@ -291,24 +296,155 @@ $Pe$ & P\'{e}clet number & $x_{ref}V_{ref}/c_{th}$ & Ratio of temperature advect
 \end{table}
 
 
-\chapter{Grain size sensitivity}
+\chapter{Grain-size sensitivity}
 \label{chapter:size_sensitivity}
 
+\begin{table}
+  \caption{List of parameters used in grain-size evolution loop}
+\label{tab:grain_evo_params}
+%\begin{tabular}{@{} l p{0.18\textwidth} l p{0.52\textwidth} @{}}
+\begin{tabular}{| L{1cm} | C{3.75cm} | C{5.25cm} | C{5cm} |}
+\hline\noalign{\smallskip}
+Symbol & Name \& Description & Definition & Assumptions \\
+\noalign{\smallskip}\hline\noalign{\smallskip}
+$X_{dif}$ & {\small Diffusion subscript} &  &  \\
+
+$X_{dis}$ & {\small Dislocation subscript} &  &  \\
+
+$\dot{d}_{tot}$ & {\small The summation of competing rates of changes in grain-size} & $\dot{d}_{tot} = \dot{d}_{red} + \dot{d}_{growth}$ & {\small When $\dot{d}_{tot} = 0$, then stable grain-size is achieved} \\
+
+$\dot{d}_{red}$ & {\small The rate of grain-size reduction} & $\frac{\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}$ &  \\
+
+$\beta$ & {\small The portion of power dissipated by dislocation creep} & $\frac{\dot{W}_{dis}}{\dot{W}_{tot}} = \frac{\sigma\dot{\varepsilon}_{dis}}{\sigma\dot{\varepsilon}_{dis} + \sigma\dot{\varepsilon}_{dif}}$ & {\small The stress used is the differential stress!} \\
+
+$\lambda$ & {\small Constant for energy produced by defect production that is stored in the microstructure} & $\lambda=\lambda_{dis}= 0.1;  where,   \lambda_{dif} = 0$ & {\small The value of the constant is derived from experimental work that showed 90\% of mechanical work is converted into heat \citep{Austin2009}}\\
+
+$\sigma_{d}$ & {\small Differential stress} & $\sigma_{1} - \sigma_{3}$ &  \\
+
+$\dot{\varepsilon}$ & {\small Strain rate} & $\frac{d\varepsilon}{dt}$ &  \\
+
+$d$ & {\small Grain-size at the increment of calculation} &  & {\small Initial grain-size must be determined by the user} \\
+$c$ & {\small Geometric constant} & $\pi$ & {\small Grains are assumed to be spherical \citep{Austin2009}} \\
+
+$\gamma$ & {\small Constant for grain-boundary energy} & $\gamma = 1 Jm^{-2}$ & {\small Value for $\gamma$ taken from Covey-Crump (1997)} \\
+
+$\dot{d}_{growth}$ & {\small The rate of grain-size growth} & $K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p}$ &  \\
+
+$K_g$ & {\small Grain growth pre-exponent} & $K_g = 2511.9 MPa^{ndis}s^{-1}$ {\footnotesize (Covey-Crump, 1997)} & \\
+
+$Q_g$ &  & $Q_g = 175 kJ mol^{-1}$ {\footnotesize \todo[inline]{(Covey-Crump, 1997)}} &  \\
+
+$R$ & {\small Gas constant} & $R = 8.314 JK^{-1}mol^{-1}$  &  \\
+
+$p$ & {\small Grain growth exponent} & $p = 3$ {\footnotesize (From Covey-Crump (1997) chosen by \citet{Herwegh2014})} &  \\
+
+$d_{ss}$ & Steady state grain size & $d_{ss} = \kappa \sigma_{d}^{m'} exp^-{\left(\frac{Q^{'}}{RT}\right)}$  &  \\
+
+$\kappa$ &  & $\left[\frac{c \gamma K_g}{\lambda p K_{dis}}\right]^{\frac{1}{p+1}}$ & {\small 
+
+$K_{dis}$ is the dislocation creep flow law's pre-exponent} \\
+
+$m^{'}$ &  & $\left[\frac{n+1}{p+1}\right]$ &  \\
+
+$Q^{'}$ &  & $\frac{Q_g-Q_{dis}}{p+1}$ & {\small $Q_{dis}$ is the dislocation flow law's activation energy} \\
+\noalign{\smallskip}\hline
+\end{tabular}
+\end{table}
+
 \section{Theory}
+\label{section:theory_size_sensitivity}
 
-At depths in the crust great enough to yeild pressure insensitve material responses, the rheological behaviour of a rock can be considerd to be governed by the average grain-size of the sample (\textcolor{red}{insert ref}). In Nature this is manifest by the development of a ductile fault rock series known as a mylonite series. During deformation strain is localised into the zones of finer grain-sizes acheived due to the deformational condtions. Therefore any modelling approach interested in investigsting strain softening behaviour in rocks requires an robust inegration of a deformational grain-size evoltuion. We have chosen to implement the Paleowattmeter of \citep{Austin2007}.\\  
+\todo[inline]{What follows is a work flow of relevat from the 22/08/16, with user determined values for clacite only}
 
-\citet{Austin2007} propose that druing deformation the average grain-size of a sample ($\bar{d}$) evolves to a steady state grain-size ($d_{ss}$) faster than any stress preturbations. With respect to the grain-size evolution, they suggest that a steady state grain-size is acheived when the sum of the rates of growth and redcution are balanced and equal 0:\\
+At depths in the crust great enough to yeild pressure insensitve material responses, the rheological behaviour of a rock can be considerd to be governed by the average grain-size of the sample (\textcolor{red}{insert ref}). In Nature this is manifest by the development of a ductile fault rock series known as a mylonite series. During deformation strain is localised into the zones of finer grain-sizes (acheived due to the deformational condtions). Therefore any modelling approach interested in investigsting strain softening behaviour in rocks requires an robust inegration of a deformationally induced grain-size evoltuion. We have chosen to implement the Paleowattmeter of \citep{Austin2007}.\\  
+
+\citet{Austin2007} propose that druing deformation the average grain-size of a sample ($\bar{d}$) evolves to a steady state grain-size ($d_{ss}$) faster than any stress preturbations. With respect to the grain-size evolution, they suggest that a steady state grain-size is acheived when the sum of the rates of growth and redcution are balanced, i.e. equal 0:\\
 
 \begin{equation}
  \label{eq:rate_change_dss}
 \dot{d}_{tot} = \dot{d}_{red} + \dot{d}_{growth}
 \end{equation}\\
 
-For now, see Word document \textcolor{blue}{REDBACK\_def\_ass\_paleowatt\_grainsize\_loop} \& \textcolor{blue}{REDBACK\_def\_grainsize\_loop} for assumtions and equation dictionary. What follows is a work flow of relevat from the 22/08/16.\\
+Where $\dot{d}_{red}$ and $\dot{d}_{growth}$ are:
 
-Note: In \citet{Austin2007} Eq.10 contians error in $\kappa$ formulation, $\varepsilon_0$ is actually $K_{dis}$. See \citet{Herwegh2014} Eq.16 for the correct formulation of $\kappa$.
+\begin{equation}
+ \label{eq:d_red}
+\dot{d}_{red}=\frac{\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}
+\end{equation}\\
 
+\begin{equation}
+ \label{eq:d_growth}
+\dot{d}_{growth}=K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p} 	
+\end{equation}\\
+
+Therefore; \:
+
+\begin{equation}
+ \label{eq:d_tot}
+\dot{d}_{tot} = \left(\frac{\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}\right) + \left(K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p}\right)
+\end{equation}\\
+
+If , \: 
+\begin{equation}
+ \label{eq:d_tot_0}
+\dot{d}_{tot} = 0 = \left(\frac{\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}\right) + \left(K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p}\right)
+\end{equation}\\
+
+and the rock deforms by powerlaw creep then, \: 
+\begin{equation}
+ \label{eq:dislocation_creep}
+\dot{\varepsilon}_{dis} = K_{dis} \sigma_d^n exp^{\left(\frac{-Q_{dis}}{RT}\right)}
+\end{equation}\\
+
+The steady state grain-size is: \:
+\begin{equation}
+ \label{eq:steady_state_gs}
+\ d_{ss} = \kappa \sigma_d^{m'} exp^{\left(\frac{-Q_{'}}{RT}\right)}
+\end{equation}\\
+
+\todo[inline]{Note: In \citet{Austin2007} Eq.10 contians error in $\kappa$ formulation, $\varepsilon_0$ is actually $K_{dis}$. See \citet{Herwegh2014} Eq.16 for the correct formulation of $\kappa$. This document contains the correct term definitions.}
+
+\section{Grain-size evolution loop}
+\label{section:gs_evolution_loop}
+The loop below implements the theory from section ~\ref{section:theory_size_sensitivity}. At each timestep the grain-size is compared to the predicted steady state grain-size expected for the modelled deformation conditions. This loop is repated at each timestep until the observed grain-size is equal to the expected grain-size.\\
+
+See Table ~\ref{tab:grain_evo_params} for the defintions of terms used in loop.\\
+
+\todo[inline]{ Note: Temperature in loop has dimentions but the code uses a dimensionless normalisation. TO DO! CODE LOOP TO NORMALISE TEMPERATURE}
+
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!30]
+\tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=3cm, minimum height=1cm, text centered, text width=4cm, draw=black, fill=blue!30]
+\tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=2.5cm, text centered, text width=6cm, draw=black, fill=orange!30]
+\tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
+\tikzstyle{arrow} = [thick,->,>=stealth]
+
+\begin{figure}
+\centering
+\caption{Grain-size evolution loop} 
+\label{fig:gs_evolution_loop}
+\begin{tikzpicture}[node distance=2cm]
+
+\node (start) [startstop] {Starting timestep};
+\node (in1) [io, below of=start] {Extract:\\ \textbf {$\dot{\varepsilon},\:\sigma_d,\:T \: \& \: d$}};
+\node (pro1) [process, below of=in1, yshift=-0.5cm] {For extracted data use:\\ \textbf{$ d_{ss} = \kappa\sigma_d^{m'} exp^{\left(\frac{-Q_{'}}{RT}\right)}$}};
+\node (dec1) [decision, below of=pro1, yshift=-1.5cm] {Does $d = d_{ss}$ };
+\node (out1) [io, below of=dec1, yshift=-0.5cm] {Steady state grain-size has been acheived};
+\node (pro2) [process, right of=dec1, xshift=7cm] {If, $d<d_{ss}$ use:\\ $\dot{d}_{growth}=K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p}$};
+\node (pro3) [process, right of=pro1, xshift=7cm] {If, $d>d_{ss}$ use:\\ $\dot{d}_{red}=\frac{\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}$};
+\node (stop) [startstop, below of=out1] {Stop};
+
+\draw [arrow] (start) -- (in1);
+\draw [arrow] (in1) -- (pro1);
+\draw [arrow] (pro1) -- (dec1);
+\draw [arrow] (dec1) -- node[anchor=east] {\textbf{yes}} (out1);
+\draw [arrow] (dec1) -- node[anchor=south] {\textbf{no}} (pro2);
+\draw [arrow] (pro2) -- node[anchor=east] {\textbf{or}} (pro3);
+\draw [arrow] (pro3) |- node[arrow, above] {\textbf{move one timestep forward}} (in1);
+\draw [arrow] (out1) -- (stop);
+
+\end{tikzpicture}
+\end{figure}
 
 
 \chapter{Code architecture}
