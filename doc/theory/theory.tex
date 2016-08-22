@@ -291,6 +291,26 @@ $Pe$ & P\'{e}clet number & $x_{ref}V_{ref}/c_{th}$ & Ratio of temperature advect
 \end{table}
 
 
+\chapter{Grain size sensitivity}
+\label{chapter:size_sensitivity}
+
+\section{Theory}
+
+At depths in the crust great enough to yeild pressure insensitve material responses, the rheological behaviour of a rock can be considerd to be governed by the average grain-size of the sample (\textcolor{red}{insert ref}). In Nature this is manifest by the development of a ductile fault rock series known as a mylonite series. During deformation strain is localised into the zones of finer grain-sizes acheived due to the deformational condtions. Therefore any modelling approach interested in investigsting strain softening behaviour in rocks requires an robust inegration of a deformational grain-size evoltuion. We have chosen to implement the Paleowattmeter of \citep{Austin2007}.\\  
+
+\citet{Austin2007} propose that druing deformation the average grain-size of a sample ($\bar{d}$) evolves to a steady state grain-size ($d_{ss}$) faster than any stress preturbations. With respect to the grain-size evolution, they suggest that a steady state grain-size is acheived when the sum of the rates of growth and redcution are balanced and equal 0:\\
+
+\begin{equation}
+ \label{eq:rate_change_dss}
+\dot{d}_{tot} = \dot{d}_{red} + \dot{d}_{growth}
+\end{equation}\\
+
+For now, see Word document \textcolor{blue}{REDBACK\_def\_ass\_paleowatt\_grainsize\_loop} \& \textcolor{blue}{REDBACK\_def\_grainsize\_loop} for assumtions and equation dictionary. What follows is a work flow of relevat from the 22/08/16.\\
+
+Note: In \citet{Austin2007} Eq.10 contians error in $\kappa$ formulation, $\varepsilon_0$ is actually $K_{dis}$. See \citet{Herwegh2014} Eq.16 for the correct formulation of $\kappa$.
+
+
+
 \chapter{Code architecture}
 \label{chapter:code}
 \section{Kernels}
