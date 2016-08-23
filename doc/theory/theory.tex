@@ -23,10 +23,9 @@
 \usepackage{hyperref}
 \usepackage{epstopdf}
 \usepackage{url}
-\usepackage{tikz}
-\usetikzlibrary{shapes.geometric, arrows}
+\usepackage{tikz} % FOR FLOWCHART
+\usetikzlibrary{shapes.geometric, arrows} % FOR FLOW CHART ARROWS
 %\usepackage{ragged2e} % use for full justification eg.{\justifying\emph{Text I would....}\par}
-
 
 \DeclareCaptionFont{white}{\color{white}}
 \DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
@@ -299,14 +298,18 @@ $Pe$ & P\'{e}clet number & $x_{ref}V_{ref}/c_{th}$ & Ratio of temperature advect
 \chapter{Grain-size sensitivity}
 \label{chapter:size_sensitivity}
 
+%%%%%% Table of parameters for grain-size evoultion %%%%%% 
 \begin{table}
-  \caption{List of parameters used in grain-size evolution loop}
+  \caption[inline]{List of parameters used in grain-size evolution loop}
 \label{tab:grain_evo_params}
-%\begin{tabular}{@{} l p{0.18\textwidth} l p{0.52\textwidth} @{}}
-\begin{tabular}{| L{1cm} | C{3.75cm} | C{5.25cm} | C{5cm} |}
+
+%%% Table setup %%% 
+\begin{tabular}{| L{1.3cm} | C{3.95cm} | C{5.25cm} | C{4.95cm} |}
 \hline\noalign{\smallskip}
 Symbol & Name \& Description & Definition & Assumptions \\
 \noalign{\smallskip}\hline\noalign{\smallskip}
+
+%%% Table inputs %%%
 $X_{dif}$ & {\small Diffusion subscript} &  &  \\
 
 $X_{dis}$ & {\small Dislocation subscript} &  &  \\
@@ -354,12 +357,13 @@ $Q^{'}$ &  & $\frac{Q_g-Q_{dis}}{p+1}$ & {\small $Q_{dis}$ is the dislocation fl
 \section{Theory}
 \label{section:theory_size_sensitivity}
 
-\todo[inline]{What follows is a work flow of relevat from the 22/08/16, with user determined values for clacite only}
+\todo[inline]{What follows is a work flow of relevant from the 22/08/16, with user determined values for clacite only}
 
 At depths in the crust great enough to yeild pressure insensitve material responses, the rheological behaviour of a rock can be considerd to be governed by the average grain-size of the sample (\textcolor{red}{insert ref}). In Nature this is manifest by the development of a ductile fault rock series known as a mylonite series. During deformation strain is localised into the zones of finer grain-sizes (acheived due to the deformational condtions). Therefore any modelling approach interested in investigsting strain softening behaviour in rocks requires an robust inegration of a deformationally induced grain-size evoltuion. We have chosen to implement the Paleowattmeter of \citep{Austin2007}.\\  
 
 \citet{Austin2007} propose that druing deformation the average grain-size of a sample ($\bar{d}$) evolves to a steady state grain-size ($d_{ss}$) faster than any stress preturbations. With respect to the grain-size evolution, they suggest that a steady state grain-size is acheived when the sum of the rates of growth and redcution are balanced, i.e. equal 0:\\
 
+%%% Competion of grain-size rates %%%
 \begin{equation}
  \label{eq:rate_change_dss}
 \dot{d}_{tot} = \dot{d}_{red} + \dot{d}_{growth}
@@ -367,36 +371,41 @@ At depths in the crust great enough to yeild pressure insensitve material respon
 
 Where $\dot{d}_{red}$ and $\dot{d}_{growth}$ are:
 
+%%% Rate of grain-size reduction %%%
 \begin{equation}
  \label{eq:d_red}
 \dot{d}_{red}=\frac{\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}
 \end{equation}\\
 
+%%% Rate of grain-size growth %%%
 \begin{equation}
  \label{eq:d_growth}
 \dot{d}_{growth}=K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p} 	
 \end{equation}\\
 
 Therefore; \:
-
+%%% Competion of grain-size rates with red & growth terms %%%
 \begin{equation}
  \label{eq:d_tot}
 \dot{d}_{tot} = \left(\frac{\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}\right) + \left(K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p}\right)
 \end{equation}\\
 
 If , \: 
+%%% Competion of grain-size rates at steady state %%%
 \begin{equation}
  \label{eq:d_tot_0}
 \dot{d}_{tot} = 0 = \left(\frac{\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}\right) + \left(K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p}\right)
 \end{equation}\\
 
-and the rock deforms by powerlaw creep then, \: 
+and the rock deforms by powerlaw creep then, \:
+%%% Dislocation creep flow law %%% 
 \begin{equation}
  \label{eq:dislocation_creep}
 \dot{\varepsilon}_{dis} = K_{dis} \sigma_d^n exp^{\left(\frac{-Q_{dis}}{RT}\right)}
 \end{equation}\\
 
 The steady state grain-size is: \:
+%%% Steady state grain-size flow law (?) %%%
 \begin{equation}
  \label{eq:steady_state_gs}
 \ d_{ss} = \kappa \sigma_d^{m'} exp^{\left(\frac{-Q_{'}}{RT}\right)}
@@ -406,11 +415,22 @@ The steady state grain-size is: \:
 
 \section{Grain-size evolution loop}
 \label{section:gs_evolution_loop}
-The loop below implements the theory from section ~\ref{section:theory_size_sensitivity}. At each timestep the grain-size is compared to the predicted steady state grain-size expected for the modelled deformation conditions. This loop is repated at each timestep until the observed grain-size is equal to the expected grain-size.\\
+The loop below (Fig.~\ref{fig:gs_evolution_loop}) implements the theory from section ~\ref{section:theory_size_sensitivity}. At each timestep the grain-size is compared to the predicted steady state grain-size expected for the modelled deformation conditions. This loop is repated at each timestep until the observed grain-size is equal to the expected grain-size.\\
 
 See Table ~\ref{tab:grain_evo_params} for the defintions of terms used in loop.\\
 
-\todo[inline]{ Note: Temperature in loop has dimentions but the code uses a dimensionless normalisation. TO DO! CODE LOOP TO NORMALISE TEMPERATURE}
+\todo[inline,backgroundcolor=green]{ Note: Temperature in loop has dimentions but the code uses a dimensionless normalisation. TO DO! CODE LOOP TO NORMALISE TEMPERATURE}
+
+\subsection{Further work on grain-size evolution}
+\label{subsection:further_work}
+
+A couple of weakness exsit in the current implementation of a grain-size evoultion law. Below is bullet points on areas to imporve:
+
+\begin{enumerate}
+\item The current model intputs a $\bar{d}$ \& a variance (2$\sigma$) for each finite element. This is based on a gaussian log normal distubtion. However this fails to address a realsitic bias to small grain-sizes. Hence underestimating the contrubtion of diffusion creep. \todo[inline, backgroundcolor=green]{Is $\bar{d}$ actually the mean? Is it infact the mode? How do we better account for the real grain-size distrubtions observed in nature?}
+\item The stored enegry in the microstructure ($\lambda$) is currently pre-defined. This prescribed constant is infered from experimental observations of 90\% heat dissipation. Is this correct to prescribe a $\lambda$ value? It seems more appropriate to include a dissipation term that incorperates the active micro-mechanisms. \citet{Huang2009} attempt to resolve a grain's dissipated energy into microstructrally appropriate terms (see their Eq.1). Integrating this approach may be more robust (with a mind to expand the $W_{AN}$ to include the current Dynamic Recovery \& Dynamic Recrystallisation along side a Plastic Cavitation term).
+\item Both point 1 \& 2 address issues with modelling at a continumm scale. With respect to understanding emergent two phase rheologies (sheet silicate rich rocks) and the ultimate development of IWL \citep{Handy1994} the problem probaly requires a grainscale evaluation of a evolution law that can be homogenised and upscaled.
+\end{enumerate}
 
 
 \tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!30]
@@ -445,6 +465,11 @@ See Table ~\ref{tab:grain_evo_params} for the defintions of terms used in loop.\
 
 \end{tikzpicture}
 \end{figure}
+
+\section{Evolution of a second phase}
+\label{section:evo_second_phase}
+
+\todo[inline,backgroundcolor=green]{Read MOOSE for phase feild modelling}
 
 
 \chapter{Code architecture}
