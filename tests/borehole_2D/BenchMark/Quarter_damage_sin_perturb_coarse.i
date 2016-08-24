@@ -59,7 +59,7 @@
 []
 
 [Functions]
-  active = 'timestep_function inner_pressure_fct outer_pressure_fct'
+  active = 'timestep_function inner_pressure_fct outer_pressure_fct sin_perturb'
   [./temp_ic]
     type = ParsedFunction
     value = 'sqrt(x*x+y*y)/0.9 - 1/9' # -sqrt(x*x+y*y)/0.9 + 10/9
@@ -79,6 +79,10 @@
   [./outer_pressure_fct]
     type = ParsedFunction
     value = 0 # 1e-3
+  [../]
+  [./sin_perturb]
+    type = ParsedFunction
+    value = 0.01*(10+sin(18*asin(y/sqrt(x*x+y*y))))
   [../]
 []
 
@@ -362,6 +366,15 @@
     pore_pres = porepressure
     disp_y = disp_y
     disp_x = disp_x
+  [../]
+[]
+
+[ICs]
+  [./damage_sin]
+    function = sin_perturb
+    variable = damage
+    boundary = 0
+    type = FunctionIC
   [../]
 []
 
