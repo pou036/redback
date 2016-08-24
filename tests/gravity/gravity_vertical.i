@@ -104,12 +104,6 @@
   [./dt]
     type = TimestepSize
   [../]
-  [./num_li]
-    type = NumLinearIterations
-  [../]
-  [./num_nli]
-    type = NumNonlinearIterations
-  [../]
 []
 
 [Executioner]

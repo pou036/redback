@@ -532,14 +532,17 @@ RedbackMaterial::computeRedbackTerms()
                                - (1 - _total_porosity[_qp]) * s_prime
                                );*/
   }
-    // Update Lewis number
-    _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
-                           std::pow(_phi0_param / _total_porosity[ _qp ], 3);
+
+  // Update Lewis number
+  _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
+                         std::pow(_phi0_param / _total_porosity[ _qp ], 3);
+  if (_inverse_lewis_number_tilde[ _qp ] != 0)
+  {
     Real inverse_lewis_number =
       1 / _lewis_number[ _qp ] + _inverse_lewis_number_tilde[ _qp ]; // to include modification from
-                                                                     // multi-app for example
+                                                                   // multi-app for example
     _lewis_number[ _qp ] = 1 / inverse_lewis_number;
-
+  }
   // Forming the compressibilities of the phases
   one_minus_phi_beta_star_s = (1 - _total_porosity[ _qp ]) * _solid_compressibility[ _qp ]; // normalized
 // compressibility of
@@ -549,18 +552,6 @@ RedbackMaterial::computeRedbackTerms()
   beta_star_m = one_minus_phi_beta_star_s + phi_beta_star_f; // normalized compressibility of the mixture
   _mixture_compressibility[ _qp ] = beta_star_m;
 
-  //Calculating the elements for the sand production model of Papamichos et al 2001.
-  //Actual calculation in RedbackSandProductionAux.C AuxKernel
-  Real fluid_density = _fluid_density_param * (1 + _fluid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
-          _fluid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param));
-  RealVectorValue flux = beta_star_m * (_grad_pore_pressure[ _qp ] - fluid_density * _gravity_param) /
-          (_peclet_number[ _qp ] * _lewis_number[ _qp ]);
-  Real norm_flux = flux.norm_sq();
-  _sand_production_rate[_qp] = (1-_total_porosity[ _qp ]) * norm_flux;
-
-  // convective terms
-  if (_are_convective_terms_on)
-  {
     Real solid_density, fluid_density;
     Real lambda_m_star, one_minus_phi_lambda_s, phi_lambda_f;
     RealVectorValue mixture_velocity, normalized_gravity;
@@ -595,15 +586,23 @@ RedbackMaterial::computeRedbackTerms()
                                                                              // the fluid phase
     lambda_m_star = one_minus_phi_lambda_s + phi_lambda_f; // normalized compressibility of the mixture
 
+    //Calculating the elements for the sand production model of Papamichos et al 2001.
+    //Actual calculation in RedbackSandProductionAux.C AuxKernel
+    RealVectorValue darcy_flux = - beta_star_m * (_grad_pore_pressure[ _qp ] - fluid_density * normalized_gravity) /
+            (_peclet_number[ _qp ] * _lewis_number[ _qp ]);
+    Real norm_flux = darcy_flux.norm_sq();
+    _sand_production_rate[_qp] = (1 - _total_porosity[ _qp ]) * norm_flux;
+
     // Forming the velocities through mechanics and Darcy's flow law
-    _fluid_velocity[ _qp ] =
-      _solid_velocity[ _qp ] -
-      beta_star_m * (_grad_pore_pressure[ _qp ] - fluid_density * normalized_gravity) /
-        (_peclet_number[ _qp ] * _lewis_number[ _qp ] * _total_porosity[ _qp ]); // solving Darcy's flux
-                                                                                 // for the fluid velocity
+    _fluid_velocity[ _qp ] = darcy_flux/_total_porosity[ _qp ] + _solid_velocity[ _qp ];
+
     mixture_velocity =
       (solid_density / _mixture_density[ _qp ]) * _solid_velocity[ _qp ] +
       (fluid_density / _mixture_density[ _qp ]) * _fluid_velocity[ _qp ]; // barycentric velocity for the mixture
+
+    // convective terms
+    if (_are_convective_terms_on)
+    {
 
     // Forming the kernels and their jacobians
     _pressure_convective_mass[ _qp ] =
@@ -641,6 +640,6 @@ RedbackMaterial::computeRedbackTerms()
     //(_peclet_number[_qp]/_lewis_number[_qp])*(phi_beta_star_f*_fluid_gravity_term[_qp]*_grad_temp[_qp]
     //- 0); // 2nd
     // term is for del_square_P; //derivative with respect to temperature
-  }
+    }
   return;
 }
