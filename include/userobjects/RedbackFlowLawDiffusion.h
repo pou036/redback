@@ -1,22 +1,22 @@
-#ifndef REDBACKFLOWLAWDISLOCATION_H
-#define REDBACKFLOWLAWDISLOCATION_H
+#ifndef REDBACKFLOWLAWDIFFUSION_H
+#define REDBACKFLOWLAWDIFFUSION_H
 
 #include "RedbackFlowLawBase.h"
 #include "RankTwoTensor.h"
 
-class RedbackFlowLawDislocation;
+class RedbackFlowLawDiffusion;
 
 
 template<>
-InputParameters validParams<RedbackFlowLawDislocation>();
+InputParameters validParams<RedbackFlowLawDiffusion>();
 
 /**
  * Redback user objects class for dislocation flow law
  */
-class RedbackFlowLawDislocation : public RedbackFlowLawBase
+class RedbackFlowLawDiffusion : public RedbackFlowLawBase
 {
  public:
-  RedbackFlowLawDislocation(const InputParameters & parameters);
+  RedbackFlowLawDiffusion(const InputParameters & parameters);
 
   /**
    * The value of strain rate given by the flow law, accounting for deviatoric and volumetric parts.
@@ -49,7 +49,9 @@ class RedbackFlowLawDislocation : public RedbackFlowLawBase
   virtual std::string activeModelName(unsigned int qp) const {return "Redback_flow_law_dislocation";};
 
  protected:
-  Real _pre_exponential_factor, _exponent, _arrhenius;
+  bool _has_grain_size;
+  const VariableValue & _grain_size;
+  Real _pre_exponential_factor, _exponent, _grain_size_exponent, _arrhenius;
 };
 
 /*
@@ -58,4 +60,4 @@ class RedbackFlowLawDislocation : public RedbackFlowLawBase
    * @return the yield function
 
  */
-#endif // REDBACKFLOWLAWDISLOCATION_H
+#endif // REDBACKFLOWLAWDIFFUSION_H
