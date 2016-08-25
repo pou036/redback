@@ -74,6 +74,9 @@
 // Timesteppers
 #include "ReturnMapIterDT.h"
 
+// UserObjects
+#include "RedbackFlowLawDislocation.h"
+
 // AuxKernels
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
@@ -161,6 +164,8 @@ RedbackApp::registerObjects(Factory & factory)
   registerMeshModifier(ElementFileSubdomain);
 
   registerExecutioner(ReturnMapIterDT);
+
+  registerUserObject(RedbackFlowLawDislocation);
 
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);

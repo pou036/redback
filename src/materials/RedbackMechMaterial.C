@@ -727,8 +727,9 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
     Real m_prime = (_exponent + 1)/ (_gs_exponent_param + 1);
     Real ar_ss = (_gs_ar_growth_param - _ar[_qp])/(_gs_exponent_param + 1); // Q_prime
-    Real eps_0 = 7.8; // TODO
-    Real steady_state_grain_size = std::pow(pi * _gs_gamma_param * _gs_growth_constant_param / (_gs_lambda_param * _gs_exponent_param * eps_0), 1/(_gs_exponent_param + 1)) * std::pow(_mises_stress[ _qp ], m_prime)* std::exp(- ar_ss/(1 + _T[_qp]));
+    Real steady_state_grain_size = std::pow(pi * _gs_gamma_param * _gs_growth_constant_param / (_gs_lambda_param * _gs_exponent_param * _ref_pe_rate),
+        1/(_gs_exponent_param + 1))
+      * std::pow(_mises_stress[ _qp ], m_prime)* std::exp(- ar_ss/(1 + _T[_qp]));
 
     if (_grain_size[ _qp ] < steady_state_grain_size)
       _grain_size[ _qp ] = fmin(grain_growth, steady_state_grain_size);
