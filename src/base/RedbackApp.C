@@ -75,6 +75,7 @@
 #include "ReturnMapIterDT.h"
 
 // UserObjects
+#include "RedbackFlowLawDiffusion.h"
 #include "RedbackFlowLawDislocation.h"
 
 // AuxKernels
@@ -165,6 +166,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerExecutioner(ReturnMapIterDT);
 
+  registerUserObject(RedbackFlowLawDiffusion);
   registerUserObject(RedbackFlowLawDislocation);
 
   registerAux(RedbackContinuationTangentAux);
