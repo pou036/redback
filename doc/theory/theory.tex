@@ -300,7 +300,9 @@ $Pe$ & P\'{e}clet number & $x_{ref}V_{ref}/c_{th}$ & Ratio of temperature advect
 
 %%%%%% Table of parameters for grain-size evoultion %%%%%% 
 \begin{table}
-  \caption[inline]{List of parameters used in grain-size evolution loop}
+\centering
+\captionsetup{justification=centering, font=footnotesize}
+  \caption[inline]{List of parameters used in grain-size evolution loop. User defined values relate to CALCITE.}
 \label{tab:grain_evo_params}
 
 %%% Table setup %%% 
@@ -357,7 +359,7 @@ $Q^{'}$ &  & $\frac{Q_g-Q_{dis}}{p+1}$ & {\small $Q_{dis}$ is the dislocation fl
 \section{Theory}
 \label{section:theory_size_sensitivity}
 
-\todo[inline]{What follows is a work flow of relevant from the 22/08/16, with user determined values for clacite only}
+\todo[inline]{What follows is a work flow of relevant from the 22/08/16 (James Gilgannon)}
 
 At depths in the crust great enough to yeild pressure insensitve material responses, the rheological behaviour of a rock can be considerd to be governed by the average grain-size of the sample (\textcolor{red}{insert ref}). In Nature this is manifest by the development of a ductile fault rock series known as a mylonite series. During deformation strain is localised into the zones of finer grain-sizes (acheived due to the deformational condtions). Therefore any modelling approach interested in investigsting strain softening behaviour in rocks requires an robust inegration of a deformationally induced grain-size evoltuion. We have chosen to implement the Paleowattmeter of \citep{Austin2007}.\\  
 
@@ -429,7 +431,7 @@ A couple of weakness exsit in the current implementation of a grain-size evoulti
 \begin{enumerate}
 \item The current model intputs a $\bar{d}$ \& a variance (2$\sigma$) for each finite element. This is based on a gaussian log normal distubtion. However this fails to address a realsitic bias to small grain-sizes. Hence underestimating the contrubtion of diffusion creep. \todo[inline, backgroundcolor=green]{Is $\bar{d}$ actually the mean? Is it infact the mode? How do we better account for the real grain-size distrubtions observed in nature?}
 \item The stored enegry in the microstructure ($\lambda$) is currently pre-defined. This prescribed constant is infered from experimental observations of 90\% heat dissipation. Is this correct to prescribe a $\lambda$ value? It seems more appropriate to include a dissipation term that incorperates the active micro-mechanisms. \citet{Huang2009} attempt to resolve a grain's dissipated energy into microstructrally appropriate terms (see their Eq.1). Integrating this approach may be more robust (with a mind to expand the $W_{AN}$ to include the current Dynamic Recovery \& Dynamic Recrystallisation along side a Plastic Cavitation term).
-\item Both point 1 \& 2 address issues with modelling at a continumm scale. With respect to understanding emergent two phase rheologies (sheet silicate rich rocks) and the ultimate development of IWL \citep{Handy1994} the problem probaly requires a grainscale evaluation of a evolution law that can be homogenised and upscaled.
+\item Both point 1 \& 2 address issues with modelling at a continumm scale. With respect to understanding emergent two phase rheologies (sheet silicate rich rocks) and ultimately the development of IWL \citep{Handy1994} the problem probaly requires a grainscale evaluation of a evolution law that can be homogenised and upscaled.
 \end{enumerate}
 
 
