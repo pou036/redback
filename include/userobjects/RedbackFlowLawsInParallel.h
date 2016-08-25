@@ -1,22 +1,21 @@
-#ifndef REDBACKFLOWLAWDIFFUSION_H
-#define REDBACKFLOWLAWDIFFUSION_H
+#ifndef REDBACKFLOWLAWSINPARALLEL_H
+#define REDBACKFLOWLAWSINPARALLEL_H
 
 #include "RedbackFlowLawBase.h"
-#include "RankTwoTensor.h"
 
-class RedbackFlowLawDiffusion;
+class RedbackFlowLawsInParallel;
 
 
 template<>
-InputParameters validParams<RedbackFlowLawDiffusion>();
+InputParameters validParams<RedbackFlowLawsInParallel>();
 
 /**
- * Redback user objects class for diffusion flow law
+ * Redback user objects class for adding flow laws in parallel (Kelvin-Voigt)
  */
-class RedbackFlowLawDiffusion : public RedbackFlowLawBase
+class RedbackFlowLawsInParallel : public RedbackFlowLawBase
 {
  public:
-  RedbackFlowLawDiffusion(const InputParameters & parameters);
+  RedbackFlowLawsInParallel(const InputParameters & parameters);
 
   /**
    * The value of strain rate given by the flow law, accounting for deviatoric and volumetric parts.
@@ -46,12 +45,11 @@ class RedbackFlowLawDiffusion : public RedbackFlowLawBase
   virtual Real derivative(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress,
                           const RankTwoTensor & sig, unsigned int qp, Real dt) const;
 
-  virtual std::string activeModelName(unsigned int qp) const {return "Redback_flow_law_diffusion";};
+  virtual std::string activeModelName(unsigned int qp) const {return "Redback_flow_laws_in_parallel";};
 
  protected:
-  bool _has_grain_size;
-  const VariableValue & _grain_size;
-  Real _pre_exponential_factor, _exponent, _grain_size_exponent, _arrhenius;
+  std::vector<const RedbackFlowLawBase *> _flow_laws_uo;
+  unsigned int _num_flow_law_uos;
 };
 
 /*
@@ -60,4 +58,4 @@ class RedbackFlowLawDiffusion : public RedbackFlowLawBase
    * @return the yield function
 
  */
-#endif // REDBACKFLOWLAWDIFFUSION_H
+#endif // REDBACKFLOWLAWSINPARALLEL_H

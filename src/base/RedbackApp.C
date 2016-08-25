@@ -77,6 +77,8 @@
 // UserObjects
 #include "RedbackFlowLawDiffusion.h"
 #include "RedbackFlowLawDislocation.h"
+#include "RedbackFlowLawsInParallel.h"
+#include "RedbackFlowLawsInSeries.h"
 
 // AuxKernels
 #include "RedbackContinuationTangentAux.h"
@@ -168,6 +170,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerUserObject(RedbackFlowLawDiffusion);
   registerUserObject(RedbackFlowLawDislocation);
+  registerUserObject(RedbackFlowLawsInSeries);
 
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);
