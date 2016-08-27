@@ -7,7 +7,7 @@ template <>
 InputParameters
 validParams<RedbackFlowLawDislocation>()
 {
-  InputParameters params = validParams<RedbackFlowLawDislocation>();
+  InputParameters params = validParams<RedbackFlowLawBase>();
   params.addParam<Real>("pre_exponential_factor", 1.0, "Value of pre-exponential factor.");
   params.addParam<Real>("exponent", 1.0, "Exponent for rate dependent plasticity (Perzyna)");
   params.addParam<Real>("Arrhenius", 1.0, "Value of Arrhenius coefficient.");
