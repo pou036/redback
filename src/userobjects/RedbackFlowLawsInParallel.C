@@ -5,7 +5,7 @@ template <>
 InputParameters
 validParams<RedbackFlowLawsInParallel>()
 {
-  InputParameters params = validParams<RedbackFlowLawsInParallel>();
+  InputParameters params = validParams<RedbackFlowLawBase>();
   params.addRequiredParam<std::vector<UserObjectName> >("flow_law_user_objects", "List of names of user objects that define the flow laws to use in series");
 
   return params;

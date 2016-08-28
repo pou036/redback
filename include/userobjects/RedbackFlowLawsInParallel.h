@@ -2,6 +2,7 @@
 #define REDBACKFLOWLAWSINPARALLEL_H
 
 #include "RedbackFlowLawBase.h"
+#include "RankTwoTensor.h"
 
 class RedbackFlowLawsInParallel;
 

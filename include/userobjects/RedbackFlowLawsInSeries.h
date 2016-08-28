@@ -2,6 +2,7 @@
 #define REDBACKFLOWLAWSINSERIES_H
 
 #include "RedbackFlowLawBase.h"
+#include "RankTwoTensor.h"
 
 class RedbackFlowLawsInSeries;
 

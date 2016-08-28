@@ -7,7 +7,7 @@ template <>
 InputParameters
 validParams<RedbackFlowLawDiffusion>()
 {
-  InputParameters params = validParams<RedbackFlowLawDiffusion>();
+  InputParameters params = validParams<RedbackFlowLawBase>();
   params.addCoupledVar("grain_size", 0.0, "grain size aux variable");
   params.addParam<Real>("pre_exponential_factor", 1.0, "Value of pre-exponential factor.");
   params.addParam<Real>("exponent", 1.0, "Exponent for rate dependent plasticity (Perzyna)");
