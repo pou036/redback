@@ -170,6 +170,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerUserObject(RedbackFlowLawDiffusion);
   registerUserObject(RedbackFlowLawDislocation);
+  registerUserObject(RedbackFlowLawsInParallel);
   registerUserObject(RedbackFlowLawsInSeries);
 
   registerAux(RedbackContinuationTangentAux);
