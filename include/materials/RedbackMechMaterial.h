@@ -19,6 +19,7 @@
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
 #include "RotationTensor.h"
+#include "RedbackFlowLawDislocation.h"
 //#include "FiniteStrainPlasticMaterial.h"
 
 // Forward Declarations
@@ -122,7 +123,8 @@ protected:
   virtual Real getFlowIncrement(Real, Real, Real, Real, Real) = 0;
   virtual void get_py_qy(Real, Real, Real &, Real &, Real) = 0;
 
-  Real _ref_pe_rate;
+  const RedbackFlowLawBase & _flow_law_uo;
+  //Real _ref_pe_rate;
   Real _exponent;
   Real _chemo_mechanical_porosity_coeff;
 
@@ -134,6 +136,7 @@ protected:
   MaterialProperty<Real> & _mises_stress;
   MaterialProperty<Real> & _mean_stress;
   MaterialProperty<Real> & _mises_strain_rate;
+  MaterialProperty<Real> & _dislocation_strain_rate;
   MaterialProperty<Real> & _volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;
   MaterialProperty<Real> & _total_volumetric_strain;
@@ -147,9 +150,9 @@ protected:
   MaterialProperty<Real> & _damage_kernel;
   MaterialProperty<Real> & _damage_kernel_jac;
   Real _damage_coeff, _dmg_exponent, _healing_coeff;
-  MaterialProperty<Real> & _grain_size;
+  //<Real> & _grain_size;
 
-  Real _exponential;
+  //Real _exponential;
   // const VariableValue & _dispx_dot;
   // const VariableValue & _dispy_dot;
   // const VariableValue & _dispz_dot;
@@ -157,6 +160,8 @@ protected:
   // MaterialProperty<RealVectorValue> & _solid_velocity;
 
   // Using variables
+  bool _has_dislocation;
+  const RedbackFlowLawDislocation _flow_law_dis_uo;
   bool _has_T;
   const VariableValue & _T;
   const VariableValue & _T_old;
@@ -196,10 +201,6 @@ protected:
   virtual void formCreepDamage(Real);
 
   Real _damage_dissipation;
-
-  const VariableValue & _initial_grain_size;
-  Real _gs_ar_growth_param, _gs_exponent_param, _gs_steady_state_constant_param, _gs_growth_constant_param;
-  Real _gs_lambda_param, _gs_gamma_param;
 
 };
 

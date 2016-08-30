@@ -62,11 +62,11 @@
 #include "RedbackFluidMaterial.h"
 #include "ImageProcessing.h"
 #include "RedbackMaterial.h"
-#include "RedbackMechMaterialJ2.h"
+//#include "RedbackMechMaterialJ2.h"
 #include "RedbackMechMaterialDP.h"
-#include "RedbackMechMaterialCC.h"
-#include "RedbackMechMaterialCCanisotropic.h"
-#include "RedbackMechMaterialElastic.h"
+//#include "RedbackMechMaterialCC.h"
+//#include "RedbackMechMaterialCCanisotropic.h"
+//#include "RedbackMechMaterialElastic.h"
 
 // MeshModifiers
 #include "ElementFileSubdomain.h"
@@ -83,6 +83,7 @@
 // AuxKernels
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
+#include "RedbackGrainSizeAux.h"
 #include "RedbackTotalPorosityAux.h"
 #include "RedbackPolarTensorMaterialAux.h"
 
@@ -158,11 +159,11 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackFluidMaterial);
   registerMaterial(ImageProcessing);
   registerMaterial(RedbackMaterial);
-  registerMaterial(RedbackMechMaterialJ2);
+  //registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialDP);
-  registerMaterial(RedbackMechMaterialCC);
-  registerMaterial(RedbackMechMaterialCCanisotropic);
-  registerMaterial(RedbackMechMaterialElastic);
+  //registerMaterial(RedbackMechMaterialCC);
+  //registerMaterial(RedbackMechMaterialCCanisotropic);
+  //registerMaterial(RedbackMechMaterialElastic);
 
   registerMeshModifier(ElementFileSubdomain);
 
@@ -175,6 +176,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);
+  registerAux(RedbackGrainSizeAux);
   registerAux(RedbackTotalPorosityAux);
   registerAux(RedbackPolarTensorMaterialAux);
 #undef registerObject

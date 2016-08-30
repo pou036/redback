@@ -14,6 +14,7 @@
 #include "libmesh/quadrature.h"
 #include "RedbackMechMaterial.h"
 #include "MooseMesh.h"
+#include "RedbackFlowLawDislocation.h"
 
 /**
 RedbackMechMaterial integrates the rate dependent plasticity model of Perzyna
@@ -64,12 +65,14 @@ validParams<RedbackMechMaterial>()
   params.addClassDescription("Associative overstress plasticity");
 
   //  Copy-paste from FiniteStrainPlasticRateMaterial.C
-  params.addParam<Real>("ref_pe_rate",
+  /*params.addParam<Real>("ref_pe_rate",
                         1.0,
                         "Reference plastic strain rate "
                         "parameter for rate dependent "
-                        "plasticity (Overstress model)");
+                        "plasticity (Overstress model)");*/
   params.addParam<Real>("exponent", 1.0, "Exponent for rate dependent plasticity (Perzyna)");
+  params.addRequiredParam<UserObjectName>("flow_law", "Name of the user object implementing the flow law to use");
+
   params.addParam<Real>(
     "chemo_mechanical_porosity_coeff", 1.0, "The coefficient of volumetric plastic strain in chemical porosity");
 
@@ -90,16 +93,9 @@ validParams<RedbackMechMaterial>()
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
 
-  params.addCoupledVar("gs_initial_grain_size", 0.0, "The initial grain size");
-
-  //// REDUCTION ////
-  params.addParam<Real>("gs_lambda", 0.1, "Microstructural energy storage constant (lambda)"); // Assumed from eperimental work that 0.9 converted to heat
-  params.addParam<Real>("gs_gamma", 1.0, "Grain boundary energy constant (gamma)"); // Assumed from Covey-Crump (1997)
-
-  //// GROWTH ////
-  params.addParam<Real>("gs_Arrhenius_growth", 175.0, "Arrhenius growth (Qg)"); // Assumed from Covey-Crump (1997)
-  params.addParam<Real>("gs_exponent", 3.0, "Grain growth constant (p)"); // Assumed from Covey-Crump (1997)
-  params.addParam<Real>("gs_growth_constant", 2511.9, "Grain growth constant (Kg)"); // Assumed from Covey-Crump (1997)
+  // Grain size evolution
+  params.addParam<UserObjectName>("flow_law_dislocation",
+    "Name of the user object implementing a dislocation flow law, only used to compute grain size evolution");
 
   return params;
 }
@@ -138,8 +134,9 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
 
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
-    _ref_pe_rate(getParam<Real>("ref_pe_rate")),
-    _exponent(getParam<Real>("exponent")),
+    _flow_law_uo(getUserObject<RedbackFlowLawBase>("flow_law")),
+    //_ref_pe_rate(getParam<Real>("ref_pe_rate")),
+    _exponent(getParam<Real>("exponent")), // TODO: still used for Gr evolution, should change...
     _chemo_mechanical_porosity_coeff(getParam<Real>("chemo_mechanical_porosity_coeff")),
 
     // Redback
@@ -148,6 +145,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _mises_stress(declareProperty<Real>("mises_stress")),
     _mean_stress(declareProperty<Real>("mean_stress")),
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
+    _dislocation_strain_rate(declareProperty<Real>("dislocation_strain_rate")),
     _volumetric_strain(declareProperty<Real>("volumetric_strain")),
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
@@ -166,7 +164,9 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _dmg_exponent(getParam<Real>("damage_exponent")),
     _healing_coeff(getParam<Real>("healing_coefficient")),
 
-    _grain_size(declareProperty<Real>("grain_size")),
+    //_grain_size(declareProperty<Real>("grain_size")),
+    _has_dislocation(isCoupled("flow_law_dislocation")),
+    _flow_law_dis_uo(getUserObject<RedbackFlowLawDislocation>("flow_law_dislocation")),
 
     // Get coupled variables (T & P & porosity & damage)
     _has_T(isCoupled("temperature")),
@@ -200,15 +200,14 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _peclet_number(getMaterialProperty<Real>("Peclet_number")),
     _returnmap_iter(declareProperty<Real>("returnmap_iter")),
     _T0_param(getParam<Real>("temperature_reference")),
-    _P0_param(getParam<Real>("pressure_reference")),
+    _P0_param(getParam<Real>("pressure_reference"))
 
-    _initial_grain_size(coupledValue("gs_initial_grain_size")),
-    //_gs_reduction_constant_param(getParam<Real>("gs_reduction_constant")),
-    _gs_ar_growth_param(getParam<Real>("gs_Arrhenius_growth")),
+    //_initial_grain_size(coupledValue("gs_initial_grain_size")),
+    /*_gs_ar_growth_param(getParam<Real>("gs_Arrhenius_growth")),
     _gs_exponent_param(getParam<Real>("gs_exponent")),
     _gs_growth_constant_param(getParam<Real>("gs_growth_constant")),
     _gs_lambda_param(getParam<Real>("gs_lambda")),
-    _gs_gamma_param(getParam<Real>("gs_gamma"))
+    _gs_gamma_param(getParam<Real>("gs_gamma"))*/
 {
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
@@ -250,6 +249,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mises_stress[ _qp ] = 0;
   _mean_stress[ _qp ] = 0;
   _mises_strain_rate[ _qp ] = 0;
+  _dislocation_strain_rate[ _qp ] = 0;
   _volumetric_strain[ _qp ] = 0;
   _volumetric_strain_rate[ _qp ] = 0;
   _total_volumetric_strain[ _qp ] = 0;
@@ -261,7 +261,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mechanical_dissipation_jac_mech[ _qp ] = 0;
   _damage_kernel[ _qp ] = 0;
   _damage_kernel_jac[ _qp ] = 0;
-  _grain_size[ _qp ] = _initial_grain_size[ _qp ];
+  //_grain_size[ _qp ] = _initial_grain_size[ _qp ];
   _mass_removal_rate[ _qp ] = 0;
 }
 
@@ -702,7 +702,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
   // calculate the term _exponential = -Q_{mech}/(RT) with Q_{mech} = E_0 + p'c
   // V_{ref} + p_f V_{act}
-  _exponential = 1;
+  // TODO: ensure that Damage is handled in _exponential by the flow law
+  /*_exponential = 1;
   if (_has_D)
   {
     _exponential *= std::pow(1 - _damage[ _qp ], -_dmg_exponent);
@@ -747,7 +748,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   _exponential = _exponential * std::exp(-_alpha_1[ _qp ] * _confining_pressure[ _qp ] -
                                          _pore_pres[ _qp ] * _alpha_2[ _qp ] *
                                            (1 + _alpha_3[ _qp ] * std::log(_confining_pressure[ _qp ])));
-
+  */
   while (err3 > tol3 && iterisohard < maxiterisohard) // Hardness update iteration
   {
     iterisohard++;
@@ -815,6 +816,13 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
   dp = dpn; // Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
+
+  // Get value of epsilon_dot_dislocation for the (optional) purpose of grain size evolution
+  if (_has_dislocation)
+  {
+    _dislocation_strain_rate[ _qp ] = _flow_law_dis_uo.value(q, p, q_y, p_y, yield_stress, _qp, _dt);
+  }
+
 }
 
 void

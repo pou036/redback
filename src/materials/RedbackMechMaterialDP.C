@@ -81,6 +81,10 @@ Real
 RedbackMechMaterialDP::getFlowIncrement(
   Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real yield_stress)
 {
+  return _flow_law_uo.value(sig_eqv, pressure, q_yield_stress,
+                            p_yield_stress, yield_stress, _qp, _dt);
+
+  /*
   Real flow_incr_vol =
     _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
   // TODO: q_yield_stress can be 0, we should handle that case properly...
@@ -90,13 +94,16 @@ RedbackMechMaterialDP::getFlowIncrement(
     _exponential;
   //(q_yield_stress > 0 ? 1:-1) is the sign function
   return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
-  // TODO: change the formula to use dist_pq^m
+  // TODO: change the formula to use dist_pq^m*/
 }
 
 Real
 RedbackMechMaterialDP::getDerivativeFlowIncrement(
   const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real q_yield_stress, Real p_yield_stress)
 {
+  return _flow_law_uo.derivative(sig_eqv, pressure, q_yield_stress, p_yield_stress, sig, _qp, _dt);
+
+  /*
   Real delta_lambda_p =
     _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
   Real delta_lambda_q =
@@ -111,6 +118,7 @@ RedbackMechMaterialDP::getDerivativeFlowIncrement(
   Real der_flow_incr_vol = _ref_pe_rate * _dt * _exponent *
                            std::pow(macaulayBracket(pressure - p_yield_stress), _exponent - 1.0) * _exponential;
   return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
+  */
 }
 
 void

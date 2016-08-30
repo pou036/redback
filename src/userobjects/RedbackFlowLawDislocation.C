@@ -71,3 +71,21 @@ RedbackFlowLawDislocation::derivative(Real sig_eqv, Real pressure, Real q_yield_
     std::pow(Utils::macaulayBracket(pressure - p_yield_stress), _exponent - 1.0) * exponential;
   return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
 }
+
+Real
+RedbackFlowLawDislocation::getPreExponentialFactor() const
+{
+  return _pre_exponential_factor;
+}
+
+Real
+RedbackFlowLawDislocation::getArrhenius() const
+{
+  return _arrhenius;
+}
+
+Real
+RedbackFlowLawDislocation::getStressExponent() const
+{
+  return _exponent;
+}

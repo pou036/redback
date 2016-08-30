@@ -48,6 +48,12 @@ class RedbackFlowLawDislocation : public RedbackFlowLawBase
 
   virtual std::string activeModelName(unsigned int qp) const {return "Redback_flow_law_dislocation";};
 
+  virtual Real getPreExponentialFactor() const;
+
+  virtual Real getArrhenius() const;
+
+  virtual Real getStressExponent() const;
+
  protected:
   Real _pre_exponential_factor, _exponent, _arrhenius;
 };
