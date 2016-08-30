@@ -14,7 +14,6 @@
 #include "libmesh/quadrature.h"
 #include "RedbackMechMaterial.h"
 #include "MooseMesh.h"
-#include "RedbackFlowLawDislocation.h"
 
 /**
 RedbackMechMaterial integrates the rate dependent plasticity model of Perzyna
@@ -135,6 +134,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
 
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
     _flow_law_uo(getUserObject<RedbackFlowLawBase>("flow_law")),
+    _has_dislocation(isParamValid("flow_law_dislocation")),
+    _flow_law_dis_uo(_has_dislocation ? &getUserObject<RedbackFlowLawDislocation>("flow_law_dislocation") : NULL),
     //_ref_pe_rate(getParam<Real>("ref_pe_rate")),
     _exponent(getParam<Real>("exponent")), // TODO: still used for Gr evolution, should change...
     _chemo_mechanical_porosity_coeff(getParam<Real>("chemo_mechanical_porosity_coeff")),
@@ -163,10 +164,6 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _damage_coeff(getParam<Real>("damage_coefficient")),
     _dmg_exponent(getParam<Real>("damage_exponent")),
     _healing_coeff(getParam<Real>("healing_coefficient")),
-
-    //_grain_size(declareProperty<Real>("grain_size")),
-    _has_dislocation(isCoupled("flow_law_dislocation")),
-    _flow_law_dis_uo(getUserObject<RedbackFlowLawDislocation>("flow_law_dislocation")),
 
     // Get coupled variables (T & P & porosity & damage)
     _has_T(isCoupled("temperature")),
@@ -820,7 +817,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   // Get value of epsilon_dot_dislocation for the (optional) purpose of grain size evolution
   if (_has_dislocation)
   {
-    _dislocation_strain_rate[ _qp ] = _flow_law_dis_uo.value(q, p, q_y, p_y, yield_stress, _qp, _dt);
+    _dislocation_strain_rate[ _qp ] = _flow_law_dis_uo->value(q, p, q_y, p_y, yield_stress, _qp, _dt);
   }
 
 }

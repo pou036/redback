@@ -124,6 +124,8 @@ protected:
   virtual void get_py_qy(Real, Real, Real &, Real &, Real) = 0;
 
   const RedbackFlowLawBase & _flow_law_uo;
+  bool _has_dislocation;
+  const RedbackFlowLawDislocation * _flow_law_dis_uo;
   //Real _ref_pe_rate;
   Real _exponent;
   Real _chemo_mechanical_porosity_coeff;
@@ -160,8 +162,6 @@ protected:
   // MaterialProperty<RealVectorValue> & _solid_velocity;
 
   // Using variables
-  bool _has_dislocation;
-  const RedbackFlowLawDislocation _flow_law_dis_uo;
   bool _has_T;
   const VariableValue & _T;
   const VariableValue & _T_old;
