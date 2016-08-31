@@ -11,10 +11,24 @@
     exodiff = 'bench_TM_DP_out.e'
     rel_err = 5e-3
   [../]
-    [./test_6_TM_CC] # can't put a dot in that name!
+  [./test_6_TM_CC] # can't put a dot in that name!
     type = 'Exodiff'
     input = 'bench_TM_CC.i'
     exodiff = 'bench_TM_CC_out.e'
+    rel_err = 1e-6
+  [../]
+  [./test_6_TM_FlowLaw_DP1] # can't put a dot in that name!
+    # Test that eps_dot_dislocation gets computed when dislocation flow law is provided
+    type = 'CSVDiff'
+    input = 'bench_TM_FlowLaw_DP1.i'
+    csvdiff = 'bench_TM_FlowLaw_DP1_out.csv'
+    rel_err = 1e-6
+  [../]
+  [./test_6_TM_FlowLaw_DP2] # can't put a dot in that name!
+    # Test that eps_dot_dislocation does not get computed when dislocation flow law is not provided
+    type = 'CSVDiff'
+    input = 'bench_TM_FlowLaw_DP2.i'
+    csvdiff = 'bench_TM_FlowLaw_DP2_out.csv'
     rel_err = 1e-6
   [../]
 []
