@@ -25,7 +25,7 @@ protected:
 private:
   bool _has_T;
   const VariableValue & _T;
-  const VariableValue & _initial_grain_size;
+  //const VariableValue & _initial_grain_size;
   const RedbackFlowLawDislocation & _flow_law_dis_uo;
 
   const MaterialProperty<Real> & _mises_stress;

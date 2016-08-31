@@ -18,7 +18,7 @@ validParams<RedbackGrainSizeAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addCoupledVar("temperature", 0.0, "temperature variable");
-  params.addCoupledVar("initial_grain_size", 0.0, "The initial grain size");
+  //params.addCoupledVar("initial_grain_size", 0.0, "The initial grain size");
   //params.addRequiredParam<UserObjectName>("flow_law_diffusion", "Name of the user object implementing the diffusion flow law in use");
   params.addRequiredParam<UserObjectName>("flow_law_dislocation", "Name of the user object implementing the dislocation flow law in use");
 
@@ -38,7 +38,7 @@ RedbackGrainSizeAux::RedbackGrainSizeAux(const InputParameters & parameters) :
     AuxKernel(parameters),
     _has_T(isCoupled("temperature")),
     _T(_has_T ? coupledValue("temperature") : _zero),
-    _initial_grain_size(coupledValue("initial_grain_size")),
+    //_initial_grain_size(coupledValue("initial_grain_size")),
     _flow_law_dis_uo(getUserObject<RedbackFlowLawDislocation>("flow_law_dislocation")),
     _mises_stress(getMaterialProperty<Real>("mises_stress")),
     _mises_strain_rate(getMaterialProperty<Real>("mises_strain_rate")), // total plastic strain rate
