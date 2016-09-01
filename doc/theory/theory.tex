@@ -361,7 +361,7 @@ $Q^{'}$ &  & $\frac{Q_g-Q_{dis}}{p+1}$ & {\small $Q_{dis}$ is the dislocation fl
 
 \todo[inline]{What follows is a work flow of relevant from the 22/08/16 (James Gilgannon)}
 
-At depths in the crust great enough to yeild pressure insensitve material responses, the rheological behaviour of a rock can be considerd to be governed by the average grain-size of the sample (\textcolor{red}{insert ref}). In Nature this is manifest by the development of a ductile fault rock series known as a mylonite series. During deformation strain is localised into the zones of finer grain-sizes (acheived due to the deformational condtions). Therefore any modelling approach interested in investigsting strain softening behaviour in rocks requires an robust inegration of a deformationally induced grain-size evoltuion. We have chosen to implement the Paleowattmeter of \citep{Austin2007}.\\  
+At depths in the crust great enough to yeild pressure insensitve material responses, the rheological behaviour of a rock can be considerd to be governed by the average grain-size of the sample (\textcolor{red}{insert ref}). In Nature this is manifest by the development of a ductile fault rock series known as a mylonite series. During deformation strain is localised into the zones of finer grain-sizes (acheived due to the deformational condtions). Therefore any modelling approach interested in investigsting strain softening behaviour in rocks requires an robust inegration of a deformationally induced grain-size evoltuion. For this purpose we have chosen to implement the Paleowattmeter of \citep{Austin2007} which describes the evoltuion of grain-size as a function of the deformation condtions.\\  
 
 \citet{Austin2007} propose that druing deformation the average grain-size of a sample ($\bar{d}$) evolves to a steady state grain-size ($d_{ss}$) faster than any stress preturbations. With respect to the grain-size evolution, they suggest that a steady state grain-size is acheived when the sum of the rates of growth and redcution are balanced, i.e. equal 0:\\
 
@@ -406,22 +406,33 @@ and the rock deforms by powerlaw creep then, \:
 \dot{\varepsilon}_{dis} = K_{dis} \sigma_d^n exp^{\left(\frac{-Q_{dis}}{RT}\right)}
 \end{equation}\\
 
-The steady state grain-size is: \:
+\citet{Austin2007} propose that steady state grain-size can be expressed by: \:
 %%% Steady state grain-size flow law (?) %%%
 \begin{equation}
  \label{eq:steady_state_gs}
 \ d_{ss} = \kappa \sigma_d^{m'} exp^{\left(\frac{-Q_{'}}{RT}\right)}
 \end{equation}\\
 
-\todo[inline]{Note: In \citet{Austin2007} Eq.10 contians error in $\kappa$ formulation, $\varepsilon_0$ is actually $K_{dis}$. See \citet{Herwegh2014} Eq.16 for the correct formulation of $\kappa$. This document contains the correct term definitions.}
+Please refer to Table \ref{tab:grain_evo_params} for detailed explaination of the paramters of Eq. \ref{eq:d_tot} \& \ref{eq:steady_state_gs}.\\
+
+\todo[inline, backgroundcolor=green]{Note: In \citet{Austin2007} Eq.10 contians error in $\kappa$ formulation, $\varepsilon_0$ is actually $K_{dis}$. See \citet{Herwegh2014} Eq.16 for the correct formulation of $\kappa$. This document contains the correct term definitions.}
 
 \section{Grain-size evolution loop}
 \label{section:gs_evolution_loop}
-The loop below (Fig.~\ref{fig:gs_evolution_loop}) implements the theory from section ~\ref{section:theory_size_sensitivity}. At each timestep the grain-size is compared to the predicted steady state grain-size expected for the modelled deformation conditions. This loop is repated at each timestep until the observed grain-size is equal to the expected grain-size.\\
+The loop below (Fig.~\ref{fig:gs_evolution_loop}) implements the theory from section ~\ref{section:theory_size_sensitivity}. At each timestep the grain-size is compared to the predicted steady state grain-size expected for the modelled deformation conditions. This loop is repeated at each timestep until the observed grain-size is equal to the expected grain-size for steady state. See Table ~\ref{tab:grain_evo_params} for the defintions of terms used in loop.\\
 
-See Table ~\ref{tab:grain_evo_params} for the defintions of terms used in loop.\\
+The loop is implemented with an AuxKernel (RedbackGrainSizeAux) that updates an AuxVariable ("grain size"). The input file requires the user to asign a few things:\\
 
-\todo[inline,backgroundcolor=green]{ Note: Temperature in loop has dimentions but the code uses a dimensionless normalisation. TO DO! CODE LOOP TO NORMALISE TEMPERATURE}
+\begin{enumerate} 
+
+\item a \textcolor{red}{UserObjectFlowLaw}. This is composite flow law, it must contain at least one dislocation and one diffusion flow laws with in it. With in each flow law the user will provide the relevant normalised parameters.
+\item a \textcolor{red}{UserObjectDislocationFlowLaw} must also be provided. This is required for the calculation of $\dot{\varepsilon}_{dis}$ (\textcolor{blue}{THIS FLOW LAW WILL BE ASKED FOR AGAIN IN THE MATERIAL}). The user will provide the relevant normalised parameters for the flow law. \todo[inline, backgroundcolor=green]{Note: The code should be reviewed to removed the need for the \textcolor{red}{UserObjectDislocationFlowLaw} to be entered twice.} 
+\item a grain size \textcolor{red}{AuxVariable}. The inital condtions for the \textcolor{red}{AuxVariable} will be set in the \textcolor{blue}{InitialCondition}
+\item a \textcolor{red}{Variable} for temperature, "temp". 
+
+
+\end{enumerate}
+\todo[inline]{ Note: Temperature in loop has dimentions but the code uses a dimensionless normalisation. TO DO! CODE LOOP TO NORMALISE TEMPERATURE}
 
 \subsection{Further work on grain-size evolution}
 \label{subsection:further_work}
@@ -436,7 +447,7 @@ A couple of weakness exsit in the current implementation of a grain-size evoulti
 
 
 \tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!30]
-\tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=3cm, minimum height=1cm, text centered, text width=4cm, draw=black, fill=blue!30]
+\tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=3cm, minimum height=1cm, text centered, text width=3cm, draw=black, fill=blue!30]
 \tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=2.5cm, text centered, text width=6cm, draw=black, fill=orange!30]
 \tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
 \tikzstyle{arrow} = [thick,->,>=stealth]
@@ -447,29 +458,35 @@ A couple of weakness exsit in the current implementation of a grain-size evoulti
 \label{fig:gs_evolution_loop}
 \begin{tikzpicture}[node distance=2cm]
 
-\node (start) [startstop] {Starting timestep};
-\node (in1) [io, below of=start] {Extract:\\ \textbf {$\dot{\varepsilon},\:\sigma_d,\:T \: \& \: d$}};
-\node (pro1) [process, below of=in1, yshift=-0.5cm] {For extracted data use:\\ \textbf{$ d_{ss} = \kappa\sigma_d^{m'} exp^{\left(\frac{-Q_{'}}{RT}\right)}$}};
+\node (start) [startstop] {Start of timestep};
+\node (in1) [io, below of=start, yshift=-0.5cm] {Extract Grain Size (\textcolor{red}{AuxVar}): $d$};
+\node (in2) [io, left of=in1, xshift=-2cm] {Extract From Composite Flow Law (\textcolor{red}{UO}): $\dot{\varepsilon}_{tot}$, $K_{dis}$, $Q_{dis}$ $\&$ n};
+\node (in3) [io, right of=in1, xshift=2cm] {Extract from Dislocation Flow Law (\textcolor{red}{AuxVar}): $\dot{\varepsilon}_{dis}$};
+\node (pro1) [process, below of=start, yshift=-4cm, xshift=-2cm] {For extracted data use:\\ \textbf{$ d_{ss} = \kappa\sigma_d^{m'} exp^{\left(\frac{-Q_{'}}{RT}\right)}$}};
 \node (dec1) [decision, below of=pro1, yshift=-1.5cm] {Does $d = d_{ss}$ };
-\node (out1) [io, below of=dec1, yshift=-0.5cm] {Steady state grain-size has been acheived};
-\node (pro2) [process, right of=dec1, xshift=7cm] {If, $d<d_{ss}$ use:\\ $\dot{d}_{growth}=K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p}$};
+\node (out1) [io, below of=dec1, yshift=-1.5cm] {Steady state grain-size has been acheived};
+\node (pro2) [process, right of=dec1, xshift=5cm] {If, $d<d_{ss}$ use:\\ $\dot{d}_{growth}=K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p}$};
 \node (pro3) [process, right of=pro1, xshift=7cm] {If, $d>d_{ss}$ use:\\ $\dot{d}_{red}=\frac{\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}$};
 \node (stop) [startstop, below of=out1] {Stop};
 
 \draw [arrow] (start) -- (in1);
+\draw [arrow] (start) -- (in2);
+\draw [arrow] (start) -- (in3);
 \draw [arrow] (in1) -- (pro1);
+\draw [arrow] (in2) -- (pro1);
+\draw [arrow] (in3) -- (pro1);
 \draw [arrow] (pro1) -- (dec1);
 \draw [arrow] (dec1) -- node[anchor=east] {\textbf{yes}} (out1);
 \draw [arrow] (dec1) -- node[anchor=south] {\textbf{no}} (pro2);
 \draw [arrow] (pro2) -- node[anchor=east] {\textbf{or}} (pro3);
-\draw [arrow] (pro3) |- node[arrow, above] {\textbf{move one timestep forward}} (in1);
+\draw [arrow] (pro3) |- node[arrow, above] {\textbf{move one timestep forward}} (start);
 \draw [arrow] (out1) -- (stop);
 
 \end{tikzpicture}
 \end{figure}
 
-\section{Evolution of a second phase}
-\label{section:evo_second_phase}
+\chapter{Evolution of a second phase}
+\label{chapter:evo_second_phase}
 
 \todo[inline,backgroundcolor=green]{Read MOOSE for phase feild modelling}
 
