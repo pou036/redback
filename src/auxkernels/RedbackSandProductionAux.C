@@ -18,7 +18,7 @@ validParams<RedbackSandProductionAux>()
 {
   InputParameters params = validParams<AuxKernel>();
     params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
-    params.addParam<Real>("peak_strain", 0.0, "The plastic peak shear strain");
+    params.addRequiredParam<FunctionName>("peak_strain", "The function describing the plastic peak shear strain evolution with (rock) pressure.");
     params.addParam<Real>("lambda_1", 1.0, "The first sand production coefficient (Papamichos et al 2001)");
     params.addParam<Real>("lambda_2", 1.0, "The second sand production coefficient (Papamichos et al 2001)");
 
@@ -27,27 +27,28 @@ validParams<RedbackSandProductionAux>()
 
 RedbackSandProductionAux::RedbackSandProductionAux(const InputParameters & parameters) :
     AuxKernel(parameters),
+    _function(getFunction("peak_strain")),
     _total_porosity(coupledValue("total_porosity")),
-
-    _peak_strain(getParam<Real>("peak_strain")),
     _lambda_1(getParam<Real>("lambda_1")),
     _lambda_2(getParam<Real>("lambda_2")),
 
     _sand_production_rate(getMaterialProperty<Real>("sand_production_rate")),
-    _eqv_plastic_strain(getMaterialProperty<Real>("eqv_plastic_strain"))
+    _eqv_plastic_strain(getMaterialProperty<Real>("eqv_plastic_strain")),
+    _mean_stress(getMaterialProperty<Real>("mean_stress"))
 {
 }
 
 Real
 RedbackSandProductionAux::computeValue()
 {
-  Real mass_production_rate, lambda;
+  Real mass_production_rate, lambda, peak_strain;
+  peak_strain =  _function.value(_mean_stress[_qp], NULL);
 
-  if (_eqv_plastic_strain[_qp] < _peak_strain)
+  if (_eqv_plastic_strain[_qp] < peak_strain)
        lambda = 0;
-  else if (_eqv_plastic_strain[_qp] > _peak_strain + _lambda_2/_lambda_1)
+  else if (_eqv_plastic_strain[_qp] > peak_strain + _lambda_2/_lambda_1)
        lambda = _lambda_2;
-  else lambda = _lambda_1 * (_eqv_plastic_strain[_qp] - _peak_strain);
+  else lambda = _lambda_1 * (_eqv_plastic_strain[_qp] - peak_strain);
 
   mass_production_rate = lambda*_sand_production_rate[_qp];
   return mass_production_rate;
