@@ -1,0 +1,8 @@
+[Tests]
+  [./test_DK] # can't put a dot in that name!
+    type = 'CSVDiff'
+    input = 'test_DK.i'
+    csvdiff = 'test_DK.csv'
+    rel_err = 1.0E-5
+  [../]
+[]
