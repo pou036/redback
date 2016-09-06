@@ -17,10 +17,12 @@ InputParameters
 validParams<RedbackGrainSizeAux>()
 {
   InputParameters params = validParams<AuxKernel>();
+  params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
   params.addCoupledVar("temperature", 0.0, "temperature variable");
-  //params.addCoupledVar("initial_grain_size", 0.0, "The initial grain size");
-  //params.addRequiredParam<UserObjectName>("flow_law_diffusion", "Name of the user object implementing the diffusion flow law in use");
   params.addRequiredParam<UserObjectName>("flow_law_dislocation", "Name of the user object implementing the dislocation flow law in use");
+
+  // Steady-State Grain Size
+  params.addParam<Real>("pre_exponential_factor_ss", 1.0, "Value of pre-exponential factor for steady-state grain size (A^*_{ss}.");
 
   // Grain Size Reduction
   params.addParam<Real>("lambda", 0.1, "Microstructural energy storage constant (lambda)"); // Assumed from eperimental work that 0.9 converted to heat
@@ -43,11 +45,13 @@ RedbackGrainSizeAux::RedbackGrainSizeAux(const InputParameters & parameters) :
     _mises_stress(getMaterialProperty<Real>("mises_stress")),
     _mises_strain_rate(getMaterialProperty<Real>("mises_strain_rate")), // total plastic strain rate
     _strain_rate_dis(getMaterialProperty<Real>("dislocation_strain_rate")), // dislocation strain rate
+    _delta_param(getParam<Real>("delta")),
     _ar_growth_param(getParam<Real>("Arrhenius_growth")),
     _growth_exponent_param(getParam<Real>("growth_exponent")),
     _growth_constant_param(getParam<Real>("growth_constant")),
     _lambda_param(getParam<Real>("lambda")),
-    _gamma_param(getParam<Real>("gamma"))
+    _gamma_param(getParam<Real>("gamma")),
+    _A_star_ss_param(getParam<Real>("pre_exponential_factor_ss"))
 {
 }
 
@@ -71,10 +75,8 @@ RedbackGrainSizeAux::computeValue()
     Real _ar_dis = _flow_law_dis_uo.getArrhenius();
     Real _pre_exp_factor_dir = _flow_law_dis_uo.getPreExponentialFactor();
     Real ar_ss = (_ar_growth_param - _ar_dis)/(_growth_exponent_param + 1); // Q_prime
-    Real steady_state_grain_size = std::pow(pi * _gamma_param * _growth_constant_param
-        / (_lambda_param * _growth_exponent_param * _pre_exp_factor_dir),
-        1/(_growth_exponent_param + 1))
-      * std::pow(_mises_stress[ _qp ], m_prime)* std::exp(- ar_ss/(1 + _T[_qp]));
+    Real steady_state_grain_size = _A_star_ss_param
+      * std::pow(_mises_stress[ _qp ], m_prime)* std::exp(ar_ss*_delta_param*_T[_qp]/(1 + _delta_param*_T[_qp]));
 
     if (_u_old[ _qp ] < steady_state_grain_size)
       grain_size = fmin(grain_growth, steady_state_grain_size);
