@@ -24,7 +24,8 @@
 \usepackage{epstopdf}
 \usepackage{url}
 \usepackage{tikz} % FOR FLOWCHART
-\usetikzlibrary{shapes.geometric, arrows} % FOR FLOW CHART ARROWS
+\usetikzlibrary{shapes,shapes.geometric,arrows,fit,calc,positioning,automata,} % FOR FLOW CHART ARROWS
+\usepackage{amsmath}
 %\usepackage{ragged2e} % use for full justification eg.{\justifying\emph{Text I would....}\par}
 
 \DeclareCaptionFont{white}{\color{white}}
@@ -294,6 +295,28 @@ $Pe$ & P\'{e}clet number & $x_{ref}V_{ref}/c_{th}$ & Ratio of temperature advect
 \end{tabular}
 \end{table}
 
+\chapter{Flow Laws}
+\label{chapter:flow_laws}
+
+The coupling of boundary condtions (p,T) and different physical processes (dissolution$\-$precipitation, dislocation \& diffusion creep) affects materials in different ways. Experimentalists have constrained relationships for single behaviours by generating, process appropriate, flow laws to describe the realtionships between physical quantities like stress, strain and temperature. In natural samples it is common for many mechanisms to act congruently and as such a single flow law may be inappropriate to describe the physics at play. We have utilised a \textcolor{blue}{UserObjectBase} Class to implement Flow Laws. This architecture allows for the creation of composite Flow Laws that capture multipule processes at work.\\
+
+The UserObjectBase is called \textcolor{red}{RedbackFlowLawBase} and is characterised as always have an exponential Arrhenius term $\left(\frac{Q}{RT}\right)$.\\
+
+It is then possible to create flow laws from this BaseClass that are unique to the physical process that will be active in the model being generated.\\
+
+When multipule processes are acitve, composite flow laws can be generated. This does require the single process flow laws to be gerenated as a child of the RedbackFlowLawBase first. If the processes are not dependant on each other the they should be solved in seires. For example, dislocation creep and diffusion creep:\\
+
+$\dot{\varepsilon}_{tot}=\dot{\varepsilon}_{dis}+\dot{\varepsilon}_{dif}$\\
+
+If the processes are dependant they should be solved in parallel. For example, the process of grain boundary sliding is dependant on the process of diffusion creep:\\
+
+$\frac{1}{\dot{\varepsilon}_{tot}}=\frac{1}{\dot{\varepsilon}_{dif}}+\frac{1}{\dot{\varepsilon}_{gbs}}$\\
+
+These composite flow laws can be combined even further. For example, we know that dislocation creep acts independantly of diffusion creep but diffusion creep may have several active processes dependant on it. Therefore we can say:\\
+
+$\dot{\varepsilon}_{tot}=\dot{\varepsilon}_{dis}+\left(\frac{1}{\frac{1}{\dot{\varepsilon}_{dif}}+\frac{1}{\dot{\varepsilon}_{gbs}}}\right)$\\
+\todo[inline,backgroundcolor=green]{Check how to add a parallel to a series}
+
 
 \chapter{Grain-size sensitivity}
 \label{chapter:size_sensitivity}
@@ -335,7 +358,7 @@ $\gamma$ & {\small Constant for grain-boundary energy} & $\gamma = 1 Jm^{-2}$ & 
 
 $\dot{d}_{growth}$ & {\small The rate of grain-size growth} & $K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p}$ &  \\
 
-$K_g$ & {\small Grain growth pre-exponent} & $K_g = 2511.9 MPa^{ndis}s^{-1}$ {\footnotesize (Covey-Crump, 1997)} & \\
+$K_g$ & {\small Grain growth pre-exponent} & $K_g = 2511.9 MPa^{-ndis}s^{-1}$ {\footnotesize (Covey-Crump, 1997)} & \\
 
 $Q_g$ &  & $Q_g = 175 kJ mol^{-1}$ {\footnotesize \todo[inline]{(Covey-Crump, 1997)}} &  \\
 
@@ -432,7 +455,7 @@ The loop is implemented with an AuxKernel (RedbackGrainSizeAux) that updates an 
 
 
 \end{enumerate}
-\todo[inline]{ Note: Temperature in loop has dimentions but the code uses a dimensionless normalisation. TO DO! CODE LOOP TO NORMALISE TEMPERATURE}
+\todo[inline]{ Note: Temperature in loop has dimentions but the code uses a dimensionless normalisation. TO DO! CODE LOOP TO NORMALISE TEMPERATURE. 4.3e7*math.pow(1e6,1.1)*1e-2*math.pow(1e-6, -3.3)*math.exp(-2e5/(8.3*300))}
 
 \subsection{Further work on grain-size evolution}
 \label{subsection:further_work}
@@ -445,12 +468,15 @@ A couple of weakness exsit in the current implementation of a grain-size evoulti
 \item Both point 1 \& 2 address issues with modelling at a continumm scale. With respect to understanding emergent two phase rheologies (sheet silicate rich rocks) and ultimately the development of IWL \citep{Handy1994} the problem probaly requires a grainscale evaluation of a evolution law that can be homogenised and upscaled.
 \end{enumerate}
 
-
+\tikzset{container/.style={draw, rectangle, dashed, inner sep=1em}}
 \tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!30]
-\tikzstyle{io} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=3cm, minimum height=1cm, text centered, text width=3cm, draw=black, fill=blue!30]
+\tikzstyle{input} = [trapezium, trapezium left angle=70, trapezium right angle=110, minimum width=1cm, minimum height=1cm, text centered, text width=1cm, draw=black, fill=blue!30]
+\tikzstyle{timestep} = [rectangle, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=pink!30]
 \tikzstyle{process} = [rectangle, minimum width=3cm, minimum height=2.5cm, text centered, text width=6cm, draw=black, fill=orange!30]
 \tikzstyle{decision} = [diamond, minimum width=3cm, minimum height=1cm, text centered, draw=black, fill=green!30]
+\tikzstyle{output} = [rectangle, minimum width=3cm, minimum height=1cm,text centered, draw=black, fill=red!30]
 \tikzstyle{arrow} = [thick,->,>=stealth]
+
 
 \begin{figure}
 \centering
@@ -458,29 +484,57 @@ A couple of weakness exsit in the current implementation of a grain-size evoulti
 \label{fig:gs_evolution_loop}
 \begin{tikzpicture}[node distance=2cm]
 
-\node (start) [startstop] {Start of timestep};
-\node (in1) [io, below of=start, yshift=-0.5cm] {Extract Grain Size (\textcolor{red}{AuxVar}): $d$};
-\node (in2) [io, left of=in1, xshift=-2cm] {Extract From Composite Flow Law (\textcolor{red}{UO}): $\dot{\varepsilon}_{tot}$, $K_{dis}$, $Q_{dis}$ $\&$ n};
-\node (in3) [io, right of=in1, xshift=2cm] {Extract from Dislocation Flow Law (\textcolor{red}{AuxVar}): $\dot{\varepsilon}_{dis}$};
-\node (pro1) [process, below of=start, yshift=-4cm, xshift=-2cm] {For extracted data use:\\ \textbf{$ d_{ss} = \kappa\sigma_d^{m'} exp^{\left(\frac{-Q_{'}}{RT}\right)}$}};
-\node (dec1) [decision, below of=pro1, yshift=-1.5cm] {Does $d = d_{ss}$ };
-\node (out1) [io, below of=dec1, yshift=-1.5cm] {Steady state grain-size has been acheived};
-\node (pro2) [process, right of=dec1, xshift=5cm] {If, $d<d_{ss}$ use:\\ $\dot{d}_{growth}=K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p}$};
-\node (pro3) [process, right of=pro1, xshift=7cm] {If, $d>d_{ss}$ use:\\ $\dot{d}_{red}=\frac{\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}$};
-\node (stop) [startstop, below of=out1] {Stop};
+\node (start1) [startstop] {Grain-size (AuxVar)};
+\node (start2) [startstop, left of=start1, xshift=-50] {Flow Law (UO)};
+\node (start3) [startstop, right of=start1, xshift=50] {Temperature (Var)};
+\node (start4) [startstop, right of=start3, xshift=80] {Material};
 
-\draw [arrow] (start) -- (in1);
-\draw [arrow] (start) -- (in2);
-\draw [arrow] (start) -- (in3);
-\draw [arrow] (in1) -- (pro1);
-\draw [arrow] (in2) -- (pro1);
-\draw [arrow] (in3) -- (pro1);
+\node (in1) [input, below of=start1, yshift=-1cm] {$d$};
+\node (in2) [input, below of=start2, yshift=-1cm] {$Q_{dis}$, $K_{dis}$ \&  $n$};
+\node (in3) [input, below of=start3, yshift=-1cm] {$T$};
+\node (in4) [input, right of=in3, xshift=3cm] {$\dot{\varepsilon}_{tot}$ \& $\dot{\varepsilon}_{dis}$};
+
+\node (pro1) [process, below of=in2, yshift=-2.5cm, xshift=2cm] {For extracted data use:\\ \textbf{$ d_{ss} = \kappa\sigma_d^{m'} exp^{\left(\frac{-Q_{'}}{RT}\right)}$}};
+\node (dec1) [decision, below of=pro1, yshift=-2.5cm] {Does $d = d_{ss}$ };
+\node (pro2) [process, right of=dec1, yshift=-1cm, xshift=5cm] {If, $d<d_{ss}$ use:\\ $\dot{d}_{growth}=K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p}$};
+\node (pro3) [process, right of=pro1, yshift=-2cm, xshift=7cm] {If, $d>d_{ss}$ use:\\ $\dot{d}_{red}=\frac{\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}$};
+
+\node (out1) [output, below of=dec1, yshift=-2cm] {Steady state grain-size!};
+
+\node(container1) [container, fit=(start1) (start2) (start3) (start4)] {};
+\node at (container1)[left of=container1, xshift=-180, rotate=90] {User defined in .i};
+
+\node(container2) [container, fit=(pro1) (pro2) (pro3)] {};
+\node at (container2)[left of=container2, xshift=-180, rotate=90] {Grain-size Loop (AuxKern): RedbackGrainSizeAux};
+
+\node(container3) [container, fit=(in1) (in2) (in3)] {};
+\node at (container3)[left of=container3, xshift=-100, rotate=90] {User Inputs};
+
+\node(container4) [container, fit=(in4)] {};
+\node at (container4)[above of=in4, yshift=-15, rotate=0, text centered, text width=4cm] {Hidden Inputs from Material calculations};
+
+\node (time1) [timestep, above of=container2, yshift=90] {TIME STEP};
+
+
+
+
+
+
+\draw [arrow] (start1) -- (in1);
+\draw [arrow] (start2) -- (in2);
+\draw [arrow] (start3) -- (in3);
+
+\draw [arrow] (container3.south) |- (time1.west);
+\draw [arrow] (container4.south) |- (time1.east);
+
+\draw [arrow] (time1.south)-- ++(-.5,0) -- ++(0,-1)|-(pro1.east);
+\draw [arrow] (pro3.west) -| node[pos=0.7,right] {\textbf{move to next TIME STEP}} (time1.south);
+
 \draw [arrow] (pro1) -- (dec1);
-\draw [arrow] (dec1) -- node[anchor=east] {\textbf{yes}} (out1);
-\draw [arrow] (dec1) -- node[anchor=south] {\textbf{no}} (pro2);
+\draw [arrow] (dec1) -- node[pos=0.3,left] {\textbf{yes}} (out1);
+\draw [arrow] (dec1.east) -- node[anchor=south] {\textbf{no}} (pro2.west);
 \draw [arrow] (pro2) -- node[anchor=east] {\textbf{or}} (pro3);
-\draw [arrow] (pro3) |- node[arrow, above] {\textbf{move one timestep forward}} (start);
-\draw [arrow] (out1) -- (stop);
+
 
 \end{tikzpicture}
 \end{figure}
