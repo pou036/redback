@@ -33,8 +33,8 @@ private:
   const MaterialProperty<Real> & _strain_rate_dis;
 
   Real _delta_param;
-  Real _ar_growth_param, _growth_exponent_param, _steady_state_constant_param, _growth_constant_param;
-  Real _lambda_param, _gamma_param;
+  Real _ar_growth_param, _growth_exponent_param, _steady_state_constant_param, _pre_exp_factor_growth;
+  Real _pre_exp_factor_reduction;
   Real _A_star_ss_param;
 };
 
