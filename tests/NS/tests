@@ -1,7 +1,7 @@
 [Tests]
-  [./test_NS]
-    type = 'Exodiff'
+  [./test_NS_Poiseuille]
+    type = 'CSVDiff'
     input = 'test_RedbackNS.i'
-    exodiff = 'NSRedback_test.e'
+    csvdiff = 'NSRedback_test.csv'
   [../]
 []
