@@ -19,7 +19,7 @@ InputParameters
 validParams<RedbackFluidDivergence>()
 {
   InputParameters params = validParams<Kernel>();
-  //params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
+  // params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
 
   params.addRequiredCoupledVar("fluid_vel_x", "x-velocity");
   params.addRequiredCoupledVar("fluid_vel_y", "y-velocity");
@@ -52,7 +52,7 @@ RedbackFluidDivergence::computeQpResidual()
   // it works in MOOSE if they integrate_p_by_parts
   // because we don't it might not make a difference
   return -_test[ _i ][ _qp ] * _div_fluid_kernel[ _qp ];
-  //return -_time_factor * _test[ _i ][ _qp ] * _div_fluid_kernel[ _qp ];
+  // return -_time_factor * _test[ _i ][ _qp ] * _div_fluid_kernel[ _qp ];
 }
 
 Real
