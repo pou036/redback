@@ -10,7 +10,7 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifdef COSSERAT_DYNLIB_EXISTS
+//#ifdef COSSERAT_DYNLIB_EXISTS
 
 #include "Function.h"
 #include "RedbackMechMaterialHO.h"
@@ -250,8 +250,6 @@ Real h_1;
 Real h_2;
 Real h_3;
 Real h_4;
-
-
 
 if (_plasticity_type.compare("DruckerPrager_cohesion3D_") == 0 || _plasticity_type.compare("DruckerPrager_friction3D_") == 0 ){
    g_1 = 8./5.;
@@ -934,4 +932,4 @@ RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p
 }
 
 
-#endif // COSSERAT_DYNLIB_EXISTS
+//#endif // COSSERAT_DYNLIB_EXISTS

@@ -71,10 +71,10 @@
 #include "RedbackMechMaterialElastic.h"
 
 
-#ifdef COSSERAT_DYNLIB_EXISTS
+//#ifdef COSSERAT_DYNLIB_EXISTS
 #include "RedbackMechMaterialHO.h"
 #include "RedbackMechMaterialHOelastic.h"
-#endif // COSSERAT_DYNLIB_EXISTS
+//#endif // COSSERAT_DYNLIB_EXISTS
 
 // MeshModifiers
 #include "ElementFileSubdomain.h"
@@ -169,10 +169,10 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
 
-#ifdef COSSERAT_DYNLIB_EXISTS
+//#ifdef COSSERAT_DYNLIB_EXISTS
   registerMaterial(RedbackMechMaterialHO);
   registerMaterial(RedbackMechMaterialHOelastic);
-#endif // COSSERAT_DYNLIB_EXISTS
+//#endif // COSSERAT_DYNLIB_EXISTS
 
   registerMeshModifier(ElementFileSubdomain);
 

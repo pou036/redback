@@ -11,7 +11,7 @@
 /****************************************************************/
 
 
-#ifdef COSSERAT_DYNLIB_EXISTS
+//#ifdef COSSERAT_DYNLIB_EXISTS
 
 #include "Function.h"
 #include "RedbackMechMaterialHOelastic.h"
@@ -467,4 +467,4 @@ RedbackMechMaterialHOelastic::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, 
 }
 
 
-#endif // COSSERAT_DYNLIB_EXISTS
+//#endif // COSSERAT_DYNLIB_EXISTS

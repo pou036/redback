@@ -15,7 +15,7 @@
 #ifndef RedbackMechMaterialHOelastic_H
 #define RedbackMechMaterialHOelastic_H
 
-#ifdef COSSERAT_DYNLIB_EXISTS
+//#ifdef COSSERAT_DYNLIB_EXISTS
 
 #include "RedbackMechMaterial.h"
 
@@ -106,6 +106,6 @@ private:
 };
 
 
-#endif // COSSERAT_DYNLIB_EXISTS
+//#endif // COSSERAT_DYNLIB_EXISTS
 
 #endif // RedbackMechMaterialHOelastic_H

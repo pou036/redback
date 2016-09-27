@@ -3,7 +3,7 @@
 
 
 
-ifeq ($(COSSERAT_DYNLIB_EXISTS), 1)
+#ifeq ($(COSSERAT_DYNLIB_EXISTS), 1)
 #to compile it and add the path automatically using libtool
 multisurfaceplasticityhard_DIR := $(HOME)/projects/cosserat_dynlib/DruckerPrager_friction3D
 #multisurfaceplasticityhard_srcfiles  += $(multisurfaceplasticityhard_DIR)/src/​file1.C
@@ -182,6 +182,6 @@ clean​multisurfaceplasticityhard4:
 			@rm -f $(multisurfaceplasticityhard4_DIR)/libmultisurfaceplasticityhard4-$(METHOD)*.dylib
 			@rm -f $(multisurfaceplasticityhard4_DIR)/libmultisurfaceplasticityhard4-$(METHOD)*.so
 			@rm -f $(multisurfaceplasticityhard4_DIR)/libmultisurfaceplasticityhard4-$(METHOD)*.a
-			
-			
-endif  #COSSERAT_DYNLIB_EXISTS
+
+
+#endif  #COSSERAT_DYNLIB_EXISTS
