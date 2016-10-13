@@ -41,7 +41,7 @@ RedbackThermalPressurization::~RedbackThermalPressurization()
 Real
 RedbackThermalPressurization::computeQpResidual()
 {
-  return -_time_factor * _pressurization_coefficient[_qp] * _temp_dot[_qp] * _test[_i][_qp];
+  return -_time_factor * _pressurization_coefficient[ _qp ] * _temp_dot[ _qp ] * _test[ _i ][ _qp ];
 }
 
 Real
@@ -55,7 +55,8 @@ RedbackThermalPressurization::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _temp_var)
   {
-    return -_time_factor * _pressurization_coefficient[_qp] * _dtemp_dot_dtemp[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    return -_time_factor * _pressurization_coefficient[ _qp ] * _dtemp_dot_dtemp[ _qp ] * _phi[ _j ][ _qp ] *
+           _test[ _i ][ _qp ];
   }
   return 0;
 }

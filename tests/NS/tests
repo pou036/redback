@@ -1,0 +1,7 @@
+[Tests]
+  [./test_NS]
+    type = 'Exodiff'
+    input = 'test_RedbackNS.i'
+    exodiff = 'NSRedback_test.e'
+  [../]
+[]

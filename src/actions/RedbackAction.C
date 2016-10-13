@@ -83,11 +83,13 @@ RedbackAction::act()
   for (unsigned int j = 0; j < num_coupled; ++j)
   {
     params.addCoupledVar(keys[j], "");
-    params.set<std::vector<VariableName> >(keys[j]) = std::vector<VariableName>(1, vars[j]);
+    params.set<std::vector<VariableName> >(keys[j]) =
+  std::vector<VariableName>(1, vars[j]);
   }
 
   params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-  params.set<std::string>("appended_property_name") = getParam<std::string>("appended_property_name");
+  params.set<std::string>("appended_property_name") =
+  getParam<std::string>("appended_property_name");
 
   for (unsigned int i = 0; i < dim; ++i)
   {

@@ -18,7 +18,6 @@
 #include "Material.h"
 #include "RankTwoTensor.h"
 #include "RankFourTensor.h"
-#include "ElasticityTensorR4.h"
 #include "RotationTensor.h"
 //#include "FiniteStrainPlasticMaterial.h"
 
@@ -58,22 +57,22 @@ protected:
   virtual void computeQpStress();
   virtual void initQpStatefulProperties(); // from FiniteStrainMaterial.h
 
-  VariableGradient & _grad_disp_x;
-  VariableGradient & _grad_disp_y;
-  VariableGradient & _grad_disp_z;
+  const VariableGradient & _grad_disp_x;
+  const VariableGradient & _grad_disp_y;
+  const VariableGradient & _grad_disp_z;
 
-  VariableGradient & _grad_disp_x_old;
-  VariableGradient & _grad_disp_y_old;
-  VariableGradient & _grad_disp_z_old;
+  const VariableGradient & _grad_disp_x_old;
+  const VariableGradient & _grad_disp_y_old;
+  const VariableGradient & _grad_disp_z_old;
 
   MaterialProperty<RankTwoTensor> & _stress;
   MaterialProperty<RankTwoTensor> & _total_strain;
   MaterialProperty<RankTwoTensor> & _elastic_strain;
-  MaterialProperty<ElasticityTensorR4> & _elasticity_tensor;
-  MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+  MaterialProperty<RankFourTensor> & _elasticity_tensor;
+  MaterialProperty<RankFourTensor> & _Jacobian_mult;
 
   /// Individual material information
-  ElasticityTensorR4 _Cijkl;
+  RankFourTensor _Cijkl;
 
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
   // RankTwoTensor _strain_increment;
@@ -81,7 +80,7 @@ protected:
   /// Current deformation gradient
   // RankTwoTensor _dfgrd;
 
-  // VariableValue & _T;
+  // const VariableValue & _T;
 
   // Copy-paste from FiniteStrainMaterial.h
   MaterialProperty<RankTwoTensor> & _strain_rate;
@@ -99,7 +98,8 @@ protected:
   MaterialProperty<Real> & _eqv_plastic_strain;
   MaterialProperty<Real> & _eqv_plastic_strain_old;
 
-  // virtual Real yieldFunction(const RankTwoTensor & stress, const Real yield_stress);
+  // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
+  // yield_stress);
   Real getSigEqv(const RankTwoTensor & stress);
   Real deltaFunc(unsigned int i, unsigned int j);
   Real getYieldStress(const Real equivalent_plastic_strain);
@@ -124,6 +124,7 @@ protected:
 
   Real _ref_pe_rate;
   Real _exponent;
+  Real _chemo_mechanical_porosity_coeff;
 
   Real macaulayBracket(Real);
 
@@ -137,6 +138,7 @@ protected:
   MaterialProperty<Real> & _volumetric_strain_rate;
   MaterialProperty<Real> & _total_volumetric_strain;
   MaterialProperty<Real> & _mechanical_porosity;
+  MaterialProperty<Real> & _mass_removal_rate;
   MaterialProperty<Real> & _poromech_kernel;
   MaterialProperty<Real> & _poromech_jac;
   MaterialProperty<Real> & _mod_gruntfest_number;
@@ -144,23 +146,25 @@ protected:
   MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
   MaterialProperty<Real> & _damage_kernel;
   MaterialProperty<Real> & _damage_kernel_jac;
-  Real _damage_coeff, _healing_coeff;
+  Real _damage_coeff, _dmg_exponent, _healing_coeff;
 
   Real _exponential;
-  // VariableValue & _dispx_dot;
-  // VariableValue & _dispy_dot;
-  // VariableValue & _dispz_dot;
+  // const VariableValue & _dispx_dot;
+  // const VariableValue & _dispy_dot;
+  // const VariableValue & _dispz_dot;
 
   // MaterialProperty<RealVectorValue> & _solid_velocity;
 
   // Using variables
   bool _has_T;
-  VariableValue &_T, &_T_old;
+  const VariableValue & _T;
+  const VariableValue & _T_old;
   bool _has_pore_pres;
-  VariableValue & _pore_pres;
-  VariableValue & _total_porosity;
+  const VariableValue & _pore_pres;
+  const VariableValue & _total_porosity;
   bool _has_D;
-  VariableValue &_damage, &_damage_old;
+  const VariableValue & _damage;
+  const VariableValue & _damage_old;
 
   DamageMethod _damage_method;
 
@@ -187,6 +191,8 @@ protected:
   virtual void form_damage_kernels(Real);
 
   virtual void formDamageDissipation(RankTwoTensor &);
+  virtual void formBrittleDamage();
+  virtual void formCreepDamage(Real);
 
   Real _damage_dissipation;
 };

@@ -40,7 +40,7 @@ RedbackPoromechanics::~RedbackPoromechanics()
 Real
 RedbackPoromechanics::computeQpResidual()
 {
-  return _time_factor * _poromech_kernel[_qp] * _test[_i][_qp];
+  return _time_factor * _poromech_kernel[ _qp ] * _test[ _i ][ _qp ];
   // TODO: add note in doco to tell users not to turn on term if compress=0
   // TODO: add check compress > 0
 }
@@ -56,7 +56,7 @@ RedbackPoromechanics::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _temp_var)
   {
-    return _time_factor * _poromech_kernel[_qp] * _poromech_jac[_qp] * _phi[_j][_qp] * _test[_i][_qp];
+    return _time_factor * _poromech_kernel[ _qp ] * _poromech_jac[ _qp ] * _phi[ _j ][ _qp ] * _test[ _i ][ _qp ];
   }
   return 0;
 }

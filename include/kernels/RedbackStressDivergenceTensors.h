@@ -2,20 +2,22 @@
 #define REDBACKSTRESSDIVERGENCETENSORS_H
 
 #include "Kernel.h"
-#include "ElasticityTensorR4.h"
+#include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 
 // Forward Declarations
 class RedbackStressDivergenceTensors;
-class ElasticityTensorR4;
+class RankFourTensor;
 class RankTwoTensor;
 
 template <>
 InputParameters validParams<RedbackStressDivergenceTensors>();
 
 /**
- * RedbackStressDivergenceTensors mostly copies from StressDivergence.  There are small changes to use
- * RankFourTensor and RankTwoTensors instead of SymmElasticityTensors and SymmTensors.  This is done
+ * RedbackStressDivergenceTensors mostly copies from StressDivergence.  There
+ * are small changes to use
+ * RankFourTensor and RankTwoTensors instead of SymmElasticityTensors and
+ * SymmTensors.  This is done
  * to allow for more mathematical transparancy.
  */
 class RedbackStressDivergenceTensors : public Kernel
@@ -28,11 +30,11 @@ protected:
   virtual Real computeQpJacobian();
   virtual Real computeQpOffDiagJacobian(unsigned int jvar);
 
-  VariableValue & _pore_pres;
+  const VariableValue & _pore_pres;
   RealVectorValue _poromech_stress_row;
 
   const MaterialProperty<RankTwoTensor> & _stress;
-  const MaterialProperty<ElasticityTensorR4> & _Jacobian_mult;
+  const MaterialProperty<RankFourTensor> & _Jacobian_mult;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
 
   const unsigned int _component;

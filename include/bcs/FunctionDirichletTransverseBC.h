@@ -31,16 +31,22 @@ protected:
    */
   virtual Real computeQpValue();
 
+  const VariableValue & _u_old;
+
   /// Function being used for evaluation of this BC
   Function & _func;
 
   /// Center point to calculate transversal direction for boundary point.
   const RealVectorValue & _center;
 
-  /// Axis of rotation, vector to calculate transversal direction for boundary point.
+  /// Axis of rotation, vector to calculate transversal direction for boundary
+  /// point.
   const RealVectorValue & _axis;
 
-  /// Direction index (0 for X, 1 for Y, 2 for Z), since we can't really rely on variable name "disp_x"...
+  const Real _angular_velocity;
+
+  /// Direction index (0 for X, 1 for Y, 2 for Z), since we can't really rely on
+  /// variable name "disp_x"...
   const unsigned int & _dir_index;
 };
 

@@ -38,11 +38,11 @@ RedbackChemEndo::~RedbackChemEndo()
 Real
 RedbackChemEndo::computeQpResidual()
 {
-  return _time_factor * _test[_i][_qp] * _chemical_endothermic_energy[_qp];
+  return _time_factor * _test[ _i ][ _qp ] * _chemical_endothermic_energy[ _qp ];
 }
 
 Real
 RedbackChemEndo::computeQpJacobian()
 {
-  return _time_factor * _test[_i][_qp] * _chemical_endothermic_energy_jac[_qp] * _phi[_j][_qp];
+  return _time_factor * _test[ _i ][ _qp ] * _chemical_endothermic_energy_jac[ _qp ] * _phi[ _j ][ _qp ];
 }
