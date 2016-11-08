@@ -135,7 +135,7 @@
 []
 
 [AuxVariables]
-  active = 'mech_porosity Mod_Gruntfest_number total_porosity returnmap_iter mises_strain mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
+  active = 'mech_porosity Mod_Gruntfest_number total_porosity returnmap_iter mises_strain mises_strain_rate mises_stress volumetric_strain mean_stress'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -203,7 +203,7 @@
 []
 
 [AuxKernels]
-  active = 'mech_porosity volumetric_strain total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress returnmap_iter Gruntfest_Number'
+  active = 'mech_porosity volumetric_strain total_porosity mises_strain mises_strain_rate mises_stress mean_stress returnmap_iter Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -294,7 +294,7 @@
 []
 
 [Postprocessors]
-  active = 'volumetric_strain mises_strain mises_strain_rate max_returnmap_iter volumetric_strain_rate mises_stress mean_stress'
+  active = 'volumetric_strain mises_strain mises_strain_rate max_returnmap_iter mises_stress mean_stress'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
