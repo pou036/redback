@@ -71,9 +71,6 @@ RedbackGrainSizeAux::computeValue()
         * _mises_strain_rate[ _qp ] * std::pow(_u_old[ _qp ],2);
     }
 
-    Real beta = _strain_rate_dis[_qp] / _mises_strain_rate[_qp];
-    grain_reduction_rate = _pre_exp_factor_reduction * (-beta) * _mises_stress[ _qp ]
-      * _mises_strain_rate[ _qp ] * std::pow(_u_old[ _qp ],2);
     Real grain_growth_rate = _pre_exp_factor_growth * 1/_growth_exponent_param * std::pow(_u_old[ _qp ], 1 -_growth_exponent_param)
       * std::exp(_ar_growth_param*_delta_param*_T[_qp]/(1 + _delta_param*_T[_qp]));
 
@@ -81,13 +78,14 @@ RedbackGrainSizeAux::computeValue()
     //std::cout << "_pre_exp_factor_growth = " << _pre_exp_factor_growth << std::endl;
     //std::cout << "_growth_exponent_param = " << _growth_exponent_param << std::endl;
     //std::cout << "_ar_growth_param = " << _ar_growth_param << std::endl;
-    std::cout << "grain_reduction_rate = " << grain_reduction_rate << std::endl;
-    std::cout << "grain_growth_rate = " << grain_growth_rate << std::endl;
-    //std::cout << "beta = " << beta << std::endl;
+    //std::cout << "grain_reduction_rate = " << grain_reduction_rate << std::endl;
+    //std::cout << "grain_growth_rate = " << grain_growth_rate << std::endl;
+    //std::cout << "_strain_rate_dis[_qp] = " << _strain_rate_dis[_qp] << std::endl;
+    //std::cout << "_mises_strain_rate[_qp] = " << _mises_strain_rate[_qp] << std::endl;
     //std::cout << "steady_state_grain_size = " << grain_reduction_rate << std::endl;
-    std::cout << "target_grain_red = " << (_u_old[ _qp ] - grain_reduction_rate) << std::endl;
-    std::cout << "target_grain_grow = " << (_u_old[ _qp ] + grain_growth_rate) << std::endl;
-    std::cout << "grain_size = " << grain_size << std::endl;
+    //std::cout << "target_grain_red = " << (_u_old[ _qp ] - grain_reduction_rate) << std::endl;
+    //std::cout << "target_grain_grow = " << (_u_old[ _qp ] + grain_growth_rate) << std::endl;
+    //std::cout << "grain_size = " << grain_size << std::endl;
 
 
     Real n_dis = _flow_law_dis_uo.getStressExponent();
