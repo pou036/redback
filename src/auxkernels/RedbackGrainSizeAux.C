@@ -63,8 +63,16 @@ RedbackGrainSizeAux::computeValue()
   Real grain_size = -1.0;
   if (_has_T)
   {
+    Real grain_reduction_rate = 0.;
+    if (_strain_rate_dis[_qp] > 0)
+    {
+      Real beta = _strain_rate_dis[_qp] / _mises_strain_rate[_qp];
+      grain_reduction_rate = _pre_exp_factor_reduction * (-beta) * _mises_stress[ _qp ]
+        * _mises_strain_rate[ _qp ] * std::pow(_u_old[ _qp ],2);
+    }
+
     Real beta = _strain_rate_dis[_qp] / _mises_strain_rate[_qp];
-    Real grain_reduction_rate = _pre_exp_factor_reduction * (-beta) * _mises_stress[ _qp ]
+    grain_reduction_rate = _pre_exp_factor_reduction * (-beta) * _mises_stress[ _qp ]
       * _mises_strain_rate[ _qp ] * std::pow(_u_old[ _qp ],2);
     Real grain_growth_rate = _pre_exp_factor_growth * 1/_growth_exponent_param * std::pow(_u_old[ _qp ], 1 -_growth_exponent_param)
       * std::exp(_ar_growth_param*_delta_param*_T[_qp]/(1 + _delta_param*_T[_qp]));
