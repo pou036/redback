@@ -25,6 +25,7 @@
 
 // Boundary conditions
 #include "FunctionDirichletTransverseBC.h"
+#include "PressureNeumannBC.h"
 
 // Functions
 #include "RedbackRandomFunction.h"
@@ -121,6 +122,7 @@ RedbackApp::registerObjects(Factory & factory)
 #undef registerObject
 #define registerObject(name) factory.reg<name>(stringifyName(name))
   registerBoundaryCondition(FunctionDirichletTransverseBC);
+  registerBoundaryCondition(PressureNeumannBC);
 
   registerFunction(RedbackRandomFunction);
 
