@@ -52,6 +52,8 @@
 #include "RedbackThermalPressurization.h"
 #include "RedbackDamage.h"
 #include "RedbackVarAnisotropicDiffusion.h"
+#include "LneFluidMassTimeDerivative.h"
+
 
 // Scalar Kernels
 #include "RedbackContinuation.h"
@@ -81,6 +83,9 @@
 #include "RedbackDiffVarsAux.h"
 #include "RedbackTotalPorosityAux.h"
 #include "RedbackPolarTensorMaterialAux.h"
+
+// UserObjects
+//#include "PorousFlowDictator.h"
 
 template <>
 InputParameters
@@ -147,6 +152,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalPressurization);
   registerKernel(RedbackDamage);
   registerKernel(RedbackVarAnisotropicDiffusion);
+  registerKernel(LneFluidMassTimeDerivative);
 
   registerScalarKernel(RedbackContinuation);
 
@@ -170,6 +176,9 @@ RedbackApp::registerObjects(Factory & factory)
   registerAux(RedbackDiffVarsAux);
   registerAux(RedbackTotalPorosityAux);
   registerAux(RedbackPolarTensorMaterialAux);
+  
+  // UserObjects
+  //registerUserObject(PorousFlowDictator);
 #undef registerObject
 #define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
