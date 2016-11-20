@@ -53,7 +53,7 @@
 #include "RedbackDamage.h"
 #include "RedbackVarAnisotropicDiffusion.h"
 #include "LneFluidMassTimeDerivative.h"
-
+#include "LneFluidMassSpaceDerivative.h"
 
 // Scalar Kernels
 #include "RedbackContinuation.h"
@@ -71,6 +71,7 @@
 #include "RedbackMechMaterialCCanisotropic.h"
 #include "RedbackMechMaterialElastic.h"
 #include "RedbackMaterialElasticVarDiff.h"
+#include "LneFluidMaterial.h"
 
 // MeshModifiers
 #include "ElementFileSubdomain.h"
@@ -153,6 +154,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackDamage);
   registerKernel(RedbackVarAnisotropicDiffusion);
   registerKernel(LneFluidMassTimeDerivative);
+  registerKernel(LneFluidMassSpaceDerivative);  
 
   registerScalarKernel(RedbackContinuation);
 
@@ -167,6 +169,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
   registerMaterial(RedbackMaterialElasticVarDiff);
+  registerMaterial(LneFluidMaterial);  
 
   registerMeshModifier(ElementFileSubdomain);
 
