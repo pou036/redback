@@ -12,16 +12,20 @@ InputParameters validParams<LneFluidMassSpaceDerivative>()
 {
   InputParameters params = validParams<Kernel>();
   params.addClassDescription("Time derivative Kernel that acts on a product of three variables");
-  params.addRequiredCoupledVar("rho", "Coupled variable one-for fluid flow the density");
+  params.addRequiredCoupledVar("p", "Coupled variable one-for fluid flow the density");
   params.addRequiredCoupledVar("phi", "Coupled variable two-for fluid flow the porosity");  
   return params;
 }
 
 LneFluidMassSpaceDerivative::LneFluidMassSpaceDerivative(const InputParameters & parameters) :
     Kernel(parameters),  
-    _grad_v(coupledGradient("rho")),
-    _v_var(coupled("rho")),
-    _w_var(coupled("phi"))            
+    _grad_v(coupledGradient("p")),
+    _v_var(coupled("p")),
+    _w_var(coupled("phi")),
+    _rho(getMaterialProperty<Real>("fluid_density")),     
+    _drhodp(getMaterialProperty<Real>("fluid_density derivative with pressure")),
+    _diff(getMaterialProperty<Real>("diffusivity")),     
+    _ddiffds(getMaterialProperty<Real>("diffusivity derivative with saturation"))                            
 {
 }
 
@@ -29,7 +33,9 @@ Real
 LneFluidMassSpaceDerivative::computeQpResidual()
 {
   RealVectorValue dmass = 0.0;
-  dmass += 0.01*_grad_u[_qp];
+  
+  dmass += _rho[_qp]*_diff[_qp]*_grad_v[_qp];
+  
   return _grad_test[_i][_qp]*dmass;
 }
 
@@ -37,7 +43,9 @@ Real
 LneFluidMassSpaceDerivative::computeQpJacobian()
 {
   RealVectorValue  QpJ = 0.0;
-     
+   
+  QpJ += _rho[_qp]*_ddiffds[_qp]*_phi[_j][_qp]*_grad_v[_qp];      
+    
   return _grad_test[_i][_qp]*QpJ;
 }
 

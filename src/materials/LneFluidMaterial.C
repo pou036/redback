@@ -14,6 +14,7 @@
 
 #include "LneFluidMaterial.h"
 
+
 template <>
 InputParameters
 validParams<LneFluidMaterial>()
@@ -31,6 +32,10 @@ validParams<LneFluidMaterial>()
     "gravity",
     RealVectorValue(),
     "Gravitational acceleration (m/s^2) as a vector pointing downwards.  Eg '0 0 -9.81'");
+    
+    
+  params.addParam<Real>("temperature_reference", 1, "Reference temperature");
+  params.addParam<Real>("pressure_reference", 1, "Reference pressure");  
   return params;
 }
 
@@ -95,10 +100,10 @@ LneFluidMaterial::computeQpProperties()
 void
 LneFluidMaterial::computeLneTerms()
 {
-  _fluid_density[ _qp ] = (_fluid_density_param + _fluid_compressibility_param * _pore_pres[ _qp ]);
+  _fluid_density[ _qp ] = (_fluid_density_param + _fluid_compressibility_param * (_pore_pres[ _qp ]-_P0_param));
   _dfluid_density[ _qp ] = _fluid_compressibility_param ;  
-  _diffusivity[ _qp ] = (_fluid_density_param + _fluid_compressibility_param * _pore_pres[ _qp ]);
-  _ddiffusivity[ _qp ] = _fluid_compressibility_param ;    
+  _diffusivity[ _qp ] = 0.01* pow(std::max( _sat[ _qp ]-0.1,0.0),3.0)+0.0001;
+  _ddiffusivity[ _qp ] = 3.0 * 0.01* pow(std::max( _sat[ _qp ]-0.1,0.0),2.0);    
 
   return;
 }

@@ -37,7 +37,13 @@ protected:
 //  const VariableValue & _w_dot;
 //  const VariableValue & _dw_dot;
   const unsigned int _w_var; 
-//  const VariableValue & _w;     
+//  const VariableValue & _w;  
+
+  const MaterialProperty<Real>& _rho;  
+  const MaterialProperty<Real>& _drhodp; 
+  
+  const MaterialProperty<Real>& _diff;  
+  const MaterialProperty<Real>& _ddiffds;    
 };
 
 #endif //LNEFLUIDMASSTIMEDERIVATIVE_H

@@ -8,8 +8,7 @@
 #ifndef LNEFLUIDMASSTIMEDERIVATIVE_H
 #define LNEFLUIDMASSTIMEDERIVATIVE_H
 
-#include "TimeDerivative.h"
-#include "CoupledTimeDerivative.h"
+#include "Kernel.h"
 
 // Forward Declarations
 class LneFluidMassTimeDerivative;
@@ -38,7 +37,10 @@ protected:
   const VariableValue & _w_dot;
   const VariableValue & _dw_dot;
   const unsigned int _w_var; 
-  const VariableValue & _w;     
+  const VariableValue & _w;    
+  
+  const MaterialProperty<Real>& _rho;  
+  const MaterialProperty<Real>& _drhodp;    
 };
 
 #endif //LNEFLUIDMASSTIMEDERIVATIVE_H
