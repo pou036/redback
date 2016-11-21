@@ -22,6 +22,10 @@ private:
   const std::string _disp_r;
   const std::string _temp;
   const std::string _pore_pres;
+
+protected:
+  /// if this vector is not empty the variables, kernels and materials are restricted to these subdomains
+  std::vector<SubdomainName> _subdomain_names;
 };
 
 #endif // REDBACKMECHACTION_H
