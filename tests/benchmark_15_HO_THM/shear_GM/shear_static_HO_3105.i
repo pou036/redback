@@ -322,17 +322,17 @@
     disp_x = wc_x
   [../]
   [./x_moment]
-    type = MomentBalancing
+    type = RedbackMomentBalancing
     variable = wc_x
     component = 0
   [../]
   [./y_moment]
-    type = MomentBalancing
+    type = RedbackMomentBalancing
     variable = wc_y
     component = 1
   [../]
   [./z_moment]
-    type = MomentBalancing
+    type = RedbackMomentBalancing
     variable = wc_z
     component = 2
   [../]
@@ -463,7 +463,7 @@
 
 [BCs]
   # following is natural BC
-  active = 'Periodic uy_bottom ux_imposed_top confining_stress wcx_equals_zero_on_top ux_zero_bottom wc_x_bottom uz_bottom wc_y_bottom'
+  active = 'Periodic uy_bottom ux_imposed_top confining_stress wcx_equals_zero_on_top ux_zero_bottom wc_x_bottom uz_bottom wc_y_bottom wcz_imposed_top wc_z_bottom_zero'
   [./Periodic]
     [./xperiodic]
       auto_direction = x
@@ -472,10 +472,6 @@
     [./zperiodic]
       auto_direction = z
       variable = 'disp_x disp_y disp_z wc_x wc_y wc_z temperature pressure'
-    [../]
-    [./wcz_periodic]
-      variable = wc_z
-      auto_direction = y
     [../]
   [../]
   [./wcx_equals_zero_on_top]
@@ -614,6 +610,7 @@
     pore_pres = pressure
     temperature = temperature
     plasticity_type = DruckerPrager_friction3D
+	 min_stepsize = 0.5
   [../]
   [./redback_mat]
     type = RedbackMaterial

@@ -15,7 +15,6 @@
 
 #include "Function.h"
 #include "RedbackMechMaterialHOelastic.h"
-#include "multisurfaceplasticityhard.h"
 
 /**
  * RedbackMechMaterialHOelastic handles a high order material.

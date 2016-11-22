@@ -38,13 +38,14 @@ validParams<RedbackMechMaterialHO>()
   params.addParam<Real>("friction_coefficient", 0, "Friction coefficient");
   params.addParam<Real>("dilatancy_coefficient", 0, "Dilatancy coefficient");
   params.addParam<Real>("hardening_mech_modulus", 0, " mechanical hardening parameter value");
+  params.addParam<Real>("beta_star", 0, " storage capacity in the fluid mass balance");
   MooseEnum fm = RankFourTensor::fillMethodEnum();
   fm = "general_isotropic";
   params.addParam<MooseEnum>("fill_method_bending", fm, "The fill method for the 'bending' tensor.");
   params.addParam<std::string>("plasticity_type", "Name that allows to switch for different subroutines for the return map algorithm");
   params.addParam<bool>("ignore_failures", false, "The return-map algorithm will return with the best admissible stresses and internal parameters that it can, even if they don't fully correspond to the applied strain increment.  To speed computations, this flag can be set to true, the max_NR_iterations set small, and the min_stepsize large.");
   params.addRangeCheckedParam<Real>("min_stepsize", 0.01, "min_stepsize>0 & min_stepsize<=1", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the minimum fraction of applied strain increment that may be applied before the algorithm gives up entirely");
-
+  
   return params;
 }
 
@@ -92,6 +93,8 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _min_stepsize(getParam<Real>("min_stepsize")),
     _iter(declareProperty<Real>("plastic_local_iterations")), // this is really an unsigned int, but for visualisation i convert it to Real
     _ignore_failures(getParam<bool>("ignore_failures")),
+    _poromech_kernel(declareProperty<Real>("poromechanics_kernel")),
+    _poromech_jac(declareProperty<Real>("poromechanics_jacobian")),
     _wc_x(coupledValue("wc_x")),
     _wc_y(coupledValue("wc_y")),
     _wc_z(coupledValue("wc_z")),
@@ -108,7 +111,8 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _cohesion(getParam<Real>("cohesion")),
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _dilatancy_coefficient(getParam<Real>("dilatancy_coefficient")),
-    _hardening_mech_modulus(getParam<Real>("hardening_mech_modulus"))
+    _hardening_mech_modulus(getParam<Real>("hardening_mech_modulus")),
+    _beta_star(getParam<Real>("beta_star")) 
 {
   _Bijkl.fillFromInputVector(_Bijkl_vector, (RankFourTensor::FillMethod)(int)_fill_method_bending);
   _shear_modulus = _Cijkl_vector[ 1 ];
@@ -149,7 +153,8 @@ RedbackMechMaterialHO::initQpStatefulProperties()
   _lagrange_multiplier[ _qp ] = 0.0;
   _failure_surface[ _qp ] = 0.0;
   _iter[_qp] = 0.0; // this is really an unsigned int, but for visualisation i convert it to Real
-
+  _poromech_kernel[ _qp ] = 0;
+  _poromech_jac[ _qp ] = 0;
 }
 
 
@@ -643,7 +648,6 @@ for (unsigned int i = 0; i < 3; ++i)
 _eqv_plastic_strain[_qp] = std::pow(normL2, 0.5);
 _volumetric_strain[_qp] = _plastic_strain[_qp].trace(); // PLASTIC vol strain
 
-
 recupSigmaNew(_elastic_strain[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
 recupMomentNew(_elastic_curvature[_qp], SVARSGP, 3*NSTR+3+ nb_hardening);
 
@@ -928,6 +932,12 @@ RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p
   delta_phi_mech_pl = (1.0 - _total_porosity[ _qp ]) * (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]).trace();
 
   _mechanical_porosity[ _qp ] = delta_phi_mech_el + delta_phi_mech_pl;
+  
+  //Compute terms for the RedbackPoroHO
+  Real instantaneous_vol_strain_rate;
+  instantaneous_vol_strain_rate = (_plastic_strain[ _qp ].trace() - _plastic_strain_old[ _qp ].trace()) / _dt;
+ _poromech_kernel[ _qp ] = instantaneous_vol_strain_rate / _beta_star;
+ _poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
 
 }
 

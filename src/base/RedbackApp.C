@@ -53,6 +53,7 @@
 #include "RedbackInertialForce.h"
 #include "RedbackDynamicMomentBalancing.h"
 #include "RedbackCosseratDynamicStressDivergenceTensors2.h"
+#include "RedbackPoroMechHO.h"
 
 // Scalar Kernels
 #include "RedbackContinuation.h"
@@ -155,6 +156,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackInertialForce);
   registerKernel(RedbackDynamicMomentBalancing);
   registerKernel(RedbackCosseratDynamicStressDivergenceTensors2);
+  registerKernel(RedbackPoroMechHO);
 
   registerScalarKernel(RedbackContinuation);
 

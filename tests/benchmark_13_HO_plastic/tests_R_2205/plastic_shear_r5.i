@@ -350,17 +350,17 @@
     disp_x = wc_x
   [../]
   [./x_moment]
-    type = MomentBalancing
+    type = RedbackMomentBalancing
     variable = wc_x
     component = 0
   [../]
   [./y_moment]
-    type = MomentBalancing
+    type = RedbackMomentBalancing
     variable = wc_y
     component = 1
   [../]
   [./z_moment]
-    type = MomentBalancing
+    type = RedbackMomentBalancing
     variable = wc_z
     component = 2
   [../]
@@ -675,7 +675,7 @@
     hardening_mech_modulus = -10
     friction_coefficient = 0.4
     min_stepsize = 1e-8
-    plasticity_type = druckerPrager3D_frictionHard
+    plasticity_type = DruckerPrager_friction3D
     ignore_failures = true
   [../]
   [./redback_mat]
