@@ -45,7 +45,7 @@ validParams<RedbackMechMaterialHO>()
   params.addParam<std::string>("plasticity_type", "Name that allows to switch for different subroutines for the return map algorithm");
   params.addParam<bool>("ignore_failures", false, "The return-map algorithm will return with the best admissible stresses and internal parameters that it can, even if they don't fully correspond to the applied strain increment.  To speed computations, this flag can be set to true, the max_NR_iterations set small, and the min_stepsize large.");
   params.addRangeCheckedParam<Real>("min_stepsize", 0.01, "min_stepsize>0 & min_stepsize<=1", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the minimum fraction of applied strain increment that may be applied before the algorithm gives up entirely");
-  
+
   return params;
 }
 
@@ -112,7 +112,7 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _dilatancy_coefficient(getParam<Real>("dilatancy_coefficient")),
     _hardening_mech_modulus(getParam<Real>("hardening_mech_modulus")),
-    _beta_star(getParam<Real>("beta_star")) 
+    _beta_star(getParam<Real>("beta_star"))
 {
   _Bijkl.fillFromInputVector(_Bijkl_vector, (RankFourTensor::FillMethod)(int)_fill_method_bending);
   _shear_modulus = _Cijkl_vector[ 1 ];
@@ -375,83 +375,21 @@ int element_id = _current_elem->id();
 // but I also want to be able to subdivide an initial_stress
 RankTwoTensor this_strain_increment = _strain_increment[_qp];
 RankTwoTensor this_curvature_increment = _curvature_increment[_qp];
-/*
-if (_plasticity_type.compare("druckerPrager3D_frictionHard_") == 0){
 
-  usermat_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
- int iter_rout=0;
- return_successful = (NILL==0);
- //if (!return_successful){
-  // std::cout <<"number of iterations is "<< iter_rout << std::endl;
-  // mooseError("Exiting\n");
- //}
-}
-
- if(_t_step == 6 && element_id==13 && _qp == 3 && nl_it==0){
-  for (unsigned int k = 0; k < 1000000 ; k++) {
-    if (k%10000==0)
-      std::cout << k << std::endl;
-    int NSTR3 = NSTR2;
-    int NPROPS3 = NPROPS2;
-    int NSVARSGP3 = NSVARSGP2;
-    int NILL3 = NILL2;
-
-    for (unsigned i = 0; i < NSTR3; ++i){
-      STRESSF3[i] = STRESSF2[i];
-      DEFORT3[i] = DEFORT2[i];
-    }
-    for (unsigned i = 0; i < NSTR3*NSTR3; ++i){
-      DSDE3[i] = DSDE2[i];
-    }
-    for (unsigned i = 0; i < NSVARSGP3; ++i){
-      SVARSGP3[i] = SVARSGP2[i];
-    }
-    for (unsigned i = 0; i < NPROPS3; ++i){
-      PROPS3[i] = PROPS2[i];
-    }
-
-    usermat_(STRESSF3,DEFORT3,DSDE3,&NSTR3,PROPS3,&NPROPS3,SVARSGP3,&NSVARSGP3,&NILL3);
-    return_successful = (NILL3==0);
-     if (!return_successful){
-       for (unsigned int i = 0; i < NSTR2 ; ++i)
-       {
-         std::cout <<"DEFORT input" << i << " = " << DEFORT2[i] <<std::endl;
-       }
-       for (unsigned int i = 0; i < NSTR2 ; ++i)
-       {
-         std::cout <<"STRESS input" << i << " = " << STRESSF2[i] <<std::endl;
-       }
-
-       for (unsigned int i = 0; i < NSVARSGP2 ; ++i)
-       {
-         std::cout <<"SVARSGP input" << i << " = " << SVARSGP2[i] <<std::endl;
-       }
-       for (unsigned int i = 0; i < NSTR2*NSTR2 ; ++i)
-       {
-         std::cout <<"DSDE input" << i << " = " << DSDE2[i] <<std::endl;
-       }
-       for (unsigned int i = 0; i < NPROPS2 ; ++i)
-       {
-         std::cout <<"PROPS input" << i << " = " << PROPS2[i] <<std::endl;
-       }
-
-       std::cout <<"NSTR input = " << NSTR2 <<std::endl;
-       std::cout <<"NPROPS input = " << NPROPS2 <<std::endl;
-       std::cout <<"NSVARSGP input = " << NSVARSGP2 <<std::endl;
-       std::cout <<"NILL input = " << NILL2 <<std::endl;
-       std::cout <<"number of iterations is "<< iter_rout << std::endl;
-       mooseError("Exiting\n");
-     }
-    iter_rout+=1;
-    }
-   }
-  }
-
-else if (_plasticity_type.compare("druckerPrager3D_frictionHard_adim_") == 0){
+if (_plasticity_type.compare("DruckerPrager_friction3D_") == 0){
   usermat1_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
 }
-else if (_plasticity_type.compare("druckerPrager3D_cohesionHard_") == 0){
+else if (_plasticity_type.compare("DruckerPrager_friction2D_") == 0){
   usermat2_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+}
+else if (_plasticity_type.compare("DeBorst_2D_") == 0){
+  usermat3_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+}
+else if (_plasticity_type.compare("DruckerPrager_cohesion3D_") == 0){
+  usermat4_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
+}
+else if (_plasticity_type.compare("DruckerPrager_cohesion2D_") == 0){
+  usermat5_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
 }
 else{
   std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
@@ -510,10 +448,14 @@ for (unsigned int i = 0; i < NPROPS2 ; ++i)
 //      std::cout << sprintf5 <<std::endl;
 //}}
 
-  //throw MooseException("MooseException due to the non convergence of the subroutine");
-  //mooseError("Exiting\n");
+throw MooseException("MooseException due to the non convergence of the subroutine");
+//mooseError("Exiting\n");
 }
-*/
+
+
+
+/*
+
 while (time_simulated < 1.0 && step_size >= _min_stepsize)
 {
 
@@ -624,6 +566,8 @@ if (!return_successful)
   }
 }
 
+*/
+
 
 recupSigmaNew(_stress[_qp], STRESSF, 0);
 recupMomentNew(_stress_couple[_qp], STRESSF, 0);
@@ -697,6 +641,7 @@ _Jacobian_offdiag_cb[_qp](i,j,k,l) = DSDE[NSTR*(cormoment(k,l) + NSTR / 2) + cor
 
 // Compute the energy dissipation and the properties declared
 computeRedbackTerms(_stress[_qp], 0, 0);
+
 
 }
 
@@ -932,7 +877,7 @@ RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p
   delta_phi_mech_pl = (1.0 - _total_porosity[ _qp ]) * (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]).trace();
 
   _mechanical_porosity[ _qp ] = delta_phi_mech_el + delta_phi_mech_pl;
-  
+
   //Compute terms for the RedbackPoroHO
   Real instantaneous_vol_strain_rate;
   instantaneous_vol_strain_rate = (_plastic_strain[ _qp ].trace() - _plastic_strain_old[ _qp ].trace()) / _dt;

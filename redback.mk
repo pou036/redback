@@ -1,6 +1,7 @@
 #to create a library by copying after compile in the user files
 #ADDITIONAL_LIBS := /usr/local/lib/myLib.dylib
-COSSERAT_LIBS := /libre/hrattez/cosserat_dynlib/
+#COSSERAT_LIBS := /libre/hrattez/cosserat_dynlib/
+COSSERAT_LIBS := /Users/IST/projects/cosserat_dynlib
 
 
 #ifeq ($(COSSERAT_DYNLIB_EXISTS), 1)
