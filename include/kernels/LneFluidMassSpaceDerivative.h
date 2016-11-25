@@ -44,6 +44,8 @@ protected:
   
   const MaterialProperty<Real>& _diff;  
   const MaterialProperty<Real>& _ddiffds;    
+  
+  const MaterialProperty<RealVectorValue> & _grav;
 };
 
 #endif //LNEFLUIDMASSTIMEDERIVATIVE_H

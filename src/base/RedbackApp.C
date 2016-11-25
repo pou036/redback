@@ -54,6 +54,7 @@
 #include "RedbackVarAnisotropicDiffusion.h"
 #include "LneFluidMassTimeDerivative.h"
 #include "LneFluidMassSpaceDerivative.h"
+#include "LneFluidPorePressure.h"
 
 // Scalar Kernels
 #include "RedbackContinuation.h"
@@ -155,6 +156,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackVarAnisotropicDiffusion);
   registerKernel(LneFluidMassTimeDerivative);
   registerKernel(LneFluidMassSpaceDerivative);  
+  registerKernel(LneFluidPorePressure);   
 
   registerScalarKernel(RedbackContinuation);
 

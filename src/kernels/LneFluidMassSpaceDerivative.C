@@ -25,7 +25,8 @@ LneFluidMassSpaceDerivative::LneFluidMassSpaceDerivative(const InputParameters &
     _rho(getMaterialProperty<Real>("fluid_density")),     
     _drhodp(getMaterialProperty<Real>("fluid_density derivative with pressure")),
     _diff(getMaterialProperty<Real>("diffusivity")),     
-    _ddiffds(getMaterialProperty<Real>("diffusivity derivative with saturation"))                            
+    _ddiffds(getMaterialProperty<Real>("diffusivity derivative with saturation")),         
+    _grav(getMaterialProperty<RealVectorValue>("gravity_term"))                        
 {
 }
 
@@ -34,7 +35,7 @@ LneFluidMassSpaceDerivative::computeQpResidual()
 {
   RealVectorValue dmass = 0.0;
   
-  dmass += _rho[_qp]*_diff[_qp]*_grad_v[_qp];
+  dmass += _rho[_qp]*_diff[_qp]*_grad_v[_qp] - _rho[_qp]*_rho[_qp]*_grav[_qp];
   
   return _grad_test[_i][_qp]*dmass;
 }
@@ -54,6 +55,10 @@ LneFluidMassSpaceDerivative::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _v_var) {
     RealVectorValue QoJ = 0.0;	
+    
+    QoJ += _rho[_qp]*_diff[_qp]*_grad_test[_j][_qp];
+    QoJ += _drhodp[_qp]*_phi[_j][_qp]*_diff[_qp]*_grad_v[_qp];
+    QoJ +=-2.0*_rho[_qp]*_drhodp[_qp]*_phi[_j][_qp]*_grav[_qp];    
 
     return _grad_test[_i][_qp] * QoJ;
   } 

@@ -50,7 +50,7 @@ LneFluidMaterial::LneFluidMaterial(const InputParameters & parameters) :
     _gravity_param(getParam<RealVectorValue>("gravity")),
 
     _gravity_term(declareProperty<RealVectorValue>(
-      "gravity_term")), // actually fluid gravity (but need to be called mixture for the kernel)
+      "gravity_term")), // actually fluid gravity 
 
     _fluid_density(
       declareProperty<Real>("fluid_density")), // this fluid density is used in the stressdivergence kernel
@@ -59,7 +59,7 @@ LneFluidMaterial::LneFluidMaterial(const InputParameters & parameters) :
     _diffusivity(
       declareProperty<Real>("diffusivity")),     
     _ddiffusivity(
-      declareProperty<Real>("diffusivity derivative with saturation")),         
+      declareProperty<Real>("diffusivity derivative with saturation")),        
 
     _fluid_density_param(getParam<Real>("fluid_density")),
     _fluid_compressibility_param(getParam<Real>("fluid_compressibility")),
@@ -102,8 +102,8 @@ LneFluidMaterial::computeLneTerms()
 {
   _fluid_density[ _qp ] = (_fluid_density_param + _fluid_compressibility_param * (_pore_pres[ _qp ]-_P0_param));
   _dfluid_density[ _qp ] = _fluid_compressibility_param ;  
-  _diffusivity[ _qp ] = 0.01* pow(std::max( _sat[ _qp ]-0.1,0.0),3.0)+0.0001;
-  _ddiffusivity[ _qp ] = 3.0 * 0.01* pow(std::max( _sat[ _qp ]-0.1,0.0),2.0);    
+  _diffusivity[ _qp ] = 0.01* pow(std::max( _sat[ _qp ]-0.1,0.0),3.0)+0.01;
+  _ddiffusivity[ _qp ] = 3.0 * 0.01* pow(std::max( _sat[ _qp ],0.0),2.0);    
 
   return;
 }
