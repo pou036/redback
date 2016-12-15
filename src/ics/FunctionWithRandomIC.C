@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "FunctionWithRandomIC.h"
 #include "Function.h"
+#include "FunctionWithRandomIC.h"
 #include "MooseRandom.h"
 
 #include "libmesh/point.h"

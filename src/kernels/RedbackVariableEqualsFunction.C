@@ -12,40 +12,31 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "PressureNeumannBC.h"
+#include "Function.h"
+#include "RedbackVariableEqualsFunction.h"
 
 template <>
 InputParameters
-validParams<PressureNeumannBC>()
+validParams<RedbackVariableEqualsFunction>()
 {
-  InputParameters params = validParams<IntegratedBC>();
-  params.addRequiredCoupledVar("coupled_var", "The variable whose value we are to match.");
-  params.addRequiredParam<unsigned int>(
-    "component",
-    "An integer corresponding to the direction the variable this BC acts in. (0 for x, 1 for y, 2 for z)");
+  InputParameters params = validParams<TimeKernel>();
+  params.addRequiredParam<FunctionName>("function", "The function to assign values to the variable.");
   return params;
 }
 
-PressureNeumannBC::PressureNeumannBC(const InputParameters & parameters) :
-    IntegratedBC(parameters),
-    _var(coupledValue("coupled_var")),
-    _var_num(coupled("coupled_var")),
-    _component(getParam<unsigned int>("component"))
+RedbackVariableEqualsFunction::RedbackVariableEqualsFunction(const InputParameters & parameters) :
+    TimeKernel(parameters), _func(getFunction("function"))
 {
 }
 
 Real
-PressureNeumannBC::computeQpResidual()
+RedbackVariableEqualsFunction::computeQpResidual()
 {
-  return -_var[ _qp ] * _normals[ _qp ](_component) * _test[ _i ][ _qp ];
+  return _test[ _i ][ _qp ] * (_u[ _qp ] - _func.value(_t, _q_point[ _qp ]));
 }
 
 Real
-PressureNeumannBC::computeQpOffDiagJacobian(unsigned int jvar)
+RedbackVariableEqualsFunction::computeQpJacobian()
 {
-  if (jvar == _var_num)
-    return -_phi[ _j ][ _qp ] * _normals[ _qp ](_component) * _test[ _i ][ _qp ];
-
-  else
-    return 0.;
+  return _test[ _i ][ _qp ] * 1 * _phi[ _j ][ _qp ];
 }

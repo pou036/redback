@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "RedbackContinuationTangentAux.h"
 #include "MooseMesh.h"
+#include "RedbackContinuationTangentAux.h"
 
 template <>
 InputParameters

@@ -12,33 +12,26 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REDBACKMECHDISSIP_H
-#define REDBACKMECHDISSIP_H
+#ifndef REDBACKVARIABLEEQUALSFUNCTION_H
+#define REDBACKVARIABLEEQUALSFUNCTION_H
 
-#include "Kernel.h"
-#include "RankTwoTensor.h"
+#include "TimeKernel.h"
 
-class RedbackMechDissip;
+// Forward Declaration
+class RedbackVariableEqualsFunction;
 
 template <>
-InputParameters validParams<RedbackMechDissip>();
+InputParameters validParams<RedbackVariableEqualsFunction>();
 
-class RedbackMechDissip : public Kernel
+class RedbackVariableEqualsFunction : public TimeKernel
 {
 public:
-  RedbackMechDissip(const InputParameters & parameters);
-  virtual ~RedbackMechDissip();
+  RedbackVariableEqualsFunction(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-
-  // const VariableValue & _pressure;
-  const MaterialProperty<Real> & _mechanical_dissipation;
-  const MaterialProperty<Real> & _mechanical_dissipation_jac;
-
-private:
-  Real _time_factor;
+  Function & _func;
 };
 
-#endif /* REDBACKMECHDISSIP_H */
+#endif // REDBACKVARIABLEEQUALSFUNCTION_H

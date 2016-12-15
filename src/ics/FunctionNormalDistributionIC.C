@@ -10,8 +10,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "FunctionNormalDistributionIC.h"
 #include "Function.h"
+#include "FunctionNormalDistributionIC.h"
 #include "MooseRandom.h"
 
 #include "libmesh/point.h"

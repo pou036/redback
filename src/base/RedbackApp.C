@@ -10,11 +10,11 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 // Main Application
-#include "RedbackApp.h"
+#include "ActionFactory.h"
+#include "AppFactory.h"
 #include "Moose.h"
 #include "MooseSyntax.h"
-#include "AppFactory.h"
-#include "ActionFactory.h"
+#include "RedbackApp.h"
 
 // Modules
 #include "TensorMechanicsApp.h"
@@ -31,15 +31,16 @@
 #include "RedbackRandomFunction.h"
 
 // Initial conditions
-#include "FunctionNormalDistributionIC.h"
 #include "FunctionLogNormalDistributionIC.h"
-#include "FunctionWithRandomIC.h"
+#include "FunctionNormalDistributionIC.h"
 #include "FunctionTimesRandomIC.h"
+#include "FunctionWithRandomIC.h"
 
 // Kernels
 #include "RedbackChemEndo.h"
 #include "RedbackChemExo.h"
 #include "RedbackChemPressure.h"
+#include "RedbackDamage.h"
 #include "RedbackFluidDivergence.h"
 #include "RedbackFluidStressDivergenceTensors.h"
 #include "RedbackMassConvection.h"
@@ -51,7 +52,7 @@
 #include "RedbackThermalConvection.h"
 #include "RedbackThermalDiffusion.h"
 #include "RedbackThermalPressurization.h"
-#include "RedbackDamage.h"
+#include "RedbackVariableEqualsFunction.h"
 
 // Scalar Kernels
 #include "RedbackContinuation.h"
@@ -60,14 +61,14 @@
 #include "FunctionPointSource.h"
 
 // Materials
-#include "RedbackFluidMaterial.h"
 #include "ImageProcessing.h"
+#include "RedbackFluidMaterial.h"
 #include "RedbackMaterial.h"
-#include "RedbackMechMaterialJ2.h"
-#include "RedbackMechMaterialDP.h"
 #include "RedbackMechMaterialCC.h"
 #include "RedbackMechMaterialCCanisotropic.h"
+#include "RedbackMechMaterialDP.h"
 #include "RedbackMechMaterialElastic.h"
+#include "RedbackMechMaterialJ2.h"
 
 // MeshModifiers
 #include "ElementFileSubdomain.h"
@@ -78,8 +79,8 @@
 // AuxKernels
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
-#include "RedbackTotalPorosityAux.h"
 #include "RedbackPolarTensorMaterialAux.h"
+#include "RedbackTotalPorosityAux.h"
 
 template <>
 InputParameters
@@ -146,6 +147,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalDiffusion);
   registerKernel(RedbackThermalPressurization);
   registerKernel(RedbackDamage);
+  registerKernel(RedbackVariableEqualsFunction);
 
   registerScalarKernel(RedbackContinuation);
 
