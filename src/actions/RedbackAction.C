@@ -1,7 +1,7 @@
 #include "RedbackAction.h"
 
-#include "Factory.h"
 #include "FEProblem.h"
+#include "Factory.h"
 #include "Parser.h"
 
 template <>

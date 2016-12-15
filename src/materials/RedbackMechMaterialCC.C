@@ -10,8 +10,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "RedbackMechMaterialCC.h"
 #include "Ellipse.h"
+#include "RedbackMechMaterialCC.h"
 #include <cmath> //used for fabs
 
 template <>
