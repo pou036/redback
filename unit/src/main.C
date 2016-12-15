@@ -13,17 +13,17 @@
 /****************************************************************/
 
 // CPPUnit includes
-#include "cppunit/XmlOutputter.h"
 #include "cppunit/CompilerOutputter.h"
-#include "cppunit/ui/text/TestRunner.h"
+#include "cppunit/XmlOutputter.h"
 #include "cppunit/extensions/TestFactoryRegistry.h"
+#include "cppunit/ui/text/TestRunner.h"
 
 // Moose includes
 #include "Moose.h"
 #include "MooseInit.h"
 
-#include "Factory.h"
 #include "AppFactory.h"
+#include "Factory.h"
 #include "RedbackApp.h"
 
 #include <fstream>

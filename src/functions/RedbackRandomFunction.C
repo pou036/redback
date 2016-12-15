@@ -10,8 +10,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "RedbackRandomFunction.h"
 #include "MooseRandom.h"
+#include "RedbackRandomFunction.h"
 
 template <>
 InputParameters

@@ -16,8 +16,8 @@
 #define REDBACKMECHMATERIAL_H
 
 #include "Material.h"
-#include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "RankTwoTensor.h"
 #include "RotationTensor.h"
 //#include "FiniteStrainPlasticMaterial.h"
 
