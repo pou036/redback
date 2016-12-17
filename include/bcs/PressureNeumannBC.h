@@ -45,6 +45,9 @@ protected:
   unsigned int _var_num;
 
   const unsigned int _component;
+
+private:
+  Real _scale_factor;
 };
 
 #endif // PRESSURENEUMANNBC_H
