@@ -20,7 +20,7 @@ class Txtdiff(RunApp):
     RunApp.__init__(self, name, params)
 
 
-  def prepare(self):
+  def prepare(self, options):
     if self.specs['delete_output_before_running'] == True:
       for file in self.specs['txtdiff']:
         try:
