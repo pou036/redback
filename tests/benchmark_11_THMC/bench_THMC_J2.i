@@ -443,7 +443,7 @@
 
 [Outputs]
   file_base = bench_THMC_J2_out
-  output_initial = true
+  # output_initial = true
   exodus = true
   [./console]
     type = Console
@@ -473,4 +473,3 @@
     value = 0
   [../]
 []
-

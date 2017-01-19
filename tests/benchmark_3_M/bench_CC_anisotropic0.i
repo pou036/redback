@@ -28,6 +28,7 @@
 
 [Materials]
   [./mat_mech]
+    # yield_criterion = modified_Cam_Clay
     type = RedbackMechMaterialCCanisotropic
     block = 0
     disp_x = disp_x
@@ -38,7 +39,6 @@
     poisson_ratio = 0.3
     ref_pe_rate = 1
     slope_yield_surface = -0.6
-    yield_criterion = modified_Cam_Clay
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
   [../]
@@ -347,7 +347,7 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 0.006
+  end_time = 0.005
   dtmax = 1
   dtmin = 1e-7
   type = Transient
@@ -360,20 +360,14 @@
   reset_dt = true
   line_search = basic
   [./TimeStepper]
-    type = ReturnMapIterDT
-    dt = 1e-3
-    min_iter = 10
-    ratio = 0.5
-    max_iter = 20
-    dt_max = 1e-3
-    postprocessor = max_returnmap_iter
-    dt_min = 1e-5
+    type = ConstantDT
+    dt = 5e-4
   [../]
 []
 
 [Outputs]
+  # output_initial = true
   file_base = bench_CC_anisotropic0_out
-  output_initial = true
   exodus = true
   csv = true
   print_linear_residuals = true
