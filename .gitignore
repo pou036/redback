@@ -176,6 +176,7 @@ peacock_*.e
 tests/*/*.trace
 
 !/tests/transverseBC/*.msh
+!/meshes/2d_footing_pb_coarse.msh
 theory.synctex.gz
 
 # Allow files in documentation directories
