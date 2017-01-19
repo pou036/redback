@@ -32,7 +32,7 @@
     disp_x = disp_x
     disp_z = 0
     temperature = temp
-    C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
+    # C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     yield_stress = '0. 1 1. 1'
     exponent = 1
     ref_pe_rate = 1
@@ -166,13 +166,13 @@
 
 [Outputs]
   file_base = bench_elastic_3
-  output_initial = true
+  # output_initial = true
   exodus = true
   csv = true
   [./console]
     type = Console
     perf_log = true
-    linear_output = false
+    # linear_output = false
   [../]
 []
 
@@ -198,4 +198,3 @@
     disp_x = disp_x
   [../]
 []
-

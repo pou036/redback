@@ -474,7 +474,7 @@
 
 [Outputs]
   file_base = ring_shear_out
-  output_initial = true
+  # output_initial = true
   exodus = true
   print_linear_residuals = false
   csv = true
@@ -505,4 +505,3 @@
     value = 0
   [../]
 []
-

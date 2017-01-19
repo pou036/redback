@@ -18,7 +18,7 @@
   # displacements = 'disp_x disp_y disp_z'
   order = FIRST
   family = LAGRANGE
-  time_factor = 1
+  # time_factor = 1
 []
 
 [Variables]
@@ -208,4 +208,3 @@
     temp = temp
   [../]
 []
-
