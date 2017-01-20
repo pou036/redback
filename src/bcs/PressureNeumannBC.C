@@ -39,14 +39,14 @@ PressureNeumannBC::PressureNeumannBC(const InputParameters & parameters) :
 Real
 PressureNeumannBC::computeQpResidual()
 {
-  return -_var[ _qp ] * _normals[ _qp ](_component)*_test[ _i ][ _qp ] * _scale_factor;
+  return -_var[ _qp ] * _normals[ _qp ](_component) * _test[ _i ][ _qp ] * _scale_factor;
 }
 
 Real
 PressureNeumannBC::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _var_num)
-    return -_phi[ _j ][ _qp ] * _normals[ _qp ](_component)*_test[ _i ][ _qp ] * _scale_factor;
+    return -_phi[ _j ][ _qp ] * _normals[ _qp ](_component) * _test[ _i ][ _qp ] * _scale_factor;
 
   else
     return 0.;
