@@ -50,6 +50,7 @@ RedbackStressDivergenceTensors::RedbackStressDivergenceTensors(const InputParame
     _component(getParam<unsigned int>("component")),
     _biot_coeff(getMaterialProperty<Real>("biot_coefficient")),
 
+
     _xdisp_coupled(isCoupled("disp_x")),
     _ydisp_coupled(isCoupled("disp_y")),
     _zdisp_coupled(isCoupled("disp_z")),

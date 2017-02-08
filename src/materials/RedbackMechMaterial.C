@@ -95,6 +95,8 @@ validParams<RedbackMechMaterial>()
   // Grain size evolution
   params.addParam<UserObjectName>("flow_law_dislocation",
     "Name of the user object implementing a dislocation flow law, only used to compute grain size evolution");
+  params.addParam<UserObjectName>("flow_law_diffusion",
+    "Name of the user object implementing a diffusion flow law, USE TO SEE switch in deformation mechanisims");
 
   return params;
 }
@@ -135,8 +137,10 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
     _flow_law_uo(getUserObject<RedbackFlowLawBase>("flow_law")),
     _has_dislocation(isParamValid("flow_law_dislocation")),
+    _has_diffusion(isParamValid("flow_law_diffusion")),
     _flow_law_dis_uo(_has_dislocation ? &getUserObject<RedbackFlowLawDislocation>("flow_law_dislocation") : NULL),
     //_ref_pe_rate(getParam<Real>("ref_pe_rate")),
+    _flow_law_dif_uo(_has_diffusion ? &getUserObject<RedbackFlowLawDiffusion>("flow_law_diffusion") : NULL),
     _exponent(getParam<Real>("exponent")), // TODO: still used for Gr evolution, should change...
     _chemo_mechanical_porosity_coeff(getParam<Real>("chemo_mechanical_porosity_coeff")),
 
@@ -147,6 +151,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _mean_stress(declareProperty<Real>("mean_stress")),
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
     _dislocation_strain_rate(declareProperty<Real>("dislocation_strain_rate")),
+    _diffusion_strain_rate(declareProperty<Real>("diffusion_strain_rate")),
     _volumetric_strain(declareProperty<Real>("volumetric_strain")),
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
@@ -247,6 +252,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mean_stress[ _qp ] = 0;
   _mises_strain_rate[ _qp ] = 0;
   _dislocation_strain_rate[ _qp ] = 0;
+  _diffusion_strain_rate[ _qp ] = 0;
   _volumetric_strain[ _qp ] = 0;
   _volumetric_strain_rate[ _qp ] = 0;
   _total_volumetric_strain[ _qp ] = 0;
@@ -473,6 +479,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   // Compute stresses
   _mises_stress[ _qp ] = getSigEqv(sig);
   _mean_stress[ _qp ] = sig.trace() / 3.0;
+
+  // TODO: Compute Differential Stress. I couldnt figure out how to call components of the trace.
 
   // Compute plastic strains
   RankTwoTensor instantaneous_strain_rate, total_volumetric_strain_rate;
@@ -818,6 +826,12 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   if (_has_dislocation)
   {
     _dislocation_strain_rate[ _qp ] = _flow_law_dis_uo->value(q, p, q_y, p_y, yield_stress, _qp, _dt);
+  }
+
+  // Get value of epsilon_dot_diffusion for to moniter change in deformation mechanisims when grains size is on
+  if (_has_diffusion)
+  {
+    _diffusion_strain_rate[ _qp ] = _flow_law_dif_uo->value(q, p, q_y, p_y, yield_stress, _qp, _dt);
   }
 
 }

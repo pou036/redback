@@ -20,6 +20,7 @@
 #include "RankFourTensor.h"
 #include "RotationTensor.h"
 #include "RedbackFlowLawDislocation.h"
+#include "RedbackFlowLawDiffusion.h"
 //#include "FiniteStrainPlasticMaterial.h"
 
 // Forward Declarations
@@ -125,7 +126,9 @@ protected:
 
   const RedbackFlowLawBase & _flow_law_uo;
   bool _has_dislocation;
+  bool _has_diffusion;
   const RedbackFlowLawDislocation * _flow_law_dis_uo;
+  const RedbackFlowLawDiffusion * _flow_law_dif_uo;
   //Real _ref_pe_rate;
   Real _exponent;
   Real _chemo_mechanical_porosity_coeff;
@@ -139,6 +142,7 @@ protected:
   MaterialProperty<Real> & _mean_stress;
   MaterialProperty<Real> & _mises_strain_rate;
   MaterialProperty<Real> & _dislocation_strain_rate;
+  MaterialProperty<Real> & _diffusion_strain_rate;
   MaterialProperty<Real> & _volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;
   MaterialProperty<Real> & _total_volumetric_strain;

@@ -69,6 +69,7 @@ RedbackFlowLawDiffusion::derivative(Real sig_eqv, Real pressure, Real q_yield_st
         _exponent) * std::pow(_grain_size[qp], _grain_size_exponent) * exponential;
   Real delta_lambda = (std::pow(delta_lambda_p * delta_lambda_p + delta_lambda_q * delta_lambda_q, 0.5));
   //Real delta_lambda = value(sig_eqv, pressure, q_yield_stress, p_yield_stress, 0, qp, dt);
+  // James Question: what is lambda? I don't understand where it is used or how it relates to the flow law
   Real der_flow_incr_dev =
     _pre_exponential_factor * dt * _exponent *
     std::pow(Utils::macaulayBracket((q_yield_stress > 0 ? 1 : -1) * (sig_eqv / q_yield_stress - 1.0)),
