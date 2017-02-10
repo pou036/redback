@@ -688,7 +688,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   if (_has_T)
   {
     // E_0/(RT) = Ar/(1+delta T*)
-    _exponential =
+    _exponential *=
       std::exp(-_ar[ _qp ]) * std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
   }
 
