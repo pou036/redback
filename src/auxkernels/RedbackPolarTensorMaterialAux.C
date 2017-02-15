@@ -82,7 +82,7 @@ RedbackPolarTensorMaterialAux::computeValue()
   else if ((_i == 1) && (_j == 1))
   {
     // User is asking for tensor_theta_theta
-    result = _tensor[ _qp ](0, 0) * std::sin(theta) * std::cos(theta) -
+    result = _tensor[ _qp ](0, 0) * std::sin(theta) * std::sin(theta) -
              2 * _tensor[ _qp ](0, 1) * std::sin(theta) * std::cos(theta) +
              _tensor[ _qp ](1, 1) * std::cos(theta) * std::cos(theta);
   }
