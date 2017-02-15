@@ -40,6 +40,26 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./strain_theta_theta]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_r_theta]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_r_r]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_theta_theta]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./mech_dissip]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
 []
 
 [Functions]
@@ -121,12 +141,45 @@
     index_j = 0
     index_i = 0
   [../]
-  [./strain_r_theta]
+  [./plastic_strain_r_theta]
     type = RedbackPolarTensorMaterialAux
     variable = strain_r_theta
     rank_two_tensor = plastic_strain
     index_j = 1
     index_i = 0
+  [../]
+  [./plastic_strain_theta_theta]
+    type = RedbackPolarTensorMaterialAux
+    variable = strain_theta_theta
+    rank_two_tensor = plastic_strain
+    index_j = 1
+    index_i = 1
+  [../]
+  [./stress_r_r]
+    type = RedbackPolarTensorMaterialAux
+    variable = stress_r_r
+    rank_two_tensor = stress
+    index_j = 0
+    index_i = 0
+  [../]
+  [./stress_r_theta]
+    type = RedbackPolarTensorMaterialAux
+    variable = stress_r_theta
+    rank_two_tensor = stress
+    index_j = 1
+    index_i = 0
+  [../]
+  [./stress_theta_theta]
+    type = RedbackPolarTensorMaterialAux
+    variable = stress_theta_theta
+    rank_two_tensor = stress
+    index_j = 1
+    index_i = 1
+  [../]
+  [./mech_dissip]
+    type = MaterialRealAux
+    variable = mech_dissip
+    property = mechanical_dissipation_mech
   [../]
 []
 
@@ -226,7 +279,7 @@
 []
 
 [Postprocessors]
-  active = 'nnli max_r_theta new_timestep nli old_timestep'
+  active = 'max_r_theta new_timestep old_timestep avg_dissip disp_hole_x Num_elements'
   [./max_temp]
     type = NodalMaxValue
     variable = temperature
@@ -253,6 +306,18 @@
   [../]
   [./nnli]
     type = NumNonlinearIterations
+  [../]
+  [./avg_dissip]
+    type = ElementAverageValue
+    variable = mech_dissip
+  [../]
+  [./disp_hole_x]
+    type = PointValue
+    variable = disp_x
+    point = '0.1 0 0'
+  [../]
+  [./Num_elements]
+    type = NumElems
   [../]
 []
 

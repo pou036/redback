@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = Cylinder_hollow_noperturb_2D_Coarse.msh
+  file = Cylinder_hollow_perturb_fine_2D_smoother_dense_test.msh
   boundary_name = 'bottom top inside outside'
   boundary_id = '109 110 112 111'
   displacements = 'disp_x disp_y'
@@ -13,15 +13,15 @@
 []
 
 [MeshModifiers]
-  [./top]
-    type = AddExtraNodeset
-    new_boundary = 101
-    coord = '0 1'
-  [../]
   [./bottom]
     type = AddExtraNodeset
-    new_boundary = 102
+    new_boundary = 101
     coord = '0 -1'
+  [../]
+  [./top]
+    type = AddExtraNodeset
+    new_boundary = 102
+    coord = '0 1'
   [../]
   [./left]
     type = AddExtraNodeset
@@ -38,18 +38,23 @@
 [Variables]
   active = 'temperature disp_y disp_x porepressure damage'
   [./disp_x]
+    block = '0 1'
   [../]
   [./disp_y]
+    block = '0 1'
   [../]
   [./disp_z]
     block = 0
   [../]
   [./porepressure]
     scaling = 1E9 # Notice the scaling, to make porepressure's kernels roughly of same magnitude as disp's kernels
+    block = '0 1'
   [../]
   [./damage]
+    block = '0 1'
   [../]
   [./temperature]
+    block = '0 1'
   [../]
 []
 
@@ -57,39 +62,28 @@
   [./strain_r_r]
     order = CONSTANT
     family = MONOMIAL
+    block = '0 1'
   [../]
   [./strain_r_theta]
     order = CONSTANT
     family = MONOMIAL
-  [../]
-  [./strain_theta_theta]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_r_r]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_r_theta]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./stress_theta_theta]
-    order = CONSTANT
-    family = MONOMIAL
+    block = '0 1'
   [../]
 []
 
 [Functions]
-  active = 'timestep_function inner_pressure_fct outer_pressure_fct'
+  active = 'inner_displacement timestep_function inner_pressure_fct'
   [./temp_ic]
     type = ParsedFunction
     value = 'sqrt(x*x+y*y)/0.9 - 1/9' # -sqrt(x*x+y*y)/0.9 + 10/9
   [../]
   [./inner_pressure_fct]
-    # 1.5e-3
     type = ParsedFunction
-    value = 1e-3+4e-2*t # 1e-3+4e-2*t
+    value = 0.01+1000*t
+  [../]
+  [./inner_displacement]
+    type = ParsedFunction
+    value = 1e-3 # 1e-4+10*t
   [../]
   [./timestep_function]
     # max(1e-7,min(1e1, dt*max(0.2,1-5*(T-T_old-0.2))))
@@ -97,25 +91,24 @@
     # max(1e-7,min(1e-2, dt*max(0.1,0.1-5*(T-T_old-0.2))))
     # 
     # if(T>3.5, 1e-5, max(1e-7,min(1e-2, dt*max(0.2,1-5*(T-T_old-0.2)))))
-    # if(t>0.0169, 1e-7, if(t>0.0168, 2e-6, max(1e-7,min(1e-2, dt*max(0.2, 1-5*(T-T_old-0.2))))))
     type = ParsedFunction
-    value = 1e-3 # 5e-4
-  [../]
-  [./outer_pressure_fct]
-    type = ParsedFunction
-    value = 1e-3
+    value = 'if(t>0.04, 1e-7, max(1e-7,min(1e-2, dt*max(0.2, 1-5*(T-T_old-0.2)))))'
+    vals = 'max_temp max_temp_old old_timestep'
+    vars = 'T T_old dt'
   [../]
 []
 
 [Kernels]
-  active = 'damage_dt diff_temp dt_temp damage_kernel dp_dt mass_diff'
+  active = 'mech_dissip damage_dt Thermal_press dt_temp damage_kernel dp_dt mass_diff'
   [./dp_dt]
     type = TimeDerivative
     variable = porepressure
+    block = '0 1'
   [../]
   [./mass_diff]
     type = RedbackMassDiffusion
     variable = porepressure
+    block = '0 1'
   [../]
   [./poromech]
     type = RedbackPoromechanics
@@ -125,19 +118,22 @@
   [./damage_dt]
     type = TimeDerivative
     variable = damage
+    block = '0 1'
   [../]
   [./damage_kernel]
     type = RedbackDamage
     variable = damage
+    block = '0 1'
   [../]
   [./dt_temp]
     type = TimeDerivative
     variable = temperature
+    block = '0 1'
   [../]
   [./diff_temp]
-    type = RedbackThermalDiffusion
+    type = Diffusion
     variable = temperature
-    time_factor = 1e-3
+    block = '0 1'
   [../]
   [./mech_dissip]
     type = RedbackMechDissip
@@ -147,66 +143,35 @@
   [./Thermal_press]
     type = RedbackThermalPressurization
     variable = porepressure
+    temperature = temperature
     block = '0 1'
   [../]
 []
 
 [AuxKernels]
+  [./plastic_strain_r_r]
+    type = RedbackPolarTensorMaterialAux
+    variable = strain_r_r
+    rank_two_tensor = plastic_strain
+    index_j = 0
+    index_i = 0
+    block = '0 1'
+  [../]
   [./strain_r_theta]
     type = RedbackPolarTensorMaterialAux
     variable = strain_r_theta
     rank_two_tensor = plastic_strain
     index_j = 1
     index_i = 0
-  [../]
-  [./strain_r_r]
-    type = RedbackPolarTensorMaterialAux
-    variable = strain_r_r
-    rank_two_tensor = plastic_strain
-    index_j = 0
-    index_i = 0
-  [../]
-  [./strain_theta_theta]
-    type = RedbackPolarTensorMaterialAux
-    variable = strain_theta_theta
-    rank_two_tensor = plastic_strain
-    index_j = 1
-    index_i = 1
-  [../]
-  [./stress_r_r]
-    type = RedbackPolarTensorMaterialAux
-    variable = stress_r_r
-    rank_two_tensor = stress
-    index_j = 0
-    index_i = 0
-  [../]
-  [./stress_r_theta]
-    type = RedbackPolarTensorMaterialAux
-    variable = stress_r_theta
-    rank_two_tensor = stress
-    index_j = 1
-    index_i = 0
-  [../]
-  [./stress_theta_theta]
-    type = RedbackPolarTensorMaterialAux
-    variable = stress_theta_theta
-    rank_two_tensor = stress
-    index_j = 1
-    index_i = 1
+    block = '0 1'
   [../]
 []
 
 [BCs]
   active = 'Pressure confine_y confine_x'
   [./Pressure]
-    [./press_inner]
-      function = inner_pressure_fct
-      boundary = 0
-      disp_y = disp_y
-      disp_x = disp_x
-    [../]
-    [./press_outer]
-      function = outer_pressure_fct
+    [./myPressure]
+      function = inner_displacement
       boundary = 1
       disp_y = disp_y
       disp_x = disp_x
@@ -221,19 +186,19 @@
   [./Temp_outside]
     type = DirichletBC
     variable = temperature
-    boundary = 1
+    boundary = 0
     value = 1
   [../]
   [./fixed_outer_x]
     type = PresetBC
     variable = disp_x
-    boundary = '2 3'
+    boundary = 0
     value = 0
   [../]
   [./fixed_outer_y]
     type = PresetBC
     variable = disp_y
-    boundary = '1 2'
+    boundary = 0
     value = 0
   [../]
   [./confine_x]
@@ -254,17 +219,18 @@
   active = 'no_mech plastic_material'
   [./no_mech]
     type = RedbackMaterial
+    block = '0 1'
     disp_y = disp_y
-    disp_x = disp_x
+    disp_x = disp_y
     pore_pres = porepressure
     total_porosity = 0.1
     phi0 = 0.1
     pressurization_coefficient = 1e-7
-    gr = 20000 # 1000
+    temperature = temperature
+    gr = 1000
     ar = 10
     solid_compressibility = 1000
     is_mechanics_on = true
-    temperature = temperature
   [../]
   [./elastic_material]
     type = RedbackMechMaterialElastic
@@ -278,6 +244,7 @@
   [./plastic_material]
     # 0 0.001 0.1 0.0008
     type = RedbackMechMaterialDP
+    block = '0 1'
     disp_y = disp_y
     disp_x = disp_x
     outputs = all
@@ -286,15 +253,14 @@
     poisson_ratio = 0.25
     youngs_modulus = 100
     damage = damage
-    damage_coefficient = 3e3 # 1e4
+    damage_coefficient = 1e4
     damage_method = BrittleDamage
-    exponent = 10
     temperature = temperature
+    exponent = 10
   [../]
 []
 
 [Postprocessors]
-  active = 'nnli max_r_theta new_timestep nli old_timestep'
   [./max_temp]
     type = NodalMaxValue
     variable = temperature
@@ -374,7 +340,7 @@
 [Outputs]
   exodus = true
   execute_on = 'timestep_end initial'
-  file_base = Thermo_dmg_4
+  file_base = borehole_dmg_2D_test3_smooth_test1
 []
 
 [RedbackMechAction]
@@ -382,33 +348,23 @@
     pore_pres = porepressure
     disp_y = disp_y
     disp_x = disp_x
-    temp = temperature
   [../]
 []
 
 [ICs]
-  active = 'random_temp_ic'
+  active = 'random_dmg_ic'
   [./random_dmg_ic]
     variable = damage
     max = 0.01
     type = RandomIC
+    block = '0 1'
   [../]
   [./random_temp_ic]
-    type = RandomIC
-    variable = temperature
-    boundary = 0
-  [../]
-  [./random_dmg_test]
-    variable = damage
-    max = 0.05
-    boundary = 0
-    type = RandomIC
-  [../]
-  [./random_func_temp_ic]
     function = temp_ic
     max = 0.1
     type = FunctionWithRandomIC
     variable = temperature
+    block = '0 1'
   [../]
 []
 

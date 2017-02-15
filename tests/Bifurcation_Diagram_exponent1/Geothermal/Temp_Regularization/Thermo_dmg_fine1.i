@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = Cylinder_hollow_noperturb_2D_Coarse.msh
+  file = Cylinder_hollow_noperturb_2D_thin.msh
   boundary_name = 'bottom top inside outside'
   boundary_id = '109 110 112 111'
   displacements = 'disp_x disp_y'
@@ -16,22 +16,22 @@
   [./top]
     type = AddExtraNodeset
     new_boundary = 101
-    coord = '0 1'
+    coord = '0 0.25'
   [../]
   [./bottom]
     type = AddExtraNodeset
     new_boundary = 102
-    coord = '0 -1'
+    coord = '0 -0.25'
   [../]
   [./left]
     type = AddExtraNodeset
     new_boundary = 103
-    coord = '-1 0'
+    coord = '-0.25 0'
   [../]
   [./right]
     type = AddExtraNodeset
     new_boundary = 104
-    coord = '1 0'
+    coord = '0.25 0'
   [../]
 []
 
@@ -89,7 +89,7 @@
   [./inner_pressure_fct]
     # 1.5e-3
     type = ParsedFunction
-    value = 1e-3+4e-2*t # 1e-3+4e-2*t
+    value = 0.1+4*t # 1e-3+4e-2*t
   [../]
   [./timestep_function]
     # max(1e-7,min(1e1, dt*max(0.2,1-5*(T-T_old-0.2))))
@@ -99,16 +99,16 @@
     # if(T>3.5, 1e-5, max(1e-7,min(1e-2, dt*max(0.2,1-5*(T-T_old-0.2)))))
     # if(t>0.0169, 1e-7, if(t>0.0168, 2e-6, max(1e-7,min(1e-2, dt*max(0.2, 1-5*(T-T_old-0.2))))))
     type = ParsedFunction
-    value = 1e-3 # 5e-4
+    value = 1e-3 # 1e-3
   [../]
   [./outer_pressure_fct]
     type = ParsedFunction
-    value = 1e-3
+    value = 0.1
   [../]
 []
 
 [Kernels]
-  active = 'damage_dt diff_temp dt_temp damage_kernel dp_dt mass_diff'
+  active = 'damage_dt dt_temp damage_kernel dp_dt mass_diff'
   [./dp_dt]
     type = TimeDerivative
     variable = porepressure
@@ -260,7 +260,7 @@
     total_porosity = 0.1
     phi0 = 0.1
     pressurization_coefficient = 1e-7
-    gr = 20000 # 1000
+    gr = 1e5 # 20000
     ar = 10
     solid_compressibility = 1000
     is_mechanics_on = true
@@ -374,7 +374,7 @@
 [Outputs]
   exodus = true
   execute_on = 'timestep_end initial'
-  file_base = Thermo_dmg_4
+  file_base = Thermo_dmg_5_test
 []
 
 [RedbackMechAction]
@@ -394,6 +394,7 @@
     type = RandomIC
   [../]
   [./random_temp_ic]
+    max = 0.01
     type = RandomIC
     variable = temperature
     boundary = 0
