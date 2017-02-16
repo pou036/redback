@@ -101,8 +101,8 @@ Real
 RedbackMechMaterialDP::getDerivativeFlowIncrement(
   const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real q_yield_stress, Real p_yield_stress)
 {
-  return _flow_law_uo.derivative(sig_eqv, pressure, q_yield_stress, p_yield_stress, sig, _qp, _dt);
 
+  return _flow_law_uo.derivative(sig_eqv, pressure, q_yield_stress, p_yield_stress, sig, _qp, _dt);
   /*
   Real delta_lambda_p =
     _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
