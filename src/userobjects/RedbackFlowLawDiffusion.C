@@ -50,7 +50,6 @@ RedbackFlowLawDiffusion::value(Real sig_eqv, Real pressure, Real q_yield_stress,
   return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
 }
 
-
 Real
 RedbackFlowLawDiffusion::derivative(Real sig_eqv, Real pressure, Real q_yield_stress,
                                       Real p_yield_stress, const RankTwoTensor & sig,
@@ -78,4 +77,7 @@ RedbackFlowLawDiffusion::derivative(Real sig_eqv, Real pressure, Real q_yield_st
     std::pow(Utils::macaulayBracket(pressure - p_yield_stress), _exponent - 1.0)
     * std::pow(_grain_size[qp], _grain_size_exponent) * exponential;
   return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
+
+  // Debugging
+  //std::cout << "der_flow_incr_dev = " << der_flow_incr_dev << std::endl;
 }

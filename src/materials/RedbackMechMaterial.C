@@ -829,6 +829,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   }
 
   // Get value of epsilon_dot_diffusion for to moniter change in deformation mechanisims when grains size is on
+  // TODO: fix value function to include more that 7 values, this will include grain size
   if (_has_diffusion)
   {
     _diffusion_strain_rate[ _qp ] = _flow_law_dif_uo->value(q, p, q_y, p_y, yield_stress, _qp, _dt);
