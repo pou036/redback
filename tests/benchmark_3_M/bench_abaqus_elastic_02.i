@@ -178,8 +178,8 @@
 [Executioner]
   # Preconditioned JFNK (default)
   start_time = 0.0
-  end_time = 5
-  dtmax = 1
+  end_time = 10000
+  dtmax = 10
   dtmin = 1e-7
   type = Transient
   num_steps = 3
@@ -192,7 +192,7 @@
   line_search = basic
   [./TimeStepper]
     type = ConstantDT
-    dt = 1e-3
+    dt = 10
   [../]
 []
 
