@@ -316,6 +316,92 @@ These composite flow laws can be combined even further. For example, we know tha
 
 $\dot{\varepsilon}_{tot}=\dot{\varepsilon}_{dis}+\left(\frac{1}{\frac{1}{\dot{\varepsilon}_{dif}}+\frac{1}{\dot{\varepsilon}_{gbs}}}\right)$\\
 
+\section{Normalisation}
+\label{section:flow_normalisation}
+
+In an effort to reduce the differences in the orders of magnitudes between units for calculations, the flow laws are made dimentionless by a series of normalising operations.\\
+
+The reference units used are:\\
+
+\begin{itemize}
+\item $\sigma_{ref} = 1e^6 $ \# reference stress ($Pa$)\\
+\item $d_{ref} = 1e^{-6} $ \# reference grain size ($m$)\\
+\item $T_{ref} = 800 $ \# reference temperature ($^{\circ} C$)\\
+\item $x_{ref} = 1e^{-2} $ \# reference size, usually model size ($m$)\\
+\item $c_{th} = 800 $ \# thermal diffusivity ($m^2/s$)\\
+\item $t_{ref} = x_{ref}^2/c_{th}$ \# reference time ($s$)\\
+\end{itemize}
+
+1) Dislocation creep of form:
+
+%%% Dislocation creep flow law %%% 
+\begin{equation}
+ \label{eq:dislocation_creep}
+\dot{\varepsilon}_{dis} = A_{dis} \sigma_d^n exp^{\left(\frac{-Q_{dis}}{RT}\right)}
+\end{equation}\\
+
+Note;\\
+
+$A_{dis}$ units are MPa$^{-n}$s$^{-1}$\\
+
+Normalisation operations:
+
+$Ar_{dis} = \left(\frac{Q_{dis}\cdot1e^3}{RT_{ref}}\right)$\\
+
+$A_{dis}^* = A_{dis}\left(\sigma_{ref}\cdot1e^{-6}\right)^n t_{ref} exp^{-Ar_{dis}}$\\
+
+$T^* = \left(\frac{T-T_{ref}}{\delta T_{ref}}\right)$\\
+
+$\sigma^* = \left(\frac{\sigma_d\cdot1e^6}{\sigma_{ref}}\right)$\\
+
+Normalised flow law:
+
+%%% Normalised Dislocation creep flow law %%% 
+\begin{equation}
+ \label{eq:norm_dislocation_creep}
+\dot{\varepsilon}_{dis}^* = A_{dis}^* \sigma^{*n} exp^{\left(\frac{Ar_{dis} \delta T^*}{\left(1+\delta\right)T^*}\right)}
+\end{equation}\\
+
+2) Dislocation creep of form:
+
+\begin{equation}
+ \label{eq:dislocation_creep_renner_2002}
+\dot{\varepsilon}_{p} = A_{p} \sigma_d^2 exp^{\left(\frac{\sigma_d}{\sigma_{p}}\right)} exp^{\left(\frac{-Q_{p}}{RT}\right)}
+\end{equation}\\
+
+Where;\\
+
+$\sigma_{p} = \left(\Sigma_{p,0} + K d^{-0.5}\right) \left(T_m - T\right)$\\
+
+Note that;\\
+
+$A_{p}$ units are MPa$^{-2}$s$^{-1}$\\
+
+$\Sigma_{p,0}$ \& $K$ units are MPa kK$^{-1}$ \& MPa kK$^{-1}\mu m^{0.5}$ \\
+
+$T_m$ \& $T$ are in Kelvin for this flow law\\ 
+
+
+Normalisation operations:
+
+$Ar_{p} = \left(\frac{Q_{p}\cdot1e^3}{RT_{ref}}\right)$\\
+
+$A_{p}^* = A_{p}\left(\sigma_{ref}\cdot1e^{-6}\right)^2 t_{ref} exp^{-Ar_{p}}$\\
+
+$T^* = \left(\frac{T-T_{ref}}{\delta T_{ref}}\right)$\\
+
+$\sigma^* = \left(\frac{\sigma_d\cdot1e^6}{\sigma_{ref}}\right)$\\
+
+$\sigma_p^* =  \left(\frac{\sigma_p\cdot1e^3}{\sigma_{ref}}\right)$\\
+
+Normalised flow law:
+
+%%% Normalised Dislocation creep flow law %%% 
+\begin{equation}
+ \label{eq:norm_dislocation_creep}
+\dot{\varepsilon}_{p}^* = A_{p}^* \sigma^{*2} exp^{\left(\frac{\sigma^{*}}{\sigma_p^*}\right)} exp^{\left(\frac{Ar_{p} \delta T^*}{\left(1+\delta\right)T^*}\right)}
+\end{equation}\\
+
 
 \chapter{Grain-size sensitivity}
 \label{chapter:size_sensitivity}
