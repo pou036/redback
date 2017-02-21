@@ -73,7 +73,7 @@ RedbackFlowLawPeierlsDislocation::derivative(Real sig_eqv, Real pressure, Real q
                                       unsigned int qp, Real dt) const
 {
   // define Peierls Stress for calculation
-  peierls_stress =
+  Real peierls_stress =
     (_Sigma_p + _K_p * std::pow(_grain_size[qp],_peierls_grain_exponent)) * (_T_m - _T[ qp ]);
 
   Real exponential = RedbackFlowLawBase::computeExponentialTemperature(qp, _arrhenius);

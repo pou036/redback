@@ -77,6 +77,7 @@
 // UserObjects
 #include "RedbackFlowLawDiffusion.h"
 #include "RedbackFlowLawDislocation.h"
+#include "RedbackFlowLawPeierlsDislocation.h"
 #include "RedbackFlowLawsInParallel.h"
 #include "RedbackFlowLawsInSeries.h"
 
@@ -171,6 +172,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerUserObject(RedbackFlowLawDiffusion);
   registerUserObject(RedbackFlowLawDislocation);
+  registerUserObject(RedbackFlowLawPeierlsDislocation);
   registerUserObject(RedbackFlowLawsInParallel);
   registerUserObject(RedbackFlowLawsInSeries);
 
