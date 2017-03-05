@@ -28,7 +28,6 @@ private:
   const VariableValue & _T;
   //const VariableValue & _initial_grain_size;
   const RedbackFlowLawDislocation & _flow_law_dis_uo;
-  const RedbackFlowLawPeierlsDislocation & _flow_law_peierls_uo;
 
   const MaterialProperty<Real> & _mises_stress;
   const MaterialProperty<Real> & _mises_strain_rate;

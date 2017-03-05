@@ -2,6 +2,7 @@
 #define REDBACKFLOWLAWPEIERLSDISLOCATION_H
 
 #include "RedbackFlowLawBase.h"
+#include "RedbackFlowLawDislocation.h"
 #include "RankTwoTensor.h"
 
 class RedbackFlowLawPeierlsDislocation;
@@ -12,7 +13,7 @@ InputParameters validParams<RedbackFlowLawPeierlsDislocation>();
 /**
  * Redback user objects class for dislocation flow law
  */
-class RedbackFlowLawPeierlsDislocation : public RedbackFlowLawBase
+class RedbackFlowLawPeierlsDislocation : public RedbackFlowLawDislocation
 {
  public:
   RedbackFlowLawPeierlsDislocation(const InputParameters & parameters);

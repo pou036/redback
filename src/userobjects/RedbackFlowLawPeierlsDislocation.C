@@ -1,4 +1,5 @@
 #include "RedbackFlowLawBase.h"
+#include "RedbackFlowLawDislocation.h"
 #include "RedbackFlowLawPeierlsDislocation.h"
 #include "Utils.h"
 #include <math.h> // for M_PI
@@ -7,7 +8,7 @@ template <>
 InputParameters
 validParams<RedbackFlowLawPeierlsDislocation>()
 {
-  InputParameters params = validParams<RedbackFlowLawBase>();
+  InputParameters params = validParams<RedbackFlowLawDislocation>();
   params.addCoupledVar("temperature", 0.0, "temperature variable");
   params.addCoupledVar("grain_size", 0.0, "grain size aux variable");
   params.addParam<Real>("pre_exponential_factor", 1.0, "Value of pre-exponential factor.");
@@ -23,7 +24,7 @@ validParams<RedbackFlowLawPeierlsDislocation>()
 }
 
 RedbackFlowLawPeierlsDislocation::RedbackFlowLawPeierlsDislocation(const InputParameters& parameters) :
-    RedbackFlowLawBase(parameters),
+    RedbackFlowLawDislocation(parameters),
     _has_T(isCoupled("temperature")),
     _T(_has_T ? coupledValue("temperature") : _zero),
     _has_grain_size(isCoupled("grain_size")),
