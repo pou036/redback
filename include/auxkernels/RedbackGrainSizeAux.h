@@ -32,7 +32,6 @@ private:
   const MaterialProperty<Real> & _mises_stress;
   const MaterialProperty<Real> & _mises_strain_rate;
   const MaterialProperty<Real> & _strain_rate_dis;
-  const MaterialProperty<Real> & _strain_rate_peirels;
 
   Real _delta_param;
   Real _ar_growth_param, _growth_exponent_param, _steady_state_constant_param, _pre_exp_factor_growth;

@@ -34,7 +34,7 @@ RedbackFlowLawPeierlsDislocation::RedbackFlowLawPeierlsDislocation(const InputPa
     _arrhenius(getParam<Real>("Arrhenius")),
 
     _peierls_grain_exponent(getParam<Real>("Peierls_grain_size_exponent")),
-    _Sigma_p(getParam<Real>("_Sigma_p")),
+    _Sigma_p(getParam<Real>("Sigma_p")),
     _K_p(getParam<Real>("K_p")),
     _T_m(getParam<Real>("T_m"))
 {

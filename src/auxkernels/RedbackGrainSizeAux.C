@@ -45,7 +45,6 @@ RedbackGrainSizeAux::RedbackGrainSizeAux(const InputParameters & parameters) :
     _mises_stress(getMaterialProperty<Real>("mises_stress")),
     _mises_strain_rate(getMaterialProperty<Real>("mises_strain_rate")), // total plastic strain rate
     _strain_rate_dis(getMaterialProperty<Real>("dislocation_strain_rate")), // dislocation strain rate
-    _strain_rate_peirels(getMaterialProperty<Real>("peierls_strain_rate")), // peierls dislocation strain rate
     _delta_param(getParam<Real>("delta")),
     _ar_growth_param(getParam<Real>("Arrhenius_growth")),
     _growth_exponent_param(getParam<Real>("growth_exponent")),
