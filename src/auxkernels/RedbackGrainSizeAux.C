@@ -20,7 +20,7 @@ validParams<RedbackGrainSizeAux>()
   params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
   params.addCoupledVar("temperature", 0.0, "temperature variable");
   params.addRequiredParam<UserObjectName>("flow_law_dislocation", "Name of the user object implementing the dislocation flow law in use");
-
+  params.addRequiredParam<UserObjectName>("flow_law_peierls_dislocation", "Name of the user object implementing the peierls dislocation flow law in use");
   // Steady-State Grain Size
   params.addParam<Real>("pre_exponential_factor_ss", 6107416391.26, "Value of pre-exponential factor for steady-state grain size (A^*_{ss}.");
 
@@ -43,9 +43,11 @@ RedbackGrainSizeAux::RedbackGrainSizeAux(const InputParameters & parameters) :
     _T(_has_T ? coupledValue("temperature") : _zero),
     //_initial_grain_size(coupledValue("initial_grain_size")),
     _flow_law_dis_uo(getUserObject<RedbackFlowLawDislocation>("flow_law_dislocation")),
+    _flow_law_peierls_uo(getUserObject<RedbackFlowLawPeierlsDislocation>("flow_law_peierls_dislocation")),
     _mises_stress(getMaterialProperty<Real>("mises_stress")),
     _mises_strain_rate(getMaterialProperty<Real>("mises_strain_rate")), // total plastic strain rate
     _strain_rate_dis(getMaterialProperty<Real>("dislocation_strain_rate")), // dislocation strain rate
+    _strain_rate_peirels(getMaterialProperty<Real>("peierls_strain_rate")), // peierls dislocation strain rate
     _delta_param(getParam<Real>("delta")),
     _ar_growth_param(getParam<Real>("Arrhenius_growth")),
     _growth_exponent_param(getParam<Real>("growth_exponent")),
@@ -61,9 +63,12 @@ Real
 RedbackGrainSizeAux::computeValue()
 {
   Real grain_size = -1.0; //What does this mean?
+  Real grain_size_1 = -1.0; //What does this mean?
   if (_has_T)
   {
     Real grain_reduction_rate = 0.;
+
+
     if (_strain_rate_dis[_qp] > 0)
     {
       Real beta = _strain_rate_dis[_qp] / _mises_strain_rate[_qp];
@@ -76,17 +81,6 @@ RedbackGrainSizeAux::computeValue()
 
     // Debugging
     //std::cout << "_pre_exp_factor_growth = " << _pre_exp_factor_growth << std::endl;
-    //std::cout << "_growth_exponent_param = " << _growth_exponent_param << std::endl;
-    //std::cout << "_ar_growth_param = " << _ar_growth_param << std::endl;
-    //std::cout << "grain_reduction_rate = " << grain_reduction_rate << std::endl;
-    //std::cout << "grain_growth_rate = " << grain_growth_rate << std::endl;
-    //std::cout << "_strain_rate_dis[_qp] = " << _strain_rate_dis[_qp] << std::endl;
-    //std::cout << "_mises_strain_rate[_qp] = " << _mises_strain_rate[_qp] << std::endl;
-    //std::cout << "steady_state_grain_size = " << grain_reduction_rate << std::endl;
-    //std::cout << "target_grain_red = " << (_u_old[ _qp ] + grain_reduction_rate) << std::endl;
-    //std::cout << "_u_old[ _qp ] = " << _u_old[ _qp ] << std::endl;
-
-
 
     Real n_dis = _flow_law_dis_uo.getStressExponent();
     Real m_prime = (n_dis + 1)/ (_growth_exponent_param + 1);
@@ -102,6 +96,36 @@ RedbackGrainSizeAux::computeValue()
     else
       grain_size = steady_state_grain_size;
       //std::cout << "grain_size = " << grain_size << std::endl;
+
+    Real grain_reduction_rate_1 = 0.;
+
+    if (_strain_rate_peirels[_qp] > 0)
+    {
+      Real beta_1 = _strain_rate_peirels[_qp] / _mises_strain_rate[_qp];
+      grain_reduction_rate_1 = _pre_exp_factor_reduction * (-beta_1) * _mises_stress[ _qp ]
+        * _mises_strain_rate[ _qp ] * std::pow(_u_old[ _qp ],2);
+    }
+
+    Real grain_growth_rate_1 = _pre_exp_factor_growth * 1/_growth_exponent_param * std::pow(_u_old[ _qp ], 1 -_growth_exponent_param)
+      * std::exp(_ar_growth_param*_delta_param*_T[_qp]/(1 + _delta_param*_T[_qp]));
+
+    Real n_p = _flow_law_peierls_uo.getStressExponent();
+    Real m_prime_1 = (n_p + 1)/ (_growth_exponent_param + 1);
+    Real ar_p = _flow_law_peierls_uo.getArrhenius();
+    Real ar_ss_1 = (_ar_growth_param - ar_dis)/(_growth_exponent_param + 1);
+    Real steady_state_grain_size_1 = _A_star_ss_param
+      * std::pow(_mises_stress[ _qp ], -m_prime_1)* std::exp(ar_ss_1*_delta_param*_T[_qp]/(1 + _delta_param*_T[_qp]));
+
+    if (_u_old[ _qp ] < steady_state_grain_size_1)
+      grain_size_1 = fmin(_u_old[ _qp ] + (grain_growth_rate*_dt), steady_state_grain_size_1);
+    else if (_u_old[ _qp ] > steady_state_grain_size_1)
+      grain_size_1 = fmax(steady_state_grain_size_1, _u_old[ _qp ] + (grain_reduction_rate*_dt));
+    else
+      grain_size_1 = steady_state_grain_size_1;
+      //std::cout << "grain_size = " << grain_size << std::endl;
   }
+
   return grain_size;
+  return grain_size_1;
+
 }

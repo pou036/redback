@@ -97,6 +97,8 @@ validParams<RedbackMechMaterial>()
     "Name of the user object implementing a dislocation flow law, only used to compute grain size evolution");
   params.addParam<UserObjectName>("flow_law_diffusion",
     "Name of the user object implementing a diffusion flow law, USE TO SEE switch in deformation mechanisims");
+  params.addParam<UserObjectName>("flow_law_peierls_dislocation",
+    "Name of the user object implementing a peierls dislocation flow law, only used to compute grain size evolution");
 
   return params;
 }
@@ -138,9 +140,11 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _flow_law_uo(getUserObject<RedbackFlowLawBase>("flow_law")),
     _has_dislocation(isParamValid("flow_law_dislocation")),
     _has_diffusion(isParamValid("flow_law_diffusion")),
+    _has_peierls(isParamValid("flow_law_peierls_dislocation")),
     _flow_law_dis_uo(_has_dislocation ? &getUserObject<RedbackFlowLawDislocation>("flow_law_dislocation") : NULL),
     //_ref_pe_rate(getParam<Real>("ref_pe_rate")),
     _flow_law_dif_uo(_has_diffusion ? &getUserObject<RedbackFlowLawDiffusion>("flow_law_diffusion") : NULL),
+    _flow_law_peierls_uo(_has_peierls ? &getUserObject<RedbackFlowLawPeierlsDislocation>("flow_law_peierls_dislocation") : NULL),
     _exponent(getParam<Real>("exponent")), // TODO: still used for Gr evolution, should change...
     _chemo_mechanical_porosity_coeff(getParam<Real>("chemo_mechanical_porosity_coeff")),
 
@@ -152,6 +156,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
     _dislocation_strain_rate(declareProperty<Real>("dislocation_strain_rate")),
     _diffusion_strain_rate(declareProperty<Real>("diffusion_strain_rate")),
+    _peierls_strain_rate(declareProperty<Real>("peierls_strain_rate")),
     _volumetric_strain(declareProperty<Real>("volumetric_strain")),
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
@@ -253,6 +258,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mises_strain_rate[ _qp ] = 0;
   _dislocation_strain_rate[ _qp ] = 0;
   _diffusion_strain_rate[ _qp ] = 0;
+  _peierls_strain_rate[ _qp ] = 0;
   _volumetric_strain[ _qp ] = 0;
   _volumetric_strain_rate[ _qp ] = 0;
   _total_volumetric_strain[ _qp ] = 0;
@@ -833,6 +839,12 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   if (_has_diffusion)
   {
     _diffusion_strain_rate[ _qp ] = _flow_law_dif_uo->value(q, p, q_y, p_y, yield_stress, _qp, _dt);
+  }
+
+  // Get value of epsilon_dot_peierls_dislocation for the (optional) purpose of grain size evolution
+  if (_has_peierls)
+  {
+    _peierls_strain_rate[ _qp ] = _flow_law_peierls_uo->value(q, p, q_y, p_y, yield_stress, _qp, _dt);
   }
 
 }
