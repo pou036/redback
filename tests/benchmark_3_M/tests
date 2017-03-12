@@ -51,4 +51,15 @@
     heavy = true
     rel_err = 1e-4
   [../]
+  ## Abaqus benchmarks
+  [./test_3_M_abaqus_elastic_01] # can't put a dot in that name!
+    type = 'CSVDiff'
+    input = 'bench_abaqus_elastic_01.i'
+    csvdiff = 'bench_abaqus_elastic_01.csv'
+  [../]
+  [./test_3_M_abaqus_elastic_02] # can't put a dot in that name!
+    type = 'CSVDiff'
+    input = 'bench_abaqus_elastic_02.i'
+    csvdiff = 'bench_abaqus_elastic_02.csv'
+  [../]
 []

@@ -127,6 +127,9 @@ yaml_dump*
 
 # test garbagge
 *.FAILED.txt
+*.failed_tests
+doc/benchmarks/abaqus/input files/a
+*.odb
 
 # eclipse garbage
 .project
