@@ -279,9 +279,9 @@ else if (_plasticity_type.compare("DeBorst_2D_") == 0 ){
    g_2 = 1./3.;
    g_3 = 2./3.;
    g_4 = 0.;
-   h_1 = 1./4.;
-   h_2 = 1./4.;
-   h_3 = 1./2.;
+   h_1 = 3./4.;
+   h_2 = 3./4.;
+   h_3 = 3./2.;
    h_4 = 0.;}
 else {
   std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
@@ -306,6 +306,7 @@ PROPS2[5]=_cohesion;
 PROPS2[6]=_hardening_mech_modulus;
 PROPS2[7] = _dilatancy_coefficient;
 PROPS2[8]=0.0;
+
 
 remplSigmaOld(_strain_increment[_qp], DEFORT, 0);
 remplMomentOld(_curvature_increment[_qp], DEFORT, 0);
@@ -369,7 +370,8 @@ int l_it = system._current_l_its.size();
 
 int element_id = _current_elem->id();
 //if ((_t_step == 4) && (_dt > 0.03)&& (nl_it > 1))
-
+//if ((_t_step > 4) && (_t_step < 6))
+//std::cout <<"hardening variable is"<< SVARSGP2[2*NSTR] << std::endl;
 
 // Following is necessary because I want strain_increment to be "const"
 // but I also want to be able to subdivide an initial_stress
@@ -517,7 +519,7 @@ for (unsigned int i = 0; i < NPROPS2 ; ++i)
 while (time_simulated < 1.0 && step_size >= _min_stepsize)
 {
 
-  if (_plasticity_type.compare("DruckerPrager_friction3D_") == 0){
+/*  if (_plasticity_type.compare("DruckerPrager_friction3D_") == 0){
     usermat1_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
   }
   else if (_plasticity_type.compare("DruckerPrager_friction2D_") == 0){
@@ -535,7 +537,8 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
   else{
     std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
   }
-
+*/
+  usermat5_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
   //Real verbose = 0;
   //Real y_coord = _current_elem->centroid()(1);
   //Real x_coord = _current_elem->centroid()(0);
@@ -543,6 +546,12 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
   //  verbose = 1;
   //if (verbose == 1 && NILL != 0)std::cout << " fortran not converging******************************** " << std::endl;
 
+//    for (unsigned int i = 0; i < NSTR ; ++i){
+//for (unsigned int j = 0; j < NSTR ; ++j){
+//  char sprintf5 [50];
+//     std::sprintf(sprintf5," DSDE ( %u , %u) = %13.6e", i+1,j+1, DSDE[i*NSTR + j]);
+//     std::cout << sprintf5 <<std::endl;  
+//}}
 
   return_successful = (NILL==0);
   _iter[_qp] += 1;
@@ -577,6 +586,17 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
   else
   {
     Moose::out << "the stepsize begins to be reduced " << _iter[_qp] << std::endl;
+//    for (unsigned int i = 0; i < NSTR ; ++i){
+//for (unsigned int j = 0; j < NSTR ; ++j){
+//  char sprintf5 [50];
+//     std::sprintf(sprintf5," DSDE ( %u , %u) = %13.6e", i+1,j+1, DSDE[i*NSTR + j]);
+//     std::cout << sprintf5 <<std::endl;   
+//}}
+// for (unsigned int i = 0; i < NSTR ; ++i)
+// {  char sprintf1 [50];
+//   std::sprintf(sprintf1," STRESS (%u) = %13.6e", i+1, STRESSF[i]);
+//   std::cout << sprintf1 <<std::endl;
+// }
     step_size *= 0.5;
     num_consecutive_successes = 0;
     remplSigmaOld(_stress_old[_qp], STRESSF, 0);

@@ -89,6 +89,9 @@
 #include "RedbackTotalPorosityAux.h"
 #include "RedbackPolarTensorMaterialAux.h"
 
+//userobjects
+#include "TensorMechanicsHardeningLinear.h"
+
 template <>
 InputParameters
 validParams<RedbackApp>()
@@ -184,6 +187,8 @@ RedbackApp::registerObjects(Factory & factory)
   registerAux(RedbackDiffVarsAux);
   registerAux(RedbackTotalPorosityAux);
   registerAux(RedbackPolarTensorMaterialAux);
+  
+  registerUserObject(TensorMechanicsHardeningLinear);
 #undef registerObject
 #define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
