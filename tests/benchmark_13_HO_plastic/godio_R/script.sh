@@ -1,0 +1,1 @@
+/libre/hrattez/redback/redback-opt -i shear_plastic_80_R10_PP2.i --n-threads=12 --no-color Outputs/csv=true

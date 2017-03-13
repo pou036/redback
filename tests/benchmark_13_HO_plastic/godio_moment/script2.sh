@@ -1,0 +1,1 @@
+/libre/hrattez/redback/redback-opt -i R35_h400_notch1_mom_PP.i --n-threads=12 Outputs/csv=true
