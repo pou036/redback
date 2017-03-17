@@ -11,10 +11,15 @@
     exodiff = 'bench_TM_DP_out.e'
     rel_err = 5e-3
   [../]
-    [./test_6_TM_CC] # can't put a dot in that name!
+  [./test_6_TM_CC] # can't put a dot in that name!
     type = 'Exodiff'
     input = 'bench_TM_CC.i'
     exodiff = 'bench_TM_CC_out.e'
     rel_err = 1e-6
+  [../]
+  [./test_6_TM_thermo_elastic] # can't put a dot in that name!
+    type = 'CSVDiff'
+    input = 'thermo_elasticity.i'
+    csvdiff = 'thermo_elasticity.csv'
   [../]
 []

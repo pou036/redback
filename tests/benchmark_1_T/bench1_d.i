@@ -92,7 +92,7 @@
     block = 0
     alpha_2 = 1
     ar = 10
-    yield_stress = '0 1 1 1'
+    # yield_stress = '0 1 1 1'
     gr = 4.534e-6 # 0.1*exp(-Ar), Ar=10
     pore_pres = 0
     temperature = temp
@@ -152,4 +152,3 @@
     block = 0
   [../]
 []
-

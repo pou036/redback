@@ -54,6 +54,7 @@ private:
   const unsigned int _porepressure_var;
 
   const MaterialProperty<RealVectorValue> & _gravity_term;
+  bool _stokes;
 };
 
 #endif // REDBACKFLUIDSTRESSDIVERGENCETENSORS_H

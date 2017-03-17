@@ -8,6 +8,7 @@ os.chdir(os.path.abspath(os.path.dirname(sys.argv[0])))
 app_name = 'redback'
 
 MOOSE_DIR = os.path.abspath(os.path.join('..', 'moose'))
+
 #### See if MOOSE_DIR is already in the environment instead
 if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
@@ -16,15 +17,19 @@ sys.path.append(os.path.join(MOOSE_DIR, 'python'))
 import path_tool
 path_tool.activate_module('TestHarness')
 
+# Append error flag when running tests
+sys.argv.insert(1, "--error")
+
 from TestHarness import TestHarness
 from Tester import Tester
 
 # Run the tests!
-#TestHarness.buildAndRun(sys.argv, app_name, MOOSE_DIR)
-if '--store-timing' in sys.argv:
-  harness = TestTimer(sys.argv, app_name, MOOSE_DIR)
-else:
-  harness = TestHarness(sys.argv, app_name, MOOSE_DIR)
+TestHarness.buildAndRun(sys.argv, app_name, MOOSE_DIR)
 
-harness.factory.loadPlugins([os.path.join(os.getcwd(), 'python/TestHarness')], 'testers', Tester)
-harness.findAndRunTests()
+#if '--store-timing' in sys.argv:
+#  harness = TestTimer(sys.argv, app_name, MOOSE_DIR)
+#else:
+#  harness = TestHarness(sys.argv, app_name, MOOSE_DIR)
+
+#harness.factory.loadPlugins([os.path.join(os.getcwd(), 'python/TestHarness')], 'testers', Tester)
+#harness.findAndRunTests()

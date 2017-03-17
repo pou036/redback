@@ -350,13 +350,13 @@
 
 [Outputs]
   file_base = timestep_out
-  output_initial = true
+  # output_initial = true
   exodus = true
   csv = true
   [./console]
     type = Console
     perf_log = true
-    linear_output = false
+    # linear_output = false
   [../]
 []
 
@@ -382,4 +382,3 @@
     disp_x = disp_x
   [../]
 []
-

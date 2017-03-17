@@ -79,7 +79,7 @@
     yield_stress = '0. 1 1. 1'
     total_porosity = 0.1
     disp_z = disp_z
-    outputs = all
+    # outputs = all
   [../]
   [./mat_nomech]
     type = RedbackMaterial

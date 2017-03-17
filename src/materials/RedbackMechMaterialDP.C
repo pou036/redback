@@ -82,7 +82,9 @@ RedbackMechMaterialDP::getFlowIncrement(
   Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real yield_stress)
 {
   Real flow_incr_vol =
-    _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
+    _ref_pe_rate * _dt *
+    std::pow(macaulayBracket((pressure - p_yield_stress) * (_slope_yield_surface < 0 ? 1 : -1)), _exponent) *
+    _exponential;
   // TODO: q_yield_stress can be 0, we should handle that case properly...
   Real flow_incr_dev =
     _ref_pe_rate * _dt *
