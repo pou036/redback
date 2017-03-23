@@ -194,7 +194,7 @@ protected:
   virtual void formBrittleDamage();
   virtual void formCreepDamage(Real);
 
-  Real _damage_dissipation;
+  Real _damage_dissipation, _max_confining_pressure;
 };
 
 #endif // REDBACKMECHMATERIAL_H
