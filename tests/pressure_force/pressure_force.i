@@ -152,19 +152,16 @@
   [./small_strain]
     type = ComputePlaneSmallStrain
     block = 0
-    use_displaced_mesh = true
   [../]
   [./linear_stress]
     type = ComputeLinearElasticStress
     block = 0
-    use_displaced_mesh = true
   [../]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 0
     poissons_ratio = 0.3
     youngs_modulus = 1e4
-    use_displaced_mesh = true
   [../]
   [./fluid]
     type = RedbackFluidMaterial
