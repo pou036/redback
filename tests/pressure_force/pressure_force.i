@@ -49,36 +49,41 @@
   fluid_vel_y = vel_y
   pore_pres = p
   displacements = 'disp_x disp_y'
-  use_displaced_mesh = true
 []
 
 [Kernels]
   [./mass_fluid_divergence]
     type = RedbackFluidDivergence
     variable = p
+    use_displaced_mesh = true
   [../]
   [./stress_div_x]
     type = RedbackFluidStressDivergenceTensors
     variable = vel_x
     component = 0
+    use_displaced_mesh = true
   [../]
   [./stress_div_y]
     type = RedbackFluidStressDivergenceTensors
     variable = vel_y
     component = 1
+    use_displaced_mesh = true
   [../]
   [./TensorMechanics]
     block = 0
+    use_displaced_mesh = true
   [../]
   [./diff_x]
     type = Diffusion
     variable = disp_x
     block = 1
+    use_displaced_mesh = true
   [../]
   [./diff_y]
     type = Diffusion
     variable = disp_y
     block = 1
+    use_displaced_mesh = true
   [../]
 []
 
@@ -125,6 +130,7 @@
     boundary = 10
     component = 1
     coupled_var = p
+    use_displaced_mesh = true
   [../]
   [./p_force_x]
     type = PressureNeumannBC
@@ -132,6 +138,7 @@
     boundary = 10
     component = 0
     coupled_var = p
+    use_displaced_mesh = true
   [../]
   [./disp_top]
     type = DirichletBC
@@ -145,20 +152,24 @@
   [./small_strain]
     type = ComputePlaneSmallStrain
     block = 0
+    use_displaced_mesh = true
   [../]
   [./linear_stress]
     type = ComputeLinearElasticStress
     block = 0
+    use_displaced_mesh = true
   [../]
   [./elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     block = 0
     poissons_ratio = 0.3
     youngs_modulus = 1e4
+    use_displaced_mesh = true
   [../]
   [./fluid]
     type = RedbackFluidMaterial
     block = 1
+    use_displaced_mesh = true
   [../]
 []
 
