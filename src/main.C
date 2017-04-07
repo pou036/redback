@@ -1,8 +1,8 @@
-#include "RedbackApp.h"
-#include "MooseInit.h"
+#include "AppFactory.h"
 #include "Moose.h"
 #include "MooseApp.h"
-#include "AppFactory.h"
+#include "MooseInit.h"
+#include "RedbackApp.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("Redback");

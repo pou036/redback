@@ -450,7 +450,7 @@
 
 [Outputs]
   file_base = bench_HM_J2_out
-  output_initial = true
+  # output_initial = true
   exodus = true
   [./console]
     type = Console
@@ -480,4 +480,3 @@
     value = 0
   [../]
 []
-

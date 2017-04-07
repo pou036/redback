@@ -3,46 +3,30 @@
 [GlobalParams]
   fluid_vel_x = vel_x
   fluid_vel_y = vel_y
-  fluid_vel_z = vel_z
+  pore_pres = p
 []
 
 [Mesh]
   type = GeneratedMesh
-  dim = 3
+  dim = 2
   uniform_refine = 1
-  block_name = pore
+  block_name = pores
   block_id = 0
-  elem_type = HEX20
+  elem_type = QUAD9
 []
 
 [Variables]
   [./vel_x]
     order = SECOND
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0.0
-    [../]
   [../]
   [./vel_y]
     order = SECOND
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0.0
-    [../]
   [../]
   [./p]
-    [./InitialCondition]
-      type = ConstantIC
-      value = 0 # This number is arbitrary for NS...
-    [../]
-  [../]
-  [./vel_z]
-    order = SECOND
   [../]
 []
 
 [Kernels]
-  active = 'stress_div_y stress_div_x stress_div_z navier_x navier_y navier_z mass_fluid_divergence'
   [./mass_fluid_divergence]
     type = RedbackFluidDivergence
     variable = p
@@ -57,29 +41,6 @@
     type = RedbackFluidStressDivergenceTensors
     variable = vel_y
     component = 1
-    pore_pres = p
-  [../]
-  [./stress_div_z]
-    type = RedbackFluidStressDivergenceTensors
-    variable = vel_z
-    component = 2
-    pore_pres = p
-  [../]
-  [./dt_v_x]
-    type = TimeDerivative
-    variable = vel_x
-  [../]
-  [./dt_v_y]
-    type = TimeDerivative
-    variable = vel_y
-  [../]
-  [./dt_v_z]
-    type = TimeDerivative
-    variable = vel_z
-  [../]
-  [./dt_p]
-    type = TimeDerivative
-    variable = p
   [../]
   [./navier_x]
     type = RedbackNavier
@@ -91,18 +52,13 @@
     variable = vel_y
     component = 1
   [../]
-  [./navier_z]
-    type = RedbackNavier
-    variable = vel_z
-    component = 2
-  [../]
 []
 
 [BCs]
   [./x_no_slip]
     type = DirichletBC
     variable = vel_x
-    boundary = 'top bottom left right'
+    boundary = 'top bottom'
     value = 0.0
   [../]
   [./y_no_slip]
@@ -111,22 +67,16 @@
     boundary = 'top bottom left right'
     value = 0.0
   [../]
-  [./z_no_slip]
-    type = DirichletBC
-    variable = vel_z
-    boundary = 'top bottom left right'
-    value = 0
-  [../]
   [./lowp]
     type = DirichletBC
     variable = p
-    boundary = back
+    boundary = right
     value = 0
   [../]
   [./inlet]
     type = DirichletBC
     variable = p
-    boundary = front
+    boundary = left
     value = 1
   [../]
 []
@@ -134,42 +84,73 @@
 [Materials]
   [./fluid]
     type = RedbackFluidMaterial
-    block = pore
-    pore_pres = p
+    block = pores
   [../]
 []
 
-[Preconditioning]
-  [./SMP_PJFNK]
-    # Preconditioned JFNK (default)
-    type = SMP
-    full = true
-    solve_type = PJFNK
+[Postprocessors]
+  [./vel_avg]
+    type = ElementAverageValue
+    variable = vel_x
+  [../]
+  [./vel_max]
+    type = PointValue
+    variable = vel_x
+    point = '0.5 0.5 0'
   [../]
 []
 
 [Executioner]
-  # type = Steady
+  # This is setup automatically in MOOSE (SetupPBPAction.C)
+  # petsc_options = '-snes_mf_operator'
+  # petsc_options_iname = '-pc_type'
+  # petsc_options_value =  'asm'
   type = Steady
-  petsc_options_iname = '-ksp_gmres_restart '
-  petsc_options_value = '300                '
-  line_search = none
-  nl_rel_tol = 1e-6
-  nl_max_its = 6
-  l_tol = 1e-8
-  l_max_its = 50
-  nl_abs_tol = 1e-10
-  nl_rel_step_tol = 1e-10
-  nl_abs_step_tol = 1e-10
-  [./TimeStepper]
-    type = ConstantDT
-    dt = 0.1
+[]
+
+[Preconditioning]
+  active = 'FSP'
+  [./FSP]
+    # It is the starting point of splitting
+    type = FSP
+    petsc_options = '-ksp_converged_reason -snes_converged_reason'
+    petsc_options_iname = '-snes_type -ksp_type -ksp_rtol ksp_atol -ksp_max_it -snes_atol -snes_rtol -snes_max_it -snes_max_funcs'
+    petsc_options_value = 'newtonls     fgmres     1e-2     1e-15       200       1e-8        1e-15       200           100000'
+    topsplit = uv
+    line_search = cp
+    [./uv]
+      petsc_options_iname = '-pc_fieldsplit_schur_fact_type -pc_fieldsplit_schur_precondition'
+      petsc_options_value = 'full selfp'
+      splitting = 'u v' # 'u' and 'v'
+      splitting_type = schur
+    [../]
+    [./u]
+      # PETSc options for this subsolver
+      # A prefix will be applied, so just put the options for this subsolver only
+      vars = 'vel_x vel_y'
+      petsc_options_iname = '-pc_type -ksp_type -pc_hypre_type'
+      petsc_options_value = '  hypre    preonly     boomeramg '
+    [../]
+    [./v]
+      # PETSc options for this subsolver
+      vars = p
+      petsc_options_iname = '-pc_type -ksp_type -sub_pc_type -sub_pc_factor_levels'
+      petsc_options_value = '  jacobi  preonly        ilu            3'
+    [../]
+  [../]
+  [./asm_ilu]
+    type = SMP
+    full = true
+    solve_type = PJFNK
+    petsc_options = '-ksp_converged_reason -snes_converged_reason' #-snes_monitor -snes_linesearch_monitor -ksp_monitor'
+    petsc_options_iname = '-ksp_type -pc_type  -snes_atol -snes_rtol -snes_max_it -ksp_max_it -ksp_atol -sub_pc_type -sub_pc_factor_shift_type'
+    petsc_options_value = 'gmres        asm        1E-8      1E-15        200        100         1e-8        lu                   NONZERO'
   [../]
 []
 
 [Outputs]
   file_base = NSRedback_test
-  csv = true
   exodus = true
+  csv = true
 []
 

@@ -15,8 +15,8 @@
 #ifndef REDBACKMECHDISSIP_H
 #define REDBACKMECHDISSIP_H
 
-#include "RankTwoTensor.h"
 #include "Kernel.h"
+#include "RankTwoTensor.h"
 
 class RedbackMechDissip;
 

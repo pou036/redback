@@ -36,7 +36,7 @@ protected:
   const MaterialProperty<Real> & _div_fluid_kernel;
 
 private:
-  Real _time_factor;
+  // Real _time_factor;
 
   // Variable numberings
   unsigned _x_vel_var_number;

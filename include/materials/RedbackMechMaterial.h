@@ -16,8 +16,8 @@
 #define REDBACKMECHMATERIAL_H
 
 #include "Material.h"
-#include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "RankTwoTensor.h"
 #include "RotationTensor.h"
 //#include "FiniteStrainPlasticMaterial.h"
 
@@ -98,6 +98,11 @@ protected:
   MaterialProperty<Real> & _eqv_plastic_strain;
   MaterialProperty<Real> & _eqv_plastic_strain_old;
 
+  /// J-integral implementation
+    MaterialProperty<Real> & _SED;
+    MaterialProperty<Real> & _SED_old;
+    MaterialProperty<RankTwoTensor> & _Eshelby_tensor;
+
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
   // yield_stress);
   Real getSigEqv(const RankTwoTensor & stress);
@@ -166,6 +171,12 @@ protected:
   const VariableValue & _damage;
   const VariableValue & _damage_old;
 
+  const bool _compute_JIntegral;
+  //These are used in calculation of the J integral
+    // MaterialProperty<Real> * _SED;
+    // MaterialProperty<Real> * _SED_old;
+    // MaterialProperty<RankTwoTensor> * _Eshelby_tensor;
+
   DamageMethod _damage_method;
 
   // Reading material properties from RedbackMaterial
@@ -193,6 +204,11 @@ protected:
   virtual void formDamageDissipation(RankTwoTensor &);
   virtual void formBrittleDamage();
   virtual void formCreepDamage(Real);
+
+  // Compute strain energy density, used in Eshelby tensor calculation
+  // virtual void computeStrainEnergyDensity();
+  // Compute Eshelby tensor, used in J Integral calculation
+  // virtual void computeEshelby();
 
   Real _damage_dissipation;
 };
