@@ -39,6 +39,7 @@ validParams<RedbackMechMaterialHO>()
   params.addParam<Real>("dilatancy_coefficient", 0, "Dilatancy coefficient");
   params.addParam<Real>("hardening_mech_modulus", 0, " mechanical hardening parameter value");
   params.addParam<Real>("beta_star", 0, " storage capacity in the fluid mass balance");
+  params.addParam<Real>("tolerance_tau", 1E-5, " tolerance added in the plastic strain invariant to have a better convergence in plasticity");
   MooseEnum fm = RankFourTensor::fillMethodEnum();
   fm = "general_isotropic";
   params.addParam<MooseEnum>("fill_method_bending", fm, "The fill method for the 'bending' tensor.");
@@ -112,7 +113,8 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _friction_coefficient(getParam<Real>("friction_coefficient")),
     _dilatancy_coefficient(getParam<Real>("dilatancy_coefficient")),
     _hardening_mech_modulus(getParam<Real>("hardening_mech_modulus")),
-    _beta_star(getParam<Real>("beta_star"))
+    _beta_star(getParam<Real>("beta_star")),
+    _tolerance_tau(getParam<Real>("tolerance_tau"))
 {
   _Bijkl.fillFromInputVector(_Bijkl_vector, (RankFourTensor::FillMethod)(int)_fill_method_bending);
   _shear_modulus = _Cijkl_vector[ 1 ];
@@ -218,7 +220,7 @@ RedbackMechMaterialHO::computeQpStress()
   //  _plastic_potential_multiplier = std::exp(-_ar[ _qp ]) * std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
   //}
 
-int NPROPS = 9;
+int NPROPS = 19;
 int NSTR = 18;
 int NILL = 1;
 int NSVARSGP = 76;
@@ -255,6 +257,7 @@ Real h_1;
 Real h_2;
 Real h_3;
 Real h_4;
+Real plast;
 
 if (_plasticity_type.compare("DruckerPrager_cohesion3D_") == 0 || _plasticity_type.compare("DruckerPrager_friction3D_") == 0 ){
    g_1 = 8./5.;
@@ -287,6 +290,14 @@ else {
   std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
 }
 
+if (_plasticity_type.compare("DruckerPrager_cohesion3D_") == 0 || _plasticity_type.compare("DruckerPrager_cohesion2D_") == 0 || _plasticity_type.compare("DeBorst_2D_") == 0 ){
+plast = 0.;}
+else if (_plasticity_type.compare("DruckerPrager_friction3D_") == 0 || _plasticity_type.compare("DruckerPrager_friction2D_") == 0 ){
+plast = 1.;}
+else {
+  std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
+}
+
 PROPS[0]=_bulk_modulus;
 PROPS[1]=_shear_modulus;
 PROPS[2]=_cosserat_shear_modulus;
@@ -296,6 +307,16 @@ PROPS[5]=_cohesion;
 PROPS[6]=_hardening_mech_modulus;
 PROPS[7] = _dilatancy_coefficient;
 PROPS[8]=0.0;
+PROPS[9]=h_1;
+PROPS[10]=h_2;
+PROPS[11]=h_3;
+PROPS[12]=h_4;
+PROPS[13]=g_1;
+PROPS[14]=g_2;
+PROPS[15]=g_3;
+PROPS[16]=g_4;
+PROPS[17]=plast;
+PROPS[18]=_tolerance_tau;
 
 PROPS2[0]=_bulk_modulus;
 PROPS2[1]=_shear_modulus;
@@ -306,6 +327,16 @@ PROPS2[5]=_cohesion;
 PROPS2[6]=_hardening_mech_modulus;
 PROPS2[7] = _dilatancy_coefficient;
 PROPS2[8]=0.0;
+PROPS2[9]=h_1;
+PROPS2[10]=h_2;
+PROPS2[11]=h_3;
+PROPS2[12]=h_4;
+PROPS2[13]=g_1;
+PROPS2[14]=g_2;
+PROPS2[15]=g_3;
+PROPS2[16]=g_4;
+PROPS2[17]=plast;
+PROPS2[18]=_tolerance_tau;
 
 
 remplSigmaOld(_strain_increment[_qp], DEFORT, 0);
@@ -378,6 +409,7 @@ int element_id = _current_elem->id();
 RankTwoTensor this_strain_increment = _strain_increment[_qp];
 RankTwoTensor this_curvature_increment = _curvature_increment[_qp];
 
+/*
 if (_plasticity_type.compare("DruckerPrager_friction3D_") == 0){
   usermat1_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
 }
@@ -453,14 +485,11 @@ for (unsigned int i = 0; i < NPROPS2 ; ++i)
 throw MooseException("MooseException due to the non convergence of the subroutine");
 //mooseError("Exiting\n");
 }
+*/
 
-
-
-/*
 
 while (time_simulated < 1.0 && step_size >= _min_stepsize)
 {
-
 /*  if (_plasticity_type.compare("DruckerPrager_friction3D_") == 0){
     usermat1_(STRESSF,DEFORT,DSDE,&NSTR,PROPS,&NPROPS,SVARSGP,&NSVARSGP,&NILL);
   }
@@ -527,6 +556,7 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
   }
   else
   {
+    throw MooseException("Bad thing");
     Moose::out << "the stepsize begins to be reduced " << _iter[_qp] << std::endl;
 //    for (unsigned int i = 0; i < NSTR ; ++i){
 //for (unsigned int j = 0; j < NSTR ; ++j){
@@ -585,8 +615,6 @@ if (!return_successful)
     mooseError("Exiting\n");
   }
 }
-
-*/
 
 
 recupSigmaNew(_stress[_qp], STRESSF, 0);
@@ -878,7 +906,7 @@ RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p
   instantaneous_strain_rate *= _plastic_potential_multiplier;
   instantaneous_curvature_rate *= _plastic_potential_multiplier;
 
-  _mechanical_dissipation_mech[ _qp ] =  sig.doubleContraction(instantaneous_strain_rate) +
+  _mechanical_dissipation_mech[ _qp ] = _stress[_qp].doubleContraction(instantaneous_strain_rate) +
                                       _stress_couple[_qp].doubleContraction(instantaneous_curvature_rate) ;
   _mechanical_dissipation_mech[ _qp ] *= _gr[ _qp ];
 
@@ -900,7 +928,7 @@ RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p
 
   //Compute terms for the RedbackPoroHO
   Real instantaneous_vol_strain_rate;
-  instantaneous_vol_strain_rate = (_plastic_strain[ _qp ].trace() - _plastic_strain_old[ _qp ].trace()) / _dt;
+  instantaneous_vol_strain_rate = (_total_strain[ _qp ].trace() - _total_strain_old[ _qp ].trace()) / _dt;
  _poromech_kernel[ _qp ] = instantaneous_vol_strain_rate / _beta_star;
  _poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
 

@@ -86,6 +86,7 @@ validParams<RedbackMaterial>()
                                     "chemistry contributing to porosity (see "
                                     "documentation)");
   params.addParam<Real>("pressurization_coefficient", 0, "Pressurization coefficient (Lambda).");
+  params.addParam<Real>("thermal_diffusivity", 1, "thermal diffusivity (cth) for the case of dimensional equations");
   params.addParam<Real>("Peclet_number", 1, "Peclet number");
 
   params.addParam<Real>("solid_compressibility",
@@ -159,6 +160,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _eta2_param(getParam<Real>("eta2")),
     _Aphi_param(getParam<Real>("Aphi")),
     _pressurization_coefficient_param(getParam<Real>("pressurization_coefficient")),
+    _thermal_diffusivity_param(getParam<Real>("thermal_diffusivity")),
 
     _solid_compressibility_param(getParam<Real>("solid_compressibility")),
     _fluid_compressibility_param(getParam<Real>("fluid_compressibility")),
@@ -235,6 +237,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
 
     _pressurization_coefficient(declareProperty<Real>("pressurization_coefficient")),
+    _thermal_diffusivity(declareProperty<Real>("thermal_diffusivity")),
 
     _grad_temp(coupledGradient("temperature")),
     _grad_pore_pressure(coupledGradient("pore_pres")),
@@ -395,6 +398,7 @@ RedbackMaterial::stepInitQpProperties()
   _ar_R[ _qp ] = _ar_R_param;
   _mu[ _qp ] = _mu_param;
   _pressurization_coefficient[ _qp ] = _pressurization_coefficient_param;
+  _thermal_diffusivity[ _qp ] = _thermal_diffusivity_param;
   _solid_compressibility[ _qp ] = _solid_compressibility_param;
   _fluid_compressibility[ _qp ] = _fluid_compressibility_param;
   _solid_thermal_expansion[ _qp ] = _solid_thermal_expansion_param;

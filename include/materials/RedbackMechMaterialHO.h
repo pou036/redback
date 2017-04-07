@@ -143,7 +143,7 @@ private:
   /// determines the translation from B_ijkl to the Rank-4 tensor
   MooseEnum _fill_method_bending;
   
-  Real _cohesion, _friction_coefficient, _dilatancy_coefficient, _hardening_mech_modulus, _beta_star;
+  Real _cohesion, _friction_coefficient, _dilatancy_coefficient, _hardening_mech_modulus, _beta_star, _tolerance_tau;
   Real _shear_modulus, _bulk_modulus, _cosserat_shear_modulus, _cosserat_radius;
   Real _plastic_potential_multiplier;
 };

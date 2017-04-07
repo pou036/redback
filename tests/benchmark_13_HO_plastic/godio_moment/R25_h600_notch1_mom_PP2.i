@@ -4755,29 +4755,29 @@
   [./Periodic]
     [./x_direction]
       variable = 'disp_x disp_y disp_z wc_x wc_y wc_z'
-      translation = '60 0 0'
+      translation = '120 0 0'
       secondary = right_top
       primary = left_top
     [../]
     [./z_direction]
       variable = 'disp_x disp_y disp_z wc_x wc_y wc_z'
-      translation = '0 0 -60'
+      translation = '0 0 -120'
       secondary = back
       primary = front
     [../]
     [./x_direction_2]
-      translation = '60 0 0'
+      translation = '120 0 0'
       secondary = right_bot
       primary = left_bot
     [../]
     [./x_direction_3]
-      translation = '58 0 0'
+      translation = '118 0 0'
       secondary = right_mid
       primary = left_mid
     [../]
 	[./y_direction]
       variable = 'wc_z'
-      translation = '0 -60 0'
+      translation = '0 -120 0'
       secondary = bottom
       primary = top
     [../]
@@ -4878,7 +4878,7 @@
 [Outputs]
   execute_on = 'timestep_end initial'
   exodus = true
-  file_base = plastic_shear_R25_Hs600_h120_not1_mom 
+  file_base = plastic_shear_R25_Hs600_h120_test 
   print_linear_residuals = false
 []
 

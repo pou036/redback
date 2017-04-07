@@ -4878,7 +4878,7 @@
 [Outputs]
   execute_on = 'timestep_end initial'
   exodus = true
-  file_base = plastic_shear_R15_h120_not1_mom 
+  file_base = plastic_shear_R15_h120_not1_test
   print_linear_residuals = false
 []
 

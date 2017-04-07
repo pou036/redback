@@ -220,17 +220,17 @@
     base_name = coupled
   [../]
   [./x_moment]
-    type = MomentBalancing
+    type = RedbackMomentBalancing
     variable = wc_x
     component = 0
   [../]
   [./y_moment]
-    type = MomentBalancing
+    type = RedbackMomentBalancing
     variable = wc_y
     component = 1
   [../]
   [./z_moment]
-    type = MomentBalancing
+    type = RedbackMomentBalancing
     variable = wc_z
     component = 2
   [../]

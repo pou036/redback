@@ -1,145 +1,15 @@
+# A thermal loading of an elastic rod
+# 
+
 [Mesh]
   type = GeneratedMesh
   dim = 3
-  nx = 20
-  ny = 40
-  nz = 20
-  ymax = 2
-[]
-
-[GlobalParams]
-  disp_z = disp_z
-  disp_y = disp_y
-  disp_x = disp_x
-  wc_z = wc_z
-  wc_y = wc_y
-  wc_x = wc_x
-[]
-
-[Postprocessors]
-  active = 'Rotation_wcz_0_7 Rotation_wcz_0_6 Rotation_wcz_0_5 Rotation_wcz_0_4 Rotation_wcz_0_3 Rotation_wcz_0_2 Rotation_wcz_0_1 Rotation_wcz_0_9 Rotation_wcz_0_8 Displ_u_x_0_8 Displ_u_x_0_9 Displ_u_x_0_1 Displ_u_x_0_2 Displ_u_x_0_3 Displ_u_x_0_4 Displ_u_x_0_5 Displ_u_x_0_6 Displ_u_x_0_7 disp_y_top disp_x_top wc_z_top force nb_nli nb_li'
-  [./disp_y_top]
-    type = PointValue
-    point = '0.5 1 0.1'
-    variable = disp_y
-  [../]
-  [./disp_x_top]
-    type = PointValue
-    point = '0.5 1 0.1'
-    variable = disp_x
-  [../]
-  [./wc_z_top]
-    type = PointValue
-    point = '0.5 1 0.1'
-    variable = wc_z
-  [../]
-  [./antisymmetric_pp]
-    type = SideAverageValue
-    variable = antisymmetric_strain_bc
-    boundary = bottom
-  [../]
-  [./Rotation_wcz_0_9]
-    type = PointValue
-    variable = wc_z
-    point = '0.5 0.9 0.5'
-  [../]
-  [./Rotation_wcz_0_8]
-    type = PointValue
-    variable = wc_z
-    point = '0.5 0.8 0.5'
-  [../]
-  [./Rotation_wcz_0_7]
-    type = PointValue
-    variable = wc_z
-    point = '0.5 0.7 0.5'
-  [../]
-  [./Rotation_wcz_0_6]
-    type = PointValue
-    variable = wc_z
-    point = '0.5 0.6 0.5'
-  [../]
-  [./Rotation_wcz_0_5]
-    type = PointValue
-    variable = wc_z
-    point = '0.5 0.5 0.5'
-  [../]
-  [./Rotation_wcz_0_4]
-    type = PointValue
-    variable = wc_z
-    point = '0.5 0.4 0.5'
-  [../]
-  [./Rotation_wcz_0_3]
-    type = PointValue
-    variable = wc_z
-    point = '0.5 0.3 0.5'
-  [../]
-  [./Rotation_wcz_0_2]
-    type = PointValue
-    variable = wc_z
-    point = '0.5 0.2 0.5'
-  [../]
-  [./Rotation_wcz_0_1]
-    type = PointValue
-    variable = wc_z
-    point = '0.5 0.1 0.5'
-  [../]
-  [./Displ_u_x_0_9]
-    type = PointValue
-    variable = wc_z
-    point = '0.5 0.9 0.5'
-  [../]
-  [./Displ_u_x_0_8]
-    type = PointValue
-    variable = disp_x
-    point = '0.5 0.8 0.5'
-  [../]
-  [./Displ_u_x_0_7]
-    type = PointValue
-    variable = disp_x
-    point = '0.5 0.7 0.5'
-  [../]
-  [./Displ_u_x_0_6]
-    type = PointValue
-    variable = disp_x
-    point = '0.5 0.6 0.5'
-  [../]
-  [./Displ_u_x_0_5]
-    type = PointValue
-    variable = disp_x
-    point = '0.5 0.5 0.5'
-  [../]
-  [./Displ_u_x_0_4]
-    type = PointValue
-    variable = disp_x
-    point = '0.5 0.4 0.5'
-  [../]
-  [./Displ_u_x_0_3]
-    type = PointValue
-    variable = disp_x
-    point = '0.5 0.3 0.5'
-  [../]
-  [./Displ_u_x_0_2]
-    type = PointValue
-    variable = disp_x
-    point = '0.5 0.2 0.5'
-  [../]
-  [./Displ_u_x_0_1]
-    type = PointValue
-    variable = disp_x
-    point = '0.5 0.1 0.5'
-  [../]
-  [./force]
-    type = SideAverageValue
-    variable = stress_22
-    execute_on = linear
-    boundary = top
-  [../]
-  [./nb_nli]
-    type = NumNonlinearIterations
-  [../]
-  [./nb_li]
-    type = NumLinearIterations
-  [../]
+  xmin = -0.5
+  xmax = 0.5
+  ymin = -0.5
+  ymax = 0.5
+  zmin = -5
+  zmax = 5
 []
 
 [Variables]
@@ -155,22 +25,85 @@
   [../]
   [./wc_z]
   [../]
-  [./temperature]
+  [./temp]
+  [../]
+[]
+
+[GlobalParams]
+  disp_z = disp_z
+  disp_y = disp_y
+  disp_x = disp_x
+  wc_z = wc_z
+  wc_y = wc_y
+  wc_x = wc_x
+  temperature = temp
+  temp = temp
+[]
+
+[Materials]
+  [./mat_mech]
+    type = RedbackMechMaterialHO
+    block = 0
+    exponent = 0
+    fill_method = general_isotropic
+    B_ijkl = '1 1 1'
+    cohesion = 0.01
+    C_ijkl = '1 1.5 0.75'
+    plasticity_type = DeBorst_2D
+  [../]
+  [./mat_nomech]
+    # 3.7037
+    type = RedbackMaterial
+    block = 0
+    eta1 = 0
+    gr = 0
+    total_porosity = 0.1
+    Peclet_number = 10
+    solid_density = 0
+    confining_pressure = 0
+    delta = 0
+    fluid_density = 0
+    eta2 = 0
+    solid_compressibility = 0 # 1/(0.9*0.3)
+    solid_thermal_expansion = 2.5E-3
+  [../]
+[]
+
+[BCs]
+  active = 'basefixed_z confinex confiney temperature_back'
+  [./confinex]
+    type = PresetBC
+    variable = disp_x
+    boundary = 'left right'
+    value = 0
+  [../]
+  [./confiney]
+    type = PresetBC
+    variable = disp_y
+    value = 0
+    boundary = 'bottom top'
+  [../]
+  [./basefixed_z]
+    type = PresetBC
+    variable = disp_z
+    boundary = back
+    value = 0
+  [../]
+  [./temperature_back]
+    type = FunctionDirichletBC
+    variable = temp
+    boundary = back
+    function = 1
+  [../]
+  [./Temperature_front]
+    type = FunctionDirichletBC
+    variable = temp
+    boundary = front
+    function = 0
   [../]
 []
 
 [AuxVariables]
-  [./stress_22]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
-  [./epsilon_22]
-    family = MONOMIAL
-  [../]
-  [./epsilon_11]
-    order = CONSTANT
-    family = MONOMIAL
-  [../]
   [./plastic_strain]
     order = CONSTANT
     family = MONOMIAL
@@ -179,21 +112,188 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./mech_dissip]
+  [./ecroui]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./failure]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./lagrange]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_22]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_33]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_12]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_21]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_23]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_32]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_13]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./stress_31]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./couple_stress_32]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./couple_stress_23]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./epsilon_11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./epsilon_22]
+    family = MONOMIAL
+  [../]
+  [./strain_12]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./strain_21]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./macro_rot]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_22]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_12]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_21]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_cur_11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_cur_22]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_cur_33]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_cur_12]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_cur_21]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_cur_32]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_cur_23]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_cur_31]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./plastic_cur_13]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./elastic_strain_11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./elastic_strain_22]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./elastic_strain_33]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./elastic_strain_12]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./elastic_strain_21]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./elastic_strain_32]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./elastic_strain_23]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./elastic_strain_31]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./elastic_strain_13]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./elastic_curvature_23]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./elastic_curvature_32]
     order = CONSTANT
     family = MONOMIAL
   [../]
 []
 
-[Functions]
-  [./ramp]
-    type = ParsedFunction
-    value = -0.001*t
-  [../]
-[]
-
 [Kernels]
-  active = 'x_couple cz_elastic cy_elastic cx_elastic y_moment z_couple x_moment y_couple z_moment dT_dt temp_dissip'
+  [./td_temp]
+    type = TimeDerivative
+    variable = temp
+  [../]
+  [./temp_diff]
+    type = Diffusion
+    variable = temp
+  [../]
   [./cx_elastic]
     type = RedbackCosseratStressDivergenceTensors
     variable = disp_x
@@ -221,6 +321,9 @@
     wc_z = disp_z
     component = 0
     base_name = coupled
+    disp_z = wc_y
+    disp_y = wc_y
+    disp_x = wc_x
   [../]
   [./y_couple]
     type = RedbackCosseratStressDivergenceTensors
@@ -231,6 +334,9 @@
     wc_y = disp_y
     wc_z = disp_z
     base_name = coupled
+    disp_z = wc_z
+    disp_y = wc_y
+    disp_x = wc_x
   [../]
   [./z_couple]
     type = RedbackCosseratStressDivergenceTensors
@@ -241,58 +347,28 @@
     wc_y = disp_y
     wc_z = disp_z
     base_name = coupled
+    disp_z = wc_z
+    disp_y = wc_y
+    disp_x = wc_x
   [../]
   [./x_moment]
-    type = MomentBalancing
+    type = RedbackMomentBalancing
     variable = wc_x
     component = 0
   [../]
   [./y_moment]
-    type = MomentBalancing
+    type = RedbackMomentBalancing
     variable = wc_y
     component = 1
   [../]
   [./z_moment]
-    type = MomentBalancing
+    type = RedbackMomentBalancing
     variable = wc_z
     component = 2
-  [../]
-  [./dT_dt]
-    type = TimeDerivative
-    variable = temperature
-  [../]
-  [./diff_T]
-    type = RedbackThermalDiffusion
-    variable = temperature
-  [../]
-  [./temp_dissip]
-    type = RedbackMechDissip
-    variable = temperature
   [../]
 []
 
 [AuxKernels]
-  [./stress_22]
-    type = RankTwoAux
-    variable = stress_22
-    rank_two_tensor = stress
-    index_j = 1
-    index_i = 1
-  [../]
-  [./epsilon_22]
-    type = RankTwoAux
-    variable = epsilon_22
-    rank_two_tensor = elastic_strain
-    index_j = 1
-    index_i = 1
-  [../]
-  [./epsilon_11]
-    type = RankTwoAux
-    variable = epsilon_11
-    rank_two_tensor = elastic_strain
-    index_j = 0
-    index_i = 0
-  [../]
   [./plastic_strain]
     type = MaterialRealAux
     variable = plastic_strain
@@ -303,200 +379,367 @@
     variable = stress_invariant
     property = stress_invariant
   [../]
-  [./mech_dissip]
+  [./ecroui_param]
     type = MaterialRealAux
-    variable = mech_dissip
-    property = mechanical_dissipation_mech
+    variable = ecroui
+    property = hardening_variable
+  [../]
+  [./failure_surf]
+    type = MaterialRealAux
+    variable = failure
+    property = failure_surface
+  [../]
+  [./lagrange_mult]
+    type = MaterialRealAux
+    variable = lagrange
+    property = lagrange_multiplier
+    execute_on = timestep_end
+  [../]
+  [./stress_11]
+    type = RankTwoAux
+    variable = stress_11
+    rank_two_tensor = stress
+    index_j = 0
+    index_i = 0
+  [../]
+  [./stress_22]
+    type = RankTwoAux
+    variable = stress_22
+    rank_two_tensor = stress
+    index_j = 1
+    index_i = 1
+  [../]
+  [./stress_33]
+    type = RankTwoAux
+    variable = stress_33
+    rank_two_tensor = stress
+    index_j = 2
+    index_i = 2
+  [../]
+  [./stress_12]
+    type = RankTwoAux
+    variable = stress_12
+    rank_two_tensor = stress
+    index_j = 1
+    index_i = 0
+  [../]
+  [./stress_21]
+    type = RankTwoAux
+    variable = stress_21
+    rank_two_tensor = stress
+    index_j = 0
+    index_i = 1
+  [../]
+  [./stress_23]
+    type = RankTwoAux
+    variable = stress_23
+    rank_two_tensor = stress
+    index_j = 2
+    index_i = 1
+  [../]
+  [./stress_32]
+    type = RankTwoAux
+    variable = stress_32
+    rank_two_tensor = stress
+    index_j = 1
+    index_i = 2
+  [../]
+  [./stress_31]
+    type = RankTwoAux
+    variable = stress_31
+    rank_two_tensor = stress
+    index_j = 0
+    index_i = 2
+  [../]
+  [./stress_13]
+    type = RankTwoAux
+    variable = stress_13
+    rank_two_tensor = stress
+    index_j = 2
+    index_i = 0
+  [../]
+  [./couple_stress_32]
+    type = RankTwoAux
+    variable = couple_stress_32
+    rank_two_tensor = coupled_stress
+    index_j = 1
+    index_i = 2
+    execute_on = nonlinear
+  [../]
+  [./couple_stress_23]
+    type = RankTwoAux
+    variable = couple_stress_23
+    rank_two_tensor = coupled_stress
+    index_j = 2
+    index_i = 1
+    execute_on = nonlinear
+  [../]
+  [./epsilon_11]
+    type = RankTwoAux
+    variable = epsilon_11
+    rank_two_tensor = elastic_strain
+    index_j = 0
+    index_i = 0
+  [../]
+  [./epsilon_22]
+    type = RankTwoAux
+    variable = epsilon_22
+    rank_two_tensor = elastic_strain
+    index_j = 1
+    index_i = 1
+  [../]
+  [./strain_12]
+    type = RankTwoAux
+    variable = strain_12
+    rank_two_tensor = total_strain
+    index_j = 1
+    index_i = 0
+  [../]
+  [./strain_21]
+    type = RankTwoAux
+    variable = strain_21
+    rank_two_tensor = total_strain
+    index_j = 0
+    index_i = 1
+  [../]
+  [./antisymmetric_strain]
+    type = RankTwoAux
+    variable = macro_rot
+    rank_two_tensor = macro_rotation
+    index_j = 1
+    index_i = 0
+    execute_on = linear
+  [../]
+  [./plastic_xx]
+    type = RankTwoAux
+    variable = plastic_11
+    rank_two_tensor = plastic_strain
+    index_j = 0
+    index_i = 0
+  [../]
+  [./plastic_yy]
+    type = RankTwoAux
+    variable = plastic_22
+    rank_two_tensor = plastic_strain
+    index_j = 1
+    index_i = 1
+  [../]
+  [./plastic_xy]
+    type = RankTwoAux
+    variable = plastic_12
+    rank_two_tensor = plastic_strain
+    index_j = 1
+    index_i = 0
+  [../]
+  [./plastic_yx]
+    type = RankTwoAux
+    variable = plastic_21
+    rank_two_tensor = plastic_strain
+    index_j = 0
+    index_i = 1
+  [../]
+  [./plastic_curv_11]
+    type = RankTwoAux
+    variable = plastic_cur_11
+    rank_two_tensor = plastic_curvature
+    index_j = 0
+    index_i = 0
+  [../]
+  [./plastic_curv_22]
+    type = RankTwoAux
+    variable = plastic_cur_22
+    rank_two_tensor = plastic_curvature
+    index_j = 1
+    index_i = 1
+  [../]
+  [./plastic_curv_33]
+    type = RankTwoAux
+    variable = plastic_cur_33
+    rank_two_tensor = plastic_curvature
+    index_j = 2
+    index_i = 2
+  [../]
+  [./plastic_curv_12]
+    type = RankTwoAux
+    variable = plastic_cur_12
+    rank_two_tensor = plastic_curvature
+    index_j = 1
+    index_i = 0
+  [../]
+  [./plastic_curv_21]
+    type = RankTwoAux
+    variable = plastic_cur_21
+    rank_two_tensor = plastic_curvature
+    index_j = 0
+    index_i = 1
+  [../]
+  [./plastic_curv_32]
+    type = RankTwoAux
+    variable = plastic_cur_32
+    rank_two_tensor = plastic_curvature
+    index_j = 1
+    index_i = 2
+  [../]
+  [./plastic_curv_23]
+    type = RankTwoAux
+    variable = plastic_cur_23
+    rank_two_tensor = plastic_curvature
+    index_j = 2
+    index_i = 1
+  [../]
+  [./plastic_curv_31]
+    type = RankTwoAux
+    variable = plastic_cur_31
+    rank_two_tensor = plastic_curvature
+    index_j = 0
+    index_i = 2
+  [../]
+  [./plastic_curv_13]
+    type = RankTwoAux
+    variable = plastic_cur_13
+    rank_two_tensor = plastic_curvature
+    index_j = 2
+    index_i = 0
+  [../]
+  [./elastic_strain_11]
+    type = RankTwoAux
+    variable = elastic_strain_11
+    rank_two_tensor = elastic_strain
+    index_j = 0
+    index_i = 0
+  [../]
+  [./elastic_strain_22]
+    type = RankTwoAux
+    variable = elastic_strain_22
+    rank_two_tensor = elastic_strain
+    index_j = 1
+    index_i = 1
+  [../]
+  [./elastic_strain_33]
+    type = RankTwoAux
+    variable = elastic_strain_33
+    rank_two_tensor = elastic_strain
+    index_j = 2
+    index_i = 2
+  [../]
+  [./elastic_strain_12]
+    type = RankTwoAux
+    variable = elastic_strain_12
+    rank_two_tensor = elastic_strain
+    index_j = 1
+    index_i = 0
+  [../]
+  [./elastic_strain_21]
+    type = RankTwoAux
+    variable = elastic_strain_21
+    rank_two_tensor = elastic_strain
+    index_j = 0
+    index_i = 1
+  [../]
+  [./elastic_strain_32]
+    type = RankTwoAux
+    variable = elastic_strain_32
+    rank_two_tensor = elastic_strain
+    index_j = 1
+    index_i = 2
+  [../]
+  [./elastic_strain_23]
+    type = RankTwoAux
+    variable = elastic_strain_23
+    rank_two_tensor = elastic_strain
+    index_j = 2
+    index_i = 1
+  [../]
+  [./elastic_strain_31]
+    type = RankTwoAux
+    variable = elastic_strain_31
+    rank_two_tensor = elastic_strain
+    index_j = 0
+    index_i = 2
+  [../]
+  [./elastic_strain_13]
+    type = RankTwoAux
+    variable = elastic_strain_13
+    rank_two_tensor = elastic_strain
+    index_j = 2
+    index_i = 0
+  [../]
+  [./elastic_curvature_32]
+    type = RankTwoAux
+    variable = elastic_curvature_32
+    rank_two_tensor = elastic_curvature
+    index_j = 1
+    index_i = 2
+  [../]
+  [./elastic_curvature_23]
+    type = RankTwoAux
+    variable = elastic_curvature_23
+    rank_two_tensor = elastic_curvature
+    index_j = 2
+    index_i = 1
   [../]
 []
 
-[BCs]
-  # following is natural BC
-  active = 'uy_bottom ux_imposed_top wcz_imposed_top wcx_equals_zero_on_top ux_zero_bottom wcy_equals_zero_on_top uy_ramp_top wc_x_bottom uz_bottom wc_z_bottom_zero wc_y_bottom uz_top box_T'
-  [./wcx_equals_zero_on_top]
-    type = DirichletBC
-    variable = wc_x
-    boundary = top
-    value = 0
+[Postprocessors]
+  active = 'temperature stress_yy stress_xx zdisp stress_zz'
+  [./p0]
+    type = PointValue
+    point = '0 0 0'
+    variable = pore_pressure
   [../]
-  [./wcy_equals_zero_on_top]
-    type = DirichletBC
-    variable = wc_y
-    boundary = top
-    value = 0
-  [../]
-  [./uy_bottom]
-    type = DirichletBC
-    variable = disp_y
-    boundary = bottom
-    value = 0.0
-  [../]
-  [./uz_bottom]
-    type = DirichletBC
+  [./zdisp]
+    type = PointValue
+    point = '0 0 5'
     variable = disp_z
-    boundary = bottom
-    value = 0.0
   [../]
-  [./wc_x_bottom]
-    type = DirichletBC
-    variable = wc_x
-    boundary = bottom
-    value = 0.0
+  [./strain_zz]
+    type = PointValue
+    point = '0 0 0'
+    variable = strain_zz
   [../]
-  [./wc_y_bottom]
-    type = DirichletBC
-    variable = wc_y
-    boundary = bottom
-    value = 0.0
+  [./stress_xx]
+    type = PointValue
+    point = '0 0 0'
+    variable = stress_11
   [../]
-  [./ux_zero_bottom]
-    type = DirichletBC
-    variable = disp_x
-    boundary = bottom
-    value = 0.
+  [./stress_yy]
+    type = PointValue
+    point = '0 0 0'
+    variable = stress_22
   [../]
-  [./wc_z_rotationBC]
-    type = RedbackRotationBC
-    variable = wc_z
-    boundary = bottom
-    dir1 = 1
-    antisymmetric_strain_ij = antisymmetric_strain_ij
-    some_var_1 = disp_x
-    some_var_2 = disp_y
-    grad_ux = _grad_ux
+  [./stress_zz]
+    type = PointValue
+    point = '0 0 0'
+    variable = stress_33
   [../]
-  [./dux_top]
-    type = NeumannBC
-    variable = disp_z
-    boundary = top
-  [../]
-  [./wcz_imposed_top]
-    type = DirichletBC
-    variable = wc_z
-    boundary = top
-    value = 0
-  [../]
-  [./ux_imposed_top]
-    type = DirichletBC
-    variable = disp_x
-    boundary = top
-    value = 0
-  [../]
-  [./wc_z_bottom_zero]
-    type = DirichletBC
-    variable = wc_z
-    boundary = bottom
-    value = 0
-  [../]
-  [./Rotation_wc_z_BC]
-    type = PostprocessorDirichletBC
-    variable = wc_z
-    boundary = bottom
-    postprocessor = antisymmetric_pp
-  [../]
-  [./uy_ramp_top]
-    type = FunctionDirichletBC
-    variable = disp_y
-    boundary = top
-    function = ramp
-  [../]
-  [./u_x_right]
-    type = DirichletBC
-    variable = disp_x
-    boundary = right
-    value = 0
-  [../]
-  [./u_z_face]
-    type = DirichletBC
-    variable = disp_z
-    boundary = front
-    value = 0
-  [../]
-  [./uz_back]
-    type = DirichletBC
-    variable = disp_z
-    boundary = back
-    value = 0
-  [../]
-  [./ux_zero_left]
-    type = DirichletBC
-    variable = disp_x
-    boundary = left
-    value = 0
-  [../]
-  [./uz_top]
-    type = DirichletBC
-    variable = disp_z
-    boundary = top
-    value = 0
-  [../]
-  [./box_T]
-    type = NeumannBC
-    variable = temperature
-    boundary = 'top bottom'
-  [../]
-[]
-
-[Materials]
-  active = 'Redbackcosserat redback_mat'
-  [./cosserat]
-    type = CosseratLinearElasticMaterial
-    block = 0
-    B_ijkl = 40
-    C_ijkl = '5 10 5'
-    fill_method = general_isotropic
-  [../]
-  [./Redbackcosserat]
-    type = RedbackMechMaterialHO
-    block = 0
-    B_ijkl = '0.0 0.0000076923 0.0000076923'
-    C_ijkl = '5.76923333 3.84615 1.9230769'
-    fill_method = general_isotropic
-    poisson_ratio = -9999
-    youngs_modulus = -9999
-    damage_method = BreakageMechanics
-    cohesion = 0.01
-  [../]
-  [./redback_mat]
-    type = RedbackMaterial
-    block = 0
+  [./temperature]
+    type = PointValue
+    variable = temp
+    point = '0 0 0'
   [../]
 []
 
 [Preconditioning]
-  active = 'andy'
-  [./andy]
+  [./SMP]
     type = SMP
     full = true
-    petsc_options_iname = '-ksp_type -pc_type    -snes_atol -snes_rtol -snes_max_it -ksp_atol -ksp_rtol'
-    petsc_options_value = 'gmres          bjacobi     1E-7           1E-10          50                1E-15      1E-10 '
-    line_search = none
-  [../]
-  [./debug_jacob]
-    type = FDP
-    full = true
-  [../]
-  [./default]
-    type = SMP
     solve_type = NEWTON
-    line_search = basic
+    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
+    petsc_options_value = 'bcgs bjacobi 1E-14 1E-10 10000'
   [../]
 []
 
 [Executioner]
   type = Transient
-  l_max_its = 100
-  solve_type = NEWTON
-  num_steps = 10
-  nl_abs_tol = 1e-8
-  nl_rel_tol = 1e-04
-  l_tol = 1e-10
+  solve_type = Newton
+  end_time = 500
+  dt = 100
 []
 
 [Outputs]
-  execute_on = 'timestep_end initial'
   exodus = true
-  file_base = bench_elastic_HO_tensile_shear
-  print_linear_residuals = false
+  execute_on = 'timestep_end initial'
+  file_base = bench_TM_plastic_nodissip
+  csv = true
 []
 

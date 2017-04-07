@@ -1,9 +1,9 @@
 [Tests]
-  [./test_HO_shear_elastic] # can't put a dot in that name!
+  [./test_HO_shear_elastic]
     type = 'CSVDiff'
     input = 'shear_elastic.i'
     csvdiff = 'bench_elastic_HO_shear.csv'
     # This test requires the Cosserat dynamic library
-    env_vars = HAS_COSSERAT_DYNLIB
+    # env_vars = HAS_COSSERAT_DYNLIB
   [../]
 []

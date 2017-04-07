@@ -4827,7 +4827,7 @@
     # 0 2.6549E3 2.6549E3
     type = RedbackMechMaterialHO
     block = '1 2 3'
-    B_ijkl = '0 9.8E4 9.8E4'
+    B_ijkl = '0 5E4 5E4'
     C_ijkl = '1.3333E3 4.0E3 2.0E3'
     fill_method = general_isotropic
     poisson_ratio = -9999
@@ -4867,7 +4867,7 @@
 
 [Executioner]
   type = Transient
-  dt = 0.5
+  dt = 0.2
   solve_type = NEWTON
   num_steps = 2000
   nl_abs_tol = 1e-8
@@ -4878,7 +4878,7 @@
 [Outputs]
   execute_on = 'timestep_end initial'
   exodus = true
-  file_base = plastic_shear_R25_Hs600_h120_not1_mom 
+  file_base = plastic_shear_R25_Hs600_h120_test
   print_linear_residuals = false
 []
 
