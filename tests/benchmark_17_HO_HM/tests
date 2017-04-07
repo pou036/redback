@@ -1,0 +1,21 @@
+[Tests]
+  [./bench_plastic_HO_HM]
+    type = 'Exodiff'
+    input = 'bench_plastic_HO_HM.i'
+    exodiff = 'bench_HM_plastic_1.e'
+    rel_err = 1e-4
+    abs_zero = 1e-9
+  [../]
+  [./bench_elastic_HO_HM_1]
+    type = 'Exodiff'
+    input = 'bench_HM_elastic_1.i'
+    exodiff = 'bench_HM_elastic_1.e'
+    rel_err = 1e-4
+  [../]
+  [./bench_elastic_HO_HM_2]
+    type = 'Exodiff'
+    input = 'bench_HM_elastic_2.i'
+    exodiff = 'bench_HM_elastic_2.e'
+    rel_err = 1e-4
+  [../]
+[]

@@ -1,0 +1,34 @@
+[Tests]
+  [./bench_plastic_nodissip_HO_TM]
+    type = 'Exodiff'
+    input = 'bench_plastic_HO_temperature.i'
+    exodiff = 'bench_TM_plastic_nodissip.e'
+    rel_err = 1e-4
+    abs_zero = 1e-8
+  [../]  
+  [./bench_plastic_dissip_HO_TM]
+    type = 'Exodiff'
+    input = 'bench_plastic_HO_temp_dissip.i'
+    exodiff = 'bench_TM_plastic_dissip.e'
+    rel_err = 1e-4
+    abs_zero = 1e-8
+  [../]
+  [./bench_elastic_HO_TM_1]
+    type = 'Exodiff'
+    input = 'bench_elastic_HO_TM_1.i'
+    exodiff = 'bench_TM_elastic_1.e'
+    rel_err = 1e-4
+  [../]
+  [./bench_elastic_HO_TM_2]
+    type = 'Exodiff'
+    input = 'bench_elastic_HO_TM_2.i'
+    exodiff = 'bench_TM_elastic_2.e'
+    rel_err = 1e-4
+  [../]  
+  [./bench_elastic_HO_TM_diffu]
+    type = 'Exodiff'
+    input = 'bench_elastic_HO_diffusivity.i'
+    exodiff = 'bench_TM_elastic_diffu.e'
+    rel_err = 1e-4
+  [../]  
+[]

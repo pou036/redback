@@ -1,0 +1,30 @@
+[Tests]
+  [./test_DeBorst_soft]
+    type = 'Exodiff'
+    input = 'test_DeBorst_soft.i'
+    exodiff = 'test_DeBorst_soft.e'
+    rel_err = 1e-4
+    abs_zero = 1e-8
+  [../]  
+  [./test_DeBorst_hard]
+    type = 'Exodiff'
+    input = 'test_DeBorst_hard.i'
+    exodiff = 'test_DeBorst_hard.e'
+    rel_err = 1e-4
+    abs_zero = 1e-8
+  [../]
+  [./test_MV_hard]
+    type = 'Exodiff'
+    input = 'test_MV_hard.i'
+    exodiff = 'test_MV_hard.e'
+    rel_err = 1e-4
+    abs_zero = 1e-8
+  [../]
+  [./test_MV_soft]
+    type = 'Exodiff'
+    input = 'test_MV_soft.i'
+    exodiff = 'test_MV_soft.e'
+    rel_err = 1e-4
+    abs_zero = 1e-8
+  [../]  
+[]
