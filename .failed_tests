@@ -4,50 +4,26 @@ benchmark_10_TMC.test_10_TMC_CC
 benchmark_11_THMC.test_11_THMC_J2
 benchmark_11_THMC.test_11_THMC_DP
 benchmark_11_THMC.test_11_THMC_CC
-<<<<<<< HEAD
 benchmark_3_M.test_3_M_J2
 benchmark_3_M.test_3_M_DP
-benchmark_3_M.test_3_M_elastic_1
 benchmark_3_M.test_3_M_CC
-benchmark_3_M.test_3_M_CC_anisotropic1
-benchmark_3_M.test_3_M_elastic_3
 benchmark_3_M.test_3_M_elastic_2
+benchmark_3_M.test_3_M_elastic_3
+benchmark_3_M.test_3_M_CC_anisotropic1
+benchmark_3_M.test_3_M_elastic_1
 benchmark_6_TM.test_6_TM_J2
-benchmark_6_TM.test_6_TM_CC
 benchmark_6_TM.test_6_TM_DP
 benchmark_6_TM.test_6_TM_thermo_elastic
-benchmark_7_HM.test_7_HM_elastic
-benchmark_7_HM.test_7_HM_elastic_porosity
-benchmark_7_HM.test_7_HM_elastic_no_porosity
-benchmark_7_HM.test_7_HM_DP
-benchmark_7_HM.test_7_HM_J2
-=======
-benchmark_2_H.test_darcy
-benchmark_3_M.test_3_M_J2
-benchmark_3_M.test_3_M_DP
-benchmark_3_M.test_3_M_CC
-benchmark_3_M.test_3_M_CC_anisotropic0
-benchmark_3_M.test_3_M_CC_anisotropic1
-benchmark_3_M.test_3_M_elastic_1
-benchmark_3_M.test_3_M_elastic_2
-benchmark_3_M.test_3_M_elastic_3
-benchmark_6_TM.test_6_TM_J2
-benchmark_6_TM.test_6_TM_DP
 benchmark_6_TM.test_6_TM_CC
 benchmark_7_HM.test_7_HM_elastic
 benchmark_7_HM.test_7_HM_elastic_porosity
 benchmark_7_HM.test_7_HM_elastic_no_porosity
 benchmark_7_HM.test_7_HM_J2
 benchmark_7_HM.test_7_HM_DP
->>>>>>> da204f3f3206b0f018480903d29fbef04c416551
 benchmark_7_HM.test_7_HM_CC
 benchmark_8_THM.test_8_THM_J2
 benchmark_8_THM.test_8_THM_DP
 benchmark_8_THM.test_8_THM_CC
 gravity.test_rho_g_h
-<<<<<<< HEAD
-pressure_force.test_pressure_force
-=======
->>>>>>> da204f3f3206b0f018480903d29fbef04c416551
 timestepper.test_timestep
 transverseBC.ring_shear

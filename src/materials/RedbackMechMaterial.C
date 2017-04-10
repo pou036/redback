@@ -129,12 +129,6 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
 
 ////////////////////////////////////////////////////////////////////////
     // Copy-paste from SolidModel.C
-<<<<<<< HEAD
-=======
-      // _SED(NULL),
-      // _SED_old(NULL),
-      // _Eshelby_tensor(NULL),
->>>>>>> da204f3f3206b0f018480903d29fbef04c416551
     _SED(declareProperty<Real>("strain_energy_density")),
     _SED_old(declarePropertyOld<Real>("strain_energy_density")),
     _Eshelby_tensor(declareProperty<RankTwoTensor>("Eshelby_tensor")),
@@ -272,11 +266,6 @@ RedbackMechMaterial::computeProperties()
     computeQpElasticityTensor();
     computeQpStress();
   }
-<<<<<<< HEAD
-
-=======
-      //  if (_compute_JIntegral)
->>>>>>> da204f3f3206b0f018480903d29fbef04c416551
       //    computeStrainEnergyDensity();
       _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
 }
