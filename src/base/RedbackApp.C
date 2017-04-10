@@ -84,10 +84,13 @@
 #include "RedbackPolarTensorMaterialAux.h"
 #include "RedbackSandProductionAux.h"
 #include "RedbackTotalPorosityAux.h"
+<<<<<<< HEAD
 
 // Implementing J-integral
 #include "JIntegral.h"
 #include "CrackFrontDefinition.h"
+=======
+>>>>>>> da204f3f3206b0f018480903d29fbef04c416551
 
 template <>
 InputParameters

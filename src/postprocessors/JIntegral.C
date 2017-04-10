@@ -1,4 +1,5 @@
 /****************************************************************/
+<<<<<<< HEAD
 /*               DO NOT MODIFY THIS HEADER                      */
 /*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
 /*                                                              */
@@ -12,6 +13,15 @@
 //  This post processor calculates the J-Integral
 //  Converting ColumnMajorMatrix to RankTwoTensor
 
+=======
+/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*                                                              */
+/*          All contents are licensed under LGPL V2.1           */
+/*             See LICENSE for full restrictions                */
+/****************************************************************/
+//  This post processor calculates the J-Integral
+//
+>>>>>>> da204f3f3206b0f018480903d29fbef04c416551
 #include "JIntegral.h"
 
 template<>
@@ -37,12 +47,19 @@ JIntegral::JIntegral(const InputParameters & parameters):
     _has_crack_front_point_index(isParamValid("crack_front_point_index")),
     _crack_front_point_index(_has_crack_front_point_index ? getParam<unsigned int>("crack_front_point_index") : 0),
     _treat_as_2d(false),
+<<<<<<< HEAD
     //_grad_of_tensor_q(declareProperty<RankTwoTensor>("grad_of_tensor_q")),
     //_Eshelby_tensor(declareProperty<RankTwoTensor>("Eshelby_tensor")),
     _Eshelby_tensor(getMaterialProperty<RankTwoTensor>("Eshelby_tensor")),
     // _J_thermal_term_vec(hasMaterialProperty<RealVectorValue>("J_thermal_term_vec")?
     //                     &getMaterialProperty<RealVectorValue>("J_thermal_term_vec"):
     //                     NULL),
+=======
+    _Eshelby_tensor(getMaterialProperty<ColumnMajorMatrix>("Eshelby_tensor")),
+    _J_thermal_term_vec(hasMaterialProperty<RealVectorValue>("J_thermal_term_vec")?
+                        &getMaterialProperty<RealVectorValue>("J_thermal_term_vec"):
+                        NULL),
+>>>>>>> da204f3f3206b0f018480903d29fbef04c416551
     _convert_J_to_K(getParam<bool>("convert_J_to_K")),
     _has_symmetry_plane(isParamValid("symmetry_plane")),
     _poissons_ratio(isParamValid("poissons_ratio") ? getParam<Real>("poissons_ratio") : 0),
@@ -77,6 +94,7 @@ JIntegral::initialSetup()
 Real
 JIntegral::computeQpIntegral()
 {
+<<<<<<< HEAD
   RankTwoTensor grad_of_tensor_q;
   const RealVectorValue& crack_direction = _crack_front_definition->getCrackDirection(_crack_front_point_index);
   grad_of_tensor_q(0,0) = crack_direction(0)*_grad_of_scalar_q[_qp](0);
@@ -98,6 +116,29 @@ JIntegral::computeQpIntegral()
   //   for (unsigned int i = 0; i < 3; i++)
   //     eq_thermal += crack_direction(i)*_scalar_q[_qp]*(*_J_thermal_term_vec)[_qp](i);
   // }
+=======
+  ColumnMajorMatrix grad_of_vector_q;
+  const RealVectorValue& crack_direction = _crack_front_definition->getCrackDirection(_crack_front_point_index);
+  grad_of_vector_q(0,0) = crack_direction(0)*_grad_of_scalar_q[_qp](0);
+  grad_of_vector_q(0,1) = crack_direction(0)*_grad_of_scalar_q[_qp](1);
+  grad_of_vector_q(0,2) = crack_direction(0)*_grad_of_scalar_q[_qp](2);
+  grad_of_vector_q(1,0) = crack_direction(1)*_grad_of_scalar_q[_qp](0);
+  grad_of_vector_q(1,1) = crack_direction(1)*_grad_of_scalar_q[_qp](1);
+  grad_of_vector_q(1,2) = crack_direction(1)*_grad_of_scalar_q[_qp](2);
+  grad_of_vector_q(2,0) = crack_direction(2)*_grad_of_scalar_q[_qp](0);
+  grad_of_vector_q(2,1) = crack_direction(2)*_grad_of_scalar_q[_qp](1);
+  grad_of_vector_q(2,2) = crack_direction(2)*_grad_of_scalar_q[_qp](2);
+
+  Real eq = _Eshelby_tensor[_qp].doubleContraction(grad_of_vector_q);
+
+  //Thermal component
+  Real eq_thermal = 0.0;
+  if (_J_thermal_term_vec)
+  {
+    for (unsigned int i = 0; i < 3; i++)
+      eq_thermal += crack_direction(i)*_scalar_q[_qp]*(*_J_thermal_term_vec)[_qp](i);
+  }
+>>>>>>> da204f3f3206b0f018480903d29fbef04c416551
 
   Real q_avg_seg = 1.0;
   if (!_crack_front_definition->treatAs2D())

@@ -228,3 +228,4 @@ dump.txt
 moose_cxx11_compatibility_check.txt
 tests/image_subdomains/idfile.txt
 tests/image_subdomains/idfile_unique.txt
+.failed_tests

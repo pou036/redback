@@ -129,6 +129,12 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
 
 ////////////////////////////////////////////////////////////////////////
     // Copy-paste from SolidModel.C
+<<<<<<< HEAD
+=======
+      // _SED(NULL),
+      // _SED_old(NULL),
+      // _Eshelby_tensor(NULL),
+>>>>>>> da204f3f3206b0f018480903d29fbef04c416551
     _SED(declareProperty<Real>("strain_energy_density")),
     _SED_old(declarePropertyOld<Real>("strain_energy_density")),
     _Eshelby_tensor(declareProperty<RankTwoTensor>("Eshelby_tensor")),
@@ -266,7 +272,11 @@ RedbackMechMaterial::computeProperties()
     computeQpElasticityTensor();
     computeQpStress();
   }
+<<<<<<< HEAD
 
+=======
+      //  if (_compute_JIntegral)
+>>>>>>> da204f3f3206b0f018480903d29fbef04c416551
       //    computeStrainEnergyDensity();
       _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
 }
@@ -919,3 +929,30 @@ RedbackMechMaterial::formCreepDamage(Real cohesion)
   _damage_kernel[ _qp ] = plastic_damage + healing_damage;
   _damage_kernel_jac[ _qp ] = 0;
 }
+
+// ////////////////////////////////////////////////////////////////////////
+// void
+// RedbackMechMaterial::computeStrainEnergyDensity()
+//     {
+//       //mooseAssert(_SED, "_SED not initialized");
+//       //mooseAssert(_SED_old, "_SED_old not initialized");
+//       //(*_SED)[_qp] = (*_SED_old)[_qp] + _stress[_qp].doubleContraction(_strain_increment[_qp])/2 + _stress_old_prop[_qp].doubleContraction(_strain_increment[_qp])/2;
+//     }
+// ////////////////////////////////////////////////////////////////////////
+// void
+// RedbackMechMaterial::computeEshelby()
+//     {
+// //       mooseAssert(_SED, "_SED not initialized");
+// //       mooseAssert(_Eshelby_tensor, "_Eshelby_tensor not initialized");
+// //
+// //       //Deformation gradient (F):
+// //       _element->computeDeformationGradient(_qp, F);
+// //       FT = F.transpose();
+// //       FTP = FT.doubleContraction(_stress[_qp]);
+// //
+// //       WI.identity();
+// //       WI *= (*_SED)[_qp];
+// //       (*_Eshelby_tensor)[_qp] = WI - FTP;
+//     }
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
