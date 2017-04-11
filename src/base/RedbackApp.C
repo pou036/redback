@@ -85,9 +85,9 @@
 #include "RedbackSandProductionAux.h"
 #include "RedbackTotalPorosityAux.h"
 
-// Implementing J-integral
-#include "JIntegral.h"
-#include "CrackFrontDefinition.h"
+// // Implementing J-integral
+// #include "JIntegral.h"
+// #include "CrackFrontDefinition.h"
 
 template <>
 InputParameters
@@ -181,9 +181,9 @@ RedbackApp::registerObjects(Factory & factory)
   registerAux(RedbackSandProductionAux);
 
 
-  // Implementing J-integral
-  registerPostprocessor(JIntegral);
-  registerUserObject(CrackFrontDefinition);
+  // // Implementing J-integral
+  // registerPostprocessor(JIntegral);
+  // registerUserObject(CrackFrontDefinition);
 
 #undef registerObject
 #define registerObject(name) factory.regLegacy<name>(stringifyName(name))
