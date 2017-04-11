@@ -179,8 +179,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _damage(coupledValue("damage")),
     _damage_old(coupledValueOld("damage")),
 
-_compute_JIntegral(getParam<bool>("compute_JIntegral")),
-//(If not put here, an error appears)
+    _compute_JIntegral(getParam<bool>("compute_JIntegral")), //(If not put here, an error appears)
 
     _damage_method((DamageMethod)(int)getParam<MooseEnum>("damage_method")),
 
@@ -268,6 +267,7 @@ RedbackMechMaterial::computeProperties()
   }
       // //    computeStrainEnergyDensity();
       // _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
+      //// elastic_strain is calculated elsewhere in REDBACK
 }
 
 void
@@ -570,19 +570,19 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   // formulate the Taylor-Quinney coefficient and Gruntfest numbers for the case
   // of damage
 
-  // //loop to calculate J-integral
-  // // 1. Calculate Strain Energy density (SED)
-  //   _SED[_qp] = _SED_old[_qp] + _stress[_qp].doubleContraction(_strain_increment[_qp])/2 + _stress_old[_qp].doubleContraction(_strain_increment[_qp])/2;
-  // // 2. Calculate Eshelby tensor
-  // // Calculate Deformation gradient TODO: we need to grab it from its function, not recalculate it here
-  //
-  //   RankTwoTensor A(_grad_disp_x[ _qp ], _grad_disp_y[ _qp ], _grad_disp_z[ _qp ]); // Deformation gradient
-  //   RankTwoTensor FTP = A.transpose() * _stress[_qp];
-  //   RankTwoTensor WI;
-  //   WI.Identity();
-  //   WI *= _SED[_qp];
-  //   _Eshelby_tensor[_qp] = WI - FTP;
-  //
+  //loop to calculate J-integral
+  // 1. Calculate Strain Energy density (SED)
+    _SED[_qp] = _SED_old[_qp] + _stress[_qp].doubleContraction(_strain_increment[_qp])/2 + _stress_old[_qp].doubleContraction(_strain_increment[_qp])/2;
+  // 2. Calculate Eshelby tensor
+  // Calculate Deformation gradient TODO: we need to grab it from its function, not recalculate it here
+
+    RankTwoTensor A(_grad_disp_x[ _qp ], _grad_disp_y[ _qp ], _grad_disp_z[ _qp ]); // Deformation gradient
+    RankTwoTensor FTP = A.transpose() * _stress[_qp];
+    RankTwoTensor WI;
+    WI.Identity();
+    WI *= _SED[_qp];
+    _Eshelby_tensor[_qp] = WI - FTP;
+
   return;
 }
 
@@ -920,30 +920,3 @@ RedbackMechMaterial::formCreepDamage(Real cohesion)
   _damage_kernel[ _qp ] = plastic_damage + healing_damage;
   _damage_kernel_jac[ _qp ] = 0;
 }
-
-// ////////////////////////////////////////////////////////////////////////
-// void
-// RedbackMechMaterial::computeStrainEnergyDensity()
-//     {
-//       //mooseAssert(_SED, "_SED not initialized");
-//       //mooseAssert(_SED_old, "_SED_old not initialized");
-//       //(*_SED)[_qp] = (*_SED_old)[_qp] + _stress[_qp].doubleContraction(_strain_increment[_qp])/2 + _stress_old_prop[_qp].doubleContraction(_strain_increment[_qp])/2;
-//     }
-// ////////////////////////////////////////////////////////////////////////
-// void
-// RedbackMechMaterial::computeEshelby()
-//     {
-// //       mooseAssert(_SED, "_SED not initialized");
-// //       mooseAssert(_Eshelby_tensor, "_Eshelby_tensor not initialized");
-// //
-// //       //Deformation gradient (F):
-// //       _element->computeDeformationGradient(_qp, F);
-// //       FT = F.transpose();
-// //       FTP = FT.doubleContraction(_stress[_qp]);
-// //
-// //       WI.identity();
-// //       WI *= (*_SED)[_qp];
-// //       (*_Eshelby_tensor)[_qp] = WI - FTP;
-//     }
-// //////////////////////////////////////////////////////////////////////
-// //////////////////////////////////////////////////////////////////////
