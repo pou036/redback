@@ -1,0 +1,274 @@
+\documentclass[]{scrreprt}
+\usepackage{amsmath,amsfonts,graphicx}
+%\usepackage{multirow}
+%\usepackage{pslatex}
+%\usepackage{tabularx}
+%\usepackage{comment}
+%\usepackage{xspace}
+\usepackage{array}
+\usepackage{caption}
+
+\RequirePackage{fix-cm}
+\usepackage{graphicx}
+\usepackage{color,soul}
+\usepackage{todonotes}
+\usepackage{subfigure}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{empheq}
+\usepackage{mathrsfs}
+\usepackage{natbib}
+\usepackage{listings}
+\usepackage{rotating}
+\usepackage{hyperref}
+\usepackage{epstopdf}
+\usepackage{url}
+
+\usepackage{longtable}
+
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+
+\graphicspath{
+{figures/}
+}
+
+\newcommand{\uo}{\mbox{UO\textsubscript{2}}\xspace}
+
+\setcounter{secnumdepth}{3}
+
+\newcommand{\moose}{{MOOSE}}
+\newcommand{\redback}{{REDBACK}}
+\newcommand{\pd}{\ensuremath{\partial}}
+\newcommand{\pdiff}[2]{\ensuremath{\pd_{#2} #1}}
+\newcommand*\widefbox[1]{\fbox{\hspace{1em}#1\hspace{1em}}}
+
+
+\begin{document}
+
+\newif\ifshowallderivations % flag=False to get published doco, True to see more derivations
+\showallderivationstrue
+%\showallderivationsfalse
+
+
+
+%\tableofcontents
+
+\chapter{\redback{} mechanics}
+\section{Introduction}
+This document aims at describing the underlying structure of the mechanics implementation of \redback{}, which is built on top of \moose{}'s \href{http://mooseframework.org/wiki/PhysicsModules/TensorMechanics}{\texttt{TensorMechanics}} module. The current implementation of the \texttt{FiniteStrainHyperElasticViscoPlastic} material is using a finite strain formulation, which makes it helpful to document some definitions, link between variables in the code and mathematical variables, as well as some of the derivations used. See the related \href{http://mooseframework.org/wiki/PhysicsModules/TensorMechanics/HyperelasticViscoplastic/}{wiki page}. As that page mentions, the two main references used are:
+\begin{list}{}{}
+  \item \citep{Belytschko2014} for the Hyperelastic Viscoplastic J2 model;
+  \item \citep{Ling2005} for the integration algorithm.
+\end{list}
+
+
+
+\section{Symbols}
+Tab.~\ref{tab:symbols} lists some of the main symbols used in this document. Equations from \citep{Belytschko2014} are referred to as (B x.y.z)
+
+{\footnotesize
+\begin{longtable}{ l l l l }
+\caption{List of main symbols} \label{tab:symbols} \\
+\hline \multicolumn{1}{l}{Symbol} & \multicolumn{1}{l}{Name} & \multicolumn{1}{l}{Variable} & \multicolumn{1}{l}{Comment} \\ \hline 
+\endfirsthead
+
+\multicolumn{3}{c}%
+{{\thetable{} -- continued from previous page}} \\
+\hline \multicolumn{1}{l}{Symbol} & \multicolumn{1}{l}{Name} & \multicolumn{1}{l}{Variable} & \multicolumn{1}{l}{Comment} \\ \hline 
+\endhead
+
+\hline\hline \multicolumn{3}{r}{{Continued on next page}} \\ \hline\hline
+\endfoot
+
+\hline \hline
+\endlastfoot
+
+% Greek symbols
+$\sigma$ & Cauchy stress & ?? & \\
+$\sigma'$ & Deviatoric stress & ?? & \\
+$\sigma_e$ & Effective stress & ?? & \\
+
+\hline
+% Latin symbols - Upper case
+$C$ & right Cauchy--Green deformation tensor & ?? & $C=F^T.F=U.U$ \\
+$\bar{C}^e$ & elastic right Cauchy--Green deformation tensor & \texttt{\_ce} & $\bar{C}^e=F_e^T.F_e$ \quad (B 5.7.3) \\
+            &  in intermediate configuration & & \\
+$D$ & Rate of deformation tensor & ?? & $D=\frac{1}{2}(L+L^T)=F^{-T}.\dot{E}.F^{-1}$ \\
+$E$ & Green--Lagrange strain & ?? & $E=\frac{1}{2}(F^T.F-I)$ \\
+$F$ & Deformation gradient& \texttt{\_deformation gradient} & $F = F^e F^p$\\
+$F^e$, $F^p$ & elastic, plastic part of $F$ & \texttt{\_fe}, \texttt{\_fp} & \\
+$J$ & Jacobian determinant & ?? & $J=det(F)$ \\
+$L$ & Velocity gradient & ?? & $L=D+W=\dot{F}.F^{-1}$ \\
+$S$ & 2\textsuperscript{nd} Piola--Kirchhoff stress & \texttt{pk2} & $S=J F^{-1}\sigma F^{-T}$ \\
+$S'$ & Deviatoric Piola--Kirchhoff stress & \texttt{pk2\_dev} & $S'=J F^{-1}\sigma' F^{-T}$ \\
+$T$ & Temperature & ?? & \\
+$W$ & Spin tensor & ?? & $W=\frac{1}{2}(L-L^T)$ \\
+
+\hline
+% Latin symbols - Lower case
+$p_f$ & Pore pressure & ?? &  \\
+
+\end{longtable}
+}
+
+\section{Piola--Kirchhoff stress}
+
+We use the convention that stresses are positive in tension. Using the finite strain formulation, the stress is expressed using the 2\textsuperscript{nd} Piola--Kirchhoff stress tensor $S$, which is related to the Cauchy stress tensor $\sigma$ by the relationship
+\begin{equation}
+	S = J F^{-1} \sigma F^{-T}
+\end{equation}
+where $F$ is the deformation gradient and $J=det(F)$ the Jacobian determinant. The deformation gradient can itself be decomposed in elastic ($F^e$) and plastic ($F^p$) components \citep{Belytschko2014}
+\begin{equation}
+	F = F^e F^p
+\end{equation}
+
+\subsection{Deviatoric stress}
+The deviatoric stress $\sigma'$ is defined as
+\begin{equation}
+  \label{eq:deviatoric_stress}
+	\sigma = \sigma' + p I
+\end{equation}
+where the pressure $p$ is defined as $p=\frac{Tr(\sigma)}{3}$ and $I$ represents the identity.
+
+\todo[inline]{Note that Belytschko defines the pressure as $p=-\frac{Tr(\sigma)}{3}$ (B 3.4.4), opposite of hydrostatic, so the deviatoric is $\sigma^{dev}=\sigma + pI$ (B 4.5.26)}
+
+The corresponding formulation for the 2\textsuperscript{nd} Piola--Kirchhoff stress is
+\begin{equation}
+  \label{eq:def_dev_pk2}
+	S' = J F^{-1} \sigma' F^{-T}
+\end{equation}
+
+\begin{align} \label{eq:p_pk2}
+	  p  & =  \frac{Tr(\sigma)}{3} =  \frac{Tr\left(\frac{1}{J} F S F^{T} \right)}{3} \nonumber \\	
+	     & = \frac{1}{3J}\;Tr\left( F^T F S \right) \quad \text{since the trace is invariant under cyclic permutations} \nonumber \\
+	     & = \frac{1}{3J}\;S:C
+\end{align}
+from the definition of the right Cauchy--Green deformation tensor $C=F^T\;F$.
+
+From Eq.~(\ref{eq:deviatoric_stress}) we get
+\begin{align}
+	  S  & = S' + pJ\;F^{-1}F^{-T} \nonumber \\
+	     & = S' + pJ\;C^{-1}
+\end{align}
+
+\citet{Belytschko2014} uses the terms \textit{deviatoric} and \textit{hydrostatic} (opposite of his pressure). The hydrostatic component $S^{hyd}$ can then be written (B 5.4.17a) as
+\begin{align}
+	  S^{hyd}  & = pJ\;C^{-1} = (\frac{1}{3J}\;S:C)J\;C^{-1} \nonumber \\
+	     & = \frac{1}{3}(S:C)\;C^{-1}
+\end{align}
+
+Note that \texttt{HEVPFlowRatePowerLawJ2::computePK2Deviatoric} uses the formula (B 5.7.39) from \citep{Belytschko2014}, in which the values are considered in the intermediate configuration 
+\begin{equation}
+	\bar{S}^{dev}=\bar{S}-\frac{1}{3}(\bar{S}:\bar{C}^e)\bar{C}^{e-1}
+\end{equation}
+
+\subsection{von Mises effective stress}
+Using the relationship $A:B=Tr(A\,B^T)$, we note that
+\begin{align}
+	  S':C  & = Tr(S'\,C^T) =  Tr(S'\,C) \nonumber \\
+	        & = Tr(JF^{-1}\sigma'F^{-T}\:F^T F) \nonumber \\
+	        & = J\;Tr(FF^{-1}\sigma') \quad \text{(trace invariance by permutation)} \nonumber \\
+	        & = J\;Tr(\sigma') \nonumber \\
+	        & = 0
+\end{align}
+
+The effective stress $\sigma_e$ can be expressed as
+\begin{align}
+  \sigma_e  & = \sqrt{\frac{3}{2}\:\sigma':\sigma'} \nonumber \\
+	          & = \sqrt{\frac{3}{2}\:Tr\left( \sigma'\sigma' \right)} \quad \text{($\sigma'$ symmetric)} \nonumber \\
+	          & = \sqrt{\frac{3}{2}\:Tr\left( \frac{1}{J}FS'F^T\frac{1}{J}FS'F^T \right)} \nonumber \\
+	          & = \frac{1}{J}\sqrt{\frac{3}{2}\:Tr\left( FS'C S'F^T \right)} \nonumber \\
+	          & = \frac{1}{J}\sqrt{\frac{3}{2}\:Tr\left( S'C S'C \right)}  \quad \text{(trace invariance by permutation)} \nonumber \\
+	          & = \frac{1}{J}\sqrt{\frac{3}{2}\: (S'C):(S'C)^T} 
+\end{align}
+
+\citet{Belytschko2014} is defining the von Mises effective stress $\bar{\sigma}$ (in the intermediate configuration) as (B 5.7.41)
+\begin{equation}
+	\bar{\sigma}^2=\frac{3}{2}\left( \bar{S}^{dev}.\bar{C}^e \right):\left( \bar{S}^{dev}.\bar{C}^e \right)^T
+\end{equation}
+\todo[inline]{Why is the 1/J different? Is Eq.\ref{eq:def_dev_pk2} correct?}
+as expressed in \texttt{HEVPFlowRatePowerLawJ2::computeEqvStress}.
+
+\subsection{Flow law -- power law}
+\citet{Belytschko2014} defines the plastic flow rule, which determines $\dot{F}^p$, in the intermediate configuration (B 5.7.15).
+\begin{equation}
+  \bar{L}^p=\dot{\lambda}\bar{r}(\bar{S},\bar{q})
+\end{equation}
+where $\bar{L}^p$ is the plastic velocity gradient (see B 5.7.9), $\bar{r}$ is the plastic flow direction, $\dot{\lambda}$ is the plastic rate parameter and $\bar{q}$ is a set of internal variables.
+
+The UserObject \texttt{HEVPFlowRatePowerLawJ2::computeValue} implements a power law of the form
+\begin{equation}
+  \dot{\epsilon_{eq}} = \dot{\epsilon_0} \left( \frac{\sigma_{e}}{\sigma_s} \right)^m
+\end{equation}
+where $\sigma_s$ is the strength, itself a UserObject (to handle dependency on $\epsilon^p_{eq}$ for example).
+
+The function \texttt{HEVPFlowRatePowerLawJ2::computeDerivative} computes the derivatives of $\dot{\epsilon_{eq}}$ with respect to other scalar parameters. In practice, it deals only with the strength $\sigma_s$
+\begin{equation}
+  \frac{\partial \dot{\epsilon_{eq}}}{\partial \sigma_s} = - \frac{\dot{\epsilon_0}}{\sigma_s}m \left( \frac{\sigma_{e}}{\sigma_s} \right)^m
+\end{equation}
+
+The function \texttt{HEVPFlowRatePowerLawJ2::computeTensorDerivative} computes the derivatives of $\dot{\epsilon_{eq}}$ with respect to tensor parameters. In practice, it deals only with the 2\textsuperscript{nd} Piola--Kirchhoff stress\todo{which stress exactly?...}.
+\begin{equation}
+  \frac{\partial \dot{\epsilon_{eq}}}{\partial \bar{S}_{ij}} =
+  	\frac{\partial \dot{\epsilon_{eq}}}{\partial \sigma_e}
+  	\frac{\partial \bar{S}^{dev}_{kl}}{\partial \bar{S}_{ij}}^T
+  	\frac{\partial \sigma_e}{\partial \bar{S}^{dev}_{kl}} 
+  	???
+\end{equation}
+\todo[inline]{TODO: derive that term...}
+
+\subsection{Flow direction -- J2 plasticity}
+For a J2 yield criterion, the (associated) flow potential is
+\begin{equation}
+	f(\sigma) = \sigma_e - Y
+\end{equation}
+The flow direction $\vec{n} = \frac{\partial f}{\partial \sigma}$ is computed as follows, (switching to indices notation for the derivation)
+\begin{align}
+	\vec{n}_{ij} & = \frac{\partial \left( \sqrt{\frac{3}{2}\sigma'_{kl}\sigma'_{kl}} - Y \right)}{\partial \sigma_{ij}} \nonumber \\
+	        & = \frac{3}{2\sigma_e}\sigma'_{kl}\frac{\partial \sigma'_{kl}}{\partial \sigma_{ij}} \nonumber \\
+	        & = \frac{3}{2\sigma_e}\sigma'_{kl} \left(\delta_{ik}\delta_{jl} -\frac{1}{3}\delta_{kl}\delta_{ij} \right) \nonumber \\
+	        & = \frac{3}{2\sigma_e} \left(\sigma'_{ij} -\frac{1}{3}\sigma'_{kk}\delta_{ij} \right) \nonumber \\
+	        & = \frac{3\sigma'_{ij}}{2\sigma_e} \qquad \text{(since $\sigma'_{kk}=0$)}
+\end{align}
+Using Eq.~(\ref{eq:def_dev_pk2}) we obtain
+\begin{equation}
+	\vec{n} = \frac{3}{2\;J\;\sigma_e} FS'F^T
+\end{equation}
+
+\citet{Belytschko2014} defines the flow direction (B 5.7.40) as 
+\begin{equation}
+  \vec{n} = sym(\bar{r}) = \frac{3}{2\;\bar{\sigma}_e} \bar{C}^e.\bar{S}^{dev}.\bar{C}^e
+\end{equation}
+as expressed in \texttt{HEVPFlowRatePowerLawJ2::computeDirection}.
+
+\begin{align}
+	\vec{n}_{ij} & = \frac{\partial \left( \sqrt{\frac{3}{2}\left( \bar{S}^{dev}.\bar{C}^e \right)_{kl}\left( \bar{S}^{dev}.\bar{C}^e \right)_{lk}} - Y \right)}{\partial \bar{S}_{ij}} \nonumber \\
+	        & = 	\frac{\partial \left( \sqrt{\frac{3}{2}\left( \bar{S}^{dev}.\bar{C}^e  \right)_{kl} \left( \bar{S}^{dev}.\bar{C}^e \right)_{lk}}\right)}{\partial \bar{S}^{dev}_{ij}} \frac{\partial \bar{S}^{dev}_{ij}}{\partial \bar{S}_{ij}}\nonumber \\
+	        & = 	\frac{\partial \left( \sqrt{\frac{3}{2}\left( \bar{S}^{dev}.\bar{C}^e  \right)_{kl} \left( \bar{S}^{dev}.\bar{C}^e \right)_{lk}}\right)}{\partial \bar{S}^{dev}_{ij}} \quad \text{(since $\frac{\partial \bar{S}^{dev}_{ij}}{\partial \bar{S}_{ij}}=1$)}\nonumber \\
+	        & = 	\frac{3}{4\bar{\sigma}_e}\frac{\partial \left[ \left( \bar{S}^{dev}.\bar{C}^e  \right)_{kl} \left( \bar{S}^{dev}.\bar{C}^e \right)_{lk}\right]}{\partial \bar{S}^{dev}_{ij}} \nonumber \\
+	        & = 	\frac{3}{4\bar{\sigma}_e}\left[\frac{\partial  \left( \bar{S}^{dev}.\bar{C}^e  \right)_{kl} }{\partial \bar{S}^{dev}_{ij}} \left( \bar{S}^{dev}.\bar{C}^e \right)_{lk}+ 
+	        \left( \bar{S}^{dev}.\bar{C}^e  \right)_{kl} \frac{\partial   \left( \bar{S}^{dev}.\bar{C}^e \right)_{lk}}{\partial \bar{S}^{dev}_{ij}} 
+	        \right] \nonumber \\
+	        & = 	\frac{3}{4\bar{\sigma}_e}\left[\frac{\partial  \left( \bar{S}^{dev}_{kt}.\bar{C}^e_{tl}  \right) }{\partial \bar{S}^{dev}_{ij}} \left( \bar{S}^{dev}.\bar{C}^e \right)_{lk}+ 
+	        \left( \bar{S}^{dev}.\bar{C}^e  \right)_{kl} \frac{\partial   \left( \bar{S}^{dev}_{lt}.\bar{C}^e_{tk} \right)}{\partial \bar{S}^{dev}_{ij}} 
+	        \right] \nonumber \\
+	        & = 	\frac{3}{4\bar{\sigma}_e}\left[\bar{C}^e_{jl} \left( \bar{S}^{dev}.\bar{C}^e \right)_{li}+ 
+	        \left( \bar{S}^{dev}.\bar{C}^e  \right)_{ki} \bar{C}^e_{jk} \right] \nonumber \\
+	        & = 	\frac{3}{4\bar{\sigma}_e}\left[2 \left(\bar{C}^e.\bar{S}^{dev}.\bar{C}^e \right)_{ji} \right] \nonumber \\
+	        & = \frac{3}{2\;\bar{\sigma}_e} \left(\bar{C}^e.\bar{S}^{dev}.\bar{C}^e\right)_{ij} \qquad \text{(by symmetry)}
+\end{align}
+
+
+
+
+\bibliographystyle{aps-nameyear}      % American Physical Society (APS) style, author-year citations
+\bibliography{redback_mech}           % name your BibTeX data base
+\nocite{*}
+
+\end{document}
+
