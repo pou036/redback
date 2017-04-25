@@ -1,0 +1,6 @@
+benchmark_9_THC.test_9_THC_no_porosity
+benchmark_9_THC.test_9_THC_porosity
+benchmark_2_H.test_darcy
+benchmark_4_TH.test_4_TH
+transverseBC.ring_shear
+benchmark_3_M.test_3_M_CC_anisotropic1
