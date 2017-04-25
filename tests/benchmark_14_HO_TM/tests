@@ -31,4 +31,11 @@
     exodiff = 'bench_TM_elastic_diffu.e'
     rel_err = 1e-4
   [../]  
+  [./test_mech_dissip]
+    type = 'Exodiff'
+    input = 'test_mech_dissip.i'
+    exodiff = 'test_mech_dissip.e'
+    rel_err = 1e-4
+    abs_zero = 1e-8
+  [../]
 []

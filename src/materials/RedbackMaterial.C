@@ -234,7 +234,6 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _permeability_method((PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method")),
 
     _mises_strain(declareProperty<Real>("mises_strain")),
-    _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
 
     _pressurization_coefficient(declareProperty<Real>("pressurization_coefficient")),
     _thermal_diffusivity(declareProperty<Real>("thermal_diffusivity")),
@@ -435,7 +434,7 @@ RedbackMaterial::computeRedbackTerms()
   // Compute Mises strain
   _mises_strain[ _qp ] = _exponential * _dt;
   // Compute Mises strain rate
-  _mises_strain_rate[ _qp ] = _exponential;
+  //_mises_strain_rate[ _qp ] = _exponential;
 
   if (!_is_mechanics_on)
   {

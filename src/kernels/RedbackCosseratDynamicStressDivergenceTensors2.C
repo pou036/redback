@@ -44,7 +44,7 @@ RedbackCosseratDynamicStressDivergenceTensors2::computeQpOffDiagJacobian(unsigne
 
   if (coupled_component < 3)
     return //_Jacobian_mult[_qp].elasticJacobianwc(_component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]*(1+_alpha+_zeta/_dt));
-    ElasticityTensorTools::elasticJacobianWC(_Jacobian_mult[_qp], _component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]*(1+_alpha+_zeta/_dt));
+    ElasticityTensorTools::elasticJacobianWC(_Jacobian_mult[_qp], _component, coupled_component, _grad_test[_i][_qp], _phi[_j][_qp]*(1+_alpha+_zeta[_qp]/_dt));
   else;
 
   return StressDivergenceTensors::computeQpOffDiagJacobian(jvar);

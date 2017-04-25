@@ -148,7 +148,6 @@ protected:
   Real _exponential;
 
   MaterialProperty<Real> & _mises_strain;
-  MaterialProperty<Real> & _mises_strain_rate;
 
   MaterialProperty<Real> & _pressurization_coefficient;
   MaterialProperty<Real> & _thermal_diffusivity;

@@ -47,7 +47,7 @@
     exponent = 0
     fill_method = general_isotropic
     B_ijkl = '1 1 1'
-    cohesion = 0.1
+    cohesion = 0.01
     C_ijkl = '1 1.5 0.75'
     plasticity_type = DeBorst_2D
   [../]
@@ -57,7 +57,6 @@
     block = 0
     eta1 = 0
     total_porosity = 0.1
-    Peclet_number = 1
     solid_density = 0
     confining_pressure = 0
     delta = 0
@@ -65,12 +64,12 @@
     eta2 = 0
     solid_compressibility = 0 # 1/(0.9*0.3)
     solid_thermal_expansion = 2.5E-3
-	gr = 0
+    gr = 1000
   [../]
 []
 
 [BCs]
-  active = 'basefixed_z confinex confiney temperature_back'
+  active = 'temperature_back basefixed_z confinex confiney'
   [./confinex]
     type = PresetBC
     variable = disp_x
@@ -93,7 +92,7 @@
     type = FunctionDirichletBC
     variable = temp
     boundary = back
-    function = 1000
+    function = 1
   [../]
   [./Temperature_front]
     type = FunctionDirichletBC
@@ -290,7 +289,6 @@
 []
 
 [Kernels]
-  active = 'td_temp temp_diff cx_elastic cy_elastic cz_elastic x_couple y_couple z_couple x_moment y_moment z_moment mechdissip'
   [./td_temp]
     type = TimeDerivative
     variable = temp
@@ -747,7 +745,7 @@
   type = Transient
   solve_type = Newton
   end_time = 200
-  dt = 10
+  dt = 40
 []
 
 [Outputs]

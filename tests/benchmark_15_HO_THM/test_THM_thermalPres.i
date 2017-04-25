@@ -70,6 +70,11 @@
     variable = temperature
     point = '0 0 0'
   [../]
+  [./pressure0]
+    type = PointValue
+    variable = pore_pressure
+    point = '0 0 0'
+  [../]
 []
 
 [Variables]

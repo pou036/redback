@@ -18,4 +18,10 @@
     exodiff = 'bench_HM_elastic_2.e'
     rel_err = 1e-4
   [../]
+  [./bench_HM_diff]
+    type = 'Exodiff'
+    input = 'bench_HM_diff.i'
+    exodiff = 'bench_HM_diff.e'
+    rel_err = 1e-4
+  [../]  
 []

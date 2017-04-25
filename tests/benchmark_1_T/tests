@@ -18,5 +18,6 @@
     type = 'CSVDiff'
     input = 'bench1_d.i'
     csvdiff = 'bench1_d_out.csv'
+    rel_err = 1e-4
   [../]
 []

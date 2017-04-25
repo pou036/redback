@@ -46,7 +46,7 @@ validParams<RedbackMechMaterialHO>()
   params.addParam<std::string>("plasticity_type", "Name that allows to switch for different subroutines for the return map algorithm");
   params.addParam<bool>("ignore_failures", false, "The return-map algorithm will return with the best admissible stresses and internal parameters that it can, even if they don't fully correspond to the applied strain increment.  To speed computations, this flag can be set to true, the max_NR_iterations set small, and the min_stepsize large.");
   params.addRangeCheckedParam<Real>("min_stepsize", 0.01, "min_stepsize>0 & min_stepsize<=1", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the minimum fraction of applied strain increment that may be applied before the algorithm gives up entirely");
-
+//  params.addParam<Real>("plast_factor", 1, "factor in the exponential for hardening");
   return params;
 }
 
@@ -90,8 +90,11 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _failure_surface(declareProperty<Real>("failure_surface")),
     _stress_older(declarePropertyOlder<RankTwoTensor>("stress")),
     _stress_couple_older(declarePropertyOlder<RankTwoTensor>("coupled_stress")),
+    _mechanical_dissipation_tot(declareProperty<Real>("mechanical_dissipation_tot")),    
+    _mechanical_dissipation_tot_old(declarePropertyOld<Real>("mechanical_dissipation_tot")),
     _plasticity_type(isParamValid("plasticity_type") ? getParam<std::string>("plasticity_type") + "_" : ""),
     _min_stepsize(getParam<Real>("min_stepsize")),
+    //_plast_factor(getParam<Real>("plast_factor")),
     _iter(declareProperty<Real>("plastic_local_iterations")), // this is really an unsigned int, but for visualisation i convert it to Real
     _ignore_failures(getParam<bool>("ignore_failures")),
     _poromech_kernel(declareProperty<Real>("poromechanics_kernel")),
@@ -257,7 +260,6 @@ Real h_1;
 Real h_2;
 Real h_3;
 Real h_4;
-Real plast;
 
 if (_plasticity_type.compare("DruckerPrager_cohesion3D_") == 0 || _plasticity_type.compare("DruckerPrager_friction3D_") == 0 ){
    g_1 = 8./5.;
@@ -267,7 +269,15 @@ if (_plasticity_type.compare("DruckerPrager_cohesion3D_") == 0 || _plasticity_ty
    h_1 = 2./3.;
    h_2 = -1./6.;
    h_3 = 2./3.;
-   h_4 = -1./6.;}
+   h_4 = -1./6.;
+/*   g_1 = 8./3.;
+   g_2 = -2./3.;
+   g_3 = 8./3.;
+   g_4 = -2./3.;
+   h_1 = 2./5.;
+   h_2 = 1./10.;
+   h_3 = 2./5.;
+   h_4 = 1./10.;*/}
 else if (_plasticity_type.compare("DruckerPrager_cohesion2D_") == 0 || _plasticity_type.compare("DruckerPrager_friction2D_") == 0 ){
    g_1 = 3./2.;
    g_2 = 1./2.;
@@ -276,7 +286,15 @@ else if (_plasticity_type.compare("DruckerPrager_cohesion2D_") == 0 || _plastici
    h_1 = 3./4.;
    h_2 = -1./4.;
    h_3 = 1.;
-   h_4 = 0.;}
+   h_4 = 0.;
+/*   g_1 = 3.;
+   g_2 = -1.;
+   g_3 = 4.;
+   g_4 = 0.;
+   h_1 = 3./8.;
+   h_2 = 1./8.;
+   h_3 = 1./4.;
+   h_4 = 0.; */}
 else if (_plasticity_type.compare("DeBorst_2D_") == 0 ){
    g_1 = 1./3.;
    g_2 = 1./3.;
@@ -290,6 +308,8 @@ else {
   std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
 }
 
+Real plast;
+
 if (_plasticity_type.compare("DruckerPrager_cohesion3D_") == 0 || _plasticity_type.compare("DruckerPrager_cohesion2D_") == 0 || _plasticity_type.compare("DeBorst_2D_") == 0 ){
 plast = 0.;}
 else if (_plasticity_type.compare("DruckerPrager_friction3D_") == 0 || _plasticity_type.compare("DruckerPrager_friction2D_") == 0 ){
@@ -298,6 +318,18 @@ else {
   std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
 }
 
+//Real Hs;
+/*
+if (( _eqv_plastic_strain_old[_qp] < 0.1) ){
+ Hs = _hardening_mech_modulus;} 
+ else {
+ Hs = _hardening_mech_modulus / 2.0 ;}
+
+if (( _eqv_plastic_strain_old[_qp] < 0.2) ){
+   } 
+ else {
+ Hs = _hardening_mech_modulus / 4.0 ;}
+*/
 PROPS[0]=_bulk_modulus;
 PROPS[1]=_shear_modulus;
 PROPS[2]=_cosserat_shear_modulus;
@@ -315,8 +347,9 @@ PROPS[13]=g_1;
 PROPS[14]=g_2;
 PROPS[15]=g_3;
 PROPS[16]=g_4;
-PROPS[17]=plast;
+PROPS[17]= plast;
 PROPS[18]=_tolerance_tau;
+
 
 PROPS2[0]=_bulk_modulus;
 PROPS2[1]=_shear_modulus;
@@ -324,7 +357,7 @@ PROPS2[2]=_cosserat_shear_modulus;
 PROPS2[3]=_cosserat_radius;
 PROPS2[4]=_friction_coefficient;
 PROPS2[5]=_cohesion;
-PROPS2[6]=_hardening_mech_modulus;
+PROPS2[6]= _hardening_mech_modulus;
 PROPS2[7] = _dilatancy_coefficient;
 PROPS2[8]=0.0;
 PROPS2[9]=h_1;
@@ -335,7 +368,7 @@ PROPS2[13]=g_1;
 PROPS2[14]=g_2;
 PROPS2[15]=g_3;
 PROPS2[16]=g_4;
-PROPS2[17]=plast;
+PROPS2[17]= plast;
 PROPS2[18]=_tolerance_tau;
 
 
@@ -556,7 +589,7 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
   }
   else
   {
-    throw MooseException("Bad thing");
+    throw MooseException("Something happened, dt needs to be reduced");
     Moose::out << "the stepsize begins to be reduced " << _iter[_qp] << std::endl;
 //    for (unsigned int i = 0; i < NSTR ; ++i){
 //for (unsigned int j = 0; j < NSTR ; ++j){
@@ -915,6 +948,7 @@ RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p
   {
    _mechanical_dissipation_jac_mech[ _qp ] = _mechanical_dissipation_jac_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
   }
+  _mechanical_dissipation_tot[ _qp ] =  _mechanical_dissipation_tot_old[ _qp ] + _mechanical_dissipation_mech[ _qp ]* _dt;
 
   // Update the mechanical porosity
   Real delta_phi_mech_el, delta_phi_mech_pl;
@@ -930,8 +964,8 @@ RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p
   Real instantaneous_vol_strain_rate;
   instantaneous_vol_strain_rate = (_total_strain[ _qp ].trace() - _total_strain_old[ _qp ].trace()) / _dt;
  _poromech_kernel[ _qp ] = instantaneous_vol_strain_rate / _beta_star;
- _poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
-
+ //_poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
+ _poromech_jac[ _qp ] = 1;
 }
 
 
