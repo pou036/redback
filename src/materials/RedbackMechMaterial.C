@@ -537,7 +537,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   else {
   _poromech_jac[ _qp ] = 0 ;
   }
-  
+
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO:
   // Remove this number from the tests!!!
