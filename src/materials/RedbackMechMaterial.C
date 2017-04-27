@@ -526,8 +526,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   }*/
 
   // Compute Mechanical Dissipation Jacobian
-    _mechanical_dissipation_jac_mech[ _qp ] =
-    _mechanical_dissipation_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
+  _mechanical_dissipation_jac_mech[ _qp ] =
+  _mechanical_dissipation_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
 
   _poromech_kernel[ _qp ] = def_grad_rate * _peclet_number[ _qp ] / _mixture_compressibility[ _qp ];
     if (_has_T)
