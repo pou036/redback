@@ -526,11 +526,18 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   }*/
 
   // Compute Mechanical Dissipation Jacobian
-  _mechanical_dissipation_jac_mech[ _qp ] =
-    _mechanical_dissipation_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
+   _mechanical_dissipation_jac_mech[ _qp ] =
+   _mechanical_dissipation_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
 
   _poromech_kernel[ _qp ] = def_grad_rate * _peclet_number[ _qp ] / _mixture_compressibility[ _qp ];
-  _poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
+    if (_has_T)
+  {
+    _poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
+  }
+  else {
+  _poromech_jac[ _qp ] = 0 ;
+  }
+
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO:
   // Remove this number from the tests!!!
