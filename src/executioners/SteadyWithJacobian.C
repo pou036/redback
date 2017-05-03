@@ -35,8 +35,10 @@
 #include "libmesh/petsc_matrix.h"
 //#include <Eigen/Eigenvalues>
 
-#include <slepceps.h>
 
+#ifdef LIBMESH_HAVE_SLEPC
+#include <slepceps.h>
+#endif
 
 #endif
 
@@ -282,8 +284,8 @@ SteadyWithJacobian::execute()
 #else
         // need slepc to run eigen solver (can still calculate from "jacobian.txt" though if it has been created)
         _console <<  std::scientific << COLOR_RED
-		<< "Error!! Calculation of eigenvalues requires libMesh to be compiled with SLEPc eigen solver support!\n";
-        << COLOR_DEFAULT
+		<< "Error!! Calculation of eigenvalues requires libMesh to be compiled with SLEPc eigen solver support!\n"
+        << COLOR_DEFAULT;
         break;
 
 #endif  // LIBMESH_HAVE_SLEPC
