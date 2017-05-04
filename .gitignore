@@ -233,3 +233,4 @@ tests/image_subdomains/idfile_unique.txt
 redback_mech.bib.sav
 redback_mech.dvi
 redback_mech.ps
+temp_print_trace.*
