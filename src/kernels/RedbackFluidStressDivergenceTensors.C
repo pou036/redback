@@ -1,7 +1,7 @@
 #include "RedbackFluidStressDivergenceTensors.h"
 
-#include "Material.h"
 #include "ElasticityTensorTools.h"
+#include "Material.h"
 
 template <>
 InputParameters
@@ -16,6 +16,7 @@ validParams<RedbackFluidStressDivergenceTensors>()
   params.addCoupledVar("fluid_vel_z", 0.0, "The z-component of fluid velocity");
   // params.addRequiredCoupledVar("temp", 0.0, "The temperature");
   params.addRequiredCoupledVar("pore_pres", "The pore fluid pressure");
+  params.addParam<bool>("stokes", false, "simplifies system to stokes");
 
   // Using the displaced mesh will be set in the solid mechanics action input now.
   params.set<bool>("use_displaced_mesh") = true;
@@ -46,41 +47,69 @@ RedbackFluidStressDivergenceTensors::RedbackFluidStressDivergenceTensors(const I
     //_temp_var(coupled("temp")),
     _porepressure_var(coupled("pore_pres")),
 
-    _gravity_term(getMaterialProperty<RealVectorValue>("gravity_term"))
+    _gravity_term(getMaterialProperty<RealVectorValue>("gravity_term")),
+
+    _stokes(getParam<bool>("stokes"))
 {
 }
 
 Real
 RedbackFluidStressDivergenceTensors::computeQpResidual()
 {
-  return (_fluid_stress[ _qp ].row(_component)) * _grad_test[ _i ][ _qp ] /
-           (_reynolds_number[ _qp ] * _fluid_density[ _qp ]) +
-         (_grad_pore_pressure[ _qp ](_component) / _fluid_density[ _qp ] - _gravity_term[ _qp ](_component)) *
-           _test[ _i ][ _qp ];
+  if (_stokes)
+    return _grad_u[ _qp ] * _grad_test[ _i ][ _qp ] / _reynolds_number[ _qp ] +
+           _grad_pore_pressure[ _qp ](_component) * _test[ _i ][ _qp ];
+  else
+    // density does not disappear because it depends of pressure and temperature
+    return (_fluid_stress[ _qp ].row(_component)) * _grad_test[ _i ][ _qp ] /
+             (_reynolds_number[ _qp ] * _fluid_density[ _qp ]) +
+           _test[ _i ][ _qp ] *
+             // gradient of pressure * test, no integration by parts to be able to have DirichletBC of P
+             (_grad_pore_pressure[ _qp ](_component) / _fluid_density[ _qp ] - _gravity_term[ _qp ](_component));
 }
 
 Real
 RedbackFluidStressDivergenceTensors::computeQpJacobian()
 {
-  return 1 / _reynolds_number[ _qp ] *
-         (_grad_phi[ _j ][ _qp ] * _grad_test[ _i ][ _qp ] +
-          //                   _grad_phi[_j][_qp](_component) * _grad_test[_i][_qp](_component));
-          1 / 3 * _grad_phi[ _j ][ _qp ](_component)*_grad_test[ _i ][ _qp ](_component) + // input of div u
-          _viscosity_ratio[ _qp ] * _grad_phi[ _j ][ _qp ](_component)*_grad_test[ _i ][ _qp ](_component));
+  if (_stokes)
+    return 1. / _reynolds_number[ _qp ] * _grad_phi[ _j ][ _qp ] * _grad_test[ _i ][ _qp ];
+  else
+    return 1. / (_reynolds_number[ _qp ] * _fluid_density[ _qp ]) *
+           (_grad_phi[ _j ][ _qp ] * _grad_test[ _i ][ _qp ] +
+            // 1+(lambda-2/3) both are influencing
+            // comes from the gradu_transpose + volumetric expansion term in the stress
+            (1. / 3. + _viscosity_ratio[ _qp ]) * _grad_phi[ _j ][ _qp ](_component) *
+              _grad_test[ _i ][ _qp ](_component));
 }
 
 Real
 RedbackFluidStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _vel_fluid_x_var)
-    return 1 / _reynolds_number[ _qp ] * _grad_phi[ _j ][ _qp ](_component)*_grad_test[ _i ][ _qp ](0);
+  if (_stokes)
+    if (jvar == _porepressure_var)
+      return _grad_phi[ _j ][ _qp ](_component) * _test[ _i ][ _qp ];
+    else
+      return 0;
+  else if (jvar == _vel_fluid_x_var)
+    // this comes from the volumetric expansion term in the stress
+    return (-2. / 3. + _viscosity_ratio[ _qp ]) / (_reynolds_number[ _qp ] * _fluid_density[ _qp ]) *
+             _grad_phi[ _j ][ _qp ](0) * _grad_test[ _i ][ _qp ](_component) +
+           // this comes from the gradu_transpose in the stress
+           1. / (_reynolds_number[ _qp ] * _fluid_density[ _qp ]) * _grad_phi[ _j ][ _qp ](_component) *
+             _grad_test[ _i ][ _qp ](0);
   else if (jvar == _vel_fluid_y_var)
-    return 1 / _reynolds_number[ _qp ] * _grad_phi[ _j ][ _qp ](_component)*_grad_test[ _i ][ _qp ](1);
+    return (-2. / 3. + _viscosity_ratio[ _qp ]) / (_reynolds_number[ _qp ] * _fluid_density[ _qp ]) *
+             _grad_phi[ _j ][ _qp ](1) * _grad_test[ _i ][ _qp ](_component) +
+           1. / (_reynolds_number[ _qp ] * _fluid_density[ _qp ]) * _grad_phi[ _j ][ _qp ](_component) *
+             _grad_test[ _i ][ _qp ](1);
   else if (jvar == _vel_fluid_z_var)
-    return 1 / _reynolds_number[ _qp ] * _grad_phi[ _j ][ _qp ](_component)*_grad_test[ _i ][ _qp ](2);
+    return (-2. / 3. + _viscosity_ratio[ _qp ]) / (_reynolds_number[ _qp ] * _fluid_density[ _qp ]) *
+             _grad_phi[ _j ][ _qp ](_component) * _grad_test[ _i ][ _qp ](2) +
+           1. / (_reynolds_number[ _qp ] * _fluid_density[ _qp ]) * _grad_phi[ _j ][ _qp ](_component) *
+             _grad_test[ _i ][ _qp ](2);
   // Porepressure term
   else if (jvar == _porepressure_var)
-    return _grad_phi[ _j ][ _qp ](_component)*_test[ _i ][ _qp ];
+    return _grad_phi[ _j ][ _qp ](_component) * _test[ _i ][ _qp ] / _fluid_density[ _qp ];
 
   else
     return 0;

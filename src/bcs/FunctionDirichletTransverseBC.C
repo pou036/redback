@@ -4,8 +4,8 @@
 /* vectorial product of the normal with a given vector          */
 /****************************************************************/
 
-#include "FunctionDirichletTransverseBC.h"
 #include "Function.h"
+#include "FunctionDirichletTransverseBC.h"
 
 template <>
 InputParameters

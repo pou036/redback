@@ -92,7 +92,7 @@
   [./strain_rate]
     type = MaterialRealAux
     variable = strain_rate
-    property = mises_strain_rate
+    property = mises_strain_rate_nomech
   [../]
   [./solid_ratio]
     type = MaterialRealAux
@@ -222,7 +222,7 @@
   exodus = true
   console = true
   execute_on = TIMESTEP_END
-  base_file = bench_THC_poro_out
+  # base_file = bench_THC_poro_out
 []
 
 [ICs]
@@ -238,4 +238,3 @@
     value = 0
   [../]
 []
-

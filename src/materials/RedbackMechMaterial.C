@@ -11,9 +11,9 @@
 /****************************************************************/
 
 #include "Function.h"
-#include "libmesh/quadrature.h"
-#include "RedbackMechMaterial.h"
 #include "MooseMesh.h"
+#include "RedbackMechMaterial.h"
+#include "libmesh/quadrature.h"
 
 /**
 RedbackMechMaterial integrates the rate dependent plasticity model of Perzyna
@@ -352,13 +352,13 @@ RedbackMechMaterial::computeQpStress()
   _volumetric_strain[ _qp ] = dp.trace();
 
   // Calculate elastic strain increment
+  RankTwoTensor total_strain_increment;
+  total_strain_increment = _strain_increment[ _qp ];
+  total_strain_increment.addIa(_solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T_old[ _qp ]));
   RankTwoTensor delta_ee = _strain_increment[ _qp ] - (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]);
 
   // Update elastic strain tensor in intermediate configuration
   _elastic_strain[ _qp ] = _elastic_strain_old[ _qp ] + delta_ee;
-  // thermoelasticity
-  //_elastic_strain[_qp].addIa(_solid_thermal_expansion[_qp]*(_T[_qp] -
-  //_T0_param));
 
   // Rotate elastic strain tensor to the current configuration
   _elastic_strain[ _qp ] =
@@ -369,7 +369,7 @@ RedbackMechMaterial::computeQpStress()
     _rotation_increment[ _qp ] * _plastic_strain[ _qp ] * _rotation_increment[ _qp ].transpose();
 
   // Update strain in intermediate configuration
-  _total_strain[ _qp ] = _total_strain_old[ _qp ] + _strain_increment[ _qp ];
+  _total_strain[ _qp ] = _total_strain_old[ _qp ] + total_strain_increment;
   /*RankTwoTensor grad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp],
   _grad_disp_z[_qp]);
   RankTwoTensor total_strain_small_deformation = ( grad_tensor +
@@ -526,11 +526,18 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   }*/
 
   // Compute Mechanical Dissipation Jacobian
-  _mechanical_dissipation_jac_mech[ _qp ] =
-    _mechanical_dissipation_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
+   _mechanical_dissipation_jac_mech[ _qp ] =
+   _mechanical_dissipation_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
 
   _poromech_kernel[ _qp ] = def_grad_rate * _peclet_number[ _qp ] / _mixture_compressibility[ _qp ];
-  _poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
+    if (_has_T)
+  {
+    _poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
+  }
+  else {
+  _poromech_jac[ _qp ] = 0 ;
+  }
+
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO:
   // Remove this number from the tests!!!
@@ -688,7 +695,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   if (_has_T)
   {
     // E_0/(RT) = Ar/(1+delta T*)
-    _exponential =
+    _exponential *=
       std::exp(-_ar[ _qp ]) * std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
   }
 

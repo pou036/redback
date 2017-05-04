@@ -15,8 +15,8 @@
 #ifndef REDBACKDAMAGE_H
 #define REDBACKDAMAGE_H
 
-#include "RankTwoTensor.h"
 #include "Kernel.h"
+#include "RankTwoTensor.h"
 
 class RedbackDamage;
 

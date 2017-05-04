@@ -136,7 +136,7 @@
 
 [Outputs]
   file_base = gravity_horizontal
-  output_initial = true
+  # output_initial = true
   exodus = true
   print_linear_residuals = true
   [./console]
@@ -144,4 +144,3 @@
     perf_log = true
   [../]
 []
-

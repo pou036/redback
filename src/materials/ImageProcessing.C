@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ImageProcessing.h"
 #include "Function.h"
+#include "ImageProcessing.h"
 #include <fstream>
 
 template <>

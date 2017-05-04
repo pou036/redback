@@ -232,7 +232,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _permeability_method((PermeabilityMethod)(int)getParam<MooseEnum>("permeability_method")),
 
     _mises_strain(declareProperty<Real>("mises_strain")),
-    _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
+    _mises_strain_rate_nomech(declareProperty<Real>("mises_strain_rate_nomech")),
 
     _pressurization_coefficient(declareProperty<Real>("pressurization_coefficient")),
 
@@ -431,7 +431,7 @@ RedbackMaterial::computeRedbackTerms()
   // Compute Mises strain
   _mises_strain[ _qp ] = _exponential * _dt;
   // Compute Mises strain rate
-  _mises_strain_rate[ _qp ] = _exponential;
+  _mises_strain_rate_nomech[ _qp ] = _exponential;
 
   if (!_is_mechanics_on)
   {
@@ -534,9 +534,11 @@ RedbackMaterial::computeRedbackTerms()
     // Update Lewis number
     _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
                            std::pow(_phi0_param / _total_porosity[ _qp ], 3);
-    Real inverse_lewis_number =
-      1 / _lewis_number[ _qp ] + _inverse_lewis_number_tilde[ _qp ]; // to include modification from
-                                                                     // multi-app for example
+  }
+  if (_inverse_lewis_number_tilde[ _qp ] != 0)
+  {
+    // to include modifications from multi-app for example
+    Real inverse_lewis_number = 1 / _lewis_number[ _qp ] + _inverse_lewis_number_tilde[ _qp ];
     _lewis_number[ _qp ] = 1 / inverse_lewis_number;
   }
 
