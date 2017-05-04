@@ -186,7 +186,7 @@ SteadyWithJacobian::execute()
     	  nl.sys().matrix->print(std::cout,true);
     	}
 
-    	bool doDumpToFile = false;
+    	bool doDumpToFile = true;
     	if (doDumpToFile){
     		//
     		std::ofstream fout("jacobian.txt");
@@ -194,7 +194,7 @@ SteadyWithJacobian::execute()
     	}
 
 
-    	bool doFindEigenValues = true;
+    	bool doFindEigenValues = false;
     	if(doFindEigenValues){ // run eigen solver
 
 

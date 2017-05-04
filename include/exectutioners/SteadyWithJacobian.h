@@ -54,7 +54,7 @@ public:
   virtual void checkIntegrity();
 
 protected:
-  FEProblem & _problem;
+  FEProblemBase & _problem;
 
   int & _time_step;
   Real & _time;
