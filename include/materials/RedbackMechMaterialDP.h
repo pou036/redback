@@ -35,7 +35,7 @@ protected:
   void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
   Real getFlowIncrement(Real, Real, Real, Real, Real);
   void get_py_qy(Real, Real, Real &, Real &, Real);
-  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real);
+  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real);
   Real getPressureProjection(Real, Real, Real);
 
   // virtual void form_damage_kernels(Real);

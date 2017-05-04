@@ -97,21 +97,21 @@ RedbackMechMaterialDP::getFlowIncrement(
 
 Real
 RedbackMechMaterialDP::getDerivativeFlowIncrement(
-  const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real q_yield_stress, Real p_yield_stress)
+  const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real yield_stress, Real q_yield_stress, Real p_yield_stress)
 {
   Real delta_lambda_p =
-    _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
+    _ref_pe_rate * _dt * std::pow(macaulayBracket((pressure - p_yield_stress)/yield_stress), _exponent) * _exponential;
   Real delta_lambda_q =
     _ref_pe_rate * _dt *
-    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * (sig_eqv / q_yield_stress - 1.0)), _exponent) *
+    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * ((sig_eqv - q_yield_stress)/yield_stress)), _exponent) *
     _exponential;
   Real delta_lambda = (std::pow(delta_lambda_p * delta_lambda_p + delta_lambda_q * delta_lambda_q, 0.5));
   Real der_flow_incr_dev =
     _ref_pe_rate * _dt * _exponent *
-    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * (sig_eqv / q_yield_stress - 1.0)), _exponent - 1.0) *
-    _exponential / q_yield_stress;
+    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * ((sig_eqv - q_yield_stress)/yield_stress)), _exponent - 1.0) *
+    _exponential / yield_stress;
   Real der_flow_incr_vol = _ref_pe_rate * _dt * _exponent *
-                           std::pow(macaulayBracket(pressure - p_yield_stress), _exponent - 1.0) * _exponential;
+                           std::pow(macaulayBracket((pressure - p_yield_stress)/yield_stress), _exponent - 1.0) * _exponential / yield_stress;
   return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
 }
 
@@ -135,7 +135,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
 
   sig_dev = sig.deviatoric();
 
-  dfi_dseqv = getDerivativeFlowIncrement(sig, pressure, sig_eqv, q_yield_stress, p_yield_stress);
+  dfi_dseqv = getDerivativeFlowIncrement(sig, pressure, sig_eqv, yield_stress, q_yield_stress, p_yield_stress);
   getFlowTensor(sig, sig_eqv, pressure, yield_stress, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the
