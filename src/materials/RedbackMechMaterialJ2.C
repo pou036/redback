@@ -30,7 +30,7 @@ RedbackMechMaterialJ2::RedbackMechMaterialJ2(const InputParameters & parameters)
  */
 void
 RedbackMechMaterialJ2::getFlowTensor(
-  const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor_dev)
+  const RankTwoTensor & sig, Real q, Real /*p*/, Real /*yield_stress*/, RankTwoTensor & flow_tensor_dev)
 {
   RankTwoTensor sig_dev;
   Real val;
@@ -45,7 +45,7 @@ RedbackMechMaterialJ2::getFlowTensor(
 }
 
 Real
-RedbackMechMaterialJ2::getFlowIncrement(Real sig_eqv, Real p, Real q_y, Real p_y, Real yield_stress)
+RedbackMechMaterialJ2::getFlowIncrement(Real sig_eqv, Real /*p*/, Real /*q_y*/, Real /*p_y*/, Real yield_stress)
 {
   return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) * _exponential;
 }
@@ -69,8 +69,8 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig,
                               Real flow_incr_dev,
                               Real q,
                               Real p,
-                              Real p_y,
-                              Real q_y,
+                              Real /*p_y*/,
+                              Real /*q_y*/,
                               Real yield_stress,
                               RankFourTensor & dresid_dsig)
 {
@@ -117,7 +117,7 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig,
 }
 
 void
-RedbackMechMaterialJ2::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterialJ2::get_py_qy(Real p, Real /*q*/, Real & p_y, Real & q_y, Real yield_stress)
 {
   p_y = p;
   q_y = yield_stress;

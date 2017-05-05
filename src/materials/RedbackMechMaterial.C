@@ -815,7 +815,7 @@ RedbackMechMaterial::form_damage_kernels(Real cohesion)
 }*/
 
 void
-RedbackMechMaterial::formDamageDissipation(RankTwoTensor & sig)
+RedbackMechMaterial::formDamageDissipation(RankTwoTensor & /*sig*/)
 {
   /* The damage potential is being formed in this function. We start by
    * postulating a helmholtz free energy of the form:
