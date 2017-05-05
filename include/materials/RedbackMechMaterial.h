@@ -195,6 +195,10 @@ protected:
   virtual void formCreepDamage(Real);
 
   Real _damage_dissipation;
+
+  /// initial stress components
+  std::vector<Function *> _initial_stress;
+
 };
 
 #endif // REDBACKMECHMATERIAL_H
