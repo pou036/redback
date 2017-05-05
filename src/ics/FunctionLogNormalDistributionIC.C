@@ -38,13 +38,13 @@ FunctionLogNormalDistributionIC::FunctionLogNormalDistributionIC(const InputPara
     _max(getParam<Real>("maximum"))
 {
   mooseAssert(_stddev > 0.0, "standard_deviation must be positive for FunctionLogNormalDistributionIC!");
-  Real range = _max - _min;
+  // Real range = _max - _min;
   mooseAssert(range >= 0.0, "The maximum value must be greater than the minimum in FunctionLogNormalDistributionIC");
   MooseRandom::seed(getParam<unsigned int>("seed"));
 }
 
 Real
-FunctionLogNormalDistributionIC::value(const Point & p)
+FunctionLogNormalDistributionIC::value(const Point & /*p*/)
 {
   Real result = MooseRandom::randNormal(log10(_mean), _stddev);
   return std::pow(10, fmax(_min, fmin(_max, result)));
