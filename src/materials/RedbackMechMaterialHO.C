@@ -946,10 +946,12 @@ RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p
   _mechanical_dissipation_mech[ _qp ] *= _gr[ _qp ];
 
   _mechanical_dissipation_jac_mech[ _qp ] = 0;
+  /*
   if (_has_T)
   {
    _mechanical_dissipation_jac_mech[ _qp ] = _mechanical_dissipation_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
   }
+  */
   _mechanical_dissipation_tot[ _qp ] =  _mechanical_dissipation_tot_old[ _qp ] + _mechanical_dissipation_mech[ _qp ]* _dt;
 
   if (_plastic_strain[_qp] == _plastic_strain_old[_qp])

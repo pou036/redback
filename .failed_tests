@@ -8,6 +8,5 @@ transverseBC.ring_shear
 benchmark_2_H.test_darcy
 benchmark_4_TH.test_4_TH
 benchmark_5_TC.test_5_TC
-benchmark_14_HO_TM.bench_elastic_HO_TM_1
 benchmark_14_HO_TM.test_mech_dissip
 benchmark_3_M.test_3_M_CC_anisotropic1

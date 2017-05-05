@@ -36,8 +36,6 @@
   wc_z = wc_z
   wc_y = wc_y
   wc_x = wc_x
-  temperature = temp
-  temp = temp
 []
 
 [Materials]
@@ -50,6 +48,7 @@
     cohesion = 100
     C_ijkl = '2 1.5 0.75'
     plasticity_type = DeBorst_2D
+    temperature = temp
   [../]
   [./mat_nomech]
     # 3.7037
@@ -66,11 +65,12 @@
     eta2 = 0
     solid_compressibility = 0 # 1/(0.9*0.3)
     solid_thermal_expansion = 2.5E-3
+    temperature = temp
   [../]
 []
 
 [BCs]
-  active = 'basefixed_z temperature_back'
+  active = 'temperature_back basefixed_z fixed_left fixed_top'
   [./confinex]
     type = PresetBC
     variable = disp_x
@@ -100,6 +100,18 @@
     variable = temp
     boundary = front
     function = 0
+  [../]
+  [./fixed_left]
+    type = DirichletBC
+    variable = disp_x
+    boundary = left
+    value = 0
+  [../]
+  [./fixed_top]
+    type = DirichletBC
+    variable = disp_y
+    boundary = top
+    value = 0
   [../]
 []
 
@@ -299,18 +311,21 @@
     variable = disp_x
     displacements = 'disp_x disp_y disp_z'
     component = 0
+    temp = temp
   [../]
   [./cy_elastic]
     type = RedbackCosseratStressDivergenceTensors
     variable = disp_y
     displacements = 'disp_x disp_y disp_z'
     component = 1
+    temp = temp
   [../]
   [./cz_elastic]
     type = RedbackCosseratStressDivergenceTensors
     variable = disp_z
     component = 2
     displacements = 'disp_x disp_y disp_z'
+    temp = temp
   [../]
   [./x_couple]
     type = RedbackCosseratStressDivergenceTensors
