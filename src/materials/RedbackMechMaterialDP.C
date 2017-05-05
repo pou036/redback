@@ -157,7 +157,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
         for (l = 0; l < 3; ++l)
           dfi_dsig(i, j, k, l) = flow_dirn(i, j) * flow_dirn(k, l) * dfi_dseqv;
 
-  //Real flow_tensor_norm = flow_dirn.L2norm();
+  // Real flow_tensor_norm = flow_dirn.L2norm();
 
   // This loop calculates the second term. Read REDBACK's documentation
   // (same as J2 plasticity case)

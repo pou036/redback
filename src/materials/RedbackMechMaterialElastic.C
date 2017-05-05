@@ -46,7 +46,8 @@ RedbackMechMaterialElastic::getFlowTensor(
 }
 
 Real
-RedbackMechMaterialElastic::getFlowIncrement(Real /*sig_eqv*/, Real /*p*/, Real /*q_y*/, Real /*p_y*/, Real /*yield_stress*/)
+RedbackMechMaterialElastic::getFlowIncrement(
+  Real /*sig_eqv*/, Real /*p*/, Real /*q_y*/, Real /*p_y*/, Real /*yield_stress*/)
 {
   return 0;
 }

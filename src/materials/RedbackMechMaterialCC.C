@@ -39,7 +39,8 @@ RedbackMechMaterialCC::RedbackMechMaterialCC(const InputParameters & parameters)
  * Get unitary flow tensor in deviatoric direction, modified Cam-Clay
  */
 void
-RedbackMechMaterialCC::getFlowTensor(const RankTwoTensor & sig, Real /*q*/, Real p, Real pc, RankTwoTensor & flow_tensor)
+RedbackMechMaterialCC::getFlowTensor(
+  const RankTwoTensor & sig, Real /*q*/, Real p, Real pc, RankTwoTensor & flow_tensor)
 {
   if (pc > 0)
     pc *= -1;
