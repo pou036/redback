@@ -51,7 +51,7 @@ RedbackThermalConvection::computeQpJacobian()
 }
 
 Real
-RedbackThermalConvection::computeQpOffDiagJacobian(unsigned int jvar)
+RedbackThermalConvection::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   /*if (jvar == _pore_pres_var)
   {
