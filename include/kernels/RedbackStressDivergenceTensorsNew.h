@@ -41,6 +41,7 @@ protected:
   const unsigned int _component;
 
   const MaterialProperty<Real> & _biot_coeff;
+  const MaterialProperty<Real> & _solid_thermal_expansion;
 
 private:
   const bool _xdisp_coupled;

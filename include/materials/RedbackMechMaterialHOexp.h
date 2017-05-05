@@ -13,8 +13,8 @@
 /****************************************************************/
 
 
-#ifndef RedbackMechMaterialHO_H
-#define RedbackMechMaterialHO_H
+#ifndef RedbackMechMaterialHOexp_H
+#define RedbackMechMaterialHOexp_H
 
 
 //#ifdef COSSERAT_DYNLIB_EXISTS
@@ -22,15 +22,15 @@
 #include "RedbackMechMaterial.h"
 
 // Forward Declarations
-class RedbackMechMaterialHO;
+class RedbackMechMaterialHOexp;
 
 template <>
-InputParameters validParams<RedbackMechMaterialHO>();
+InputParameters validParams<RedbackMechMaterialHOexp>();
 
-class RedbackMechMaterialHO : public RedbackMechMaterial
+class RedbackMechMaterialHOexp : public RedbackMechMaterial
 {
 public:
-  RedbackMechMaterialHO(const InputParameters & parameters);
+  RedbackMechMaterialHOexp(const InputParameters & parameters);
 
 protected:
   virtual void initQpStatefulProperties();
@@ -115,7 +115,7 @@ protected:
   /// Minimum fraction of applied strain that may be applied during adaptive stepsizing
   Real _min_stepsize;
   
-  //Real _plast_factor;
+  Real _plast_factor;
   /// Number of time division due to the non convergence of the routine for the return-map
   MaterialProperty<Real> & _iter;
   /// Even if the returnMap fails, return the best values found for stress and internal parameters
@@ -123,8 +123,9 @@ protected:
 
   MaterialProperty<Real> & _poromech_kernel;
   MaterialProperty<Real> & _poromech_jac;
-  //MaterialProperty<RankTwoTensor> & _dplastic_heat_dstrain;
-  //MaterialProperty<RankTwoTensor> & _dplastic_heat_dcurvature;
+  MaterialProperty<RankTwoTensor> & _dplastic_heat_dstrain;
+  MaterialProperty<RankTwoTensor> & _dplastic_heat_dcurvature;
+
 
 private:
   const VariableValue & _wc_x;
@@ -157,4 +158,4 @@ private:
 
 //#endif // COSSERAT_DYNLIB_EXISTS
 
-#endif // RedbackMechMaterialHO_H
+#endif // RedbackMechMaterialHOexp_H

@@ -4001,7 +4001,7 @@
   [../]
   [./Redbackcosserat]
     # 0 2.6549E3 2.6549E3
-    type = RedbackMechMaterialHO
+    type = RedbackMechMaterialHOexp
     block = '0'
     B_ijkl = '0 18 18'
     C_ijkl = '1.3333E4 1.0E4 5.0E3'
@@ -4010,10 +4010,11 @@
     youngs_modulus = -9999
     damage_method = BreakageMechanics
     cohesion = 0.01
-    hardening_mech_modulus = -1
-    friction_coefficient = 0.5
+    hardening_mech_modulus = 0.66666
+    friction_coefficient = 0.3
     min_stepsize = 1e-8
     plasticity_type = DruckerPrager_friction3D
+	plast_factor = 10
   [../]
   [./redback_mat]
     type = RedbackMaterial
@@ -4043,7 +4044,7 @@
 
 [Executioner]
   type = Transient
-  dt = 0.000002
+  dt = 0.000001
   solve_type = NEWTON
   num_steps = 2000
   nl_abs_tol = 1e-8
@@ -4054,7 +4055,7 @@
 [Outputs]
   execute_on = 'timestep_end initial'
   exodus = true
-  file_base = shear_R30_mesh160
+  file_base = shear_R30_mesh160_expmures03
   print_linear_residuals = false
 []
 

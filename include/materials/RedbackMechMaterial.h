@@ -195,6 +195,12 @@ protected:
   virtual void formCreepDamage(Real);
 
   Real _damage_dissipation;
+  
+  /// initial stress components
+  std::vector<Function *> _initial_stress;
+  MaterialProperty<RankTwoTensor> & _dplastic_heat_dstrain;
+  MaterialProperty<RankTwoTensor> & _dplastic_heat_dcurvature;
+
 };
 
 #endif // REDBACKMECHMATERIAL_H

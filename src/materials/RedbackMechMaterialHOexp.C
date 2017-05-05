@@ -13,18 +13,18 @@
 //#ifdef COSSERAT_DYNLIB_EXISTS
 
 #include "Function.h"
-#include "RedbackMechMaterialHO.h"
+#include "RedbackMechMaterialHOexp.h"
 #include "MooseException.h"
 #include "multisurfaceplasticityhard.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
 
 /**
- * RedbackMechMaterialHO handles a high order material.
+ * RedbackMechMaterialHOexp handles a high order material.
  */
 template <>
 InputParameters
-validParams<RedbackMechMaterialHO>()
+validParams<RedbackMechMaterialHOexp>()
 {
   InputParameters params = validParams<RedbackMechMaterial>();
   params.addCoupledVar("wc_x", 0, "Cosserat rotation around x axis");
@@ -46,11 +46,11 @@ validParams<RedbackMechMaterialHO>()
   params.addParam<std::string>("plasticity_type", "Name that allows to switch for different subroutines for the return map algorithm");
   params.addParam<bool>("ignore_failures", false, "The return-map algorithm will return with the best admissible stresses and internal parameters that it can, even if they don't fully correspond to the applied strain increment.  To speed computations, this flag can be set to true, the max_NR_iterations set small, and the min_stepsize large.");
   params.addRangeCheckedParam<Real>("min_stepsize", 0.01, "min_stepsize>0 & min_stepsize<=1", "If ordinary Newton-Raphson + line-search fails, then the applied strain increment is subdivided, and the return-map is tried again.  This parameter is the minimum fraction of applied strain increment that may be applied before the algorithm gives up entirely");
-//  params.addParam<Real>("plast_factor", 1, "factor in the exponential for hardening");
+  params.addParam<Real>("plast_factor", 1, "factor in the exponential for hardening");
   return params;
 }
 
-RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters) :
+RedbackMechMaterialHOexp::RedbackMechMaterialHOexp(const InputParameters & parameters) :
     RedbackMechMaterial(parameters),
     _symmetric_strain(declareProperty<RankTwoTensor>("symmetric_strain")),
     _antisymmetric_strain(declareProperty<RankTwoTensor>("antisymmetric_strain")),
@@ -94,13 +94,13 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
     _mechanical_dissipation_tot_old(declarePropertyOld<Real>("mechanical_dissipation_tot")),
     _plasticity_type(isParamValid("plasticity_type") ? getParam<std::string>("plasticity_type") + "_" : ""),
     _min_stepsize(getParam<Real>("min_stepsize")),
-    //_plast_factor(getParam<Real>("plast_factor")),
+    _plast_factor(getParam<Real>("plast_factor")),
     _iter(declareProperty<Real>("plastic_local_iterations")), // this is really an unsigned int, but for visualisation i convert it to Real
     _ignore_failures(getParam<bool>("ignore_failures")),
     _poromech_kernel(declareProperty<Real>("poromechanics_kernel")),
     _poromech_jac(declareProperty<Real>("poromechanics_jacobian")),
-    //_dplastic_heat_dstrain(declareProperty<RankTwoTensor>("dplastic_heat_dstrain")),
-    //_dplastic_heat_dcurvature(declareProperty<RankTwoTensor>("dplastic_heat_dcurvature")),
+    _dplastic_heat_dstrain(declareProperty<RankTwoTensor>("dplastic_heat_dstrain")),
+    _dplastic_heat_dcurvature(declareProperty<RankTwoTensor>("dplastic_heat_dcurvature")),
     _wc_x(coupledValue("wc_x")),
     _wc_y(coupledValue("wc_y")),
     _wc_z(coupledValue("wc_z")),
@@ -130,7 +130,7 @@ RedbackMechMaterialHO::RedbackMechMaterialHO(const InputParameters & parameters)
 }
 
 void
-RedbackMechMaterialHO::initQpStatefulProperties()
+RedbackMechMaterialHOexp::initQpStatefulProperties()
 {
   RedbackMechMaterial::initQpStatefulProperties();
   _symmetric_strain[ _qp ].zero();
@@ -166,7 +166,7 @@ RedbackMechMaterialHO::initQpStatefulProperties()
 
 
 void
-RedbackMechMaterialHO::computeQpStrain(const RankTwoTensor & Fhat)
+RedbackMechMaterialHOexp::computeQpStrain(const RankTwoTensor & Fhat)
 {
   //strain = (grad_disp + grad_disp^T)/2
   RankTwoTensor grad_tensor(_grad_disp_x[_qp], _grad_disp_y[_qp], _grad_disp_z[_qp]);
@@ -214,7 +214,7 @@ _curvature_increment[_qp] = wc_grad_tensor - old_curvature;
 }
 
 void
-RedbackMechMaterialHO::computeQpStress()
+RedbackMechMaterialHOexp::computeQpStress()
 {
   //RedbackMechMaterial::computeQpStress();
 
@@ -310,8 +310,7 @@ else {
   std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
 }
 
-Real plast;
-
+/*
 if (_plasticity_type.compare("DruckerPrager_cohesion3D_") == 0 || _plasticity_type.compare("DruckerPrager_cohesion2D_") == 0 || _plasticity_type.compare("DeBorst_2D_") == 0 ){
 plast = 0.;}
 else if (_plasticity_type.compare("DruckerPrager_friction3D_") == 0 || _plasticity_type.compare("DruckerPrager_friction2D_") == 0 ){
@@ -319,7 +318,7 @@ plast = 1.;}
 else {
   std::cout << " the plasticity type entered doesn't correspond to any of the ones registered " << std::endl;
 }
-
+*/
 //Real Hs;
 /*
 if (( _eqv_plastic_strain_old[_qp] < 0.1) ){
@@ -349,7 +348,7 @@ PROPS[13]=g_1;
 PROPS[14]=g_2;
 PROPS[15]=g_3;
 PROPS[16]=g_4;
-PROPS[17]= plast;
+PROPS[17]= _plast_factor;
 PROPS[18]=_tolerance_tau;
 
 
@@ -370,7 +369,7 @@ PROPS2[13]=g_1;
 PROPS2[14]=g_2;
 PROPS2[15]=g_3;
 PROPS2[16]=g_4;
-PROPS2[17]= plast;
+PROPS2[17]= _plast_factor;
 PROPS2[18]=_tolerance_tau;
 
 
@@ -728,7 +727,7 @@ computeRedbackTerms(_stress[_qp], 0, 0);
 
 }
 
-int RedbackMechMaterialHO::corsigma(int num1, int num2){
+int RedbackMechMaterialHOexp::corsigma(int num1, int num2){
   int result;
 
   if (num1 == 0 && num2 == 0){
@@ -761,7 +760,7 @@ int RedbackMechMaterialHO::corsigma(int num1, int num2){
   return result;
 }
 
-int RedbackMechMaterialHO::cormoment(int num1, int num2){
+int RedbackMechMaterialHOexp::cormoment(int num1, int num2){
   int result;
 
   if (num1 == 0 && num2 == 0){
@@ -795,7 +794,7 @@ int RedbackMechMaterialHO::cormoment(int num1, int num2){
 return result;
 }
 
-void RedbackMechMaterialHO::remplSigmaOld(RankTwoTensor & tens_old,  Real* vect, int  ini){
+void RedbackMechMaterialHOexp::remplSigmaOld(RankTwoTensor & tens_old,  Real* vect, int  ini){
   for (unsigned i = 0; i < 3; ++i){
     vect[ini + i]=tens_old(i,i);
   }
@@ -808,7 +807,7 @@ void RedbackMechMaterialHO::remplSigmaOld(RankTwoTensor & tens_old,  Real* vect,
 }
 
 
-void RedbackMechMaterialHO::remplMomentOld(RankTwoTensor & tens_old, Real* vect, int  ini){
+void RedbackMechMaterialHOexp::remplMomentOld(RankTwoTensor & tens_old, Real* vect, int  ini){
   vect[ini+9]=tens_old(0,0);
   vect[ini+10]=tens_old(0,1);
   vect[ini+11]=tens_old(0,2);
@@ -821,7 +820,7 @@ void RedbackMechMaterialHO::remplMomentOld(RankTwoTensor & tens_old, Real* vect,
 }
 
 
-void RedbackMechMaterialHO::recupSigmaNew(RankTwoTensor & tens_new, Real* vect, int  ini){
+void RedbackMechMaterialHOexp::recupSigmaNew(RankTwoTensor & tens_new, Real* vect, int  ini){
   for (unsigned i = 0; i < 3; ++i){
   tens_new(i,i) = vect[ini + i];
   }
@@ -836,7 +835,7 @@ void RedbackMechMaterialHO::recupSigmaNew(RankTwoTensor & tens_new, Real* vect, 
 }
 
 
-void RedbackMechMaterialHO::recupMomentNew(RankTwoTensor & tens_new, Real* vect, int  ini){
+void RedbackMechMaterialHOexp::recupMomentNew(RankTwoTensor & tens_new, Real* vect, int  ini){
   tens_new(0,0)=vect[ini + 9];
   tens_new(0,1)=vect[ini + 10];
   tens_new(0,2)=vect[ini + 11];
@@ -850,7 +849,7 @@ void RedbackMechMaterialHO::recupMomentNew(RankTwoTensor & tens_new, Real* vect,
 
 
 
-void RedbackMechMaterialHO::computeQpElasticityTensor()
+void RedbackMechMaterialHOexp::computeQpElasticityTensor()
 {
 //  RedbackMechMaterial::computeQpElasticityTensor();
 
@@ -863,7 +862,7 @@ void RedbackMechMaterialHO::computeQpElasticityTensor()
  */
 
 void
-RedbackMechMaterialHO::returnMap(const RankTwoTensor & sig_old,
+RedbackMechMaterialHOexp::returnMap(const RankTwoTensor & sig_old,
                                       const RankTwoTensor & delta_d,
                                       const RankFourTensor & E_ijkl,
                                       RankTwoTensor & dp,
@@ -884,7 +883,7 @@ RedbackMechMaterialHO::returnMap(const RankTwoTensor & sig_old,
  * Get unitary flow tensor in deviatoric direction
  */
 void
-RedbackMechMaterialHO::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real pc, RankTwoTensor & flow_tensor)
+RedbackMechMaterialHOexp::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real pc, RankTwoTensor & flow_tensor)
 {
   flow_tensor.zero(); // TODO: not implemented yet
 }
@@ -894,20 +893,20 @@ RedbackMechMaterialHO::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, 
  * pc ... pre-consolidation pressure (pc = -getYieldStress(eqvpstrain))
  */
 Real
-RedbackMechMaterialHO::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real pc)
+RedbackMechMaterialHOexp::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real pc)
 {
   return 0; // TODO: not implemented yet
 }
 
 Real
-RedbackMechMaterialHO::getDerivativeFlowIncrement(
+RedbackMechMaterialHOexp::getDerivativeFlowIncrement(
   const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
 {
   return 0; // TODO: not implemented yet
 }
 
 void
-RedbackMechMaterialHO::getJac(const RankTwoTensor & sig,
+RedbackMechMaterialHOexp::getJac(const RankTwoTensor & sig,
                               const RankFourTensor & E_ijkl,
                               Real flow_incr,
                               Real sig_eqv,
@@ -921,7 +920,7 @@ RedbackMechMaterialHO::getJac(const RankTwoTensor & sig,
 }
 
 void
-RedbackMechMaterialHO::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterialHOexp::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
 {
   // TODO: not implemented yet
   p_y = 0;
@@ -929,7 +928,7 @@ RedbackMechMaterialHO::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yi
 }
 
 void
-RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y)
+RedbackMechMaterialHOexp::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y)
 {
   // Update the mechanical dissipation
   RankTwoTensor instantaneous_strain_rate;
@@ -989,22 +988,13 @@ RedbackMechMaterialHO::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p
   delta_phi_mech_pl = (1.0 - _total_porosity[ _qp ]) * (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]).trace();
 
   _mechanical_porosity[ _qp ] = delta_phi_mech_el + delta_phi_mech_pl;
-  
-  //Real _beta_star_init = 0.0;
 
   //Compute terms for the RedbackPoroHO
-  //if ( _stress[_qp](0,0) > -65 ){
-  //  _beta_star_init = _beta_star * 10000000 ;}
-  //else {
-  //  _beta_star_init = _beta_star ;}
-  
   Real instantaneous_vol_strain_rate;
   instantaneous_vol_strain_rate = (_total_strain[ _qp ].trace() - _total_strain_old[ _qp ].trace()) / _dt;
-  //instantaneous_vol_strain_rate = (_plastic_strain[ _qp ].trace() - _plastic_strain_old[ _qp ].trace()) / _dt;
  _poromech_kernel[ _qp ] = instantaneous_vol_strain_rate / _beta_star;
  //_poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
  _poromech_jac[ _qp ] = 1 / ( _beta_star * _dt);
 }
 
 
-//#endif // COSSERAT_DYNLIB_EXISTS

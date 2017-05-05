@@ -91,6 +91,13 @@ validParams<RedbackMechMaterial>()
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
+  
+  params.addParam<std::vector<FunctionName> >(
+    "initial_stress",
+    "A list of functions describing the initial stress. If provided, there "
+    "must be 9 of these, corresponding to the xx, yx, zx, xy, yy, zy, xz, yz, "
+    "zz components respectively.  If not provided, all components of the "
+    "initial stress will be zero");
 
   return params;
 }
@@ -189,7 +196,9 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _peclet_number(getMaterialProperty<Real>("Peclet_number")),
     _returnmap_iter(declareProperty<Real>("returnmap_iter")),
     _T0_param(getParam<Real>("temperature_reference")),
-    _P0_param(getParam<Real>("pressure_reference"))
+    _P0_param(getParam<Real>("pressure_reference")),
+    _dplastic_heat_dstrain(declareProperty<RankTwoTensor>("dplastic_heat_dstrain")),
+    _dplastic_heat_dcurvature(declareProperty<RankTwoTensor>("dplastic_heat_dcurvature"))
 {
   /*Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
@@ -203,6 +212,19 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic
                                        // elasticity tensor.
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int)fill_method);*/
+  
+    // Initial stress
+  const std::vector<FunctionName> & fcn_names(getParam<std::vector<FunctionName> >("initial_stress"));
+  const unsigned num = fcn_names.size();
+  if (!(num == 0 || num == 3 * 3))
+    mooseError("Either zero or ",
+               3 * 3,
+               " initial stress functions must be provided to TensorMechanicsMaterial.  You supplied ",
+               num,
+               "\n");
+  _initial_stress.resize(num);
+  for (unsigned i = 0; i < num; ++i)
+    _initial_stress[ i ] = &getFunctionByName(fcn_names[ i ]);
 }
 
 MooseEnum
@@ -218,6 +240,10 @@ RedbackMechMaterial::initQpStatefulProperties()
   _total_strain[ _qp ].zero();
   _elastic_strain[ _qp ].zero();
   _stress[ _qp ].zero();
+   if (_initial_stress.size() == 3 * 3)
+    for (unsigned i = 0; i < 3; ++i)
+      for (unsigned j = 0; j < 3; ++j)
+        _stress[ _qp ](i, j) = _initial_stress[ i * 3 + j ]->value(_t, _q_point[ _qp ]);
   _plastic_strain[ _qp ].zero();
   _eqv_plastic_strain[ _qp ] = 0.0;
   _elasticity_tensor[ _qp ] = _Cijkl;
@@ -244,6 +270,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _damage_kernel_jac[ _qp ] = 0;
   _returnmap_iter[ _qp ] = 0;
   _mass_removal_rate[ _qp ] = 0;
+  _dplastic_heat_dstrain[_qp].zero();
 }
 
 void

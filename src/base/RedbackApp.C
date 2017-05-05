@@ -74,6 +74,7 @@
 
 //#ifdef COSSERAT_DYNLIB_EXISTS
 #include "RedbackMechMaterialHO.h"
+#include "RedbackMechMaterialHOexp.h"
 #include "RedbackMechMaterialHOHard.h"
 #include "RedbackMechMaterialHOelastic.h"
 //#endif // COSSERAT_DYNLIB_EXISTS
@@ -177,6 +178,7 @@ RedbackApp::registerObjects(Factory & factory)
 
 //#ifdef COSSERAT_DYNLIB_EXISTS
   registerMaterial(RedbackMechMaterialHO);
+  registerMaterial(RedbackMechMaterialHOexp);
   registerMaterial(RedbackMechMaterialHOHard);
   registerMaterial(RedbackMechMaterialHOelastic);
 //#endif // COSSERAT_DYNLIB_EXISTS

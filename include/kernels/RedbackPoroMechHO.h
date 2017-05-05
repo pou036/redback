@@ -39,9 +39,17 @@ protected:
   const MaterialProperty<Real> & _poromech_kernel;
   const MaterialProperty<Real> & _poromech_jac;
 
-  unsigned int _temp_var; // variable number of the temperature variable
+  // number of coupled displacement variables
+  unsigned int _ndisp;
+
+  // MOOSE variable number for the displacement variables
+  std::vector<unsigned int> _disp_var;
+  
+  const MaterialProperty<Real> & _solid_thermal_expansion;
 
 private:
+  const bool _temp_coupled;
+  const unsigned int _temp_var;
   Real _time_factor;
 };
 

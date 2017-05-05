@@ -1,6 +1,13 @@
+benchmark_1_T.test_bench1a_temperature
+benchmark_1_T.test_bench1b_temperature
+benchmark_1_T.test_bench1c_temperature
+benchmark_1_T.test_bench1d_temperature
 benchmark_9_THC.test_9_THC_no_porosity
 benchmark_9_THC.test_9_THC_porosity
+transverseBC.ring_shear
 benchmark_2_H.test_darcy
 benchmark_4_TH.test_4_TH
-transverseBC.ring_shear
+benchmark_5_TC.test_5_TC
+benchmark_14_HO_TM.bench_elastic_HO_TM_1
+benchmark_14_HO_TM.test_mech_dissip
 benchmark_3_M.test_3_M_CC_anisotropic1

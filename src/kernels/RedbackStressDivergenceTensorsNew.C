@@ -55,6 +55,7 @@ RedbackStressDivergenceTensorsNew::RedbackStressDivergenceTensorsNew(const Input
     // getParam<std::string>("appended_property_name"))),
     _component(getParam<unsigned int>("component")),
     _biot_coeff(getMaterialProperty<Real>("biot_coefficient")),
+    _solid_thermal_expansion(getMaterialProperty<Real>("solid_thermal_expansion")),
 
     _xdisp_coupled(isCoupled("disp_x")),
     _ydisp_coupled(isCoupled("disp_y")),
@@ -144,22 +145,21 @@ RedbackStressDivergenceTensorsNew::computeQpOffDiagJacobian(unsigned int jvar)
 
   // Porepressure term (disabled for now, doesn't seem to make any
   // difference...)
-  // if (_pore_pres_coupled && jvar == _porepressure_var)
-  //  porepressure_term = _phi[_j][_qp]*_grad_test[_i][_qp](_component);
+   if (_pore_pres_coupled && jvar == _porepressure_var){
+    return -_biot_coeff[ _qp ] * _phi[_j][_qp]*_grad_test[_i][_qp](_component);}
 
-  if (active)
+  if (active){
     return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[ _qp ],_component,
                                                  coupled_component,
                                                  _grad_test[ _i ][ _qp ],
-                                                 _grad_phi[ _j ][ _qp ]) +
-           porepressure_term; // (porepressure_term = 0 here)
+                                                 _grad_phi[ _j ][ _qp ]);}
 
-  if (_temp_coupled && jvar == _temp_var)
-  {
-    // return _d_stress_dT[_qp].rowDot(_component, _grad_test[_i][_qp]) *
-    // _phi[_j][_qp];
-    return 0.0 + porepressure_term; // (porepressure_term = 0 here)
-  }
+  RankTwoTensor Dstress_DT;
+  Dstress_DT.zero();
+  Dstress_DT.addIa(-_solid_thermal_expansion[_qp]);
+
+  if (_temp_coupled && jvar == _temp_var){
+     return (( _Jacobian_mult[ _qp ] *  Dstress_DT ).row(_component)*_grad_test[_i][_qp]) * _phi[_j][_qp];}
 
   return 0 + porepressure_term;
 }

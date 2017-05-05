@@ -14,12 +14,10 @@
   wc_z = wc_z
   wc_y = wc_y
   wc_x = wc_x
-  temperature = temperature
-  pore_pres = pore_pressure
-  pore_pressure = pore_pressure
 []
 
 [Postprocessors]
+  active  = 'number_nonlin wc_z_mid Temperature_mid pressure_mid disp_y_top number_lin normal_force tangential_force disp_x_top dt strain_12_mid strain_12_pl_mid disp_x_0 disp_x_1 disp_x_2 disp_x_3 disp_x_4 disp_x_5 disp_x_6 disp_x_7 disp_x_8 disp_x_9 disp_x_10 disp_x_11 disp_x_12 disp_x_13 disp_x_14 disp_x_15 disp_x_16 disp_x_17 disp_x_18 disp_x_19 disp_x_20 disp_x_21 disp_x_22 disp_x_23 disp_x_24 disp_x_25 disp_x_26 disp_x_27 disp_x_28 disp_x_29 disp_x_30 disp_x_31 disp_x_32 disp_x_33 disp_x_34 disp_x_35 disp_x_36 disp_x_37 disp_x_38 disp_x_39 disp_x_40 disp_x_41 disp_x_42 disp_x_43 disp_x_44 disp_x_45 disp_x_46 disp_x_47 disp_x_48 disp_x_49 disp_x_50 disp_x_51 disp_x_52 disp_x_53 disp_x_54 disp_x_55 disp_x_56 disp_x_57 disp_x_58 disp_x_59 disp_x_60 disp_x_61 disp_x_62 disp_x_63 disp_x_64 disp_x_65 disp_x_66 disp_x_67 disp_x_68 disp_x_69 disp_x_70 disp_x_71 disp_x_72 disp_x_73 disp_x_74 disp_x_75 disp_x_76 disp_x_77 disp_x_78 disp_x_79 disp_x_80 disp_x_81 disp_x_82 disp_x_83 disp_x_84 disp_x_85 disp_x_86 disp_x_87 disp_x_88 disp_x_89 disp_x_90 disp_x_91 disp_x_92 disp_x_93 disp_x_94 disp_x_95 disp_x_96 disp_x_97 disp_x_98 disp_x_99 disp_x_100 disp_x_101 disp_x_102 disp_x_103 disp_x_104 disp_x_105 disp_x_106 disp_x_107 disp_x_108 disp_x_109 disp_x_110 disp_x_111 disp_x_112 disp_x_113 disp_x_114 disp_x_115 disp_x_116 disp_x_117 disp_x_118 disp_x_119 disp_x_120 disp_x_121 disp_x_122 disp_x_123 disp_x_124 disp_x_125 disp_x_126 disp_x_127 disp_x_128 disp_x_129 disp_x_130 disp_x_131 disp_x_132 disp_x_133 disp_x_134 disp_x_135 disp_x_136 disp_x_137 disp_x_138 disp_x_139 disp_x_140 disp_x_141 disp_x_142 disp_x_143 disp_x_144 disp_x_145 disp_x_146 disp_x_147 disp_x_148 disp_x_149 disp_x_150 disp_x_151 disp_x_152 disp_x_153 disp_x_154 disp_x_155 disp_x_156 disp_x_157 disp_x_158 disp_x_159 disp_x_160 lagrange_0 lagrange_1 lagrange_2 lagrange_3 lagrange_4 lagrange_5 lagrange_6 lagrange_7 lagrange_8 lagrange_9 lagrange_10 lagrange_11 lagrange_12 lagrange_13 lagrange_14 lagrange_15 lagrange_16 lagrange_17 lagrange_18 lagrange_19 lagrange_20 lagrange_21 lagrange_22 lagrange_23 lagrange_24 lagrange_25 lagrange_26 lagrange_27 lagrange_28 lagrange_29 lagrange_30 lagrange_31 lagrange_32 lagrange_33 lagrange_34 lagrange_35 lagrange_36 lagrange_37 lagrange_38 lagrange_39 lagrange_40 lagrange_41 lagrange_42 lagrange_43 lagrange_44 lagrange_45 lagrange_46 lagrange_47 lagrange_48 lagrange_49 lagrange_50 lagrange_51 lagrange_52 lagrange_53 lagrange_54 lagrange_55 lagrange_56 lagrange_57 lagrange_58 lagrange_59 lagrange_60 lagrange_61 lagrange_62 lagrange_63 lagrange_64 lagrange_65 lagrange_66 lagrange_67 lagrange_68 lagrange_69 lagrange_70 lagrange_71 lagrange_72 lagrange_73 lagrange_74 lagrange_75 lagrange_76 lagrange_77 lagrange_78 lagrange_79 lagrange_80 lagrange_81 lagrange_82 lagrange_83 lagrange_84 lagrange_85 lagrange_86 lagrange_87 lagrange_88 lagrange_89 lagrange_90 lagrange_91 lagrange_92 lagrange_93 lagrange_94 lagrange_95 lagrange_96 lagrange_97 lagrange_98 lagrange_99 lagrange_100 lagrange_101 lagrange_102 lagrange_103 lagrange_104 lagrange_105 lagrange_106 lagrange_107 lagrange_108 lagrange_109 lagrange_110 lagrange_111 lagrange_112 lagrange_113 lagrange_114 lagrange_115 lagrange_116 lagrange_117 lagrange_118 lagrange_119 lagrange_120 lagrange_121 lagrange_122 lagrange_123 lagrange_124 lagrange_125 lagrange_126 lagrange_127 lagrange_128 lagrange_129 lagrange_130 lagrange_131 lagrange_132 lagrange_133 lagrange_134 lagrange_135 lagrange_136 lagrange_137 lagrange_138 lagrange_139 lagrange_140 lagrange_141 lagrange_142 lagrange_143 lagrange_144 lagrange_145 lagrange_146 lagrange_147 lagrange_148 lagrange_149 lagrange_150 lagrange_151 lagrange_152 lagrange_153 lagrange_154 lagrange_155 lagrange_156 lagrange_157 lagrange_158 lagrange_159 moment_0 moment_1 moment_2 moment_3 moment_4 moment_5 moment_6 moment_7 moment_8 moment_9 moment_10 moment_11 moment_12 moment_13 moment_14 moment_15 moment_16 moment_17 moment_18 moment_19 moment_20 moment_21 moment_22 moment_23 moment_24 moment_25 moment_26 moment_27 moment_28 moment_29 moment_30 moment_31 moment_32 moment_33 moment_34 moment_35 moment_36 moment_37 moment_38 moment_39 moment_40 moment_41 moment_42 moment_43 moment_44 moment_45 moment_46 moment_47 moment_48 moment_49 moment_50 moment_51 moment_52 moment_53 moment_54 moment_55 moment_56 moment_57 moment_58 moment_59 moment_60 moment_61 moment_62 moment_63 moment_64 moment_65 moment_66 moment_67 moment_68 moment_69 moment_70 moment_71 moment_72 moment_73 moment_74 moment_75 moment_76 moment_77 moment_78 moment_79 moment_80 moment_81 moment_82 moment_83 moment_84 moment_85 moment_86 moment_87 moment_88 moment_89 moment_90 moment_91 moment_92 moment_93 moment_94 moment_95 moment_96 moment_97 moment_98 moment_99 moment_100 moment_101 moment_102 moment_103 moment_104 moment_105 moment_106 moment_107 moment_108 moment_109 moment_110 moment_111 moment_112 moment_113 moment_114 moment_115 moment_116 moment_117 moment_118 moment_119 moment_120 moment_121 moment_122 moment_123 moment_124 moment_125 moment_126 moment_127 moment_128 moment_129 moment_130 moment_131 moment_132 moment_133 moment_134 moment_135 moment_136 moment_137 moment_138 moment_139 moment_140 moment_141 moment_142 moment_143 moment_144 moment_145 moment_146 moment_147 moment_148 moment_149 moment_150 moment_151 moment_152 moment_153 moment_154 moment_155 moment_156 moment_157 moment_158 moment_159 failure_0 failure_1 failure_2 failure_3 failure_4 failure_5 failure_6 failure_7 failure_8 failure_9 failure_10 failure_11 failure_12 failure_13 failure_14 failure_15 failure_16 failure_17 failure_18 failure_19 failure_20 failure_21 failure_22 failure_23 failure_24 failure_25 failure_26 failure_27 failure_28 failure_29 failure_30 failure_31 failure_32 failure_33 failure_34 failure_35 failure_36 failure_37 failure_38 failure_39 failure_40 failure_41 failure_42 failure_43 failure_44 failure_45 failure_46 failure_47 failure_48 failure_49 failure_50 failure_51 failure_52 failure_53 failure_54 failure_55 failure_56 failure_57 failure_58 failure_59 failure_60 failure_61 failure_62 failure_63 failure_64 failure_65 failure_66 failure_67 failure_68 failure_69 failure_70 failure_71 failure_72 failure_73 failure_74 failure_75 failure_76 failure_77 failure_78 failure_79 failure_80 failure_81 failure_82 failure_83 failure_84 failure_85 failure_86 failure_87 failure_88 failure_89 failure_90 failure_91 failure_92 failure_93 failure_94 failure_95 failure_96 failure_97 failure_98 failure_99 failure_100 failure_101 failure_102 failure_103 failure_104 failure_105 failure_106 failure_107 failure_108 failure_109 failure_110 failure_111 failure_112 failure_113 failure_114 failure_115 failure_116 failure_117 failure_118 failure_119 failure_120 failure_121 failure_122 failure_123 failure_124 failure_125 failure_126 failure_127 failure_128 failure_129 failure_130 failure_131 failure_132 failure_133 failure_134 failure_135 failure_136 failure_137 failure_138 failure_139 failure_140 failure_141 failure_142 failure_143 failure_144 failure_145 failure_146 failure_147 failure_148 failure_149 failure_150 failure_151 failure_152 failure_153 failure_154 failure_155 failure_156 failure_157 failure_158 failure_159'
   [./disp_x_0]
     type = PointValue
     point = '0.0 0.0 0.0'
@@ -3231,10 +3229,20 @@
     execute_on = linear
     boundary = top
   [../]
-  [./wc_z_top]
+  [./wc_z_mid]
     type = PointValue
-    point = '1 1 1'
+    point = '1 0.5 1'
     variable = wc_z
+  [../]
+  [./Temperature_mid]
+    type = PointValue
+    point = '1 0.5 1'
+    variable = temperature
+  [../]
+  [./pressure_mid]
+    type = PointValue
+    point = '1 0.5 1'
+    variable = pore_pressure
   [../]
   [./number_nonlin]
     type = NumNonlinearIterations
@@ -3260,6 +3268,16 @@
   [../]
   [./dt]
     type = TimestepSize
+  [../]
+  [./strain_12_mid]
+    type = PointValue
+    point = '1 0.5 1'
+    variable = strain_12
+  [../]
+  [./strain_12_pl_mid]
+    type = PointValue
+    point = '1 0.5 1'
+    variable = plastic_12
   [../]
 []
 
@@ -3359,6 +3377,14 @@
     family = MONOMIAL
   [../]
   [./strain_21]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./strain_11]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./strain_22]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -3462,12 +3488,20 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
+  [./mech_dissip]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+  [./mech_dissip_energy]
+    order = CONSTANT
+    family = MONOMIAL
+  [../]
+
 []
 
 [Functions]
   active = 'ramp_neg ramp'
   [./ramp]
-    # -0.0005*t
     type = ParsedFunction
     value = if(t>0.000002,1000*(t-0.000002),0)
   [../]
@@ -3487,18 +3521,24 @@
     variable = disp_x
     displacements = 'disp_x disp_y disp_z'
     component = 0
+    temp = temperature
+    pore_pres = pore_pressure
   [../]
   [./cy_elastic]
     type = RedbackCosseratStressDivergenceTensors
     variable = disp_y
     displacements = 'disp_x disp_y disp_z'
     component = 1
+    temp = temperature
+    pore_pres = pore_pressure
   [../]
   [./cz_elastic]
     type = RedbackCosseratStressDivergenceTensors
     variable = disp_z
     component = 2
     displacements = 'disp_x disp_y disp_z'
+    temp = temperature
+    pore_pres = pore_pressure
   [../]
   [./x_couple]
     type = RedbackCosseratStressDivergenceTensors
@@ -3557,6 +3597,8 @@
   [./mech_dissip]
     type = RedbackMechDissip
     variable = temperature
+    displacements = 'disp_x disp_y disp_z'
+    rotations = 'wc_x wc_y wc_z'
   [../]
   [./dT_dt]
     type = TimeDerivative
@@ -3569,10 +3611,12 @@
   [./thermal_press]
     type = RedbackThermalPressurization
     variable = pore_pressure
+    temperature = temperature
   [../]
   [./poromech]
     type = RedbackPoroMechHO
     variable = pore_pressure
+    displacements = 'disp_x disp_y disp_z'
   [../]
   [./T_diff]
     type = RedbackThermalDiffusion
@@ -3717,6 +3761,20 @@
     rank_two_tensor = total_strain
     index_j = 0
     index_i = 1
+  [../]
+  [./strain_22]
+    type = RankTwoAux
+    variable = strain_22
+    rank_two_tensor = total_strain
+    index_j = 1
+    index_i = 1
+  [../]
+  [./strain_11]
+    type = RankTwoAux
+    variable = strain_11
+    rank_two_tensor = total_strain
+    index_j = 0
+    index_i = 0
   [../]
   [./antisymmetric_strain]
     type = RankTwoAux
@@ -3894,6 +3952,16 @@
     index_j = 2
     index_i = 1
   [../]
+  [./mech_dissip]
+    type = MaterialRealAux
+    variable = mech_dissip
+    property = mechanical_dissipation_mech
+  [../]
+  [./mech_dissip_energy]
+    type = MaterialRealAux
+    variable = mech_dissip_energy
+    property = mechanical_dissipation_tot
+  [../]
 []
 
 [BCs]
@@ -4037,7 +4105,7 @@
     # 0 2.6549E3 2.6549E3
     type = RedbackMechMaterialHO
     block = 0
-    B_ijkl = '0 18.0 18.0'
+    B_ijkl = '0 8.0 8.0'
     C_ijkl = '1.3333E4 1.0E4 5.0E3'
     fill_method = general_isotropic
     poisson_ratio = -9999
@@ -4047,16 +4115,20 @@
     hardening_mech_modulus = -1
     friction_coefficient = 0.5
     min_stepsize = 1e-8
-    beta_star = 1/12200
+    beta_star = 8.19672E5
     plasticity_type = DruckerPrager_friction3D
+    pore_pres = pore_pressure
+    temperature = temperature
   [../]
   [./redback_mat]
     type = RedbackMaterial
     block = 0
-    gr = 1/2.8
-    pressurization_coefficient = 0.8
+    gr = 0.357142857
+    pressurization_coefficient = 0.9
     solid_thermal_expansion = 2.5E-5
-    ref_lewis_nb = 1/12.2
+    ref_lewis_nb = 0.08196721
+    pore_pres = pore_pressure
+    temperature = temperature
   [../]
 []
 
@@ -4093,7 +4165,7 @@
 [Outputs]
   execute_on = 'timestep_end initial'
   exodus = true
-  file_base = shear_R30_mesh160_THM_pres08
+  file_base = shear_R20_mesh160_THM_PP_rice
   print_linear_residuals = false
 []
 
