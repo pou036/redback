@@ -58,7 +58,7 @@ RedbackMechMaterialDP::getPressureProjection(Real pressure, Real sig_eqv, Real c
 
 void
 RedbackMechMaterialDP::getFlowTensor(
-  const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor)
+  const RankTwoTensor & sig, Real q, Real p, Real /*yield_stress*/, RankTwoTensor & flow_tensor)
 {
   RankTwoTensor sig_dev;
   Real val;
@@ -79,7 +79,7 @@ RedbackMechMaterialDP::getFlowTensor(
  */
 Real
 RedbackMechMaterialDP::getFlowIncrement(
-  Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real yield_stress)
+  Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real /*yield_stress*/)
 {
   Real flow_incr_vol =
     _ref_pe_rate * _dt *
@@ -97,7 +97,7 @@ RedbackMechMaterialDP::getFlowIncrement(
 
 Real
 RedbackMechMaterialDP::getDerivativeFlowIncrement(
-  const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real yield_stress, Real q_yield_stress, Real p_yield_stress)
+  const RankTwoTensor & /*sig*/, Real pressure, Real sig_eqv, Real yield_stress, Real q_yield_stress, Real p_yield_stress)
 {
   Real delta_lambda_p =
     _ref_pe_rate * _dt * std::pow(macaulayBracket((pressure - p_yield_stress)/yield_stress), _exponent) * _exponential;
@@ -131,7 +131,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
   RankTwoTensor dfi_dft;
   RankFourTensor dft_dsig1, /*dft_dsig2,*/ dfd_dft, dfd_dsig, dfi_dsig;
   Real f1, f2, f3;
-  Real dfi_dseqv_dev, dfi_dseqv_vol, dfi_dseqv;
+  Real dfi_dseqv;
 
   sig_dev = sig.deviatoric();
 
@@ -157,7 +157,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
         for (l = 0; l < 3; ++l)
           dfi_dsig(i, j, k, l) = flow_dirn(i, j) * flow_dirn(k, l) * dfi_dseqv;
 
-  Real flow_tensor_norm = flow_dirn.L2norm();
+  // Real flow_tensor_norm = flow_dirn.L2norm();
 
   // This loop calculates the second term. Read REDBACK's documentation
   // (same as J2 plasticity case)

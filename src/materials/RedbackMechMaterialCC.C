@@ -39,7 +39,8 @@ RedbackMechMaterialCC::RedbackMechMaterialCC(const InputParameters & parameters)
  * Get unitary flow tensor in deviatoric direction, modified Cam-Clay
  */
 void
-RedbackMechMaterialCC::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real pc, RankTwoTensor & flow_tensor)
+RedbackMechMaterialCC::getFlowTensor(
+  const RankTwoTensor & sig, Real /*q*/, Real p, Real pc, RankTwoTensor & flow_tensor)
 {
   if (pc > 0)
     pc *= -1;
@@ -75,7 +76,7 @@ RedbackMechMaterialCC::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yiel
 
 Real
 RedbackMechMaterialCC::getDerivativeFlowIncrement(
-  const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
+  const RankTwoTensor & /*sig*/, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
 {
   if (Ellipse::isPointOutsideOfEllipse(/*m=*/_slope_yield_surface,
                                        /*p_c=*/pc,
@@ -114,7 +115,7 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig,
   RankTwoTensor dfi_dft;
   RankFourTensor dfd_dsig, dfi_dsig;
   Real f1, f2;
-  Real dfi_dseqv_dev, dfi_dseqv_vol, dfi_dseqv;
+  Real dfi_dseqv;
 
   pc *= -1;
 
@@ -178,6 +179,6 @@ RedbackMechMaterialCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yi
 }
 
 void
-RedbackMechMaterialCC::form_damage_kernels(Real q_y)
+RedbackMechMaterialCC::form_damage_kernels(Real /*q_y*/)
 {
 }
