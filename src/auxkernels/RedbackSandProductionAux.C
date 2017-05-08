@@ -17,10 +17,11 @@ InputParameters
 validParams<RedbackSandProductionAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-    params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
-    params.addRequiredParam<FunctionName>("peak_strain", "The function describing the plastic peak shear strain evolution with (rock) pressure.");
-    params.addParam<Real>("lambda_1", 1.0, "The first sand production coefficient (Papamichos et al 2001)");
-    params.addParam<Real>("lambda_2", 1.0, "The second sand production coefficient (Papamichos et al 2001)");
+  params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
+  params.addRequiredParam<FunctionName>(
+    "peak_strain", "The function describing the plastic peak shear strain evolution with (rock) pressure.");
+  params.addParam<Real>("lambda_1", 1.0, "The first sand production coefficient (Papamichos et al 2001)");
+  params.addParam<Real>("lambda_2", 1.0, "The second sand production coefficient (Papamichos et al 2001)");
 
   return params;
 }
@@ -42,14 +43,15 @@ Real
 RedbackSandProductionAux::computeValue()
 {
   Real mass_production_rate, lambda, peak_strain;
-  peak_strain =  _function.value(_mean_stress[_qp], NULL);
+  peak_strain = _function.value(_mean_stress[ _qp ], NULL);
 
-  if (_eqv_plastic_strain[_qp] < peak_strain)
-       lambda = 0;
-  else if (_eqv_plastic_strain[_qp] > peak_strain + _lambda_2/_lambda_1)
-       lambda = _lambda_2;
-  else lambda = _lambda_1 * (_eqv_plastic_strain[_qp] - peak_strain);
+  if (_eqv_plastic_strain[ _qp ] < peak_strain)
+    lambda = 0;
+  else if (_eqv_plastic_strain[ _qp ] > peak_strain + _lambda_2 / _lambda_1)
+    lambda = _lambda_2;
+  else
+    lambda = _lambda_1 * (_eqv_plastic_strain[ _qp ] - peak_strain);
 
-  mass_production_rate = lambda*_sand_production_rate[_qp];
+  mass_production_rate = lambda * _sand_production_rate[ _qp ];
   return mass_production_rate;
 }

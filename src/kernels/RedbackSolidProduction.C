@@ -41,8 +41,8 @@ RedbackSolidProduction::~RedbackSolidProduction()
 Real
 RedbackSolidProduction::computeQpResidual()
 {
-  Real solid_production_kernel = _density_ratio *  _solid_production[ _qp ];
-  return _time_factor * _test[ _i ][ _qp ] *  solid_production_kernel;
+  Real solid_production_kernel = _density_ratio * _solid_production[ _qp ];
+  return _time_factor * _test[ _i ][ _qp ] * solid_production_kernel;
 }
 
 Real

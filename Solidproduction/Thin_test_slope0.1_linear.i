@@ -74,9 +74,9 @@
   [../]
   [./timestep_function]
     # max(1e-7,min(1e1, dt*max(0.2,1-5*(T-T_old-0.2))))
-    # 
+    #
     # max(1e-7,min(1e-2, dt*max(0.1,0.1-5*(T-T_old-0.2))))
-    # 
+    #
     # if(T>3.5, 1e-5, max(1e-7,min(1e-2, dt*max(0.2,1-5*(T-T_old-0.2)))))
     # if(t>0.0169, 1e-7, if(t>0.0168, 2e-6, max(1e-7,min(1e-2, dt*max(0.2, 1-5*(T-T_old-0.2))))))
     type = ParsedFunction

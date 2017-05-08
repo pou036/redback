@@ -99,9 +99,9 @@ protected:
   MaterialProperty<Real> & _eqv_plastic_strain_old;
 
   /// J-integral implementation
-    MaterialProperty<Real> & _SED;
-    MaterialProperty<Real> & _SED_old;
-    MaterialProperty<RankTwoTensor> & _Eshelby_tensor;
+  MaterialProperty<Real> & _SED;
+  MaterialProperty<Real> & _SED_old;
+  MaterialProperty<RankTwoTensor> & _Eshelby_tensor;
 
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
   // yield_stress);
@@ -172,10 +172,10 @@ protected:
   const VariableValue & _damage_old;
 
   const bool _compute_JIntegral;
-  //These are used in calculation of the J integral
-    // MaterialProperty<Real> * _SED;
-    // MaterialProperty<Real> * _SED_old;
-    // MaterialProperty<RankTwoTensor> * _Eshelby_tensor;
+  // These are used in calculation of the J integral
+  // MaterialProperty<Real> * _SED;
+  // MaterialProperty<Real> * _SED_old;
+  // MaterialProperty<RankTwoTensor> * _Eshelby_tensor;
 
   DamageMethod _damage_method;
 

@@ -180,7 +180,6 @@ RedbackApp::registerObjects(Factory & factory)
   registerAux(RedbackPolarTensorMaterialAux);
   registerAux(RedbackSandProductionAux);
 
-
   // Implementing J-integral
   registerPostprocessor(JIntegral);
   registerUserObject(CrackFrontDefinition);

@@ -1,23 +1,23 @@
 # Testing that gravity changes the stress (with depth for example) in the stress divergence kernel
 # Based on oedometer settings (http://ascelibrary.org/doi/pdf/10.1061/40785%28164%2924)
 # and taking into account pore pressure.
-# 
+#
 # The system is solved analytically as follows: (NOTE: need to amend those formulae!!! Expected num. values are correct though!)
 # sigma'_zz + p_f = rho*g*L
 # p_f = - Pe/(beta*(1-phi)) sigma'zz / (K+4G/3)
 # sigma'_xx = sigma'_yy = K0*sigma'_zz
-# 
+#
 # This gives the solutions:
 # p_f = - Pe / (beta(1-phi)k' - Pe) * rho*g*L
 # with k' = (K+4G/3)
-# 
+#
 # Input:
 # L = 1
 # rho = 1
 # g = -9.81
 # E = 5e4
 # nu = 0.2
-# 
+#
 # expected output at the location of the postprocessor, which is at the center of the bottom cell (95% down the way):
 # K0 = E*nu/(E*(1-nu)) = 0.25
 # p_f = +0.00176612
@@ -300,7 +300,6 @@
 
 [Executioner]
   type = Transient
-  dt = 0.25
   solve_type = Newton
   end_time = 10
   nl_abs_tol = 1e-10

@@ -133,16 +133,16 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
     _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
 
-////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
     // Copy-paste from SolidModel.C
     _SED(declareProperty<Real>("strain_energy_density")),
     _SED_old(declarePropertyOld<Real>("strain_energy_density")),
     _Eshelby_tensor(declareProperty<RankTwoTensor>("Eshelby_tensor")),
 
-  // Copy-paste from FiniteStrainPlasticRateMaterial.C
-  _ref_pe_rate(getParam<Real>("ref_pe_rate")),
-  _exponent(getParam<Real>("exponent")),
-  _chemo_mechanical_porosity_coeff(getParam<Real>("chemo_mechanical_porosity_coeff")),
+    // Copy-paste from FiniteStrainPlasticRateMaterial.C
+    _ref_pe_rate(getParam<Real>("ref_pe_rate")),
+    _exponent(getParam<Real>("exponent")),
+    _chemo_mechanical_porosity_coeff(getParam<Real>("chemo_mechanical_porosity_coeff")),
 
     // Redback
     _youngs_modulus(getParam<Real>("youngs_modulus")),
@@ -167,7 +167,6 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _damage_coeff(getParam<Real>("damage_coefficient")),
     _dmg_exponent(getParam<Real>("damage_exponent")),
     _healing_coeff(getParam<Real>("healing_coefficient")),
-
 
     // Get coupled variables (T & P & porosity & damage)
     _has_T(isCoupled("temperature")),
@@ -288,9 +287,9 @@ RedbackMechMaterial::computeProperties()
     computeQpElasticityTensor();
     computeQpStress();
   }
-      // //    computeStrainEnergyDensity();
-      // _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
-      //// elastic_strain is calculated elsewhere in REDBACK
+  // //    computeStrainEnergyDensity();
+  // _elastic_strain[_qp] = _elastic_strain_old[_qp] + _strain_increment[_qp];
+  //// elastic_strain is calculated elsewhere in REDBACK
 }
 
 void
@@ -587,8 +586,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
      std::fabs(_mean_stress[ _qp ] * std::pow(macaulayBracket(_mean_stress[ _qp ] - p_y), _exponent)));
 
   // Begin of the chemical degradation method of Hu and Hueckel 2013 (doi:10.1680/geot.SIP13.P.020)
-  _mass_removal_rate[_qp] = 0;
-  Real total_energy_input = sig.doubleContraction(instantaneous_strain_rate);
+  _mass_removal_rate[ _qp ] = 0;
+  //Real total_energy_input = sig.doubleContraction(instantaneous_strain_rate);
 
   // _mass_removal_rate[ _qp ] = _chemo_mechanical_porosity_coeff * (1 + total_energy_input);
   if (_volumetric_strain[ _qp ] > 0)
@@ -600,18 +599,19 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   // formulate the Taylor-Quinney coefficient and Gruntfest numbers for the case
   // of damage
 
-  //loop to calculate J-integral
+  // loop to calculate J-integral
   // 1. Calculate Strain Energy density (SED)
-    _SED[_qp] = _SED_old[_qp] + _stress[_qp].doubleContraction(_strain_increment[_qp])/2 + _stress_old[_qp].doubleContraction(_strain_increment[_qp])/2;
+  _SED[ _qp ] = _SED_old[ _qp ] + _stress[ _qp ].doubleContraction(_strain_increment[ _qp ]) / 2 +
+                _stress_old[ _qp ].doubleContraction(_strain_increment[ _qp ]) / 2;
   // 2. Calculate Eshelby tensor
   // Calculate Deformation gradient TODO: we need to grab it from its function, not recalculate it here
 
-    RankTwoTensor A(_grad_disp_x[ _qp ], _grad_disp_y[ _qp ], _grad_disp_z[ _qp ]); // Deformation gradient
-    RankTwoTensor FTP = A.transpose() * _stress[_qp];
-    RankTwoTensor WI;
-    WI.Identity();
-    WI *= _SED[_qp];
-    _Eshelby_tensor[_qp] = WI - FTP;
+  RankTwoTensor A(_grad_disp_x[ _qp ], _grad_disp_y[ _qp ], _grad_disp_z[ _qp ]); // Deformation gradient
+  RankTwoTensor FTP = A.transpose() * _stress[ _qp ];
+  RankTwoTensor WI;
+  WI.Identity();
+  WI *= _SED[ _qp ];
+  _Eshelby_tensor[ _qp ] = WI - FTP;
 
   return;
 }
