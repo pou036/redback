@@ -87,10 +87,10 @@ RedbackMechMaterialCC::getDerivativeFlowIncrement(
     Real delta_lambda_q = _ref_pe_rate * _dt * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent) * _exponential;
     Real delta_lambda = (std::pow(delta_lambda_p * delta_lambda_p + delta_lambda_q * delta_lambda_q, 0.5));
     Real der_flow_incr_dev =
-      _ref_pe_rate * _dt * _exponent * std::pow(std::fabs((sig_eqv - q_yield_stress)/pc), _exponent - 1.0) * _exponential / pc;
+      _ref_pe_rate * _dt * _exponent * std::pow(std::fabs((sig_eqv - q_yield_stress)/pc), _exponent - 1.0) * _exponential / std::fabs(pc);
       // _ref_pe_rate * _dt * _exponent * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent - 1.0) * _exponential;
     Real der_flow_incr_vol =
-      _ref_pe_rate * _dt * _exponent * std::pow(std::fabs((pressure - p_yield_stress)/pc), _exponent - 1.0) * _exponential / pc;
+      _ref_pe_rate * _dt * _exponent * std::pow(std::fabs((pressure - p_yield_stress)/pc), _exponent - 1.0) * _exponential / std::fabs(pc);
       // _ref_pe_rate * _dt * _exponent * std::pow(std::fabs(pressure - p_yield_stress), _exponent - 1.0) * _exponential;
     return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
   }
