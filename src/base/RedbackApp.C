@@ -47,6 +47,7 @@
 #include "RedbackMassDiffusion.h"
 #include "RedbackMechDissip.h"
 #include "RedbackNavier.h"
+#include "RedbackOffDiagonalScalarJacobian.h"
 #include "RedbackPoromechanics.h"
 #include "RedbackStressDivergenceTensors.h"
 #include "RedbackThermalConvection.h"
@@ -56,6 +57,7 @@
 
 // Scalar Kernels
 #include "RedbackContinuation.h"
+#include "RedbackOffDiagonalNonScalar.h"
 
 // Dirac Kernels
 #include "FunctionPointSource.h"
@@ -141,6 +143,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackMassDiffusion);
   registerKernel(RedbackMechDissip);
   registerKernel(RedbackNavier);
+  registerKernel(RedbackOffDiagonalScalarJacobian);
   registerKernel(RedbackPoromechanics);
   registerKernel(RedbackStressDivergenceTensors);
   registerKernel(RedbackThermalConvection);
@@ -150,6 +153,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackVariableEqualsFunction);
 
   registerScalarKernel(RedbackContinuation);
+  registerScalarKernel(RedbackOffDiagonalNonScalar);
 
   registerDiracKernel(FunctionPointSource);
 
