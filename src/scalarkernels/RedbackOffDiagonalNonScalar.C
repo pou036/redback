@@ -21,14 +21,20 @@ InputParameters
 validParams<RedbackOffDiagonalNonScalar>()
 {
   InputParameters params = validParams<ODEKernel>();
-  params.addRequiredCoupledVar("non_scalar_variable", "The (non scalar) variable to couple");
+  params.addParam<Real>("ds_old", 1.0, "Old continuation increment");
+  params.addRequiredCoupledVar("x", "The (non scalar) variable to couple");
+  params.addRequiredCoupledVar("x_old", "The old version of the (non scalar) variable to couple");
+  params.addRequiredCoupledVar("x_older", "The older version of the (non scalar) variable to couple");
   return params;
 }
 
 RedbackOffDiagonalNonScalar::RedbackOffDiagonalNonScalar(const InputParameters & parameters) :
     ODEKernel(parameters),
-    _non_scalar_variable(coupledValue("non_scalar_variable")),
-    _non_scalar_variable_var(coupled("non_scalar_variable"))
+    _ds_old_param(getParam<Real>("ds_old")),
+    _x(coupledValue("x")),
+    _x_var(coupled("x")),
+    _x_old(coupledValue("x_old")),
+    _x_older(coupledValue("x_older"))
 {
 }
 
@@ -47,8 +53,16 @@ RedbackOffDiagonalNonScalar::computeQpJacobian()
 Real
 RedbackOffDiagonalNonScalar::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _non_scalar_variable_var)
-    return 0.;
+  if (jvar == _x_var)
+  {
+    //std::cout << "RedbackOffDiagonalNonScalar::computeQpOffDiagJacobian (jvar == _non_scalar_variable_var)" << std::endl;
+    //std::cout << "_non_scalar_variable[_qp] = " << _non_scalar_variable[_qp] << std::endl;
+    //std::cout << "_u[_i] = " << _u[_i] << std::endl;
+    return (_x_old[_qp] - _x_older[_qp])/_ds_old_param;
+  }
   else
+  {
+    //std::cout << "RedbackOffDiagonalNonScalar::computeQpOffDiagJacobian (jvar == else)" << std::endl;
     return 0.;
+  }
 }

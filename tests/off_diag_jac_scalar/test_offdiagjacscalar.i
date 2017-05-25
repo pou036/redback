@@ -4,6 +4,7 @@
 []
 
 [Variables]
+  active = 'y diffused z'
   [./diffused]
     order = FIRST
     family = LAGRANGE
@@ -13,6 +14,9 @@
   [./y]
     family = SCALAR
     initial_condition = 1.234
+  [../]
+  [./my_unused_scalarvar]
+    family = SCALAR
   [../]
 []
 
@@ -91,6 +95,9 @@
     variable = y
     type = RedbackOffDiagonalNonScalar
     non_scalar_variable = diffused
+    x_older = z
+    x_old = diffused
+    x = diffused
   [../]
 []
 

@@ -26,8 +26,11 @@ public:
   RedbackOffDiagonalNonScalar(const InputParameters & parameters);
 
 protected:
-  const VariableValue & _non_scalar_variable;
-  unsigned int _non_scalar_variable_var;
+  Real _ds_old_param;
+  const VariableValue & _x;
+  unsigned int _x_var;
+  const VariableValue & _x_old;
+  const VariableValue & _x_older;
 
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
