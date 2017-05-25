@@ -89,7 +89,7 @@ RedbackMechMaterialCCanisotropic::getFlowIncrement(
 
 Real
 RedbackMechMaterialCCanisotropic::getDerivativeFlowIncrement(
-  const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
+  const RankTwoTensor & /*sig*/, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
 {
   if (Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/_slope_yield_surface,
                                               /*p_0=*/pc,
@@ -127,7 +127,7 @@ RedbackMechMaterialCCanisotropic::getJac(const RankTwoTensor & sig,
   RankTwoTensor dfi_dft;
   RankFourTensor dfd_dsig, dfi_dsig;
   Real f1, f2, f3, f4, f5;
-  Real dfi_dseqv_dev, dfi_dseqv_vol, dfi_dseqv;
+  Real dfi_dseqv;
 
   pc *= -1; // TODO: check sign at very beginning, only once, and stick to
             // whatever convention!

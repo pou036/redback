@@ -58,7 +58,7 @@ RedbackMassConvection::computeQpJacobian()
 }
 
 Real
-RedbackMassConvection::computeQpOffDiagJacobian(unsigned int jvar)
+RedbackMassConvection::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   /*if (jvar == _temp_var)
   {

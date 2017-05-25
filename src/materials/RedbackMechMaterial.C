@@ -89,6 +89,12 @@ validParams<RedbackMechMaterial>()
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
+  params.addParam<std::vector<FunctionName> >(
+    "initial_stress",
+    "A list of functions describing the initial stress. If provided, there "
+    "must be 9 of these, corresponding to the xx, yx, zx, xy, yy, zy, xz, yz, "
+    "zz components respectively.  If not provided, all components of the "
+    "initial stress will be zero");
 
   return params;
 }
@@ -201,6 +207,19 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   fill_method = "symmetric_isotropic"; // Creates symmetric and isotropic
                                        // elasticity tensor.
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int)fill_method);
+
+  // Initial stress
+  const std::vector<FunctionName> & fcn_names(getParam<std::vector<FunctionName> >("initial_stress"));
+  const unsigned num = fcn_names.size();
+  if (!(num == 0 || num == 3 * 3))
+    mooseError("Either zero or ",
+               3 * 3,
+               " initial stress functions must be provided to TensorMechanicsMaterial.  You supplied ",
+               num,
+               "\n");
+  _initial_stress.resize(num);
+  for (unsigned i = 0; i < num; ++i)
+    _initial_stress[ i ] = &getFunctionByName(fcn_names[ i ]);
 }
 
 MooseEnum
@@ -216,6 +235,10 @@ RedbackMechMaterial::initQpStatefulProperties()
   _total_strain[ _qp ].zero();
   _elastic_strain[ _qp ].zero();
   _stress[ _qp ].zero();
+  if (_initial_stress.size() == 3 * 3)
+    for (unsigned i = 0; i < 3; ++i)
+      for (unsigned j = 0; j < 3; ++j)
+        _stress[ _qp ](i, j) = _initial_stress[ i * 3 + j ]->value(_t, _q_point[ _qp ]);
   _plastic_strain[ _qp ].zero();
   _eqv_plastic_strain[ _qp ] = 0.0;
   _elasticity_tensor[ _qp ].zero();
@@ -226,8 +249,8 @@ RedbackMechMaterial::initQpStatefulProperties()
   _dfgrd[ _qp ].zero();
 
   // Redback properties
-  _mises_stress[ _qp ] = 0;
-  _mean_stress[ _qp ] = 0;
+  _mises_stress[ _qp ] = getSigEqv(_stress[ _qp ]);
+  _mean_stress[ _qp ] = _stress[ _qp ].trace() / 3.0;
   _mises_strain_rate[ _qp ] = 0;
   _volumetric_strain[ _qp ] = 0;
   _volumetric_strain_rate[ _qp ] = 0;
@@ -526,18 +549,18 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   }*/
 
   // Compute Mechanical Dissipation Jacobian
-   _mechanical_dissipation_jac_mech[ _qp ] =
-   _mechanical_dissipation_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
+  _mechanical_dissipation_jac_mech[ _qp ] =
+    _mechanical_dissipation_mech[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]);
 
   _poromech_kernel[ _qp ] = def_grad_rate * _peclet_number[ _qp ] / _mixture_compressibility[ _qp ];
-    if (_has_T)
+  if (_has_T)
   {
     _poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
   }
-  else {
-  _poromech_jac[ _qp ] = 0 ;
+  else
+  {
+    _poromech_jac[ _qp ] = 0;
   }
-
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO:
   // Remove this number from the tests!!!
@@ -790,7 +813,7 @@ RedbackMechMaterial::form_damage_kernels(Real cohesion)
 }*/
 
 void
-RedbackMechMaterial::formDamageDissipation(RankTwoTensor & sig)
+RedbackMechMaterial::formDamageDissipation(RankTwoTensor & /*sig*/)
 {
   /* The damage potential is being formed in this function. We start by
    * postulating a helmholtz free energy of the form:
