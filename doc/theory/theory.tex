@@ -300,7 +300,7 @@ $Pe$ & P\'{e}clet number & $x_{ref}V_{ref}/c_{th}$ & Ratio of temperature advect
 
 The coupling of boundary condtions (p,T) and different physical processes (dissolution$\-$precipitation, dislocation \& diffusion creep) affects materials in different ways. Experimentalists have constrained relationships for single behaviours by generating, process appropriate, flow laws to describe the realtionships between physical quantities like stress, strain and temperature. In natural samples it is common for many mechanisms to act congruently and as such a single flow law may be inappropriate to describe the physics at play. We have utilised a \textcolor{blue}{UserObjectBase} Class to implement Flow Laws. This architecture allows for the creation of composite Flow Laws that capture multipule processes at work.\\
 
-The UserObjectBase is called \textcolor{red}{RedbackFlowLawBase} and is characterised as always have an exponential Arrhenius term $\left(\frac{Q}{RT}\right)$.\\
+The UserObjectBase is called \textcolor{red}{RedbackFlowLawBase} and is characterised as always have an exponential Arrhenius term $\left(\frac{-Q}{RT}\right)$.\\
 
 It is then possible to create flow laws from this BaseClass that are unique to the physical process that will be active in the model being generated.\\
 

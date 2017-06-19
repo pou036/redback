@@ -45,6 +45,7 @@ RedbackGrainSizeAux::RedbackGrainSizeAux(const InputParameters & parameters) :
     _mises_stress(getMaterialProperty<Real>("mises_stress")),
     _mises_strain_rate(getMaterialProperty<Real>("mises_strain_rate")), // total plastic strain rate
     _strain_rate_dis(getMaterialProperty<Real>("dislocation_strain_rate")), // dislocation strain rate
+    _damage_potential(getMaterialProperty<Real>("damage_potential")), // elastic energy term that changes with time
     _delta_param(getParam<Real>("delta")),
     _ar_growth_param(getParam<Real>("Arrhenius_growth")),
     _growth_exponent_param(getParam<Real>("growth_exponent")),
@@ -53,6 +54,8 @@ RedbackGrainSizeAux::RedbackGrainSizeAux(const InputParameters & parameters) :
     //_gamma_param(getParam<Real>("gamma")),
     _pre_exp_factor_reduction(getParam<Real>("pre_exponential_factor_reduction")),
     _A_star_ss_param(getParam<Real>("pre_exponential_factor_ss"))
+
+
 {
 }
 
@@ -68,7 +71,7 @@ RedbackGrainSizeAux::computeValue()
     if (_strain_rate_dis[_qp] > 0)
     {
       Real beta = _strain_rate_dis[_qp] / _mises_strain_rate[_qp];
-      grain_reduction_rate = _pre_exp_factor_reduction * (-beta) * _mises_stress[ _qp ]
+      grain_reduction_rate = _pre_exp_factor_reduction * _damage_potential[ _qp ] * (-beta) * _mises_stress[ _qp ]
         * _mises_strain_rate[ _qp ] * std::pow(_u_old[ _qp ],2);
     }
 
