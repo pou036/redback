@@ -371,7 +371,7 @@ RedbackMechMaterial::computeQpStress()
   _plastic_strain[ _qp ] = dp;
 
   // Evaluate and update current equivalent and volumetric plastic strain
-  _eqv_plastic_strain[ _qp ] = std::pow(2.0 / 3.0, 0.5) * dp.L2norm();
+  _eqv_plastic_strain[ _qp ] = std::pow(2.0 / 3.0, 0.5) * dp.deviatoric().L2norm();
   _volumetric_strain[ _qp ] = dp.trace();
 
   // Calculate elastic strain increment
