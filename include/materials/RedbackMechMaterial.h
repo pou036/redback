@@ -85,18 +85,18 @@ protected:
   // Copy-paste from FiniteStrainMaterial.h
   MaterialProperty<RankTwoTensor> & _strain_rate;
   MaterialProperty<RankTwoTensor> & _strain_increment;
-  MaterialProperty<RankTwoTensor> & _total_strain_old;
-  MaterialProperty<RankTwoTensor> & _elastic_strain_old;
-  MaterialProperty<RankTwoTensor> & _stress_old;
+  const MaterialProperty<RankTwoTensor> & _total_strain_old;
+  const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
+  const MaterialProperty<RankTwoTensor> & _stress_old;
   MaterialProperty<RankTwoTensor> & _rotation_increment;
   MaterialProperty<RankTwoTensor> & _dfgrd;
 
   // Copy-paste from FiniteStrainPlasticMaterial.h
   std::vector<Real> _yield_stress_vector;
   MaterialProperty<RankTwoTensor> & _plastic_strain;
-  MaterialProperty<RankTwoTensor> & _plastic_strain_old;
+  const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
   MaterialProperty<Real> & _eqv_plastic_strain;
-  MaterialProperty<Real> & _eqv_plastic_strain_old;
+  const MaterialProperty<Real> & _eqv_plastic_strain_old;
 
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
   // yield_stress);
