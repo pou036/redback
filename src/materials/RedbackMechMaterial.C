@@ -119,18 +119,18 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     // Copy-paste from FiniteStrainMaterial.C
     _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),
     _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
-    _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
-    _elastic_strain_old(declarePropertyOld<RankTwoTensor>("elastic_strain")),
-    _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
+    _total_strain_old(getMaterialPropertyOld<RankTwoTensor>("total_strain")),
+    _elastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("elastic_strain")),
+    _stress_old(getMaterialPropertyOld<RankTwoTensor>("stress")),
     _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment")),
     _dfgrd(declareProperty<RankTwoTensor>("deformation gradient")),
 
     // Copy-paste from FiniteStrainPlasticMaterial.C
     _yield_stress_vector(getParam<std::vector<Real> >("yield_stress")), // Read from input file
     _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
-    _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
+    _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("plastic_strain")),
     _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
-    _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
+    _eqv_plastic_strain_old(getMaterialPropertyOld<Real>("eqv_plastic_strain")),
 
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
     _ref_pe_rate(getParam<Real>("ref_pe_rate")),
