@@ -11,6 +11,7 @@
 /****************************************************************/
 
 #include "Function.h"
+#include "MooseException.h"
 #include "MooseMesh.h"
 #include "RedbackMechMaterial.h"
 #include "libmesh/quadrature.h"
@@ -769,16 +770,16 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
       flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
       if (flow_incr < 0.0) // negative flow increment not allowed
-        mooseError("Constitutive Error-Negative flow increment: Reduce time "
-                   "increment.");
+        throw MooseException("Constitutive Error-Negative flow increment: Reduce time "
+          "increment.");
       getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
       flow_tensor *= flow_incr;
       resid = flow_tensor - delta_dp; // Residual
       err1 = resid.L2norm();
     }
     if (iter >= maxiter) // Convergence failure
-      mooseError("Constitutive Error-Too many iterations: Reduce time "
-                 "increment.\n"); // Convergence failure //TODO: check the
+      throw MooseException("Constitutive Error-Too many iterations: Reduce time "
+        "increment.\n"); // Convergence failure //TODO: check the
                                   // adaptive time stepping
     _returnmap_iter[ _qp ] = iter;
 
@@ -790,8 +791,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   }
 
   if (iterisohard >= maxiterisohard)
-    mooseError("Constitutive Error-Too many iterations in Hardness "
-               "Update:Reduce time increment.\n"); // Convergence failure
+    throw MooseException("Constitutive Error-Too many iterations in Hardness "
+      "Update:Reduce time increment.\n"); // Convergence failure
 
   dp = dpn; // Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
