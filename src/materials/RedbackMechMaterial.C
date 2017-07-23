@@ -11,6 +11,7 @@
 /****************************************************************/
 
 #include "Function.h"
+#include "MooseException.h"
 #include "MooseMesh.h"
 #include "RedbackMechMaterial.h"
 #include "libmesh/quadrature.h"
@@ -119,18 +120,18 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     // Copy-paste from FiniteStrainMaterial.C
     _strain_rate(declareProperty<RankTwoTensor>("strain_rate")),
     _strain_increment(declareProperty<RankTwoTensor>("strain_increment")),
-    _total_strain_old(declarePropertyOld<RankTwoTensor>("total_strain")),
-    _elastic_strain_old(declarePropertyOld<RankTwoTensor>("elastic_strain")),
-    _stress_old(declarePropertyOld<RankTwoTensor>("stress")),
+    _total_strain_old(getMaterialPropertyOld<RankTwoTensor>("total_strain")),
+    _elastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("elastic_strain")),
+    _stress_old(getMaterialPropertyOld<RankTwoTensor>("stress")),
     _rotation_increment(declareProperty<RankTwoTensor>("rotation_increment")),
     _dfgrd(declareProperty<RankTwoTensor>("deformation gradient")),
 
     // Copy-paste from FiniteStrainPlasticMaterial.C
     _yield_stress_vector(getParam<std::vector<Real> >("yield_stress")), // Read from input file
     _plastic_strain(declareProperty<RankTwoTensor>("plastic_strain")),
-    _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
+    _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("plastic_strain")),
     _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
-    _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
+    _eqv_plastic_strain_old(getMaterialPropertyOld<Real>("eqv_plastic_strain")),
 
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
     _ref_pe_rate(getParam<Real>("ref_pe_rate")),
@@ -371,7 +372,7 @@ RedbackMechMaterial::computeQpStress()
   _plastic_strain[ _qp ] = dp;
 
   // Evaluate and update current equivalent and volumetric plastic strain
-  _eqv_plastic_strain[ _qp ] = std::pow(2.0 / 3.0, 0.5) * dp.L2norm();
+  _eqv_plastic_strain[ _qp ] = std::pow(2.0 / 3.0, 0.5) * dp.deviatoric().L2norm();
   _volumetric_strain[ _qp ] = dp.trace();
 
   // Calculate elastic strain increment
@@ -769,16 +770,16 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
       flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
       if (flow_incr < 0.0) // negative flow increment not allowed
-        mooseError("Constitutive Error-Negative flow increment: Reduce time "
-                   "increment.");
+        throw MooseException("Constitutive Error-Negative flow increment: Reduce time "
+          "increment.");
       getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
       flow_tensor *= flow_incr;
       resid = flow_tensor - delta_dp; // Residual
       err1 = resid.L2norm();
     }
     if (iter >= maxiter) // Convergence failure
-      mooseError("Constitutive Error-Too many iterations: Reduce time "
-                 "increment.\n"); // Convergence failure //TODO: check the
+      throw MooseException("Constitutive Error-Too many iterations: Reduce time "
+        "increment.\n"); // Convergence failure //TODO: check the
                                   // adaptive time stepping
     _returnmap_iter[ _qp ] = iter;
 
@@ -790,8 +791,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   }
 
   if (iterisohard >= maxiterisohard)
-    mooseError("Constitutive Error-Too many iterations in Hardness "
-               "Update:Reduce time increment.\n"); // Convergence failure
+    throw MooseException("Constitutive Error-Too many iterations in Hardness "
+      "Update:Reduce time increment.\n"); // Convergence failure
 
   dp = dpn; // Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
