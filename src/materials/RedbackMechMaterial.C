@@ -886,8 +886,15 @@ RedbackMechMaterial::formBrittleDamage()
   plastic_damage = _damage_coeff * std::pow(kachanov, exponent_kachanov);
   healing_damage = 0;
 
-  _damage_kernel[ _qp ] = plastic_damage + healing_damage;
-  _damage_kernel_jac[ _qp ] = 0;
+  Real mises_stress_old = getSigEqv(_stress_old[_qp]);
+  if (mises_stress_old > _mises_stress[_qp])
+    {
+      _damage_kernel[ _qp ] = healing_damage;
+      _damage_kernel_jac[ _qp ] = 0;
+    }
+    else
+    _damage_kernel[ _qp ] = plastic_damage + healing_damage;
+    _damage_kernel_jac[ _qp ] = 0;
 }
 
 void
