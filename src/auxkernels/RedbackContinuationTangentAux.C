@@ -105,7 +105,7 @@ RedbackContinuationTangentAux::RedbackContinuationTangentAux(const InputParamete
   // Check that all variables to sum have same size
   if (_is_var1_coupled)
   {
-    int var_size = _sum_var_1.size();
+    unsigned int var_size = _sum_var_1.size();
     if (_is_var2_coupled && (_sum_var_2.size() != var_size))
       mooseError("RedbackContinuationTangentAux: variable 2 has different size from variable 1");
     if (_is_var3_coupled && (_sum_var_3.size() != var_size))
