@@ -590,11 +590,15 @@ RedbackMaterial::computeRedbackTerms()
     lambda_m_star = one_minus_phi_lambda_s + phi_lambda_f; // normalized compressibility of the mixture
 
     // Forming the velocities through mechanics and Darcy's flow law
-    _fluid_velocity[ _qp ] =
-      _solid_velocity[ _qp ] -
-      beta_star_m * (_grad_pore_pressure[ _qp ] - fluid_density * normalized_gravity) /
-        (_peclet_number[ _qp ] * _lewis_number[ _qp ] * _total_porosity[ _qp ]); // solving Darcy's flux
+    if (_total_porosity[ _qp ] != 0)
+      _fluid_velocity[ _qp ] =
+        _solid_velocity[ _qp ] -
+        beta_star_m * (_grad_pore_pressure[ _qp ] - fluid_density * normalized_gravity) /
+          (_peclet_number[ _qp ] * _lewis_number[ _qp ] * _total_porosity[ _qp ]); // solving Darcy's flux
                                                                                  // for the fluid velocity
+    else
+      _fluid_velocity[ _qp ] = _solid_velocity[ _qp ];
+
     mixture_velocity =
       (solid_density / _mixture_density[ _qp ]) * _solid_velocity[ _qp ] +
       (fluid_density / _mixture_density[ _qp ]) * _fluid_velocity[ _qp ]; // barycentric velocity for the mixture
