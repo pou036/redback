@@ -38,7 +38,7 @@ FunctionNormalDistributionIC::FunctionNormalDistributionIC(const InputParameters
 {
   mooseAssert(_stddev > 0.0, "standard_deviation must be positive for FunctionNormalDistributionIC!");
   // Real range = _max - _min;
-  mooseAssert(range >= 0.0, "The maximum value must be greater than the minimum in FunctionNormalDistributionIC");
+  // mooseAssert(range >= 0.0, "The maximum value must be greater than the minimum in FunctionNormalDistributionIC");
   MooseRandom::seed(getParam<unsigned int>("seed"));
 }
 

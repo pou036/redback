@@ -149,12 +149,17 @@ RedbackFluidMaterial::computeRedbackTerms()
 
   // Fluid divergence for mass Kernel component
   if (_fluid_compressibility_param == 0)
+  {
     _div_fluid_kernel[ _qp ] = _div_fluid_vel[ _qp ] * _peclet_number[ _qp ];
+    _pressurization_coefficient[ _qp ] = _fluid_thermal_expansion_param;
+  }
   else
+  {
     _div_fluid_kernel[ _qp ] = _div_fluid_vel[ _qp ] * _peclet_number[ _qp ] / _fluid_compressibility_param;
+    _pressurization_coefficient[ _qp ] = _fluid_thermal_expansion_param / _fluid_compressibility_param;
+  }
 
   // Assembling mass kernels components
-  _pressurization_coefficient[ _qp ] = _fluid_thermal_expansion_param / _fluid_compressibility_param;
   RealVectorValue fluid_vel_vector = RealVectorValue(_fluid_vel_x[ _qp ], _fluid_vel_y[ _qp ], _fluid_vel_z[ _qp ]);
   //_pressure_convective_mass[_qp] = _grad_pore_pressure[_qp]*fluid_vel_vector -
   //_pressurization_coefficient[_qp]*_grad_temp[_qp]*fluid_vel_vector;

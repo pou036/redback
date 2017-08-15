@@ -565,11 +565,13 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO:
   // Remove this number from the tests!!!
+  if (q_y != 0)
+  {
   _mod_gruntfest_number[ _qp ] =
     gruntfest_number * std::exp(-_ar[ _qp ]) *
     (std::fabs(getSigEqv(sig) * std::pow(macaulayBracket(getSigEqv(sig) / q_y - 1.0), _exponent)) +
      std::fabs(_mean_stress[ _qp ] * std::pow(macaulayBracket(_mean_stress[ _qp ] - p_y), _exponent)));
-
+  }
   // Begin of the chemical degradation method of Hu and Hueckel 2013 (doi:10.1680/geot.SIP13.P.020)
   // _mass_removal_rate[_qp] = 0;
   Real total_energy_input = sig.doubleContraction(instantaneous_strain_rate);
@@ -887,8 +889,15 @@ RedbackMechMaterial::formBrittleDamage()
   plastic_damage = _damage_coeff * std::pow(kachanov, exponent_kachanov);
   healing_damage = 0;
 
-  _damage_kernel[ _qp ] = plastic_damage + healing_damage;
-  _damage_kernel_jac[ _qp ] = 0;
+  Real mises_stress_old = getSigEqv(_stress_old[_qp]);
+  if (mises_stress_old > _mises_stress[_qp])
+    {
+      _damage_kernel[ _qp ] = healing_damage;
+      _damage_kernel_jac[ _qp ] = 0;
+    }
+    else
+    _damage_kernel[ _qp ] = plastic_damage + healing_damage;
+    _damage_kernel_jac[ _qp ] = 0;
 }
 
 void

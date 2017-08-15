@@ -66,7 +66,7 @@ ElementFileSubdomain::modify()
         std::istream_iterator<std::string> end;
         std::vector<std::string> vstrings(begin, end);
 
-        for (int i = 0; i < vstrings.size(); ++i)
+        for (unsigned int i = 0; i < vstrings.size(); ++i)
         {
           elemids.push_back((dof_id_type)atoi(vstrings[ i ].c_str()));
         }
