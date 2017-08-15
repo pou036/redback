@@ -2,24 +2,11 @@
   type = GeneratedMesh
   dim = 1
   nx = 6
-  ny = 5
-  nz = 5
   xmin = -1
 []
 
 [Variables]
-  active = 'pore_pressure temp'
   [./temp]
-  [../]
-  [./disp_x]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
-  [../]
-  [./disp_y]
-    order = CONSTANT
-    family = MONOMIAL
-    block = 0
   [../]
   [./pore_pressure]
   [../]
@@ -27,7 +14,6 @@
 
 [AuxVariables]
   [./porosity]
-    order = FIRST
     family = MONOMIAL
     block = 0
   [../]
@@ -69,12 +55,10 @@
   [./chem_press]
     type = RedbackChemPressure
     variable = pore_pressure
-    block = 0
   [../]
   [./Chem_endo_temp]
     type = RedbackChemEndo
     variable = temp
-    block = 0
   [../]
 []
 
@@ -82,7 +66,7 @@
   [./porosity]
     type = RedbackTotalPorosityAux
     variable = porosity
-    block = 0
+    execute_on = 'initial LINEAR'
   [../]
   [./Lewis_number]
     type = MaterialRealAux
@@ -102,7 +86,6 @@
 []
 
 [BCs]
-  active = 'press_bc left_temp right_temp'
   [./left_temp]
     type = DirichletBC
     variable = temp
@@ -112,24 +95,6 @@
   [./right_temp]
     type = DirichletBC
     variable = temp
-    boundary = right
-    value = 0
-  [../]
-  [./disp_y]
-    type = DirichletBC
-    variable = disp_y
-    boundary = 'left right'
-    value = 0
-  [../]
-  [./disp_x_left]
-    type = DirichletBC
-    variable = disp_x
-    boundary = left
-    value = 1
-  [../]
-  [./disp_x_rigth]
-    type = DirichletBC
-    variable = disp_x
     boundary = right
     value = 0
   [../]
@@ -150,15 +115,13 @@
     gr = 5e-6 # 0.11*exp(-Ar), Ar=10
     pore_pres = pore_pressure
     temperature = temp
-    ref_lewis_nb = 1
     Kc = 1
     ar_F = 20
     ar_R = 10
     phi0 = 1e-10
-    Aphi = 0
     da_endo = 1e-4
     is_chemistry_on = true
-    total_porosity = porosity
+    total_porosity = porosity # porosity
     alpha_2 = 3
   [../]
 []
@@ -205,23 +168,20 @@
 [Executioner]
   type = Transient
   num_steps = 10000
+  dt = 0.2
   petsc_options_iname = '-pc_type -pc_hypre_type'
   petsc_options_value = 'hypre boomeramg'
   ss_check_tol = 1e-6
-  end_time = 8
+  end_time = 8 # 8
   dtmax = 1
   scheme = bdf2
-  [./TimeStepper]
-    type = ConstantDT
-    dt = 0.2
-  [../]
 []
 
 [Outputs]
+  # base_file = bench_THC_no_poro_out
   exodus = true
   console = true
   execute_on = TIMESTEP_END
-  #base_file = bench_THC_no_poro_out
 []
 
 [ICs]
@@ -237,3 +197,4 @@
     value = 0
   [../]
 []
+

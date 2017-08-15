@@ -551,6 +551,8 @@ RedbackMaterial::computeRedbackTerms()
                                                                             // phase
   beta_star_m = one_minus_phi_beta_star_s + phi_beta_star_f; // normalized compressibility of the mixture
   _mixture_compressibility[ _qp ] = beta_star_m;
+  if (_mixture_compressibility[ _qp ] == 0)
+    mooseError("The mixture compressiblity cannot be zero!");
 
   // convective terms
   if (_are_convective_terms_on)
