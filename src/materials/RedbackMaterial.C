@@ -532,7 +532,8 @@ RedbackMaterial::computeRedbackTerms()
                                );*/
 
     // Update Lewis number
-    _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
+    if (_phi0_param != _total_porosity[ _qp ])
+      _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
                            std::pow(_phi0_param / _total_porosity[ _qp ], 3);
   }
   if (_inverse_lewis_number_tilde[ _qp ] != 0)
@@ -550,6 +551,8 @@ RedbackMaterial::computeRedbackTerms()
                                                                             // phase
   beta_star_m = one_minus_phi_beta_star_s + phi_beta_star_f; // normalized compressibility of the mixture
   _mixture_compressibility[ _qp ] = beta_star_m;
+  if (_mixture_compressibility[ _qp ] == 0)
+    mooseError("The mixture compressiblity cannot be zero!");
 
   // convective terms
   if (_are_convective_terms_on)
@@ -589,11 +592,15 @@ RedbackMaterial::computeRedbackTerms()
     lambda_m_star = one_minus_phi_lambda_s + phi_lambda_f; // normalized compressibility of the mixture
 
     // Forming the velocities through mechanics and Darcy's flow law
-    _fluid_velocity[ _qp ] =
-      _solid_velocity[ _qp ] -
-      beta_star_m * (_grad_pore_pressure[ _qp ] - fluid_density * normalized_gravity) /
-        (_peclet_number[ _qp ] * _lewis_number[ _qp ] * _total_porosity[ _qp ]); // solving Darcy's flux
+    if (_total_porosity[ _qp ] != 0)
+      _fluid_velocity[ _qp ] =
+        _solid_velocity[ _qp ] -
+        beta_star_m * (_grad_pore_pressure[ _qp ] - fluid_density * normalized_gravity) /
+          (_peclet_number[ _qp ] * _lewis_number[ _qp ] * _total_porosity[ _qp ]); // solving Darcy's flux
                                                                                  // for the fluid velocity
+    else
+      _fluid_velocity[ _qp ] = _solid_velocity[ _qp ];
+
     mixture_velocity =
       (solid_density / _mixture_density[ _qp ]) * _solid_velocity[ _qp ] +
       (fluid_density / _mixture_density[ _qp ]) * _fluid_velocity[ _qp ]; // barycentric velocity for the mixture

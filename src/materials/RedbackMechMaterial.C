@@ -565,11 +565,13 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO:
   // Remove this number from the tests!!!
+  if (q_y != 0)
+  {
   _mod_gruntfest_number[ _qp ] =
     gruntfest_number * std::exp(-_ar[ _qp ]) *
     (std::fabs(getSigEqv(sig) * std::pow(macaulayBracket(getSigEqv(sig) / q_y - 1.0), _exponent)) +
      std::fabs(_mean_stress[ _qp ] * std::pow(macaulayBracket(_mean_stress[ _qp ] - p_y), _exponent)));
-
+  }
   // Begin of the chemical degradation method of Hu and Hueckel 2013 (doi:10.1680/geot.SIP13.P.020)
   // _mass_removal_rate[_qp] = 0;
   Real total_energy_input = sig.doubleContraction(instantaneous_strain_rate);

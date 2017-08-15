@@ -316,6 +316,7 @@ Ellipse::getDafaliasEllipseAxesAndCentre(Real const m,
 {
   Real x = 1 + m * m + std::sqrt((m * m - 1) * (m * m - 1) + 4 * alpha * alpha);
   horizontal_axis = std::sqrt(((x * p_0 * p_0) / 8.0));
+  // TODO: what is the correct formula  if ((m + alpha) * (m - alpha) < 0)? (not 0, not 1...)
   vertical_axis = std::sqrt(((m + alpha) * (m - alpha) * p_0 * p_0) / (2 * x));
   center_p = p_0 / 2.0;
   center_q = alpha * p_0 / 2.0;
