@@ -56,7 +56,7 @@ RedbackMechMaterialCCanisotropic::getFlowTensor(
 
   Real M_squared = _slope_yield_surface * _slope_yield_surface;
   Real alpha_squared = _anisotropy_coeff[ _qp ] * _anisotropy_coeff[ _qp ];
-  if (q !=0 )
+  if (q != 0)
     flow_tensor = 3.0 * ((q - _anisotropy_coeff[ _qp ] * p) / q) * sig.deviatoric() / (M_squared - alpha_squared);
   else
     flow_tensor.zero(); // TODO: is that the right thing to do?

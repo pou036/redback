@@ -534,7 +534,7 @@ RedbackMaterial::computeRedbackTerms()
     // Update Lewis number
     if (_phi0_param != _total_porosity[ _qp ])
       _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
-                           std::pow(_phi0_param / _total_porosity[ _qp ], 3);
+                             std::pow(_phi0_param / _total_porosity[ _qp ], 3);
   }
   if (_inverse_lewis_number_tilde[ _qp ] != 0)
   {
@@ -597,7 +597,7 @@ RedbackMaterial::computeRedbackTerms()
         _solid_velocity[ _qp ] -
         beta_star_m * (_grad_pore_pressure[ _qp ] - fluid_density * normalized_gravity) /
           (_peclet_number[ _qp ] * _lewis_number[ _qp ] * _total_porosity[ _qp ]); // solving Darcy's flux
-                                                                                 // for the fluid velocity
+                                                                                   // for the fluid velocity
     else
       _fluid_velocity[ _qp ] = _solid_velocity[ _qp ];
 
