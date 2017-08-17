@@ -48,16 +48,6 @@ RankTwoScalarPostprocessor::RankTwoScalarPostprocessor(const InputParameters & p
 {
 }
 
-void
-RankTwoScalarPostprocessor::initialize()
-{
-}
-
-void
-RankTwoScalarPostprocessor::execute()
-{
-}
-
 PostprocessorValue
 RankTwoScalarPostprocessor::getValue()
 {
@@ -86,10 +76,4 @@ RankTwoScalarPostprocessor::getValue()
     default:
       mooseError("RankTwoScalar Error: unvalid scalar type");
   }
-}
-
-void
-RankTwoScalarPostprocessor::threadJoin(const UserObject & /*uo*/)
-{
-  // nothing to do here, general PPS do not run threaded
 }

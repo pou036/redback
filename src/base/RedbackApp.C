@@ -74,7 +74,7 @@
 // MeshModifiers
 #include "ElementFileSubdomain.h"
 
-// MeshModifiers
+// Postprocessors
 #include "RankTwoScalarPostprocessor.h"
 
 // Timesteppers
