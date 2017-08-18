@@ -61,6 +61,7 @@
 #include "FunctionPointSource.h"
 
 // Materials
+#include "ComputePlasticStrainRate.h"
 #include "ImageProcessing.h"
 #include "RedbackFluidMaterial.h"
 #include "RedbackMaterial.h"
@@ -72,6 +73,9 @@
 
 // MeshModifiers
 #include "ElementFileSubdomain.h"
+
+// Postprocessors
+#include "RankTwoScalarPostprocessor.h"
 
 // Timesteppers
 #include "ReturnMapIterDT.h"
@@ -153,6 +157,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerDiracKernel(FunctionPointSource);
 
+  registerMaterial(ComputePlasticStrainRate);
   registerMaterial(RedbackFluidMaterial);
   registerMaterial(ImageProcessing);
   registerMaterial(RedbackMaterial);
@@ -163,6 +168,8 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialElastic);
 
   registerMeshModifier(ElementFileSubdomain);
+
+  registerPostprocessor(RankTwoScalarPostprocessor);
 
   registerExecutioner(ReturnMapIterDT);
 
