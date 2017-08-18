@@ -48,6 +48,16 @@ RankTwoScalarPostprocessor::RankTwoScalarPostprocessor(const InputParameters & p
 {
 }
 
+void
+RankTwoScalarPostprocessor::initialize()
+{
+}
+
+void
+RankTwoScalarPostprocessor::execute()
+{
+}
+
 PostprocessorValue
 RankTwoScalarPostprocessor::getValue()
 {

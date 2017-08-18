@@ -27,6 +27,8 @@ class RankTwoScalarPostprocessor : public GeneralPostprocessor
 public:
   RankTwoScalarPostprocessor(const InputParameters & parameters);
 
+  virtual void initialize() override;
+  virtual void execute() override;
   virtual PostprocessorValue getValue() override;
 
 protected:
