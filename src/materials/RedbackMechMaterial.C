@@ -372,7 +372,7 @@ RedbackMechMaterial::computeQpStress()
   _plastic_strain[ _qp ] = dp;
 
   // Evaluate and update current equivalent and volumetric plastic strain
-  _eqv_plastic_strain[ _qp ] = std::pow(2.0 / 3.0, 0.5) * dp.deviatoric().L2norm();
+  _eqv_plastic_strain[ _qp ] = std::pow(2.0 / 3.0, 0.5) * dp.L2norm();
   _volumetric_strain[ _qp ] = dp.trace();
 
   // Calculate elastic strain increment
@@ -567,10 +567,10 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   // Remove this number from the tests!!!
   if (q_y != 0)
   {
-  _mod_gruntfest_number[ _qp ] =
-    gruntfest_number * std::exp(-_ar[ _qp ]) *
-    (std::fabs(getSigEqv(sig) * std::pow(macaulayBracket(getSigEqv(sig) / q_y - 1.0), _exponent)) +
-     std::fabs(_mean_stress[ _qp ] * std::pow(macaulayBracket(_mean_stress[ _qp ] - p_y), _exponent)));
+    _mod_gruntfest_number[ _qp ] =
+      gruntfest_number * std::exp(-_ar[ _qp ]) *
+      (std::fabs(getSigEqv(sig) * std::pow(macaulayBracket(getSigEqv(sig) / q_y - 1.0), _exponent)) +
+       std::fabs(_mean_stress[ _qp ] * std::pow(macaulayBracket(_mean_stress[ _qp ] - p_y), _exponent)));
   }
   // Begin of the chemical degradation method of Hu and Hueckel 2013 (doi:10.1680/geot.SIP13.P.020)
   // _mass_removal_rate[_qp] = 0;
@@ -773,7 +773,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
       flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
       if (flow_incr < 0.0) // negative flow increment not allowed
         throw MooseException("Constitutive Error-Negative flow increment: Reduce time "
-          "increment.");
+                             "increment.");
       getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
       flow_tensor *= flow_incr;
       resid = flow_tensor - delta_dp; // Residual
@@ -781,8 +781,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
     }
     if (iter >= maxiter) // Convergence failure
       throw MooseException("Constitutive Error-Too many iterations: Reduce time "
-        "increment.\n"); // Convergence failure //TODO: check the
-                                  // adaptive time stepping
+                           "increment.\n"); // Convergence failure //TODO: check the
+                                            // adaptive time stepping
     _returnmap_iter[ _qp ] = iter;
 
     dpn = dp + delta_dp;
@@ -794,7 +794,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
   if (iterisohard >= maxiterisohard)
     throw MooseException("Constitutive Error-Too many iterations in Hardness "
-      "Update:Reduce time increment.\n"); // Convergence failure
+                         "Update:Reduce time increment.\n"); // Convergence failure
 
   dp = dpn; // Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
@@ -889,15 +889,15 @@ RedbackMechMaterial::formBrittleDamage()
   plastic_damage = _damage_coeff * std::pow(kachanov, exponent_kachanov);
   healing_damage = 0;
 
-  Real mises_stress_old = getSigEqv(_stress_old[_qp]);
-  if (mises_stress_old > _mises_stress[_qp])
-    {
-      _damage_kernel[ _qp ] = healing_damage;
-      _damage_kernel_jac[ _qp ] = 0;
-    }
-    else
-    _damage_kernel[ _qp ] = plastic_damage + healing_damage;
+  Real mises_stress_old = getSigEqv(_stress_old[ _qp ]);
+  if (mises_stress_old > _mises_stress[ _qp ])
+  {
+    _damage_kernel[ _qp ] = healing_damage;
     _damage_kernel_jac[ _qp ] = 0;
+  }
+  else
+    _damage_kernel[ _qp ] = plastic_damage + healing_damage;
+  _damage_kernel_jac[ _qp ] = 0;
 }
 
 void
