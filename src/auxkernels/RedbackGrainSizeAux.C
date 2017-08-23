@@ -20,6 +20,7 @@ validParams<RedbackGrainSizeAux>()
   params.addParam<Real>("delta", 1, "Kamenetskii coefficient.");
   params.addCoupledVar("temperature", 0.0, "temperature variable");
   params.addRequiredParam<UserObjectName>("flow_law_dislocation", "Name of the user object implementing the dislocation flow law in use");
+
   // Steady-State Grain Size
   params.addParam<Real>("pre_exponential_factor_ss", 6107416391.26, "Value of pre-exponential factor for steady-state grain size (A^*_{ss}.");
 
@@ -40,12 +41,12 @@ RedbackGrainSizeAux::RedbackGrainSizeAux(const InputParameters & parameters) :
     AuxKernel(parameters),
     _has_T(isCoupled("temperature")),
     _T(_has_T ? coupledValue("temperature") : _zero),
+
     //_initial_grain_size(coupledValue("initial_grain_size")),
     _flow_law_dis_uo(getUserObject<RedbackFlowLawDislocation>("flow_law_dislocation")),
     _mises_stress(getMaterialProperty<Real>("mises_stress")),
     _mises_strain_rate(getMaterialProperty<Real>("mises_strain_rate")), // total plastic strain rate
     _strain_rate_dis(getMaterialProperty<Real>("dislocation_strain_rate")), // dislocation strain rate
-    _damage_potential(getMaterialProperty<Real>("damage_potential")), // elastic energy term that changes with time
     _delta_param(getParam<Real>("delta")),
     _ar_growth_param(getParam<Real>("Arrhenius_growth")),
     _growth_exponent_param(getParam<Real>("growth_exponent")),
@@ -71,7 +72,7 @@ RedbackGrainSizeAux::computeValue()
     if (_strain_rate_dis[_qp] > 0)
     {
       Real beta = _strain_rate_dis[_qp] / _mises_strain_rate[_qp];
-      grain_reduction_rate = _pre_exp_factor_reduction * _damage_potential[ _qp ] * (-beta) * _mises_stress[ _qp ]
+      grain_reduction_rate = _pre_exp_factor_reduction * (-beta) * _mises_stress[ _qp ]
         * _mises_strain_rate[ _qp ] * std::pow(_u_old[ _qp ],2);
     }
 
