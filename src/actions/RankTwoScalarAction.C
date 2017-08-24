@@ -84,10 +84,10 @@ RankTwoScalarAction::act()
     }
   }
 
-  InputParameters pp_params = _factory.getValidParams("VolumePostprocessor");
-  if (isParamValid("block"))
-  {
-    pp_params.set<std::vector<SubdomainName> >("block") = getParam<std::vector<SubdomainName> >("block");
-  }
-  _problem->addPostprocessor("VolumePostprocessor", "Volume", pp_params);
+  // InputParameters pp_params = _factory.getValidParams("VolumePostprocessor");
+  // if (isParamValid("block"))
+  // {
+  //   pp_params.set<std::vector<SubdomainName> >("block") = getParam<std::vector<SubdomainName> >("block");
+  // }
+  // _problem->addPostprocessor("VolumePostprocessor", "Volume", pp_params);
 }
