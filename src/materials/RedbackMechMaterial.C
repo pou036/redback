@@ -354,7 +354,7 @@ void
 RedbackMechMaterial::computeQpStress()
 {
   RankTwoTensor dp, sig;
-  Real p_y, q_y; // volumetric (p) and deviatoric (q) projections of yield stress
+  Real p_y = 0, q_y = 0; // volumetric (p) and deviatoric (q) projections of yield stress
 
   // Obtain previous plastic rate of deformation tensor
   dp = _plastic_strain_old[ _qp ];
