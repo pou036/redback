@@ -48,14 +48,14 @@ public:
 
 protected:
   // Copy-paste from TensorMechanicsMaterial.h
-  virtual void computeProperties();
+  virtual void computeProperties() override;
   virtual void stepInitQpProperties();
   virtual void computeQpElasticityTensor();
   virtual void computeStrain();
   virtual void computeQpStrain();
   virtual void computeQpStrain(const RankTwoTensor & Fhat); // from FiniteStrainMaterial.h
   virtual void computeQpStress();
-  virtual void initQpStatefulProperties(); // from FiniteStrainMaterial.h
+  virtual void initQpStatefulProperties() override;
 
   const VariableGradient & _grad_disp_x;
   const VariableGradient & _grad_disp_y;
