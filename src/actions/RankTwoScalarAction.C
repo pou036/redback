@@ -46,7 +46,7 @@ RankTwoScalarAction::act()
   std::vector<MaterialPropertyName> tensors = getParam<std::vector<MaterialPropertyName> >("rank_two_tensor");
   const MultiMooseEnum scalar_types = getParam<MultiMooseEnum>("scalar_type");
 
-  for (int i = 0; i < tensors.size(); i++)
+  for (unsigned int i = 0; i < tensors.size(); i++)
   {
     for (int j = 0; j < LIBMESH_DIM; j++)
     {
@@ -66,7 +66,7 @@ RankTwoScalarAction::act()
       }
     }
 
-    for (int j = 0; j < scalar_types.size(); j++)
+    for (unsigned int j = 0; j < scalar_types.size(); j++)
     {
       InputParameters pp_params = _factory.getValidParams("RankTwoScalarPostprocessor");
       for (int j = 0; j < LIBMESH_DIM; j++)
