@@ -40,8 +40,8 @@ public:
   ImageProcessing(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-  virtual void computeQpProperties();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpProperties() override;
 
   FunctionName _func;
   std::vector<Function *> _function;
