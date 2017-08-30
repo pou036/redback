@@ -495,7 +495,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
     (1.0 - _total_porosity[ _qp ]) * (_solid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
                                       _solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param) +
                                       (_elastic_strain[ _qp ] - _elastic_strain_old[ _qp ]).trace());
-  Real delta_phi_mech_pl = (1.0 - _total_porosity[ _qp ]) * (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]).trace();
+  Real delta_phi_mech_pl =
+    (1.0 - _total_porosity[ _qp ]) * (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]).trace();
 
   _mechanical_porosity[ _qp ] = delta_phi_mech_el + delta_phi_mech_pl;
 
@@ -743,8 +744,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
       getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig);
       RankFourTensor dr_dsig_inv = dr_dsig.invSymm();
       RankTwoTensor ddsig = -dr_dsig_inv * resid; // Newton Raphson
-      delta_dp -= E_ijkl.invSymm() * ddsig; // Update increment of plastic rate of deformation tensor
-      sig_new += ddsig;                     // Update stress
+      delta_dp -= E_ijkl.invSymm() * ddsig;       // Update increment of plastic rate of deformation tensor
+      sig_new += ddsig;                           // Update stress
 
       // Update residual
       p = sig_new.trace() / 3.0;
