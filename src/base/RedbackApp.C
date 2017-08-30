@@ -70,6 +70,7 @@
 #include "RedbackMechMaterialCCanisotropic.h"
 #include "RedbackMechMaterialDP.h"
 #include "RedbackMechMaterialElastic.h"
+#include "RedbackMechMaterialExpCC.h"
 #include "RedbackMechMaterialJ2.h"
 
 // MeshModifiers
@@ -167,6 +168,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialCC);
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
+  registerMaterial(RedbackMechMaterialExpCC);
 
   registerMeshModifier(ElementFileSubdomain);
 
