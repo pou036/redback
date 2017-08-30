@@ -26,7 +26,15 @@ protected:
 private:
   bool _has_T;
   const VariableValue & _T;
-  //const VariableValue & _initial_grain_size;
+  bool _has_D;
+  const VariableValue & _damage;
+  const VariableValue & _damage_old;
+
+  const MaterialProperty<RankTwoTensor> & _elastic_strain;
+
+  Real _youngs_modulus;
+  Real _poisson_ratio;
+
   const RedbackFlowLawDislocation & _flow_law_dis_uo;
 
   const MaterialProperty<Real> & _mises_stress;
