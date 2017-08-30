@@ -12,21 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REDBACKMECHMATERIALCC_H
-#define REDBACKMECHMATERIALCC_H
+#ifndef REDBACKMECHMATERIALEXPCC_H
+#define REDBACKMECHMATERIALEXPCC_H
 
 #include "RedbackMechMaterial.h"
 
 // Forward Declarations
-class RedbackMechMaterialCC;
+class RedbackMechMaterialExpCC;
 
 template <>
-InputParameters validParams<RedbackMechMaterialCC>();
+InputParameters validParams<RedbackMechMaterialExpCC>();
 
-class RedbackMechMaterialCC : public RedbackMechMaterial
+class RedbackMechMaterialExpCC : public RedbackMechMaterial
 {
 public:
-  RedbackMechMaterialCC(const InputParameters & parameters);
+  RedbackMechMaterialExpCC(const InputParameters & parameters);
 
 protected:
   Real _slope_yield_surface; // coefficient for yield surface
@@ -40,4 +40,4 @@ protected:
   Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real);
 };
 
-#endif // REDBACKMECHMATERIALCC_H
+#endif // REDBACKMECHMATERIALEXPCC_H

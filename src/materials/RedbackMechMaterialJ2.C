@@ -107,7 +107,7 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig,
           dft_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) - f2 * deltaFunc(i, j) * deltaFunc(k, l) -
                                  f3 * sig_dev(i, j) * sig_dev(k, l); // d_flow_dirn/d_sig - 2nd part
 
-                                                                        // d_flow_dirn/d_sig
+  // d_flow_dirn/d_sig
   dresid_dsig = E_ijkl.invSymm() + dft_dsig * flow_incr_dev + dfi_dsig; // Jacobian
 }
 
