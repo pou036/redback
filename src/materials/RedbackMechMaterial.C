@@ -696,14 +696,14 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   // The following expression should be further pursued for a forward
   // physics-based model
   // The old formula for the triaxial (Tengattini)
-  /*_exponential = _exponential * std::exp(-_alpha_1[ _qp ] * _confining_pressure[ _qp ] -
-                                         _pore_pres[ _qp ] * _alpha_2[ _qp ] *
-                                           (1 + _alpha_3[ _qp ] * std::log(_confining_pressure[ _qp ])));
-  */
+  //_exponential = _exponential * std::exp(-_alpha_1[ _qp ] * _confining_pressure[ _qp ] -
+ //                                     _pore_pres[ _qp ] * _alpha_2[ _qp ] *
+//                                         (1 + _alpha_3[ _qp ] * std::log(_confining_pressure[ _qp ])));
+
     _max_confining_pressure = fmax(_confining_pressure[ _qp ], _max_confining_pressure);
   //   The old formula for the isotropic
-  //  _exponential = _exponential * std::exp(-_alpha_1[ _qp ] * _max_confining_pressure * (1.0+_alpha_3[ _qp ]* std::log(_max_confining_pressure) )
-  //                                          -_pore_pres[ _qp ]  * (1 + 0.45 * std::log(_max_confining_pressure)) * _alpha_2[ _qp ]);
+    //_exponential = _exponential * std::exp(-_alpha_1[ _qp ] * _max_confining_pressure * (1.0+_alpha_3[ _qp ]* std::log(_max_confining_pressure) )
+    //                                       -_pore_pres[ _qp ]  * (1 + 0.45 * std::log(_max_confining_pressure)) * _alpha_2[ _qp ]);
 
   // The New formula that works for both (triaxial and isotropic)
    _exponential = _exponential * std::exp( (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure - _alpha_2[_qp] * _pore_pres[_qp]));
