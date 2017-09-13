@@ -54,8 +54,8 @@ RedbackGrainSizeAux::RedbackGrainSizeAux(const InputParameters & parameters) :
     _elastic_strain(getMaterialProperty<RankTwoTensor>("elastic_strain")),
 
     // From REDBACK
-    _youngs_modulus(getParam<Real>("youngs_modulus")),
-    _poisson_ratio(getParam<Real>("poisson_ratio")),
+    _youngs_modulus(getMaterialProperty<Real>("youngs_modulus")),
+    _poisson_ratio(getMaterialProperty<Real>("poisson_ratio")),
 
     // For grain size calculation
     _flow_law_dis_uo(getUserObject<RedbackFlowLawDislocation>("flow_law_dislocation")),
@@ -85,8 +85,8 @@ RedbackGrainSizeAux::computeValue()
   Real _damage_dissipation, damage_potential, damage_rate;
 
   bulk_modulus =
-  _youngs_modulus * _poisson_ratio / (1 + _poisson_ratio) / (1 - 2 * _poisson_ratio); // First Lame modulus
-  shear_modulus = 0.5 * _youngs_modulus / (1 + _poisson_ratio); // Second Lame modulus (shear)
+  _youngs_modulus[ _qp ] * _poisson_ratio[ _qp ] / (1 + _poisson_ratio[ _qp ]) / (1 - 2 * _poisson_ratio[ _qp ]); // First Lame modulus
+  shear_modulus = 0.5 * _youngs_modulus[ _qp ] / (1 + _poisson_ratio[ _qp ]); // Second Lame modulus (shear)
 
   vol_elastic_strain = _elastic_strain[ _qp ].trace();
   dev_elastic_strain = std::pow(2.0 / 3.0, 0.5) * _elastic_strain[ _qp ].L2norm();

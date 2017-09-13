@@ -145,8 +145,10 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _chemo_mechanical_porosity_coeff(getParam<Real>("chemo_mechanical_porosity_coeff")),
 
     // Redback
-    _youngs_modulus(getParam<Real>("youngs_modulus")),
-    _poisson_ratio(getParam<Real>("poisson_ratio")),
+    _youngs_modulus_param(getParam<Real>("youngs_modulus")),
+    _youngs_modulus(declareProperty<Real>("youngs_modulus")),
+    _poisson_ratio_param(getParam<Real>("poisson_ratio")),
+    _poisson_ratio(declareProperty<Real>("poisson_ratio")),
     _mises_stress(declareProperty<Real>("mises_stress")),
     _mean_stress(declareProperty<Real>("mean_stress")),
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
@@ -211,8 +213,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _gs_lambda_param(getParam<Real>("gs_lambda")),
     _gs_gamma_param(getParam<Real>("gs_gamma"))*/
 {
-  Real E = _youngs_modulus;
-  Real nu = _poisson_ratio;
+  Real E = _youngs_modulus_param;
+  Real nu = _poisson_ratio_param;
   Real l1 = E * nu / (1 + nu) / (1 - 2 * nu); // First Lame modulus
   Real l2 = 0.5 * E / (1 + nu);               // Second Lame modulus (shear)
   Real input_array[] = { l1, l2 };
@@ -248,6 +250,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _dfgrd[ _qp ].zero();
 
   // Redback properties
+  _youngs_modulus[ _qp ] = _youngs_modulus_param;
   _mises_stress[ _qp ] = 0;
   _mean_stress[ _qp ] = 0;
   _mises_strain_rate[ _qp ] = 0;
@@ -872,8 +875,8 @@ RedbackMechMaterial::formDamageDissipation(RankTwoTensor & sig)
   Real damage_potential, damage_rate;
 
   bulk_modulus =
-  _youngs_modulus * _poisson_ratio / (1 + _poisson_ratio) / (1 - 2 * _poisson_ratio); // First Lame modulus
-  shear_modulus = 0.5 * _youngs_modulus / (1 + _poisson_ratio);                         // Second Lame modulus (shear)
+  _youngs_modulus_param * _poisson_ratio_param / (1 + _poisson_ratio_param) / (1 - 2 * _poisson_ratio_param); // First Lame modulus
+  shear_modulus = 0.5 * _youngs_modulus_param / (1 + _poisson_ratio_param);                         // Second Lame modulus (shear)
 
   vol_elastic_strain = _elastic_strain[ _qp ].trace();
   dev_elastic_strain = std::pow(2.0 / 3.0, 0.5) * _elastic_strain[ _qp ].L2norm();
