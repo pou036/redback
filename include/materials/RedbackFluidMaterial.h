@@ -33,7 +33,7 @@ public:
 
 protected:
   virtual void stepInitQpProperties();
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
   virtual void computeRedbackTerms();
 
   bool _has_T;

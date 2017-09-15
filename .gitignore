@@ -229,3 +229,8 @@ dump.txt
 moose_cxx11_compatibility_check.txt
 tests/image_subdomains/idfile.txt
 tests/image_subdomains/idfile_unique.txt
+temp_print_trace.*
+*.dvi
+*.sav
+.failed_tests
+*.ps

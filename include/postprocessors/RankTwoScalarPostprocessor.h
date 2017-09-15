@@ -11,30 +11,37 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+#ifndef RANKTWOSCALARPOSTPROCESSOR_H
+#define RANKTWOSCALARPOSTPROCESSOR_H
 
-#ifndef REDBACKMECHMATERIALJ2_H
-#define REDBACKMECHMATERIALJ2_H
+#include "GeneralPostprocessor.h"
+#include "RankTwoTensor.h"
 
-#include "RedbackMechMaterial.h"
-
-// Forward Declarations
-class RedbackMechMaterialJ2;
+class RankTwoScalarPostprocessor;
 
 template <>
-InputParameters validParams<RedbackMechMaterialJ2>();
+InputParameters validParams<RankTwoScalarPostprocessor>();
 
-class RedbackMechMaterialJ2 : public RedbackMechMaterial
+class RankTwoScalarPostprocessor : public GeneralPostprocessor
 {
 public:
-  RedbackMechMaterialJ2(const InputParameters & parameters);
+  RankTwoScalarPostprocessor(const InputParameters & parameters);
+
+  virtual void initialize() override;
+  virtual void execute() override;
+  virtual PostprocessorValue getValue() override;
 
 protected:
-  virtual void
-  getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) override;
-  virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &) override;
-  virtual Real getFlowIncrement(Real, Real, Real, Real, Real) override;
-  virtual void get_py_qy(Real, Real, Real &, Real &, Real) override;
-  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real);
+  const PostprocessorValue & _index00;
+  const PostprocessorValue & _index01;
+  const PostprocessorValue & _index02;
+  const PostprocessorValue & _index10;
+  const PostprocessorValue & _index11;
+  const PostprocessorValue & _index12;
+  const PostprocessorValue & _index20;
+  const PostprocessorValue & _index21;
+  const PostprocessorValue & _index22;
+  MooseEnum _scalar_type;
 };
 
-#endif // REDBACKMECHMATERIAL_H
+#endif /* RANKTWOSCALARPOSTPROCESSOR_H */

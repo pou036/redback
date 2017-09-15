@@ -59,7 +59,7 @@ public:
 
 protected:
   virtual void stepInitQpProperties();
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
   virtual void computeRedbackTerms();
 
   bool _has_T;
@@ -77,7 +77,7 @@ protected:
   std::vector<std::string> _init_from_functions__params;
   std::vector<FunctionName> _init_from_functions__function_names;
   std::vector<Function *> _init_functions;
-  int _num_init_functions;
+  unsigned int _num_init_functions;
 
   Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param;
   Real _confining_pressure_param, _biot_coeff_param, _alpha_1_param, _alpha_2_param, _alpha_3_param,

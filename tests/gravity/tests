@@ -31,4 +31,10 @@
     csvdiff = 'gravity_poro_stress.csv'
     rel_err = 1e-5
   [../]
+  [./test_initialstress] # can't put a dot in that name!
+    type = 'CSVDiff'
+    input = 'initial_stress.i'
+    csvdiff = 'initial_stress.csv'
+    rel_err = 1e-8
+  [../]
 []

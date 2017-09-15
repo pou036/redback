@@ -20,6 +20,7 @@
 #include "TensorMechanicsApp.h"
 
 // Actions
+#include "RankTwoScalarAction.h"
 #include "RedbackAction.h"
 #include "RedbackMechAction.h"
 
@@ -61,6 +62,7 @@
 #include "FunctionPointSource.h"
 
 // Materials
+#include "ComputePlasticStrainRate.h"
 #include "ImageProcessing.h"
 #include "RedbackFluidMaterial.h"
 #include "RedbackMaterial.h"
@@ -68,10 +70,14 @@
 #include "RedbackMechMaterialCCanisotropic.h"
 #include "RedbackMechMaterialDP.h"
 #include "RedbackMechMaterialElastic.h"
+#include "RedbackMechMaterialExpCC.h"
 #include "RedbackMechMaterialJ2.h"
 
 // MeshModifiers
 #include "ElementFileSubdomain.h"
+
+// Postprocessors
+#include "RankTwoScalarPostprocessor.h"
 
 // Timesteppers
 #include "ReturnMapIterDT.h"
@@ -153,6 +159,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerDiracKernel(FunctionPointSource);
 
+  registerMaterial(ComputePlasticStrainRate);
   registerMaterial(RedbackFluidMaterial);
   registerMaterial(ImageProcessing);
   registerMaterial(RedbackMaterial);
@@ -161,8 +168,11 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialCC);
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
+  registerMaterial(RedbackMechMaterialExpCC);
 
   registerMeshModifier(ElementFileSubdomain);
+
+  registerPostprocessor(RankTwoScalarPostprocessor);
 
   registerExecutioner(ReturnMapIterDT);
 
@@ -179,6 +189,8 @@ RedbackApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
 #undef registerAction
 #define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
+  syntax.registerActionSyntax("RankTwoScalarAction", "RankTwoScalarAction/*");
+  registerAction(RankTwoScalarAction, "add_postprocessor");
   syntax.registerActionSyntax("RedbackMechAction", "RedbackMechAction/*");
   registerAction(RedbackMechAction, "add_kernel");
 // syntax.registerActionSyntax("RedbackAction", "RedbackAction/*");
