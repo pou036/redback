@@ -97,7 +97,7 @@ protected:
   MaterialProperty<RankTwoTensor> & _plastic_strain_old;
   MaterialProperty<Real> & _eqv_plastic_strain;
   MaterialProperty<Real> & _eqv_plastic_strain_old;
-
+  MaterialProperty<Real> & _qmech;
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
   // yield_stress);
   Real getSigEqv(const RankTwoTensor & stress);

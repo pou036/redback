@@ -125,7 +125,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _plastic_strain_old(declarePropertyOld<RankTwoTensor>("plastic_strain")),
     _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
     _eqv_plastic_strain_old(declarePropertyOld<Real>("eqv_plastic_strain")),
-
+    _qmech(declareProperty<Real>("qmech")),
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
     _ref_pe_rate(getParam<Real>("ref_pe_rate")),
     _exponent(getParam<Real>("exponent")),
@@ -219,6 +219,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _stress[ _qp ].zero();
   _plastic_strain[ _qp ].zero();
   _eqv_plastic_strain[ _qp ] = 0.0;
+  _qmech[ _qp ] = 0.0;
   _elasticity_tensor[ _qp ].zero();
   _Jacobian_mult[ _qp ].zero();
   _strain_rate[ _qp ].zero();
@@ -706,7 +707,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
     //                                       -_pore_pres[ _qp ]  * (1 + 0.45 * std::log(_max_confining_pressure)) * _alpha_2[ _qp ]);
 
   // The New formula that works for both (triaxial and isotropic)
-   _exponential = _exponential * std::exp( (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure - _alpha_2[_qp] * _pore_pres[_qp]));
+  _qmech[_qp] = (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure - _alpha_2[_qp] * _pore_pres[_qp]);
+  _exponential = _exponential * std::exp(_qmech[_qp]);
 
 
   while (err3 > tol3 && iterisohard < maxiterisohard) // Hardness update iteration
