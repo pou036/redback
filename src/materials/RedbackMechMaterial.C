@@ -244,6 +244,7 @@ RedbackMechMaterial::initQpStatefulProperties()
         _stress[ _qp ](i, j) = _initial_stress[ i * 3 + j ]->value(_t, _q_point[ _qp ]);
   _plastic_strain[ _qp ].zero();
   _eqv_plastic_strain[ _qp ] = 0.0;
+  _qmech[ _qp ] = 0.0;
   _elasticity_tensor[ _qp ].zero();
   _Jacobian_mult[ _qp ].zero();
   _strain_rate[ _qp ].zero();
@@ -704,7 +705,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   // The following expression should be further pursued for a forward
   // physics-based model
   _max_confining_pressure = fmax(_confining_pressure[ _qp ], _max_confining_pressure);
-  _exponential = _exponential * std::exp( (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure - _alpha_2[_qp] * _pore_pres[_qp]));
+  _qmech[_qp] = (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure - _alpha_2[_qp] * _pore_pres[_qp]);
+  _exponential = _exponential * std::exp(_qmech[_qp]);
 
   unsigned int iterisohard = 0;
   const unsigned int maxiterisohard = 20, maxiter = 50;
