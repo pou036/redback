@@ -22,5 +22,6 @@
     type = 'CSVDiff'
     input = 'thermo_elasticity.i'
     csvdiff = 'thermo_elasticity.csv'
+    skip = "Not valgrind clean"
   [../]
 []
