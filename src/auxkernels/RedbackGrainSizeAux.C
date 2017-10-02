@@ -28,8 +28,6 @@ validParams<RedbackGrainSizeAux>()
   params.addParam<Real>("pre_exponential_factor_ss", 6107416391.26, "Value of pre-exponential factor for steady-state grain size (A^*_{ss}.");
 
   // Grain Size Reduction
-  //params.addParam<Real>("lambda", 0.1, "Microstructural energy storage constant (lambda)"); // Assumed from experimental work that 0.9 converted to heat
-  //params.addParam<Real>("gamma", 1.0, "Grain boundary energy constant (gamma)");
   params.addParam<Real>("pre_exponential_factor_reduction", 0.032, "Value of pre-exponential factor for reduction rate of grain size (A^*_{red}).");
 
   // Grain Size Growth
@@ -95,8 +93,9 @@ RedbackGrainSizeAux::computeValue()
   Psi0_dev = (3 / 2) * shear_modulus * std::pow(dev_elastic_strain, 2);
   Psi0 = Psi0_vol + Psi0_dev;
 
-  damage_potential = (1 - _damage[ _qp ]) * Psi0;
-  damage_rate = (_damage[ _qp ] - _damage_old[ _qp ]) / _dt;
+  damage_potential = ((1 - _damage[ _qp ]) * Psi0)/Psi0; // fraction of elastic energy left after a time step
+
+  //damage_rate = (_damage[ _qp ] - _damage_old[ _qp ]) / _dt;
 
   // _damage_dissipation is equal to (- d Psi / d D * D_dot) which in this code
   // is (damage_potential * damage_rate)
@@ -112,7 +111,7 @@ RedbackGrainSizeAux::computeValue()
     if (_strain_rate_dis[_qp] > 0)
     {
       Real beta = _strain_rate_dis[_qp] / _mises_strain_rate[_qp];
-      grain_reduction_rate = _pre_exp_factor_reduction * (-beta) * _damage_dissipation * _mises_stress[ _qp ]
+      grain_reduction_rate = _pre_exp_factor_reduction * (-beta) * damage_potential * _mises_stress[ _qp ]
         * _mises_strain_rate[ _qp ] * std::pow(_u_old[ _qp ],2); // unsure if I need _damage_dissipation or damage_potential
     }
 
