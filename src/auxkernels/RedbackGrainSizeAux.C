@@ -99,7 +99,7 @@ RedbackGrainSizeAux::computeValue()
 
   // _damage_dissipation is equal to (- d Psi / d D * D_dot) which in this code
   // is (damage_potential * damage_rate)
-  _damage_dissipation = damage_potential * damage_rate;
+  //_damage_dissipation = damage_potential * damage_rate;
 
   /* Grain size calculation for the time step of interest */
   Real grain_size = -1.0; //What does this mean?
