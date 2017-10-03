@@ -959,7 +959,13 @@ RedbackMechMaterial::formCreepDamage(Real cohesion)
     lambda_dot = 0;
 
   plastic_damage = _damage_coeff * lambda_dot;
+
+  // Debugging
+  //std::cout << "plastic_damage = " << plastic_damage << std::endl;
+
   healing_damage = 0;
+
   _damage_kernel[ _qp ] = plastic_damage + healing_damage;
+
   _damage_kernel_jac[ _qp ] = 0;
 }
