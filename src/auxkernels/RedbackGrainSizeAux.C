@@ -93,6 +93,8 @@ RedbackGrainSizeAux::computeValue()
   Psi0_dev = (3 / 2) * shear_modulus * std::pow(dev_elastic_strain, 2);
   Psi0 = Psi0_vol + Psi0_dev;
 
+  std::cout << "damage = " << _damage[ _qp ] << std::endl;
+
   damage_potential = ((1 - _damage[ _qp ]) * Psi0)/Psi0; // fraction of elastic energy left after a time step
 
   //damage_rate = (_damage[ _qp ] - _damage_old[ _qp ]) / _dt;
