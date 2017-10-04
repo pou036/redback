@@ -93,9 +93,11 @@ RedbackGrainSizeAux::computeValue()
   Psi0_dev = (3 / 2) * shear_modulus * std::pow(dev_elastic_strain, 2);
   Psi0 = Psi0_vol + Psi0_dev;
 
-  std::cout << "damage = " << _damage[ _qp ] << std::endl;
+  //std::cout << "damage = " << _damage[ _qp ] << std::endl;
 
   damage_potential = ((1 - _damage[ _qp ]) * Psi0)/Psi0; // fraction of elastic energy left after a time step
+
+  //std::cout << "damage_potential = " << damage_potential << std::endl;
 
   //damage_rate = (_damage[ _qp ] - _damage_old[ _qp ]) / _dt;
 
@@ -117,28 +119,36 @@ RedbackGrainSizeAux::computeValue()
         * _mises_strain_rate[ _qp ] * std::pow(_u_old[ _qp ],2); // unsure if I need _damage_dissipation or damage_potential
     }
 
+    //std::cout << "grain_reduction_rate = " << grain_reduction_rate << std::endl;
+    //std::cout << "dd_r_dt  = " << (grain_reduction_rate*_dt) << std::endl;
+
     Real grain_growth_rate = _pre_exp_factor_growth * 1/_growth_exponent_param * std::pow(_u_old[ _qp ], 1 -_growth_exponent_param)
       * std::exp(_ar_growth_param*_delta_param*_T[_qp]/(1 + _delta_param*_T[_qp]));
 
     // Debugging
-    //std::cout << "_pre_exp_factor_growth = " << _pre_exp_factor_growth << std::endl;
+    //std::cout << "grain_growth_rate = " << grain_growth_rate << std::endl;
 
     Real n_dis = _flow_law_dis_uo.getStressExponent();
     Real m_prime = (n_dis + 1)/ (_growth_exponent_param + 1);
     Real ar_dis = _flow_law_dis_uo.getArrhenius();
     Real ar_ss = (_ar_growth_param - ar_dis)/(_growth_exponent_param + 1);
-    Real steady_state_grain_size = _A_star_ss_param * (1/_damage_dissipation)
+    Real steady_state_grain_size = _A_star_ss_param * (1/damage_potential)
       * std::pow(_mises_stress[ _qp ], -m_prime)* std::exp(ar_ss*_delta_param*_T[_qp]/(1 + _delta_param*_T[_qp]));
+
+    std::cout << "(_u_old[ _qp ] + (grain_reduction_rate*_dt)) = " << (_u_old[ _qp ] + (grain_reduction_rate*_dt)) << std::endl;
 
     if (_u_old[ _qp ] < steady_state_grain_size)
       grain_size = fmin(_u_old[ _qp ] + (grain_growth_rate*_dt), steady_state_grain_size);
     else if (_u_old[ _qp ] > steady_state_grain_size)
-      grain_size = fmax(steady_state_grain_size, _u_old[ _qp ] + (grain_reduction_rate*_dt));
+      grain_size = fmax(steady_state_grain_size, (_u_old[ _qp ] + (grain_reduction_rate*_dt))); // this is the problem line
     else
       grain_size = steady_state_grain_size;
-      //std::cout << "grain_size = " << grain_size << std::endl;
+
   }
 
+  //std::cout << "grain_size = " << grain_size << std::endl;
+
   return grain_size;
+
 
 }
