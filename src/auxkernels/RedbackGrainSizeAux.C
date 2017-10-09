@@ -93,6 +93,9 @@ RedbackGrainSizeAux::computeValue()
   Psi0_dev = (3 / 2) * shear_modulus * std::pow(dev_elastic_strain, 2);
   Psi0 = Psi0_vol + Psi0_dev;
 
+  std::cout << "Psi0 = " << Psi0 << std::endl;
+  std::cout << "_damage[ _qp ] = " << _damage[ _qp ] << std::endl;
+
   //std::cout << "damage = " << _damage[ _qp ] << std::endl;
 
   damage_potential = ((1 - _damage[ _qp ]) * Psi0)/Psi0; // fraction of elastic energy left after a time step
@@ -136,6 +139,7 @@ RedbackGrainSizeAux::computeValue()
     Real steady_state_grain_size = _A_star_ss_param * (1/damage_potential)
       * std::pow(_mises_stress[ _qp ], -m_prime)* std::exp(ar_ss*_delta_param*_T[_qp]/(1 + _delta_param*_T[_qp]));
 
+    std::cout << "_u_old[ _qp ] = " << _u_old[ _qp ] << std::endl;
     std::cout << "(_u_old[ _qp ] + (grain_reduction_rate*_dt)) = " << (_u_old[ _qp ] + (grain_reduction_rate*_dt)) << std::endl;
     std::cout << "steady_state_grain_size = " << steady_state_grain_size << std::endl;
 
