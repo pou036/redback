@@ -30,9 +30,11 @@ private:
   const VariableValue & _damage;
   const VariableValue & _damage_old;
 
+
   const MaterialProperty<RankTwoTensor> & _elastic_strain;
   const MaterialProperty<Real> & _youngs_modulus;
   const MaterialProperty<Real> & _poisson_ratio;
+  
 
   const RedbackFlowLawDislocation & _flow_law_dis_uo;
 
