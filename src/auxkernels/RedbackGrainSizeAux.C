@@ -112,7 +112,7 @@ RedbackGrainSizeAux::computeValue()
 
 
   //std::cout << "damage = " << _damage[ _qp ] << std::endl;
-  std::cout << "_u_old[0] = " << _u_old[ 0 ] << std::endl;
+
 
 
 
@@ -130,12 +130,6 @@ RedbackGrainSizeAux::computeValue()
       grain_reduction_rate = (((-beta) * (_mises_stress[ _qp ]
         * _mises_strain_rate[ _qp ])) * damage_potential) * std::pow(_u_old[ _qp ],2) * _pre_exp_factor_reduction; // unsure if I need _damage_dissipation or damage_potential
 
-
-      /* Alt grain_reduction_rate
-
-      grain_reduction_rate = ((-(_mises_stress[ _qp ]
-        * _strain_rate_dis[_qp])) * damage_potential) * std::pow(_u_old[ _qp ],2) * _pre_exp_factor_reduction;
-        */
     }
 
     //std::cout << "beta = " << (-(_mises_stress[ _qp ] * _strain_rate_dis[_qp])) << std::endl;
@@ -146,7 +140,7 @@ RedbackGrainSizeAux::computeValue()
       * std::exp(_ar_growth_param*_delta_param*_T[_qp]/(1 + _delta_param*_T[_qp]));
 
     // Debugging
-    //std::cout << "grain_growth_rate = " << grain_growth_rate << std::endl;
+    std::cout << "grain_growth_rate = " << grain_growth_rate << std::endl;
 
     Real n_dis = _flow_law_dis_uo.getStressExponent();
     Real m_prime = (n_dis + 1)/ (_growth_exponent_param + 1);
@@ -155,6 +149,7 @@ RedbackGrainSizeAux::computeValue()
     Real steady_state_grain_size = _A_star_ss_param * (1/damage_potential)
       * std::pow(_mises_stress[ _qp ], -m_prime)* std::exp(ar_ss*_delta_param*_T[_qp]/(1 + _delta_param*_T[_qp]));
 
+    //std::cout << "_u_old[0] = " << _u_old[ 0 ] << std::endl;
     //std::cout << "_u_old[ _qp ] = " << _u_old[ _qp ] << std::endl;
     //std::cout << "(_u_old[ _qp ] + (grain_reduction_rate*_dt)) = " << (_u_old[ _qp ] + (grain_reduction_rate*_dt)) << std::endl;
     //std::cout << "steady_state_grain_size = " << steady_state_grain_size << std::endl;
@@ -167,7 +162,7 @@ RedbackGrainSizeAux::computeValue()
       grain_size = steady_state_grain_size;
 
   }
-  
+
   //std::cout << "grain_size = " << grain_size << std::endl;
 
   return grain_size;
