@@ -20,6 +20,7 @@
 #include "TensorMechanicsApp.h"
 
 // Actions
+#include "RankTwoContractionAction.h"
 #include "RankTwoScalarAction.h"
 #include "RedbackAction.h"
 #include "RedbackMechAction.h"
@@ -77,6 +78,7 @@
 #include "ElementFileSubdomain.h"
 
 // Postprocessors
+#include "RankTwoContractionPostprocessor.h"
 #include "RankTwoScalarPostprocessor.h"
 
 // Timesteppers
@@ -172,6 +174,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerMeshModifier(ElementFileSubdomain);
 
+  registerPostprocessor(RankTwoContractionPostprocessor);
   registerPostprocessor(RankTwoScalarPostprocessor);
 
   registerExecutioner(ReturnMapIterDT);
@@ -189,6 +192,8 @@ RedbackApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
 #undef registerAction
 #define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
+  syntax.registerActionSyntax("RankTwoContractionAction", "RankTwoContractionAction/*");
+  registerAction(RankTwoContractionAction, "add_postprocessor");
   syntax.registerActionSyntax("RankTwoScalarAction", "RankTwoScalarAction/*");
   registerAction(RankTwoScalarAction, "add_postprocessor");
   syntax.registerActionSyntax("RedbackMechAction", "RedbackMechAction/*");

@@ -61,8 +61,10 @@ RankTwoScalarAction::act()
         {
           pp_params.set<std::vector<SubdomainName> >("block") = getParam<std::vector<SubdomainName> >("block");
         }
-        _problem->addPostprocessor(
-          "MaterialTensorIntegral", std::string(tensors[ i ]) + std::to_string(j) + std::to_string(k), pp_params);
+        _problem->addPostprocessor("MaterialTensorIntegral",
+                                   std::string("RankTwoScalarAction_") + std::string(tensors[ i ]) +
+                                     std::to_string(j) + std::to_string(k),
+                                   pp_params);
       }
     }
 
@@ -74,7 +76,7 @@ RankTwoScalarAction::act()
         for (int k = 0; k < LIBMESH_DIM; k++)
         {
           pp_params.set<PostprocessorName>(std::string("index") + std::to_string(j) + std::to_string(k)) =
-            std::string(tensors[ i ]) + std::to_string(j) + std::to_string(k);
+            std::string("RankTwoScalarAction_") + std::string(tensors[ i ]) + std::to_string(j) + std::to_string(k);
         }
       }
       pp_params.set<MooseEnum>("scalar_type") = scalar_types[ j ];
