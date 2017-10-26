@@ -23,7 +23,8 @@ validParams<RankTwoContractionAction>()
 {
   InputParameters params = validParams<Action>();
   params.addRequiredParam<std::vector<MaterialPropertyName> >("rank_two_tensor", "The rank two material tensors name");
-
+  params.addParam<bool>(
+    "compute_on_boundary", false, "Allows macro dissipation to be computed on boundaries instead of blocks");
   return params;
 }
 
@@ -35,6 +36,9 @@ void
 RankTwoContractionAction::act()
 {
   std::vector<MaterialPropertyName> tensors = getParam<std::vector<MaterialPropertyName> >("rank_two_tensor");
+  std::string postprocessor = "MaterialTensorIntegral";
+  if (getParam<bool>("compute_on_boundary"))
+    std::string postprocessor = "MaterialTensorSideIntegral";
 
   for (int i = 0; i < 2; i++)
   {
@@ -42,12 +46,12 @@ RankTwoContractionAction::act()
     {
       for (int k = 0; k < LIBMESH_DIM; k++)
       {
-        InputParameters pp_params = _factory.getValidParams("MaterialTensorIntegral");
+        InputParameters pp_params = _factory.getValidParams(postprocessor);
         pp_params.set<MaterialPropertyName>("rank_two_tensor") = tensors[ i ];
         pp_params.set<unsigned int>("index_i") = j;
         pp_params.set<unsigned int>("index_j") = k;
         pp_params.set<std::vector<OutputName> >("outputs") = { "none" };
-        _problem->addPostprocessor("MaterialTensorIntegral",
+        _problem->addPostprocessor(postprocessor,
                                    std::string("RankTwoContractionAction_") + std::string(tensors[ i ]) +
                                      std::to_string(j) + std::to_string(k),
                                    pp_params);

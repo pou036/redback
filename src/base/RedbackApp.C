@@ -78,6 +78,7 @@
 #include "ElementFileSubdomain.h"
 
 // Postprocessors
+#include "MaterialTensorSideIntegral.h"
 #include "RankTwoContractionPostprocessor.h"
 #include "RankTwoScalarPostprocessor.h"
 
@@ -174,6 +175,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerMeshModifier(ElementFileSubdomain);
 
+  registerPostprocessor(MaterialTensorSideIntegral);
   registerPostprocessor(RankTwoContractionPostprocessor);
   registerPostprocessor(RankTwoScalarPostprocessor);
 
