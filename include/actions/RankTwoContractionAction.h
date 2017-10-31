@@ -24,6 +24,9 @@ public:
 
   MultiMooseEnum scalarOptions();
   virtual void act() override;
+
+private:
+  std::string _base_name;
 };
 
 template <>
