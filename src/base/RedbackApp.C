@@ -81,6 +81,7 @@
 #include "MaterialTensorSideIntegral.h"
 #include "RankTwoContractionPostprocessor.h"
 #include "RankTwoScalarPostprocessor.h"
+#include "SideExtremeValue.h"
 
 // Timesteppers
 #include "ReturnMapIterDT.h"
@@ -178,6 +179,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerPostprocessor(MaterialTensorSideIntegral);
   registerPostprocessor(RankTwoContractionPostprocessor);
   registerPostprocessor(RankTwoScalarPostprocessor);
+  registerPostprocessor(SideExtremeValue);
 
   registerExecutioner(ReturnMapIterDT);
 
