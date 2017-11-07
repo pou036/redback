@@ -97,6 +97,7 @@ protected:
   const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
   MaterialProperty<Real> & _eqv_plastic_strain;
   const MaterialProperty<Real> & _eqv_plastic_strain_old;
+  MaterialProperty<Real> & _max_mean_stress;
   MaterialProperty<Real> & _qmech;
 
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
@@ -104,6 +105,7 @@ protected:
   Real getSigEqv(const RankTwoTensor & stress);
   Real deltaFunc(unsigned int i, unsigned int j);
   Real getYieldStress(const Real equivalent_plastic_strain);
+  Real getYieldStress0(const Real equivalent_plastic_strain);
 
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
   virtual void returnMap(const RankTwoTensor &,

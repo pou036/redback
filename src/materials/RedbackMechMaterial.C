@@ -132,6 +132,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("plastic_strain")),
     _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
     _eqv_plastic_strain_old(getMaterialPropertyOld<Real>("eqv_plastic_strain")),
+    _max_mean_stress(declareProperty<Real>("max_mean_stress")),
     _qmech(declareProperty<Real>("qmech")),
 
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
@@ -244,6 +245,7 @@ RedbackMechMaterial::initQpStatefulProperties()
         _stress[ _qp ](i, j) = _initial_stress[ i * 3 + j ]->value(_t, _q_point[ _qp ]);
   _plastic_strain[ _qp ].zero();
   _eqv_plastic_strain[ _qp ] = 0.0;
+  _max_mean_stress[ _qp ] = 0.0;
   _qmech[ _qp ] = 0.0;
   _elasticity_tensor[ _qp ].zero();
   _Jacobian_mult[ _qp ].zero();
@@ -420,6 +422,19 @@ RedbackMechMaterial::deltaFunc(const unsigned int i, const unsigned int j)
 // Obtain yield stress for a given equivalent plastic strain (input)
 Real
 RedbackMechMaterial::getYieldStress(const Real eqpe)
+{
+  //_max_confining_pressure = fmax(_confining_pressure[ _qp ], _max_confining_pressure);
+  //_max_mean_stress[_qp]
+  Real ocr_exponent = 2.0;
+  Real ocr = -99.9;
+  if (_mean_stress[_qp] == 0)
+    ocr = 1.0;
+  Real ocr = _max_mean_stress[_qp] / _mean_stress[_qp]; // should be updated in plasticity only...
+  return getYieldStress0(eqpe)*std::pow(ocr, ocr_exponent);
+}
+
+Real
+RedbackMechMaterial::getYieldStress0(const Real eqpe)
 {
   unsigned int nsize = _yield_stress_vector.size();
 
@@ -705,6 +720,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   // The following expression should be further pursued for a forward
   // physics-based model
   _max_confining_pressure = fmax(_confining_pressure[ _qp ], _max_confining_pressure);
+  _max_mean_stress[_qp] = fmax(_mean_stress[ _qp ], _max_mean_stress[ _qp ]);
   //qmech[_qp] = (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure - _alpha_2[_qp] * _pore_pres[_qp]);
   _qmech[_qp] = (_alpha_1[_qp] +_alpha_2[_qp] * _pore_pres[_qp]);
 
