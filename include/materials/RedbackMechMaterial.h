@@ -100,7 +100,7 @@ protected:
   MaterialProperty<Real> & _max_mean_stress;
   const MaterialProperty<Real> & _max_mean_stress_old;
   MaterialProperty<Real> & _ocr;
-  const MaterialProperty<Real> & _ocr_old;
+  //const MaterialProperty<Real> & _ocr_old;
   MaterialProperty<Real> & _qmech;
 
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real

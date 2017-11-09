@@ -136,7 +136,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _max_mean_stress(declareProperty<Real>("max_mean_stress")),
     _max_mean_stress_old(getMaterialPropertyOld<Real>("max_mean_stress")),
     _ocr(declareProperty<Real>("ocr")),
-    _ocr_old(getMaterialPropertyOld<Real>("ocr")),
+    //_ocr_old(getMaterialPropertyOld<Real>("ocr")),
     _qmech(declareProperty<Real>("qmech")),
 
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
@@ -429,7 +429,7 @@ RedbackMechMaterial::deltaFunc(const unsigned int i, const unsigned int j)
 Real
 RedbackMechMaterial::getYieldStress(const Real eqpe)
 {
-  return getYieldStress0(eqpe)*std::pow(_ocr_old[ _qp], _ocr_exponent_param);
+  return getYieldStress0(eqpe)*std::pow(_ocr[ _qp], _ocr_exponent_param);
 }
 
 Real
@@ -719,11 +719,16 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
   // The following expression should be further pursued for a forward
   // physics-based model
+
   _max_confining_pressure = fmax(_confining_pressure[ _qp ], _max_confining_pressure);
   _max_mean_stress[_qp] = fmax(fabs(_mean_stress[ _qp ]), _max_mean_stress[ _qp ]);
   //qmech[_qp] = (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure - _alpha_2[_qp] * _pore_pres[_qp]);
 
-
+  /*if (_q_point[0](0)<0.0898335 && _q_point[0](0) > 0.0898333 && _q_point[0](1)< 0.105663 && _q_point[0](1) >0.105661  && _q_point[0](2)<0.0391070 && _q_point[0](2) >0.0391068 )
+  {
+    std::cout << "_confining_pressure[ _qp ] = " << _confining_pressure[ _qp ] <<", _max_confining_pressure="<<_max_confining_pressure<<std::endl;
+  }
+*/
   // THOMAS putting back the MASTER formula in here
   _qmech[_qp] = -_alpha_1[ _qp ] * _confining_pressure[ _qp ] -
                 _pore_pres[ _qp ] * _alpha_2[ _qp ] *
@@ -767,6 +772,9 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
     {
       iter++;
       is_plastic = true;
+      // Update OCR (for next time step), only if we were in plasticity
+      updateOcr();
+
 
       // Jacobian = d(residual)/d(sigma)
       RankFourTensor dr_dsig;
@@ -810,22 +818,22 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   dp = dpn; // Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
 
-  // Update OCR (for next time step), only if we were in plasticity
-  if (is_plastic)
-    updateOcr();
-
 }
 
 void
 RedbackMechMaterial::updateOcr()
 {
   // Update max mean stress seen (in plasticity)
-  _max_mean_stress[_qp] = fmax(fabs(_mean_stress[_qp]), _max_mean_stress_old[_qp]);
+  //_max_mean_stress[_qp] = fmax(fabs(_mean_stress[_qp]), _max_mean_stress_old[_qp]);
   // Update OCR
-  if (_mean_stress[_qp] == 0)
-    _ocr[_qp] = 1.0;
-  else
-    _ocr[_qp] = _max_mean_stress_old[_qp] / fabs(_mean_stress[_qp]);
+  //if (_mean_stress[_qp] == 0)
+  //  _ocr[_qp] = 1.0;
+  //else
+    _ocr[_qp] = _max_confining_pressure / _confining_pressure[ _qp ];//_max_mean_stress_old[_qp] / fabs(_mean_stress[_qp]);
+    /*if (_t > 3000 && _q_point[0](0)<0.0898335 && _q_point[0](0) > 0.0898333 && _q_point[0](1)< 0.105663 && _q_point[0](1) >0.105661  && _q_point[0](2)<0.0391070 && _q_point[0](2) >0.0391068 )
+    {
+      std::cout << "t="<<_t<<", _ocr[_qp]="<<_ocr[_qp]<<", _confining_pressure[ _qp ] = " << _confining_pressure[ _qp ] <<", _max_confining_pressure="<<_max_confining_pressure<<std::endl;
+    }*/
   //std::cout << "new OCR = " << _ocr[_qp] << ", _max_mean_stress_old[_qp]=" << _max_mean_stress_old[_qp] << ", _mean_stress[_qp]=" << _mean_stress[_qp] << std::endl;
 }
 
