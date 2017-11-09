@@ -88,6 +88,7 @@ validParams<RedbackMechMaterial>()
                              "The method to describe damage evolution");
 
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
+  params.addParam<Real>("ocr_exponent", 2.0, "exponent to update yield value from ocr as y=y0*pow(OCR, exponent)");
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
   params.addParam<std::vector<FunctionName> >(
@@ -133,6 +134,9 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
     _eqv_plastic_strain_old(getMaterialPropertyOld<Real>("eqv_plastic_strain")),
     _max_mean_stress(declareProperty<Real>("max_mean_stress")),
+    _max_mean_stress_old(getMaterialPropertyOld<Real>("max_mean_stress")),
+    _ocr(declareProperty<Real>("ocr")),
+    _ocr_old(getMaterialPropertyOld<Real>("ocr")),
     _qmech(declareProperty<Real>("qmech")),
 
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
@@ -195,6 +199,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _mixture_compressibility(getMaterialProperty<Real>("mixture_compressibility")),
     _peclet_number(getMaterialProperty<Real>("Peclet_number")),
     _returnmap_iter(declareProperty<Real>("returnmap_iter")),
+    _ocr_exponent_param(getParam<Real>("ocr_exponent")),
     _T0_param(getParam<Real>("temperature_reference")),
     _P0_param(getParam<Real>("pressure_reference"))
 {
@@ -245,6 +250,8 @@ RedbackMechMaterial::initQpStatefulProperties()
         _stress[ _qp ](i, j) = _initial_stress[ i * 3 + j ]->value(_t, _q_point[ _qp ]);
   _plastic_strain[ _qp ].zero();
   _eqv_plastic_strain[ _qp ] = 0.0;
+  _max_mean_stress[ _qp ] = 0.0;
+  _ocr[ _qp ] = 1.0;
   _max_mean_stress[ _qp ] = 0.0;
   _qmech[ _qp ] = 0.0;
   _elasticity_tensor[ _qp ].zero();
@@ -423,14 +430,8 @@ RedbackMechMaterial::deltaFunc(const unsigned int i, const unsigned int j)
 Real
 RedbackMechMaterial::getYieldStress(const Real eqpe)
 {
-  //_max_confining_pressure = fmax(_confining_pressure[ _qp ], _max_confining_pressure);
-  //_max_mean_stress[_qp]
   Real ocr_exponent = 2.0;
-  Real ocr = -99.9;
-  if (_mean_stress[_qp] == 0)
-    ocr = 1.0;
-  Real ocr = _max_mean_stress[_qp] / _mean_stress[_qp]; // should be updated in plasticity only...
-  return getYieldStress0(eqpe)*std::pow(ocr, ocr_exponent);
+  return getYieldStress0(eqpe)*std::pow(_ocr_old[ _qp], ocr_exponent);
 }
 
 Real
@@ -699,6 +700,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   const Real tol1 = 1e-10; // TODO: expose to user interface and/or make the tolerance relative
   const Real tol3 = 1e-6;  // TODO: expose to user interface and/or make the tolerance relative
   Real err3 = 1.1 * tol3;
+  bool is_plastic = false; // keep track whether that stress is in plastic regime
 
   Real eqvpstrain = std::pow(2.0 / 3.0, 0.5) * dp.L2norm();
   Real yield_stress = getYieldStress(eqvpstrain);
@@ -759,6 +761,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
     while (err1 > tol1 && iter < maxiter) // Stress update iteration (hardness fixed)
     {
       iter++;
+      is_plastic = true;
 
       // Jacobian = d(residual)/d(sigma)
       RankFourTensor dr_dsig;
@@ -801,6 +804,24 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
   dp = dpn; // Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;
+
+  // Update OCR (for next time step), only if we were in plasticity
+  if (is_plastic)
+    updateOcr();
+
+}
+
+void
+RedbackMechMaterial::updateOcr()
+{
+  return;
+  // Update max mean stress seen (in plasticity)
+  _max_mean_stress[_qp] = fmax(_mean_stress[_qp], _max_mean_stress_old[_qp]);
+  // Update OCR
+  if (_mean_stress[_qp] == 0)
+    _ocr[_qp] = 1.0;
+  else
+    _ocr[_qp] = _max_mean_stress_old[_qp] / _mean_stress[_qp];
 }
 
 void

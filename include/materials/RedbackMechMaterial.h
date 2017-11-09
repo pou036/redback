@@ -98,6 +98,9 @@ protected:
   MaterialProperty<Real> & _eqv_plastic_strain;
   const MaterialProperty<Real> & _eqv_plastic_strain_old;
   MaterialProperty<Real> & _max_mean_stress;
+  const MaterialProperty<Real> & _max_mean_stress_old;
+  MaterialProperty<Real> & _ocr;
+  const MaterialProperty<Real> & _ocr_old;
   MaterialProperty<Real> & _qmech;
 
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
@@ -187,9 +190,10 @@ protected:
   const MaterialProperty<Real> & _peclet_number;
   MaterialProperty<Real> & _returnmap_iter;
 
-  Real _T0_param, _P0_param;
+  Real _ocr_exponent_param, _T0_param, _P0_param;
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
+  virtual void updateOcr();
   virtual void get_py_qy_damaged(Real, Real, Real &, Real &, Real);
   virtual void form_damage_kernels(Real);
 
