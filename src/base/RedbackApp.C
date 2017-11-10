@@ -21,6 +21,7 @@
 
 // Actions
 #include "RankTwoContractionAction.h"
+#include "RankTwoCstContractionAction.h"
 #include "RankTwoScalarAction.h"
 #include "RedbackAction.h"
 #include "RedbackMechAction.h"
@@ -198,6 +199,8 @@ RedbackApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 #define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
   syntax.registerActionSyntax("RankTwoContractionAction", "RankTwoContractionAction/*");
   registerAction(RankTwoContractionAction, "add_postprocessor");
+  syntax.registerActionSyntax("RankTwoCstContractionAction", "RankTwoCstContractionAction/*");
+  registerAction(RankTwoCstContractionAction, "add_postprocessor");
   syntax.registerActionSyntax("RankTwoScalarAction", "RankTwoScalarAction/*");
   registerAction(RankTwoScalarAction, "add_postprocessor");
   syntax.registerActionSyntax("RedbackMechAction", "RedbackMechAction/*");

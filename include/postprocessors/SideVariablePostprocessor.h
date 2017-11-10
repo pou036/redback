@@ -15,8 +15,8 @@
 #ifndef SIDEVARIABLEPOSTPROCESSOR_H
 #define SIDEVARIABLEPOSTPROCESSOR_H
 
-#include "SidePostprocessor.h"
 #include "MooseVariableInterface.h"
+#include "SidePostprocessor.h"
 
 // Forward Declarations
 class SideVariablePostprocessor;

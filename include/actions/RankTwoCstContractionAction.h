@@ -12,36 +12,24 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "MooseTypes.h"
-#include "MooseVariable.h"
-#include "SideVariablePostprocessor.h"
-#include "SubProblem.h"
+#ifndef RANKTWOCSTCONTRACTIONACTION_H
+#define RANKTWOCSTCONTRACTIONACTION_H
 
-#include "libmesh/quadrature.h"
+#include "Action.h"
+
+class RankTwoCstContractionAction : public Action
+{
+public:
+  RankTwoCstContractionAction(InputParameters params);
+
+  MultiMooseEnum scalarOptions();
+  virtual void act() override;
+
+private:
+  std::string _base_name;
+};
 
 template <>
-InputParameters
-validParams<SideVariablePostprocessor>()
-{
-  InputParameters params = validParams<SidePostprocessor>();
-  params.addRequiredCoupledVar("variable", "The name of the variable that this postprocessor operates on");
-  return params;
-}
+InputParameters validParams<RankTwoCstContractionAction>();
 
-SideVariablePostprocessor::SideVariablePostprocessor(const InputParameters & parameters) :
-    SidePostprocessor(parameters),
-    MooseVariableInterface(this, false),
-    _u(coupledValue("variable")),
-    _grad_u(coupledGradient("variable")),
-    _u_dot(coupledDot("variable")),
-    _qp(0)
-{
-  addMooseVariableDependency(mooseVariable());
-}
-
-void
-SideVariablePostprocessor::execute()
-{
-  for (_qp = 0; _qp < _qrule->n_points(); _qp++)
-    computeQpValue();
-}
+#endif // RANKTWOCSTCONTRACTIONACTION_H

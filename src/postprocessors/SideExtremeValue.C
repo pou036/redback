@@ -36,8 +36,8 @@ validParams<SideExtremeValue>()
   return params;
 }
 
-SideExtremeValue::SideExtremeValue(const InputParameters & parameters)
-  : SideVariablePostprocessor(parameters),
+SideExtremeValue::SideExtremeValue(const InputParameters & parameters) :
+    SideVariablePostprocessor(parameters),
     _type((ExtremeType)(int)parameters.get<MooseEnum>("value_type")),
     _value(_type == 0 ? -std::numeric_limits<Real>::max() : std::numeric_limits<Real>::max())
 {
@@ -64,11 +64,11 @@ SideExtremeValue::computeQpValue()
   switch (_type)
   {
     case MAX:
-      _value = std::max(_value, _u[_qp]);
+      _value = std::max(_value, _u[ _qp ]);
       break;
 
     case MIN:
-      _value = std::min(_value, _u[_qp]);
+      _value = std::min(_value, _u[ _qp ]);
       break;
   }
 }

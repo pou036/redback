@@ -27,14 +27,14 @@ validParams<RankTwoContractionAction>()
     "compute_on_boundary", false, "Allows macro dissipation to be computed on boundaries instead of blocks");
   params.addParam<std::string>("base_name", "Material property base name");
   params.addParam<std::vector<SubdomainName> >("block",
-         "The list of block ids (SubdomainID) that this object will be applied");
-  params.addParam<std::vector<BoundaryName> >("boundary",
-        "The list of boundary IDs from the mesh that this object will be applied");
+                                               "The list of block ids (SubdomainID) that this object will be applied");
+  params.addParam<std::vector<BoundaryName> >(
+    "boundary", "The list of boundary IDs from the mesh that this object will be applied");
   return params;
 }
 
-RankTwoContractionAction::RankTwoContractionAction(InputParameters params) : Action(params),
-    _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "")
+RankTwoContractionAction::RankTwoContractionAction(InputParameters params) :
+    Action(params), _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "")
 {
 }
 
@@ -61,7 +61,8 @@ RankTwoContractionAction::act()
           pp_params.set<std::vector<BoundaryName> >("boundary") = getParam<std::vector<BoundaryName> >("boundary");
         else if (isParamValid("block"))
           pp_params.set<std::vector<SubdomainName> >("block") = getParam<std::vector<SubdomainName> >("block");
-        _problem->addPostprocessor(postprocessor, _base_name + std::string("RankTwoContractionAction_") + std::string(tensors[ i ]) +
+        _problem->addPostprocessor(postprocessor,
+                                   _base_name + std::string("RankTwoContractionAction_") + std::string(tensors[ i ]) +
                                      std::to_string(j) + std::to_string(k),
                                    pp_params);
       }
@@ -76,10 +77,13 @@ RankTwoContractionAction::act()
       for (int k = 0; k < LIBMESH_DIM; k++)
       {
         pp_params.set<PostprocessorName>(std::to_string(i + 1) + std::string("_index") + std::to_string(j) +
-                                         std::to_string(k)) =
-          _base_name + std::string("RankTwoContractionAction_") + std::string(tensors[ i ]) + std::to_string(j) + std::to_string(k);
+                                         std::to_string(k)) = _base_name + std::string("RankTwoContractionAction_") +
+                                                              std::string(tensors[ i ]) + std::to_string(j) +
+                                                              std::to_string(k);
       }
     }
   }
-  _problem->addPostprocessor("RankTwoContractionPostprocessor", _base_name + std::string(tensors[0]) + std::string("-") + std::string(tensors[1]), pp_params);
+  _problem->addPostprocessor("RankTwoContractionPostprocessor",
+                             _base_name + std::string(tensors[ 0 ]) + std::string("-") + std::string(tensors[ 1 ]),
+                             pp_params);
 }
