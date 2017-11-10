@@ -99,8 +99,12 @@ protected:
   const MaterialProperty<Real> & _eqv_plastic_strain_old;
   MaterialProperty<Real> & _max_mean_stress;
   const MaterialProperty<Real> & _max_mean_stress_old;
+  MaterialProperty<Real> & _yield_value;
+  const MaterialProperty<Real> & _yield_value_old;
   MaterialProperty<Real> & _ocr;
   //const MaterialProperty<Real> & _ocr_old;
+  MaterialProperty<Real> & _ocr_max;
+  const MaterialProperty<Real> & _ocr_max_old;
   MaterialProperty<Real> & _qmech;
 
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
@@ -130,6 +134,8 @@ protected:
 
   Real _ref_pe_rate;
   Real _exponent;
+  //Real _current_ocr;
+  //Real _current_max_mean_stress;
   Real _chemo_mechanical_porosity_coeff;
 
   Real macaulayBracket(Real);
@@ -139,6 +145,7 @@ protected:
   Real _poisson_ratio;
   MaterialProperty<Real> & _mises_stress;
   MaterialProperty<Real> & _mean_stress;
+  const MaterialProperty<Real> & _mean_stress_old;
   MaterialProperty<Real> & _mises_strain_rate;
   MaterialProperty<Real> & _volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;

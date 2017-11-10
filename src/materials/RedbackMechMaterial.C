@@ -135,13 +135,19 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _eqv_plastic_strain_old(getMaterialPropertyOld<Real>("eqv_plastic_strain")),
     _max_mean_stress(declareProperty<Real>("max_mean_stress")),
     _max_mean_stress_old(getMaterialPropertyOld<Real>("max_mean_stress")),
+    _yield_value(declareProperty<Real>("yield_value")),
+    _yield_value_old(getMaterialPropertyOld<Real>("yield_value")),
     _ocr(declareProperty<Real>("ocr")),
     //_ocr_old(getMaterialPropertyOld<Real>("ocr")),
+    _ocr_max(declareProperty<Real>("ocr_max")),
+    _ocr_max_old(getMaterialPropertyOld<Real>("ocr_max")),
     _qmech(declareProperty<Real>("qmech")),
 
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
     _ref_pe_rate(getParam<Real>("ref_pe_rate")),
     _exponent(getParam<Real>("exponent")),
+    //_current_ocr(1.0),
+    //_current_max_mean_stress(0.0),
     _chemo_mechanical_porosity_coeff(getParam<Real>("chemo_mechanical_porosity_coeff")),
 
     // Redback
@@ -149,6 +155,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _poisson_ratio(getParam<Real>("poisson_ratio")),
     _mises_stress(declareProperty<Real>("mises_stress")),
     _mean_stress(declareProperty<Real>("mean_stress")),
+    _mean_stress_old(getMaterialPropertyOld<Real>("mean_stress")),
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
     _volumetric_strain(declareProperty<Real>("volumetric_strain")),
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
@@ -251,7 +258,9 @@ RedbackMechMaterial::initQpStatefulProperties()
   _plastic_strain[ _qp ].zero();
   _eqv_plastic_strain[ _qp ] = 0.0;
   _max_mean_stress[ _qp ] = 0.0;
+  _yield_value[ _qp ] = 1.0;
   _ocr[ _qp ] = 1.0;
+  _ocr_max[ _qp ] = 1.0;
   _qmech[ _qp ] = 0.0;
   _elasticity_tensor[ _qp ].zero();
   _Jacobian_mult[ _qp ].zero();
@@ -429,7 +438,9 @@ RedbackMechMaterial::deltaFunc(const unsigned int i, const unsigned int j)
 Real
 RedbackMechMaterial::getYieldStress(const Real eqpe)
 {
-  return getYieldStress0(eqpe)*std::pow(_ocr[ _qp], _ocr_exponent_param);
+  //_yield_value[_qp] = getYieldStress0(eqpe)*_yield_value_old[_qp]*std::pow(_ocr[_qp], _ocr_exponent_param);
+  //return _yield_value[_qp];
+  return getYieldStress0(eqpe)*std::pow(_ocr_max[ _qp], _ocr_exponent_param);
 }
 
 Real
@@ -721,7 +732,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   // physics-based model
 
   _max_confining_pressure = fmax(_confining_pressure[ _qp ], _max_confining_pressure);
-  _max_mean_stress[_qp] = fmax(fabs(_mean_stress[ _qp ]), _max_mean_stress[ _qp ]);
+  _max_mean_stress[_qp] = fmax(fabs(_mean_stress[ _qp ]), _max_mean_stress_old[ _qp ]);
   //qmech[_qp] = (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure - _alpha_2[_qp] * _pore_pres[_qp]);
 
   /*if (_q_point[0](0)<0.0898335 && _q_point[0](0) > 0.0898333 && _q_point[0](1)< 0.105663 && _q_point[0](1) >0.105661  && _q_point[0](2)<0.0391070 && _q_point[0](2) >0.0391068 )
@@ -829,7 +840,9 @@ RedbackMechMaterial::updateOcr()
   //if (_mean_stress[_qp] == 0)
   //  _ocr[_qp] = 1.0;
   //else
-    _ocr[_qp] = _max_confining_pressure / _confining_pressure[ _qp ];//_max_mean_stress_old[_qp] / fabs(_mean_stress[_qp]);
+    _ocr[_qp] = _max_mean_stress_old[_qp] / fabs(_mean_stress_old[_qp]);
+    _ocr_max[_qp] = fmax(_ocr_max_old[_qp], _ocr[_qp]);
+    //_ocr[_qp] = _max_confining_pressure / _confining_pressure[ _qp ];
     /*if (_t > 3000 && _q_point[0](0)<0.0898335 && _q_point[0](0) > 0.0898333 && _q_point[0](1)< 0.105663 && _q_point[0](1) >0.105661  && _q_point[0](2)<0.0391070 && _q_point[0](2) >0.0391068 )
     {
       std::cout << "t="<<_t<<", _ocr[_qp]="<<_ocr[_qp]<<", _confining_pressure[ _qp ] = " << _confining_pressure[ _qp ] <<", _max_confining_pressure="<<_max_confining_pressure<<std::endl;
