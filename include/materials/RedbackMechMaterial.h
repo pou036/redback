@@ -102,9 +102,9 @@ protected:
   MaterialProperty<Real> & _yield_value;
   const MaterialProperty<Real> & _yield_value_old;
   MaterialProperty<Real> & _ocr;
-  const MaterialProperty<Real> & _ocr_old;
-  MaterialProperty<Real> & _ocr_max;
-  const MaterialProperty<Real> & _ocr_max_old;
+  //const MaterialProperty<Real> & _ocr_old;
+  //MaterialProperty<Real> & _ocr_max;
+  //const MaterialProperty<Real> & _ocr_max_old;
   MaterialProperty<Real> & _qmech;
 
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
@@ -186,6 +186,7 @@ protected:
   const MaterialProperty<Real> & _lewis_number;
   const MaterialProperty<Real> & _ar;
   const MaterialProperty<Real> & _confining_pressure;
+  MaterialProperty<Real> & _confining_pressure_max;
   const MaterialProperty<Real> & _alpha_1;
   const MaterialProperty<Real> & _alpha_2;
   const MaterialProperty<Real> & _alpha_3;
