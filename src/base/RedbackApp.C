@@ -88,6 +88,7 @@
 #include "ReturnMapIterDT.h"
 
 // AuxKernels
+#include "RankTwoDoubleContraction.h"
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
 #include "RedbackPolarTensorMaterialAux.h"
@@ -184,6 +185,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerExecutioner(ReturnMapIterDT);
 
+  registerAux(RankTwoDoubleContraction);
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);
   registerAux(RedbackTotalPorosityAux);
