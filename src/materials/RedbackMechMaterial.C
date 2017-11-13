@@ -138,7 +138,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _yield_value(declareProperty<Real>("yield_value")),
     _yield_value_old(getMaterialPropertyOld<Real>("yield_value")),
     _ocr(declareProperty<Real>("ocr")),
-    //_ocr_old(getMaterialPropertyOld<Real>("ocr")),
+    _ocr_old(getMaterialPropertyOld<Real>("ocr")),
     _ocr_max(declareProperty<Real>("ocr_max")),
     _ocr_max_old(getMaterialPropertyOld<Real>("ocr_max")),
     _qmech(declareProperty<Real>("qmech")),
@@ -438,9 +438,10 @@ RedbackMechMaterial::deltaFunc(const unsigned int i, const unsigned int j)
 Real
 RedbackMechMaterial::getYieldStress(const Real eqpe)
 {
-  //_yield_value[_qp] = getYieldStress0(eqpe)*_yield_value_old[_qp]*std::pow(_ocr[_qp], _ocr_exponent_param);
+  //_yield_value[_qp] = getYieldStress0(eqpe)*std::pow(_ocr_max[ _qp], _ocr_exponent_param);
+  _yield_value[_qp] = getYieldStress0(eqpe);//*std::pow(_ocr_max[ _qp], _ocr_exponent_param);
   //return _yield_value[_qp];
-  return getYieldStress0(eqpe)*std::pow(_ocr_max[ _qp], _ocr_exponent_param);
+  return _yield_value[_qp];//getYieldStress0(eqpe)*std::pow(_ocr_max[ _qp], _ocr_exponent_param);
 }
 
 Real
@@ -727,6 +728,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
     _exponential *=
       std::exp(-_ar[ _qp ]) * std::exp(_ar[ _qp ] * _delta[ _qp ] * _T[ _qp ] / (1 + _delta[ _qp ] * _T[ _qp ]));
   }
+  Real exponential0 = _exponential;
 
   // The following expression should be further pursued for a forward
   // physics-based model
@@ -741,9 +743,12 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   }
 */
   // THOMAS putting back the MASTER formula in here
-  _qmech[_qp] = -_alpha_1[ _qp ] * _confining_pressure[ _qp ] -
-                _pore_pres[ _qp ] * _alpha_2[ _qp ] *
-                  (1 + _alpha_3[ _qp ] * std::log(_confining_pressure[ _qp ]));
+//  _qmech[_qp] = -_alpha_1[ _qp ] * _max_confining_pressure -
+  //              _pore_pres[ _qp ] * _alpha_2[ _qp ] *
+    //              (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));
+
+    updateQmech();
+
 
   //_qmech[_qp] = (_alpha_1[_qp] +_alpha_2[_qp] * _pore_pres[_qp]);
 
@@ -785,7 +790,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
       is_plastic = true;
       // Update OCR (for next time step), only if we were in plasticity
       updateOcr();
-
+      updateQmech();
+      _exponential = exponential0 * std::exp(_qmech[_qp]);
 
       // Jacobian = d(residual)/d(sigma)
       RankFourTensor dr_dsig;
@@ -832,6 +838,13 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 }
 
 void
+RedbackMechMaterial::updateQmech()
+{
+  _qmech[_qp] = -_alpha_1[ _qp ] * std::pow(_ocr_old[_qp], _ocr_exponent_param) * _confining_pressure[_qp] -
+                _pore_pres[ _qp ] * _alpha_2[ _qp ] *
+                  (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));
+}
+void
 RedbackMechMaterial::updateOcr()
 {
   // Update max mean stress seen (in plasticity)
@@ -840,9 +853,9 @@ RedbackMechMaterial::updateOcr()
   //if (_mean_stress[_qp] == 0)
   //  _ocr[_qp] = 1.0;
   //else
-    _ocr[_qp] = _max_mean_stress_old[_qp] / fabs(_mean_stress_old[_qp]);
+    //_ocr[_qp] = _max_mean_stress_old[_qp] / fabs(_mean_stress_old[_qp]);
+    _ocr[_qp] = _max_confining_pressure / _confining_pressure[ _qp ];
     _ocr_max[_qp] = fmax(_ocr_max_old[_qp], _ocr[_qp]);
-    //_ocr[_qp] = _max_confining_pressure / _confining_pressure[ _qp ];
     /*if (_t > 3000 && _q_point[0](0)<0.0898335 && _q_point[0](0) > 0.0898333 && _q_point[0](1)< 0.105663 && _q_point[0](1) >0.105661  && _q_point[0](2)<0.0391070 && _q_point[0](2) >0.0391068 )
     {
       std::cout << "t="<<_t<<", _ocr[_qp]="<<_ocr[_qp]<<", _confining_pressure[ _qp ] = " << _confining_pressure[ _qp ] <<", _max_confining_pressure="<<_max_confining_pressure<<std::endl;

@@ -102,7 +102,7 @@ protected:
   MaterialProperty<Real> & _yield_value;
   const MaterialProperty<Real> & _yield_value_old;
   MaterialProperty<Real> & _ocr;
-  //const MaterialProperty<Real> & _ocr_old;
+  const MaterialProperty<Real> & _ocr_old;
   MaterialProperty<Real> & _ocr_max;
   const MaterialProperty<Real> & _ocr_max_old;
   MaterialProperty<Real> & _qmech;
@@ -200,6 +200,7 @@ protected:
   Real _ocr_exponent_param, _T0_param, _P0_param;
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
+  virtual void updateQmech();
   virtual void updateOcr();
   virtual void get_py_qy_damaged(Real, Real, Real &, Real &, Real);
   virtual void form_damage_kernels(Real);
