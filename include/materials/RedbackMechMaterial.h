@@ -102,9 +102,6 @@ protected:
   MaterialProperty<Real> & _yield_value;
   const MaterialProperty<Real> & _yield_value_old;
   MaterialProperty<Real> & _ocr;
-  //const MaterialProperty<Real> & _ocr_old;
-  //MaterialProperty<Real> & _ocr_max;
-  //const MaterialProperty<Real> & _ocr_max_old;
   MaterialProperty<Real> & _qmech;
 
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
@@ -112,8 +109,7 @@ protected:
   Real getSigEqv(const RankTwoTensor & stress);
   Real deltaFunc(unsigned int i, unsigned int j);
   Real getYieldStress(const Real equivalent_plastic_strain);
-  Real getYieldStress0(const Real equivalent_plastic_strain);
-
+  
   // Copy-paste from FiniteStrainPlasticRateMaterial.h
   virtual void returnMap(const RankTwoTensor &,
                          const RankTwoTensor &,
@@ -134,8 +130,6 @@ protected:
 
   Real _ref_pe_rate;
   Real _exponent;
-  //Real _current_ocr;
-  //Real _current_max_mean_stress;
   Real _chemo_mechanical_porosity_coeff;
 
   Real macaulayBracket(Real);
@@ -186,7 +180,6 @@ protected:
   const MaterialProperty<Real> & _lewis_number;
   const MaterialProperty<Real> & _ar;
   const MaterialProperty<Real> & _confining_pressure;
-  MaterialProperty<Real> & _confining_pressure_max;
   const MaterialProperty<Real> & _alpha_1;
   const MaterialProperty<Real> & _alpha_2;
   const MaterialProperty<Real> & _alpha_3;
