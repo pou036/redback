@@ -405,6 +405,7 @@ RedbackMechMaterial::computeQpStress()
 
   // Compute the energy dissipation and the properties declared
   computeRedbackTerms(sig, q_y, p_y);
+  //std::cout << " _qp = " << _qp <<std::endl; # to calculate how many gauss point for the msh
 }
 
 // Delta Function
@@ -705,9 +706,9 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   // The following expression should be further pursued for a forward
   // physics-based model
   _max_confining_pressure = fmax(_confining_pressure[ _qp ], _max_confining_pressure);
-  //qmech[_qp] = (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure - _alpha_2[_qp] * _pore_pres[_qp]);
-  _qmech[_qp] = (_alpha_1[_qp] +_alpha_2[_qp] * _pore_pres[_qp]);
-
+  //_qmech[_qp] = (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure - _alpha_2[_qp] * _pore_pres[_qp]);
+  //_qmech[_qp] = (_alpha_1[_qp] +_alpha_2[_qp] * _pore_pres[_qp]);
+  _qmech[_qp] = -_alpha_1[_qp] - _alpha_2[_qp] * _pore_pres[_qp] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));
   _exponential = _exponential * std::exp(_qmech[_qp]);
 
   unsigned int iterisohard = 0;
