@@ -809,7 +809,10 @@ RedbackMechMaterial::formKarrech2011DamageDissipation(RankTwoTensor & /*sig*/)
   Real mu = _Cijkl(0,1,1,0);
   Real G = mu;
   Real K = lambda + 2.0*mu/3.0;
-  _damage_Y = sigma_eq*sigma_eq/(2.0*(1 - _damage[ _qp ]))*(1/(3*G) + std::pow(sigma_H/sigma_eq, 2)/K);
+  if (sigma_eq != 0)
+    _damage_Y = sigma_eq*sigma_eq/(2.0*(1 - _damage[ _qp ]))*(1/(3*G) + std::pow(sigma_H/sigma_eq, 2)/K);
+  else
+    _damage_Y = 0;
 
   Real D_dot = (_damage[ _qp ] - _damage_old[ _qp ]) / _dt;
 

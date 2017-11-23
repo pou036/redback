@@ -3,7 +3,9 @@
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  xmax = 2
+  nx = 10
+  ny = 10
+  xmin = -1
 []
 
 [Variables]
@@ -73,14 +75,13 @@
 []
 
 [Functions]
-  active = 'vel_right_fct'
-  [./applied_load_fct]
-    type = ParsedFunction
-    value = 10*tanh(1e3*t)
-  [../]
   [./vel_right_fct]
     type = ParsedFunction
-    value = 2e-1*t
+    value = 5e-1*t # 2e-1*t
+  [../]
+  [./initial_damage]
+    type = ParsedFunction
+    value = 1e-2*exp(-(x*x+y*y)*10)
   [../]
 []
 
@@ -136,6 +137,14 @@
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
+  [../]
+[]
+
+[ICs]
+  [./D_initial]
+    function = initial_damage
+    variable = damage
+    type = FunctionIC
   [../]
 []
 
