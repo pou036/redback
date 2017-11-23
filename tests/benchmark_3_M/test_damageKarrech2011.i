@@ -15,6 +15,8 @@
   [../]
   [./damage]
   [../]
+  [./temperature]
+  [../]
 []
 
 [GlobalParams]
@@ -34,6 +36,7 @@
     damage = damage
     damage_method = Karrech2011Damage
     outputs = all
+    temperature = temperature
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -43,11 +46,12 @@
     phi0 = 0.1
     total_porosity = 0.1
     is_mechanics_on = true
+    temperature = temperature
   [../]
 []
 
 [BCs]
-  active = 'confine_x confine_y vel_x_right'
+  active = 'confine_x confine_y vel_x_right T_top'
   [./confine_x]
     type = PresetBC
     variable = disp_x
@@ -72,6 +76,12 @@
     boundary = top
     value = 0
   [../]
+  [./T_top]
+    type = DirichletBC
+    variable = temperature
+    boundary = top
+    value = 0
+  [../]
 []
 
 [Functions]
@@ -81,7 +91,7 @@
   [../]
   [./initial_damage]
     type = ParsedFunction
-    value = 1e-2*exp(-(x*x+y*y)*10)
+    value = 1e-2*exp(-(x*x+y*y)*100)
   [../]
 []
 
@@ -94,23 +104,52 @@
     type = RedbackDamage
     variable = damage
   [../]
+  [./T_td]
+    type = TimeDerivative
+    variable = temperature
+  [../]
+  [./T_diffusion]
+    type = RedbackThermalDiffusion
+    variable = temperature
+  [../]
+  [./T_mech_dissip]
+    type = RedbackMechDissip
+    variable = temperature
+  [../]
+[]
+
+[Postprocessors]
+  [./nnli]
+    type = NumNonlinearIterations
+  [../]
+  [./nli]
+    type = NumLinearIterations
+  [../]
 []
 
 [Preconditioning]
-  active = 'SMP2'
-  [./SMP]
+  active = 'SMP_default'
+  [./SMP2]
     # petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it'
     # petsc_options_value = 'bcgs bjacobi 1E-14 1E-10 10000'
     # 
+    type = SMP
+    full = true
     petsc_options = '-snes_monitor -snes_linesearch_monitor -ksp_monitor'
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it' # -ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it -sub_pc_type -sub_pc_factor_shift_type
-    petsc_options_value = 'bcgs bjacobi 1E-14 1E-10 10000' # gmres asm 1E0 1E-6 200 500 lu NONZERO
+    petsc_options_value = 'bcgs bjacobi 1E-8 1E-5 10000' # gmres asm 1E0 1E-6 200 500 lu NONZERO
+  [../]
+  [./SMP_default]
     type = SMP
     full = true
   [../]
-  [./SMP2]
+  [./SMP3]
+    # petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it -sub_pc_type -sub_pc_factor_shift_type'
+    #     petsc_options_value = 'gmres asm 1E0 1E-10 200 500 lu NONZERO'
     type = SMP
-    full = true
+    petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it -sub_pc_type -sub_pc_factor_shift_type'
+    petsc_options_value = 'gmres asm 1E-10 1E-10 200 500 lu NONZERO'
+    line_search = basic
   [../]
 []
 
@@ -126,17 +165,21 @@
   nl_rel_step_tol = 1e-10
   nl_rel_tol = 1e-06
   nl_abs_step_tol = 1e-10
+  l_tol = 1e-03 # 1e-05
 []
 
 [Outputs]
   exodus = true
   file_base = Karrech2011
+  print_perf_log = true
+  print_linear_residuals = false
 []
 
 [RedbackMechAction]
   [./solid]
     disp_x = disp_x
     disp_y = disp_y
+    temp = temperature
   [../]
 []
 
