@@ -41,6 +41,7 @@ public:
   {
     BrittleDamage,
     CreepDamage,
+    Karrech2011Damage,
     BreakageMechanics,
     DamageHealing,
     FromMultiApp
@@ -167,6 +168,7 @@ protected:
   const VariableValue & _damage_old;
 
   DamageMethod _damage_method;
+  Real _damage_Y; // Y_D in Karrech 2011
 
   // Reading material properties from RedbackMaterial
   const MaterialProperty<Real> & _gr;
@@ -191,8 +193,10 @@ protected:
   virtual void form_damage_kernels(Real);
 
   virtual void formDamageDissipation(RankTwoTensor &);
+  virtual void formKarrech2011DamageDissipation(RankTwoTensor &);
   virtual void formBrittleDamage();
   virtual void formCreepDamage(Real);
+  virtual void formKarrech2011Damage();
 
   Real _damage_dissipation;
 

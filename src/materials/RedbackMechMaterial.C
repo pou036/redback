@@ -226,7 +226,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
 MooseEnum
 RedbackMechMaterial::damageMethodEnum()
 {
-  return MooseEnum("BrittleDamage CreepDamage BreakageMechanics DamageHealing FromMultiApp");
+  return MooseEnum("BrittleDamage CreepDamage Karrech2011Damage BreakageMechanics DamageHealing FromMultiApp");
 }
 
 void
@@ -265,6 +265,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _damage_kernel[ _qp ] = 0;
   _damage_kernel_jac[ _qp ] = 0;
   _mass_removal_rate[ _qp ] = 0;
+  _damage_Y = 0;
 }
 
 void
@@ -511,6 +512,9 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
         break;
       case CreepDamage:
         formDamageDissipation(sig);
+        break;
+      case Karrech2011Damage:
+        formKarrech2011DamageDissipation(sig);
         break;
       case BreakageMechanics:
         formDamageDissipation(sig);
@@ -797,6 +801,22 @@ RedbackMechMaterial::form_damage_kernels(Real cohesion)
 }*/
 
 void
+RedbackMechMaterial::formKarrech2011DamageDissipation(RankTwoTensor & /*sig*/)
+{
+  Real sigma_eq = _mises_stress[ _qp ];//std::pow(2 * _stress[ _qp ].secondInvariant(), 0.5);
+  Real sigma_H = _mean_stress[ _qp ];
+  Real lambda = _Cijkl(0,0,1,1); // See Moose TensorSymmetries documentation
+  Real mu = _Cijkl(0,1,1,0);
+  Real G = mu;
+  Real K = lambda + 2.0*mu/3.0;
+  _damage_Y = sigma_eq*sigma_eq/(2.0*(1 - _damage[ _qp ]))*(1/(3*G) + std::pow(sigma_H/sigma_eq, 2)/K);
+
+  Real D_dot = (_damage[ _qp ] - _damage_old[ _qp ]) / _dt;
+
+  _damage_dissipation = _damage_Y * D_dot;
+}
+
+void
 RedbackMechMaterial::formDamageDissipation(RankTwoTensor & /*sig*/)
 {
   /* The damage potential is being formed in this function. We start by
@@ -841,6 +861,9 @@ RedbackMechMaterial::form_damage_kernels(Real cohesion)
       break;
     case CreepDamage:
       formCreepDamage(cohesion);
+      break;
+    case Karrech2011Damage:
+      formKarrech2011Damage();
       break;
     case BreakageMechanics:
       mooseError("damage method not implemented yet, use other options");
@@ -898,5 +921,21 @@ RedbackMechMaterial::formCreepDamage(Real cohesion)
   Real plastic_damage = _damage_coeff * lambda_dot;
   Real healing_damage = 0;
   _damage_kernel[ _qp ] = plastic_damage + healing_damage;
+  _damage_kernel_jac[ _qp ] = 0;
+}
+
+void
+RedbackMechMaterial::formKarrech2011Damage()
+{
+  // formula from Karrech et al 2011 ('Continuum damage mechanics for the lithosphere', JGR V116;
+  /*   also referring to Karrech et al. 2011 'A damage visco-plasticity model for pressure and
+   *        temperature sensitive geomaterial',Int. J. Eng. Sci., 49, 1141-1150) */
+  Real n = 3.1; // stress exponent (qpop2 in Fortran .inc), TODO: expose to interface
+  Real H = 1.0; // TODO: expose to interface
+  Real kappa = 1.0; // TODO: expose to interface
+  RankTwoTensor eps_dot_in = (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ])/ _dt;
+  Real lambda_dot = eps_dot_in.L2norm();
+
+  _damage_kernel[ _qp ] = lambda_dot*(1.0/std::pow(1 - _damage[ _qp ], n+1) - 1.0 + std::pow(_damage_Y/H, kappa));
   _damage_kernel_jac[ _qp ] = 0;
 }
