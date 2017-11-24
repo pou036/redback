@@ -46,6 +46,7 @@
 #include "RedbackFluidStressDivergenceTensors.h"
 #include "RedbackMassConvection.h"
 #include "RedbackMassDiffusion.h"
+#include "RedbackMassDiffusionCoeff.h"
 #include "RedbackMechDissip.h"
 #include "RedbackNavier.h"
 #include "RedbackPoromechanics.h"
@@ -63,6 +64,7 @@
 
 // Materials
 #include "ComputePlasticStrainRate.h"
+#include "GenericConstantVector.h"
 #include "ImageProcessing.h"
 #include "RedbackFluidMaterial.h"
 #include "RedbackMaterial.h"
@@ -83,6 +85,7 @@
 #include "ReturnMapIterDT.h"
 
 // AuxKernels
+#include "RankTwoProjectionAux.h"
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
 #include "RedbackPolarTensorMaterialAux.h"
@@ -145,6 +148,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackFluidStressDivergenceTensors);
   registerKernel(RedbackMassConvection);
   registerKernel(RedbackMassDiffusion);
+  registerKernel(RedbackMassDiffusionCoeff);
   registerKernel(RedbackMechDissip);
   registerKernel(RedbackNavier);
   registerKernel(RedbackPoromechanics);
@@ -162,6 +166,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(ComputePlasticStrainRate);
   registerMaterial(RedbackFluidMaterial);
   registerMaterial(ImageProcessing);
+  registerMaterial(GenericConstantVector);
   registerMaterial(RedbackMaterial);
   registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialDP);
@@ -176,6 +181,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerExecutioner(ReturnMapIterDT);
 
+  registerAux(RankTwoProjectionAux);
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);
   registerAux(RedbackTotalPorosityAux);
