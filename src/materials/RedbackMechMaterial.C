@@ -90,6 +90,7 @@ validParams<RedbackMechMaterial>()
   params.addCoupledVar("total_porosity", 0.0, "The total porosity (as AuxKernel)");
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
+  params.addParam<Real>("time_reference", 1.0, "Reference time used for normalisation (for damage kernel)");
   params.addParam<std::vector<FunctionName> >(
     "initial_stress",
     "A list of functions describing the initial stress. If provided, there "
@@ -194,7 +195,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _peclet_number(getMaterialProperty<Real>("Peclet_number")),
     _returnmap_iter(declareProperty<Real>("returnmap_iter")),
     _T0_param(getParam<Real>("temperature_reference")),
-    _P0_param(getParam<Real>("pressure_reference"))
+    _P0_param(getParam<Real>("pressure_reference")),
+    _t_ref(getParam<Real>("time_reference"))
 {
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
@@ -810,7 +812,7 @@ RedbackMechMaterial::formKarrech2011DamageDissipation(RankTwoTensor & /*sig*/)
   Real G = mu;
   Real K = lambda + 2.0*mu/3.0;
   if (sigma_eq != 0)
-    _damage_Y = sigma_eq*sigma_eq/(2.0*(1 - _damage[ _qp ]))*(1/(3*G) + std::pow(sigma_H/sigma_eq, 2)/K);
+    _damage_Y = (1/_t_ref/_t_ref)*sigma_eq*sigma_eq/(2.0*_t_ref*_t_ref*std::pow(1-_damage[ _qp ], 2))*(1/(3*G) + std::pow(sigma_H/sigma_eq, 2)/K);
   else
     _damage_Y = 0;
 
@@ -934,11 +936,11 @@ RedbackMechMaterial::formKarrech2011Damage()
   /*   also referring to Karrech et al. 2011 'A damage visco-plasticity model for pressure and
    *        temperature sensitive geomaterial',Int. J. Eng. Sci., 49, 1141-1150) */
   Real n = 3.1; // stress exponent (qpop2 in Fortran .inc), TODO: expose to interface
-  Real H = 1.0; // TODO: expose to interface
+  Real H = 1.0e-5; // TODO: expose to interface
   Real kappa = 1.0; // TODO: expose to interface
   RankTwoTensor eps_dot_in = (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ])/ _dt;
   Real lambda_dot = eps_dot_in.L2norm();
 
-  _damage_kernel[ _qp ] = lambda_dot*(1.0/std::pow(1 - _damage[ _qp ], n+1) - 1.0 + std::pow(_damage_Y/H, kappa));
+  _damage_kernel[ _qp ] = (1/_t_ref)*lambda_dot*(1.0/std::pow(1 - _damage[ _qp ], n+1) - 1.0 + std::pow(_damage_Y/H, kappa));
   _damage_kernel_jac[ _qp ] = 0;
 }
