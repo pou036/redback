@@ -83,6 +83,7 @@
 #include "RankTwoContractionPostprocessor.h"
 #include "RankTwoScalarPostprocessor.h"
 #include "SideExtremeValue.h"
+#include "SideIntegralVoidPostprocessor.h"
 
 // Timesteppers
 #include "ReturnMapIterDT.h"
@@ -182,6 +183,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerPostprocessor(RankTwoContractionPostprocessor);
   registerPostprocessor(RankTwoScalarPostprocessor);
   registerPostprocessor(SideExtremeValue);
+  registerPostprocessor(SideIntegralVoidPostprocessor);
 
   registerExecutioner(ReturnMapIterDT);
 
