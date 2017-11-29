@@ -91,6 +91,7 @@ validParams<RedbackMechMaterial>()
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
   params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
   params.addParam<Real>("time_reference", 1.0, "Reference time used for normalisation (for damage kernel)");
+  params.addParam<Real>("normalization_coefficient", 1.0, "Reference number used before damage and melt dissipations for normalisation (for damage kernel)");
   params.addParam<std::vector<FunctionName> >(
     "initial_stress",
     "A list of functions describing the initial stress. If provided, there "
@@ -196,7 +197,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _returnmap_iter(declareProperty<Real>("returnmap_iter")),
     _T0_param(getParam<Real>("temperature_reference")),
     _P0_param(getParam<Real>("pressure_reference")),
-    _t_ref(getParam<Real>("time_reference"))
+    _t_ref(getParam<Real>("time_reference")),
+    _norm_coef(getParam<Real>("normalization_coefficient"))
 {
   Real E = _youngs_modulus;
   Real nu = _poisson_ratio;
@@ -819,6 +821,7 @@ RedbackMechMaterial::formKarrech2011DamageDissipation(RankTwoTensor & /*sig*/)
   Real D_dot = (_damage[ _qp ] - _damage_old[ _qp ]) / _dt;
 
   _damage_dissipation = _damage_Y * D_dot;
+  _damage_kernel_jac[ _qp ] = _damage_dissipation; // TODO: remove: just for debugging!!!
 }
 
 void
@@ -941,6 +944,6 @@ RedbackMechMaterial::formKarrech2011Damage()
   RankTwoTensor eps_dot_in = (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ])/ _dt;
   Real lambda_dot = eps_dot_in.L2norm();
 
-  _damage_kernel[ _qp ] = (1/_t_ref)*lambda_dot*(1.0/std::pow(1 - _damage[ _qp ], n+1) - 1.0 + std::pow(_damage_Y/H, kappa));
-  _damage_kernel_jac[ _qp ] = 0;
+  _damage_kernel[ _qp ] = _norm_coef*(1/_t_ref)*lambda_dot*(1.0/std::pow(1 - _damage[ _qp ], n+1) - 1.0 + std::pow(_damage_Y/H, kappa));
+  //_damage_kernel_jac[ _qp ] = 0; // TODO: uncomment: debugging!!!!
 }

@@ -44,5 +44,6 @@ RedbackDamage::computeQpResidual()
 Real
 RedbackDamage::computeQpJacobian()
 {
-  return -_time_factor * _test[ _i ][ _qp ] * _damage_kernel_jac[ _qp ] * _phi[ _j ][ _qp ];
+  return 0;
+  //return -_time_factor * _test[ _i ][ _qp ] * _damage_kernel_jac[ _qp ] * _phi[ _j ][ _qp ];
 }

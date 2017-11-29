@@ -31,27 +31,29 @@
     disp_y = disp_y
     youngs_modulus = 100
     poisson_ratio = 0.2
-    yield_stress = '0 1 0 1'
+    yield_stress = '0 1.0e-6 0 1.0e-6'
     total_porosity = 0.1
     damage = damage
     damage_method = Karrech2011Damage
     outputs = all
     temperature = temperature
+    normalization_coefficient = 1.39e13
+    time_reference = 1.0e16
   [../]
   [./mat_nomech]
     type = RedbackMaterial
     block = 0
     disp_x = disp_x
     disp_y = disp_y
-    phi0 = 0.1
-    total_porosity = 0.1
     is_mechanics_on = true
     temperature = temperature
+    temperature_reference = 300
+    solid_density = 3000
   [../]
 []
 
 [BCs]
-  active = 'confine_x confine_y vel_x_right T_top'
+  active = 'confine_x confine_y vel_x_right'
   [./confine_x]
     type = PresetBC
     variable = disp_x
@@ -87,7 +89,7 @@
 [Functions]
   [./vel_right_fct]
     type = ParsedFunction
-    value = 5e-1*t # 2e-1*t
+    value = 1.58e-2*t # 2e-1*t
   [../]
   [./initial_damage]
     type = ParsedFunction
@@ -125,6 +127,9 @@
   [./nli]
     type = NumLinearIterations
   [../]
+  [./dt]
+    type = TimestepSize
+  [../]
 []
 
 [Preconditioning]
@@ -145,7 +150,7 @@
   [../]
   [./SMP3]
     # petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it -sub_pc_type -sub_pc_factor_shift_type'
-    #     petsc_options_value = 'gmres asm 1E0 1E-10 200 500 lu NONZERO'
+    # petsc_options_value = 'gmres asm 1E0 1E-10 200 500 lu NONZERO'
     type = SMP
     petsc_options_iname = '-ksp_type -pc_type -snes_atol -snes_rtol -snes_max_it -ksp_max_it -sub_pc_type -sub_pc_factor_shift_type'
     petsc_options_value = 'gmres asm 1E-10 1E-10 200 500 lu NONZERO'
@@ -155,16 +160,15 @@
 
 [Executioner]
   type = Transient
-  num_steps = 25
+  num_steps = 30
   solve_type = PJFNK
-  end_time = 9999999999
-  dt = 1e-2
+  end_time = 1.0e-2
+  dt = 0.333e-3
   petsc_options_iname = '-ksp_type -pc_type -sub_pc_type -ksp_gmres_restart'
   petsc_options_value = 'gmres asm lu 201'
-  nl_abs_tol = 1e-10
+  nl_abs_tol = 1e-12
   nl_rel_step_tol = 1e-10
-  nl_rel_tol = 1e-06
-  nl_abs_step_tol = 1e-10
+  nl_abs_step_tol = 1e-12
   l_tol = 1e-03 # 1e-05
 []
 

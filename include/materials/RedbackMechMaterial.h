@@ -186,7 +186,7 @@ protected:
   const MaterialProperty<Real> & _peclet_number;
   MaterialProperty<Real> & _returnmap_iter;
 
-  Real _T0_param, _P0_param, _t_ref;
+  Real _T0_param, _P0_param, _t_ref, _norm_coef;
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
   virtual void get_py_qy_damaged(Real, Real, Real &, Real &, Real);
