@@ -160,6 +160,11 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
 
     _damage_kernel(declareProperty<Real>("damage_kernel")),
     _damage_kernel_jac(declareProperty<Real>("damage_kernel_jacobian")),
+    _dummy_export_1(declareProperty<Real>("dummy_export_1")),
+    _dummy_export_2(declareProperty<Real>("dummy_export_2")),
+    _dummy_export_3(declareProperty<Real>("dummy_export_3")),
+    _dummy_export_4(declareProperty<Real>("dummy_export_4")),
+    _dummy_export_5(declareProperty<Real>("dummy_export_5")),
     _damage_coeff(getParam<Real>("damage_coefficient")),
     _dmg_exponent(getParam<Real>("damage_exponent")),
     _healing_coeff(getParam<Real>("healing_coefficient")),
@@ -268,6 +273,11 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mechanical_dissipation_jac_mech[ _qp ] = 0;
   _damage_kernel[ _qp ] = 0;
   _damage_kernel_jac[ _qp ] = 0;
+  _dummy_export_1[ _qp ] = 0;
+  _dummy_export_2[ _qp ] = 0;
+  _dummy_export_3[ _qp ] = 0;
+  _dummy_export_4[ _qp ] = 0;
+  _dummy_export_5[ _qp ] = 0;
   _mass_removal_rate[ _qp ] = 0;
   _damage_Y = 0;
 }
@@ -813,15 +823,15 @@ RedbackMechMaterial::formKarrech2011DamageDissipation(RankTwoTensor & /*sig*/)
   Real mu = _Cijkl(0,1,1,0);
   Real G = mu;
   Real K = lambda + 2.0*mu/3.0;
+  Real sigma_ref=8.0e6;
   if (sigma_eq != 0)
-    _damage_Y = (1/_t_ref/_t_ref)*sigma_eq*sigma_eq/(2.0*_t_ref*_t_ref*std::pow(1-_damage[ _qp ], 2))*(1/(3*G) + std::pow(sigma_H/sigma_eq, 2)/K);
+    _damage_Y = sigma_eq*sigma_eq/(2.0*std::pow(1-_damage[ _qp ], 2))*(1/(3*G) + std::pow(sigma_H/sigma_eq, 2)/K)/sigma_ref;
   else
     _damage_Y = 0;
 
   Real D_dot = (_damage[ _qp ] - _damage_old[ _qp ]) / _dt;
 
-  _damage_dissipation = _damage_Y * D_dot;
-  _damage_kernel_jac[ _qp ] = _damage_dissipation; // TODO: remove: just for debugging!!!
+  _damage_dissipation = _norm_coef*_damage_Y * D_dot;
 }
 
 void
@@ -944,6 +954,12 @@ RedbackMechMaterial::formKarrech2011Damage()
   RankTwoTensor eps_dot_in = (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ])/ _dt;
   Real lambda_dot = eps_dot_in.L2norm();
 
-  _damage_kernel[ _qp ] = _norm_coef*(1/_t_ref)*lambda_dot*(1.0/std::pow(1 - _damage[ _qp ], n+1) - 1.0 + std::pow(_damage_Y/H, kappa));
-  //_damage_kernel_jac[ _qp ] = 0; // TODO: uncomment: debugging!!!!
+  _damage_kernel[ _qp ] = (1/_t_ref)*lambda_dot*(1.0/std::pow(1 - _damage[ _qp ], n+1) - 1.0 + std::pow(_damage_Y/H, kappa));
+//  _damage_kernel[ _qp ] = lambda_dot*(1.0/std::pow(1 - _damage[ _qp ], n+1) - 1.0 + std::pow(_damage_Y/H, kappa));
+  _damage_kernel_jac[ _qp ] = 0;
+  _dummy_export_1[ _qp ] = lambda_dot; // debugging
+  _dummy_export_2[ _qp ] = (1.0/std::pow(1 - _damage[ _qp ], n+1) - 1.0 + std::pow(_damage_Y/H, kappa)); // debugging
+  _dummy_export_3[ _qp ] = 1.0/std::pow(1 - _damage[ _qp ], n+1) - 1.0; // debugging
+  _dummy_export_4[ _qp ] = std::pow(_damage_Y/H, kappa);
+  _dummy_export_5[ _qp ] = _damage_Y;
 }

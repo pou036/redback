@@ -31,14 +31,15 @@
     disp_y = disp_y
     youngs_modulus = 100
     poisson_ratio = 0.2
-    yield_stress = '0 1.0e-6 0 1.0e-6'
+    yield_stress = '0 1 0 1'
     total_porosity = 0.1
     damage = damage
     damage_method = Karrech2011Damage
     outputs = all
     temperature = temperature
     normalization_coefficient = 1.39e13
-    time_reference = 1.0e16
+    time_reference = 1.0e16 # 1.0e16
+    temperature_reference = 1
   [../]
   [./mat_nomech]
     type = RedbackMaterial
@@ -47,7 +48,6 @@
     disp_y = disp_y
     is_mechanics_on = true
     temperature = temperature
-    temperature_reference = 300
     solid_density = 3000
   [../]
 []
@@ -89,7 +89,7 @@
 [Functions]
   [./vel_right_fct]
     type = ParsedFunction
-    value = 1.58e-2*t # 2e-1*t
+    value = 1.58e-1*t # 2e-1*t
   [../]
   [./initial_damage]
     type = ParsedFunction
@@ -170,6 +170,8 @@
   nl_rel_step_tol = 1e-10
   nl_abs_step_tol = 1e-12
   l_tol = 1e-03 # 1e-05
+  mffd_type = ds
+  isObjectAction = false
 []
 
 [Outputs]

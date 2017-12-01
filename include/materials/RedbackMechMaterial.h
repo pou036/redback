@@ -147,6 +147,11 @@ protected:
   MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
   MaterialProperty<Real> & _damage_kernel;
   MaterialProperty<Real> & _damage_kernel_jac;
+  MaterialProperty<Real> & _dummy_export_1; // for debuggin, remove!
+  MaterialProperty<Real> & _dummy_export_2; // for debuggin, remove!
+  MaterialProperty<Real> & _dummy_export_3; // for debuggin, remove!
+  MaterialProperty<Real> & _dummy_export_4; // for debuggin, remove!
+  MaterialProperty<Real> & _dummy_export_5; // for debuggin, remove!
   Real _damage_coeff, _dmg_exponent, _healing_coeff;
 
   Real _exponential;
