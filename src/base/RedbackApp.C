@@ -85,6 +85,7 @@
 // AuxKernels
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
+#include "RedbackMeltAux.h"
 #include "RedbackPolarTensorMaterialAux.h"
 #include "RedbackTotalPorosityAux.h"
 
@@ -178,6 +179,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);
+  registerAux(RedbackMeltAux);
   registerAux(RedbackTotalPorosityAux);
   registerAux(RedbackPolarTensorMaterialAux);
 #undef registerObject

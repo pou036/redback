@@ -47,6 +47,7 @@ validParams<RedbackMechMaterial>()
   params.addCoupledVar("disp_z", 0.0, "The z displacement");
   params.addCoupledVar("temperature", 0.0, "temperature variable");
   params.addCoupledVar("damage", 0.0, "damage variable");
+  params.addCoupledVar("melt", 0.0, "melt variable (phi_m in Karrech 2011)");
 
   // Copy-paste from FiniteStrainMaterial.C
   // nothing
@@ -186,6 +187,9 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
 
     _damage_method((DamageMethod)(int)getParam<MooseEnum>("damage_method")),
 
+    _has_melt(isCoupled("melt")),
+    _melt(coupledValue("melt")),
+
     // Get some material properties from RedbackMaterial
     _gr(getMaterialProperty<Real>("gr")),
     _lewis_number(getMaterialProperty<Real>("lewis_number")),
@@ -230,6 +234,9 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   _initial_stress.resize(num);
   for (unsigned i = 0; i < num; ++i)
     _initial_stress[ i ] = &getFunctionByName(fcn_names[ i ]);
+
+  _damage_dissipation = 0;
+  _melt_dissipation = 0;
 }
 
 MooseEnum
@@ -529,6 +536,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
         break;
       case Karrech2011Damage:
         formKarrech2011DamageDissipation(sig);
+        if (_has_melt)
+          formKarrech2011MeltDissipation();
         break;
       case BreakageMechanics:
         formDamageDissipation(sig);
@@ -546,11 +555,12 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   Real gruntfest_number = _gr[ _qp ] * std::exp(_ar[ _qp ]);
 
   // Compute Mechanical Dissipation.
-  _mechanical_dissipation_mech[ _qp ] = gruntfest_number * sig.doubleContraction(instantaneous_strain_rate) +
-                                        _damage_dissipation; // The negative sign in damage dissipation is
-                                                             // according
-                                                             // to thermodynamics with internal state variables (see
-                                                             // Rosakis et al, 2000)
+  _mechanical_dissipation_mech[ _qp ] = gruntfest_number * sig.doubleContraction(instantaneous_strain_rate)
+                                        + _damage_dissipation + _melt_dissipation;
+                                       // The negative sign in damage dissipation is
+                                       // according
+                                       // to thermodynamics with internal state variables (see
+                                       // Rosakis et al, 2000)
   /* The following loop can ensure positive mechanical dissipation.
    * if (_mechanical_dissipation_mech[_qp] < 0)
   {
@@ -813,6 +823,12 @@ RedbackMechMaterial::form_damage_kernels(Real cohesion)
 {
   mooseError("form_damage_kernels must be overwritten in children class");
 }*/
+
+void
+RedbackMechMaterial::formKarrech2011MeltDissipation()
+{
+  _melt_dissipation = 0; // TODO: put real formula in here!
+}
 
 void
 RedbackMechMaterial::formKarrech2011DamageDissipation(RankTwoTensor & /*sig*/)
