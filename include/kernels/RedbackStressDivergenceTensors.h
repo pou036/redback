@@ -7,7 +7,7 @@
 
 // Forward Declarations
 class RedbackStressDivergenceTensors;
-class RankFourTensor;
+class ElasticityTensorR4;
 class RankTwoTensor;
 
 template <>
@@ -33,6 +33,8 @@ protected:
   const VariableValue & _pore_pres;
   RealVectorValue _poromech_stress_row;
 
+  std::string _base_name;
+
   const MaterialProperty<RankTwoTensor> & _stress;
   const MaterialProperty<RankFourTensor> & _Jacobian_mult;
   // MaterialProperty<RankTwoTensor> & _d_stress_dT;
@@ -40,6 +42,7 @@ protected:
   const unsigned int _component;
 
   const MaterialProperty<Real> & _biot_coeff;
+  const MaterialProperty<Real> & _solid_thermal_expansion;
 
 private:
   const bool _xdisp_coupled;
