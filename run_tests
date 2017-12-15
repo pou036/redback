@@ -14,14 +14,14 @@ if os.environ.has_key("MOOSE_DIR"):
   MOOSE_DIR = os.environ['MOOSE_DIR']
 
 sys.path.append(os.path.join(MOOSE_DIR, 'python'))
-import path_tool
-path_tool.activate_module('TestHarness')
+##import path_tool
+#path_tool.activate_module('TestHarness')
 
 # Append error flag when running tests
-sys.argv.insert(1, "--error")
+#sys.argv.insert(1, "--error")
 
 from TestHarness import TestHarness
-from Tester import Tester
+#from Tester import Tester
 
 # Run the tests!
 TestHarness.buildAndRun(sys.argv, app_name, MOOSE_DIR)
