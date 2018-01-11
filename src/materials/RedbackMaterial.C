@@ -101,10 +101,10 @@ validParams<RedbackMaterial>()
                         "solid expansion (lambda^{(s)} in 1/K)"); // _solid_thermal_expansion_param
   params.addParam<Real>("fluid_thermal_expansion",
                         0,
-                        "fluid expansion (lambda^{(f)} in 1/K)");              // _fluid_thermal_expansion_param
+                        "fluid expansion (lambda^{(f)} in 1/K)"); // _fluid_thermal_expansion_param
   params.addParam<Real>("thermal_diffusivity", 1, "normalised thermal diffusivity (-)"); // _thermal_diffusivity_param
-  params.addParam<Real>("solid_density", 2.5, "normalised solid density (-)"); // solid_density_param
-  params.addParam<Real>("fluid_density", 1, "normalised fluid density (-)");   // fluid_density_param
+  params.addParam<Real>("solid_density", 2.5, "normalised solid density (-)");           // solid_density_param
+  params.addParam<Real>("fluid_density", 1, "normalised fluid density (-)");             // fluid_density_param
 
   params.addParam<RealVectorValue>("gravity",
                                    RealVectorValue(),
@@ -165,7 +165,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _fluid_compressibility_param(getParam<Real>("fluid_compressibility")),
     _solid_thermal_expansion_param(getParam<Real>("solid_thermal_expansion")),
     _fluid_thermal_expansion_param(getParam<Real>("fluid_thermal_expansion")),
-	_thermal_diffusivity_param(getParam<Real>("thermal_diffusivity")),
+    _thermal_diffusivity_param(getParam<Real>("thermal_diffusivity")),
     _solid_density_param(getParam<Real>("solid_density")),
     _fluid_density_param(getParam<Real>("fluid_density")),
 
@@ -226,7 +226,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _fluid_compressibility(declareProperty<Real>("fluid_compressibility")),
     _solid_thermal_expansion(declareProperty<Real>("solid_thermal_expansion")),
     _fluid_thermal_expansion(declareProperty<Real>("fluid_thermal_expansion")),
-	_thermal_diffusivity(declareProperty<Real>("thermal_diffusivity")),
+    _thermal_diffusivity(declareProperty<Real>("thermal_diffusivity")),
 
     _mixture_density(declareProperty<Real>("mixture_density")),
 
@@ -383,7 +383,7 @@ RedbackMaterial::stepInitQpProperties()
   }
   else
   {
-	_thermal_diffusivity[ _qp ] = _thermal_diffusivity_param;
+    _thermal_diffusivity[ _qp ] = _thermal_diffusivity_param;
   }
 
   switch (_continuation_method)
@@ -465,14 +465,14 @@ RedbackMaterial::computeRedbackTerms()
   if (_is_chemistry_on)
   {
     /*
-    * The following calculates the volume ratios of a generic reversible
-    * reaction of the form:
-    * AB_(solid) <-> A_(solid)  + B_(fluid)
-    * The chemical porosity is the volume ration of B over the total volume
-    * V=V_A + V_B + V_AB
-    * and the solid ratio is the volume of product A over the solid volume
-    * V_A+V_AB
-    */
+     * The following calculates the volume ratios of a generic reversible
+     * reaction of the form:
+     * AB_(solid) <-> A_(solid)  + B_(fluid)
+     * The chemical porosity is the volume ration of B over the total volume
+     * V=V_A + V_B + V_AB
+     * and the solid ratio is the volume of product A over the solid volume
+     * V_A+V_AB
+     */
 
     // Update chemical Arrhenius term
     _ar_F[ _qp ] += _chemical_ar_F_factor * _concentration[ _qp ];
