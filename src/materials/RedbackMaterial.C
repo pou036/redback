@@ -271,6 +271,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
   valid_params.push_back("ar");
   valid_params.push_back("confining_pressure");
   valid_params.push_back("gravity");
+  valid_params.push_back("thermal_diffusivity");
   unsigned int pos;
   for (unsigned int i = 0; i < _num_init_functions; i++)
   {
@@ -373,6 +374,16 @@ RedbackMaterial::stepInitQpProperties()
   {
     _gravity_param = _init_functions[ pos ]->vectorValue(_t, _q_point[ _qp ]);
     // TODO: does not need to be (re)set for  each _qp...
+  }
+  pos = find(_init_from_functions__params.begin(), _init_from_functions__params.end(), "thermal_diffusivity") -
+        _init_from_functions__params.begin();
+  if (pos < _num_init_functions)
+  {
+    _thermal_diffusivity[ _qp ] = _init_functions[ pos ]->value(_t, _q_point[ _qp ]);
+  }
+  else
+  {
+	_thermal_diffusivity[ _qp ] = _thermal_diffusivity_param;
   }
 
   switch (_continuation_method)
