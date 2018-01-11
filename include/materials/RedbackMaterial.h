@@ -85,7 +85,7 @@ protected:
   Real _ar_F_param, _ar_R_param, _chemical_ar_F_factor, _da_endo_param, _da_exo_param, _mu_param, _Kc_param,
     _eta1_param, _eta2_param, _Aphi_param, _pressurization_coefficient_param;
   Real _solid_compressibility_param, _fluid_compressibility_param, _solid_thermal_expansion_param,
-    _fluid_thermal_expansion_param, _solid_density_param, _fluid_density_param;
+    _fluid_thermal_expansion_param, _thermal_diffusivity_param, _solid_density_param, _fluid_density_param;
   bool _is_mechanics_on, _is_chemistry_on, _are_convective_terms_on;
 
   RealVectorValue _gravity_param;
@@ -138,6 +138,7 @@ protected:
   MaterialProperty<Real> & _fluid_compressibility;   // \bar(\beta_f)/\sigma_{ref}
   MaterialProperty<Real> & _solid_thermal_expansion; // \bar(\lambda_s)/ \delta T_ref
   MaterialProperty<Real> & _fluid_thermal_expansion; // \bar(\lambda_f)/delta T_ref
+  MaterialProperty<Real> & _thermal_diffusivity;
 
   MaterialProperty<Real> & _mixture_density;
 

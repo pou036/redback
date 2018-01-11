@@ -36,7 +36,7 @@
     variable = temp
   [../]
   [./diff_temp]
-    type = Diffusion
+    type = RedbackThermalDiffusion
     variable = temp
   [../]
   [./mh_temp]
@@ -150,4 +150,3 @@
     block = 0
   [../]
 []
-
