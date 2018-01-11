@@ -102,6 +102,7 @@ validParams<RedbackMaterial>()
   params.addParam<Real>("fluid_thermal_expansion",
                         0,
                         "fluid expansion (lambda^{(f)} in 1/K)");              // _fluid_thermal_expansion_param
+  params.addParam<Real>("thermal_diffusivity", 1, "normalised thermal diffusivity (-)"); // _thermal_diffusivity_param
   params.addParam<Real>("solid_density", 2.5, "normalised solid density (-)"); // solid_density_param
   params.addParam<Real>("fluid_density", 1, "normalised fluid density (-)");   // fluid_density_param
 
@@ -164,6 +165,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _fluid_compressibility_param(getParam<Real>("fluid_compressibility")),
     _solid_thermal_expansion_param(getParam<Real>("solid_thermal_expansion")),
     _fluid_thermal_expansion_param(getParam<Real>("fluid_thermal_expansion")),
+	_thermal_diffusivity_param(getParam<Real>("thermal_diffusivity")),
     _solid_density_param(getParam<Real>("solid_density")),
     _fluid_density_param(getParam<Real>("fluid_density")),
 
@@ -224,6 +226,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _fluid_compressibility(declareProperty<Real>("fluid_compressibility")),
     _solid_thermal_expansion(declareProperty<Real>("solid_thermal_expansion")),
     _fluid_thermal_expansion(declareProperty<Real>("fluid_thermal_expansion")),
+	_thermal_diffusivity(declareProperty<Real>("thermal_diffusivity")),
 
     _mixture_density(declareProperty<Real>("mixture_density")),
 
@@ -399,6 +402,7 @@ RedbackMaterial::stepInitQpProperties()
   _fluid_compressibility[ _qp ] = _fluid_compressibility_param;
   _solid_thermal_expansion[ _qp ] = _solid_thermal_expansion_param;
   _fluid_thermal_expansion[ _qp ] = _fluid_thermal_expansion_param;
+  _thermal_diffusivity[ _qp ] = _thermal_diffusivity_param;
   _mixture_density[ _qp ] = (1 - _phi0_param) * _solid_density_param + _phi0_param * _fluid_density_param;
   _mixture_gravity_term[ _qp ] = _mixture_density[ _qp ] * _gravity_param;
   _fluid_gravity_term[ _qp ] = _fluid_density_param * _gravity_param;
