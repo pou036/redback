@@ -32,6 +32,8 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
 
+  const MaterialProperty<Real> & _diffusivity;
+
 private:
   Real _time_factor;
 };
