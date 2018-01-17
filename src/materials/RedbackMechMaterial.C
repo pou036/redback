@@ -144,7 +144,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _poisson_ratio(getParam<Real>("poisson_ratio")),
     _mises_stress(declareProperty<Real>("mises_stress")),
     _mean_stress(declareProperty<Real>("mean_stress")),
-	_J3(declareProperty<Real>("J3")),
+    _J3(declareProperty<Real>("J3")),
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
     _volumetric_strain(declareProperty<Real>("volumetric_strain")),
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
@@ -257,7 +257,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mises_stress[ _qp ] = getSigEqv(_stress[ _qp ]);
   _mean_stress[ _qp ] = _stress[ _qp ].trace() / 3.0;
   RankTwoTensor tmp = RankTwoTensor(_stress[ _qp ]);
-  tmp.addIa(-_mean_stress[ _qp]);
+  tmp.addIa(-_mean_stress[ _qp ]);
   _J3[ _qp ] = tmp.det();
   _mises_strain_rate[ _qp ] = 0;
   _volumetric_strain[ _qp ] = 0;
@@ -442,9 +442,9 @@ RedbackMechMaterial::getYieldStress(const Real eqpe)
     if (ind + 2 < nsize)
     {
       if (eqpe > _yield_stress_vector[ ind ] && eqpe < _yield_stress_vector[ ind + 2 ])
-        return _yield_stress_vector[ ind + 1 ] +
-               (eqpe - _yield_stress_vector[ ind ]) / (_yield_stress_vector[ ind + 2 ] - _yield_stress_vector[ ind ]) *
-                 (_yield_stress_vector[ ind + 3 ] - _yield_stress_vector[ ind + 1 ]);
+        return _yield_stress_vector[ ind + 1 ] + (eqpe - _yield_stress_vector[ ind ]) /
+                                                   (_yield_stress_vector[ ind + 2 ] - _yield_stress_vector[ ind ]) *
+                                                   (_yield_stress_vector[ ind + 3 ] - _yield_stress_vector[ ind + 1 ]);
     }
     else
       return _yield_stress_vector[ nsize - 1 ];
@@ -477,9 +477,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _mises_stress[ _qp ] = getSigEqv(sig);
   _mean_stress[ _qp ] = sig.trace() / 3.0;
   RankTwoTensor tmp = RankTwoTensor(sig);
-  tmp.addIa(-_mean_stress[ _qp]);
+  tmp.addIa(-_mean_stress[ _qp ]);
   _J3[ _qp ] = tmp.det();
-  
 
   // Compute plastic strains
   RankTwoTensor instantaneous_strain_rate, total_volumetric_strain_rate;
@@ -713,10 +712,11 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   // The following expression should be further pursued for a forward
   // physics-based model
   _max_confining_pressure = fmax(_confining_pressure[ _qp ], _max_confining_pressure);
-  //qmech[_qp] = (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure - _alpha_2[_qp] * _pore_pres[_qp]);
-  //_qmech[_qp] = (_alpha_1[_qp] +_alpha_2[_qp] * _pore_pres[_qp]);
-  _qmech[_qp] = -_alpha_1[_qp] - _alpha_2[_qp] * _pore_pres[_qp] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));
-  _exponential = _exponential * std::exp(_qmech[_qp]);
+  // qmech[_qp] = (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure -
+  // _alpha_2[_qp] * _pore_pres[_qp]); _qmech[_qp] = (_alpha_1[_qp] +_alpha_2[_qp] * _pore_pres[_qp]);
+  _qmech[ _qp ] =
+    -_alpha_1[ _qp ] - _alpha_2[ _qp ] * _pore_pres[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));
+  _exponential = _exponential * std::exp(_qmech[ _qp ]);
 
   unsigned int iterisohard = 0;
   const unsigned int maxiterisohard = 20, maxiter = 50;

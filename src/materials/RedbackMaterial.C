@@ -450,14 +450,14 @@ RedbackMaterial::computeRedbackTerms()
   if (_is_chemistry_on)
   {
     /*
-    * The following calculates the volume ratios of a generic reversible
-    * reaction of the form:
-    * AB_(solid) <-> A_(solid)  + B_(fluid)
-    * The chemical porosity is the volume ration of B over the total volume
-    * V=V_A + V_B + V_AB
-    * and the solid ratio is the volume of product A over the solid volume
-    * V_A+V_AB
-    */
+     * The following calculates the volume ratios of a generic reversible
+     * reaction of the form:
+     * AB_(solid) <-> A_(solid)  + B_(fluid)
+     * The chemical porosity is the volume ration of B over the total volume
+     * V=V_A + V_B + V_AB
+     * and the solid ratio is the volume of product A over the solid volume
+     * V_A+V_AB
+     */
 
     // Update chemical Arrhenius term
     _ar_F[ _qp ] += _chemical_ar_F_factor * _concentration[ _qp ];

@@ -39,9 +39,8 @@ RedbackMechMaterialCCanisotropic::stepInitQpProperties()
   if (_t == 0)
     _anisotropy_coeff[ _qp ] = _initial_anisotropy_param; // TODO: implement \dot{alpha}
   else
-    _anisotropy_coeff[ _qp ] =
-      _anisotropy_coeff[ _qp ] +
-      0 * (_slope_yield_surface - _anisotropy_coeff[ _qp ]) * _dt; // TODO:check the sign of the anisotropy coefficient
+    _anisotropy_coeff[ _qp ] = _anisotropy_coeff[ _qp ] + 0 * (_slope_yield_surface - _anisotropy_coeff[ _qp ]) *
+                                                            _dt; // TODO:check the sign of the anisotropy coefficient
 }
 
 /**
@@ -169,8 +168,9 @@ RedbackMechMaterialCCanisotropic::getJac(const RankTwoTensor & sig,
   {
     f1 = 3.0 / (_slope_yield_surface * _slope_yield_surface - _anisotropy_coeff[ _qp ] * _anisotropy_coeff[ _qp ]);
     f2 = f1 * (1.0 - _anisotropy_coeff[ _qp ] * p_yield_stress / q_yield_stress);
-    f3 = -f1 * (1.0 - _anisotropy_coeff[ _qp ] * p_yield_stress / q_yield_stress -
-                2 * _slope_yield_surface * _slope_yield_surface / 9.0) /
+    f3 = -f1 *
+         (1.0 - _anisotropy_coeff[ _qp ] * p_yield_stress / q_yield_stress -
+          2 * _slope_yield_surface * _slope_yield_surface / 9.0) /
          3.0;
     f4 = -f1 * (_anisotropy_coeff[ _qp ] / (3.0 * q_yield_stress));
     f5 = f1 * (3.0 * _anisotropy_coeff[ _qp ] * p_yield_stress / (2.0 * q_yield_stress * q_yield_stress));

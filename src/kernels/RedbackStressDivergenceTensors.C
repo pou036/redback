@@ -12,8 +12,8 @@
 
 #include "RedbackStressDivergenceTensors.h"
 
-#include "Material.h"
 #include "ElasticityTensorTools.h"
+#include "Material.h"
 
 template <>
 InputParameters
@@ -29,7 +29,7 @@ validParams<RedbackStressDivergenceTensors>()
   params.addCoupledVar("temp", 0.0, "The temperature");
   params.addCoupledVar("pore_pres", 0.0, "The pore fluid pressure");
   params.addParam<std::string>("base_name", "Material property base name");
-  //params.addParam<std::string>(
+  // params.addParam<std::string>(
   //  "appended_property_name", "", "Name appended to material properties to make them unique");
 
   // Using the displaced mesh will be set in the solid mechanics action input
@@ -91,7 +91,7 @@ RedbackStressDivergenceTensors::computeQpResidual()
     _poromech_stress_row = _stress[ _qp ].row(_component);
     _poromech_stress_row(_component) -= _biot_coeff[ _qp ] * _pore_pres[ _qp ];
     // return (_poromech_stress_row - _gravity_term[_qp])* _grad_test[_i][_qp];
-    return (_poromech_stress_row)*_grad_test[ _i ][ _qp ] - _gravity_term[ _qp ](_component)*_test[ _i ][ _qp ];
+    return (_poromech_stress_row)*_grad_test[ _i ][ _qp ] - _gravity_term[ _qp ](_component) * _test[ _i ][ _qp ];
 
     // Note: 30th of October 2015: Negative signs in gravity and pore pressure
     // are being currently tested for the
@@ -105,14 +105,14 @@ RedbackStressDivergenceTensors::computeQpResidual()
   //  return (_stress[_qp].row(_component) - _gravity_term[_qp])*
   //  _grad_test[_i][_qp]; //TODO: Add the gravity kernel
   return (_stress[ _qp ].row(_component)) * _grad_test[ _i ][ _qp ] -
-         _gravity_term[ _qp ](_component)*_test[ _i ][ _qp ]; // TODO: Add the gravity kernel
+         _gravity_term[ _qp ](_component) * _test[ _i ][ _qp ]; // TODO: Add the gravity kernel
 }
 
 Real
 RedbackStressDivergenceTensors::computeQpJacobian()
 {
-  return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[ _qp ],
-    _component, _component, _grad_test[ _i ][ _qp ], _grad_phi[ _j ][ _qp ]);
+  return ElasticityTensorTools::elasticJacobian(
+    _Jacobian_mult[ _qp ], _component, _component, _grad_test[ _i ][ _qp ], _grad_phi[ _j ][ _qp ]);
   /*Real result = _Jacobian_mult[_qp].elasticJacobian(_component, _component,
   _grad_test[_i][_qp], _grad_phi[_j][_qp]);
   if (_var.number() != _porepressure_var)
@@ -145,21 +145,25 @@ RedbackStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
 
   // Porepressure term (disabled for now, doesn't seem to make any
   // difference...)
-   if (_pore_pres_coupled && jvar == _porepressure_var){
-    return -_biot_coeff[ _qp ] * _phi[_j][_qp]*_grad_test[_i][_qp](_component);}
+  if (_pore_pres_coupled && jvar == _porepressure_var)
+  {
+    return -_biot_coeff[ _qp ] * _phi[ _j ][ _qp ] * _grad_test[ _i ][ _qp ](_component);
+  }
 
-  if (active){
-    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[ _qp ],_component,
-                                                 coupled_component,
-                                                 _grad_test[ _i ][ _qp ],
-                                                 _grad_phi[ _j ][ _qp ]);}
+  if (active)
+  {
+    return ElasticityTensorTools::elasticJacobian(
+      _Jacobian_mult[ _qp ], _component, coupled_component, _grad_test[ _i ][ _qp ], _grad_phi[ _j ][ _qp ]);
+  }
 
   RankTwoTensor Dstress_DT;
   Dstress_DT.zero();
-  Dstress_DT.addIa(-_solid_thermal_expansion[_qp]);
+  Dstress_DT.addIa(-_solid_thermal_expansion[ _qp ]);
 
-  if (_temp_coupled && jvar == _temp_var){
-     return (( _Jacobian_mult[ _qp ] *  Dstress_DT ).row(_component)*_grad_test[_i][_qp]) * _phi[_j][_qp];}
+  if (_temp_coupled && jvar == _temp_var)
+  {
+    return ((_Jacobian_mult[ _qp ] * Dstress_DT).row(_component) * _grad_test[ _i ][ _qp ]) * _phi[ _j ][ _qp ];
+  }
 
   return 0 + porepressure_term;
 }
