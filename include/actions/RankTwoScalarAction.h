@@ -12,29 +12,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef REDBACKMECHMATERIALJ2_H
-#define REDBACKMECHMATERIALJ2_H
+#ifndef RANKTWOSCALARACTION_H
+#define RANKTWOSCALARACTION_H
 
-#include "RedbackMechMaterial.h"
+#include "Action.h"
 
-// Forward Declarations
-class RedbackMechMaterialJ2;
-
-template <>
-InputParameters validParams<RedbackMechMaterialJ2>();
-
-class RedbackMechMaterialJ2 : public RedbackMechMaterial
+class RankTwoScalarAction : public Action
 {
 public:
-  RedbackMechMaterialJ2(const InputParameters & parameters);
+  RankTwoScalarAction(InputParameters params);
 
-protected:
-  virtual void
-  getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) override;
-  virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &) override;
-  virtual Real getFlowIncrement(Real, Real, Real, Real, Real) override;
-  virtual void get_py_qy(Real, Real, Real &, Real &, Real) override;
-  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real);
+  MultiMooseEnum scalarOptions();
+  virtual void act() override;
 };
 
-#endif // REDBACKMECHMATERIAL_H
+template <>
+InputParameters validParams<RankTwoScalarAction>();
+
+#endif // RANKTWOSCALARACTION_H

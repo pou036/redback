@@ -39,9 +39,8 @@ RedbackMechMaterialCCanisotropic::stepInitQpProperties()
   if (_t == 0)
     _anisotropy_coeff[ _qp ] = _initial_anisotropy_param; // TODO: implement \dot{alpha}
   else
-    _anisotropy_coeff[ _qp ] =
-      _anisotropy_coeff[ _qp ] +
-      0 * (_slope_yield_surface - _anisotropy_coeff[ _qp ]) * _dt; // TODO:check the sign of the anisotropy coefficient
+    _anisotropy_coeff[ _qp ] = _anisotropy_coeff[ _qp ] + 0 * (_slope_yield_surface - _anisotropy_coeff[ _qp ]) *
+                                                            _dt; // TODO:check the sign of the anisotropy coefficient
 }
 
 /**
@@ -56,7 +55,10 @@ RedbackMechMaterialCCanisotropic::getFlowTensor(
 
   Real M_squared = _slope_yield_surface * _slope_yield_surface;
   Real alpha_squared = _anisotropy_coeff[ _qp ] * _anisotropy_coeff[ _qp ];
-  flow_tensor = 3.0 * ((q - _anisotropy_coeff[ _qp ] * p) / q) * sig.deviatoric() / (M_squared - alpha_squared);
+  if (q != 0)
+    flow_tensor = 3.0 * ((q - _anisotropy_coeff[ _qp ] * p) / q) * sig.deviatoric() / (M_squared - alpha_squared);
+  else
+    flow_tensor.zero(); // TODO: is that the right thing to do?
   flow_tensor.addIa(2.0 * p - pc -
                     2.0 * _anisotropy_coeff[ _qp ] * (q - _anisotropy_coeff[ _qp ] * p) / (M_squared - alpha_squared) /
                       3.0); //(p > 0 ? 1:-1)
@@ -89,7 +91,7 @@ RedbackMechMaterialCCanisotropic::getFlowIncrement(
 
 Real
 RedbackMechMaterialCCanisotropic::getDerivativeFlowIncrement(
-  const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
+  const RankTwoTensor & /*sig*/, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
 {
   if (Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/_slope_yield_surface,
                                               /*p_0=*/pc,
@@ -127,7 +129,7 @@ RedbackMechMaterialCCanisotropic::getJac(const RankTwoTensor & sig,
   RankTwoTensor dfi_dft;
   RankFourTensor dfd_dsig, dfi_dsig;
   Real f1, f2, f3, f4, f5;
-  Real dfi_dseqv_dev, dfi_dseqv_vol, dfi_dseqv;
+  Real dfi_dseqv;
 
   pc *= -1; // TODO: check sign at very beginning, only once, and stick to
             // whatever convention!
@@ -166,8 +168,9 @@ RedbackMechMaterialCCanisotropic::getJac(const RankTwoTensor & sig,
   {
     f1 = 3.0 / (_slope_yield_surface * _slope_yield_surface - _anisotropy_coeff[ _qp ] * _anisotropy_coeff[ _qp ]);
     f2 = f1 * (1.0 - _anisotropy_coeff[ _qp ] * p_yield_stress / q_yield_stress);
-    f3 = -f1 * (1.0 - _anisotropy_coeff[ _qp ] * p_yield_stress / q_yield_stress -
-                2 * _slope_yield_surface * _slope_yield_surface / 9.0) /
+    f3 = -f1 *
+         (1.0 - _anisotropy_coeff[ _qp ] * p_yield_stress / q_yield_stress -
+          2 * _slope_yield_surface * _slope_yield_surface / 9.0) /
          3.0;
     f4 = -f1 * (_anisotropy_coeff[ _qp ] / (3.0 * q_yield_stress));
     f5 = f1 * (3.0 * _anisotropy_coeff[ _qp ] * p_yield_stress / (2.0 * q_yield_stress * q_yield_stress));

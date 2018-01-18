@@ -19,4 +19,9 @@
     input = 'bench1_d.i'
     csvdiff = 'bench1_d_out.csv'
   [../]
+  [./test_diffusion_2_zones] # can't put a dot in that name!
+    type = 'CSVDiff'
+    input = 'diffusion_2_zones.i'
+    csvdiff = 'diffusion_2_zones.csv'
+  [../]
 []

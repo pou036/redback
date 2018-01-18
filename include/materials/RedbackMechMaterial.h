@@ -48,14 +48,14 @@ public:
 
 protected:
   // Copy-paste from TensorMechanicsMaterial.h
-  virtual void computeProperties();
+  virtual void computeProperties() override;
   virtual void stepInitQpProperties();
   virtual void computeQpElasticityTensor();
   virtual void computeStrain();
   virtual void computeQpStrain();
   virtual void computeQpStrain(const RankTwoTensor & Fhat); // from FiniteStrainMaterial.h
   virtual void computeQpStress();
-  virtual void initQpStatefulProperties(); // from FiniteStrainMaterial.h
+  virtual void initQpStatefulProperties() override;
 
   const VariableGradient & _grad_disp_x;
   const VariableGradient & _grad_disp_y;
@@ -85,18 +85,18 @@ protected:
   // Copy-paste from FiniteStrainMaterial.h
   MaterialProperty<RankTwoTensor> & _strain_rate;
   MaterialProperty<RankTwoTensor> & _strain_increment;
-  MaterialProperty<RankTwoTensor> & _total_strain_old;
-  MaterialProperty<RankTwoTensor> & _elastic_strain_old;
-  MaterialProperty<RankTwoTensor> & _stress_old;
+  const MaterialProperty<RankTwoTensor> & _total_strain_old;
+  const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
+  const MaterialProperty<RankTwoTensor> & _stress_old;
   MaterialProperty<RankTwoTensor> & _rotation_increment;
   MaterialProperty<RankTwoTensor> & _dfgrd;
 
   // Copy-paste from FiniteStrainPlasticMaterial.h
   std::vector<Real> _yield_stress_vector;
   MaterialProperty<RankTwoTensor> & _plastic_strain;
-  MaterialProperty<RankTwoTensor> & _plastic_strain_old;
+  const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
   MaterialProperty<Real> & _eqv_plastic_strain;
-  MaterialProperty<Real> & _eqv_plastic_strain_old;
+  const MaterialProperty<Real> & _eqv_plastic_strain_old;
 
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
   // yield_stress);
@@ -195,6 +195,9 @@ protected:
   virtual void formCreepDamage(Real);
 
   Real _damage_dissipation;
+
+  /// initial stress components
+  std::vector<Function *> _initial_stress;
 };
 
 #endif // REDBACKMECHMATERIAL_H

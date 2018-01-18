@@ -101,9 +101,10 @@ validParams<RedbackMaterial>()
                         "solid expansion (lambda^{(s)} in 1/K)"); // _solid_thermal_expansion_param
   params.addParam<Real>("fluid_thermal_expansion",
                         0,
-                        "fluid expansion (lambda^{(f)} in 1/K)");              // _fluid_thermal_expansion_param
-  params.addParam<Real>("solid_density", 2.5, "normalised solid density (-)"); // solid_density_param
-  params.addParam<Real>("fluid_density", 1, "normalised fluid density (-)");   // fluid_density_param
+                        "fluid expansion (lambda^{(f)} in 1/K)"); // _fluid_thermal_expansion_param
+  params.addParam<Real>("thermal_diffusivity", 1, "normalised thermal diffusivity (-)"); // _thermal_diffusivity_param
+  params.addParam<Real>("solid_density", 2.5, "normalised solid density (-)");           // solid_density_param
+  params.addParam<Real>("fluid_density", 1, "normalised fluid density (-)");             // fluid_density_param
 
   params.addParam<RealVectorValue>("gravity",
                                    RealVectorValue(),
@@ -164,6 +165,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _fluid_compressibility_param(getParam<Real>("fluid_compressibility")),
     _solid_thermal_expansion_param(getParam<Real>("solid_thermal_expansion")),
     _fluid_thermal_expansion_param(getParam<Real>("fluid_thermal_expansion")),
+    _thermal_diffusivity_param(getParam<Real>("thermal_diffusivity")),
     _solid_density_param(getParam<Real>("solid_density")),
     _fluid_density_param(getParam<Real>("fluid_density")),
 
@@ -224,6 +226,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _fluid_compressibility(declareProperty<Real>("fluid_compressibility")),
     _solid_thermal_expansion(declareProperty<Real>("solid_thermal_expansion")),
     _fluid_thermal_expansion(declareProperty<Real>("fluid_thermal_expansion")),
+    _thermal_diffusivity(declareProperty<Real>("thermal_diffusivity")),
 
     _mixture_density(declareProperty<Real>("mixture_density")),
 
@@ -268,6 +271,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
   valid_params.push_back("ar");
   valid_params.push_back("confining_pressure");
   valid_params.push_back("gravity");
+  valid_params.push_back("thermal_diffusivity");
   unsigned int pos;
   for (unsigned int i = 0; i < _num_init_functions; i++)
   {
@@ -371,6 +375,16 @@ RedbackMaterial::stepInitQpProperties()
     _gravity_param = _init_functions[ pos ]->vectorValue(_t, _q_point[ _qp ]);
     // TODO: does not need to be (re)set for  each _qp...
   }
+  pos = find(_init_from_functions__params.begin(), _init_from_functions__params.end(), "thermal_diffusivity") -
+        _init_from_functions__params.begin();
+  if (pos < _num_init_functions)
+  {
+    _thermal_diffusivity[ _qp ] = _init_functions[ pos ]->value(_t, _q_point[ _qp ]);
+  }
+  else
+  {
+    _thermal_diffusivity[ _qp ] = _thermal_diffusivity_param;
+  }
 
   switch (_continuation_method)
   {
@@ -399,6 +413,7 @@ RedbackMaterial::stepInitQpProperties()
   _fluid_compressibility[ _qp ] = _fluid_compressibility_param;
   _solid_thermal_expansion[ _qp ] = _solid_thermal_expansion_param;
   _fluid_thermal_expansion[ _qp ] = _fluid_thermal_expansion_param;
+  _thermal_diffusivity[ _qp ] = _thermal_diffusivity_param;
   _mixture_density[ _qp ] = (1 - _phi0_param) * _solid_density_param + _phi0_param * _fluid_density_param;
   _mixture_gravity_term[ _qp ] = _mixture_density[ _qp ] * _gravity_param;
   _fluid_gravity_term[ _qp ] = _fluid_density_param * _gravity_param;
@@ -450,14 +465,14 @@ RedbackMaterial::computeRedbackTerms()
   if (_is_chemistry_on)
   {
     /*
-    * The following calculates the volume ratios of a generic reversible
-    * reaction of the form:
-    * AB_(solid) <-> A_(solid)  + B_(fluid)
-    * The chemical porosity is the volume ration of B over the total volume
-    * V=V_A + V_B + V_AB
-    * and the solid ratio is the volume of product A over the solid volume
-    * V_A+V_AB
-    */
+     * The following calculates the volume ratios of a generic reversible
+     * reaction of the form:
+     * AB_(solid) <-> A_(solid)  + B_(fluid)
+     * The chemical porosity is the volume ration of B over the total volume
+     * V=V_A + V_B + V_AB
+     * and the solid ratio is the volume of product A over the solid volume
+     * V_A+V_AB
+     */
 
     // Update chemical Arrhenius term
     _ar_F[ _qp ] += _chemical_ar_F_factor * _concentration[ _qp ];
@@ -532,8 +547,9 @@ RedbackMaterial::computeRedbackTerms()
                                );*/
 
     // Update Lewis number
-    _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
-                           std::pow(_phi0_param / _total_porosity[ _qp ], 3);
+    if (_phi0_param != _total_porosity[ _qp ])
+      _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
+                             std::pow(_phi0_param / _total_porosity[ _qp ], 3);
   }
   if (_inverse_lewis_number_tilde[ _qp ] != 0)
   {
@@ -550,6 +566,8 @@ RedbackMaterial::computeRedbackTerms()
                                                                             // phase
   beta_star_m = one_minus_phi_beta_star_s + phi_beta_star_f; // normalized compressibility of the mixture
   _mixture_compressibility[ _qp ] = beta_star_m;
+  if (_mixture_compressibility[ _qp ] == 0)
+    mooseError("The mixture compressiblity cannot be zero!");
 
   // convective terms
   if (_are_convective_terms_on)
@@ -589,11 +607,15 @@ RedbackMaterial::computeRedbackTerms()
     lambda_m_star = one_minus_phi_lambda_s + phi_lambda_f; // normalized compressibility of the mixture
 
     // Forming the velocities through mechanics and Darcy's flow law
-    _fluid_velocity[ _qp ] =
-      _solid_velocity[ _qp ] -
-      beta_star_m * (_grad_pore_pressure[ _qp ] - fluid_density * normalized_gravity) /
-        (_peclet_number[ _qp ] * _lewis_number[ _qp ] * _total_porosity[ _qp ]); // solving Darcy's flux
-                                                                                 // for the fluid velocity
+    if (_total_porosity[ _qp ] != 0)
+      _fluid_velocity[ _qp ] =
+        _solid_velocity[ _qp ] -
+        beta_star_m * (_grad_pore_pressure[ _qp ] - fluid_density * normalized_gravity) /
+          (_peclet_number[ _qp ] * _lewis_number[ _qp ] * _total_porosity[ _qp ]); // solving Darcy's flux
+                                                                                   // for the fluid velocity
+    else
+      _fluid_velocity[ _qp ] = _solid_velocity[ _qp ];
+
     mixture_velocity =
       (solid_density / _mixture_density[ _qp ]) * _solid_velocity[ _qp ] +
       (fluid_density / _mixture_density[ _qp ]) * _fluid_velocity[ _qp ]; // barycentric velocity for the mixture

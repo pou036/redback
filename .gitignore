@@ -185,7 +185,6 @@ theory.synctex.gz
 /doc/**/*-eps-converted-to.pdf
 !/doc/theory/figures/*/*.pdf
 !/doc/theory/data/succombe_files/*.xml
-!/doc/mechanics/redback_mech.pdf
 
 RedbackRevision.h
 
@@ -229,8 +228,8 @@ dump.txt
 moose_cxx11_compatibility_check.txt
 tests/image_subdomains/idfile.txt
 tests/image_subdomains/idfile_unique.txt
-.failed_tests
-redback_mech.bib.sav
-redback_mech.dvi
-redback_mech.ps
 temp_print_trace.*
+*.dvi
+*.sav
+.failed_tests
+*.ps

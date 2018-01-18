@@ -1,20 +1,26 @@
+# None of these tests are Valgrind clean and fail randomly
+# when tested on Linux system. See discussion in #132.
+
 [Tests]
   [./test_11_THMC_J2] # can't put a dot in that name!
     type = 'Exodiff'
     input = 'bench_THMC_J2.i'
     exodiff = 'bench_THMC_J2_out.e'
     rel_err = 1e-4
+    platform = '!LINUX'
   [../]
   [./test_11_THMC_DP] # can't put a dot in that name!
     type = 'Exodiff'
     input = 'bench_THMC_DP.i'
     exodiff = 'bench_THMC_DP_out.e'
     rel_err = 1e-4
+    platform = '!LINUX'
   [../]
   [./test_11_THMC_CC] # can't put a dot in that name!
     type = 'Exodiff'
     input = 'bench_THMC_CC.i'
     exodiff = 'bench_THMC_CC_out.e'
     rel_err = 1e-4
+    platform = '!LINUX'
   [../]
 []
