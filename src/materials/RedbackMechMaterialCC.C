@@ -148,7 +148,7 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig,
   {
     f1 = 3.0 / (_slope_yield_surface * _slope_yield_surface);
     f2 = 2.0 / 9.0 - 1.0 / (_slope_yield_surface * _slope_yield_surface);
-    f3 = 3.0 * dfi_dseqv / (2.0*sig_eqv);
+    f3 = 3.0 * dfi_dseqv / (2.0 * sig_eqv);
   }
   // This loop calculates the first term
   for (i = 0; i < 3; ++i)
@@ -166,8 +166,8 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig,
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
           dfd_dsig(i, j, k, l) =
-            f1 * deltaFunc(i, k) * deltaFunc(j, l)
-            + f2 * deltaFunc(i, j) * deltaFunc(k, l); // d_flow_dirn/d_sig - 2nd part (J2 plasticity)
+            f1 * deltaFunc(i, k) * deltaFunc(j, l) +
+            f2 * deltaFunc(i, j) * deltaFunc(k, l); // d_flow_dirn/d_sig - 2nd part (J2 plasticity)
 
   // dfd_dsig = dft_dsig1/flow_tensor_norm - 3.0 * dft_dsig2 /
   // (2*sig_eqv*flow_tensor_norm*flow_tensor_norm*flow_tensor_norm);
