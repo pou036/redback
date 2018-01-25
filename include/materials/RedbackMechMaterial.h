@@ -16,8 +16,8 @@
 #define REDBACKMECHMATERIAL_H
 
 #include "Material.h"
-#include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "RankTwoTensor.h"
 #include "RotationTensor.h"
 #include "RedbackFlowLawDislocation.h"
 #include "RedbackFlowLawDiffusion.h"
@@ -50,14 +50,14 @@ public:
 
 protected:
   // Copy-paste from TensorMechanicsMaterial.h
-  virtual void computeProperties();
+  virtual void computeProperties() override;
   virtual void stepInitQpProperties();
   virtual void computeQpElasticityTensor();
   virtual void computeStrain();
   virtual void computeQpStrain();
   virtual void computeQpStrain(const RankTwoTensor & Fhat); // from FiniteStrainMaterial.h
   virtual void computeQpStress();
-  virtual void initQpStatefulProperties(); // from FiniteStrainMaterial.h
+  virtual void initQpStatefulProperties() override;
 
   const VariableGradient & _grad_disp_x;
   const VariableGradient & _grad_disp_y;
@@ -87,18 +87,18 @@ protected:
   // Copy-paste from FiniteStrainMaterial.h
   MaterialProperty<RankTwoTensor> & _strain_rate;
   MaterialProperty<RankTwoTensor> & _strain_increment;
-  MaterialProperty<RankTwoTensor> & _total_strain_old;
-  MaterialProperty<RankTwoTensor> & _elastic_strain_old;
-  MaterialProperty<RankTwoTensor> & _stress_old;
+  const MaterialProperty<RankTwoTensor> & _total_strain_old;
+  const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
+  const MaterialProperty<RankTwoTensor> & _stress_old;
   MaterialProperty<RankTwoTensor> & _rotation_increment;
   MaterialProperty<RankTwoTensor> & _dfgrd;
 
   // Copy-paste from FiniteStrainPlasticMaterial.h
   std::vector<Real> _yield_stress_vector;
   MaterialProperty<RankTwoTensor> & _plastic_strain;
-  MaterialProperty<RankTwoTensor> & _plastic_strain_old;
+  const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
   MaterialProperty<Real> & _eqv_plastic_strain;
-  MaterialProperty<Real> & _eqv_plastic_strain_old;
+  const MaterialProperty<Real> & _eqv_plastic_strain_old;
 
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
   // yield_stress);
@@ -136,10 +136,8 @@ protected:
   Real macaulayBracket(Real);
 
   // Redback specific
-  Real _youngs_modulus_param;
-  MaterialProperty<Real> &  _youngs_modulus;
-  Real _poisson_ratio_param;
-  MaterialProperty<Real> &  _poisson_ratio;
+  Real _youngs_modulus;
+  Real _poisson_ratio;
   MaterialProperty<Real> & _mises_stress;
   MaterialProperty<Real> & _mean_stress;
   MaterialProperty<Real> & _mises_strain_rate;
@@ -158,7 +156,6 @@ protected:
   MaterialProperty<Real> & _damage_kernel;
   MaterialProperty<Real> & _damage_kernel_jac;
   Real _damage_coeff, _dmg_exponent, _healing_coeff;
-  //<Real> & _grain_size;
 
   //Real _exponential;
   // const VariableValue & _dispx_dot;
@@ -208,6 +205,8 @@ protected:
 
   Real _damage_dissipation;
 
+  /// initial stress components
+  std::vector<Function *> _initial_stress;
 };
 
 #endif // REDBACKMECHMATERIAL_H

@@ -74,7 +74,7 @@
     phi0 = 0.1
     ref_lewis_nb = 1
     total_porosity = total_porosity
-    solid_compressibility = 0
+    solid_compressibility = 1e-10
   [../]
 []
 
@@ -335,11 +335,12 @@
     type = RedbackTotalPorosityAux
     variable = total_porosity
     mechanical_porosity = mech_porosity
+    execute_on = 'initial LINEAR'
   [../]
   [./mech_porosity]
     type = MaterialRealAux
     variable = mech_porosity
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
     property = mechanical_porosity
   [../]
   [./Lewis_number]
@@ -443,7 +444,7 @@
 
 [Outputs]
   file_base = bench_THMC_J2_out
-  output_initial = true
+  # output_initial = true
   exodus = true
   [./console]
     type = Console
@@ -473,4 +474,3 @@
     value = 0
   [../]
 []
-

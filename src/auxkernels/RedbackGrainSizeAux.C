@@ -87,7 +87,7 @@ RedbackGrainSizeAux::computeValue()
 
   Real bulk_modulus, shear_modulus, vol_elastic_strain, dev_elastic_strain;
   Real Psi0, Psi0_vol, Psi0_dev;
-  Real _damage_dissipation, damage_potential, damage_rate;
+  Real damage_potential;
 
   bulk_modulus =
   _youngs_modulus[ _qp ] * _poisson_ratio[ _qp ] / (1 + _poisson_ratio[ _qp ]) / (1 - 2 * _poisson_ratio[ _qp ]); // First Lame modulus

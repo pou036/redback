@@ -10,35 +10,38 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 // Main Application
-#include "RedbackApp.h"
+#include "ActionFactory.h"
+#include "AppFactory.h"
 #include "Moose.h"
 #include "MooseSyntax.h"
-#include "AppFactory.h"
-#include "ActionFactory.h"
+#include "RedbackApp.h"
 
 // Modules
 #include "TensorMechanicsApp.h"
 
 // Actions
+#include "RankTwoScalarAction.h"
 #include "RedbackAction.h"
 #include "RedbackMechAction.h"
 
 // Boundary conditions
 #include "FunctionDirichletTransverseBC.h"
+#include "PressureNeumannBC.h"
 
 // Functions
 #include "RedbackRandomFunction.h"
 
 // Initial conditions
-#include "FunctionNormalDistributionIC.h"
 #include "FunctionLogNormalDistributionIC.h"
-#include "FunctionWithRandomIC.h"
+#include "FunctionNormalDistributionIC.h"
 #include "FunctionTimesRandomIC.h"
+#include "FunctionWithRandomIC.h"
 
 // Kernels
 #include "RedbackChemEndo.h"
 #include "RedbackChemExo.h"
 #include "RedbackChemPressure.h"
+#include "RedbackDamage.h"
 #include "RedbackFluidDivergence.h"
 #include "RedbackFluidStressDivergenceTensors.h"
 #include "RedbackMassConvection.h"
@@ -50,7 +53,7 @@
 #include "RedbackThermalConvection.h"
 #include "RedbackThermalDiffusion.h"
 #include "RedbackThermalPressurization.h"
-#include "RedbackDamage.h"
+#include "RedbackVariableEqualsFunction.h"
 
 // Scalar Kernels
 #include "RedbackContinuation.h"
@@ -59,34 +62,33 @@
 #include "FunctionPointSource.h"
 
 // Materials
-#include "RedbackFluidMaterial.h"
+#include "ComputePlasticStrainRate.h"
 #include "ImageProcessing.h"
+#include "RedbackFluidMaterial.h"
 #include "RedbackMaterial.h"
-//#include "RedbackMechMaterialJ2.h"
-#include "RedbackMechMaterialDP.h"
 //#include "RedbackMechMaterialCC.h"
 //#include "RedbackMechMaterialCCanisotropic.h"
+#include "RedbackMechMaterialDP.h"
 //#include "RedbackMechMaterialElastic.h"
+//#include "RedbackMechMaterialExpCC.h"
+//#include "RedbackMechMaterialJ2.h"
 
 // MeshModifiers
 #include "ElementFileSubdomain.h"
 
+// Postprocessors
+#include "RankTwoScalarPostprocessor.h"
+
 // Timesteppers
 #include "ReturnMapIterDT.h"
-
-// UserObjects
-#include "RedbackFlowLawDiffusion.h"
-#include "RedbackFlowLawDislocation.h"
-#include "RedbackFlowLawPeierlsDislocation.h"
-#include "RedbackFlowLawsInParallel.h"
-#include "RedbackFlowLawsInSeries.h"
 
 // AuxKernels
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
-#include "RedbackGrainSizeAux.h"
-#include "RedbackTotalPorosityAux.h"
 #include "RedbackPolarTensorMaterialAux.h"
+#include "RedbackTotalPorosityAux.h"
+#include "RedbackGrainSizeAux.h"
+
 
 template <>
 InputParameters
@@ -128,7 +130,9 @@ RedbackApp::registerObjects(Factory & factory)
 {
 #undef registerObject
 #define registerObject(name) factory.reg<name>(stringifyName(name))
+
   registerBoundaryCondition(FunctionDirichletTransverseBC);
+  registerBoundaryCondition(PressureNeumannBC);
 
   registerFunction(RedbackRandomFunction);
 
@@ -152,11 +156,13 @@ RedbackApp::registerObjects(Factory & factory)
   registerKernel(RedbackThermalDiffusion);
   registerKernel(RedbackThermalPressurization);
   registerKernel(RedbackDamage);
+  registerKernel(RedbackVariableEqualsFunction);
 
   registerScalarKernel(RedbackContinuation);
 
   registerDiracKernel(FunctionPointSource);
 
+  registerMaterial(ComputePlasticStrainRate);
   registerMaterial(RedbackFluidMaterial);
   registerMaterial(ImageProcessing);
   registerMaterial(RedbackMaterial);
@@ -165,22 +171,19 @@ RedbackApp::registerObjects(Factory & factory)
   //registerMaterial(RedbackMechMaterialCC);
   //registerMaterial(RedbackMechMaterialCCanisotropic);
   //registerMaterial(RedbackMechMaterialElastic);
+  //registerMaterial(RedbackMechMaterialExpCC);
 
   registerMeshModifier(ElementFileSubdomain);
 
-  registerExecutioner(ReturnMapIterDT);
+  registerPostprocessor(RankTwoScalarPostprocessor);
 
-  registerUserObject(RedbackFlowLawDiffusion);
-  registerUserObject(RedbackFlowLawDislocation);
-  registerUserObject(RedbackFlowLawPeierlsDislocation);
-  registerUserObject(RedbackFlowLawsInParallel);
-  registerUserObject(RedbackFlowLawsInSeries);
+  registerExecutioner(ReturnMapIterDT);
 
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);
-  registerAux(RedbackGrainSizeAux);
   registerAux(RedbackTotalPorosityAux);
   registerAux(RedbackPolarTensorMaterialAux);
+  registerAux(RedbackGrainSizeAux);
 #undef registerObject
 #define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }
@@ -190,6 +193,8 @@ RedbackApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
 #undef registerAction
 #define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
+  syntax.registerActionSyntax("RankTwoScalarAction", "RankTwoScalarAction/*");
+  registerAction(RankTwoScalarAction, "add_postprocessor");
   syntax.registerActionSyntax("RedbackMechAction", "RedbackMechAction/*");
   registerAction(RedbackMechAction, "add_kernel");
 // syntax.registerActionSyntax("RedbackAction", "RedbackAction/*");

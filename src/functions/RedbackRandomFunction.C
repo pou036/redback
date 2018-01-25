@@ -10,8 +10,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "RedbackRandomFunction.h"
 #include "MooseRandom.h"
+#include "RedbackRandomFunction.h"
 
 template <>
 InputParameters
@@ -33,7 +33,7 @@ RedbackRandomFunction::RedbackRandomFunction(const InputParameters & parameters)
 }
 
 Real
-RedbackRandomFunction::value(Real t, const Point & p)
+RedbackRandomFunction::value(Real /*t*/, const Point & /*p*/)
 {
   // Random number between 0 and 1
   Real rand_num = MooseRandom::rand();

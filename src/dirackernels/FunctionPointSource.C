@@ -10,8 +10,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "FunctionPointSource.h"
 #include "Function.h"
+#include "FunctionPointSource.h"
 
 template <>
 InputParameters

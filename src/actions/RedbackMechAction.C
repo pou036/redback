@@ -1,7 +1,7 @@
 #include "RedbackMechAction.h"
 
-#include "Factory.h"
 #include "FEProblem.h"
+#include "Factory.h"
 #include "Parser.h"
 
 template <>
@@ -17,6 +17,8 @@ validParams<RedbackMechAction>()
   params.addParam<NonlinearVariableName>("pore_pres", "", "The pore fluid pressure");
   params.addParam<std::string>(
     "appended_property_name", "", "Name appended to material properties to make them unique");
+  params.addParam<std::vector<SubdomainName> >(
+    "block", "The list of ids of the blocks (subdomain) that the mechanics kernels will be applied to");
 
   // changed this from true to false
   params.set<bool>("use_displaced_mesh") = false;
@@ -30,7 +32,8 @@ RedbackMechAction::RedbackMechAction(InputParameters params) :
     _disp_z(getParam<NonlinearVariableName>("disp_z")),
     _disp_r(getParam<NonlinearVariableName>("disp_r")),
     _temp(getParam<NonlinearVariableName>("temp")),
-    _pore_pres(getParam<NonlinearVariableName>("pore_pres"))
+    _pore_pres(getParam<NonlinearVariableName>("pore_pres")),
+    _subdomain_names(getParam<std::vector<SubdomainName> >("block"))
 {
 }
 
@@ -112,6 +115,7 @@ RedbackMechAction::act()
     name << short_name;
     name << i;
 
+    params.set<std::vector<SubdomainName> >("block") = _subdomain_names;
     params.set<unsigned int>("component") = i;
     params.set<NonlinearVariableName>("variable") = vars[ i ];
 

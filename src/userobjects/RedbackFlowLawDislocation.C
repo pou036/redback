@@ -26,7 +26,7 @@ RedbackFlowLawDislocation::RedbackFlowLawDislocation(const InputParameters& para
 
 Real
 RedbackFlowLawDislocation::value(Real sig_eqv, Real pressure, Real q_yield_stress,
-                                 Real p_yield_stress, Real yield_stress, unsigned int qp, Real dt) const
+                                 Real p_yield_stress, Real /*yield_stress*/, unsigned int qp, Real dt) const
 {
    Real exponential = RedbackFlowLawBase::computeExponentialTemperature(qp, _arrhenius);
 
@@ -47,7 +47,7 @@ RedbackFlowLawDislocation::value(Real sig_eqv, Real pressure, Real q_yield_stres
 
 Real
 RedbackFlowLawDislocation::derivative(Real sig_eqv, Real pressure, Real q_yield_stress,
-                                      Real p_yield_stress, const RankTwoTensor & sig,
+                                      Real p_yield_stress, const RankTwoTensor & /*sig*/,
                                       unsigned int qp, Real dt) const
 {
   Real exponential = RedbackFlowLawBase::computeExponentialTemperature(qp, _arrhenius);

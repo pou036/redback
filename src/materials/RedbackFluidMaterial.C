@@ -25,14 +25,11 @@ validParams<RedbackFluidMaterial>()
   params.addCoupledVar("fluid_vel_x", 0.0, "The x component of fluid velocity");
   params.addCoupledVar("fluid_vel_y", 0.0, "The y component of fluid velocity");
   params.addCoupledVar("fluid_vel_z", 0.0, "The z component of fluid velocity");
-  params.addParam<Real>("viscosity_ratio", 0.0, "Ratio of Fluid bulk viscosity to Fluid dynamic viscosity (μB/μ)");
-  //  params.addParam<Real>("bulk_viscosity", 0.0, "Fluid bulk viscosity (λ)");
-  //  params.addParam<Real>("dynamic_viscosity", 0.0, "Fluid dynamic viscosity (μ)");
+  params.addParam<Real>(
+    "viscosity_ratio", 0, "Ratio of Fluid second viscosity to Fluid dynamic viscosity (lambda/μ)"); // μb=lambda-2/3
   params.addParam<Real>("fluid_density", 1, "Reference fluid density (\rho)");
   params.addParam<Real>(
-    "fluid_compressibility", 1, "Fluid compressibility (beta^{(f)} in 1/Pa)"); // default value is 1 even if the fluid
-                                                                               // is not compressible because we often
-                                                                               // divide by compressibility
+    "fluid_compressibility", 0, "Fluid compressibility (beta^{(f)} in 1/Pa)"); // default is incompressible
   params.addParam<Real>(
     "fluid_thermal_expansion", 0, "Fluid expansion (lambda^{(f)} in 1/K)"); // _fluid_thermal_expansion_param
   params.addParam<Real>("temperature_reference", 0.0, "Reference temperature used for thermal expansion");
@@ -144,16 +141,25 @@ RedbackFluidMaterial::computeRedbackTerms()
   _div_fluid_vel[ _qp ] = _grad_fluid_vel_x[ _qp ](0) + _grad_fluid_vel_y[ _qp ](1) + _grad_fluid_vel_z[ _qp ](2);
   // Fluid stress for Newtonian compressible fluid, in small deformation
   _fluid_stress[ _qp ].zero();
-  _fluid_stress[ _qp ].addIa((_viscosity_ratio[ _qp ] - 2 / 3) * _div_fluid_vel[ _qp ]); // - _pore_pres[_qp]);
+  // Influence of bulk viscosity
+  _fluid_stress[ _qp ].addIa((_viscosity_ratio[ _qp ] - 2. / 3.) * _div_fluid_vel[ _qp ]); // - _pore_pres[_qp]);
   _fluid_stress[ _qp ] += (grad_v + grad_v.transpose());
 
   //_Jacobian_fluid_mult[_qp].zero();
 
   // Fluid divergence for mass Kernel component
-  _div_fluid_kernel[ _qp ] = _div_fluid_vel[ _qp ] * _peclet_number[ _qp ] / _fluid_compressibility_param;
+  if (_fluid_compressibility_param == 0)
+  {
+    _div_fluid_kernel[ _qp ] = _div_fluid_vel[ _qp ] * _peclet_number[ _qp ];
+    _pressurization_coefficient[ _qp ] = _fluid_thermal_expansion_param;
+  }
+  else
+  {
+    _div_fluid_kernel[ _qp ] = _div_fluid_vel[ _qp ] * _peclet_number[ _qp ] / _fluid_compressibility_param;
+    _pressurization_coefficient[ _qp ] = _fluid_thermal_expansion_param / _fluid_compressibility_param;
+  }
 
   // Assembling mass kernels components
-  _pressurization_coefficient[ _qp ] = _fluid_thermal_expansion_param / _fluid_compressibility_param;
   RealVectorValue fluid_vel_vector = RealVectorValue(_fluid_vel_x[ _qp ], _fluid_vel_y[ _qp ], _fluid_vel_z[ _qp ]);
   //_pressure_convective_mass[_qp] = _grad_pore_pressure[_qp]*fluid_vel_vector -
   //_pressurization_coefficient[_qp]*_grad_temp[_qp]*fluid_vel_vector;

@@ -46,7 +46,7 @@
     poisson_ratio = 0.3
     ref_pe_rate = 1
     slope_yield_surface = -0.6
-    yield_criterion = modified_Cam_Clay
+    #   yield_criterion = modified_Cam_Clay
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
   [../]
@@ -381,7 +381,7 @@
 
 [Outputs]
   file_base = bench_TM_CC_out
-  output_initial = true
+  # output_initial = true
   exodus = true
   print_linear_residuals = true
   [./console]
@@ -405,4 +405,3 @@
     value = 0
   [../]
 []
-

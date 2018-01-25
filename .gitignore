@@ -63,7 +63,6 @@ traceout*.txt
 *.plugin
 *.outp
 *.patch
-*.txt
 *.bib.bak
 *.out
 *.vtk
@@ -177,6 +176,7 @@ peacock_*.e
 tests/*/*.trace
 
 !/tests/transverseBC/*.msh
+!/meshes/2d_footing_pb_coarse.msh
 theory.synctex.gz
 
 # Allow files in documentation directories
@@ -219,9 +219,17 @@ borehole_dmg_rectan_3D.i
 borehole_test_dmg_rectang_anisotropic.i
 borehole_test_dmg_concentra_rectang_anisotropic.i
 borehole_test_dmg_concentra_rectang.i
-doc/theory/theory.dvi
 doc/theory/figures/benchmark_1_T/benchmark_1_T_results_A_B-eps-converted-to.pdf
 doc/theory/figures/benchmark_1_T/benchmark_1_T_results_C_D-eps-converted-to.pdf
 doc/theory/figures/benchmark_1_T/benchmark_1_T_succombe_0-eps-converted-to.pdf
 doc/theory/figures/benchmark_1_T/benchmark_1_T_succombe_1-eps-converted-to.pdf
 doc/theory/figures/benchmark_1_T/benchmark_1_T_succombe_2-eps-converted-to.pdf
+dump.txt
+moose_cxx11_compatibility_check.txt
+tests/image_subdomains/idfile.txt
+tests/image_subdomains/idfile_unique.txt
+temp_print_trace.*
+*.dvi
+*.sav
+.failed_tests
+*.ps

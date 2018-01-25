@@ -34,7 +34,7 @@ private:
   const MaterialProperty<RankTwoTensor> & _elastic_strain;
   const MaterialProperty<Real> & _youngs_modulus;
   const MaterialProperty<Real> & _poisson_ratio;
-  
+
 
   const RedbackFlowLawDislocation & _flow_law_dis_uo;
 
@@ -43,7 +43,7 @@ private:
   const MaterialProperty<Real> & _strain_rate_dis;
 
   Real _delta_param;
-  Real _ar_growth_param, _growth_exponent_param, _steady_state_constant_param, _pre_exp_factor_growth;
+  Real _ar_growth_param, _growth_exponent_param, _pre_exp_factor_growth;
   Real _pre_exp_factor_reduction;
   Real _A_star_ss_param;
 };

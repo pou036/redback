@@ -16,6 +16,12 @@
     input = 'bench_TM_CC.i'
     exodiff = 'bench_TM_CC_out.e'
     rel_err = 1e-6
+    skip = "Not valgrind clean"
+  [../]
+  [./test_6_TM_thermo_elastic] # can't put a dot in that name!
+    type = 'CSVDiff'
+    input = 'thermo_elasticity.i'
+    csvdiff = 'thermo_elasticity.csv'
   [../]
   [./test_6_TM_FlowLaw_DP1] # can't put a dot in that name!
     # Test that eps_dot_dislocation gets computed when dislocation flow law is provided

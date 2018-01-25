@@ -37,7 +37,7 @@
     youngs_modulus = 1000
     poisson_ratio = 0.3
     ref_pe_rate = 1
-    slope_yield_surface = -0.6
+    # slope_yield_surface = -0.6
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
   [../]
@@ -49,7 +49,7 @@
     ar = 1
     ar_F = 1
     ar_R = 1
-    exponent = 1
+    # exponent = 1
     gr = 0.1
     alpha_2 = 1
     ref_lewis_nb = 1
@@ -349,7 +349,7 @@
 
 [Outputs]
   file_base = bench_J2_out
-  output_initial = true
+  # output_initial = true
   exodus = true
   print_linear_residuals = true
   [./console]
@@ -365,4 +365,3 @@
     disp_x = disp_x
   [../]
 []
-

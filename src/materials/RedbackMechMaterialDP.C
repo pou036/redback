@@ -58,7 +58,7 @@ RedbackMechMaterialDP::getPressureProjection(Real pressure, Real sig_eqv, Real c
 
 void
 RedbackMechMaterialDP::getFlowTensor(
-  const RankTwoTensor & sig, Real q, Real p, Real yield_stress, RankTwoTensor & flow_tensor)
+  const RankTwoTensor & sig, Real q, Real p, Real /*yield_stress*/, RankTwoTensor & flow_tensor)
 {
   RankTwoTensor sig_dev;
   Real val;
@@ -86,11 +86,14 @@ RedbackMechMaterialDP::getFlowIncrement(
 
   /*
   Real flow_incr_vol =
-    _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
+    _ref_pe_rate * _dt *
+    std::pow(macaulayBracket(((pressure - p_yield_stress) / yield_stress) * (_slope_yield_surface < 0 ? 1 : -1)),
+             _exponent) *
+    _exponential;
   // TODO: q_yield_stress can be 0, we should handle that case properly...
   Real flow_incr_dev =
     _ref_pe_rate * _dt *
-    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * (sig_eqv / q_yield_stress - 1.0)), _exponent) *
+    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * ((sig_eqv - q_yield_stress) / yield_stress)), _exponent) *
     _exponential;
   //(q_yield_stress > 0 ? 1:-1) is the sign function
   return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
@@ -98,8 +101,12 @@ RedbackMechMaterialDP::getFlowIncrement(
 }
 
 Real
-RedbackMechMaterialDP::getDerivativeFlowIncrement(
-  const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real q_yield_stress, Real p_yield_stress)
+RedbackMechMaterialDP::getDerivativeFlowIncrement(const RankTwoTensor & sig,
+                                                  Real pressure,
+                                                  Real sig_eqv,
+                                                  Real yield_stress,
+                                                  Real q_yield_stress,
+                                                  Real p_yield_stress)
 {
 
   return _flow_law_uo.derivative(sig_eqv, pressure, q_yield_stress, p_yield_stress, sig, _qp, _dt);
@@ -108,15 +115,17 @@ RedbackMechMaterialDP::getDerivativeFlowIncrement(
     _ref_pe_rate * _dt * std::pow(macaulayBracket(pressure - p_yield_stress), _exponent) * _exponential;
   Real delta_lambda_q =
     _ref_pe_rate * _dt *
-    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * (sig_eqv / q_yield_stress - 1.0)), _exponent) *
+    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * ((sig_eqv - q_yield_stress) / yield_stress)), _exponent) *
     _exponential;
   Real delta_lambda = (std::pow(delta_lambda_p * delta_lambda_p + delta_lambda_q * delta_lambda_q, 0.5));
   Real der_flow_incr_dev =
     _ref_pe_rate * _dt * _exponent *
-    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * (sig_eqv / q_yield_stress - 1.0)), _exponent - 1.0) *
-    _exponential / q_yield_stress;
+    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * ((sig_eqv - q_yield_stress) / yield_stress)),
+             _exponent - 1.0) *
+    _exponential / yield_stress;
   Real der_flow_incr_vol = _ref_pe_rate * _dt * _exponent *
-                           std::pow(macaulayBracket(pressure - p_yield_stress), _exponent - 1.0) * _exponential;
+                           std::pow(macaulayBracket((pressure - p_yield_stress) / yield_stress), _exponent - 1.0) *
+                           _exponential / yield_stress;
   return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
   */
 }
@@ -137,11 +146,11 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
   RankTwoTensor dfi_dft;
   RankFourTensor dft_dsig1, /*dft_dsig2,*/ dfd_dft, dfd_dsig, dfi_dsig;
   Real f1, f2, f3;
-  Real dfi_dseqv_dev, dfi_dseqv_vol, dfi_dseqv;
+  Real dfi_dseqv;
 
   sig_dev = sig.deviatoric();
 
-  dfi_dseqv = getDerivativeFlowIncrement(sig, pressure, sig_eqv, q_yield_stress, p_yield_stress);
+  dfi_dseqv = getDerivativeFlowIncrement(sig, pressure, sig_eqv, yield_stress, q_yield_stress, p_yield_stress);
   getFlowTensor(sig, sig_eqv, pressure, yield_stress, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the
@@ -163,7 +172,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
         for (l = 0; l < 3; ++l)
           dfi_dsig(i, j, k, l) = flow_dirn(i, j) * flow_dirn(k, l) * dfi_dseqv;
 
-  Real flow_tensor_norm = flow_dirn.L2norm();
+  // Real flow_tensor_norm = flow_dirn.L2norm();
 
   // This loop calculates the second term. Read REDBACK's documentation
   // (same as J2 plasticity case)

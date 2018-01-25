@@ -49,7 +49,7 @@
     poisson_ratio = 0.3
     ref_pe_rate = 1
     slope_yield_surface = -0.6
-    yield_criterion = Drucker_Prager
+    # yield_criterion = Drucker_Prager
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
   [../]
@@ -76,7 +76,7 @@
     phi0 = 0.1
     ref_lewis_nb = 1
     total_porosity = total_porosity
-    solid_compressibility = 0
+    solid_compressibility = 1e-10
   [../]
 []
 
@@ -337,11 +337,12 @@
     type = RedbackTotalPorosityAux
     variable = total_porosity
     mechanical_porosity = mech_porosity
+    execute_on = 'initial LINEAR'
   [../]
   [./mech_porosity]
     type = MaterialRealAux
     variable = mech_porosity
-    execute_on = timestep_end
+    execute_on = 'initial timestep_end'
     property = mechanical_porosity
   [../]
   [./Lewis_number]
@@ -445,7 +446,7 @@
 
 [Outputs]
   file_base = bench_THMC_DP_out
-  output_initial = true
+  # output_initial = true
   exodus = true
   [./console]
     type = Console
@@ -475,4 +476,3 @@
     value = 0
   [../]
 []
-

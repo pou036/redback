@@ -43,7 +43,7 @@ RedbackFlowLawPeierlsDislocation::RedbackFlowLawPeierlsDislocation(const InputPa
 
 Real
 RedbackFlowLawPeierlsDislocation::value(Real sig_eqv, Real pressure, Real q_yield_stress,
-                                 Real p_yield_stress, Real yield_stress, unsigned int qp, Real dt) const
+                                 Real p_yield_stress, Real /*yield_stress*/, unsigned int qp, Real dt) const
 {
   // define Peierls Stress for calculation
   Real peierls_stress =
@@ -70,7 +70,7 @@ RedbackFlowLawPeierlsDislocation::value(Real sig_eqv, Real pressure, Real q_yiel
 
 Real
 RedbackFlowLawPeierlsDislocation::derivative(Real sig_eqv, Real pressure, Real q_yield_stress,
-                                      Real p_yield_stress, const RankTwoTensor & sig,
+                                      Real p_yield_stress, const RankTwoTensor & /*sig*/,
                                       unsigned int qp, Real dt) const
 {
   // define Peierls Stress for calculation

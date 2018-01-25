@@ -46,7 +46,7 @@ class RedbackFlowLawPeierlsDislocation : public RedbackFlowLawDislocation
   virtual Real derivative(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress,
                           const RankTwoTensor & sig, unsigned int qp, Real dt) const;
 
-  virtual std::string activeModelName(unsigned int qp) const {return "Redback_flow_law_peierls_dislocation";};
+  virtual std::string activeModelName(unsigned int /*qp*/) const {return "Redback_flow_law_peierls_dislocation";};
 
   virtual Real getPreExponentialFactor() const;
 
