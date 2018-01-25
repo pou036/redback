@@ -1,6 +1,7 @@
 .externalToolBuilders/
 .libs
 lib
+build
 peacock_*
 *.la
 *.kate-swp
