@@ -120,7 +120,7 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig,
   RankTwoTensor sig_dev, flow_dirn_vol, flow_dirn_dev, fij, flow_dirn, flow_tensor;
   RankTwoTensor dfi_dft;
   RankFourTensor dfd_dsig, dfi_dsig;
-  Real f1, f2;
+  Real f1, f2, f3;
   Real dfi_dseqv;
 
   pc *= -1;
@@ -142,32 +142,32 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig,
    * with respect to the stress tensor. See also REDBACK's documentation
    * */
 
-  // This loop calculates the first term
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (k = 0; k < 3; ++k)
-        for (l = 0; l < 3; ++l)
-          dfi_dsig(i, j, k, l) = flow_dirn(i, j) * flow_dirn(k, l) * dfi_dseqv;
-
-  // Real flow_tensor_norm = flow_dirn.L2norm();
-
-  // This loop calculates the second term. Read REDBACK's documentation
-  // (same as J2 plasticity case)
   f1 = 0.0;
   f2 = 0.0;
   if (sig_eqv > 1e-8)
   {
     f1 = 3.0 / (_slope_yield_surface * _slope_yield_surface);
     f2 = 2.0 / 9.0 - 1.0 / (_slope_yield_surface * _slope_yield_surface);
+    f3 = 3.0 * dfi_dseqv / (2.0 * sig_eqv);
   }
+  // This loop calculates the first term
+  for (i = 0; i < 3; ++i)
+    for (j = 0; j < 3; ++j)
+      for (k = 0; k < 3; ++k)
+        for (l = 0; l < 3; ++l)
+          dfi_dsig(i, j, k, l) = flow_dirn(i, j) * f3 * sig_dev(k, l);
+
+  // Real flow_tensor_norm = flow_dirn.L2norm();
+
+  // This loop calculates the second term. Read REDBACK's documentation
+  // (same as J2 plasticity case)
   for (i = 0; i < 3; ++i)
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
           dfd_dsig(i, j, k, l) =
-            f1 * deltaFunc(i, k) * deltaFunc(j, l) - f2 * deltaFunc(i, j) *
-                                                       deltaFunc(k,
-                                                                 l); // d_flow_dirn/d_sig - 2nd part (J2 plasticity)
+            f1 * deltaFunc(i, k) * deltaFunc(j, l) +
+            f2 * deltaFunc(i, j) * deltaFunc(k, l); // d_flow_dirn/d_sig - 2nd part (J2 plasticity)
 
   // dfd_dsig = dft_dsig1/flow_tensor_norm - 3.0 * dft_dsig2 /
   // (2*sig_eqv*flow_tensor_norm*flow_tensor_norm*flow_tensor_norm);
