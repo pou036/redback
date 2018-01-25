@@ -82,12 +82,20 @@
 // Timesteppers
 #include "ReturnMapIterDT.h"
 
+// UserObjects
+#include "RedbackFlowLawDiffusion.h"
+#include "RedbackFlowLawDislocation.h"
+#include "RedbackFlowLawPeierlsDislocation.h"
+#include "RedbackFlowLawsInParallel.h"
+#include "RedbackFlowLawsInSeries.h"
+
 // AuxKernels
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
-#include "RedbackPolarTensorMaterialAux.h"
-#include "RedbackTotalPorosityAux.h"
 #include "RedbackGrainSizeAux.h"
+#include "RedbackTotalPorosityAux.h"
+#include "RedbackPolarTensorMaterialAux.h"
+
 
 
 template <>
@@ -179,11 +187,18 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerExecutioner(ReturnMapIterDT);
 
+  registerUserObject(RedbackFlowLawDiffusion);
+  registerUserObject(RedbackFlowLawDislocation);
+  registerUserObject(RedbackFlowLawPeierlsDislocation);
+  registerUserObject(RedbackFlowLawsInParallel);
+  registerUserObject(RedbackFlowLawsInSeries);
+
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);
+  registerAux(RedbackGrainSizeAux);
   registerAux(RedbackTotalPorosityAux);
   registerAux(RedbackPolarTensorMaterialAux);
-  registerAux(RedbackGrainSizeAux);
+
 #undef registerObject
 #define registerObject(name) factory.regLegacy<name>(stringifyName(name))
 }

@@ -151,8 +151,10 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _chemo_mechanical_porosity_coeff(getParam<Real>("chemo_mechanical_porosity_coeff")),
 
     // Redback
-    _youngs_modulus(getParam<Real>("youngs_modulus")),
-    _poisson_ratio(getParam<Real>("poisson_ratio")),
+    _youngs_modulus_param(getParam<Real>("youngs_modulus")),
+    _youngs_modulus(declareProperty<Real>("youngs_modulus")),
+    _poisson_ratio_param(getParam<Real>("poisson_ratio")),
+    _poisson_ratio(declareProperty<Real>("poisson_ratio")),
     _mises_stress(declareProperty<Real>("mises_stress")),
     _mean_stress(declareProperty<Real>("mean_stress")),
     _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
@@ -210,8 +212,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _T0_param(getParam<Real>("temperature_reference")),
     _P0_param(getParam<Real>("pressure_reference"))
 {
-  Real E = _youngs_modulus;
-  Real nu = _poisson_ratio;
+  Real E = _youngs_modulus_param;
+  Real nu = _poisson_ratio_param;
   Real l1 = E * nu / (1 + nu) / (1 - 2 * nu); // First Lame modulus
   Real l2 = 0.5 * E / (1 + nu);               // Second Lame modulus (shear)
   Real input_array[] = { l1, l2 };
@@ -846,8 +848,8 @@ RedbackMechMaterial::formDamageDissipation(RankTwoTensor & /*sig*/)
    * =  (1-D) * Psi0
    */
   Real bulk_modulus =
-    _youngs_modulus * _poisson_ratio / (1 + _poisson_ratio) / (1 - 2 * _poisson_ratio); // First Lame modulus
-  Real shear_modulus = 0.5 * _youngs_modulus / (1 + _poisson_ratio);                    // Second Lame modulus (shear)
+    _youngs_modulus_param * _poisson_ratio_param / (1 + _poisson_ratio_param) / (1 - 2 * _poisson_ratio_param); // First Lame modulus
+  Real shear_modulus = 0.5 * _youngs_modulus_param / (1 + _poisson_ratio_param);                    // Second Lame modulus (shear)
 
   Real vol_elastic_strain = _elastic_strain[ _qp ].trace();
   Real dev_elastic_strain = std::pow(2.0 / 3.0, 0.5) * _elastic_strain[ _qp ].L2norm();

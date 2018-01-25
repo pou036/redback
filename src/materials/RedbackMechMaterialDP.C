@@ -104,7 +104,7 @@ Real
 RedbackMechMaterialDP::getDerivativeFlowIncrement(const RankTwoTensor & sig,
                                                   Real pressure,
                                                   Real sig_eqv,
-                                                  Real yield_stress,
+                                                  Real /*yield_stress*/,
                                                   Real q_yield_stress,
                                                   Real p_yield_stress)
 {

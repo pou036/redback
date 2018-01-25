@@ -46,7 +46,7 @@ class RedbackFlowLawsInSeries : public RedbackFlowLawBase
   virtual Real derivative(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress,
                           const RankTwoTensor & sig, unsigned int qp, Real dt) const;
 
-  virtual std::string activeModelName(unsigned int qp) const {return "Redback_flow_laws_in_series";};
+  virtual std::string activeModelName(unsigned int /*qp*/) const {return "Redback_flow_laws_in_series";};
 
  protected:
   std::vector<const RedbackFlowLawBase *> _flow_laws_uo;
