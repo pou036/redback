@@ -30,6 +30,7 @@ public:
 
 protected:
   Real _slope_yield_surface; // coefficient for yield surface
+  Real _mises_stress_tol; // numerical tolerance to determine if Mises stress is non zero
 
   virtual void
   getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) override;

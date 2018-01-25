@@ -11,6 +11,7 @@
 /****************************************************************/
 
 #include "RedbackGrainSizeAux.h"
+#include <limits>
 
 template <>
 InputParameters
@@ -123,24 +124,25 @@ RedbackGrainSizeAux::computeValue()
   {
     Real grain_reduction_rate = 0.;
 
-    if (_strain_rate_dis[_qp] > 0)
+    //if (_strain_rate_dis[_qp] > 0)
+    if ((_strain_rate_dis[_qp] > 0) && (_mises_strain_rate[_qp] > 0))
     {
-
       Real beta = _strain_rate_dis[_qp] / _mises_strain_rate[_qp];
       grain_reduction_rate = (((-beta) * (_mises_stress[ _qp ]
         * _mises_strain_rate[ _qp ])) * damage_potential) * std::pow(_u_old[ _qp ],2) * _pre_exp_factor_reduction; // unsure if I need _damage_dissipation or damage_potential
 
+      std::cout << "beta = " << (_strain_rate_dis[_qp] / _mises_strain_rate[_qp]) << std::endl;
     }
 
-    //std::cout << "beta = " << (-(_mises_stress[ _qp ] * _strain_rate_dis[_qp])) << std::endl;
-    //std::cout << "grain_reduction_rate  = " << grain_reduction_rate << std::endl;
-    //std::cout << "dd_r_dt  = " << (grain_reduction_rate*_dt) << std::endl;
+    std::cout << "_mises_strain_rate  = " << _mises_strain_rate[_qp] << std::endl;
+    std::cout << "grain_reduction_rate  = " << grain_reduction_rate << std::endl;
+    std::cout << "dd_r_dt  = " << (grain_reduction_rate*_dt) << std::endl;
 
     Real grain_growth_rate = _pre_exp_factor_growth * 1/_growth_exponent_param * std::pow(_u_old[ _qp ], 1 -_growth_exponent_param)
       * std::exp(_ar_growth_param*_delta_param*_T[_qp]/(1 + _delta_param*_T[_qp]));
 
     // Debugging
-    std::cout << "grain_growth_rate = " << grain_growth_rate << std::endl;
+    //std::cout << "grain_growth_rate = " << grain_growth_rate << std::endl;
 
     Real n_dis = _flow_law_dis_uo.getStressExponent();
     Real m_prime = (n_dis + 1)/ (_growth_exponent_param + 1);
@@ -149,10 +151,11 @@ RedbackGrainSizeAux::computeValue()
     Real steady_state_grain_size = _A_star_ss_param * (1/damage_potential)
       * std::pow(_mises_stress[ _qp ], -m_prime)* std::exp(ar_ss*_delta_param*_T[_qp]/(1 + _delta_param*_T[_qp]));
 
+    // Debugging
     //std::cout << "_u_old[0] = " << _u_old[ 0 ] << std::endl;
     //std::cout << "_u_old[ _qp ] = " << _u_old[ _qp ] << std::endl;
     //std::cout << "(_u_old[ _qp ] + (grain_reduction_rate*_dt)) = " << (_u_old[ _qp ] + (grain_reduction_rate*_dt)) << std::endl;
-    //std::cout << "steady_state_grain_size = " << steady_state_grain_size << std::endl;
+    std::cout << "steady_state_grain_size = " << steady_state_grain_size << std::endl;
 
     if (_u_old[ _qp ] < steady_state_grain_size)
       grain_size = fmin(_u_old[ _qp ] + (grain_growth_rate*_dt), steady_state_grain_size);
@@ -163,7 +166,7 @@ RedbackGrainSizeAux::computeValue()
 
   }
 
-  //std::cout << "grain_size = " << grain_size << std::endl;
+  std::cout << "grain_size = " << grain_size << std::endl;
 
   return grain_size;
 

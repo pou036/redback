@@ -19,12 +19,15 @@ validParams<RedbackMechMaterialDP>()
   InputParameters params = validParams<RedbackMechMaterial>();
   // TODO: deal with sign of _slope_yield_surface properly in DP case
   params.addParam<Real>("slope_yield_surface", 0, "Slope of yield surface (usually negative)");
+  params.addParam<Real>("mises_stress_tolerance", 1e-8, "Numerical tolerance to determine if Mises stress is non null");
 
   return params;
 }
 
 RedbackMechMaterialDP::RedbackMechMaterialDP(const InputParameters & parameters) :
-    RedbackMechMaterial(parameters), _slope_yield_surface(getParam<Real>("slope_yield_surface"))
+    RedbackMechMaterial(parameters),
+    _slope_yield_surface(getParam<Real>("slope_yield_surface")),
+    _mises_stress_tol(getParam<Real>("mises_stress_tolerance"))
 {
 }
 
@@ -65,7 +68,7 @@ RedbackMechMaterialDP::getFlowTensor(
 
   sig_dev = sig.deviatoric();
   val = 0.0;
-  if (q > 1e-8)
+  if (q > _mises_stress_tol)
     val = 3.0 / (2.0 * q);
   flow_tensor = sig_dev * val;
   flow_tensor.addIa(-_slope_yield_surface * (p > 0 ? 1 : -1) / 3.0); //(p > 0 ? 1:-1) is the sign function
@@ -179,7 +182,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
   f1 = 0.0;
   f2 = 0.0;
   f3 = 0.0;
-  if (sig_eqv > 1e-8)
+  if (sig_eqv > _mises_stress_tol)
   {
     f1 = 3.0 / (2.0 * sig_eqv);
     f2 = f1 / 3.0;

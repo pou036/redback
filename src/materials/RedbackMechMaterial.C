@@ -57,9 +57,9 @@ validParams<RedbackMechMaterial>()
                                       "Input data as pairs of equivalent "
                                       "plastic strain and yield stress: Should "
                                       "start with equivalent plastic strain 0");
-  params.addParam<Real>("rtol", 1e-8, "Plastic strain NR tolerance");
-  params.addParam<Real>("ftol", 1e-4, "Consistency condition NR tolerance");
-  params.addParam<Real>("eptol", 1e-7, "Equivalent plastic strain NR tolerance");
+  params.addParam<Real>("tol1", 1e-10, "Plastic strain Newton-Raphson tolerance");
+  params.addParam<Real>("tol2", 1e-6, "Hardness Newton-Raphson tolerance");
+
   params.addClassDescription("Associative overstress plasticity");
 
   //  Copy-paste from FiniteStrainPlasticRateMaterial.C
@@ -210,7 +210,9 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _peclet_number(getMaterialProperty<Real>("Peclet_number")),
     _returnmap_iter(declareProperty<Real>("returnmap_iter")),
     _T0_param(getParam<Real>("temperature_reference")),
-    _P0_param(getParam<Real>("pressure_reference"))
+    _P0_param(getParam<Real>("pressure_reference")),
+    _tol1(getParam<Real>("tol1")),
+    _tol2(getParam<Real>("tol2"))
 {
   Real E = _youngs_modulus_param;
   Real nu = _poisson_ratio_param;
@@ -695,9 +697,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
                                Real & p_y,
                                Real & q_y)
 {
-  const Real tol1 = 1e-10; // TODO: expose to user interface and/or make the tolerance relative
-  const Real tol3 = 1e-6;  // TODO: expose to user interface and/or make the tolerance relative
-  Real err3 = 1.1 * tol3;
+  Real err3 = 1.1 * _tol2;
 
   Real eqvpstrain = std::pow(2.0 / 3.0, 0.5) * dp.L2norm();
   Real yield_stress = getYieldStress(eqvpstrain);
@@ -731,7 +731,12 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   RankTwoTensor sig_new;
   RankTwoTensor dpn;
   Real p, q;
-  while (err3 > tol3 && iterisohard < maxiterisohard) // Hardness update iteration
+  /*bool debug = false;
+  Real x = _q_point[_qp](0);
+  Real y = _q_point[_qp](1);
+  if (_t > 10.14 && x < 0.5 && y < 0.5)
+    debug = true;*/
+  while (err3 > _tol2 && iterisohard < maxiterisohard) // Hardness update iteration
   {
     iterisohard++;
     unsigned int iter = 0;
@@ -755,9 +760,9 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
     RankTwoTensor resid = flow_tensor - delta_dp;
     Real err1 = resid.L2norm();
-    // TODO: do not compute flow tensor if in elasticity
-
-    while (err1 > tol1 && iter < maxiter) // Stress update iteration (hardness fixed)
+    //if (debug)
+    //  std::cout << "x=" << x << ", y=" << y << ", t=" << _t << ", err1="<< err1 << std::endl;
+    while (err1 > _tol1 && iter < maxiter) // Stress update iteration (hardness fixed)
     {
       iter++;
 
