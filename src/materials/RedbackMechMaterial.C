@@ -514,9 +514,9 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   
   if (true)
   {_mechanical_porosity[ _qp ] = 
-					(1.0 - _total_porosity[ _qp ]) * (_solid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
-																_solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param) +
-																_total_strain[ _qp ].trace());
+	(1.0 - _total_porosity[ _qp ]) * (_solid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
+									  _solid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param) +
+									  _total_strain[ _qp ].trace());
   }
   
   

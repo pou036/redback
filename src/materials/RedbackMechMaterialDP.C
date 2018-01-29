@@ -68,7 +68,7 @@ RedbackMechMaterialDP::getFlowTensor(
   if (q > 1e-8)
     val = 3.0 / (2.0 * q);
   flow_tensor = sig_dev * val;
-  flow_tensor.addIa(-_slope_yield_surface * (p > 0 ? 1 : -1) / 3.0); //(p > 0 ? 1:-1) is the sign function
+  flow_tensor.addIa(-_slope_yield_surface / 3.0);
   flow_tensor /= std::pow(2.0 / 3.0, 0.5) * flow_tensor.L2norm();
   // flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm(); // TODO:
   // debugging, returning a tensor of norm sqrt(3/2) to match the J2 case
@@ -158,17 +158,6 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
    * with respect to the stress tensor. See also REDBACK's documentation
    * */
 
-  // This loop calculates the first term
-  for (i = 0; i < 3; ++i)
-    for (j = 0; j < 3; ++j)
-      for (k = 0; k < 3; ++k)
-        for (l = 0; l < 3; ++l)
-          dfi_dsig(i, j, k, l) = flow_dirn(i, j) * flow_dirn(k, l) * dfi_dseqv;
-
-  // Real flow_tensor_norm = flow_dirn.L2norm();
-
-  // This loop calculates the second term. Read REDBACK's documentation
-  // (same as J2 plasticity case)
   f1 = 0.0;
   f2 = 0.0;
   f3 = 0.0;
@@ -178,6 +167,18 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
     f2 = f1 / 3.0;
     f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0));
   }
+
+  // This loop calculates the first term
+  for (i = 0; i < 3; ++i)
+    for (j = 0; j < 3; ++j)
+      for (k = 0; k < 3; ++k)
+        for (l = 0; l < 3; ++l)
+          dfi_dsig(i, j, k, l) = f1 * flow_dirn(i, j) * sig_dev(k, l) * dfi_dseqv;
+
+  // Real flow_tensor_norm = flow_dirn.L2norm();
+
+  // This loop calculates the second term. Read REDBACK's documentation
+  // (same as J2 plasticity case)
   for (i = 0; i < 3; ++i)
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
