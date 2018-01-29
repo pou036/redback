@@ -226,6 +226,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters) :
     _fluid_thermal_expansion(declareProperty<Real>("fluid_thermal_expansion")),
 
     _mixture_density(declareProperty<Real>("mixture_density")),
+    _sand_production_rate(declareProperty<Real>("sand_production_rate")),
 
     _continuation_method((ContinuationMethod)(int)getParam<MooseEnum>("continuation_variable")),
     _density_method((DensityMethod)(int)getParam<MooseEnum>("density_method")),
@@ -553,6 +554,15 @@ RedbackMaterial::computeRedbackTerms()
   _mixture_compressibility[ _qp ] = beta_star_m;
   if (_mixture_compressibility[ _qp ] == 0)
     mooseError("The mixture compressiblity cannot be zero!");
+
+  //Calculating the elements for the sand production model of Papamichos et al 2001.
+  //Actual calculation in RedbackSandProductionAux.C AuxKernel
+  Real fluid_density = _fluid_density_param * (1 + _fluid_compressibility[ _qp ] * (_pore_pres[ _qp ] - _P0_param) -
+    _fluid_thermal_expansion[ _qp ] * (_T[ _qp ] - _T0_param));
+  RealVectorValue flux = beta_star_m * (_grad_pore_pressure[ _qp ] - fluid_density * _gravity_param) /
+    (_peclet_number[ _qp ] * _lewis_number[ _qp ]);
+  Real norm_flux = flux.norm_sq();
+  _sand_production_rate[_qp] = (1-_total_porosity[ _qp ]) * norm_flux;
 
   // convective terms
   if (_are_convective_terms_on)
