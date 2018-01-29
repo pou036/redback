@@ -12,6 +12,12 @@
 #include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 
+class ComputePlasticStrainRate;
+
+template <>
+InputParameters
+validParams<ComputePlasticStrainRate>();
+
 /**
  * ComputePlasticStrainRate computes stress * (plastic_strain - plastic_strain_old)
  * and, if currentlyComputingJacobian, then the derivative of this quantity wrt total strain
