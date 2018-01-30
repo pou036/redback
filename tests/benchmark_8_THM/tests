@@ -18,6 +18,6 @@
     input = 'bench_THM_CC.i'
     exodiff = 'bench_THM_CC_out.e'
     #rel_err = 1e-4
-    #abs_zero = 1e-9
+    abs_zero = 1e-9
   [../]
 []
