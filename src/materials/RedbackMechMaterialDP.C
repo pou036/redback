@@ -58,7 +58,7 @@ RedbackMechMaterialDP::getPressureProjection(Real pressure, Real sig_eqv, Real c
 
 void
 RedbackMechMaterialDP::getFlowTensor(
-  const RankTwoTensor & sig, Real q, Real p, Real /*yield_stress*/, RankTwoTensor & flow_tensor)
+  const RankTwoTensor & sig, Real q, Real /*p*/, Real /*yield_stress*/, RankTwoTensor & flow_tensor)
 {
   RankTwoTensor sig_dev;
   Real val;

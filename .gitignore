@@ -2,7 +2,9 @@
 .externalToolBuilders/
 .libs
 lib
+build
 peacock_*
+*.bak
 *.la
 *.kate-swp
 *.lo

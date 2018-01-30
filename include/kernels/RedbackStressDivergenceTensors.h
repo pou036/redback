@@ -7,7 +7,7 @@
 
 // Forward Declarations
 class RedbackStressDivergenceTensors;
-class ElasticityTensorR4;
+class RankFourTensor;
 class RankTwoTensor;
 
 template <>
