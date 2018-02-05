@@ -96,31 +96,22 @@ RedbackMechMaterialDP::getFlowIncrement(
   // TODO: change the formula to use dist_pq^m
 }
 
-Real
-RedbackMechMaterialDP::getDerivativeFlowIncrement(const RankTwoTensor & /*sig*/,
+void
+RedbackMechMaterialDP::getDerivativeFlowIncrement(Real & dfi_dp,
+                                                  Real & dfi_dq,
+                                                  const RankTwoTensor & /*sig*/,
                                                   Real pressure,
                                                   Real sig_eqv,
                                                   Real yield_stress,
                                                   Real q_yield_stress,
                                                   Real p_yield_stress)
 {
-  Real delta_lambda_p = _ref_pe_rate * _dt *
-                        std::pow(macaulayBracket((pressure - p_yield_stress) / yield_stress), _exponent) *
-                        _exponential;
-  Real delta_lambda_q =
-    _ref_pe_rate * _dt *
-    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * ((sig_eqv - q_yield_stress) / yield_stress)), _exponent) *
-    _exponential;
-  Real delta_lambda = (std::pow(delta_lambda_p * delta_lambda_p + delta_lambda_q * delta_lambda_q, 0.5));
-  Real der_flow_incr_dev =
-    _ref_pe_rate * _dt * _exponent *
-    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * ((sig_eqv - q_yield_stress) / yield_stress)),
-             _exponent - 1.0) *
-    _exponential / yield_stress;
-  Real der_flow_incr_vol = _ref_pe_rate * _dt * _exponent *
-                           std::pow(macaulayBracket((pressure - p_yield_stress) / yield_stress), _exponent - 1.0) *
-                           _exponential / yield_stress;
-  return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
+  Real p_term = macaulayBracket(((pressure - p_yield_stress) / yield_stress) * (_slope_yield_surface < 0 ? 1 : -1));
+  Real q_term = macaulayBracket((sig_eqv - q_yield_stress) / yield_stress);
+  Real factor =  _ref_pe_rate * _dt * _exponent * _exponential
+    / std::sqrt(std::pow(p_term, 2*_exponent) +  std::pow(q_term, 2*_exponent));
+  dfi_dp = factor * std::pow(p_term, 2*_exponent-1) / yield_stress;
+  dfi_dq = factor * std::pow(q_term, 2*_exponent-1) / yield_stress;
 }
 
 void
@@ -137,13 +128,13 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
   unsigned i, j, k, l;
   RankTwoTensor sig_dev, fij, flow_dirn;
   RankTwoTensor dfi_dft;
-  RankFourTensor dft_dsig1, /*dft_dsig2,*/ dfd_dft, dfd_dsig, dfi_dsig;
+  RankFourTensor dfd_dft, dfd_dsig, dfi_dsig;
   Real f1, f2, f3;
-  Real dfi_dseqv;
+  Real dfi_dp, dfi_dseqv;
 
   sig_dev = sig.deviatoric();
 
-  dfi_dseqv = getDerivativeFlowIncrement(sig, pressure, sig_eqv, yield_stress, q_yield_stress, p_yield_stress);
+  getDerivativeFlowIncrement(dfi_dp, dfi_dseqv, sig, pressure, sig_eqv, yield_stress, q_yield_stress, p_yield_stress);
   getFlowTensor(sig, sig_eqv, pressure, yield_stress, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the
@@ -173,9 +164,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dfi_dsig(i, j, k, l) = f1 * flow_dirn(i, j) * sig_dev(k, l) * dfi_dseqv;
-
-  // Real flow_tensor_norm = flow_dirn.L2norm();
+          dfi_dsig(i, j, k, l) = flow_dirn(i, j) * (f1 * sig_dev(k, l) * dfi_dseqv + dfi_dp * deltaFunc(k, l) / 3.0);
 
   // This loop calculates the second term. Read REDBACK's documentation
   // (same as J2 plasticity case)
@@ -183,18 +172,9 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dft_dsig1(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) - f2 * deltaFunc(i, j) * deltaFunc(k, l) -
-                                  f3 * sig_dev(i, j) * sig_dev(k, l); // d_flow_dirn/d_sig - 2nd part (J2 plasticity)
-  // dft_dsig2(i,j,k,l) = flow_tensor(i,j)*flow_tensor(k,l);
+          dfd_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) - f2 * deltaFunc(i, j) * deltaFunc(k, l) -
+                                 f3 * sig_dev(i, j) * sig_dev(k, l);
 
-  // dfd_dsig = dft_dsig1/flow_tensor_norm - 3.0 * dft_dsig2 /
-  // (2*sig_eqv*flow_tensor_norm*flow_tensor_norm*flow_tensor_norm);
-  // //d_flow_dirn/d_sig
-  // TODO: check if the previous two lines (i.e normalizing the flow vector)
-  // should be activated or not. Currently we are using the non-unitary flow
-  // vector
-
-  dfd_dsig = dft_dsig1;                                             // d_flow_dirn/d_sig
   dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr + dfi_dsig; // Jacobian
 }
 
