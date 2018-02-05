@@ -38,6 +38,7 @@
 #include "FunctionWithRandomIC.h"
 
 // Kernels
+#include "Poromechanics.h"
 #include "RedbackChemEndo.h"
 #include "RedbackChemExo.h"
 #include "RedbackChemPressure.h"
@@ -141,6 +142,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerInitialCondition(FunctionWithRandomIC);
   registerInitialCondition(FunctionTimesRandomIC);
 
+  registerKernel(Poromechanics);
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
