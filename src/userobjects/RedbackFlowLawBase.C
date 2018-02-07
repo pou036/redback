@@ -30,8 +30,7 @@ RedbackFlowLawBase::computeExponentialTemperature(unsigned int qp, Real arrheniu
   {
     // E_0/(RT) = Ar/(1+delta T*)
     exponential =
-      std::exp(-arrhenius) * std::exp(arrhenius * _delta_param * _T[ qp ] / (1 + _delta_param * _T[ qp ]));
+      /*std::exp(-arrhenius) * */ std::exp(arrhenius * _delta_param * _T[ qp ] / (1 + _delta_param * _T[ qp ]));
   }
   return exponential;
 }
-
