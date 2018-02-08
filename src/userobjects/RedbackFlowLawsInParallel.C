@@ -38,19 +38,32 @@ RedbackFlowLawsInParallel::value(Real sig_eqv, Real pressure, Real q_yield_stres
   return val;
 }
 
-
 Real
-RedbackFlowLawsInParallel::derivative(Real sig_eqv, Real pressure, Real q_yield_stress,
-                                      Real p_yield_stress, const RankTwoTensor & sig,
-                                      unsigned int qp, Real dt) const
+RedbackFlowLawsInParallel::derivative_p(Real sig_eqv, Real pressure, Real q_yield_stress,
+                                        Real p_yield_stress, const RankTwoTensor & sig,
+                                        unsigned int qp, Real dt) const
 {
-  // TODO: how to get the yield for value()?
   Real val = value(sig_eqv, pressure, q_yield_stress, p_yield_stress, 0., qp, dt);
   Real der = 0.;
   for (unsigned int i = 0; i < _num_flow_law_uos; ++i)
   {
-    der = der + _flow_laws_uo[i]->derivative(sig_eqv, pressure, q_yield_stress, p_yield_stress, sig, qp, dt)
-        * std::pow(val,2) / std::pow(_flow_laws_uo[i]->derivative(sig_eqv, pressure, q_yield_stress, p_yield_stress, sig, qp, dt), 2);
+    der = der + _flow_laws_uo[i]->derivative_p(sig_eqv, pressure, q_yield_stress, p_yield_stress, sig, qp, dt)
+         / std::pow(_flow_laws_uo[i]->value(sig_eqv, pressure, q_yield_stress, p_yield_stress, 0., qp, dt), 2);
   }
-  return der;
+  return der*std::pow(val,2);
+}
+
+Real
+RedbackFlowLawsInParallel::derivative_q(Real sig_eqv, Real pressure, Real q_yield_stress,
+                                        Real p_yield_stress, const RankTwoTensor & sig,
+                                        unsigned int qp, Real dt) const
+{
+  Real val = value(sig_eqv, pressure, q_yield_stress, p_yield_stress, 0., qp, dt);
+  Real der = 0.;
+  for (unsigned int i = 0; i < _num_flow_law_uos; ++i)
+  {
+    der = der + _flow_laws_uo[i]->derivative_q(sig_eqv, pressure, q_yield_stress, p_yield_stress, sig, qp, dt)
+         / std::pow(_flow_laws_uo[i]->value(sig_eqv, pressure, q_yield_stress, p_yield_stress, 0., qp, dt), 2);
+  }
+  return der*std::pow(val,2);
 }

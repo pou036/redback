@@ -38,16 +38,28 @@ RedbackFlowLawsInSeries::value(Real sig_eqv, Real pressure, Real q_yield_stress,
   return val;
 }
 
-
 Real
-RedbackFlowLawsInSeries::derivative(Real sig_eqv, Real pressure, Real q_yield_stress,
-                                      Real p_yield_stress, const RankTwoTensor & sig,
-                                      unsigned int qp, Real dt) const
+RedbackFlowLawsInSeries::derivative_p(Real sig_eqv, Real pressure, Real q_yield_stress,
+                                        Real p_yield_stress, const RankTwoTensor & sig,
+                                        unsigned int qp, Real dt) const
 {
   Real der = 0.;
   for (unsigned int i = 0; i < _num_flow_law_uos; ++i)
   {
-    der = der + _flow_laws_uo[i]->derivative(sig_eqv, pressure, q_yield_stress, p_yield_stress, sig, qp, dt);
+    der = der + _flow_laws_uo[i]->derivative_p(sig_eqv, pressure, q_yield_stress, p_yield_stress, sig, qp, dt);
+  }
+  return der;
+}
+
+Real
+RedbackFlowLawsInSeries::derivative_q(Real sig_eqv, Real pressure, Real q_yield_stress,
+                                        Real p_yield_stress, const RankTwoTensor & sig,
+                                        unsigned int qp, Real dt) const
+{
+  Real der = 0.;
+  for (unsigned int i = 0; i < _num_flow_law_uos; ++i)
+  {
+    der = der + _flow_laws_uo[i]->derivative_q(sig_eqv, pressure, q_yield_stress, p_yield_stress, sig, qp, dt);
   }
   return der;
 }

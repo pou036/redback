@@ -4,6 +4,7 @@
     input = 'bench_TM_J2.i'
     exodiff = 'bench_TM_J2_out.e'
     rel_err = 1e-4
+    skip = "Not valgrind clean"
   [../]
     [./test_6_TM_DP] # can't put a dot in that name!
     type = 'Exodiff'

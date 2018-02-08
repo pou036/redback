@@ -43,8 +43,10 @@ class RedbackFlowLawDiffusion : public RedbackFlowLawBase
    * @param dt, time step
    * @return the derivative of strain rate with respect to stress
    */
-  virtual Real derivative(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress,
-                          const RankTwoTensor & sig, unsigned int qp, Real dt) const;
+  virtual Real derivative_p(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress,
+                             const RankTwoTensor & sig, unsigned int qp, Real dt) const;
+  virtual Real derivative_q(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress,
+                             const RankTwoTensor & sig, unsigned int qp, Real dt) const;
 
   virtual std::string activeModelName(unsigned int /*qp*/) const {return "Redback_flow_law_diffusion";};
 

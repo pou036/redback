@@ -32,7 +32,7 @@ RedbackFlowLawDiffusion::RedbackFlowLawDiffusion(const InputParameters& paramete
 
 Real
 RedbackFlowLawDiffusion::value(Real sig_eqv, Real pressure, Real q_yield_stress,
-                                 Real p_yield_stress, Real yield_stress, unsigned int qp, Real dt) const
+                                 Real p_yield_stress, Real /*yield_stress*/, unsigned int qp, Real dt) const
 {
    Real exponential = RedbackFlowLawBase::computeExponentialTemperature(qp, _arrhenius);
    // TODO: exponential to include all terms: temperature, grain size, damage, pore collapse...
@@ -51,33 +51,29 @@ RedbackFlowLawDiffusion::value(Real sig_eqv, Real pressure, Real q_yield_stress,
 }
 
 Real
-RedbackFlowLawDiffusion::derivative(Real sig_eqv, Real pressure, Real q_yield_stress,
-                                      Real p_yield_stress, const RankTwoTensor & sig,
-                                      unsigned int qp, Real dt) const
+RedbackFlowLawDiffusion::derivative_p(Real sig_eqv, Real pressure, Real q_yield_stress,
+                                        Real p_yield_stress, const RankTwoTensor & /*sig*/,
+                                        unsigned int qp, Real /*dt*/) const
 {
   Real exponential = RedbackFlowLawBase::computeExponentialTemperature(qp, _arrhenius);
-
-  // TODO: exponential to include all terms: temperature, grain size, damage, pore collapse...
-
-  Real delta_lambda_p =
-    _pre_exponential_factor * _dt * std::pow(Utils::macaulayBracket(pressure - p_yield_stress),
-        _exponent) * std::pow(_grain_size[qp], _grain_size_exponent) * exponential;
-  Real delta_lambda_q =
-    _pre_exponential_factor * _dt *
-    std::pow(Utils::macaulayBracket((q_yield_stress > 0 ? 1 : -1) * (sig_eqv / q_yield_stress - 1.0)),
-        _exponent) * std::pow(_grain_size[qp], _grain_size_exponent) * exponential;
-  Real delta_lambda = (std::pow(delta_lambda_p * delta_lambda_p + delta_lambda_q * delta_lambda_q, 0.5));
-  //Real delta_lambda = value(sig_eqv, pressure, q_yield_stress, p_yield_stress, 0, qp, dt);
-  // James Question: what is lambda? I don't understand where it is used or how it relates to the flow law
-  Real der_flow_incr_dev =
-    _pre_exponential_factor * dt * _exponent *
-    std::pow(Utils::macaulayBracket((q_yield_stress > 0 ? 1 : -1) * (sig_eqv / q_yield_stress - 1.0)),
-        _exponent - 1.0) * std::pow(_grain_size[qp], _grain_size_exponent) * exponential / q_yield_stress;
+  Real p_term = Utils::macaulayBracket(pressure - p_yield_stress);
+  Real q_term = Utils::macaulayBracket(sig_eqv - q_yield_stress);
   Real der_flow_incr_vol = _pre_exponential_factor * _dt * _exponent *
-    std::pow(Utils::macaulayBracket(pressure - p_yield_stress), _exponent - 1.0)
-    * std::pow(_grain_size[qp], _grain_size_exponent) * exponential;
-  return (delta_lambda_q * der_flow_incr_dev + delta_lambda_p * der_flow_incr_vol) / delta_lambda;
+    std::pow(p_term,2*_exponent-1) * std::pow(_grain_size[qp], _grain_size_exponent) *
+    exponential / std::sqrt(std::pow(p_term,2*_exponent) + std::pow(q_term,2*_exponent));
+  return der_flow_incr_vol;
+}
 
-  // Debugging
-  //std::cout << "der_flow_incr_dev = " << der_flow_incr_dev << std::endl;
+Real
+RedbackFlowLawDiffusion::derivative_q(Real sig_eqv, Real pressure, Real q_yield_stress,
+                                        Real p_yield_stress, const RankTwoTensor & /*sig*/,
+                                        unsigned int qp, Real /*dt*/) const
+{
+  Real exponential = RedbackFlowLawBase::computeExponentialTemperature(qp, _arrhenius);
+  Real p_term = Utils::macaulayBracket(pressure - p_yield_stress);
+  Real q_term = Utils::macaulayBracket(sig_eqv - q_yield_stress);
+  Real der_flow_incr_dev = _pre_exponential_factor * _dt * _exponent *
+    std::pow(q_term,2*_exponent-1) * std::pow(_grain_size[qp], _grain_size_exponent) *
+    exponential / std::sqrt(std::pow(p_term,2*_exponent) + std::pow(q_term,2*_exponent));
+  return der_flow_incr_dev;
 }

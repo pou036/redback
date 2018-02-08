@@ -20,8 +20,12 @@ class RedbackFlowLawBase : public DiscreteElementUserObject
   virtual Real value(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress,
                      Real yield_stress, unsigned int qp, Real dt) const = 0;
   //Real operator[](unsigned int qp) const{ return value(qp);}
-  virtual Real derivative(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress,
-                          const RankTwoTensor & sig, unsigned int qp, Real dt) const = 0;
+  virtual Real derivative_p(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress,
+                            const RankTwoTensor & sig, unsigned int qp, Real dt) const = 0;
+  virtual Real derivative_q(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress,
+                            const RankTwoTensor & sig, unsigned int qp, Real dt) const = 0;
+
+
   virtual std::string activeModelName(unsigned int qp) const = 0;
 
  protected:
