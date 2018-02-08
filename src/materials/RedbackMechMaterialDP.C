@@ -69,8 +69,7 @@ RedbackMechMaterialDP::getFlowTensor(
     val = 3.0 / (2.0 * q);
   flow_tensor = sig_dev * val;
   flow_tensor.addIa(-_slope_yield_surface / 3.0);
-  flow_tensor /= std::pow(2.0 / 3.0, 0.5) * flow_tensor.L2norm();
-  // flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm(); // TODO:
+  flow_tensor /= std::pow(2.0 / 3.0, 0.5) * flow_tensor.L2norm(); //TODO: Fix Jacobian: currently not accounted in Jacobian
   // debugging, returning a tensor of norm sqrt(3/2) to match the J2 case
 }
 
@@ -104,7 +103,7 @@ RedbackMechMaterialDP::getDerivativeFlowIncrement(Real & dfi_dp,
                                                   const RankTwoTensor & sig,
                                                   Real pressure,
                                                   Real sig_eqv,
-                                                  Real yield_stress,
+                                                  Real /*yield_stress*/,
                                                   Real q_yield_stress,
                                                   Real p_yield_stress)
 {
