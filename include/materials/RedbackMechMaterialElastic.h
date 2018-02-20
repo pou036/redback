@@ -18,10 +18,10 @@
 #include "RedbackMechMaterial.h"
 
 // Forward Declarations
-class RedbackMechMaterial;
+class RedbackMechMaterialElastic;
 
 template <>
-InputParameters validParams<RedbackMechMaterial>();
+InputParameters validParams<RedbackMechMaterialElastic>();
 
 class RedbackMechMaterialElastic : public RedbackMechMaterial
 {

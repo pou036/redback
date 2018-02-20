@@ -449,9 +449,9 @@ RedbackMechMaterial::getYieldStress(const Real eqpe)
     if (ind + 2 < nsize)
     {
       if (eqpe > _yield_stress_vector[ ind ] && eqpe < _yield_stress_vector[ ind + 2 ])
-        return _yield_stress_vector[ ind + 1 ] +
-               (eqpe - _yield_stress_vector[ ind ]) / (_yield_stress_vector[ ind + 2 ] - _yield_stress_vector[ ind ]) *
-                 (_yield_stress_vector[ ind + 3 ] - _yield_stress_vector[ ind + 1 ]);
+        return _yield_stress_vector[ ind + 1 ] + (eqpe - _yield_stress_vector[ ind ]) /
+                                                   (_yield_stress_vector[ ind + 2 ] - _yield_stress_vector[ ind ]) *
+                                                   (_yield_stress_vector[ ind + 3 ] - _yield_stress_vector[ ind + 1 ]);
     }
     else
       return _yield_stress_vector[ nsize - 1 ];
