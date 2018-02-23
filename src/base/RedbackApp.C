@@ -37,6 +37,9 @@
 #include "FunctionTimesRandomIC.h"
 #include "FunctionWithRandomIC.h"
 
+// Interface kernels
+#include "InterfaceDarcy.h"
+
 // Kernels
 #include "RedbackChemEndo.h"
 #include "RedbackChemExo.h"
@@ -137,6 +140,8 @@ RedbackApp::registerObjects(Factory & factory)
   registerInitialCondition(FunctionLogNormalDistributionIC);
   registerInitialCondition(FunctionWithRandomIC);
   registerInitialCondition(FunctionTimesRandomIC);
+
+  registerInterfaceKernel(InterfaceDarcy);
 
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
