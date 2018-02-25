@@ -23,8 +23,8 @@ validParams<RedbackMassDiffusion>()
   return params;
 }
 
-RedbackMassDiffusion::RedbackMassDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
+RedbackMassDiffusion::RedbackMassDiffusion(const InputParameters & parameters)
+  : Kernel(parameters),
     _Le(getMaterialProperty<Real>("lewis_number")),
     _gravity_term(getMaterialProperty<RealVectorValue>("fluid_gravity_term")),
     _time_factor(getParam<Real>("time_factor"))

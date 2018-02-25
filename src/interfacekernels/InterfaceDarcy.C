@@ -17,16 +17,16 @@ InputParameters
 validParams<InterfaceDarcy>()
 {
   InputParameters params = validParams<InterfaceKernel>();
-  params.addParam<Real>("fault_permeability", 1., "The diffusion coefficient.");
+  params.addParam<Real>("fault_lewis_number", 1., "The diffusion coefficient.");
   params.addParam<Real>("fault_thickness", 1., "The neighboring diffusion coefficient.");
   return params;
 }
 
 InterfaceDarcy::InterfaceDarcy(const InputParameters & parameters)
   : InterfaceKernel(parameters),
-    _u_dot(_var.uDot()),
-    _neighbor_dot(_neighbor_var.uDot()),
-    _permeability(getParam<Real>("fault_permeability")),
+    _Le(getMaterialProperty<Real>("lewis_number")),
+    _Le_fault(getParam<Real>("fault_lewis_number")),
+    _gravity_term(getMaterialProperty<RealVectorValue>("fluid_gravity_term")),
     _thickness(getParam<Real>("fault_thickness"))
 {
   if (!parameters.isParamValid("boundary"))
@@ -39,51 +39,21 @@ InterfaceDarcy::InterfaceDarcy(const InputParameters & parameters)
 Real
 InterfaceDarcy::computeQpResidual(Moose::DGResidualType type)
 {
-  Real r = _permeability * (_u[_qp] - _neighbor_value[_qp]) / _thickness;
-  // 0.5 * (-_D * _grad_u[_qp] * _normals[_qp] +
-  //                 -_D_neighbor * _grad_neighbor_value[_qp] * _normals[_qp]);
+  Real res = (_neighbor_value[ _qp ] - _u[ _qp ]) / (_Le_fault * _thickness) +
+             _gravity_term[ _qp ] * _normals[ _qp ] * (1 / _Le[ _qp ] - 1 / _Le_fault);
 
   switch (type)
   {
     case Moose::Element:
-      r += _u_dot[_qp];
-      r *= _test[_i][_qp];
-      break;
+      return (res - _grad_u[ _qp ] * _normals[ _qp ] / _Le[ _qp ]) * _test[ _i ][ _qp ];
 
     case Moose::Neighbor:
-      r -= _neighbor_dot[_qp];
-      r *= _test_neighbor[_i][_qp];
-      break;
+      return (res - _grad_neighbor_value[ _qp ] * _normals[ _qp ] / _Le[ _qp ]) * _test_neighbor[ _i ][ _qp ];
   }
-
-  return r;
 }
 
 Real
 InterfaceDarcy::computeQpJacobian(Moose::DGJacobianType type)
 {
-  Real jac = 0;
-
-  // switch (type)
-  // {
-  //
-  //   case Moose::ElementElement:
-  //     jac -= 0.5 * _D * _grad_phi[_j][_qp] * _normals[_qp] * _test[_i][_qp];
-  //     break;
-  //
-  //   case Moose::NeighborNeighbor:
-  //     jac +=
-  //         0.5 * _D_neighbor * _grad_phi_neighbor[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
-  //     break;
-  //
-  //   case Moose::NeighborElement:
-  //     jac += 0.5 * _D * _grad_phi[_j][_qp] * _normals[_qp] * _test_neighbor[_i][_qp];
-  //     break;
-  //
-  //   case Moose::ElementNeighbor:
-  //     jac -= 0.5 * _D_neighbor * _grad_phi_neighbor[_j][_qp] * _normals[_qp] * _test[_i][_qp];
-  //     break;
-  // }
-
-  return jac;
+  return 0;
 }

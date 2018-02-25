@@ -25,6 +25,7 @@
 #include "RedbackMechAction.h"
 
 // Boundary conditions
+#include "DarcyFluxBC.h"
 #include "FunctionDirichletTransverseBC.h"
 #include "PressureNeumannBC.h"
 
@@ -131,6 +132,7 @@ RedbackApp::registerObjects(Factory & factory)
 {
 #undef registerObject
 #define registerObject(name) factory.reg<name>(stringifyName(name))
+  registerBoundaryCondition(DarcyFluxBC);
   registerBoundaryCondition(FunctionDirichletTransverseBC);
   registerBoundaryCondition(PressureNeumannBC);
 
