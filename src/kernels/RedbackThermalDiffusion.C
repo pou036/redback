@@ -23,8 +23,8 @@ validParams<RedbackThermalDiffusion>()
   return params;
 }
 
-RedbackThermalDiffusion::RedbackThermalDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
+RedbackThermalDiffusion::RedbackThermalDiffusion(const InputParameters & parameters)
+  : Kernel(parameters),
     _diffusivity(getMaterialProperty<Real>("thermal_diffusivity")),
     _time_factor(getParam<Real>("time_factor"))
 {

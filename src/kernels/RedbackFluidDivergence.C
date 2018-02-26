@@ -29,8 +29,8 @@ validParams<RedbackFluidDivergence>()
   return params;
 }
 
-RedbackFluidDivergence::RedbackFluidDivergence(const InputParameters & parameters) :
-    Kernel(parameters),
+RedbackFluidDivergence::RedbackFluidDivergence(const InputParameters & parameters)
+  : Kernel(parameters),
     _div_fluid_kernel(getMaterialProperty<Real>("divergence_fluid_velocity_kernel")),
     //_time_factor(getParam<Real>("time_factor")),
 

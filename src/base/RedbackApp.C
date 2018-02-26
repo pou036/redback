@@ -25,6 +25,7 @@
 #include "RedbackMechAction.h"
 
 // Boundary conditions
+#include "DarcyFluxBC.h"
 #include "FunctionDirichletTransverseBC.h"
 #include "PressureNeumannBC.h"
 
@@ -36,6 +37,9 @@
 #include "FunctionNormalDistributionIC.h"
 #include "FunctionTimesRandomIC.h"
 #include "FunctionWithRandomIC.h"
+
+// Interface kernels
+#include "InterfaceDarcy.h"
 
 // Kernels
 #include "Poromechanics.h"
@@ -132,6 +136,7 @@ RedbackApp::registerObjects(Factory & factory)
 {
 #undef registerObject
 #define registerObject(name) factory.reg<name>(stringifyName(name))
+  registerBoundaryCondition(DarcyFluxBC);
   registerBoundaryCondition(FunctionDirichletTransverseBC);
   registerBoundaryCondition(PressureNeumannBC);
 
@@ -142,7 +147,12 @@ RedbackApp::registerObjects(Factory & factory)
   registerInitialCondition(FunctionWithRandomIC);
   registerInitialCondition(FunctionTimesRandomIC);
 
+<<<<<<< HEAD
   registerKernel(Poromechanics);
+=======
+  registerInterfaceKernel(InterfaceDarcy);
+
+>>>>>>> master
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
