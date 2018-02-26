@@ -33,8 +33,8 @@ validParams<RankTwoScalarPostprocessor>()
   return params;
 }
 
-RankTwoScalarPostprocessor::RankTwoScalarPostprocessor(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+RankTwoScalarPostprocessor::RankTwoScalarPostprocessor(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _index00(getPostprocessorValue("index00")),
     _index01(getPostprocessorValue("index01")),
     _index02(getPostprocessorValue("index02")),

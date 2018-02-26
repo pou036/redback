@@ -15,8 +15,7 @@
 class ComputePlasticStrainRate;
 
 template <>
-InputParameters
-validParams<ComputePlasticStrainRate>();
+InputParameters validParams<ComputePlasticStrainRate>();
 
 /**
  * ComputePlasticStrainRate computes stress * (plastic_strain - plastic_strain_old)

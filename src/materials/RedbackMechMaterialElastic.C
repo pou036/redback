@@ -20,8 +20,8 @@ validParams<RedbackMechMaterialElastic>()
   return params;
 }
 
-RedbackMechMaterialElastic::RedbackMechMaterialElastic(const InputParameters & parameters) :
-    RedbackMechMaterial(parameters)
+RedbackMechMaterialElastic::RedbackMechMaterialElastic(const InputParameters & parameters)
+  : RedbackMechMaterial(parameters)
 {
 }
 
@@ -45,8 +45,7 @@ RedbackMechMaterialElastic::getFlowTensor(
 {
 }
 
-Real
-RedbackMechMaterialElastic::getFlowIncrement(
+Real RedbackMechMaterialElastic::getFlowIncrement(
   Real /*sig_eqv*/, Real /*p*/, Real /*q_y*/, Real /*p_y*/, Real /*yield_stress*/)
 {
   return 0;
