@@ -147,12 +147,9 @@ RedbackApp::registerObjects(Factory & factory)
   registerInitialCondition(FunctionWithRandomIC);
   registerInitialCondition(FunctionTimesRandomIC);
 
-<<<<<<< HEAD
-  registerKernel(Poromechanics);
-=======
   registerInterfaceKernel(InterfaceDarcy);
-
->>>>>>> master
+  
+  registerKernel(Poromechanics);
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
