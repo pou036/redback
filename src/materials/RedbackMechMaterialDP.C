@@ -23,8 +23,8 @@ validParams<RedbackMechMaterialDP>()
   return params;
 }
 
-RedbackMechMaterialDP::RedbackMechMaterialDP(const InputParameters & parameters) :
-    RedbackMechMaterial(parameters), _slope_yield_surface(getParam<Real>("slope_yield_surface"))
+RedbackMechMaterialDP::RedbackMechMaterialDP(const InputParameters & parameters)
+  : RedbackMechMaterial(parameters), _slope_yield_surface(getParam<Real>("slope_yield_surface"))
 {
 }
 
@@ -108,10 +108,10 @@ RedbackMechMaterialDP::getDerivativeFlowIncrement(Real & dfi_dp,
 {
   Real p_term = macaulayBracket(((pressure - p_yield_stress) / yield_stress) * (_slope_yield_surface < 0 ? 1 : -1));
   Real q_term = macaulayBracket((sig_eqv - q_yield_stress) / yield_stress);
-  Real factor =  _ref_pe_rate * _dt * _exponent * _exponential
-    / std::sqrt(std::pow(p_term, 2*_exponent) +  std::pow(q_term, 2*_exponent));
-  dfi_dp = factor * std::pow(p_term, 2*_exponent-1) / yield_stress;
-  dfi_dq = factor * std::pow(q_term, 2*_exponent-1) / yield_stress;
+  Real factor = _ref_pe_rate * _dt * _exponent * _exponential /
+                std::sqrt(std::pow(p_term, 2 * _exponent) + std::pow(q_term, 2 * _exponent));
+  dfi_dp = factor * std::pow(p_term, 2 * _exponent - 1) / yield_stress;
+  dfi_dq = factor * std::pow(q_term, 2 * _exponent - 1) / yield_stress;
 }
 
 void
