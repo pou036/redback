@@ -49,6 +49,9 @@ InterfaceDarcy::computeQpResidual(Moose::DGResidualType type)
 
     case Moose::Neighbor:
       return (res - _grad_neighbor_value[ _qp ] * _normals[ _qp ] / _Le[ _qp ]) * _test_neighbor[ _i ][ _qp ];
+
+    default:
+      mooseError("InterfaceDarcy type not supported.");
   }
 }
 
