@@ -27,6 +27,7 @@
 // Boundary conditions
 #include "DarcyFluxBC.h"
 #include "FunctionDirichletTransverseBC.h"
+#include "MatchedValueJumpBC.h"
 #include "PressureNeumannBC.h"
 
 // Functions
@@ -40,6 +41,7 @@
 
 // Interface kernels
 #include "InterfaceDarcy.h"
+#include "InterfaceStress.h"
 
 // Kernels
 #include "RedbackChemEndo.h"
@@ -134,6 +136,7 @@ RedbackApp::registerObjects(Factory & factory)
 #define registerObject(name) factory.reg<name>(stringifyName(name))
   registerBoundaryCondition(DarcyFluxBC);
   registerBoundaryCondition(FunctionDirichletTransverseBC);
+  registerBoundaryCondition(MatchedValueJumpBC);
   registerBoundaryCondition(PressureNeumannBC);
 
   registerFunction(RedbackRandomFunction);
@@ -144,6 +147,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerInitialCondition(FunctionTimesRandomIC);
 
   registerInterfaceKernel(InterfaceDarcy);
+  registerInterfaceKernel(InterfaceStress);
 
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
