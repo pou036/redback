@@ -1,0 +1,12 @@
+[Tests]
+  [./test_interface_mech]
+    type = 'Exodiff'
+    input = 'compression_interface.i'
+    exodiff = 'compression_interface.e'
+  [../]
+  [./test_angled_interface_mech]
+    type = 'Exodiff'
+    input = 'compression_angled_interface.i'
+    exodiff = 'compression_angled_interface.e'
+  [../]
+[]
