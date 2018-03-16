@@ -27,8 +27,8 @@ validParams<PressureNeumannBC>()
   return params;
 }
 
-PressureNeumannBC::PressureNeumannBC(const InputParameters & parameters)
-  : IntegratedBC(parameters),
+PressureNeumannBC::PressureNeumannBC(const InputParameters & parameters) :
+    IntegratedBC(parameters),
     _var(coupledValue("coupled_var")),
     _var_num(coupled("coupled_var")),
     _component(getParam<unsigned int>("component")),

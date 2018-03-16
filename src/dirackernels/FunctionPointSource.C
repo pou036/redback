@@ -23,8 +23,8 @@ validParams<FunctionPointSource>()
   return params;
 }
 
-FunctionPointSource::FunctionPointSource(const InputParameters & parameters)
-  : DiracKernel(parameters), _func(getFunction("function")), _point_param(getParam<std::vector<Real> >("point"))
+FunctionPointSource::FunctionPointSource(const InputParameters & parameters) :
+    DiracKernel(parameters), _func(getFunction("function")), _point_param(getParam<std::vector<Real> >("point"))
 {
   _p(0) = _point_param[ 0 ];
 

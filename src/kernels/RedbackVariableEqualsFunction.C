@@ -24,8 +24,8 @@ validParams<RedbackVariableEqualsFunction>()
   return params;
 }
 
-RedbackVariableEqualsFunction::RedbackVariableEqualsFunction(const InputParameters & parameters)
-  : TimeKernel(parameters), _func(getFunction("function"))
+RedbackVariableEqualsFunction::RedbackVariableEqualsFunction(const InputParameters & parameters) :
+    TimeKernel(parameters), _func(getFunction("function"))
 {
 }
 

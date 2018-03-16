@@ -25,8 +25,8 @@ validParams<RedbackMechAction>()
   return params;
 }
 
-RedbackMechAction::RedbackMechAction(InputParameters params)
-  : Action(params),
+RedbackMechAction::RedbackMechAction(InputParameters params) :
+    Action(params),
     _disp_x(getParam<NonlinearVariableName>("disp_x")),
     _disp_y(getParam<NonlinearVariableName>("disp_y")),
     _disp_z(getParam<NonlinearVariableName>("disp_z")),

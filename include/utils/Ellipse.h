@@ -93,6 +93,18 @@ public:
   static Real distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1);
 
   /**
+   * Function to compute the yield point coordinates from a query point
+   * to an ellipse (defined by the two parameters M and p_c from the
+   * modified Cam-Clay model) by following the flow vector.
+   * @param m: slope of the critical state line
+   * @param p_c: pre-consolidation pressure
+   * @param y: coordinates of point to project
+   * @param x: coordinates of projection point on the ellipse
+   * @return d: distance to ellipse
+   */ static void
+  getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1);
+
+  /**
    * Function to compute the distance from a query point to an ellipse
    * defined by the two parameters M and p_c from the modified Cam-Clay model.
    * It also computes the ellipse point (x0,x1) that is closest to (y0,y1).

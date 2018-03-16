@@ -46,8 +46,8 @@ validParams<RedbackContinuationTangentAux>()
   return params;
 }
 
-RedbackContinuationTangentAux::RedbackContinuationTangentAux(const InputParameters & parameters)
-  : AuxNodalScalarKernel(parameters),
+RedbackContinuationTangentAux::RedbackContinuationTangentAux(const InputParameters & parameters) :
+    AuxNodalScalarKernel(parameters),
     _ds_old_param(getParam<Real>("ds_old")),
     _sum_var_1(coupledValue("sum_var_1")),
     _sum_var_2(coupledValue("sum_var_2")),

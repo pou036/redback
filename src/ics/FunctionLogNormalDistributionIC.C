@@ -30,8 +30,8 @@ validParams<FunctionLogNormalDistributionIC>()
   return params;
 }
 
-FunctionLogNormalDistributionIC::FunctionLogNormalDistributionIC(const InputParameters & parameters)
-  : InitialCondition(parameters),
+FunctionLogNormalDistributionIC::FunctionLogNormalDistributionIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _mean(getParam<Real>("mean")),
     _stddev(getParam<Real>("standard_deviation")),
     _min(getParam<Real>("minimum")),

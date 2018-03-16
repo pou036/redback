@@ -23,8 +23,8 @@ validParams<RedbackMechDissip>()
   return params;
 }
 
-RedbackMechDissip::RedbackMechDissip(const InputParameters & parameters)
-  : Kernel(parameters),
+RedbackMechDissip::RedbackMechDissip(const InputParameters & parameters) :
+    Kernel(parameters),
     _mechanical_dissipation(hasMaterialProperty<Real>("mechanical_dissipation_mech")
                               ? getMaterialProperty<Real>("mechanical_dissipation_mech")
                               : getMaterialProperty<Real>("mechanical_dissipation_no_mech")),

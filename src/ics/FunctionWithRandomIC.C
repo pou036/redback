@@ -30,8 +30,8 @@ validParams<FunctionWithRandomIC>()
   return params;
 }
 
-FunctionWithRandomIC::FunctionWithRandomIC(const InputParameters & parameters)
-  : InitialCondition(parameters),
+FunctionWithRandomIC::FunctionWithRandomIC(const InputParameters & parameters) :
+    InitialCondition(parameters),
     _min(getParam<Real>("min")),
     _max(getParam<Real>("max")),
     _range(_max - _min),

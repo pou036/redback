@@ -23,8 +23,8 @@ validParams<RedbackDiffVarsAux>()
   return params;
 }
 
-RedbackDiffVarsAux::RedbackDiffVarsAux(const InputParameters & parameters)
-  : AuxKernel(parameters), _variable_1(coupledValue("variable_1")), _variable_2(coupledValue("variable_2"))
+RedbackDiffVarsAux::RedbackDiffVarsAux(const InputParameters & parameters) :
+    AuxKernel(parameters), _variable_1(coupledValue("variable_1")), _variable_2(coupledValue("variable_2"))
 {
 }
 
