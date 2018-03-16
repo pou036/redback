@@ -160,7 +160,7 @@ Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, 
   Real shifted_y[ 2 ]; // ellipse axes
   e[ 0 ] = fabs(p_c) / 2.0;
   e[ 1 ] = m * e[ 0 ];
-  // Shift by pc_2 to centre the ellipse on (0,0)
+  // Shift by pc/2 to centre the ellipse on (0,0)
   shifted_y[ 0 ] = y0 - p_c / 2.0;
   shifted_y[ 1 ] = y1;
   Real d = sqrDistance(e, shifted_y, x);
@@ -168,6 +168,57 @@ Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, 
   x0 = x[ 0 ] + p_c / 2.0;
   x1 = x[ 1 ];
   return sqrt(d);
+}
+
+void
+Ellipse::getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1)
+{
+  if (y1 < 0)
+  {
+    // algorithm below only works for y1 > 0, so use symmetry
+    Real neg_x1;
+    getYieldPointCC(m, p_c, y0, -y1, x0, neg_x1);
+    x1 = -neg_x1;
+    return;
+  }
+  // Deal with easy cases first
+  if (y0 == p_c / 2.0)
+  {
+    // Real t = -std::pow(m, 2)*std::log(-m*p_c/(2.0*y1))/2.0;
+    x0 = p_c / 2.0;
+    x1 = -m * p_c / 2.0;
+    return;
+  }
+  else if (y1 == 0)
+  {
+    // Real t = -std::log(std::abs(p_c/(2*y0-p_c)))/2.0;
+    if (y0 > p_c / 2.0)
+      x0 = 0.0;
+    else
+      x0 = p_c;
+    x1 = 0.0;
+    return;
+  }
+  // For all other cases, we use Newton Raphson
+  Real tol = 1e-15;       // tolerance on ellipse potential to be close to 0
+  int nb_iter_max = 1000; // number of dichotomies to avoid infinite loops
+  Real m2 = m * m;
+  Real t = 0;
+  Real phi = std::pow(y1 / m, 2) + std::pow(y0 - p_c / 2.0, 2) - p_c * p_c / 4.0;
+  Real phi_prime = -4 * std::pow(y1 / m2, 2) - 4 * std::pow(y0 - p_c / 2.0, 2);
+  int nb_iter = 0;
+  while (std::abs(phi) > tol && nb_iter < nb_iter_max)
+  {
+    nb_iter += 1;
+    t -= phi / phi_prime;
+    phi =
+      std::pow(y1 / m, 2) * std::exp(-4 * t / m2) + std::pow(y0 - p_c / 2.0, 2) * std::exp(-4 * t) - p_c * p_c / 4.0;
+    phi_prime = -4 * std::pow(y1 / m2, 2) * std::exp(-4 * t / m2) - 4 * std::pow(y0 - p_c / 2.0, 2) * std::exp(-4 * t);
+  }
+  if (nb_iter == nb_iter_max)
+    mooseError("Newton Raphson failed to converge after ", nb_iter, " iterations.");
+  x0 = p_c / 2.0 + (y0 - p_c / 2.0) * std::exp(-2 * t);
+  x1 = y1 * std::exp(-2 * t / m2);
 }
 
 Real
@@ -220,6 +271,8 @@ Ellipse::distanceCCanisotropic(
 bool
 Ellipse::isPointOutsideOfEllipse(Real const m, Real const p_c, Real const y0, Real const y1)
 {
+  return (std::pow(y1 / m, 2) + y0 * (y0 - p_c) > 0);
+  /*
   // Check sum of squared distances to ellipse's foci
   Real f; // focal distance
   // Ellipse axes are p_c/2 and m*p_c/2, so major axis is p if m<1
@@ -238,7 +291,7 @@ Ellipse::isPointOutsideOfEllipse(Real const m, Real const p_c, Real const y0, Re
     return (std::sqrt(std::pow(y0 - 0.5 * p_c, 2) + (y1 + f) * (y1 + f)) +
               std::sqrt(std::pow(y0 - 0.5 * p_c, 2) + (y1 - f) * (y1 - f)) >
             m * std::fabs(p_c));
-  }
+  }*/
 }
 
 bool

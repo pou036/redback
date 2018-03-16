@@ -25,8 +25,8 @@ validParams<ImageProcessing>()
   return params;
 }
 
-ImageProcessing::ImageProcessing(const InputParameters & parameters)
-  : Material(parameters), _func(getParam<FunctionName>("function"))
+ImageProcessing::ImageProcessing(const InputParameters & parameters) :
+    Material(parameters), _func(getParam<FunctionName>("function"))
 {
   _function.resize(1);
   _function[ 0 ] = &getFunctionByName(_func);

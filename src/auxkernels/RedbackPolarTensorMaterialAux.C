@@ -25,8 +25,8 @@ validParams<RedbackPolarTensorMaterialAux>()
   return params;
 }
 
-RedbackPolarTensorMaterialAux::RedbackPolarTensorMaterialAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
+RedbackPolarTensorMaterialAux::RedbackPolarTensorMaterialAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
     _i(getParam<unsigned int>("index_i")),
     _j(getParam<unsigned int>("index_j"))

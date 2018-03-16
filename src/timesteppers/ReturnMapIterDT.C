@@ -29,8 +29,8 @@ validParams<ReturnMapIterDT>()
   return params;
 }
 
-ReturnMapIterDT::ReturnMapIterDT(const InputParameters & parameters)
-  : TimeStepper(parameters),
+ReturnMapIterDT::ReturnMapIterDT(const InputParameters & parameters) :
+    TimeStepper(parameters),
     PostprocessorInterface(this),
     _extreme_value(getPostprocessorValue("postprocessor")),
     _has_initial_dt(isParamValid("dt")),

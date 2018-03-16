@@ -24,8 +24,8 @@ validParams<RedbackFluidStressDivergenceTensors>()
   return params;
 }
 
-RedbackFluidStressDivergenceTensors::RedbackFluidStressDivergenceTensors(const InputParameters & parameters)
-  : Kernel(parameters),
+RedbackFluidStressDivergenceTensors::RedbackFluidStressDivergenceTensors(const InputParameters & parameters) :
+    Kernel(parameters),
     //_pore_pres(coupledValue("pore_pres")),
     _grad_pore_pressure(coupledGradient("pore_pres")),
     _fluid_stress(getMaterialProperty<RankTwoTensor>("fluid_stress")),

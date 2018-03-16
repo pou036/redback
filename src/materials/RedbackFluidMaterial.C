@@ -45,8 +45,8 @@ validParams<RedbackFluidMaterial>()
   return params;
 }
 
-RedbackFluidMaterial::RedbackFluidMaterial(const InputParameters & parameters)
-  : Material(parameters),
+RedbackFluidMaterial::RedbackFluidMaterial(const InputParameters & parameters) :
+    Material(parameters),
     _has_T(isCoupled("temperature")),
     _T(_has_T ? coupledValue("temperature") : _zero),
 

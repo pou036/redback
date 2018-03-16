@@ -23,8 +23,8 @@ validParams<RedbackTotalPorosityAux>()
   return params;
 }
 
-RedbackTotalPorosityAux::RedbackTotalPorosityAux(const InputParameters & parameters)
-  : AuxKernel(parameters),
+RedbackTotalPorosityAux::RedbackTotalPorosityAux(const InputParameters & parameters) :
+    AuxKernel(parameters),
     _is_mechanics_on(getParam<bool>("is_mechanics_on")),
     _delta_porosity_mech(_is_mechanics_on ? coupledValue("mechanical_porosity") : _zero),
     _delta_porosity_chem(getMaterialProperty<Real>("chemical_porosity")),

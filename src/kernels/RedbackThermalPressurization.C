@@ -24,8 +24,8 @@ validParams<RedbackThermalPressurization>()
   return params;
 }
 
-RedbackThermalPressurization::RedbackThermalPressurization(const InputParameters & parameters)
-  : Kernel(parameters),
+RedbackThermalPressurization::RedbackThermalPressurization(const InputParameters & parameters) :
+    Kernel(parameters),
     _temp_dot(coupledDot("temperature")),
     _dtemp_dot_dtemp(coupledDotDu("temperature")),
     _pressurization_coefficient(getMaterialProperty<Real>("pressurization_coefficient")),
