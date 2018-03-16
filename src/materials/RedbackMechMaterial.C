@@ -681,6 +681,9 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   const Real tol1 = 1e-10; // TODO: expose to user interface and/or make the tolerance relative
   const Real tol3 = 1e-6;  // TODO: expose to user interface and/or make the tolerance relative
   Real err3 = 1.1 * tol3;
+  bool is_plastic; // is this point in plastic regime or not?
+  bool is_first_plastic_determined = false;
+  bool is_first_plastic; // is_plastic the first time it's called
 
   Real eqvpstrain = std::pow(2.0 / 3.0, 0.5) * dp.L2norm();
   Real yield_stress = getYieldStress(eqvpstrain);
@@ -721,52 +724,55 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
     // associative potential
     Real p = sig_new.trace() / 3.0;
     Real q = getSigEqv(sig_new);
-    get_py_qy_damaged(p, q, p_y, q_y, yield_stress);
-
-    // TODO: checking whether in plasticity
-
-    Real flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
-
-    RankTwoTensor flow_tensor;
-    getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
-    flow_tensor *= flow_incr;
-
-    RankTwoTensor resid = flow_tensor - delta_dp;
-    Real err1 = resid.L2norm();
-    // TODO: do not compute flow tensor if in elasticity
-
-    while (err1 > tol1 && iter < maxiter) // Stress update iteration (hardness fixed)
+    get_py_qy_damaged(p, q, p_y, q_y, yield_stress, is_plastic);
+    if (!is_first_plastic_determined)
     {
-      iter++;
-
-      // Jacobian = d(residual)/d(sigma)
-      RankFourTensor dr_dsig;
-      getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig);
-      RankFourTensor dr_dsig_inv = dr_dsig.invSymm();
-      RankTwoTensor ddsig = -dr_dsig_inv * resid; // Newton Raphson
-      delta_dp -= E_ijkl.invSymm() * ddsig;       // Update increment of plastic rate of deformation tensor
-      sig_new += ddsig;                           // Update stress
-
-      // Update residual
-      p = sig_new.trace() / 3.0;
-      q = getSigEqv(sig_new);
-      get_py_qy_damaged(p, q, p_y, q_y, yield_stress);
-
-      flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
-      if (flow_incr < 0.0) // negative flow increment not allowed
-        throw MooseException("Constitutive Error-Negative flow increment: Reduce time "
-                             "increment.");
-      getFlowTensor(sig_new, q, p, yield_stress, flow_tensor);
-      flow_tensor *= flow_incr;
-      resid = flow_tensor - delta_dp; // Residual
-      err1 = resid.L2norm();
+      is_first_plastic = is_plastic;
+      is_first_plastic_determined = true;
     }
-    if (iter >= maxiter) // Convergence failure
-      throw MooseException("Constitutive Error-Too many iterations: Reduce time "
-                           "increment.\n"); // Convergence failure //TODO: check the
-                                            // adaptive time stepping
-    _returnmap_iter[ _qp ] = iter;
+    if (is_first_plastic)
+    {
+      Real flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
 
+      RankTwoTensor flow_tensor;
+      getFlowTensor(sig_new, q, p, q_y, p_y, yield_stress, flow_tensor);
+      flow_tensor *= flow_incr;
+
+      RankTwoTensor resid = flow_tensor - delta_dp;
+      Real err1 = resid.L2norm();
+
+      while (err1 > tol1 && iter < maxiter) // Stress update iteration (hardness fixed)
+      {
+        iter++;
+
+        // Jacobian = d(residual)/d(sigma)
+        RankFourTensor dr_dsig;
+        getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig);
+        RankFourTensor dr_dsig_inv = dr_dsig.invSymm();
+        RankTwoTensor ddsig = -dr_dsig_inv * resid; // Newton Raphson
+        delta_dp -= E_ijkl.invSymm() * ddsig;       // Update increment of plastic rate of deformation tensor
+        sig_new += ddsig;                           // Update stress
+
+        // Update residual
+        p = sig_new.trace() / 3.0;
+        q = getSigEqv(sig_new);
+        get_py_qy_damaged(p, q, p_y, q_y, yield_stress, is_plastic);
+
+        flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
+        if (flow_incr < 0.0) // negative flow increment not allowed
+          throw MooseException("Constitutive Error-Negative flow increment: Reduce time "
+                               "increment.");
+        getFlowTensor(sig_new, q, p, q_y, p_y, yield_stress, flow_tensor);
+        flow_tensor *= flow_incr;
+        resid = flow_tensor - delta_dp; // Residual
+        err1 = resid.L2norm();
+      }
+      if (iter >= maxiter) // Convergence failure
+        throw MooseException("Constitutive Error-Too many iterations: Reduce time "
+                             "increment.\n"); // Convergence failure //TODO: check the
+                                              // adaptive time stepping
+    }
+    _returnmap_iter[ _qp ] = iter;
     dpn = dp + delta_dp;
     eqvpstrain = std::pow(2.0 / 3.0, 0.5) * dpn.L2norm();
     Real yield_stress_prev = yield_stress;
@@ -783,9 +789,9 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 }
 
 void
-RedbackMechMaterial::get_py_qy_damaged(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterial::get_py_qy_damaged(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic)
 {
-  get_py_qy(p, q, p_y, q_y, yield_stress);
+  get_py_qy(p, q, p_y, q_y, yield_stress, is_plastic);
   p_y *= (1 - _damage[ _qp ]);
   q_y *= (1 - _damage[ _qp ]);
 }

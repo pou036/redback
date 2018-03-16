@@ -40,8 +40,13 @@ RedbackMechMaterialElastic::returnMap(
 }
 
 void
-RedbackMechMaterialElastic::getFlowTensor(
-  const RankTwoTensor & /*sig*/, Real /*q*/, Real /*p*/, Real /*yield_stress*/, RankTwoTensor & /*flow_tensor_dev*/)
+RedbackMechMaterialElastic::getFlowTensor(const RankTwoTensor & /*sig*/,
+                                          Real /*q*/,
+                                          Real /*p*/,
+                                          Real /*q_y*/,
+                                          Real /*p_y*/,
+                                          Real /*yield_stress*/,
+                                          RankTwoTensor & /*flow_tensor_dev*/)
 {
 }
 
@@ -66,6 +71,8 @@ RedbackMechMaterialElastic::getJac(const RankTwoTensor & /*sig*/,
 }
 
 void
-RedbackMechMaterialElastic::get_py_qy(Real /*p*/, Real /*q*/, Real & /*p_y*/, Real & /*q_y*/, Real /*yield_stress*/)
+RedbackMechMaterialElastic::get_py_qy(
+  Real /*p*/, Real /*q*/, Real & /*p_y*/, Real & /*q_y*/, Real /*yield_stress*/, bool & /*is_plastic*/)
 {
+  mooseError("RedbackMechMaterialElastic::get_py_qy should not get called");
 }

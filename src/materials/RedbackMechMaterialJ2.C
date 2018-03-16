@@ -29,8 +29,13 @@ RedbackMechMaterialJ2::RedbackMechMaterialJ2(const InputParameters & parameters)
  * deviatoric part
  */
 void
-RedbackMechMaterialJ2::getFlowTensor(
-  const RankTwoTensor & sig, Real q, Real /*p*/, Real /*yield_stress*/, RankTwoTensor & flow_tensor_dev)
+RedbackMechMaterialJ2::getFlowTensor(const RankTwoTensor & sig,
+                                     Real q,
+                                     Real /*p*/,
+                                     Real /*q_y*/,
+                                     Real /*p_y*/,
+                                     Real /*yield_stress*/,
+                                     RankTwoTensor & flow_tensor_dev)
 {
   RankTwoTensor sig_dev;
   Real val;
@@ -69,8 +74,8 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig,
                               Real flow_incr_dev,
                               Real q,
                               Real p,
-                              Real /*p_y*/,
-                              Real /*q_y*/,
+                              Real p_y,
+                              Real q_y,
                               Real yield_stress,
                               RankFourTensor & dresid_dsig)
 {
@@ -78,7 +83,7 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig,
   Real sig_eqv = getSigEqv(sig);
 
   RankTwoTensor flow_dirn_dev;
-  getFlowTensor(sig, q, p, yield_stress, flow_dirn_dev);
+  getFlowTensor(sig, q, p, q_y, p_y, yield_stress, flow_dirn_dev);
   Real dfi_dseqv_dev = getDerivativeFlowIncrement(sig, yield_stress);
 
   RankFourTensor dfi_dsig;
@@ -112,8 +117,10 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig,
 }
 
 void
-RedbackMechMaterialJ2::get_py_qy(Real p, Real /*q*/, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterialJ2::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic)
 {
   p_y = p;
   q_y = yield_stress;
+  // Check for plasticity
+  is_plastic = (q >= q_y);
 }

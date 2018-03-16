@@ -40,7 +40,7 @@ RedbackMechMaterialExpCC::RedbackMechMaterialExpCC(const InputParameters & param
  */
 void
 RedbackMechMaterialExpCC::getFlowTensor(
-  const RankTwoTensor & sig, Real /*q*/, Real p, Real pc, RankTwoTensor & flow_tensor)
+  const RankTwoTensor & sig, Real /*q*/, Real p, Real /*q_y*/, Real /*p_y*/, Real pc, RankTwoTensor & flow_tensor)
 {
   if (pc > 0)
     pc *= -1;
@@ -77,15 +77,18 @@ RedbackMechMaterialExpCC::getFlowIncrement(
     return 0;
 }
 
-Real
-RedbackMechMaterialExpCC::getDerivativeFlowIncrement(const RankTwoTensor & /*sig*/,
+void
+RedbackMechMaterialExpCC::getDerivativeFlowIncrement(Real & dfi_dp,
+                                                     Real & dfi_dq,
+                                                     const RankTwoTensor & /*sig*/,
                                                      Real /*pressure*/,
                                                      Real /*sig_eqv*/,
                                                      Real /*pc*/,
                                                      Real /*q_yield_stress*/,
                                                      Real /*p_yield_stress*/)
 {
-  return 0;
+  dfi_dp = 0; // TODO
+  dfi_dq = 0; // TODO
 }
 
 void
@@ -96,22 +99,21 @@ RedbackMechMaterialExpCC::getJac(const RankTwoTensor & sig,
                                  Real pressure,
                                  Real p_yield_stress,
                                  Real q_yield_stress,
-                                 Real pc,
+                                 Real yield_stress,
                                  RankFourTensor & dresid_dsig)
 {
   unsigned i, j, k, l;
   RankTwoTensor sig_dev, flow_dirn_vol, flow_dirn_dev, fij, flow_dirn, flow_tensor;
   RankTwoTensor dfi_dft;
   RankFourTensor dfd_dsig, dfi_dsig;
-  Real f1, f2;
-  Real dfi_dseqv;
+  Real f1, f2, f3;
+  Real dfi_dp, dfi_dseqv;
 
-  pc *= -1;
-
+  Real pc = -yield_stress;
   sig_dev = sig.deviatoric();
 
-  dfi_dseqv = getDerivativeFlowIncrement(sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress);
-  getFlowTensor(sig, sig_eqv, pressure, pc, flow_dirn);
+  getDerivativeFlowIncrement(dfi_dp, dfi_dseqv, sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress);
+  getFlowTensor(sig, sig_eqv, pressure, q_yield_stress, p_yield_stress, pc, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the
    *residual with respect to stress, dr_dsig
@@ -125,45 +127,34 @@ RedbackMechMaterialExpCC::getJac(const RankTwoTensor & sig,
    * with respect to the stress tensor. See also REDBACK's documentation
    * */
 
+  f1 = 0.0;
+  f2 = 0.0;
+  f3 = 0.0;
+  if (sig_eqv > 1e-10)
+  {
+    f1 = 3.0 / (_slope_yield_surface * _slope_yield_surface);
+    f2 = 2.0 / 9.0 - 1.0 / (_slope_yield_surface * _slope_yield_surface);
+    f3 = 3.0 / (2.0 * sig_eqv);
+  }
   // This loop calculates the first term
   for (i = 0; i < 3; ++i)
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dfi_dsig(i, j, k, l) = flow_dirn(i, j) * flow_dirn(k, l) * dfi_dseqv;
+          dfi_dsig(i, j, k, l) = flow_dirn(i, j) * (f3 * sig_dev(k, l) * dfi_dseqv + dfi_dp * deltaFunc(k, l) / 3.0);
 
-  // Real flow_tensor_norm = flow_dirn.L2norm();
-
-  // This loop calculates the second term. Read REDBACK's documentation
-  // (same as J2 plasticity case)
-  f1 = 0.0;
-  f2 = 0.0;
-  if (sig_eqv > 1e-8)
-  {
-    f1 = 3.0 / (_slope_yield_surface * _slope_yield_surface);
-    f2 = 2.0 / 9.0 - 1.0 / (_slope_yield_surface * _slope_yield_surface);
-  }
+  // This loop calculates the second term.
   for (i = 0; i < 3; ++i)
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dfd_dsig(i, j, k, l) =
-            f1 * deltaFunc(i, k) * deltaFunc(j, l) - f2 * deltaFunc(i, j) *
-                                                       deltaFunc(k,
-                                                                 l); // d_flow_dirn/d_sig - 2nd part (J2 plasticity)
-
-  // dfd_dsig = dft_dsig1/flow_tensor_norm - 3.0 * dft_dsig2 /
-  // (2*sig_eqv*flow_tensor_norm*flow_tensor_norm*flow_tensor_norm);
-  // //d_flow_dirn/d_sig
-  // TODO: check if the previous two lines (i.e normalizing the flow vector)
-  // should be activated or not. Currently we
-  // are using the non-unitary flow vector
+          dfd_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) + f2 * deltaFunc(i, j) * deltaFunc(k, l);
 
   dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr + dfi_dsig; // Jacobian
 }
 
 void
-RedbackMechMaterialExpCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterialExpCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & /*is_plastic*/)
 {
   Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y);
 }

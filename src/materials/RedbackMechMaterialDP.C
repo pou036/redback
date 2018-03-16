@@ -57,8 +57,13 @@ RedbackMechMaterialDP::getPressureProjection(Real pressure, Real sig_eqv, Real c
 }
 
 void
-RedbackMechMaterialDP::getFlowTensor(
-  const RankTwoTensor & sig, Real q, Real /*p*/, Real /*yield_stress*/, RankTwoTensor & flow_tensor)
+RedbackMechMaterialDP::getFlowTensor(const RankTwoTensor & sig,
+                                     Real q,
+                                     Real /*p*/,
+                                     Real /*q_y*/,
+                                     Real /*p_y*/,
+                                     Real /*yield_stress*/,
+                                     RankTwoTensor & flow_tensor)
 {
   RankTwoTensor sig_dev;
   Real val;
@@ -108,10 +113,10 @@ RedbackMechMaterialDP::getDerivativeFlowIncrement(Real & dfi_dp,
 {
   Real p_term = macaulayBracket(((pressure - p_yield_stress) / yield_stress) * (_slope_yield_surface < 0 ? 1 : -1));
   Real q_term = macaulayBracket((sig_eqv - q_yield_stress) / yield_stress);
-  Real factor =  _ref_pe_rate * _dt * _exponent * _exponential
-    / std::sqrt(std::pow(p_term, 2*_exponent) +  std::pow(q_term, 2*_exponent));
-  dfi_dp = factor * std::pow(p_term, 2*_exponent-1) / yield_stress;
-  dfi_dq = factor * std::pow(q_term, 2*_exponent-1) / yield_stress;
+  Real factor = _ref_pe_rate * _dt * _exponent * _exponential /
+                std::sqrt(std::pow(p_term, 2 * _exponent) + std::pow(q_term, 2 * _exponent));
+  dfi_dp = factor * std::pow(p_term, 2 * _exponent - 1) / yield_stress;
+  dfi_dq = factor * std::pow(q_term, 2 * _exponent - 1) / yield_stress;
 }
 
 void
@@ -135,7 +140,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
   sig_dev = sig.deviatoric();
 
   getDerivativeFlowIncrement(dfi_dp, dfi_dseqv, sig, pressure, sig_eqv, yield_stress, q_yield_stress, p_yield_stress);
-  getFlowTensor(sig, sig_eqv, pressure, yield_stress, flow_dirn);
+  getFlowTensor(sig, sig_eqv, pressure, q_yield_stress, p_yield_stress, yield_stress, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the
    * residual with respect to stress, dr_dsig
@@ -179,8 +184,10 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
 }
 
 void
-RedbackMechMaterialDP::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterialDP::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic)
 {
   p_y = getPressureProjection(p /*p*/, q /*q*/, yield_stress /*yield stress*/);
   q_y = yield_stress + _slope_yield_surface * p_y; // yield deviatoric stress
+  // Check for plasticity
+  is_plastic = (q >= yield_stress + _slope_yield_surface * p);
 }

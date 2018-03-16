@@ -48,7 +48,7 @@ RedbackMechMaterialCCanisotropic::stepInitQpProperties()
  */
 void
 RedbackMechMaterialCCanisotropic::getFlowTensor(
-  const RankTwoTensor & sig, Real q, Real p, Real pc, RankTwoTensor & flow_tensor)
+  const RankTwoTensor & sig, Real q, Real p, Real /*q_y*/, Real /*p_y*/, Real pc, RankTwoTensor & flow_tensor)
 {
   if (pc > 0)
     pc *= -1;
@@ -137,7 +137,7 @@ RedbackMechMaterialCCanisotropic::getJac(const RankTwoTensor & sig,
   sig_dev = sig.deviatoric();
 
   dfi_dseqv = getDerivativeFlowIncrement(sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress);
-  getFlowTensor(sig, sig_eqv, pressure, pc, flow_dirn);
+  getFlowTensor(sig, sig_eqv, pressure, q_yield_stress, p_yield_stress, pc, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the
    * residual with respect to stress, dr_dsig
@@ -194,7 +194,15 @@ RedbackMechMaterialCCanisotropic::getJac(const RankTwoTensor & sig,
 }
 
 void
-RedbackMechMaterialCCanisotropic::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterialCCanisotropic::get_py_qy(
+  Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic)
 {
   Ellipse::distanceCCanisotropic(_slope_yield_surface, -yield_stress, _anisotropy_coeff[ _qp ], p, q, p_y, q_y);
+  Real pc = -yield_stress;
+  is_plastic = Ellipse::isPointOutsideOfRotatedEllipse(
+    /*m=*/_slope_yield_surface,
+    /*p_0=*/pc,
+    /*alpha=*/_anisotropy_coeff[ _qp ],
+    /*x=*/p,
+    /*y=*/q);
 }
