@@ -100,9 +100,10 @@ public:
    * @param p_c: pre-consolidation pressure
    * @param y: coordinates of point to project
    * @param x: coordinates of projection point on the ellipse
+   * @param s: arc-length from point to yield point
    * @return d: distance to ellipse
    */ static void
-  getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1);
+  getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real & s);
 
   /**
    * Function to compute the distance from a query point to an ellipse

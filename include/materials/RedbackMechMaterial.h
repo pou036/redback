@@ -117,10 +117,10 @@ protected:
   // virtual functions here such that no implementation is needed in
   // RedbackMechMaterial.C
   virtual void
-  getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) = 0;
+  getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, Real, RankFourTensor &) = 0;
   virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, Real, Real, RankTwoTensor &) = 0;
-  virtual Real getFlowIncrement(Real, Real, Real, Real, Real) = 0;
-  virtual void get_py_qy(Real, Real, Real &, Real &, Real, bool &) = 0;
+  virtual Real getFlowIncrement(Real, Real, Real, Real, Real, Real) = 0;
+  virtual void get_py_qy(Real, Real, Real &, Real &, Real, bool &, Real &) = 0;
 
   Real _ref_pe_rate;
   Real _exponent;
@@ -187,7 +187,7 @@ protected:
   Real _T0_param, _P0_param;
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
-  virtual void get_py_qy_damaged(Real, Real, Real &, Real &, Real, bool &);
+  virtual void get_py_qy_damaged(Real, Real, Real &, Real &, Real, bool &, Real &);
   virtual void form_damage_kernels(Real);
 
   virtual void formDamageDissipation(RankTwoTensor &);

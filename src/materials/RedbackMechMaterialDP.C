@@ -84,7 +84,7 @@ RedbackMechMaterialDP::getFlowTensor(const RankTwoTensor & sig,
  */
 Real
 RedbackMechMaterialDP::getFlowIncrement(
-  Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real yield_stress)
+  Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real yield_stress, Real /*s*/)
 {
   Real flow_incr_vol =
     _ref_pe_rate * _dt *
@@ -128,6 +128,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
                               Real p_yield_stress,
                               Real q_yield_stress,
                               Real yield_stress,
+                              Real /*s*/,
                               RankFourTensor & dresid_dsig)
 {
   unsigned i, j, k, l;
@@ -184,10 +185,11 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
 }
 
 void
-RedbackMechMaterialDP::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic)
+RedbackMechMaterialDP::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
 {
   p_y = getPressureProjection(p /*p*/, q /*q*/, yield_stress /*yield stress*/);
   q_y = yield_stress + _slope_yield_surface * p_y; // yield deviatoric stress
   // Check for plasticity
   is_plastic = (q >= yield_stress + _slope_yield_surface * p);
+  s = std::sqrt(std::pow(p-p_y, 2) + std::pow(q-q_y, 2));
 }

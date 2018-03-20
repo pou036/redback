@@ -59,13 +59,14 @@ RedbackMechMaterialCC::getFlowTensor(const RankTwoTensor & sig,
  */
 Real
 RedbackMechMaterialCC::getFlowIncrement(
-  Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real yield_stress)
+  Real /*sig_eqv*/, Real /*pressure*/, Real /*q_yield_stress*/, Real /*p_yield_stress*/, Real yield_stress, Real s)
 {
   Real pc = -yield_stress;
   Real sigma_0 = std::fabs(pc);
-  Real flow_incr_vol = _ref_pe_rate * _dt * std::pow((pressure - p_yield_stress) / sigma_0, _exponent) * _exponential;
-  Real flow_incr_dev = _ref_pe_rate * _dt * std::pow((sig_eqv - q_yield_stress) / sigma_0, _exponent) * _exponential;
-  return std::sqrt(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev);
+  //Real flow_incr_vol = _ref_pe_rate * _dt * std::pow((pressure - p_yield_stress) / sigma_0, _exponent) * _exponential;
+  //Real flow_incr_dev = _ref_pe_rate * _dt * std::pow((sig_eqv - q_yield_stress) / sigma_0, _exponent) * _exponential;
+  //return std::sqrt(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev);
+  return _ref_pe_rate * _dt * std::pow(s / sigma_0, _exponent) * _exponential;
 }
 
 void
@@ -75,16 +76,30 @@ RedbackMechMaterialCC::getDerivativeFlowIncrement(Real & dfi_dp,
                                                   Real pressure,
                                                   Real sig_eqv,
                                                   Real pc,
-                                                  Real q_yield_stress,
-                                                  Real p_yield_stress)
+                                                  Real /*q_yield_stress*/,
+                                                  Real /*p_yield_stress*/,
+                                                  Real s)
 {
   Real sigma_0 = std::fabs(pc);
-  Real p_term = (pressure - p_yield_stress) / sigma_0;
-  Real q_term = (sig_eqv - q_yield_stress) / sigma_0;
-  Real factor = _ref_pe_rate * _dt * _exponent * _exponential / sigma_0 /
-                std::sqrt(std::pow(p_term, 2 * _exponent) + std::pow(q_term, 2 * _exponent));
-  dfi_dp = factor * std::pow(p_term, 2 * _exponent - 1);
-  dfi_dq = factor * std::pow(q_term, 2 * _exponent - 1);
+//  Real p_term = (pressure - p_yield_stress) / sigma_0;
+//  Real q_term = (sig_eqv - q_yield_stress) / sigma_0;
+//  Real factor = _ref_pe_rate * _dt * _exponent * _exponential / sigma_0 /
+//                std::sqrt(std::pow(p_term, 2 * _exponent) + std::pow(q_term, 2 * _exponent));
+//  dfi_dp = factor * std::pow(p_term, 2 * _exponent - 1);
+//  dfi_dq = factor * std::pow(q_term, 2 * _exponent - 1);
+
+  // Compute numerically derivatives of s with respect to p and q
+  Real p_y2, q_y2, s2, ds_dp, ds_dq;
+  bool is_plastic;
+  Real delta_p = sigma_0 / 100.;
+  Real delta_q = _slope_yield_surface*delta_p;
+  get_py_qy(pressure + delta_p, sig_eqv, p_y2, q_y2, -pc, is_plastic, s2);
+  ds_dp = (s2 - s) / delta_p;
+  get_py_qy(pressure, sig_eqv + delta_q, p_y2, q_y2, -pc, is_plastic, s2);
+  ds_dq = (s2 - s) / delta_q;
+  Real tmp = _ref_pe_rate * _dt * _exponent * _exponential * std::pow(s/sigma_0, _exponent - 1) / sigma_0;
+  dfi_dp = tmp * ds_dp;
+  dfi_dq = tmp * ds_dq;
 }
 
 void
@@ -96,6 +111,7 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig,
                               Real p_yield_stress,
                               Real q_yield_stress,
                               Real yield_stress,
+                              Real s,
                               RankFourTensor & dresid_dsig)
 {
   unsigned i, j, k, l;
@@ -108,7 +124,7 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig,
   Real pc = -yield_stress;
   sig_dev = sig.deviatoric();
 
-  getDerivativeFlowIncrement(dfi_dp, dfi_dseqv, sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress);
+  getDerivativeFlowIncrement(dfi_dp, dfi_dseqv, sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress, s);
   getFlowTensor(sig, sig_eqv, pressure, q_yield_stress, p_yield_stress, yield_stress, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the
@@ -150,7 +166,7 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig,
 }
 
 void
-RedbackMechMaterialCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic)
+RedbackMechMaterialCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
 {
   Real M = _slope_yield_surface;
   Real pc = -yield_stress;
@@ -159,7 +175,8 @@ RedbackMechMaterialCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yi
   is_plastic = (potential >= 0); // compute yield coords regardless
 
   // get yield point in any case (even if elastic)
-  Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y);
+  //Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y);
+  Ellipse::getYieldPointCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y, s);
 }
 
 void

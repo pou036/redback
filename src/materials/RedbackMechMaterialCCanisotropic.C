@@ -72,7 +72,7 @@ RedbackMechMaterialCCanisotropic::getFlowTensor(
  */
 Real
 RedbackMechMaterialCCanisotropic::getFlowIncrement(
-  Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real pc)
+  Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real pc, Real /*s*/)
 {
   pc *= -1;
   if (Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/_slope_yield_surface,
@@ -122,6 +122,7 @@ RedbackMechMaterialCCanisotropic::getJac(const RankTwoTensor & sig,
                                          Real p_yield_stress,
                                          Real q_yield_stress,
                                          Real pc,
+                                         Real /*s*/,
                                          RankFourTensor & dresid_dsig)
 {
   unsigned i, j, k, l;
@@ -195,7 +196,7 @@ RedbackMechMaterialCCanisotropic::getJac(const RankTwoTensor & sig,
 
 void
 RedbackMechMaterialCCanisotropic::get_py_qy(
-  Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic)
+  Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & /*s*/)
 {
   Ellipse::distanceCCanisotropic(_slope_yield_surface, -yield_stress, _anisotropy_coeff[ _qp ], p, q, p_y, q_y);
   Real pc = -yield_stress;

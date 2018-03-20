@@ -684,6 +684,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   bool is_plastic; // is this point in plastic regime or not?
   bool is_first_plastic_determined = false;
   bool is_first_plastic; // is_plastic the first time it's called
+  Real s; // curvilinear arc-length between (p,q) and (p_y,q_y)
 
   Real eqvpstrain = std::pow(2.0 / 3.0, 0.5) * dp.L2norm();
   Real yield_stress = getYieldStress(eqvpstrain);
@@ -724,7 +725,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
     // associative potential
     Real p = sig_new.trace() / 3.0;
     Real q = getSigEqv(sig_new);
-    get_py_qy_damaged(p, q, p_y, q_y, yield_stress, is_plastic);
+    get_py_qy_damaged(p, q, p_y, q_y, yield_stress, is_plastic, s);
     if (!is_first_plastic_determined)
     {
       is_first_plastic = is_plastic;
@@ -732,7 +733,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
     }
     if (is_first_plastic)
     {
-      Real flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
+      Real flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress, s);
 
       RankTwoTensor flow_tensor;
       getFlowTensor(sig_new, q, p, q_y, p_y, yield_stress, flow_tensor);
@@ -747,7 +748,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
         // Jacobian = d(residual)/d(sigma)
         RankFourTensor dr_dsig;
-        getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, dr_dsig);
+        getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, s, dr_dsig);
         RankFourTensor dr_dsig_inv = dr_dsig.invSymm();
         RankTwoTensor ddsig = -dr_dsig_inv * resid; // Newton Raphson
         delta_dp -= E_ijkl.invSymm() * ddsig;       // Update increment of plastic rate of deformation tensor
@@ -756,9 +757,9 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
         // Update residual
         p = sig_new.trace() / 3.0;
         q = getSigEqv(sig_new);
-        get_py_qy_damaged(p, q, p_y, q_y, yield_stress, is_plastic);
+        get_py_qy_damaged(p, q, p_y, q_y, yield_stress, is_plastic, s);
 
-        flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress);
+        flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress, s);
         if (flow_incr < 0.0) // negative flow increment not allowed
           throw MooseException("Constitutive Error-Negative flow increment: Reduce time "
                                "increment.");
@@ -789,11 +790,12 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 }
 
 void
-RedbackMechMaterial::get_py_qy_damaged(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic)
+RedbackMechMaterial::get_py_qy_damaged(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
 {
-  get_py_qy(p, q, p_y, q_y, yield_stress, is_plastic);
+  get_py_qy(p, q, p_y, q_y, yield_stress, is_plastic, s);
   p_y *= (1 - _damage[ _qp ]);
   q_y *= (1 - _damage[ _qp ]);
+  // TODO: impact of damage on s?
 }
 
 /*void

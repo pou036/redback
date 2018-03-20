@@ -171,13 +171,13 @@ Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, 
 }
 
 void
-Ellipse::getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1)
+Ellipse::getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real & s)
 {
   if (y1 < 0)
   {
     // algorithm below only works for y1 > 0, so use symmetry
     Real neg_x1;
-    getYieldPointCC(m, p_c, y0, -y1, x0, neg_x1);
+    getYieldPointCC(m, p_c, y0, -y1, x0, neg_x1, s);
     x1 = -neg_x1;
     return;
   }
@@ -187,15 +187,22 @@ Ellipse::getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const
     // Real t = -std::pow(m, 2)*std::log(-m*p_c/(2.0*y1))/2.0;
     x0 = p_c / 2.0;
     x1 = -m * p_c / 2.0;
+    s = std::abs(y1 - x1);
     return;
   }
   else if (y1 == 0)
   {
     // Real t = -std::log(std::abs(p_c/(2*y0-p_c)))/2.0;
     if (y0 > p_c / 2.0)
+    {
       x0 = 0.0;
+      s = std::abs(y0);
+    }
     else
+    {
       x0 = p_c;
+      s = std::abs(y0 - x0);
+    }
     x1 = 0.0;
     return;
   }
@@ -219,6 +226,27 @@ Ellipse::getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const
     mooseError("Newton Raphson failed to converge after ", nb_iter, " iterations.");
   x0 = p_c / 2.0 + (y0 - p_c / 2.0) * std::exp(-2 * t);
   x1 = y1 * std::exp(-2 * t / m2);
+
+  // Compute arc-length from point to yield point
+  /*// If we have access to hypergeometric function 2F1:
+    gamma = p - pc/2.0
+    alpha = q*q/(M*M*M*M*gamma*gamma)
+    beta = 2*(1 - 1/(M*M))
+    length_analytical = std::fabs((gamma/(beta-2.0)) * \
+        (std::exp(-2*t)*(2*std::sqrt(1+alpha*std::exp(beta*2*t)) - beta*hyp2f1(0.5, -1/beta, (beta-1.0)/beta, -alpha*std::exp(beta*2*t))) \
+         -2*std::sqrt(1+alpha) + beta*hyp2f1(0.5, -1/beta, (beta-1.0)/beta, -alpha)))
+  */
+  int n_iter = 100;
+  s = 0;
+  Real t_old = 0;
+  Real t_new = 0;
+  for (int i=1; i<n_iter+1; i++)
+  {
+    t_new = i*t/n_iter;
+    s += std::sqrt( std::pow((y0 - p_c/2.0)*(std::exp(-2*t_new) - std::exp(-2*t_old)), 2) \
+        + std::pow(y1*(std::exp(-2*t_new/m2) - std::exp(-2*t_old/m2)), 2) );
+    t_old = t_new;
+  }
 }
 
 Real

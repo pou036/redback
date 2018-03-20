@@ -57,7 +57,7 @@ RedbackMechMaterialExpCC::getFlowTensor(
  */
 Real
 RedbackMechMaterialExpCC::getFlowIncrement(
-  Real sig_eqv, Real pressure, Real /*q_yield_stress*/, Real /*p_yield_stress*/, Real pc)
+  Real sig_eqv, Real pressure, Real /*q_yield_stress*/, Real /*p_yield_stress*/, Real pc, Real /*s*/)
 {
   pc *= -1;
   if (Ellipse::isPointOutsideOfEllipse(/*m=*/_slope_yield_surface,
@@ -100,6 +100,7 @@ RedbackMechMaterialExpCC::getJac(const RankTwoTensor & sig,
                                  Real p_yield_stress,
                                  Real q_yield_stress,
                                  Real yield_stress,
+                                 Real /*s*/,
                                  RankFourTensor & dresid_dsig)
 {
   unsigned i, j, k, l;
@@ -154,7 +155,7 @@ RedbackMechMaterialExpCC::getJac(const RankTwoTensor & sig,
 }
 
 void
-RedbackMechMaterialExpCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & /*is_plastic*/)
+RedbackMechMaterialExpCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & /*is_plastic*/, Real & /*s*/)
 {
   Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y);
 }
