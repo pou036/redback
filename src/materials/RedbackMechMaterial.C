@@ -160,6 +160,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
 
     _damage_kernel(declareProperty<Real>("damage_kernel")),
     _damage_kernel_jac(declareProperty<Real>("damage_kernel_jacobian")),
+	//_dummy(declareProperty<Real>("redback_dummy")),
     _damage_coeff(getParam<Real>("damage_coefficient")),
     _dmg_exponent(getParam<Real>("damage_exponent")),
     _healing_coeff(getParam<Real>("healing_coefficient")),
@@ -271,6 +272,7 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mechanical_dissipation_jac_mech[ _qp ] = 0;
   _damage_kernel[ _qp ] = 0;
   _damage_kernel_jac[ _qp ] = 0;
+  //_dummy[ _qp ] = 0;
   _mass_removal_rate[ _qp ] = 0;
 }
 
@@ -574,6 +576,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
     _poromech_jac[ _qp ] = 0;
   }
 
+  //_dummy[ _qp ] = def_grad_rate;
   // Compute the equivalent Gruntfest number for comparison with SuCCoMBE TODO:
   // Remove this number from the tests!!!
   if (q_y != 0)

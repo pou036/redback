@@ -148,6 +148,7 @@ protected:
   MaterialProperty<Real> & _mechanical_dissipation_jac_mech;
   MaterialProperty<Real> & _damage_kernel;
   MaterialProperty<Real> & _damage_kernel_jac;
+  //MaterialProperty<Real> & _dummy;
   Real _damage_coeff, _dmg_exponent, _healing_coeff;
 
   Real _exponential;
