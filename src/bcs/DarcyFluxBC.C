@@ -21,8 +21,8 @@ validParams<DarcyFluxBC>()
   return params;
 }
 
-DarcyFluxBC::DarcyFluxBC(const InputParameters & parameters)
-  : FluxBC(parameters), _Le(getMaterialProperty<Real>("lewis_number"))
+DarcyFluxBC::DarcyFluxBC(const InputParameters & parameters) :
+    FluxBC(parameters), _Le(getMaterialProperty<Real>("lewis_number"))
 {
 }
 

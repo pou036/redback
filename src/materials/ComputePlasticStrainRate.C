@@ -19,8 +19,8 @@ validParams<ComputePlasticStrainRate>()
   return params;
 }
 
-ComputePlasticStrainRate::ComputePlasticStrainRate(const InputParameters & parameters)
-  : DerivativeMaterialInterface<Material>(parameters),
+ComputePlasticStrainRate::ComputePlasticStrainRate(const InputParameters & parameters) :
+    DerivativeMaterialInterface<Material>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _plastic_strain(getMaterialProperty<RankTwoTensor>("plastic_strain")),
     _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("plastic_strain")),

@@ -32,8 +32,8 @@ validParams<RedbackNavier>()
   return params;
 }
 
-RedbackNavier::RedbackNavier(const InputParameters & parameters)
-  : Kernel(parameters),
+RedbackNavier::RedbackNavier(const InputParameters & parameters) :
+    Kernel(parameters),
     _component(getParam<unsigned int>("component")),
 
     _fluid_vel_x(coupledValue("fluid_vel_x")),

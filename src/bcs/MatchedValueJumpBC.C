@@ -26,8 +26,8 @@ validParams<MatchedValueJumpBC>()
   return params;
 }
 
-MatchedValueJumpBC::MatchedValueJumpBC(const InputParameters & parameters)
-  : NodalBC(parameters),
+MatchedValueJumpBC::MatchedValueJumpBC(const InputParameters & parameters) :
+    NodalBC(parameters),
     _v(coupledValue("v")),
     _v_num(coupled("v")),
     _jump(getPostprocessorValue("tangent_jump")),

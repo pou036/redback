@@ -29,8 +29,8 @@ validParams<RedbackContinuation>()
   return params;
 }
 
-RedbackContinuation::RedbackContinuation(const InputParameters & parameters)
-  : ODEKernel(parameters),
+RedbackContinuation::RedbackContinuation(const InputParameters & parameters) :
+    ODEKernel(parameters),
     _ds_param(getParam<Real>("ds")),
     _ds_old_param(getParam<Real>("ds_old")),
     _continuation_parameter_old_param(getParam<Real>("continuation_parameter_old")),

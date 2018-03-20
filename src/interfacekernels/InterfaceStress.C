@@ -28,8 +28,8 @@ validParams<InterfaceStress>()
   return params;
 }
 
-InterfaceStress::InterfaceStress(const InputParameters & parameters)
-  : InterfaceKernel(parameters),
+InterfaceStress::InterfaceStress(const InputParameters & parameters) :
+    InterfaceKernel(parameters),
     _stress0(getMaterialProperty<RankTwoTensor>("stress_master")),
     _stress1(getMaterialProperty<RankTwoTensor>("stress_slave")),
     _component(getParam<unsigned int>("component")),
@@ -67,7 +67,7 @@ InterfaceStress::computeQpResidual(Moose::DGResidualType type)
 }
 
 Real
-InterfaceStress::computeQpJacobian(Moose::DGJacobianType type)
+InterfaceStress::computeQpJacobian(Moose::DGJacobianType /*type*/)
 {
   return 0;
 }

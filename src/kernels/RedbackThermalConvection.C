@@ -24,8 +24,8 @@ validParams<RedbackThermalConvection>()
   return params;
 }
 
-RedbackThermalConvection::RedbackThermalConvection(const InputParameters & parameters)
-  : Kernel(parameters),
+RedbackThermalConvection::RedbackThermalConvection(const InputParameters & parameters) :
+    Kernel(parameters),
     _mixture_convective_energy(getMaterialProperty<RealVectorValue>("mixture_convective_energy")),
     //_mixture_convective_energy_jac(getMaterialProperty<Real>("mixture_convective_energy_jacobian")),
     //_mixture_convective_energy_off_jac(getMaterialProperty<Real>("mixture_convective_energy_off_jacobian")),
