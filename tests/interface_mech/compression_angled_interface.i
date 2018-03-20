@@ -134,7 +134,7 @@
   [../]
   [./loading_vel]
     type = ParsedFunction
-    value = 'if(t>0.001,0.0002*t,0)'
+    value = 'if(t>0.001,-0.0002*t,0)'
   [../]
   [./loading_stress]
     type = ParsedFunction
@@ -149,35 +149,16 @@
 []
 
 [BCs]
-  # pin particle along symmetry planes
-  # [./uz_front]
-  # type = FunctionPresetBC
-  # variable = disp_z
-  # boundary = front
-  # function = loading_vel
-  # [../]
-  # [./ux_right]
-  # type = FunctionPresetBC
-  # variable = disp_x
-  # boundary = right
-  # function = loading_vel
-  # [../]
   [./uy_top]
     type = FunctionPresetBC
     variable = disp_y1
     boundary = 'top'
     function = loading_vel
   [../]
-  # [./no_disp_x0]
-  #   type = PresetBC
-  #   variable = disp_x0
-  #   boundary = 'left_to_0'
-  #   value = 0.0
-  # [../]
-  [./no_disp_x1]
+  [./no_disp_x0]
     type = PresetBC
-    variable = disp_x1
-    boundary = 'left_to_1'
+    variable = disp_x0
+    boundary = 'left_to_0'
     value = 0.0
   [../]
   [./no_disp_y]
@@ -186,29 +167,12 @@
     boundary = 'bottom'
     value = 0.0
   [../]
-  [./Pressure]
-    # [./loading]
-    # function = loading_stress
-    # boundary = 'top'
-    # [../]
-    # [./confinement0]
-    #   function = confinement
-    #   boundary = 'right_to_0'
-    #   displacements = 'disp_x0 disp_y0'
-    # [../]
-    [./confinement1]
-      function = confinement
-      boundary = 'right_to_1'
-      displacements = 'disp_x1 disp_y1'
-    [../]
-  [../]
   [./matchx]
     type = MatchedValueJumpBC
     variable = disp_x0
     boundary = 'interface_bottom'
     v = 'disp_x1'
-    tangent_jump = 1e-4
-    fault_angle = 26.56
+    tangent_jump = -2e-5
     component = 0
   [../]
   [./matchy]
@@ -216,8 +180,7 @@
     variable = disp_y0
     boundary = 'interface_bottom'
     v = 'disp_y1'
-    tangent_jump = 1e-4
-    fault_angle = 26.56 #tan-1(0.5/1)
+    tangent_jump = -2e-5
     component = 1
   [../]
 []

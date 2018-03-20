@@ -39,16 +39,16 @@ InterfaceDarcy::InterfaceDarcy(const InputParameters & parameters)
 Real
 InterfaceDarcy::computeQpResidual(Moose::DGResidualType type)
 {
-  Real res = (_neighbor_value[ _qp ] - _u[ _qp ]) / (_Le_fault * _thickness) +
-             _gravity_term[ _qp ] * _normals[ _qp ] * (1 / _Le[ _qp ] - 1 / _Le_fault);
+  RealVectorValue res = (_neighbor_value[ _qp ] - _u[ _qp ]) / (_Le_fault * _thickness) * _normals[ _qp ] +
+             _gravity_term[ _qp ] * (1 / _Le[ _qp ] - 1 / _Le_fault);
 
   switch (type)
   {
     case Moose::Element:
-      return (res - _grad_u[ _qp ] * _normals[ _qp ] / _Le[ _qp ]) * _test[ _i ][ _qp ];
+      return (_grad_u[ _qp ] / _Le[ _qp ] - res) * _grad_test[ _i ][ _qp ];
 
     case Moose::Neighbor:
-      return (res - _grad_neighbor_value[ _qp ] * _normals[ _qp ] / _Le[ _qp ]) * _test_neighbor[ _i ][ _qp ];
+      return (_grad_neighbor_value[ _qp ] / _Le[ _qp ] - res) * _grad_test_neighbor[ _i ][ _qp ];
 
     default:
       mooseError("InterfaceDarcy type not supported.");

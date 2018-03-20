@@ -36,8 +36,8 @@ protected:
   unsigned int _v_num;
 
   const PostprocessorValue & _jump;
-  Real _angle;
   const unsigned int _component;
+  const MooseArray<Point> & _normals;
 };
 
 #endif // MATCHEDVALUEJUMPBC_H

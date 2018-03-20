@@ -25,9 +25,9 @@ protected:
 
   const MaterialProperty<RankTwoTensor> & _tensor;
   bool _normal;
-
-private:
-  Real _angle;
+  bool _has_pres;
+  const VariableValue & _pressure;
+  const MooseArray<Point> & _normals;
 };
 
 #endif // RANKTWOPROJECTIONAUX_H

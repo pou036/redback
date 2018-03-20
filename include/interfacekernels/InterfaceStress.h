@@ -34,6 +34,10 @@ protected:
   const MaterialProperty<RankTwoTensor> & _stress0;
   const MaterialProperty<RankTwoTensor> & _stress1;
   const unsigned int _component;
+  bool _has_pres0;
+  const VariableValue & _pressure0;
+  bool _has_pres1;
+  const VariableValue & _pressure1;
 };
 
 #endif

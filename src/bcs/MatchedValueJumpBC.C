@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "MatchedValueJumpBC.h"
+#include "Assembly.h"
 
 template <>
 InputParameters
@@ -17,12 +18,7 @@ validParams<MatchedValueJumpBC>()
   params.addRequiredCoupledVar("v", "The variable whose value we are to match.");
   params.addClassDescription("Implements a NodalBC which equates two different Variables' values "
                              "on a specified boundary.");
-  params.addParam<PostprocessorName>("tangent_jump", 0, "jump value on the interface");
-  params.addRequiredParam<Real>("fault_angle", "The angle of the fault in degrees");
-  params.addParam<bool>("convert_to_radians",
-                        false,
-                        "If true, the value you entered will be "
-                        "multiplied by Pi/180");
+  params.addParam<PostprocessorName>("tangent_jump", 0, "jump value on the interface. Note that the tangent vector is oriented +90deg from the normal vector.");
   params.addRequiredRangeCheckedParam<unsigned int>("component",
                                                     "component >= 0 & component <= 2",
                                                     "An integer corresponding to the direction the variable "
@@ -35,16 +31,15 @@ MatchedValueJumpBC::MatchedValueJumpBC(const InputParameters & parameters)
     _v(coupledValue("v")),
     _v_num(coupled("v")),
     _jump(getPostprocessorValue("tangent_jump")),
-    _angle(getParam<bool>("convert_to_radians") ? getParam<Real>("fault_angle") * M_PI / 180.0
-                                                : getParam<Real>("fault_angle")),
-    _component(getParam<unsigned int>("component"))
+    _component(getParam<unsigned int>("component")),
+    _normals(_assembly.normals())
 {
 }
 
 Real
 MatchedValueJumpBC::computeQpResidual()
 {
-  RealVectorValue fault_tangent(cos(_angle), sin(_angle)); // only works for linear fault
+  RealVectorValue fault_tangent(- _normals[ _qp ](1), _normals[ _qp ](0)); //90deg rotation of the normal vector
   return _u[ _qp ] - _v[ _qp ] + _jump * fault_tangent(_component);
 }
 

@@ -130,6 +130,7 @@
 [Executioner]
   type = Transient
   trans_ss_check = true
+  ss_check_tol = 1e-07
 []
 
 [Outputs]
