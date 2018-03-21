@@ -27,11 +27,14 @@ validParams<RedbackMechMaterialCC>()
   //    mooseError("modified Cam-Clay cannot deal with negative
   //    pre-consolidation stress ('yield_stress')");
   params.addParam<Real>("slope_yield_surface", 0, "Slope of yield surface (positive, see documentation)");
+  params.addParam<Real>("shift_ellipse", 0, "Horizontal shift of the ellipse in normalised stress values (positive to give the material some cohesion)");
   return params;
 }
 
 RedbackMechMaterialCC::RedbackMechMaterialCC(const InputParameters & parameters) :
-    RedbackMechMaterial(parameters), _slope_yield_surface(std::fabs(getParam<Real>("slope_yield_surface")))
+    RedbackMechMaterial(parameters),
+    _slope_yield_surface(std::fabs(getParam<Real>("slope_yield_surface"))),
+    _shift_ellipse(getParam<Real>("shift_ellipse"))
 {
 }
 
@@ -50,7 +53,7 @@ RedbackMechMaterialCC::getFlowTensor(const RankTwoTensor & sig,
   Real pc = -yield_stress;
 
   flow_tensor = 3.0 * sig.deviatoric() / (_slope_yield_surface * _slope_yield_surface);
-  flow_tensor.addIa((2.0 * p - pc) / 3.0);
+  flow_tensor.addIa((2.0 * p - pc - 2*_shift_ellipse) / 3.0);
 }
 
 /**
@@ -155,11 +158,11 @@ RedbackMechMaterialCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yi
   Real M = _slope_yield_surface;
   Real pc = -yield_stress;
   // Check if outside the ellipse
-  Real potential = std::pow(q / M, 2) + p * (p - pc);
+  Real potential = std::pow(q / M, 2) + p * (p - pc) + _shift_ellipse*(_shift_ellipse - 2*p + pc);
   is_plastic = (potential >= 0); // compute yield coords regardless
 
   // get yield point in any case (even if elastic)
-  Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y);
+  Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y, _shift_ellipse);
 }
 
 void

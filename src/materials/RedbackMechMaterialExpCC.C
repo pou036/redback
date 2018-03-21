@@ -156,7 +156,7 @@ RedbackMechMaterialExpCC::getJac(const RankTwoTensor & sig,
 void
 RedbackMechMaterialExpCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & /*is_plastic*/)
 {
-  Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y);
+  Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y, 0.);
 }
 
 void
