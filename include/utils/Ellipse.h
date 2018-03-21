@@ -101,9 +101,10 @@ public:
    * @param y: coordinates of point to project
    * @param x: coordinates of projection point on the ellipse
    * @param s: arc-length from point to yield point
+   * @param shift: horizontal shift of the ellipse
    * @return d: distance to ellipse
    */ static void
-  getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real & s);
+  getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real & s, Real shift);
 
   /**
    * Function to compute the distance from a query point to an ellipse

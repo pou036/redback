@@ -179,7 +179,7 @@ RedbackMechMaterialCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yi
 
   // get yield point in any case (even if elastic)
   //Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y, _shift_ellipse);
-  Ellipse::getYieldPointCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y, s);
+  Ellipse::getYieldPointCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y, s, _shift_ellipse);
 }
 
 void
