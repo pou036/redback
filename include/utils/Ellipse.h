@@ -90,7 +90,7 @@ public:
    * @param x: coordinates of projection point on the ellipse
    * @return d: distance to ellipse
    */
-  static Real distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1);
+  static Real distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real shift_ellipse);
 
   /**
    * Function to compute the yield point coordinates from a query point
