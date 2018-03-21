@@ -153,7 +153,7 @@ Ellipse::sqrDistance(Real const e[ 2 ], Real const y[ 2 ], Real x[ 2 ])
 }
 
 Real
-Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1)
+Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real shift_ellipse)
 {
   Real e[ 2 ];         // ellipse axes
   Real x[ 2 ];         // point coordinates as array
@@ -161,11 +161,11 @@ Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, 
   e[ 0 ] = fabs(p_c) / 2.0;
   e[ 1 ] = m * e[ 0 ];
   // Shift by pc/2 to centre the ellipse on (0,0)
-  shifted_y[ 0 ] = y0 - p_c / 2.0;
+  shifted_y[ 0 ] = y0 - p_c / 2.0 - shift_ellipse;
   shifted_y[ 1 ] = y1;
   Real d = sqrDistance(e, shifted_y, x);
   // Shift coordinates back to real space
-  x0 = x[ 0 ] + p_c / 2.0;
+  x0 = x[ 0 ] + p_c / 2.0 + shift_ellipse;
   x1 = x[ 1 ];
   return sqrt(d);
 }
