@@ -151,7 +151,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./mises_strain_rate]
+  [./eqv_plastic_strain_rate]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -166,7 +166,7 @@
   [./total_porosity]
     family = MONOMIAL
   [../]
-  [./volumetric_strain]
+  [./plastic_volumetric_strain]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -245,10 +245,10 @@
     variable = mises_stress
     property = mises_stress
   [../]
-  [./mises_strain_rate]
+  [./eqv_plastic_strain_rate]
     type = MaterialRealAux
-    variable = mises_strain_rate
-    property = mises_strain_rate
+    variable = eqv_plastic_strain_rate
+    property = eqv_plastic_strain_rate
   [../]
   [./elastic_mod]
     type = RankFourAux
@@ -264,10 +264,10 @@
     variable = mech_porosity
     property = mechanical_porosity
   [../]
-  [./volumetric_strain]
+  [./plastic_volumetric_strain]
     type = MaterialRealAux
-    variable = volumetric_strain
-    property = volumetric_strain
+    variable = plastic_volumetric_strain
+    property = plastic_volumetric_strain
   [../]
   [./mass_removal_rate]
     type = MaterialRealAux

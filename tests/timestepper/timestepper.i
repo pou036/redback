@@ -143,7 +143,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number returnmap_iter mises_strain mises_strain_rate mises_stress total_porosity'
+  active = 'Mod_Gruntfest_number returnmap_iter mises_strain eqv_plastic_strain_rate mises_stress total_porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -172,7 +172,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./mises_strain_rate]
+  [./eqv_plastic_strain_rate]
     order = CONSTANT
     family = MONOMIAL
     block = 0
@@ -210,7 +210,7 @@
 []
 
 [AuxKernels]
-  active = 'total_porosity mises_strain mises_strain_rate mises_stress returnmap_iter Gruntfest_Number'
+  active = 'total_porosity mises_strain eqv_plastic_strain_rate mises_stress returnmap_iter Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -253,11 +253,11 @@
     variable = mises_strain
     property = mises_strain
   [../]
-  [./mises_strain_rate]
+  [./eqv_plastic_strain_rate]
     type = MaterialRealAux
-    variable = mises_strain_rate
+    variable = eqv_plastic_strain_rate
     block = 0
-    property = mises_strain_rate
+    property = eqv_plastic_strain_rate
   [../]
   [./Gruntfest_Number]
     type = MaterialRealAux
@@ -291,7 +291,7 @@
   [../]
   [./strain_rate]
     type = PointValue
-    variable = mises_strain_rate
+    variable = eqv_plastic_strain_rate
     point = '0.5 0.5 0'
   [../]
   [./mises_stress]

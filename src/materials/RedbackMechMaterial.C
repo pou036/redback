@@ -143,8 +143,8 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
     _poisson_ratio(getParam<Real>("poisson_ratio")),
     _mises_stress(declareProperty<Real>("mises_stress")),
     _mean_stress(declareProperty<Real>("mean_stress")),
-    _mises_strain_rate(declareProperty<Real>("mises_strain_rate")),
-    _volumetric_strain(declareProperty<Real>("volumetric_strain")),
+    _eqv_plastic_strain_rate(declareProperty<Real>("eqv_plastic_strain_rate")),
+    _plastic_volumetric_strain(declareProperty<Real>("plastic_volumetric_strain")),
     _volumetric_strain_rate(declareProperty<Real>("volumetric_strain_rate")),
     _total_volumetric_strain(declareProperty<Real>("total_volumetric_strain")),
     _mechanical_porosity(declareProperty<Real>("mechanical_porosity")),
@@ -252,8 +252,8 @@ RedbackMechMaterial::initQpStatefulProperties()
   // Redback properties
   _mises_stress[ _qp ] = getSigEqv(_stress[ _qp ]);
   _mean_stress[ _qp ] = _stress[ _qp ].trace() / 3.0;
-  _mises_strain_rate[ _qp ] = 0;
-  _volumetric_strain[ _qp ] = 0;
+  _eqv_plastic_strain_rate[ _qp ] = 0;
+  _plastic_volumetric_strain[ _qp ] = 0;
   _volumetric_strain_rate[ _qp ] = 0;
   _total_volumetric_strain[ _qp ] = 0;
   _mechanical_porosity[ _qp ] = 0;
@@ -370,7 +370,7 @@ RedbackMechMaterial::computeQpStress()
 
   // Evaluate and update current equivalent and volumetric plastic strain
   _eqv_plastic_strain[ _qp ] = std::pow(2.0 / 3.0, 0.5) * dp.L2norm();
-  _volumetric_strain[ _qp ] = dp.trace();
+  _plastic_volumetric_strain[ _qp ] = dp.trace();
 
   // Calculate elastic strain increment
   RankTwoTensor total_strain_increment;
@@ -471,7 +471,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _mean_stress[ _qp ] = sig.trace() / 3.0;
 
   // Compute plastic strains
-  RankTwoTensor instantaneous_strain_rate, total_volumetric_strain_rate;
+  RankTwoTensor instantaneous_strain_rate, strain_rate;
 
   if (_dt == 0)
   {
@@ -481,9 +481,9 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   {
     instantaneous_strain_rate = (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]) / _dt;
   }
-  total_volumetric_strain_rate = (_total_strain[ _qp ] - _total_strain_old[ _qp ]) / _dt;
-  _mises_strain_rate[ _qp ] = std::pow(2.0 / 3.0, 0.5) * instantaneous_strain_rate.L2norm();
-  _volumetric_strain_rate[ _qp ] = total_volumetric_strain_rate.trace();
+  strain_rate = (_total_strain[ _qp ] - _total_strain_old[ _qp ]) / _dt;
+  _eqv_plastic_strain_rate[ _qp ] = std::pow(2.0 / 3.0, 0.5) * instantaneous_strain_rate.L2norm();
+  _volumetric_strain_rate[ _qp ] = strain_rate.trace();
   Real def_grad = _grad_disp_x[ _qp ](0) + _grad_disp_y[ _qp ](1) + _grad_disp_z[ _qp ](2);
   Real def_grad_old = _grad_disp_x_old[ _qp ](0) + _grad_disp_y_old[ _qp ](1) + _grad_disp_z_old[ _qp ](2);
   Real def_grad_rate = (def_grad - def_grad_old) / _dt;
@@ -567,9 +567,9 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   Real total_energy_input = sig.doubleContraction(instantaneous_strain_rate);
 
   _mass_removal_rate[ _qp ] = _chemo_mechanical_porosity_coeff * (1 + total_energy_input);
-  if (_volumetric_strain[ _qp ] > 0)
+  if (_plastic_volumetric_strain[ _qp ] > 0)
   {
-    _mass_removal_rate[ _qp ] = _chemo_mechanical_porosity_coeff * _volumetric_strain[ _qp ];
+    _mass_removal_rate[ _qp ] = _chemo_mechanical_porosity_coeff * _plastic_volumetric_strain[ _qp ];
   }
   // End of the chemical degradation method of Hu and Hueckel 2013
 
@@ -897,10 +897,10 @@ RedbackMechMaterial::formCreepDamage(Real cohesion)
   if (d_yield_dq > 0) // ensuring positiveness of the plastic multiplier
   {
     /* the plastic multiplier could be having this form:
-     * lambda_dot = _mises_stress[_qp] * _mises_strain_rate[_qp] / d_yield_dq;
+     * lambda_dot = _mises_stress[_qp] * _eqv_plastic_strain_rate[_qp] / d_yield_dq;
      * but cohesion in J2 plasticity is the mises stress at yield, so we are
      * going with a much simpler form: */
-    lambda_dot = _mises_strain_rate[ _qp ] / d_yield_dq;
+    lambda_dot = _eqv_plastic_strain_rate[ _qp ] / d_yield_dq;
   }
 
   Real plastic_damage = _damage_coeff * lambda_dot;

@@ -149,7 +149,7 @@ protected:
   Real _exponential;
 
   MaterialProperty<Real> & _mises_strain;
-  MaterialProperty<Real> & _mises_strain_rate_nomech;
+  MaterialProperty<Real> & _eqv_plastic_strain_rate_nomech;
 
   MaterialProperty<Real> & _pressurization_coefficient;
 
