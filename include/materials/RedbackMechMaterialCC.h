@@ -29,7 +29,7 @@ public:
   RedbackMechMaterialCC(const InputParameters & parameters);
 
 protected:
-  Real _slope_yield_surface; // coefficient for yield surface
+  Real _M; // coefficient for yield surface
   Real _shift_ellipse; // horizontal shift of the ellipse
 
   virtual void

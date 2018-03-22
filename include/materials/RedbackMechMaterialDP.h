@@ -29,7 +29,7 @@ public:
   RedbackMechMaterialDP(const InputParameters & parameters);
 
 protected:
-  Real _slope_yield_surface; // coefficient for yield surface
+  Real _mu; // coefficient for yield surface
 
   virtual void
   getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, Real, RankFourTensor &) override;

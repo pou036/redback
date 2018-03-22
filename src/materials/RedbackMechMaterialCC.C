@@ -20,7 +20,7 @@ validParams<RedbackMechMaterialCC>()
 {
   InputParameters params = validParams<RedbackMechMaterial>();
   // TODO: Check sign of slope_yield_surface
-  //  if (_slope_yield_surface == 0)
+  //  if (_M == 0)
   //    mooseError("modified Cam-Clay cannot deal with 0 CSL slope
   //    ('slope_yield_surface')");
   //  if (getYieldStress(0) <= 0)
@@ -33,7 +33,7 @@ validParams<RedbackMechMaterialCC>()
 
 RedbackMechMaterialCC::RedbackMechMaterialCC(const InputParameters & parameters) :
     RedbackMechMaterial(parameters),
-    _slope_yield_surface(std::fabs(getParam<Real>("slope_yield_surface"))),
+    _M(std::fabs(getParam<Real>("slope_yield_surface"))),
     _shift_ellipse(getParam<Real>("shift_ellipse"))
 {
 }
@@ -43,7 +43,7 @@ RedbackMechMaterialCC::RedbackMechMaterialCC(const InputParameters & parameters)
  */
 void
 RedbackMechMaterialCC::getFlowTensor(const RankTwoTensor & sig,
-                                     Real /*q*/,
+                                     Real q,
                                      Real p,
                                      Real /*q_y*/,
                                      Real /*p_y*/,
@@ -52,8 +52,11 @@ RedbackMechMaterialCC::getFlowTensor(const RankTwoTensor & sig,
 {
   Real pc = -yield_stress;
 
-  flow_tensor = 3.0 * sig.deviatoric() / (_slope_yield_surface * _slope_yield_surface);
+  flow_tensor = 3.0 * sig.deviatoric() / (_M * _M);
   flow_tensor.addIa((2.0 * p - pc - 2*_shift_ellipse) / 3.0);
+  // Normalise flow tensor
+  flow_tensor /= std::sqrt(std::pow(2*p - pc - 2*_shift_ellipse, 2) / 3.0
+    + 6*q*q/ std::pow(_M, 4));
 }
 
 /**
@@ -95,7 +98,7 @@ RedbackMechMaterialCC::getDerivativeFlowIncrement(Real & dfi_dp,
   Real p_y2, q_y2, s2, ds_dp, ds_dq;
   bool is_plastic;
   Real delta_p = sigma_0 / 100.;
-  Real delta_q = _slope_yield_surface*delta_p;
+  Real delta_q = _M*delta_p;
   get_py_qy(pressure + delta_p, sig_eqv, p_y2, q_y2, -pc, is_plastic, s2);
   ds_dp = (s2 - s) / delta_p;
   get_py_qy(pressure, sig_eqv + delta_q, p_y2, q_y2, -pc, is_plastic, s2);
@@ -121,7 +124,7 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig,
   RankTwoTensor sig_dev, flow_dirn_vol, flow_dirn_dev, fij, flow_dirn, flow_tensor;
   RankTwoTensor dfi_dft;
   RankFourTensor dfd_dsig, dfi_dsig;
-  Real f1, f2, f3;
+  Real f1, f2, f3, f4, f5, f6, f7;
   Real dfi_dp, dfi_dseqv;
 
   Real pc = -yield_stress;
@@ -141,16 +144,17 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig,
    *of the flow direction tensor
    * with respect to the stress tensor. See also REDBACK's documentation
    * */
-
-  f1 = 0.0;
-  f2 = 0.0;
+  Real norm = std::sqrt(std::pow(2*pressure - pc - 2*_shift_ellipse, 2) / 3.0
+      + 6*sig_eqv*sig_eqv / std::pow(_M, 4));
+  f1 = 3.0 / (_M * _M * norm);
+  f2 = (2.0 / 9.0 - 1.0 / (_M * _M)) / norm;
   f3 = 0.0;
   if (sig_eqv > 1e-10)
-  {
-    f1 = 3.0 / (_slope_yield_surface * _slope_yield_surface);
-    f2 = 2.0 / 9.0 - 1.0 / (_slope_yield_surface * _slope_yield_surface);
     f3 = 3.0 / (2.0 * sig_eqv);
-  }
+  f4 = (2*pressure - pc - 2*_shift_ellipse) / (3.0 * std::pow(norm, 3));
+  f5 = f1 / std::pow(norm, 2);
+  f6 = 2*(2*pressure - pc - 2*_shift_ellipse) / 9.0;
+  f7 = 9.0 / std::pow(_M, 4);
   // This loop calculates the first term
   for (i = 0; i < 3; ++i)
     for (j = 0; j < 3; ++j)
@@ -163,7 +167,10 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig,
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dfd_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) + f2 * deltaFunc(i, j) * deltaFunc(k, l);
+          dfd_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l)
+            + f2 * deltaFunc(i, j) * deltaFunc(k, l)
+            - (f4 * deltaFunc(i, j) + f5 * sig_dev(i, j))
+            * (f6 * deltaFunc(k, l) + f7 * sig_dev(k, l));
 
   dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr + dfi_dsig; // Jacobian
 }
@@ -171,15 +178,14 @@ RedbackMechMaterialCC::getJac(const RankTwoTensor & sig,
 void
 RedbackMechMaterialCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
 {
-  Real M = _slope_yield_surface;
   Real pc = -yield_stress;
   // Check if outside the ellipse
-  Real potential = std::pow(q / M, 2) + p * (p - pc) + _shift_ellipse*(_shift_ellipse - 2*p + pc);
+  Real potential = std::pow(q / _M, 2) + p * (p - pc) + _shift_ellipse*(_shift_ellipse - 2*p + pc);
   is_plastic = (potential >= 0); // compute yield coords regardless
 
   // get yield point in any case (even if elastic)
-  //Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y, _shift_ellipse);
-  Ellipse::getYieldPointCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y, s, _shift_ellipse);
+  //Ellipse::distanceCC(_M, -yield_stress, p, q, p_y, q_y, _shift_ellipse);
+  Ellipse::getYieldPointCC(_M, -yield_stress, p, q, p_y, q_y, s, _shift_ellipse);
 }
 
 void

@@ -17,14 +17,13 @@ InputParameters
 validParams<RedbackMechMaterialDP>()
 {
   InputParameters params = validParams<RedbackMechMaterial>();
-  // TODO: deal with sign of _slope_yield_surface properly in DP case
   params.addParam<Real>("slope_yield_surface", 0, "Slope of yield surface (usually negative)");
 
   return params;
 }
 
 RedbackMechMaterialDP::RedbackMechMaterialDP(const InputParameters & parameters) :
-    RedbackMechMaterial(parameters), _slope_yield_surface(getParam<Real>("slope_yield_surface"))
+    RedbackMechMaterial(parameters), _mu(getParam<Real>("slope_yield_surface"))
 {
 }
 
@@ -37,22 +36,22 @@ RedbackMechMaterialDP::getPressureProjection(Real pressure, Real sig_eqv, Real c
   // yield pressure, for non-associative, replace mu^2 with mu*dilatency
   // the "fmin" is to handle the apex. Apparently fmin(1/0, x) = x, so it's
   // always true
-  // return fmin(-cohesion/_slope_yield_surface, (pressure +
-  // _slope_yield_surface*(sig_eqv - cohesion))
-  //    / (1.0 + (_slope_yield_surface) * (_slope_yield_surface)));
+  // return fmin(-cohesion/_mu, (pressure +
+  // _mu*(sig_eqv - cohesion))
+  //    / (1.0 + (_mu) * (_mu)));
 
-  if (_slope_yield_surface == 0)
+  if (_mu == 0)
     return pressure;
-  else if (_slope_yield_surface < 0)
-    return fmin(-cohesion / _slope_yield_surface,
-                (pressure + _slope_yield_surface * (sig_eqv - cohesion)) /
-                  (1.0 + (_slope_yield_surface) * (_slope_yield_surface)));
+  else if (_mu < 0)
+    return fmin(-cohesion / _mu,
+                (pressure + _mu * (sig_eqv - cohesion)) /
+                  (1.0 + (_mu) * (_mu)));
   else
   {
-    // _slope_yield_surface > 0, for whatever reason...
-    return fmax(-cohesion / _slope_yield_surface,
-                (pressure + _slope_yield_surface * (sig_eqv - cohesion)) /
-                  (1.0 + (_slope_yield_surface) * (_slope_yield_surface)));
+    // _mu > 0, for whatever reason...
+    return fmax(-cohesion / _mu,
+                (pressure + _mu * (sig_eqv - cohesion)) /
+                  (1.0 + (_mu) * (_mu)));
   }
 }
 
@@ -73,10 +72,9 @@ RedbackMechMaterialDP::getFlowTensor(const RankTwoTensor & sig,
   if (q > 1e-8)
     val = 3.0 / (2.0 * q);
   flow_tensor = sig_dev * val;
-  flow_tensor.addIa(-_slope_yield_surface / 3.0);
-  flow_tensor /= std::pow(2.0 / 3.0, 0.5) * flow_tensor.L2norm();
-  // flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm(); // TODO:
-  // debugging, returning a tensor of norm sqrt(3/2) to match the J2 case
+  flow_tensor.addIa(-_mu / 3.0);
+  // Normalise flow tensor
+  flow_tensor /= std::pow(3.0 / 2.0 + _mu*_mu, 0.5);
 }
 
 /**
@@ -88,10 +86,9 @@ RedbackMechMaterialDP::getFlowIncrement(
 {
   Real flow_incr_vol =
     _ref_pe_rate * _dt *
-    std::pow(macaulayBracket(((pressure - p_yield_stress) / yield_stress) * (_slope_yield_surface < 0 ? 1 : -1)),
+    std::pow(macaulayBracket(((pressure - p_yield_stress) / yield_stress) * (_mu < 0 ? 1 : -1)),
              _exponent) *
     _exponential;
-  // TODO: q_yield_stress can be 0, we should handle that case properly...
   Real flow_incr_dev =
     _ref_pe_rate * _dt *
     std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * ((sig_eqv - q_yield_stress) / yield_stress)), _exponent) *
@@ -111,7 +108,7 @@ RedbackMechMaterialDP::getDerivativeFlowIncrement(Real & dfi_dp,
                                                   Real q_yield_stress,
                                                   Real p_yield_stress)
 {
-  Real p_term = macaulayBracket(((pressure - p_yield_stress) / yield_stress) * (_slope_yield_surface < 0 ? 1 : -1));
+  Real p_term = macaulayBracket(((pressure - p_yield_stress) / yield_stress) * (_mu < 0 ? 1 : -1));
   Real q_term = macaulayBracket((sig_eqv - q_yield_stress) / yield_stress);
   Real factor = _ref_pe_rate * _dt * _exponent * _exponential /
                 std::sqrt(std::pow(p_term, 2 * _exponent) + std::pow(q_term, 2 * _exponent));
@@ -135,7 +132,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
   RankTwoTensor sig_dev, fij, flow_dirn;
   RankTwoTensor dfi_dft;
   RankFourTensor dfd_dft, dfd_dsig, dfi_dsig;
-  Real f1, f2, f3;
+  Real f1, f2, f3, f4;
   Real dfi_dp, dfi_dseqv;
 
   sig_dev = sig.deviatoric();
@@ -158,11 +155,13 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
   f1 = 0.0;
   f2 = 0.0;
   f3 = 0.0;
+  f4 = 0.0;
   if (sig_eqv > 1e-8)
   {
-    f1 = 3.0 / (2.0 * sig_eqv);
+    f1 = 3.0 / (2.0 * sig_eqv * std::pow(3.0 / 2.0 + _mu*_mu, 0.5));
     f2 = f1 / 3.0;
-    f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0));
+    f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0) * std::pow(3.0 / 2.0 + _mu*_mu, 0.5));
+    f4 = 3.0 / (2.0 * sig_eqv);
   }
 
   // This loop calculates the first term
@@ -170,7 +169,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dfi_dsig(i, j, k, l) = flow_dirn(i, j) * (f1 * sig_dev(k, l) * dfi_dseqv + dfi_dp * deltaFunc(k, l) / 3.0);
+          dfi_dsig(i, j, k, l) = flow_dirn(i, j) * (f4 * sig_dev(k, l) * dfi_dseqv + dfi_dp * deltaFunc(k, l) / 3.0);
 
   // This loop calculates the second term. Read REDBACK's documentation
   // (same as J2 plasticity case)
@@ -188,8 +187,8 @@ void
 RedbackMechMaterialDP::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
 {
   p_y = getPressureProjection(p /*p*/, q /*q*/, yield_stress /*yield stress*/);
-  q_y = yield_stress + _slope_yield_surface * p_y; // yield deviatoric stress
+  q_y = yield_stress + _mu * p_y; // yield deviatoric stress
   // Check for plasticity
-  is_plastic = (q >= yield_stress + _slope_yield_surface * p);
+  is_plastic = (q >= yield_stress + _mu * p);
   s = std::sqrt(std::pow(p-p_y, 2) + std::pow(q-q_y, 2));
 }

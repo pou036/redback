@@ -39,7 +39,7 @@ RedbackMechMaterialCCanisotropic::stepInitQpProperties()
   if (_t == 0)
     _anisotropy_coeff[ _qp ] = _initial_anisotropy_param; // TODO: implement \dot{alpha}
   else
-    _anisotropy_coeff[ _qp ] = _anisotropy_coeff[ _qp ] + 0 * (_slope_yield_surface - _anisotropy_coeff[ _qp ]) *
+    _anisotropy_coeff[ _qp ] = _anisotropy_coeff[ _qp ] + 0 * (_M - _anisotropy_coeff[ _qp ]) *
                                                             _dt; // TODO:check the sign of the anisotropy coefficient
 }
 
@@ -53,7 +53,7 @@ RedbackMechMaterialCCanisotropic::getFlowTensor(
   if (pc > 0)
     pc *= -1;
 
-  Real M_squared = _slope_yield_surface * _slope_yield_surface;
+  Real M_squared = _M * _M;
   Real alpha_squared = _anisotropy_coeff[ _qp ] * _anisotropy_coeff[ _qp ];
   if (q != 0)
     flow_tensor = 3.0 * ((q - _anisotropy_coeff[ _qp ] * p) / q) * sig.deviatoric() / (M_squared - alpha_squared);
@@ -75,7 +75,7 @@ RedbackMechMaterialCCanisotropic::getFlowIncrement(
   Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real pc, Real /*s*/)
 {
   pc *= -1;
-  if (Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/_slope_yield_surface,
+  if (Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/_M,
                                               /*p_0=*/pc,
                                               /*alpha=*/_anisotropy_coeff[ _qp ],
                                               /*x=*/pressure,
@@ -93,7 +93,7 @@ Real
 RedbackMechMaterialCCanisotropic::getDerivativeFlowIncrement(
   const RankTwoTensor & /*sig*/, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
 {
-  if (Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/_slope_yield_surface,
+  if (Ellipse::isPointOutsideOfRotatedEllipse(/*m=*/_M,
                                               /*p_0=*/pc,
                                               /*alpha=*/_anisotropy_coeff[ _qp ],
                                               /*x=*/pressure,
@@ -167,11 +167,11 @@ RedbackMechMaterialCCanisotropic::getJac(const RankTwoTensor & sig,
   f2 = 0.0;
   if (sig_eqv > 1e-8)
   {
-    f1 = 3.0 / (_slope_yield_surface * _slope_yield_surface - _anisotropy_coeff[ _qp ] * _anisotropy_coeff[ _qp ]);
+    f1 = 3.0 / (_M * _M - _anisotropy_coeff[ _qp ] * _anisotropy_coeff[ _qp ]);
     f2 = f1 * (1.0 - _anisotropy_coeff[ _qp ] * p_yield_stress / q_yield_stress);
     f3 = -f1 *
          (1.0 - _anisotropy_coeff[ _qp ] * p_yield_stress / q_yield_stress -
-          2 * _slope_yield_surface * _slope_yield_surface / 9.0) /
+          2 * _M * _M / 9.0) /
          3.0;
     f4 = -f1 * (_anisotropy_coeff[ _qp ] / (3.0 * q_yield_stress));
     f5 = f1 * (3.0 * _anisotropy_coeff[ _qp ] * p_yield_stress / (2.0 * q_yield_stress * q_yield_stress));
@@ -198,10 +198,10 @@ void
 RedbackMechMaterialCCanisotropic::get_py_qy(
   Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & /*s*/)
 {
-  Ellipse::distanceCCanisotropic(_slope_yield_surface, -yield_stress, _anisotropy_coeff[ _qp ], p, q, p_y, q_y);
+  Ellipse::distanceCCanisotropic(_M, -yield_stress, _anisotropy_coeff[ _qp ], p, q, p_y, q_y);
   Real pc = -yield_stress;
   is_plastic = Ellipse::isPointOutsideOfRotatedEllipse(
-    /*m=*/_slope_yield_surface,
+    /*m=*/_M,
     /*p_0=*/pc,
     /*alpha=*/_anisotropy_coeff[ _qp ],
     /*x=*/p,
