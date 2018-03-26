@@ -41,6 +41,11 @@
   [../]
 []
 
+[AuxVariables]
+  [./lewis_fault]
+  [../]
+[]
+
 [Kernels]
   [./diff_left]
     type = RedbackMassDiffusion
@@ -70,7 +75,7 @@
     variable = p_left
     neighbor_var = 'p_right'
     boundary = 'interface_left'
-    fault_lewis_number = 10
+    fault_lewis_number = lewis_fault
     fault_thickness = 0.1
   [../]
 []
@@ -79,6 +84,14 @@
   [./mat]
     type = RedbackMaterial
     ref_lewis_nb = 1
+  [../]
+[]
+
+[ICs]
+  [./lewis_fault]
+    type = ConstantIC
+    variable = lewis_fault
+    value = 10
   [../]
 []
 

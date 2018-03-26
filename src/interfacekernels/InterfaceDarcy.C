@@ -17,7 +17,7 @@ InputParameters
 validParams<InterfaceDarcy>()
 {
   InputParameters params = validParams<InterfaceKernel>();
-  params.addParam<Real>("fault_lewis_number", 1., "The diffusion coefficient.");
+  params.addRequiredCoupledVar("fault_lewis_number", "Lewis number of the fault.");
   params.addParam<Real>("fault_thickness", 1., "The neighboring diffusion coefficient.");
   return params;
 }
@@ -25,7 +25,7 @@ validParams<InterfaceDarcy>()
 InterfaceDarcy::InterfaceDarcy(const InputParameters & parameters) :
     InterfaceKernel(parameters),
     _Le(getMaterialProperty<Real>("lewis_number")),
-    _Le_fault(getParam<Real>("fault_lewis_number")),
+    _Le_fault(coupledValue("fault_lewis_number")),
     _gravity_term(getMaterialProperty<RealVectorValue>("fluid_gravity_term")),
     _thickness(getParam<Real>("fault_thickness"))
 {
@@ -39,8 +39,8 @@ InterfaceDarcy::InterfaceDarcy(const InputParameters & parameters) :
 Real
 InterfaceDarcy::computeQpResidual(Moose::DGResidualType type)
 {
-  RealVectorValue res = (_neighbor_value[ _qp ] - _u[ _qp ]) / (_Le_fault * _thickness) * _normals[ _qp ] +
-             _gravity_term[ _qp ] * (1 / _Le[ _qp ] - 1 / _Le_fault);
+  RealVectorValue res = (_neighbor_value[ _qp ] - _u[ _qp ]) / (_Le_fault[ _qp ] * _thickness) * _normals[ _qp ] +
+             _gravity_term[ _qp ] * (1 / _Le[ _qp ] - 1 / _Le_fault[ _qp ]);
 
   switch (type)
   {

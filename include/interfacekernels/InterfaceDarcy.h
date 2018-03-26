@@ -31,7 +31,7 @@ protected:
   virtual Real computeQpJacobian(Moose::DGJacobianType type);
 
   const MaterialProperty<Real> & _Le;
-  Real _Le_fault;
+  const VariableValue & _Le_fault;
   const MaterialProperty<RealVectorValue> & _gravity_term;
   Real _thickness;
 };
