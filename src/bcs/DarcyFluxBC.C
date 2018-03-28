@@ -29,11 +29,11 @@ DarcyFluxBC::DarcyFluxBC(const InputParameters & parameters) :
 RealGradient
 DarcyFluxBC::computeQpFluxResidual()
 {
-  return _Le[ _qp ] * _grad_u[ _qp ];
+  return 1 / _Le[ _qp ] * _grad_u[ _qp ];
 }
 
 RealGradient
 DarcyFluxBC::computeQpFluxJacobian()
 {
-  return _Le[ _qp ] * _grad_phi[ _j ][ _qp ];
+  return 1 / _Le[ _qp ] * _grad_phi[ _j ][ _qp ];
 }
