@@ -79,8 +79,8 @@ void
 RedbackMechMaterialCC::getDerivativeFlowIncrement(Real & dfi_dp,
                                                   Real & dfi_dq,
                                                   const RankTwoTensor & /*sig*/,
-                                                  Real pressure,
-                                                  Real sig_eqv,
+                                                  Real p,
+                                                  Real q,
                                                   Real pc,
                                                   Real /*q_yield_stress*/,
                                                   Real /*p_yield_stress*/,
@@ -97,11 +97,11 @@ RedbackMechMaterialCC::getDerivativeFlowIncrement(Real & dfi_dp,
   // Compute numerically derivatives of s with respect to p and q
   Real p_y2, q_y2, s2, ds_dp, ds_dq;
   bool is_plastic;
-  Real delta_p = sigma_0 / 100.;
+  Real delta_p = sigma_0 / 1000.; // TODO: this value influences the convergence and should be dynamic!
   Real delta_q = _M*delta_p;
-  get_py_qy(pressure + delta_p, sig_eqv, p_y2, q_y2, -pc, is_plastic, s2);
+  get_py_qy(p + delta_p, q, p_y2, q_y2, -pc, is_plastic, s2);
   ds_dp = (s2 - s) / delta_p;
-  get_py_qy(pressure, sig_eqv + delta_q, p_y2, q_y2, -pc, is_plastic, s2);
+  get_py_qy(p, q + delta_q, p_y2, q_y2, -pc, is_plastic, s2);
   ds_dq = (s2 - s) / delta_q;
   Real tmp = _ref_pe_rate * _dt * _exponent * _exponential * std::pow(s/sigma_0, _exponent - 1) / sigma_0;
   dfi_dp = tmp * ds_dp;

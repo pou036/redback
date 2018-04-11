@@ -231,7 +231,7 @@ Ellipse::getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const
         (std::exp(-2*t)*(2*std::sqrt(1+alpha*std::exp(beta*2*t)) - beta*hyp2f1(0.5, -1/beta, (beta-1.0)/beta, -alpha*std::exp(beta*2*t))) \
          -2*std::sqrt(1+alpha) + beta*hyp2f1(0.5, -1/beta, (beta-1.0)/beta, -alpha)))
   */
-  int n_iter = 100;
+  int n_iter = 100; // TODO: is this value good enough even very far from the ellipse?
   s = 0;
   Real t_old = 0;
   Real t_new = 0;
