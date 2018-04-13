@@ -153,7 +153,8 @@ Ellipse::sqrDistance(Real const e[ 2 ], Real const y[ 2 ], Real x[ 2 ])
 }
 
 Real
-Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real shift_ellipse)
+Ellipse::distanceCC(
+  Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real shift_ellipse)
 {
   Real e[ 2 ];         // ellipse axes
   Real x[ 2 ];         // point coordinates as array
@@ -171,8 +172,11 @@ Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, 
 }
 
 void
-Ellipse::getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real & s, Real shift)
+Ellipse::getYieldPointCC(
+  Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real & s, Real shift)
 {
+  Real t; // curvilinear "time"
+  Real alpha, beta, gamma, norm_n;
   if (y1 < 0)
   {
     // algorithm below only works for y1 > 0, so use symmetry
@@ -184,7 +188,7 @@ Ellipse::getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const
   // Deal with easy cases first
   if (y0 == p_c / 2.0 + shift)
   {
-    // Real t = -std::pow(m, 2)*std::log(-m*p_c/(2.0*y1))/2.0;
+    // t = -std::pow(m, 2)*std::log(m*std::abs(p_c)/(2.0*y1))/2.0;
     x0 = y0;
     x1 = -m * p_c / 2.0;
     s = std::abs(y1 - x1);
@@ -192,7 +196,7 @@ Ellipse::getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const
   }
   else if (y1 == 0)
   {
-    // Real t = -std::log(std::abs(p_c/(2*y0-p_c)))/2.0;
+    // t = -std::log(std::abs(p_c/(2*y0-p_c-2*shift)))/2.0;
     if (y0 > p_c / 2.0 + shift)
       x0 = shift;
     else
@@ -201,11 +205,22 @@ Ellipse::getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const
     x1 = 0.0;
     return;
   }
+  // Cases where the point is not on any axis
+  else if (m == 1)
+  {
+    // we have a circle
+    Real R = std::sqrt(std::pow(y0 - p_c / 2.0 - shift, 2) + std::pow(y1, 2));
+    x0 = p_c / 2.0 + shift + (y0 - p_c / 2.0 - shift) * std::abs(p_c) / (2 * R);
+    x1 = std::abs(p_c) * y1 / (2 * R);
+    s = R - std::abs(p_c / 2);
+    return;
+  }
+
   // For all other cases, we use Newton Raphson
   Real tol = 1e-15;       // tolerance on ellipse potential to be close to 0
   int nb_iter_max = 1000; // max number of iterations to avoid infinite loops
   Real m2 = m * m;
-  Real t = 0;
+  t = 0;
   Real phi = std::pow(y1 / m, 2) + std::pow(y0 - shift - p_c / 2.0, 2) - p_c * p_c / 4.0;
   Real phi_prime = -4 * std::pow(y1 / m2, 2) - 4 * std::pow(y0 - shift - p_c / 2.0, 2);
   int nb_iter = 0;
@@ -213,9 +228,10 @@ Ellipse::getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const
   {
     nb_iter += 1;
     t -= phi / phi_prime;
-    phi =
-      std::pow(y1 / m, 2) * std::exp(-4 * t / m2) + std::pow(y0 - shift - p_c / 2.0, 2) * std::exp(-4 * t) - p_c * p_c / 4.0;
-    phi_prime = -4 * std::pow(y1 / m2, 2) * std::exp(-4 * t / m2) - 4 * std::pow(y0 - shift - p_c / 2.0, 2) * std::exp(-4 * t);
+    phi = std::pow(y1 / m, 2) * std::exp(-4 * t / m2) + std::pow(y0 - shift - p_c / 2.0, 2) * std::exp(-4 * t) -
+          p_c * p_c / 4.0;
+    phi_prime =
+      -4 * std::pow(y1 / m2, 2) * std::exp(-4 * t / m2) - 4 * std::pow(y0 - shift - p_c / 2.0, 2) * std::exp(-4 * t);
   }
   if (nb_iter == nb_iter_max)
     mooseError("Newton Raphson (getYieldPointCC) failed to converge after ", nb_iter, " iterations.");
@@ -223,25 +239,73 @@ Ellipse::getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const
   x1 = y1 * std::exp(-2 * t / m2);
 
   // Compute arc-length from point to yield point
-  /*// If we have access to hypergeometric function 2F1 (not accounting for shift!)
-    gamma = p - pc/2.0
-    alpha = q*q/(M*M*M*M*gamma*gamma)
-    beta = 2*(1 - 1/(M*M))
-    length_analytical = std::fabs((gamma/(beta-2.0)) * \
-        (std::exp(-2*t)*(2*std::sqrt(1+alpha*std::exp(beta*2*t)) - beta*hyp2f1(0.5, -1/beta, (beta-1.0)/beta, -alpha*std::exp(beta*2*t))) \
-         -2*std::sqrt(1+alpha) + beta*hyp2f1(0.5, -1/beta, (beta-1.0)/beta, -alpha)))
-  */
-  int n_iter = 100; // TODO: is this value good enough even very far from the ellipse?
-  s = 0;
-  Real t_old = 0;
-  Real t_new = 0;
-  for (int i=1; i<n_iter+1; i++)
+  gamma = y0 - shift - p_c / 2.0;
+  alpha = std::pow(y1, 2) / (std::pow(m, 4) * std::pow(gamma, 2));
+  beta = 2 * (1 - 1 / std::pow(m, 2));
+  // If all arguments |z|<1, we can use hypergeometric function 2F1 (not accounting for shift!)
+  // (as we don't have a good implementation for |z|>1)
+  if (std::abs(alpha) < 1 && std::abs(alpha * std::exp(beta * 2 * t / norm_n)) < 1)
   {
-    t_new = i*t/n_iter;
-    s += std::sqrt( std::pow((y0 - shift - p_c/2.0)*(std::exp(-2*t_new) - std::exp(-2*t_old)), 2) \
-        + std::pow(y1*(std::exp(-2*t_new/m2) - std::exp(-2*t_old/m2)), 2) );
-    t_old = t_new;
+    norm_n = std::sqrt(std::pow(2 * y0 - p_c - 2 * shift, 2) / 3 + 6 * std::pow(y1, 2) / std::pow(m, 4));
+    s = std::fabs(gamma) / (beta - 2.0) *
+        (std::exp(-2 * t) *
+           (2 * std::sqrt(1 + alpha * std::exp(beta * 2 * t / norm_n)) -
+            beta * hyp2f1(0.5, -1 / beta, (beta - 1.0) / beta, -alpha * std::exp(beta * 2 * t / norm_n))) -
+         2 * std::sqrt(1 + alpha) + beta * hyp2f1(0.5, -1 / beta, (beta - 1.0) / beta, -alpha));
   }
+  else
+  {
+    // Real test = alpha*std::exp(beta*2*t/norm_n);
+    // std::cout << "getYieldPointCC using sum of segments with shift=" << shift << ", alpha=" << alpha << ",
+    // alpha*std::exp(beta*2*t/norm_n)="<< test << std::endl;
+    int n_iter = 100; // TODO: is this value good enough even very far from the ellipse?
+    Real t_old = 0;
+    Real t_new = 0;
+    s = 0;
+    for (int i = 1; i < n_iter + 1; i++)
+    {
+      t_new = i * t / n_iter;
+      s += std::sqrt(std::pow((y0 - shift - p_c / 2.0) * (std::exp(-2 * t_new) - std::exp(-2 * t_old)), 2) +
+                     std::pow(y1 * (std::exp(-2 * t_new / m2) - std::exp(-2 * t_old / m2)), 2));
+      t_old = t_new;
+    }
+  }
+}
+
+Real
+Ellipse::hyp2f1(Real a, Real b, Real c, Real z)
+{
+  Real tol = 1e-12;
+  int n_max = 500; // Capping the maximum number of iterations
+  int n = 2;
+  Real S_n_minus_2, S_n_minus_1, S_n, C_n_minus_1, C_n, C_n_plus_1;
+  S_n_minus_2 = 1;                                           // S_0 = C_0 = 1
+  C_n_minus_1 = a * b * z / c;                               // C_1
+  S_n_minus_1 = S_n_minus_2 + C_n_minus_1;                   // S_1
+  C_n = C_n_minus_1 * (a + 1) * (b + 1) * z / ((c + 1) * 2); // C_2
+  S_n = S_n_minus_1 + C_n;                                   // S_2
+  C_n_plus_1 = C_n * (a + 2) * (b + 2) * z / ((c + 2) * 3);  // C_3
+  n += 1;                                                    // n=3
+  while ((std::abs(C_n_plus_1 / S_n) > tol || std::abs(C_n / S_n_minus_1) > tol ||
+          std::abs(C_n_minus_1 / S_n_minus_2) > tol) &&
+         n < n_max)
+  {
+    S_n_minus_2 = S_n_minus_1;
+    S_n_minus_1 = S_n;
+    S_n += C_n_plus_1;
+    C_n_minus_1 = C_n;
+    C_n = C_n_plus_1;
+    C_n_plus_1 *= (a + n) * (b + n) * z / ((c + n) * (n + 1));
+    // std::cout << "n="<<n<<", S_n="<<S_n<<", C_n_plus_1="<<C_n_plus_1<<std::endl;
+    n += 1;
+  }
+  if (n > n_max)
+    mooseError("hyp2f1 did not converge after " + Moose::stringify(n_max) + " iterations. Approx. reached: hyp2f1(" +
+               Moose::stringify(a) + ", " + Moose::stringify(b) + ", " + Moose::stringify(c) + ", " +
+               Moose::stringify(z) + ") = " + Moose::stringify(S_n));
+  // std::cout << "hyp2f1 took " + Moose::stringify(n) + " iterations." << std::endl;
+  // std::cout << "hyp2f1(" << a << ", " << b << ", " << c << ", " << z << ") = "<< S_n << std::endl;
+  return S_n;
 }
 
 Real

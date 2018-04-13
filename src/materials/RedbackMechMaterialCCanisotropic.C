@@ -24,8 +24,8 @@ validParams<RedbackMechMaterialCCanisotropic>()
   return params;
 }
 
-RedbackMechMaterialCCanisotropic::RedbackMechMaterialCCanisotropic(const InputParameters & parameters) :
-    RedbackMechMaterialCC(parameters),
+RedbackMechMaterialCCanisotropic::RedbackMechMaterialCCanisotropic(const InputParameters & parameters)
+  : RedbackMechMaterialCC(parameters),
     _initial_anisotropy_param(getParam<Real>("initial_anisotropy_param")),
     _anisotropy_coeff(declareProperty<Real>("anisotropy_coeff"))
 {
@@ -169,10 +169,7 @@ RedbackMechMaterialCCanisotropic::getJac(const RankTwoTensor & sig,
   {
     f1 = 3.0 / (_M * _M - _anisotropy_coeff[ _qp ] * _anisotropy_coeff[ _qp ]);
     f2 = f1 * (1.0 - _anisotropy_coeff[ _qp ] * p_yield_stress / q_yield_stress);
-    f3 = -f1 *
-         (1.0 - _anisotropy_coeff[ _qp ] * p_yield_stress / q_yield_stress -
-          2 * _M * _M / 9.0) /
-         3.0;
+    f3 = -f1 * (1.0 - _anisotropy_coeff[ _qp ] * p_yield_stress / q_yield_stress - 2 * _M * _M / 9.0) / 3.0;
     f4 = -f1 * (_anisotropy_coeff[ _qp ] / (3.0 * q_yield_stress));
     f5 = f1 * (3.0 * _anisotropy_coeff[ _qp ] * p_yield_stress / (2.0 * q_yield_stress * q_yield_stress));
   }

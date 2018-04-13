@@ -30,8 +30,8 @@ validParams<RedbackMechMaterialExpCC>()
   return params;
 }
 
-RedbackMechMaterialExpCC::RedbackMechMaterialExpCC(const InputParameters & parameters) :
-    RedbackMechMaterial(parameters), _slope_yield_surface(getParam<Real>("slope_yield_surface"))
+RedbackMechMaterialExpCC::RedbackMechMaterialExpCC(const InputParameters & parameters)
+  : RedbackMechMaterial(parameters), _slope_yield_surface(getParam<Real>("slope_yield_surface"))
 {
 }
 
@@ -155,12 +155,12 @@ RedbackMechMaterialExpCC::getJac(const RankTwoTensor & sig,
 }
 
 void
-RedbackMechMaterialExpCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & /*is_plastic*/, Real & /*s*/)
+RedbackMechMaterialExpCC::get_py_qy(
+  Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & /*is_plastic*/, Real & /*s*/)
 {
   Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y, 0.);
 }
 
-void
-RedbackMechMaterialExpCC::form_damage_kernels(Real /*q_y*/)
+void RedbackMechMaterialExpCC::form_damage_kernels(Real /*q_y*/)
 {
 }

@@ -48,7 +48,8 @@ RedbackMechMaterialJ2::getFlowTensor(const RankTwoTensor & sig,
 }
 
 Real
-RedbackMechMaterialJ2::getFlowIncrement(Real sig_eqv, Real /*p*/, Real /*q_y*/, Real /*p_y*/, Real yield_stress, Real /*s*/)
+RedbackMechMaterialJ2::getFlowIncrement(
+  Real sig_eqv, Real /*p*/, Real /*q_y*/, Real /*p_y*/, Real yield_stress, Real /*s*/)
 {
   return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) * _exponential;
 }
@@ -99,7 +100,8 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig,
     for (unsigned int j = 0; j < 3; ++j)
       for (unsigned int k = 0; k < 3; ++k)
         for (unsigned int l = 0; l < 3; ++l)
-          dfi_dsig(i, j, k, l) = f3 * flow_dirn_dev(i, j) * flow_dirn_dev(k, l) * dfi_dseqv_dev; // d_flow_increment/d_sig
+          dfi_dsig(i, j, k, l) =
+            f3 * flow_dirn_dev(i, j) * flow_dirn_dev(k, l) * dfi_dseqv_dev; // d_flow_increment/d_sig
 
   RankFourTensor dft_dsig;
   for (unsigned int i = 0; i < 3; ++i)
@@ -114,11 +116,12 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig,
 }
 
 void
-RedbackMechMaterialJ2::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
+RedbackMechMaterialJ2::get_py_qy(
+  Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
 {
   p_y = p;
   q_y = yield_stress;
   // Check for plasticity
   is_plastic = (q >= q_y);
-  s = std::abs(q-q_y);
+  s = std::abs(q - q_y);
 }

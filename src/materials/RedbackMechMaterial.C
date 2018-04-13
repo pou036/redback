@@ -100,8 +100,8 @@ validParams<RedbackMechMaterial>()
   return params;
 }
 
-RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
-    Material(parameters),
+RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters)
+  : Material(parameters),
     // Copy-paste from TensorMechanicsMaterial.C
     _grad_disp_x(coupledGradient("disp_x")),
     _grad_disp_y(coupledGradient("disp_y")),
@@ -684,7 +684,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   bool is_plastic; // is this point in plastic regime or not?
   bool is_first_plastic_determined = false;
   bool is_first_plastic; // is_plastic the first time it's called
-  Real s; // curvilinear arc-length between (p,q) and (p_y,q_y)
+  Real s;                // curvilinear arc-length between (p,q) and (p_y,q_y)
 
   Real eqvpstrain = std::pow(2.0 / 3.0, 0.5) * dp.L2norm();
   Real yield_stress = getYieldStress(eqvpstrain);
@@ -769,9 +769,12 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
         err1 = resid.L2norm();
       }
       if (iter >= maxiter) // Convergence failure
-        throw MooseException("Constitutive Error-Too many iterations: Reduce time "
-                             "increment.\n"); // Convergence failure //TODO: check the
-                                              // adaptive time stepping
+      {
+        throw MooseException("Constitutive Error-Too many iterations (" + Moose::stringify(maxiter) +
+                             ", err1=" + Moose::stringify(err1) + " > tol1=" + Moose::stringify(tol1) +
+                             "): Reduce time "
+                             "increment.\n");
+      }
     }
     _returnmap_iter[ _qp ] = iter;
     dpn = dp + delta_dp;
@@ -790,7 +793,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 }
 
 void
-RedbackMechMaterial::get_py_qy_damaged(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
+RedbackMechMaterial::get_py_qy_damaged(
+  Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
 {
   get_py_qy(p, q, p_y, q_y, yield_stress, is_plastic, s);
   p_y *= (1 - _damage[ _qp ]);

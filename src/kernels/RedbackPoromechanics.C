@@ -24,8 +24,8 @@ validParams<RedbackPoromechanics>()
   return params;
 }
 
-RedbackPoromechanics::RedbackPoromechanics(const InputParameters & parameters) :
-    Kernel(parameters),
+RedbackPoromechanics::RedbackPoromechanics(const InputParameters & parameters)
+  : Kernel(parameters),
     _poromech_kernel(getMaterialProperty<Real>("poromechanics_kernel")),
     _poromech_jac(getMaterialProperty<Real>("poromechanics_jacobian")),
     _temp_var(coupled("temperature")),

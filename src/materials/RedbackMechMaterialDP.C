@@ -22,8 +22,8 @@ validParams<RedbackMechMaterialDP>()
   return params;
 }
 
-RedbackMechMaterialDP::RedbackMechMaterialDP(const InputParameters & parameters) :
-    RedbackMechMaterial(parameters), _mu(getParam<Real>("slope_yield_surface"))
+RedbackMechMaterialDP::RedbackMechMaterialDP(const InputParameters & parameters)
+  : RedbackMechMaterial(parameters), _mu(getParam<Real>("slope_yield_surface"))
 {
 }
 
@@ -43,15 +43,11 @@ RedbackMechMaterialDP::getPressureProjection(Real pressure, Real sig_eqv, Real c
   if (_mu == 0)
     return pressure;
   else if (_mu < 0)
-    return fmin(-cohesion / _mu,
-                (pressure + _mu * (sig_eqv - cohesion)) /
-                  (1.0 + (_mu) * (_mu)));
+    return fmin(-cohesion / _mu, (pressure + _mu * (sig_eqv - cohesion)) / (1.0 + (_mu) * (_mu)));
   else
   {
     // _mu > 0, for whatever reason...
-    return fmax(-cohesion / _mu,
-                (pressure + _mu * (sig_eqv - cohesion)) /
-                  (1.0 + (_mu) * (_mu)));
+    return fmax(-cohesion / _mu, (pressure + _mu * (sig_eqv - cohesion)) / (1.0 + (_mu) * (_mu)));
   }
 }
 
@@ -74,7 +70,7 @@ RedbackMechMaterialDP::getFlowTensor(const RankTwoTensor & sig,
   flow_tensor = sig_dev * val;
   flow_tensor.addIa(-_mu / 3.0);
   // Normalise flow tensor
-  flow_tensor /= std::pow(3.0 / 2.0 + _mu*_mu, 0.5);
+  flow_tensor /= std::pow(3.0 / 2.0 + _mu * _mu, 0.5);
 }
 
 /**
@@ -86,8 +82,7 @@ RedbackMechMaterialDP::getFlowIncrement(
 {
   Real flow_incr_vol =
     _ref_pe_rate * _dt *
-    std::pow(macaulayBracket(((pressure - p_yield_stress) / yield_stress) * (_mu < 0 ? 1 : -1)),
-             _exponent) *
+    std::pow(macaulayBracket(((pressure - p_yield_stress) / yield_stress) * (_mu < 0 ? 1 : -1)), _exponent) *
     _exponential;
   Real flow_incr_dev =
     _ref_pe_rate * _dt *
@@ -158,9 +153,9 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
   f4 = 0.0;
   if (sig_eqv > 1e-8)
   {
-    f1 = 3.0 / (2.0 * sig_eqv * std::pow(3.0 / 2.0 + _mu*_mu, 0.5));
+    f1 = 3.0 / (2.0 * sig_eqv * std::pow(3.0 / 2.0 + _mu * _mu, 0.5));
     f2 = f1 / 3.0;
-    f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0) * std::pow(3.0 / 2.0 + _mu*_mu, 0.5));
+    f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0) * std::pow(3.0 / 2.0 + _mu * _mu, 0.5));
     f4 = 3.0 / (2.0 * sig_eqv);
   }
 
@@ -184,11 +179,12 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
 }
 
 void
-RedbackMechMaterialDP::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
+RedbackMechMaterialDP::get_py_qy(
+  Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
 {
   p_y = getPressureProjection(p /*p*/, q /*q*/, yield_stress /*yield stress*/);
   q_y = yield_stress + _mu * p_y; // yield deviatoric stress
   // Check for plasticity
   is_plastic = (q >= yield_stress + _mu * p);
-  s = std::sqrt(std::pow(p-p_y, 2) + std::pow(q-q_y, 2));
+  s = std::sqrt(std::pow(p - p_y, 2) + std::pow(q - q_y, 2));
 }

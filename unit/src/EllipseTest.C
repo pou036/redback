@@ -584,7 +584,6 @@ EllipseTest::isPointOutsideOfEllipseTestMajorAxisVertical()
 
 /**
  * Testing Ellipse::distanceCC with shifted ellipse
- * Case: circle
  */
 void
 EllipseTest::distanceCCTestShift()
@@ -602,6 +601,35 @@ EllipseTest::distanceCCTestShift()
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y2, 1e-14);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2) - 1.0, x3, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y3, 1e-5);
+
+  // Case: ellipse, major axis horizontal, p_c < 0
+  // top right quadrant
+  d = Ellipse::distanceCC(/*m=*/0.5, /*p_c=*/-3.0, /*x1=*/1.5 + shift, /*y1=*/3.0, x2, y2, shift);
+  Ellipse::getYieldPointCC(/*m=*/0.5, /*p_c=*/-3.0, /*x1=*/1.5 + shift, /*y1=*/3.0, x3, y3, s, shift);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis horizontal, wrong d", 3.1210069, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis horizontal, wrong s", 3.31752131594, s, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+    "distanceCCTestShift, major axis horizontal, wrong x2", shift - 0.282058, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis horizontal, wrong y2", 0.437784, y2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+    "distanceCCTestShift, major axis horizontal, wrong x3", shift - 0.0385555846931, x3, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+    "distanceCCTestShift, major axis horizontal, wrong y3", 0.168952819574, y3, 1e-10);
+
+  // Case: ellipse, major axis vertical, p_c < 0
+  // top right quadrant
+  d = Ellipse::distanceCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-0.5 + shift, /*y1=*/2.0, x2, y2, shift);
+  Ellipse::getYieldPointCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-0.5 + shift, /*y1=*/2.0, x3, y3, s, shift);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis vertical, wrong d", 0.2094051, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis vertical, wrong s",
+                                       0.209475269026,
+                                       s,
+                                       1e-5); // TODO (that's the value without shift)
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis vertical, wrong x2", -0.150317, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis vertical, wrong y2", 1.854209, y2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+    "distanceCCTestShift, major axis vertical, wrong x3", -0.153371450454, x3, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis vertical, wrong y3", 1.85734897716, y3, 1e-10);
 }
 
 /**
@@ -618,11 +646,20 @@ EllipseTest::distanceCCTestCircle()
   d = Ellipse::distanceCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/1.5, /*y1=*/3.0, x2, y2, 0.);
   Ellipse::getYieldPointCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/1.5, /*y1=*/3.0, x3, y3, s, 0.);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(3 * std::sqrt(2) - 1.5, d, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(3 * std::sqrt(2) - 1.5, s, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong s", 3 * std::sqrt(2) - 1.5, s, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2) - 1.5, x2, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y2, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2) - 1.5, x3, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y3, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong x3", 1.5 / std::sqrt(2) - 1.5, x3, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong y3", 1.5 / std::sqrt(2), y3, 1e-5);
+  // top right quadrant with shift
+  d = Ellipse::distanceCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/2.5, /*y1=*/3.0, x2, y2, 1.);
+  Ellipse::getYieldPointCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/2.5, /*y1=*/3.0, x3, y3, s, 1.);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(3 * std::sqrt(2) - 1.5, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong s", 3 * std::sqrt(2) - 1.5, s, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2) - 0.5, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong x3", 1.5 / std::sqrt(2) - 0.5, x3, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong y3", 1.5 / std::sqrt(2), y3, 1e-5);
   // top left quadrant
   d = Ellipse::distanceCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/-4.5, /*y1=*/3.0, x2, y2, 0.);
   Ellipse::getYieldPointCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/-4.5, /*y1=*/3.0, x3, y3, s, 0.);
@@ -631,6 +668,15 @@ EllipseTest::distanceCCTestCircle()
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5 / std::sqrt(2) - 1.5, x2, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y2, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5 / std::sqrt(2) - 1.5, x3, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y3, 1e-5);
+  // top left quadrant with shift
+  d = Ellipse::distanceCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/-3.5, /*y1=*/3.0, x2, y2, 1.);
+  Ellipse::getYieldPointCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/-3.5, /*y1=*/3.0, x3, y3, s, 1.);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(3 * std::sqrt(2) - 1.5, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(3 * std::sqrt(2) - 1.5, s, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5 / std::sqrt(2) - 0.5, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(-1.5 / std::sqrt(2) - 0.5, x3, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y3, 1e-5);
   // bottom right quadrant
   d = Ellipse::distanceCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/1.5, /*y1=*/-3.0, x2, y2, 0.);
@@ -702,11 +748,11 @@ EllipseTest::distanceCCTestMajorAxisHorizontal()
   d = Ellipse::distanceCC(/*m=*/0.5, /*p_c=*/-3.0, /*x1=*/1.5, /*y1=*/3.0, x2, y2, 0.);
   Ellipse::getYieldPointCC(/*m=*/0.5, /*p_c=*/-3.0, /*x1=*/1.5, /*y1=*/3.0, x3, y3, s, 0.);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(3.1210069, d, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(3.31752131594, s, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong s", 3.31752131594, s, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.282058, x2, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.437784, y2, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.0385555846931, x3, 1e-10);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.168952819574, y3, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong x3", -0.0385555846931, x3, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong y3", 0.168952819574, y3, 1e-10);
   // top left quadrant
   d = Ellipse::distanceCC(/*m=*/0.5, /*p_c=*/-3.0, /*x1=*/-4.5, /*y1=*/3.0, x2, y2, 0.);
   Ellipse::getYieldPointCC(/*m=*/0.5, /*p_c=*/-3.0, /*x1=*/-4.5, /*y1=*/3.0, x3, y3, s, 0.);
@@ -983,4 +1029,34 @@ EllipseTest::isPointOutsideOfRotatedEllipseTestMajorAxisVertical()
   r = Ellipse::isPointOutsideOfRotatedEllipse(
     /*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/0.5, /*y1*/ 0.39);
   CPPUNIT_ASSERT(r == false);
+}
+
+/**
+ * Testing hypergeometric function hyp2f1
+ */
+void
+EllipseTest::testHyp2f1()
+{
+  Real m = 1.2;
+  Real pc = -1;
+  Real p, q, alpha, beta, gamma, s;
+
+  // Tests from Pearson 2009
+  s = Ellipse::hyp2f1(/*a=*/0.1, /*b=*/0.2, /*c=*/0.3, /*z=*/0.5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.046432811217352, s, 1e-12);
+
+  s = Ellipse::hyp2f1(/*a=*/1e-8, /*b=*/1e-8, /*c=*/1e-8, /*z=*/1e-6);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.000000000000010, s, 1e-12);
+
+  s = Ellipse::hyp2f1(/*a=*/-1, /*b=*/-1.5, /*c=*/-2 - 1e-15, /*z=*/0.5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.625000000000000, s, 1e-12);
+
+  // Tests closer to our own problem
+  p = -1;
+  q = 0.2;
+  gamma = p - pc / 2.0;
+  alpha = std::pow(q, 2) / (std::pow(m, 4) * std::pow(gamma, 2));
+  beta = 2 * (1 - 1 / std::pow(m, 2));
+  s = Ellipse::hyp2f1(/*a=*/0.5, /*b=*/-1 / beta, /*c=*/(beta - 1) / beta, /*z=*/-alpha);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.890912584466695, s, 1e-12);
 }

@@ -90,7 +90,8 @@ public:
    * @param x: coordinates of projection point on the ellipse
    * @return d: distance to ellipse
    */
-  static Real distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real shift_ellipse);
+  static Real
+  distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real shift_ellipse);
 
   /**
    * Function to compute the yield point coordinates from a query point
@@ -103,8 +104,21 @@ public:
    * @param s: arc-length from point to yield point
    * @param shift: horizontal shift of the ellipse
    * @return d: distance to ellipse
-   */ static void
-  getYieldPointCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real & s, Real shift);
+   */
+  static void getYieldPointCC(
+    Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real & s, Real shift);
+
+  /**
+   * Function to compute the hypergeometric function 2F1
+   * using Taylor series method (a) of Pearson 2009
+   * http://people.maths.ox.ac.uk/porterm/research/pearson_final.pdf
+   * @param a: coefficient a
+   * @param b: coefficient b
+   * @param c: coefficient c
+   * @param z: argument
+   * @return S: 2F1(a,b;c;z) as sum of Taylor series
+   */
+  static Real hyp2f1(Real a, Real b, Real c, Real z);
 
   /**
    * Function to compute the distance from a query point to an ellipse
