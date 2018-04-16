@@ -244,9 +244,9 @@ Ellipse::getYieldPointCC(
   beta = 2 * (1 - 1 / std::pow(m, 2));
   // If all arguments |z|<1, we can use hypergeometric function 2F1 (not accounting for shift!)
   // (as we don't have a good implementation for |z|>1)
+  norm_n = std::sqrt(std::pow(2 * y0 - p_c - 2 * shift, 2) / 3 + 6 * std::pow(y1, 2) / std::pow(m, 4));
   if (std::abs(alpha) < 1 && std::abs(alpha * std::exp(beta * 2 * t / norm_n)) < 1)
   {
-    norm_n = std::sqrt(std::pow(2 * y0 - p_c - 2 * shift, 2) / 3 + 6 * std::pow(y1, 2) / std::pow(m, 4));
     s = std::fabs(gamma) / (beta - 2.0) *
         (std::exp(-2 * t) *
            (2 * std::sqrt(1 + alpha * std::exp(beta * 2 * t / norm_n)) -

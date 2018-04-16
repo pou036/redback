@@ -183,7 +183,7 @@ RedbackMechMaterialCC::get_py_qy(
   Real pc = -yield_stress;
   // Check if outside the ellipse
   Real potential = std::pow(q / _M, 2) + p * (p - pc) + _shift_ellipse * (_shift_ellipse - 2 * p + pc);
-  is_plastic = (potential >= 0); // compute yield coords regardless
+  is_plastic = (potential > 0); // compute yield coords regardless
 
   // get yield point in any case (even if elastic)
   // Ellipse::distanceCC(_M, -yield_stress, p, q, p_y, q_y, _shift_ellipse);
