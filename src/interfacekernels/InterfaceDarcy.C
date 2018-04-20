@@ -63,7 +63,21 @@ InterfaceDarcy::computeQpResidual(Moose::DGResidualType type)
 }
 
 Real
-InterfaceDarcy::computeQpJacobian(Moose::DGJacobianType /*type*/)
+InterfaceDarcy::computeQpJacobian(Moose::DGJacobianType type)
 {
-  return 0;
+  switch (type)
+  {
+    case Moose::ElementElement:
+      return (- _phi[ _j ][ _qp ] / (_Le_fault[ _qp ] * _thickness) - _grad_phi[ _j ][ _qp ] * _normals[ _qp ] / _Le[ _qp ]) * _test[ _i ][ _qp ];
+
+    case Moose::NeighborNeighbor:
+      return (_phi_neighbor[ _j ][ _qp ] / (_Le_fault[ _qp ] * _thickness) - _grad_phi_neighbor[ _j ][ _qp ] * _normals[ _qp ] / _Le[ _qp ]) * _test_neighbor[ _i ][ _qp ];
+
+    case Moose::ElementNeighbor:
+      return _phi_neighbor[ _j ][ _qp ] / (_Le_fault[ _qp ] * _thickness) * _test[ _i ][ _qp ];
+
+    case Moose::NeighborElement:
+      return - _phi[ _j ][ _qp ] / (_Le_fault[ _qp ] * _thickness) * _test_neighbor[_i][_qp];
+  }
+  mooseError("Internal error.");
 }

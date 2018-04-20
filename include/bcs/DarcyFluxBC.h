@@ -39,6 +39,7 @@ protected:
   virtual RealGradient computeQpFluxJacobian() override;
 
   const MaterialProperty<Real> & _Le;
+  const MaterialProperty<RealVectorValue> & _gravity_term;
 };
 
 #endif /* DARCYFLUXBC_H */
