@@ -81,8 +81,13 @@
 
 // MeshModifiers
 #include "ElementFileSubdomain.h"
+#include "RemoveLayerElements.h"
+
+//MultiApps
+#include "RedbackFullSolveMultiApp.h"
 
 // Postprocessors
+#include "PointValueFile.h"
 #include "RankTwoScalarPostprocessor.h"
 
 // Timesteppers
@@ -181,8 +186,12 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialElastic);
   registerMaterial(RedbackMechMaterialExpCC);
 
+  registerMeshModifier(RemoveLayerElements);
   registerMeshModifier(ElementFileSubdomain);
 
+  registerMultiApp(RedbackFullSolveMultiApp);
+
+  registerPostprocessor(PointValueFile);
   registerPostprocessor(RankTwoScalarPostprocessor);
 
   registerExecutioner(ReturnMapIterDT);
