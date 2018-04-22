@@ -176,7 +176,7 @@ Ellipse::getYieldPointCC(
   Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real & s, Real shift)
 {
   Real t; // curvilinear "time"
-  Real alpha, beta, gamma, norm_n;
+  Real alpha, beta, gamma;
   if (y1 < 0)
   {
     // algorithm below only works for y1 > 0, so use symmetry
@@ -244,20 +244,16 @@ Ellipse::getYieldPointCC(
   beta = 2 * (1 - 1 / std::pow(m, 2));
   // If all arguments |z|<1, we can use hypergeometric function 2F1 (not accounting for shift!)
   // (as we don't have a good implementation for |z|>1)
-  norm_n = std::sqrt(std::pow(2 * y0 - p_c - 2 * shift, 2) / 3 + 6 * std::pow(y1, 2) / std::pow(m, 4));
-  if (std::abs(alpha) < 1 && std::abs(alpha * std::exp(beta * 2 * t / norm_n)) < 1)
+  if (std::abs(alpha) < 1 && std::abs(alpha * std::exp(beta * 2 * t)) < 1)
   {
     s = std::fabs(gamma) / (beta - 2.0) *
         (std::exp(-2 * t) *
-           (2 * std::sqrt(1 + alpha * std::exp(beta * 2 * t / norm_n)) -
-            beta * hyp2f1(0.5, -1 / beta, (beta - 1.0) / beta, -alpha * std::exp(beta * 2 * t / norm_n))) -
+           (2 * std::sqrt(1 + alpha * std::exp(beta * 2 * t)) -
+            beta * hyp2f1(0.5, -1 / beta, (beta - 1.0) / beta, -alpha * std::exp(beta * 2 * t))) -
          2 * std::sqrt(1 + alpha) + beta * hyp2f1(0.5, -1 / beta, (beta - 1.0) / beta, -alpha));
   }
   else
   {
-    // Real test = alpha*std::exp(beta*2*t/norm_n);
-    // std::cout << "getYieldPointCC using sum of segments with shift=" << shift << ", alpha=" << alpha << ",
-    // alpha*std::exp(beta*2*t/norm_n)="<< test << std::endl;
     int n_iter = 100; // TODO: is this value good enough even very far from the ellipse?
     Real t_old = 0;
     Real t_new = 0;

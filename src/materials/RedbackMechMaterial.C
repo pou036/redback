@@ -681,10 +681,9 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   const Real tol1 = 1e-10; // TODO: expose to user interface and/or make the tolerance relative
   const Real tol3 = 1e-6;  // TODO: expose to user interface and/or make the tolerance relative
   Real err3 = 1.1 * tol3;
-  bool is_plastic; // is this point in plastic regime or not?
-  bool is_first_plastic_determined = false;
-  bool is_first_plastic; // is_plastic the first time it's called
-  Real s;                // curvilinear arc-length between (p,q) and (p_y,q_y)
+  bool is_plastic = false; // is this point in plastic regime or not?
+  Real s = 0; // curvilinear arc-length between (p,q) and (p_y,q_y)
+  RankFourTensor dr_dsig_inv = E_ijkl;
 
   Real eqvpstrain = std::pow(2.0 / 3.0, 0.5) * dp.L2norm();
   Real yield_stress = getYieldStress(eqvpstrain);
@@ -726,12 +725,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
     Real p = sig_new.trace() / 3.0;
     Real q = getSigEqv(sig_new);
     get_py_qy_damaged(p, q, p_y, q_y, yield_stress, is_plastic, s);
-    if (!is_first_plastic_determined)
-    {
-      is_first_plastic = is_plastic;
-      is_first_plastic_determined = true;
-    }
-    if (is_first_plastic)
+
+    if (is_plastic)
     {
       Real flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress, s);
 
@@ -749,7 +744,7 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
         // Jacobian = d(residual)/d(sigma)
         RankFourTensor dr_dsig;
         getJac(sig_new, E_ijkl, flow_incr, q, p, p_y, q_y, yield_stress, s, dr_dsig);
-        RankFourTensor dr_dsig_inv = dr_dsig.invSymm();
+        dr_dsig_inv = dr_dsig.invSymm();
         RankTwoTensor ddsig = -dr_dsig_inv * resid; // Newton Raphson
         delta_dp -= E_ijkl.invSymm() * ddsig;       // Update increment of plastic rate of deformation tensor
         sig_new += ddsig;                           // Update stress
@@ -787,6 +782,9 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   if (iterisohard >= maxiterisohard)
     throw MooseException("Constitutive Error-Too many iterations in Hardness "
                          "Update:Reduce time increment.\n"); // Convergence failure
+
+  if (is_plastic && _t_step > 1) // keep elasticity jacobian_mult for very first step
+    _Jacobian_mult[ _qp ] = dr_dsig_inv;
 
   dp = dpn; // Plastic rate of deformation tensor in unrotated configuration
   sig = sig_new;

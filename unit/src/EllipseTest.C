@@ -831,12 +831,12 @@ EllipseTest::distanceCCTestMajorAxisVertical()
   // top right quadrant
   d = Ellipse::distanceCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-0.5, /*y1=*/2.0, x2, y2, 0.);
   Ellipse::getYieldPointCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-0.5, /*y1=*/2.0, x3, y3, s, 0.);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.2094051, d, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(0.209475269026, s, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.650317, x2, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.854209, y2, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(-0.653371450454, x3, 1e-10);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL(1.85734897716, y3, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("major axis vertical, wrong d", 0.2094051, d, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("major axis vertical, wrong s", 0.209475269026, s, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("major axis vertical, wrong x2", -0.650317, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("major axis vertical, wrong y2", 1.854209, y2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("major axis vertical, wrong x3", -0.653371450454, x3, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("major axis vertical, wrong y3", 1.85734897716, y3, 1e-10);
   // top left quadrant
   d = Ellipse::distanceCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-2.5, /*y1=*/2.0, x2, y2, 0.);
   Ellipse::getYieldPointCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-2.5, /*y1=*/2.0, x3, y3, s, 0.);
