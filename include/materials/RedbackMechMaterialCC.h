@@ -30,7 +30,7 @@ public:
 
 protected:
   Real _slope_yield_surface; // coefficient for yield surface
-  Real _shift_ellipse; // horizontal shift of the ellipse
+  Real _shift_ellipse;       // horizontal shift of the ellipse
 
   virtual void
   getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) override;

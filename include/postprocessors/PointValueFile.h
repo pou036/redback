@@ -29,9 +29,15 @@ class PointValueFile : public GeneralPostprocessor
 public:
   PointValueFile(const InputParameters & parameters);
 
-  virtual void initialize() override {}
+  virtual void
+  initialize() override
+  {
+  }
   virtual void execute() override;
-  virtual void finalize() override {}
+  virtual void
+  finalize() override
+  {
+  }
   virtual Real getValue() override;
 
 protected:

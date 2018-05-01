@@ -31,12 +31,23 @@ public:
 
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
-  virtual void incrementTStep() override {}
+  virtual void
+  incrementTStep() override
+  {
+  }
 
-  virtual void finishStep() override {}
+  virtual void
+  finishStep() override
+  {
+  }
 
 private:
   std::vector<Executioner *> _executioners;
+  Real _threshold;
+  Real _first_threshold;
+  FileName _times_file;
+  Real _porosity_change;
+  Real _porosity_change_old;
 };
 
 #endif // REDBACKFULLSOLVEMULTIAPP_H

@@ -17,6 +17,7 @@
 #include "RedbackApp.h"
 
 // Modules
+#include "NavierStokesApp.h"
 #include "TensorMechanicsApp.h"
 
 // Actions
@@ -83,17 +84,21 @@
 #include "ElementFileSubdomain.h"
 #include "RemoveLayerElements.h"
 
-//MultiApps
+// MultiApps
 #include "RedbackFullSolveMultiApp.h"
 
 // Postprocessors
 #include "PointValueFile.h"
 #include "RankTwoScalarPostprocessor.h"
 
+// UserObjects
+#include "FunctionUserObject.h"
+
 // Timesteppers
 #include "ReturnMapIterDT.h"
 
 // AuxKernels
+#include "DynamicFunctionAux.h"
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
 #include "RedbackPolarTensorMaterialAux.h"
@@ -113,10 +118,12 @@ RedbackApp::RedbackApp(InputParameters parameters) : MooseApp(parameters)
 
   Moose::registerObjects(_factory);
   TensorMechanicsApp::registerObjects(_factory);
+  NavierStokesApp::registerObjects(_factory);
   RedbackApp::registerObjects(_factory);
 
   Moose::associateSyntax(_syntax, _action_factory);
   TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
+  NavierStokesApp::associateSyntax(_syntax, _action_factory);
   RedbackApp::associateSyntax(_syntax, _action_factory);
 }
 
@@ -194,8 +201,11 @@ RedbackApp::registerObjects(Factory & factory)
   registerPostprocessor(PointValueFile);
   registerPostprocessor(RankTwoScalarPostprocessor);
 
+  registerUserObject(FunctionUserObject);
+
   registerExecutioner(ReturnMapIterDT);
 
+  registerAux(DynamicFunctionAux);
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);
   registerAux(RedbackTotalPorosityAux);

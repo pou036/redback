@@ -29,10 +29,7 @@ public:
 
 protected:
   virtual void modify() override;
-  std::vector<Elem *> BoundaryElements();
-
-  SubdomainID _master_id;
-  SubdomainID _paired_id;
+  std::vector<Elem *> BoundaryElements(SubdomainID master_id, SubdomainID paired_id);
 };
 
 #endif // REMOVELAYERELEMENTS_H
