@@ -29,15 +29,15 @@ validParams<FunctionUserObject>()
 FunctionUserObject::FunctionUserObject(const InputParameters & params) :
     GeneralUserObject(params), _positions(getParam<std::vector<Real> >("positions")), _fcn()
 {
+  //variation of permeability in Y, 1D
   _dim = 1;
   _axes.clear();
   _axes.push_back(1);
   if (isParamValid("permeability_values"))
     _ppn = params.get<std::vector<PostprocessorName> >("permeability_values");
   _grid.clear();
-  _grid.resize(_dim); // add another dimension to the grid
+  _grid.resize(_dim);
   _grid[ _dim - 1 ] = _positions;
-  _fcn.resize(_positions.size());
 }
 
 Real

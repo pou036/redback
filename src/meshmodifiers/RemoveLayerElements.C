@@ -13,7 +13,7 @@
 #include "RemoveLayerElements.h"
 #include <fstream>
 
-#include "libmesh/mesh_refinement.h"
+// #include "libmesh/mesh_refinement.h"
 #include "libmesh/remote_elem.h"
 
 template <>
@@ -69,7 +69,7 @@ RemoveLayerElements::modify()
     return;
 
   MeshBase & mesh = _mesh_ptr->getMesh();
-  std::unique_ptr<MeshRefinement> mesh_refinement = libmesh_make_unique<MeshRefinement>(mesh);
+  //std::unique_ptr<MeshRefinement> mesh_refinement = libmesh_make_unique<MeshRefinement>(mesh);
 
   SubdomainID master_id;
   SubdomainID paired_id;
@@ -99,7 +99,7 @@ RemoveLayerElements::modify()
   std::cout << "paired_id_volume = " << frac_volume << std::endl;
   std::cout << "total_nb_elem = " << N_elem << std::endl;
   Real total_volume_to_change = total_volume * std::abs(porosity_change);
-  Real volume_change_threshold = total_volume * porosity_change_threshold;
+  // Real volume_change_threshold = total_volume * porosity_change_threshold;
   std::cout << "total_volume_to_change = " << total_volume_to_change << std::endl;
   Real volume_changed = 0;
   Real volume_to_change;
@@ -116,8 +116,8 @@ RemoveLayerElements::modify()
     std::cout << std::endl << "current_paired_id_volume = " << frac_volume << std::endl;
     std::cout << "volume_changed = " << volume_changed << std::endl;
     volume_to_change = total_volume_to_change - volume_changed;
-    if (volume_to_change < volume_change_threshold)
-      return;
+    // if (volume_to_change < volume_change_threshold)
+    //   return;
     std::cout << "volume_to_change = " << volume_to_change << std::endl;
 
     // vector of the elements on the boundary to be stored
@@ -168,8 +168,8 @@ RemoveLayerElements::modify()
     for (unsigned int i = 0; i < elements.size(); i++)
       layer_volume += elements[ i ]->volume();
     std::cout << "layer_volume = " << layer_volume << std::endl;
-    if (layer_volume < volume_change_threshold)
-      return;
+    // if (layer_volume < volume_change_threshold)
+    //   return;
     if (layer_volume > volume_to_change)
       return;
     // if (layer_volume <= volume_to_change) break;
@@ -191,7 +191,6 @@ RemoveLayerElements::modify()
     // same subdomain ID
     std::map<ElemType, std::set<SubdomainID> > type2blocks;
     for (unsigned int i = 0; i < elements.size(); i++)
-    // dof_id_type e = 0; e < elements.size(); ++e)
     {
       // Get the element we need to assign, or skip it if we just have a
       // nullptr placeholder indicating a remote element.
@@ -243,56 +242,15 @@ RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_
   typedef std::vector<std::pair<dof_id_type, unsigned int> > vec_type;
   std::vector<vec_type> queries(my_n_proc);
 
-  // mesh.find_neighbors(true, true);
-
   for (auto & elem : mesh.active_element_ptr_range())
   {
     // We only need to loop over elements in the master subdomain
     if (elem->subdomain_id() != master_id)
       continue;
 
-    // unsigned int i=0;
-    // for (auto current_neighbor : elem->neighbor_ptr_range())
-    // {
-    //   if (current_neighbor != NULL)
-    //   {
-    //     std::cout<<"id neighbor = "<<current_neighbor->subdomain_id()<<std::endl;
-    //     ++i;
-    //   }
-    // }
-    // std::cout<<"nb neighbors = "<<i<<std::endl;
-    // std::set< const Elem * > neighbor_set;
-    // elem->find_edge_neighbors(neighbor_set);
-    // std::cout<<"nb neighbors = "<<neighbor_set.size()<<std::endl;
-    // if (neighbor_set.size()<5)
-    //   {
-    //     Elem * elem1 = elem;
-    //     if (std::find(elements.begin(), elements.end(), elem1) == elements.end())
-    //       elements.push_back(elem1);
-    //   }
-    // for (const Elem * neighbor : neighbor_set)
-    //   //unsigned int i = 0; i < neighbor_set.size(); i++)
-    // {
-    //   std::cout<<"id neighbor = "<<neighbor->subdomain_id()<<std::endl;
-    //   // if (neighbor != NULL && neighbor->subdomain_id() == paired_id)
-    //   // {
-    //   //   Elem * elem1 = elem;
-    //   //   if (std::find(elements.begin(), elements.end(), elem1) == elements.end())
-    //   //     elements.push_back(elem1);
-    //   //   break;
-    //   // }
-    // }
-
     for (unsigned int side = 0; side < elem->n_sides(); side++)
     {
-      // elem->libmesh_assert_valid_neighbors();
       const Elem * neighbor = elem->neighbor_ptr(side);
-      // Elem * neighbor1 = elem->neighbor_ptr(side);
-      // SimpleRange< Elem::NeighborPtrIter > range = neighbor1->neighbor_ptr_range();
-      // std::cout<<"nb neighbors = "<<range<<std::endl;
-      // std::set< const Elem * > neighbor_set;
-      // elem->find_edge_neighbors(neighbor_set);
-      // if (neighbor_set.size)
 
       // On a replicated mesh, we add all subdomain sides ourselves.
       // On a distributed mesh, we may have missed sides which

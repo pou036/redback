@@ -57,29 +57,31 @@ RedbackFullSolveMultiApp::solveStep(Real /*dt*/, Real target_time, bool auto_adv
     {
       getline(myfile, line);
       std::stringstream ss(line);
-      std::cout << "line:" << line << std::endl;
       std::istream_iterator<std::string> begin(ss);
       std::istream_iterator<std::string> end;
       std::vector<std::string> vstrings(begin, end);
-
       if (vstrings.size() == 0)
       {
         mooseWarning("file is empty");
         break;
       }
-      _porosity_change = std::stod(vstrings[ 0 ].c_str());
+      _porosity_change = std::stod(vstrings[0].c_str());
       break;
     }
     myfile.close();
   }
 
-  if (std::abs(_porosity_change - _porosity_change_old) <
-      _threshold) // || std::abs(_porosity_change)< _first_threshold)
+  // so that we don't run the subapp at every time step
+  if (std::abs(_porosity_change - _porosity_change_old) < _threshold)
     return true;
+  // so that we don't run the subapp before we can remove the first layer
   if (_porosity_change - _porosity_change_old > 0 && std::abs(_porosity_change) < 1.01 * _first_threshold)
     return true;
-  if (_porosity_change - _porosity_change_old < 0 && std::abs(_porosity_change) < 0.9 * _first_threshold)
+  // so that the last subapp ran comes back to the inital configuration
+  if (_porosity_change - _porosity_change_old < 0 && std::abs(_porosity_change) < 0.75 * _first_threshold)
     return true;
+  // update the last time where we ran the subapp
+  _porosity_change_old = _porosity_change;
 
   // write text
   if (isParamValid("times_file"))
@@ -88,9 +90,9 @@ RedbackFullSolveMultiApp::solveStep(Real /*dt*/, Real target_time, bool auto_adv
     fputs(" ", output_file);
     fputs(std::to_string(target_time).c_str(), output_file);
     fclose(output_file);
-    _porosity_change_old = _porosity_change;
   }
 
+  //initial_setup
   if (!_has_an_app)
   {
     std::cout << "doesn't have an app" << std::endl;
@@ -125,6 +127,7 @@ RedbackFullSolveMultiApp::solveStep(Real /*dt*/, Real target_time, bool auto_adv
     _executioners[ i ] = ex;
   }
 
+  //solver
   if (!auto_advance)
     mooseError("RedbackFullSolveMultiApp is not compatible with auto_advance=false");
 
