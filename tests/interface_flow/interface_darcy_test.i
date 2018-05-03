@@ -52,18 +52,8 @@
     variable = p_left
     block = '0'
   [../]
-  [./dt_left]
-    type = TimeDerivative
-    variable = p_left
-    block = '0'
-  [../]
   [./diff_right]
     type = RedbackMassDiffusion
-    variable = p_right
-    block = '1'
-  [../]
-  [./dt_right]
-    type = TimeDerivative
     variable = p_right
     block = '1'
   [../]
@@ -141,13 +131,10 @@
 []
 
 [Executioner]
-  type = Transient
-  trans_ss_check = true
-  ss_check_tol = 1e-07
+  type = Steady
 []
 
 [Outputs]
-  file_base = interfacedarcy_test
+  file_base = interface_darcy_test
   csv = true
-  execute_on = 'FINAL'
 []
