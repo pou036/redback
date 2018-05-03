@@ -40,22 +40,15 @@ Real
 InterfaceDarcy::computeQpResidual(Moose::DGResidualType type)
 {
   Real res = (_neighbor_value[ _qp ] - _u[ _qp ]) / (_Le_fault[ _qp ] * _thickness) +
-           _gravity_term[ _qp ] * _normals[ _qp ] * (1 / _Le[ _qp ] - 1 / _Le_fault[ _qp ]);
-  // RealVectorValue res = (_neighbor_value[ _qp ] - _u[ _qp ]) / (_Le_fault[ _qp ] * _thickness) * _normals[ _qp ] +
-  //            _gravity_term[ _qp ] * (1 / _Le[ _qp ] - 1 / _Le_fault[ _qp ]);
-
-  Real res2 = res - _grad_u[ _qp ] * _normals[ _qp ] / _Le[ _qp ];
-  Real res3 = res - _grad_neighbor_value[ _qp ] * _normals[ _qp ] / _Le[ _qp ];
+             _gravity_term[ _qp ] * _normals[ _qp ] * (1 / _Le[ _qp ] - 1 / _Le_fault[ _qp ]);
 
   switch (type)
   {
     case Moose::Element:
       return (res - _grad_u[ _qp ] * _normals[ _qp ] / _Le[ _qp ]) * _test[ _i ][ _qp ];
-      // return (_grad_u[ _qp ] / _Le[ _qp ] - res) * _grad_test[ _i ][ _qp ];
-
+      
     case Moose::Neighbor:
       return (res - _grad_neighbor_value[ _qp ] * _normals[ _qp ] / _Le[ _qp ]) * _test_neighbor[ _i ][ _qp ];
-      // return (_grad_neighbor_value[ _qp ] / _Le[ _qp ] - res) * _grad_test_neighbor[ _i ][ _qp ];
 
     default:
       mooseError("InterfaceDarcy type not supported.");
@@ -68,16 +61,20 @@ InterfaceDarcy::computeQpJacobian(Moose::DGJacobianType type)
   switch (type)
   {
     case Moose::ElementElement:
-      return (- _phi[ _j ][ _qp ] / (_Le_fault[ _qp ] * _thickness) - _grad_phi[ _j ][ _qp ] * _normals[ _qp ] / _Le[ _qp ]) * _test[ _i ][ _qp ];
+      return (-_phi[ _j ][ _qp ] / (_Le_fault[ _qp ] * _thickness) -
+              _grad_phi[ _j ][ _qp ] * _normals[ _qp ] / _Le[ _qp ]) *
+             _test[ _i ][ _qp ];
 
     case Moose::NeighborNeighbor:
-      return (_phi_neighbor[ _j ][ _qp ] / (_Le_fault[ _qp ] * _thickness) - _grad_phi_neighbor[ _j ][ _qp ] * _normals[ _qp ] / _Le[ _qp ]) * _test_neighbor[ _i ][ _qp ];
+      return (_phi_neighbor[ _j ][ _qp ] / (_Le_fault[ _qp ] * _thickness) -
+              _grad_phi_neighbor[ _j ][ _qp ] * _normals[ _qp ] / _Le[ _qp ]) *
+             _test_neighbor[ _i ][ _qp ];
 
     case Moose::ElementNeighbor:
       return _phi_neighbor[ _j ][ _qp ] / (_Le_fault[ _qp ] * _thickness) * _test[ _i ][ _qp ];
 
     case Moose::NeighborElement:
-      return - _phi[ _j ][ _qp ] / (_Le_fault[ _qp ] * _thickness) * _test_neighbor[_i][_qp];
+      return -_phi[ _j ][ _qp ] / (_Le_fault[ _qp ] * _thickness) * _test_neighbor[ _i ][ _qp ];
   }
   mooseError("Internal error.");
 }

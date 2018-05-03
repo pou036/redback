@@ -5,8 +5,8 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 
-#include "RankTwoProjectionAux.h"
 #include "Assembly.h"
+#include "RankTwoProjectionAux.h"
 
 template <>
 InputParameters
@@ -38,9 +38,10 @@ RankTwoProjectionAux::computeValue()
   // ti_t = ti - ||ti_n||.n_i
   // ti_t = ti - (ti . n_i).n_i
   RankTwoTensor total_stress = _tensor[ _qp ];
-  total_stress.addIa( - _pressure[ _qp ]);
-  RealVectorValue traction = total_stress * _normals[_qp];
-  if (_normal) return traction * _normals[_qp];
-  RealVectorValue tangent_traction = traction - (traction * _normals[_qp]) * _normals[_qp];
+  total_stress.addIa(-_pressure[ _qp ]);
+  RealVectorValue traction = total_stress * _normals[ _qp ];
+  if (_normal)
+    return traction * _normals[ _qp ];
+  RealVectorValue tangent_traction = traction - (traction * _normals[ _qp ]) * _normals[ _qp ];
   return std::sqrt(tangent_traction.norm_sq());
 }

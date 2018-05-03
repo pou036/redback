@@ -22,7 +22,8 @@ validParams<DarcyFluxBC>()
 }
 
 DarcyFluxBC::DarcyFluxBC(const InputParameters & parameters) :
-    FluxBC(parameters), _Le(getMaterialProperty<Real>("lewis_number")),
+    FluxBC(parameters),
+    _Le(getMaterialProperty<Real>("lewis_number")),
     _gravity_term(getMaterialProperty<RealVectorValue>("fluid_gravity_term"))
 {
 }

@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "MatchedValueJumpBC.h"
 #include "Assembly.h"
+#include "MatchedValueJumpBC.h"
 
 template <>
 InputParameters
@@ -18,7 +18,10 @@ validParams<MatchedValueJumpBC>()
   params.addRequiredCoupledVar("v", "The variable whose value we are to match.");
   params.addClassDescription("Implements a NodalBC which equates two different Variables' values "
                              "on a specified boundary.");
-  params.addParam<PostprocessorName>("tangent_jump", 0, "jump value on the interface. Note that the tangent vector is oriented +90deg from the normal vector.");
+  params.addParam<PostprocessorName>(
+    "tangent_jump",
+    0,
+    "jump value on the interface. Note that the tangent vector is oriented +90deg from the normal vector.");
   params.addRequiredRangeCheckedParam<unsigned int>("component",
                                                     "component >= 0 & component <= 2",
                                                     "An integer corresponding to the direction the variable "
@@ -39,7 +42,7 @@ MatchedValueJumpBC::MatchedValueJumpBC(const InputParameters & parameters) :
 Real
 MatchedValueJumpBC::computeQpResidual()
 {
-  RealVectorValue fault_tangent(- _normals[ _qp ](1), _normals[ _qp ](0)); //90deg rotation of the normal vector
+  RealVectorValue fault_tangent(-_normals[ _qp ](1), _normals[ _qp ](0)); // 90deg rotation of the normal vector
   return _u[ _qp ] - _v[ _qp ] + _jump * fault_tangent(_component);
 }
 

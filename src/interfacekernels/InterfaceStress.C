@@ -50,7 +50,7 @@ InterfaceStress::computeQpResidual(Moose::DGResidualType type)
 {
   // continuity of each component of traction: (sigma_ij' - p) . n_i
   RankTwoTensor stress = _stress0[ _qp ] - _stress1[ _qp ];
-  stress.addIa( - _pressure0[ _qp ] + _pressure1[ _qp ]);
+  stress.addIa(-_pressure0[ _qp ] + _pressure1[ _qp ]);
   RealVectorValue res = stress * _normals[ _qp ];
 
   switch (type)
