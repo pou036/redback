@@ -42,9 +42,8 @@ public:
   }
 
 private:
+  Real ReadFile(FileName file_name);
   std::vector<Executioner *> _executioners;
-  Real _threshold;
-  Real _first_threshold;
   FileName _times_file;
   Real _porosity_change;
   Real _porosity_change_old;

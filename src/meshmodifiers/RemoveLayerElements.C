@@ -24,7 +24,9 @@ validParams<RemoveLayerElements>()
   params.addRequiredParam<SubdomainName>("master_block",
                                          "The master block from which we select the boundary elements");
   params.addRequiredParam<SubdomainName>("paired_block", "The paired block for which we add the boundary elements");
-  params.addParam<FileName>("file", "Name of the txt file with the porosity change");
+  params.addRequiredParam<FileName>("file", "Name of the txt file with the porosity change");
+  params.addRequiredParam<FileName>("upper_layer_file", "Name of the txt file with the next layer to erode");
+  params.addRequiredParam<FileName>("lower_layer_file", "Name of the txt file with the last layer eroded");
   params.addParam<Real>("porosity_change_threshold", 0, "threshold below which we do not remove elements");
   return params;
 }
@@ -66,7 +68,13 @@ RemoveLayerElements::modify()
 
   // do not change mesh for less than x porosity change
   if (std::abs(porosity_change) < porosity_change_threshold)
+  {
+    FileName file = getParam<FileName>("lower_layer_file");
+    FILE * output_file = fopen(file.c_str(), "w");
+    fputs("0", output_file);
+    fclose(output_file);
     return;
+  }
 
   MeshBase & mesh = _mesh_ptr->getMesh();
   //std::unique_ptr<MeshRefinement> mesh_refinement = libmesh_make_unique<MeshRefinement>(mesh);
@@ -171,7 +179,13 @@ RemoveLayerElements::modify()
     // if (layer_volume < volume_change_threshold)
     //   return;
     if (layer_volume > volume_to_change)
+    {
+      FileName file = getParam<FileName>("upper_layer_file");
+      FILE * output_file = fopen(file.c_str(), "w");
+      fputs(std::to_string(volume_changed+layer_volume).c_str(), output_file);
+      fclose(output_file);
       return;
+    }
     // if (layer_volume <= volume_to_change) break;
 
     //   mesh_refinement->clean_refinement_flags();
@@ -223,6 +237,10 @@ RemoveLayerElements::modify()
     }
 
     volume_changed += layer_volume;
+    FileName file = getParam<FileName>("lower_layer_file");
+    FILE * output_file = fopen(file.c_str(), "w");
+    fputs(std::to_string(volume_changed).c_str(), output_file);
+    fclose(output_file);
     nb_loops += 1;
   }
   mooseError("MeshModifier RemoveLayerElements exceeded number of loops possible");

@@ -21,23 +21,21 @@ validParams<RedbackFullSolveMultiApp>()
 {
   InputParameters params = validParams<MultiApp>();
   params.addRequiredParam<FileName>("file", "Name of the txt file with the porosity change");
-  params.addParam<Real>("porosity_change_threshold", 0, "threshold below which we do not run the multiapp");
-  params.addParam<Real>("first_layer_threshold", 0, "threshold below which we do not run the multiapp");
-  params.addRequiredParam<FileName>("times_file", "Name of the txt file to write the time values");
+  params.addParam<FileName>("times_file","", "Name of the txt file to write the time values");
+  params.addRequiredParam<FileName>("upper_layer_file", "Name of the txt file with the next layer to erode");
+  params.addRequiredParam<FileName>("lower_layer_file", "Name of the txt file with the last layer eroded");
   return params;
 }
 
 RedbackFullSolveMultiApp::RedbackFullSolveMultiApp(const InputParameters & parameters) :
     MultiApp(parameters),
-    _threshold(getParam<Real>("porosity_change_threshold")),
-    _first_threshold(getParam<Real>("first_layer_threshold")),
-    _times_file(isParamValid("times_file") ? getParam<FileName>("times_file") : NULL)
+    _times_file(getParam<FileName>("times_file"))
 {
   _porosity_change = 0;
   _porosity_change_old = 0;
 
   // write text
-  if (isParamValid("times_file"))
+  if (_times_file!="")
   {
     FILE * output_file = fopen(_times_file.c_str(), "w");
     fputs("", output_file);
@@ -48,43 +46,21 @@ RedbackFullSolveMultiApp::RedbackFullSolveMultiApp(const InputParameters & param
 bool
 RedbackFullSolveMultiApp::solveStep(Real /*dt*/, Real target_time, bool auto_advance)
 {
-  FileName file = getParam<FileName>("file");
-  std::string line;
-  std::ifstream myfile(file.c_str());
-  if (myfile.is_open())
-  {
-    while (myfile.good())
-    {
-      getline(myfile, line);
-      std::stringstream ss(line);
-      std::istream_iterator<std::string> begin(ss);
-      std::istream_iterator<std::string> end;
-      std::vector<std::string> vstrings(begin, end);
-      if (vstrings.size() == 0)
-      {
-        mooseWarning("file is empty");
-        break;
-      }
-      _porosity_change = std::stod(vstrings[0].c_str());
-      break;
-    }
-    myfile.close();
-  }
+  _porosity_change = ReadFile(getParam<FileName>("file"));
+  Real upper_layer_threshold = ReadFile(getParam<FileName>("upper_layer_file"));
+  Real lower_layer_threshold = ReadFile(getParam<FileName>("lower_layer_file"));
 
-  // so that we don't run the subapp at every time step
-  if (std::abs(_porosity_change - _porosity_change_old) < _threshold)
+  // so that we don't run the subapp before we can remove the next layer
+  if (_porosity_change - _porosity_change_old >= 0 && std::abs(_porosity_change) < upper_layer_threshold)
     return true;
-  // so that we don't run the subapp before we can remove the first layer
-  if (_porosity_change - _porosity_change_old > 0 && std::abs(_porosity_change) < 1.01 * _first_threshold)
-    return true;
-  // so that the last subapp ran comes back to the inital configuration
-  if (_porosity_change - _porosity_change_old < 0 && std::abs(_porosity_change) < 0.75 * _first_threshold)
+  if (_porosity_change - _porosity_change_old <= 0 && std::abs(_porosity_change) > lower_layer_threshold)
     return true;
   // update the last time where we ran the subapp
   _porosity_change_old = _porosity_change;
 
+
   // write text
-  if (isParamValid("times_file"))
+  if (_times_file!="")
   {
     FILE * output_file = fopen(_times_file.c_str(), "a");
     fputs(" ", output_file);
@@ -146,4 +122,32 @@ RedbackFullSolveMultiApp::solveStep(Real /*dt*/, Real target_time, bool auto_adv
   }
 
   return last_solve_converged;
+}
+
+Real
+RedbackFullSolveMultiApp::ReadFile(FileName file_name)
+{
+  Real value=0;
+  std::string line;
+  std::ifstream myfile(file_name.c_str());
+  if (myfile.is_open())
+  {
+    while (myfile.good())
+    {
+      getline(myfile, line);
+      std::stringstream ss(line);
+      std::istream_iterator<std::string> begin(ss);
+      std::istream_iterator<std::string> end;
+      std::vector<std::string> vstrings(begin, end);
+      if (vstrings.size() == 0)
+      {
+        mooseWarning("file is empty");
+        break;
+      }
+      value = std::stod(vstrings[0].c_str());
+      break;
+    }
+    myfile.close();
+  }
+  return value;
 }
