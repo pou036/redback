@@ -8,7 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "DynamicFunctionAux.h"
-#include "FunctionUserObject.h"
+#include "BezierUserObject.h"
 
 template <>
 InputParameters
@@ -22,7 +22,7 @@ validParams<DynamicFunctionAux>()
 }
 
 DynamicFunctionAux::DynamicFunctionAux(const InputParameters & parameters) :
-    AuxKernel(parameters), _func(getUserObject<FunctionUserObject>("dynamic_function"))
+    AuxKernel(parameters), _func(getUserObject<BezierUserObject>("dynamic_function"))
 {
 }
 
@@ -30,7 +30,7 @@ Real
 DynamicFunctionAux::computeValue()
 {
   if (isNodal())
-    return _func.value(_t, *_current_node);
+    return _func.value(*_current_node);
   else
-    return _func.value(_t, _q_point[ _qp ]);
+    return _func.value(_q_point[ _qp ]);
 }

@@ -11,7 +11,7 @@
 #define DYNAMICFUNCTIONAUX_H
 
 #include "AuxKernel.h"
-#include "FunctionUserObject.h"
+#include "BezierUserObject.h"
 
 // Forward Declarations
 class DynamicFunctionAux;
@@ -35,7 +35,7 @@ protected:
   virtual Real computeValue() override;
 
   /// Function being used to compute the value of this kernel
-  const FunctionUserObject & _func;
+  const BezierUserObject & _func;
 };
 
 #endif // DYNAMICFUNCTIONAUX_H

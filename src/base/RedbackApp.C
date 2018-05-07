@@ -92,6 +92,7 @@
 #include "RankTwoScalarPostprocessor.h"
 
 // UserObjects
+#include "BezierUserObject.h"
 #include "FunctionUserObject.h"
 
 // Timesteppers
@@ -201,6 +202,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerPostprocessor(PointValueFile);
   registerPostprocessor(RankTwoScalarPostprocessor);
 
+  registerUserObject(BezierUserObject);
   registerUserObject(FunctionUserObject);
 
   registerExecutioner(ReturnMapIterDT);

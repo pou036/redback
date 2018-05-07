@@ -27,7 +27,7 @@ validParams<RemoveLayerElements>()
   params.addRequiredParam<FileName>("file", "Name of the txt file with the porosity change");
   params.addRequiredParam<FileName>("upper_layer_file", "Name of the txt file with the next layer to erode");
   params.addRequiredParam<FileName>("lower_layer_file", "Name of the txt file with the last layer eroded");
-  params.addParam<Real>("porosity_change_threshold", 0, "threshold below which we do not remove elements");
+  params.addParam<Real>("first_layer_threshold", 0, "threshold below which we do not remove elements");
   return params;
 }
 
@@ -64,14 +64,18 @@ RemoveLayerElements::modify()
     myfile.close();
   }
 
-  Real porosity_change_threshold = getParam<Real>("porosity_change_threshold");
+  Real first_layer_threshold = getParam<Real>("first_layer_threshold");
 
   // do not change mesh for less than x porosity change
-  if (std::abs(porosity_change) < porosity_change_threshold)
+  if (std::abs(porosity_change) < first_layer_threshold)
   {
     FileName file = getParam<FileName>("lower_layer_file");
     FILE * output_file = fopen(file.c_str(), "w");
     fputs("0", output_file);
+    fclose(output_file);
+    file = getParam<FileName>("upper_layer_file");
+    output_file = fopen(file.c_str(), "w");
+    fputs(std::to_string(first_layer_threshold).c_str(), output_file);
     fclose(output_file);
     return;
   }
@@ -107,7 +111,6 @@ RemoveLayerElements::modify()
   std::cout << "paired_id_volume = " << frac_volume << std::endl;
   std::cout << "total_nb_elem = " << N_elem << std::endl;
   Real total_volume_to_change = total_volume * std::abs(porosity_change);
-  // Real volume_change_threshold = total_volume * porosity_change_threshold;
   std::cout << "total_volume_to_change = " << total_volume_to_change << std::endl;
   Real volume_changed = 0;
   Real volume_to_change;
@@ -141,7 +144,6 @@ RemoveLayerElements::modify()
     // {
     //   std::cout<<"nb_loops3 = "<<nb_loops3<<std::endl;
     elements = BoundaryElements(master_id, paired_id);
-    ;
     //   bool diff_volume = false;
     //   min_size = elements[0]->volume();
     //   std::cout<<"min_size = "<<min_size<<std::endl;
