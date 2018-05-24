@@ -546,11 +546,12 @@ RedbackMaterial::computeRedbackTerms()
                                - (1 - _total_porosity[_qp]) * s_prime
                                );*/
 
-    // Update Lewis number
-    if (_phi0_param != _total_porosity[ _qp ])
-      _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
-                             std::pow(_phi0_param / _total_porosity[ _qp ], 3);
   }
+  // Update Lewis number
+  if (_phi0_param != _total_porosity[ _qp ])
+    _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
+                           std::pow(_phi0_param / _total_porosity[ _qp ], 3);
+
   if (_inverse_lewis_number_tilde[ _qp ] != 0)
   {
     // to include modifications from multi-app for example
