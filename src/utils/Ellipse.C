@@ -154,7 +154,7 @@ Ellipse::sqrDistance(Real const e[ 2 ], Real const y[ 2 ], Real x[ 2 ])
 
 Real
 Ellipse::distanceCC(
-  Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real shift_ellipse)
+  Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real const shift_ellipse)
 {
   Real e[ 2 ];         // ellipse axes
   Real x[ 2 ];         // point coordinates as array
@@ -173,7 +173,7 @@ Ellipse::distanceCC(
 
 void
 Ellipse::getYieldPointCC(
-  Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real & s, Real shift)
+  Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real & s, Real const shift)
 {
   Real t; // curvilinear "time"
   Real alpha, beta, gamma;
@@ -456,4 +456,105 @@ Ellipse::getDafaliasEllipseAxesAndCentre(Real const m,
   vertical_axis = std::sqrt(((m + alpha) * (m - alpha) * p_0 * p_0) / (2 * x));
   center_p = p_0 / 2.0;
   center_q = alpha * p_0 / 2.0;
+}
+
+Real
+Ellipse::computeLnePotential(Real const p, Real const q, Real const p_t,
+    Real const p_c, Real const alpha, Real const beta, Real const M_f)
+{
+  Real h = std::exp(-std::pow((p - p_t)/(p_c - p_t) - alpha, 2) / beta);
+  return std::pow(q, 2) + std::pow(M_f, 2) * h * (p - p_t) * (p - p_c);
+}
+
+void
+Ellipse::getYieldPointLne(Real const M,
+    Real const M_e, Real const M_c, Real const alpha, Real const beta, Real const theta,
+    Real const p_t, Real const p_c, Real const p, Real const q, Real & p_y, Real & q_y, Real & s)
+{
+  // Algorithm parameters
+  Real tol = 1e-10;
+  int nb_iter_max = 1000;
+  Real shooting_divider = 1e2;
+  // Start algorithm
+  Real h, delta_p, delta_q, p_i_test, q_i_test;
+  Real c = M_e / M_c;
+  Real gamma = 2*c/(1 + c - (1 - c)*std::cos(3*theta));
+  Real M_f = M * gamma;
+  Real potential = computeLnePotential(p, q, p_t, p_c, alpha, beta, M_f);
+  // Handle first the easy cases
+  //if (p == (p_t + p_c)/2.0)
+  //    // TODO
+  //elif (q == 0)
+  //    // TODO
+  // Now, the generic case
+  s = 0;
+  Real p_i = p;
+  Real q_i = q;
+  Real shooting_length = potential / shooting_divider;
+  Real p_i_old = p_i;
+  Real q_i_old = q_i;
+  Real potential_old = potential;
+  int nb_iter = 0;
+  while (potential > 0 && nb_iter < nb_iter_max)
+  {
+    nb_iter = nb_iter + 1;
+    s = s + std::sqrt(std::pow(p_i - p_i_old, 2) + std::pow(q_i - q_i_old, 2));
+    // flow direction
+    h = std::exp(-std::pow((p_i - p_t)/(p_c - p_t) - alpha, 2) / beta);
+    delta_p = std::pow(M_f, 2)*h*(2*p_i - (p_t+p_c)
+      - (2*(p_i-p_t)*(p-p_c)) * ((p_i-p_t)/(p_c-p_t) - alpha) / (beta*(p_c-p_t)));
+    delta_q = 2*q_i;
+    // get next point
+    p_i_old = p_i;
+    q_i_old = q_i;
+    p_i = p_i - shooting_length*delta_p;
+    q_i = q_i - shooting_length*delta_q;
+    potential_old = potential;
+    potential = computeLnePotential(p_i, q_i, p_t, p_c, alpha, beta, M_f);
+  }
+  if (nb_iter == nb_iter_max)
+    mooseError("Path to the yield surface (getYieldPointLne) failed to "\
+      "reach yield surface after ", nb_iter, " iterations.\nParameters "\
+      "used: M=", M, ", M_e=", M_e, ", M_c=", M_c, ", p_c=", p_c,
+      ", p_t=", p_t, ", alpha=", alpha, ", beta=", beta, ", theta=",
+      theta, ", p=", p, ", q=", q);
+  // The last point was either on or under the yield surface
+  // find intersection that last linear segment with yield surface
+  Real new_shooting_length = shooting_length;
+  Real p_i_pos = p_i_old;
+  Real q_i_pos = q_i_old;
+  Real potential_pos = potential_old;
+  Real p_i_neg = p_i;
+  Real q_i_neg = q_i;
+  Real potential_neg = potential;
+  Real potential_test = potential;
+  while (std::abs(potential_test) > tol && nb_iter < nb_iter_max)
+  {
+    nb_iter = nb_iter + 1;
+    new_shooting_length = new_shooting_length*potential_pos/(potential_pos-potential_neg);
+    p_i_test = p_i_pos - new_shooting_length*delta_p;
+    q_i_test = q_i_pos - new_shooting_length*delta_q;
+    potential_test = computeLnePotential(p_i_test, q_i_test, p_t, p_c, alpha, beta, M_f);
+    if (potential_test > 0)
+    {
+      p_i_pos = p_i_test;
+      q_i_pos = q_i_test;
+      potential_pos = potential_test;
+    }
+    else
+    {
+      p_i_neg = p_i_test;
+      q_i_neg = q_i_test;
+      potential_neg = potential_test;
+    }
+  }
+  if (nb_iter == nb_iter_max)
+    mooseError("Dichotomy to find yield point (getYieldPointLne) "\
+      "failed after ", nb_iter, " iterations.\nParameters "\
+      "used: M=", M, ", M_e=", M_e, ", M_c=", M_c, ", p_c=", p_c,
+      ", p_t=", p_t, ", alpha=", alpha, ", beta=", beta, ", theta=",
+      theta, ", p=", p, ", q=", q);
+  p_y = p_i_test;
+  q_y = q_i_test;
+  s = s + std::sqrt(std::pow(p_y - p_i_old, 2) + std::pow(q_y - q_i_old, 2));
 }

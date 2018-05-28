@@ -1060,3 +1060,56 @@ EllipseTest::testHyp2f1()
   s = Ellipse::hyp2f1(/*a=*/0.5, /*b=*/-1 / beta, /*c=*/(beta - 1) / beta, /*z=*/-alpha);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.890912584466695, s, 1e-12);
 }
+
+/**
+ * Testing Ellipse::getYieldPointLne
+ */
+void
+EllipseTest::distanceLneTest()
+{
+  Real p_y, q_y, s;
+  Real M = 1;
+  Real M_e = 1.4;
+  Real M_c = 1.4;
+  Real p_c = -3;
+  Real p_t = 0;
+  Real alpha = 0;
+  Real beta = 1e5; // infinite beta to fall back on modified Cam Clay
+  Real theta = libMesh::pi / 3.0;
+
+  // Cases: perfect ellipse (MCC)
+  // Point on the p axis
+  Ellipse::getYieldPointLne(M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-5, /*q=*/0, p_y, q_y, s);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong s", 2, s, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong p_y", -3, p_y, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong q_y", 0, q_y, 1e-5);
+  // Point above the top of the ellipse
+  Ellipse::getYieldPointLne(M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-1.5, /*q=*/2, p_y, q_y, s);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong s", 0.5, s, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong p_y", -1.5, p_y, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong q_y", 1.5, q_y, 1e-5);
+  // Random point
+  Ellipse::getYieldPointLne(M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-0.5, /*q=*/2, p_y, q_y, s);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong s", 0.736068435865, s, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong p_y", -0.82917935249, p_y, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong q_y", 1.3416401469, q_y, 1e-5);
+
+  // Cases: not perfect ellipse
+  alpha = 1;
+  beta = 1;
+  // Point on the p axis
+  Ellipse::getYieldPointLne(M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-5, /*q=*/0, p_y, q_y, s);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong s", 2, s, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong p_y", -3, p_y, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong q_y", 0, q_y, 1e-5);
+  // Random point on flat side
+  Ellipse::getYieldPointLne(M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-0.5, /*q=*/2, p_y, q_y, s);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, 1, wrong s", 1.00801542687608, s, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, 1, wrong p_y", -0.9088452102838, p_y, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, 1, wrong q_y", 1.08126052737926, q_y, 1e-5);
+  // Random point on cap side
+  Ellipse::getYieldPointLne(M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-4, /*q=*/2, p_y, q_y, s);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, 1, wrong s", 1.7122202698807, s, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, 1, wrong p_y", -2.71410334843536, p_y, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, 1, wrong q_y", 0.87689101529589, q_y, 1e-5);
+}

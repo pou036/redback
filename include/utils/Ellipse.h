@@ -91,7 +91,7 @@ public:
    * @return d: distance to ellipse
    */
   static Real
-  distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real shift_ellipse);
+  distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real const shift_ellipse);
 
   /**
    * Function to compute the yield point coordinates from a query point
@@ -103,10 +103,9 @@ public:
    * @param x: coordinates of projection point on the ellipse
    * @param s: arc-length from point to yield point
    * @param shift: horizontal shift of the ellipse
-   * @return d: distance to ellipse
    */
   static void getYieldPointCC(
-    Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real & s, Real shift);
+    Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real & s, Real const shift);
 
   /**
    * Function to compute the hypergeometric function 2F1
@@ -180,6 +179,46 @@ public:
                                               Real & vertical_axis,
                                               Real & center_p,
                                               Real & center_q);
-};
 
+  /**
+   * Compute the Lne potential for given point (p,q)
+   * @param p_t: tensile strength
+   * @param p_c: isotropic compression strength
+   * @param alpha: material parameter controlling location (in p') of yield surface maximum
+   * @param beta: material parameter controlling width of yield surface bell curve
+   * @param M_f: parameter (computed as M*gamma)
+   */
+  static Real computeLnePotential(Real const p,
+                                  Real const q,
+                                  Real const p_t,
+                                  Real const p_c,
+                                  Real const alpha,
+                                  Real const beta,
+                                  Real const M_f);
+
+  /**
+   * Function to compute the yield point coordinates from a query point
+   * to a modified ellipse from Eleni Gerolymatou's model
+   * by following the flow vector.
+   * @param M: slope of the critical state line
+   * @param M_e: slope of critical state line in extension
+   * @param M_c: slope of critical state line in compression
+   * @param alpha: material parameter controlling location (in p') of yield surface maximum
+   * @param beta: material parameter controlling width of yield surface bell curve
+   * @param theta: Lode angle (using positive cosine? TODO: check with Eleni)
+   * @param p_c: isotropic compression strength
+   * @param p_t: tensile strength
+   * @param s: arc-length from point to yield point
+   * @param shift: horizontal shift of the ellipse
+   * @param p: p coordinate of point to project
+   * @param q: q coordinate of point to project
+   * @param p_y: p coordinate of "projection" (yield) point on the ellipse
+   * @param q_y: q coordinate of "projection" (yield) point on the ellipse
+   * @param s: arc-length from point to yield point
+   */
+  static void getYieldPointLne(Real const M,
+      Real const M_e, Real const M_c, Real const alpha, Real const beta, Real const theta,
+      Real const p_t, Real const p_c, Real const p, Real const q, Real & p_y, Real & q_y, Real & s);
+
+};
 #endif // ELLIPSE_H

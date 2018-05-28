@@ -40,6 +40,7 @@ class EllipseTest : public CppUnit::TestFixture
   CPPUNIT_TEST(isPointOutsideOfRotatedEllipseTestMajorAxisHorizontal);
   CPPUNIT_TEST(isPointOutsideOfRotatedEllipseTestMajorAxisVertical);
   CPPUNIT_TEST(testHyp2f1);
+  CPPUNIT_TEST(distanceLneTest);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -61,6 +62,7 @@ public:
   void isPointOutsideOfRotatedEllipseTestMajorAxisHorizontal();
   void isPointOutsideOfRotatedEllipseTestMajorAxisVertical();
   void testHyp2f1();
+  void distanceLneTest();
 };
 
 #endif // ELLIPSETEST_H
