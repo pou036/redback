@@ -165,13 +165,13 @@ RedbackMechMaterialLne::getJac(const RankTwoTensor & sig,
   Real X = (X_1 - 2.0 * X_2 * X_3 / _beta);
   Real h = std::exp(-std::pow(X_3, 2) / _beta);
   Real A = (std::pow(_M_f, 2) * h * X) / 3.0;
-  Real Z = h * (1.0 - (X_1 * X_3 + X_2) * (_beta * (pc - _p_t)));
+  Real Z = h * (1.0 - (X_1 * X_3 + X_2) / (_beta * (pc - _p_t)));
   Real Y = (2.0 * std::pow(_M_f, 2) / 9.0) * (Z - h * X_3 * X / (_beta * (pc - _p_t)));
   Real norm = std::sqrt(3*std::pow(A, 2) + 6*std::pow(sig_eqv, 2));
 
   f1 = (Y - 1.0) / norm;
   f2 = 3.0 / norm;
-  f3 = (std::pow(_M_f, 2) * h * X) / std::pow(norm, 3);
+  f3 = (std::pow(_M_f, 2) * h * X) / (3.0*std::pow(norm, 3));
   f4 = 3.0 / std::pow(norm, 3);
   f5 = (2.0/3.0) * std::pow(_M_f, 2) * A * Z;
   f6 = 9.0;
