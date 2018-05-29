@@ -62,4 +62,9 @@
   #  input = 'bench_abaqus_elastic_02.i'
   #  csvdiff = 'bench_abaqus_elastic_02.csv'
   #[../]
+  [./test_3_M_Lne] # can't put a dot in that name!
+    type = 'CSVDiff'
+    input = 'bench_Lne.i'
+    csvdiff = 'bench_Lne_out.csv'
+  [../]
 []

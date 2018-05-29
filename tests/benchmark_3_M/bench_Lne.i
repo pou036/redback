@@ -368,7 +368,7 @@
 
 [Outputs]
   # output_initial = true
-  file_base = bench_CC_out
+  file_base = bench_Lne_out
   exodus = true
   csv = true
   print_linear_residuals = true

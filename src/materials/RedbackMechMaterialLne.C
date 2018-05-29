@@ -26,7 +26,7 @@ validParams<RedbackMechMaterialLne>()
   params.addParam<Real>("beta", 1, "material parameter controlling width of yield surface bell curve");
   params.addParam<Real>("theta", 0, "Lode angle (using positive cosine)");
   //params.addParam<Real>("p_c", 0, "isotropic compression strength (normalised, positive)"); // no need, using yield_stress
-  params.addParam<Real>("p_t", 0, "tensile strength (normalised, negative)");
+  params.addParam<Real>("p_t", 0, "tensile strength (normalised, negative)"); // user convention: positive in compression, but the code works with the other convention
   return params;
 }
 
@@ -64,7 +64,7 @@ RedbackMechMaterialLne::getFlowTensor(const RankTwoTensor & sig,
                                      Real yield_stress,
                                      RankTwoTensor & flow_tensor)
 {
-  Real pc = -yield_stress; // TODO: decide if we're using slope_yield_surface or p_c
+  Real pc = -yield_stress;
   Real h = std::exp(-std::pow((p - _p_t)/(pc - _p_t) - _alpha, 2) / _beta);
   Real A = std::pow(_M_f, 2) * h * (2*p - (_p_t + pc) -
       2*(p - _p_t)*(p - pc)*((p - _p_t)/(pc - _p_t) -
@@ -83,10 +83,7 @@ RedbackMechMaterialLne::getFlowIncrement(
   Real /*sig_eqv*/, Real /*pressure*/, Real /*q_yield_stress*/, Real /*p_yield_stress*/, Real yield_stress, Real s)
 {
   Real pc = -yield_stress;
-  Real sigma_0 = std::fabs(pc);
-  // Real flow_incr_vol = _ref_pe_rate * _dt * std::pow((pressure - p_yield_stress) / sigma_0, _exponent) *
-  // _exponential;  Real flow_incr_dev = _ref_pe_rate * _dt * std::pow((sig_eqv - q_yield_stress) / sigma_0, _exponent)
-  // * _exponential;  return std::sqrt(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev);
+  Real sigma_0 = std::fabs(pc - _p_t);
   return _ref_pe_rate * _dt * std::pow(s / sigma_0, _exponent) * _exponential;
 }
 
@@ -134,14 +131,12 @@ RedbackMechMaterialLne::getJac(const RankTwoTensor & sig,
   RankTwoTensor dfi_dft;
   RankFourTensor dfd_dsig, dfi_dsig;
   Real f0, f1, f2, f3, f4, f5, f6;
-  Real dfi_dp, dfi_dseqv;
-
-  //TODO: getJac not even touched yet
+  Real dfi_dp, dfi_dseqv, dfi_ds, sigma_0;
 
   Real pc = -yield_stress;
   sig_dev = sig.deviatoric();
 
-  getDerivativeFlowIncrement(dfi_dp, dfi_dseqv, sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress, s);
+  //getDerivativeFlowIncrement(dfi_dp, dfi_dseqv, sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress, s);
   getFlowTensor(sig, sig_eqv, pressure, q_yield_stress, p_yield_stress, yield_stress, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the
@@ -164,14 +159,23 @@ RedbackMechMaterialLne::getJac(const RankTwoTensor & sig,
   Real X_3 = (pressure - _p_t) / (pc - _p_t) - _alpha;
   Real X = (X_1 - 2.0 * X_2 * X_3 / _beta);
   Real h = std::exp(-std::pow(X_3, 2) / _beta);
-  Real A = (std::pow(_M_f, 2) * h * X) / 3.0;
+  Real Mf2hX = std::pow(_M_f, 2) * h * X;
+  Real A = Mf2hX / 3.0;
   Real Z = h * (1.0 - (X_1 * X_3 + X_2) / (_beta * (pc - _p_t)));
   Real Y = (2.0 * std::pow(_M_f, 2) / 9.0) * (Z - h * X_3 * X / (_beta * (pc - _p_t)));
   Real norm = std::sqrt(3*std::pow(A, 2) + 6*std::pow(sig_eqv, 2));
 
+  // derivative of flow increment with respect to s (overstress)
+  sigma_0 = std::fabs(pc - _p_t);
+  dfi_ds = _exponent * _ref_pe_rate * _dt * std::pow(s / sigma_0, _exponent-1) * _exponential / sigma_0;
+
+  // derivatives of flow increment with respect to p and q
+  dfi_dp = dfi_ds * std::pow(_M_f, 2) * h * X;
+  dfi_dseqv = dfi_ds * 2 * sig_eqv;
+
   f1 = (Y - 1.0) / norm;
   f2 = 3.0 / norm;
-  f3 = (std::pow(_M_f, 2) * h * X) / (3.0*std::pow(norm, 3));
+  f3 = Mf2hX / (3.0 * std::pow(norm, 3));
   f4 = 3.0 / std::pow(norm, 3);
   f5 = (2.0/3.0) * std::pow(_M_f, 2) * A * Z;
   f6 = 9.0;
@@ -203,11 +207,17 @@ RedbackMechMaterialLne::get_py_qy(
   Real pc = -yield_stress;
   Real h = std::exp(-std::pow((p - _p_t)/(pc - _p_t) - _alpha, 2) / _beta);
   Real potential = std::pow(q, 2) + std::pow(_M_f, 2) * h * (p - _p_t) * (p - pc);
-  is_plastic = (potential > 0); // compute yield coords regardless
+  is_plastic = (potential > 0);
+
+  // use potential for overstress
+  s = potential;
+  // yield point actually irrelevant!
+  p_y = 1e99;
+  q_y = 1e99;
 
   // get yield point in any case (even if elastic)
-  Ellipse::getYieldPointLne(_M, _M_e, _M_c, _alpha, _beta, _theta,
-      -_p_t, pc, p, q, p_y, q_y, s);
+  //Ellipse::getYieldPointLne(_M, _M_e, _M_c, _alpha, _beta, _theta,
+  //    -_p_t, pc, p, q, p_y, q_y, s);
 }
 
 void RedbackMechMaterialLne::form_damage_kernels(Real /*q_y*/)
