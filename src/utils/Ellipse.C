@@ -153,7 +153,8 @@ Ellipse::sqrDistance(Real const e[ 2 ], Real const y[ 2 ], Real x[ 2 ])
 }
 
 Real
-Ellipse::distanceCC(Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real shift_ellipse)
+Ellipse::distanceCC(
+  Real const m, Real const p_c, Real const y0, Real const y1, Real & x0, Real & x1, Real shift_ellipse)
 {
   Real e[ 2 ];         // ellipse axes
   Real x[ 2 ];         // point coordinates as array

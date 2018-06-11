@@ -38,8 +38,8 @@ validParams<RedbackStressDivergenceTensors>()
   return params;
 }
 
-RedbackStressDivergenceTensors::RedbackStressDivergenceTensors(const InputParameters & parameters) :
-    Kernel(parameters),
+RedbackStressDivergenceTensors::RedbackStressDivergenceTensors(const InputParameters & parameters)
+  : Kernel(parameters),
     _pore_pres(coupledValue("pore_pres")),
 
     _stress(getMaterialProperty<RankTwoTensor>("stress" + getParam<std::string>("appended_property_name"))),

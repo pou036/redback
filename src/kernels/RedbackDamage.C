@@ -23,8 +23,8 @@ validParams<RedbackDamage>()
   return params;
 }
 
-RedbackDamage::RedbackDamage(const InputParameters & parameters) :
-    Kernel(parameters),
+RedbackDamage::RedbackDamage(const InputParameters & parameters)
+  : Kernel(parameters),
     _damage_kernel(getMaterialProperty<Real>("damage_kernel")),
     _damage_kernel_jac(getMaterialProperty<Real>("damage_kernel_jacobian")),
     _time_factor(getParam<Real>("time_factor"))

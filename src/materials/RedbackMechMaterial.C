@@ -100,8 +100,8 @@ validParams<RedbackMechMaterial>()
   return params;
 }
 
-RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
-    Material(parameters),
+RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters)
+  : Material(parameters),
     // Copy-paste from TensorMechanicsMaterial.C
     _grad_disp_x(coupledGradient("disp_x")),
     _grad_disp_y(coupledGradient("disp_y")),
@@ -221,6 +221,9 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters) :
   _initial_stress.resize(num);
   for (unsigned i = 0; i < num; ++i)
     _initial_stress[ i ] = &getFunctionByName(fcn_names[ i ]);
+
+  // initialise damage dissipation
+  _damage_dissipation = 0;
 }
 
 MooseEnum
