@@ -180,7 +180,6 @@
   [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
-    block = '0 1'
   [../]
   [./returnmap_iter]
     order = CONSTANT
