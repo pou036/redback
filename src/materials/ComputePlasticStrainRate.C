@@ -31,8 +31,11 @@ ComputePlasticStrainRate::ComputePlasticStrainRate(const InputParameters & param
 void
 ComputePlasticStrainRate::computeQpProperties()
 {
+  _plastic_strain_rate[ _qp ] = (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]) / _dt;
+  /*
   if (_dt > 0)
     _plastic_strain_rate[ _qp ] = (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]) / _dt;
   else
     _plastic_strain_rate[ _qp ].zero();
+    */
 }
