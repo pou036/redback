@@ -29,8 +29,8 @@ validParams<FunctionNormalDistributionIC>()
   return params;
 }
 
-FunctionNormalDistributionIC::FunctionNormalDistributionIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+FunctionNormalDistributionIC::FunctionNormalDistributionIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _mean(getParam<Real>("mean")),
     _stddev(getParam<Real>("standard_deviation")),
     _min(getParam<Real>("minimum")),

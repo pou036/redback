@@ -23,8 +23,8 @@ validParams<RedbackMechMaterialDP>()
   return params;
 }
 
-RedbackMechMaterialDP::RedbackMechMaterialDP(const InputParameters & parameters) :
-    RedbackMechMaterial(parameters), _slope_yield_surface(getParam<Real>("slope_yield_surface"))
+RedbackMechMaterialDP::RedbackMechMaterialDP(const InputParameters & parameters)
+  : RedbackMechMaterial(parameters), _slope_yield_surface(getParam<Real>("slope_yield_surface"))
 {
 }
 

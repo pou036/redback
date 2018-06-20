@@ -22,8 +22,8 @@ validParams<InterfaceDarcy>()
   return params;
 }
 
-InterfaceDarcy::InterfaceDarcy(const InputParameters & parameters) :
-    InterfaceKernel(parameters),
+InterfaceDarcy::InterfaceDarcy(const InputParameters & parameters)
+  : InterfaceKernel(parameters),
     _Le(getMaterialProperty<Real>("lewis_number")),
     _Le_fault(getParam<Real>("fault_lewis_number")),
     _gravity_term(getMaterialProperty<RealVectorValue>("fluid_gravity_term")),
@@ -55,8 +55,7 @@ InterfaceDarcy::computeQpResidual(Moose::DGResidualType type)
   }
 }
 
-Real
-InterfaceDarcy::computeQpJacobian(Moose::DGJacobianType /*type*/)
+Real InterfaceDarcy::computeQpJacobian(Moose::DGJacobianType /*type*/)
 {
   return 0;
 }
