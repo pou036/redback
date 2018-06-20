@@ -290,6 +290,8 @@ inactive = 'Functions'
 
 [Executioner]
   # Preconditioned JFNK (default)
+  # petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
+  # petsc_options_value = 'hypre boomeramg cp 201'
   type = Transient
   start_time = 0.0
   end_time = 0.005
@@ -298,8 +300,6 @@ inactive = 'Functions'
   l_max_its = 200
   nl_max_its = 10
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg cp 201'
   nl_abs_tol = 1e-10  # 1e-10 to begin with
   reset_dt = true
   line_search = basic

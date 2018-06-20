@@ -175,7 +175,6 @@
   [./mises_strain_rate]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./Mod_Gruntfest_number]
     order = CONSTANT
@@ -192,7 +191,6 @@
   [./mean_stress]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./total_porosity]
     order = FIRST
@@ -270,20 +268,17 @@
   [./mises_strain_rate]
     type = MaterialRealAux
     variable = mises_strain_rate
-    block = 0
     property = mises_strain_rate
   [../]
   [./Gruntfest_Number]
     type = MaterialRealAux
     variable = Mod_Gruntfest_number
     property = mod_gruntfest_number
-    block = 0
   [../]
   [./mean_stress]
     type = MaterialRealAux
     variable = mean_stress
     property = mean_stress
-    block = 0
   [../]
   [./volumetric_strain]
     type = MaterialRealAux
@@ -356,6 +351,8 @@
 
 [Executioner]
   # Preconditioned JFNK (default)
+  # petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
+  # petsc_options_value = 'hypre boomeramg cp 201'
   start_time = 0.0
   end_time = 1e-2
   dtmax = 1
@@ -364,8 +361,6 @@
   l_max_its = 200
   nl_max_its = 10
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg cp 201'
   nl_abs_tol = 1e-10 # 1e-10 to begin with
   reset_dt = true
   line_search = basic
