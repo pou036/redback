@@ -14,9 +14,7 @@ class RedbackTotalPorosityAux : public AuxKernel
 {
 public:
   RedbackTotalPorosityAux(const InputParameters & parameters);
-  virtual ~RedbackTotalPorosityAux()
-  {
-  }
+  virtual ~RedbackTotalPorosityAux() {}
 
 protected:
   virtual Real computeValue();

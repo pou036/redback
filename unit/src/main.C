@@ -46,7 +46,7 @@ main(int argc, char ** argv)
 
   // If you run with --xml, output will be sent to an xml file instead of the
   // screen
-  if (argc == 2 && std::string(argv[ 1 ]) == std::string("--xml"))
+  if (argc == 2 && std::string(argv[1]) == std::string("--xml"))
   {
     runner.setOutputter(new CppUnit::XmlOutputter(&runner.result(), out));
     out.open("test_results.xml");

@@ -54,7 +54,8 @@ protected:
   const VariableValue & _sum_var_older_4;
   const VariableValue & _sum_var_older_5;
   const VariableValue & _sum_var_older_6;
-  bool _is_var1_coupled, _is_var2_coupled, _is_var3_coupled, _is_var4_coupled, _is_var5_coupled, _is_var6_coupled;
+  bool _is_var1_coupled, _is_var2_coupled, _is_var3_coupled, _is_var4_coupled, _is_var5_coupled,
+      _is_var6_coupled;
 };
 
 #endif /* REDBACKCONTINUATIONTANGENTAUX_H */

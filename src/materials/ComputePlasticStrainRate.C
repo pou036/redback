@@ -32,7 +32,7 @@ void
 ComputePlasticStrainRate::computeQpProperties()
 {
   if (_dt > 0)
-    _plastic_strain_rate[ _qp ] = (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]) / _dt;
+    _plastic_strain_rate[_qp] = (_plastic_strain[_qp] - _plastic_strain_old[_qp]) / _dt;
   else
-    _plastic_strain_rate[ _qp ].zero();
+    _plastic_strain_rate[_qp].zero();
 }

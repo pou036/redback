@@ -15,7 +15,7 @@ validParams<RedbackAction>()
   params.addParam<NonlinearVariableName>("temp", "", "The temperature");
   params.addParam<NonlinearVariableName>("pore_pres", "", "The pore fluid pressure");
   params.addParam<std::string>(
-    "appended_property_name", "", "Name appended to material properties to make them unique");
+      "appended_property_name", "", "Name appended to material properties to make them unique");
 
   // changed this from true to false
   params.set<bool>("use_displaced_mesh") = true;
