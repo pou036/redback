@@ -31,18 +31,16 @@ RedbackDamage::RedbackDamage(const InputParameters & parameters)
 {
 }
 
-RedbackDamage::~RedbackDamage()
-{
-}
+RedbackDamage::~RedbackDamage() {}
 
 Real
 RedbackDamage::computeQpResidual()
 {
-  return -_time_factor * _test[ _i ][ _qp ] * _damage_kernel[ _qp ];
+  return -_time_factor * _test[_i][_qp] * _damage_kernel[_qp];
 }
 
 Real
 RedbackDamage::computeQpJacobian()
 {
-  return -_time_factor * _test[ _i ][ _qp ] * _damage_kernel_jac[ _qp ] * _phi[ _j ][ _qp ];
+  return -_time_factor * _test[_i][_qp] * _damage_kernel_jac[_qp] * _phi[_j][_qp];
 }

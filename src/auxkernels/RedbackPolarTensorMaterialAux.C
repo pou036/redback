@@ -17,11 +17,16 @@ InputParameters
 validParams<RedbackPolarTensorMaterialAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<MaterialPropertyName>("rank_two_tensor", "The rank two material tensor name");
+  params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
+                                                "The rank two material tensor name");
   params.addRequiredRangeCheckedParam<unsigned int>(
-    "index_i", "index_i >= 0 & index_i <= 1", "An index i to select r (i=0) or theta (i=1) output");
+      "index_i",
+      "index_i >= 0 & index_i <= 1",
+      "An index i to select r (i=0) or theta (i=1) output");
   params.addRequiredRangeCheckedParam<unsigned int>(
-    "index_j", "index_j >= 0 & index_j <= 1", "An index j to select r (i=0) or theta (i=1) output");
+      "index_j",
+      "index_j >= 0 & index_j <= 1",
+      "An index j to select r (i=0) or theta (i=1) output");
   return params;
 }
 
@@ -48,8 +53,8 @@ RedbackPolarTensorMaterialAux::computeValue()
   Real theta;
 
   // Real argument = y/x;
-  // Real theta = std::atan(argument)*(argument <0 ? -1: 1); //(argument < 0 ? libMesh::pi - std::atan(argument):
-  // std::atan(argument));
+  // Real theta = std::atan(argument)*(argument <0 ? -1: 1); //(argument < 0 ? libMesh::pi -
+  // std::atan(argument): std::atan(argument));
   if (r < epsilon)
     theta = 0;
   else
@@ -75,23 +80,24 @@ RedbackPolarTensorMaterialAux::computeValue()
   if ((_i == 0) && (_j == 0))
   {
     // User is asking for tensor_r_r
-    result = _tensor[ _qp ](0, 0) * std::cos(theta) * std::cos(theta) +
-             2 * _tensor[ _qp ](0, 1) * std::sin(theta) * std::cos(theta) +
-             _tensor[ _qp ](1, 1) * std::sin(theta) * std::sin(theta);
+    result = _tensor[_qp](0, 0) * std::cos(theta) * std::cos(theta) +
+             2 * _tensor[_qp](0, 1) * std::sin(theta) * std::cos(theta) +
+             _tensor[_qp](1, 1) * std::sin(theta) * std::sin(theta);
   }
   else if ((_i == 1) && (_j == 1))
   {
     // User is asking for tensor_theta_theta
-    result = _tensor[ _qp ](0, 0) * std::sin(theta) * std::sin(theta) -
-             2 * _tensor[ _qp ](0, 1) * std::sin(theta) * std::cos(theta) +
-             _tensor[ _qp ](1, 1) * std::cos(theta) * std::cos(theta);
+    result = _tensor[_qp](0, 0) * std::sin(theta) * std::sin(theta) -
+             2 * _tensor[_qp](0, 1) * std::sin(theta) * std::cos(theta) +
+             _tensor[_qp](1, 1) * std::cos(theta) * std::cos(theta);
   }
   else
   {
     // User is asking for tensor_r_theta (or tensor_theta_r, which we don't differentiate...)
-    result = -_tensor[ _qp ](0, 0) * std::sin(theta) * std::cos(theta) +
-             _tensor[ _qp ](0, 1) * (std::cos(theta) * std::cos(theta) - std::sin(theta) * std::sin(theta)) +
-             _tensor[ _qp ](1, 1) * std::sin(theta) * std::cos(theta);
+    result = -_tensor[_qp](0, 0) * std::sin(theta) * std::cos(theta) +
+             _tensor[_qp](0, 1) *
+                 (std::cos(theta) * std::cos(theta) - std::sin(theta) * std::sin(theta)) +
+             _tensor[_qp](1, 1) * std::sin(theta) * std::cos(theta);
   }
 
   return result;
