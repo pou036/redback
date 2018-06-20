@@ -88,33 +88,6 @@ RedbackMechMaterialLne::getFlowIncrement(
 }
 
 void
-RedbackMechMaterialLne::getDerivativeFlowIncrement(Real & dfi_dp,
-                                                  Real & dfi_dq,
-                                                  const RankTwoTensor & /*sig*/,
-                                                  Real p,
-                                                  Real q,
-                                                  Real pc,
-                                                  Real /*q_yield_stress*/,
-                                                  Real /*p_yield_stress*/,
-                                                  Real s)
-{
-  Real sigma_0 = std::fabs(pc - _p_t);
-
-  // Compute numerically derivatives of s with respect to p and q
-  Real p_y2, q_y2, s2, ds_dp, ds_dq;
-  bool is_plastic;
-  Real delta_p = sigma_0 / 1000.; // TODO: this value influences the convergence and should be dynamic!
-  Real delta_q = _M * delta_p;
-  get_py_qy(p + delta_p, q, p_y2, q_y2, -pc, is_plastic, s2);
-  ds_dp = (s2 - s) / delta_p;
-  get_py_qy(p, q + delta_q, p_y2, q_y2, -pc, is_plastic, s2);
-  ds_dq = (s2 - s) / delta_q;
-  Real tmp = _ref_pe_rate * _dt * _exponent * _exponential * std::pow(s / sigma_0, _exponent - 1) / sigma_0;
-  dfi_dp = tmp * ds_dp;
-  dfi_dq = tmp * ds_dq;
-}
-
-void
 RedbackMechMaterialLne::getJac(const RankTwoTensor & sig,
                               const RankFourTensor & E_ijkl,
                               Real flow_incr,
@@ -170,8 +143,8 @@ RedbackMechMaterialLne::getJac(const RankTwoTensor & sig,
   dfi_ds = _exponent * _ref_pe_rate * _dt * std::pow(s / sigma_0, _exponent-1) * _exponential / sigma_0;
 
   // derivatives of flow increment with respect to p and q
-  dfi_dp = dfi_ds * std::pow(_M_f, 2) * h * X;
-  dfi_dseqv = dfi_ds * 2 * sig_eqv;
+  dfi_dp = dfi_ds * std::pow(_M_f, 2) * h * X / (2 * s);
+  dfi_dseqv = dfi_ds * sig_eqv / s;
 
   f1 = (Y - 1.0) / norm;
   f2 = 3.0 / norm;
@@ -210,7 +183,7 @@ RedbackMechMaterialLne::get_py_qy(
   is_plastic = (potential > 0);
 
   // use potential for overstress
-  s = potential;
+  s = std::sqrt(potential);
   // yield point actually irrelevant!
   p_y = 1e99;
   q_y = 1e99;

@@ -38,7 +38,6 @@ protected:
   virtual Real getFlowIncrement(Real, Real, Real, Real, Real, Real) override;
   virtual void get_py_qy(Real, Real, Real &, Real &, Real, bool &, Real &) override;
   virtual void form_damage_kernels(Real) override;
-  void getDerivativeFlowIncrement(Real &, Real &, const RankTwoTensor &, Real, Real, Real, Real, Real, Real);
 };
 
 #endif // REDBACKMECHMATERIALLNE_H
