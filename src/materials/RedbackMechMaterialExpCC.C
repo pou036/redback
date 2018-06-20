@@ -26,7 +26,8 @@ validParams<RedbackMechMaterialExpCC>()
   //  if (getYieldStress(0) <= 0)
   //    mooseError("modified Cam-Clay cannot deal with negative
   //    pre-consolidation stress ('yield_stress')");
-  params.addParam<Real>("slope_yield_surface", 0, "Slope of yield surface (positive, see documentation)");
+  params.addParam<Real>(
+      "slope_yield_surface", 0, "Slope of yield surface (positive, see documentation)");
   return params;
 }
 
@@ -39,8 +40,13 @@ RedbackMechMaterialExpCC::RedbackMechMaterialExpCC(const InputParameters & param
  * Get unitary flow tensor in deviatoric direction, modified Cam-Clay
  */
 void
-RedbackMechMaterialExpCC::getFlowTensor(
-  const RankTwoTensor & sig, Real /*q*/, Real p, Real /*q_y*/, Real /*p_y*/, Real pc, RankTwoTensor & flow_tensor)
+RedbackMechMaterialExpCC::getFlowTensor(const RankTwoTensor & sig,
+                                        Real /*q*/,
+                                        Real p,
+                                        Real /*q_y*/,
+                                        Real /*p_y*/,
+                                        Real pc,
+                                        RankTwoTensor & flow_tensor)
 {
   if (pc > 0)
     pc *= -1;
@@ -57,7 +63,7 @@ RedbackMechMaterialExpCC::getFlowTensor(
  */
 Real
 RedbackMechMaterialExpCC::getFlowIncrement(
-  Real sig_eqv, Real pressure, Real /*q_yield_stress*/, Real /*p_yield_stress*/, Real pc)
+    Real sig_eqv, Real pressure, Real /*q_yield_stress*/, Real /*p_yield_stress*/, Real pc)
 {
   pc *= -1;
   if (Ellipse::isPointOutsideOfEllipse(/*m=*/_slope_yield_surface,
@@ -67,10 +73,9 @@ RedbackMechMaterialExpCC::getFlowIncrement(
   {
     Real flow_incr_vol = _ref_pe_rate * _dt * _exponential;
     Real flow_incr_dev = _ref_pe_rate * _dt * _exponential;
-    // Real flow_incr_vol = _ref_pe_rate * _dt * std::pow(std::fabs(pressure - p_yield_stress), _exponent) *
-    // _exponential;
-    // Real flow_incr_dev = _ref_pe_rate * _dt * std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent) *
-    // _exponential;
+    // Real flow_incr_vol = _ref_pe_rate * _dt * std::pow(std::fabs(pressure - p_yield_stress),
+    // _exponent) * _exponential; Real flow_incr_dev = _ref_pe_rate * _dt *
+    // std::pow(std::fabs(sig_eqv - q_yield_stress), _exponent) * _exponential;
     return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
   }
   else
@@ -112,7 +117,8 @@ RedbackMechMaterialExpCC::getJac(const RankTwoTensor & sig,
   Real pc = -yield_stress;
   sig_dev = sig.deviatoric();
 
-  getDerivativeFlowIncrement(dfi_dp, dfi_dseqv, sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress);
+  getDerivativeFlowIncrement(
+      dfi_dp, dfi_dseqv, sig, pressure, sig_eqv, pc, q_yield_stress, p_yield_stress);
   getFlowTensor(sig, sig_eqv, pressure, q_yield_stress, p_yield_stress, pc, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the
@@ -141,24 +147,25 @@ RedbackMechMaterialExpCC::getJac(const RankTwoTensor & sig,
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dfi_dsig(i, j, k, l) = flow_dirn(i, j) * (f3 * sig_dev(k, l) * dfi_dseqv + dfi_dp * deltaFunc(k, l) / 3.0);
+          dfi_dsig(i, j, k, l) =
+              flow_dirn(i, j) * (f3 * sig_dev(k, l) * dfi_dseqv + dfi_dp * deltaFunc(k, l) / 3.0);
 
   // This loop calculates the second term.
   for (i = 0; i < 3; ++i)
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dfd_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) + f2 * deltaFunc(i, j) * deltaFunc(k, l);
+          dfd_dsig(i, j, k, l) =
+              f1 * deltaFunc(i, k) * deltaFunc(j, l) + f2 * deltaFunc(i, j) * deltaFunc(k, l);
 
   dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr + dfi_dsig; // Jacobian
 }
 
 void
-RedbackMechMaterialExpCC::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & /*is_plastic*/)
+RedbackMechMaterialExpCC::get_py_qy(
+    Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & /*is_plastic*/)
 {
   Ellipse::distanceCC(_slope_yield_surface, -yield_stress, p, q, p_y, q_y, 0.);
 }
 
-void RedbackMechMaterialExpCC::form_damage_kernels(Real /*q_y*/)
-{
-}
+void RedbackMechMaterialExpCC::form_damage_kernels(Real /*q_y*/) {}

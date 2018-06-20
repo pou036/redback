@@ -115,9 +115,7 @@ RedbackApp::RedbackApp(InputParameters parameters) : MooseApp(parameters)
   RedbackApp::associateSyntax(_syntax, _action_factory);
 }
 
-RedbackApp::~RedbackApp()
-{
-}
+RedbackApp::~RedbackApp() {}
 
 void
 RedbackApp::registerApps()

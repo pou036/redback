@@ -29,7 +29,7 @@ validParams<RedbackStressDivergenceTensors>()
   params.addCoupledVar("temp", 0.0, "The temperature");
   params.addCoupledVar("pore_pres", 0.0, "The pore fluid pressure");
   params.addParam<std::string>(
-    "appended_property_name", "", "Name appended to material properties to make them unique");
+      "appended_property_name", "", "Name appended to material properties to make them unique");
 
   // Using the displaced mesh will be set in the solid mechanics action input
   // now.
@@ -42,9 +42,10 @@ RedbackStressDivergenceTensors::RedbackStressDivergenceTensors(const InputParame
   : Kernel(parameters),
     _pore_pres(coupledValue("pore_pres")),
 
-    _stress(getMaterialProperty<RankTwoTensor>("stress" + getParam<std::string>("appended_property_name"))),
-    _Jacobian_mult(
-      getMaterialProperty<RankFourTensor>("Jacobian_mult" + getParam<std::string>("appended_property_name"))),
+    _stress(getMaterialProperty<RankTwoTensor>("stress" +
+                                               getParam<std::string>("appended_property_name"))),
+    _Jacobian_mult(getMaterialProperty<RankFourTensor>(
+        "Jacobian_mult" + getParam<std::string>("appended_property_name"))),
     // _d_stress_dT(getMaterialProperty<RankTwoTensor>("d_stress_dT"+
     // getParam<std::string>("appended_property_name"))),
     _component(getParam<unsigned int>("component")),
@@ -81,10 +82,11 @@ RedbackStressDivergenceTensors::computeQpResidual()
 
   if (_pore_pres_coupled)
   {
-    _poromech_stress_row = _stress[ _qp ].row(_component);
-    _poromech_stress_row(_component) -= _biot_coeff[ _qp ] * _pore_pres[ _qp ];
+    _poromech_stress_row = _stress[_qp].row(_component);
+    _poromech_stress_row(_component) -= _biot_coeff[_qp] * _pore_pres[_qp];
     // return (_poromech_stress_row - _gravity_term[_qp])* _grad_test[_i][_qp];
-    return (_poromech_stress_row)*_grad_test[ _i ][ _qp ] - _gravity_term[ _qp ](_component) * _test[ _i ][ _qp ];
+    return (_poromech_stress_row)*_grad_test[_i][_qp] -
+           _gravity_term[_qp](_component) * _test[_i][_qp];
 
     // Note: 30th of October 2015: Negative signs in gravity and pore pressure
     // are being currently tested for the
@@ -97,18 +99,17 @@ RedbackStressDivergenceTensors::computeQpResidual()
 
   //  return (_stress[_qp].row(_component) - _gravity_term[_qp])*
   //  _grad_test[_i][_qp]; //TODO: Add the gravity kernel
-  return (_stress[ _qp ].row(_component)) * _grad_test[ _i ][ _qp ] -
-         _gravity_term[ _qp ](_component) * _test[ _i ][ _qp ]; // TODO: Add the gravity kernel
+  return (_stress[_qp].row(_component)) * _grad_test[_i][_qp] -
+         _gravity_term[_qp](_component) * _test[_i][_qp]; // TODO: Add the gravity kernel
 }
 
 Real
 RedbackStressDivergenceTensors::computeQpJacobian()
 {
   return ElasticityTensorTools::elasticJacobian(
-    _Jacobian_mult[ _qp ], _component, _component, _grad_test[ _i ][ _qp ], _grad_phi[ _j ][ _qp ]);
-  /*Real result = ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component, _component,
-  _grad_test[_i][_qp], _grad_phi[_j][_qp]);
-  if (_var.number() != _porepressure_var)
+      _Jacobian_mult[_qp], _component, _component, _grad_test[_i][_qp], _grad_phi[_j][_qp]);
+  /*Real result = ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp], _component,
+  _component, _grad_test[_i][_qp], _grad_phi[_j][_qp]); if (_var.number() != _porepressure_var)
     return result;
   return result + _phi[_j][_qp]*_grad_test[_i][_qp](_component);*/
 }
@@ -142,11 +143,11 @@ RedbackStressDivergenceTensors::computeQpOffDiagJacobian(unsigned int jvar)
   //  porepressure_term = _phi[_j][_qp]*_grad_test[_i][_qp](_component);
 
   if (active)
-    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[ _qp ],
+    return ElasticityTensorTools::elasticJacobian(_Jacobian_mult[_qp],
                                                   _component,
                                                   coupled_component,
-                                                  _grad_test[ _i ][ _qp ],
-                                                  _grad_phi[ _j ][ _qp ]) +
+                                                  _grad_test[_i][_qp],
+                                                  _grad_phi[_j][_qp]) +
            porepressure_term; // (porepressure_term = 0 here)
 
   if (_temp_coupled && jvar == _temp_var)

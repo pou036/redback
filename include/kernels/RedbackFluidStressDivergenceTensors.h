@@ -14,9 +14,9 @@ template <>
 InputParameters validParams<RedbackFluidStressDivergenceTensors>();
 
 /**
- * RedbackFluidStressDivergenceTensors mostly copies from StressDivergence.  There are small changes to use
- * RankFourTensor and RankTwoTensors instead of SymmElasticityTensors and SymmTensors.  This is done
- * to allow for more mathematical transparancy.
+ * RedbackFluidStressDivergenceTensors mostly copies from StressDivergence.  There are small changes
+ * to use RankFourTensor and RankTwoTensors instead of SymmElasticityTensors and SymmTensors.  This
+ * is done to allow for more mathematical transparancy.
  */
 class RedbackFluidStressDivergenceTensors : public Kernel
 {

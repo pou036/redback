@@ -14,10 +14,11 @@ InputParameters
 validParams<DarcyFluxBC>()
 {
   InputParameters params = validParams<FluxBC>();
-  params.addClassDescription("Computes a boundary residual contribution consistent with the Diffusion Kernel. "
-                             "Does not impose a boundary condition; instead computes the boundary "
-                             "contribution corresponding to the current value of grad(u) and accumulates "
-                             "it in the residual vector.");
+  params.addClassDescription(
+      "Computes a boundary residual contribution consistent with the Diffusion Kernel. "
+      "Does not impose a boundary condition; instead computes the boundary "
+      "contribution corresponding to the current value of grad(u) and accumulates "
+      "it in the residual vector.");
   return params;
 }
 
@@ -29,11 +30,11 @@ DarcyFluxBC::DarcyFluxBC(const InputParameters & parameters)
 RealGradient
 DarcyFluxBC::computeQpFluxResidual()
 {
-  return _Le[ _qp ] * _grad_u[ _qp ];
+  return _Le[_qp] * _grad_u[_qp];
 }
 
 RealGradient
 DarcyFluxBC::computeQpFluxJacobian()
 {
-  return _Le[ _qp ] * _grad_phi[ _j ][ _qp ];
+  return _Le[_qp] * _grad_phi[_j][_qp];
 }

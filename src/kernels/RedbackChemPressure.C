@@ -33,14 +33,12 @@ RedbackChemPressure::RedbackChemPressure(const InputParameters & parameters)
 {
 }
 
-RedbackChemPressure::~RedbackChemPressure()
-{
-}
+RedbackChemPressure::~RedbackChemPressure() {}
 
 Real
 RedbackChemPressure::computeQpResidual()
 {
-  return -_time_factor * _test[ _i ][ _qp ] * _chemical_source_mass[ _qp ];
+  return -_time_factor * _test[_i][_qp] * _chemical_source_mass[_qp];
 }
 
 Real
@@ -54,7 +52,7 @@ RedbackChemPressure::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _temp_var)
   {
-    return -_time_factor * _test[ _i ][ _qp ] * _chemical_source_mass_jac[ _qp ] * _phi[ _j ][ _qp ];
+    return -_time_factor * _test[_i][_qp] * _chemical_source_mass_jac[_qp] * _phi[_j][_qp];
   }
   return 0;
 }

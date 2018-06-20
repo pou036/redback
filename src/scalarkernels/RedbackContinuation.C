@@ -24,7 +24,8 @@ validParams<RedbackContinuation>()
   params.addParam<Real>("ds", 1.0, "Continuation increment");
   params.addParam<Real>("ds_old", 1.0, "Old continuation increment");
   params.addParam<Real>("continuation_parameter_old", 0.0, "Old value of continuation parameter");
-  params.addParam<Real>("continuation_parameter_older", 0.0, "Older value of continuation parameter");
+  params.addParam<Real>(
+      "continuation_parameter_older", 0.0, "Older value of continuation parameter");
   params.addCoupledVar("directional_derivative", 0.0, "The directional derivative function");
   return params;
 }
@@ -43,9 +44,9 @@ Real
 RedbackContinuation::computeQpResidual()
 {
   Real lambda_dot_old_param =
-    (_continuation_parameter_old_param - _continuation_parameter_older_param) / _ds_old_param;
-  return _directional_derivative[ 0 ] + lambda_dot_old_param * (_u[ _i ] - _continuation_parameter_old_param) -
-         _ds_param;
+      (_continuation_parameter_old_param - _continuation_parameter_older_param) / _ds_old_param;
+  return _directional_derivative[0] +
+         lambda_dot_old_param * (_u[_i] - _continuation_parameter_old_param) - _ds_param;
 }
 
 Real
@@ -53,7 +54,7 @@ RedbackContinuation::computeQpJacobian()
 {
   // dF/dx
   Real lambda_dot_old_param =
-    (_continuation_parameter_old_param - _continuation_parameter_older_param) / _ds_old_param;
+      (_continuation_parameter_old_param - _continuation_parameter_older_param) / _ds_old_param;
   // TODO: compute lambda_dot_old_param only once...
   return lambda_dot_old_param;
 }

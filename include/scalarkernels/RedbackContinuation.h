@@ -26,7 +26,8 @@ public:
   RedbackContinuation(const InputParameters & parameters);
 
 protected:
-  Real _ds_param, _ds_old_param, _continuation_parameter_old_param, _continuation_parameter_older_param;
+  Real _ds_param, _ds_old_param, _continuation_parameter_old_param,
+      _continuation_parameter_older_param;
   VariableValue & _directional_derivative;
 
   virtual Real computeQpResidual();

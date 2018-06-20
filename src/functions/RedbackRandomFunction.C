@@ -26,7 +26,10 @@ validParams<RedbackRandomFunction>()
 }
 
 RedbackRandomFunction::RedbackRandomFunction(const InputParameters & parameters)
-  : Function(parameters), _min(getParam<Real>("min")), _max(getParam<Real>("max")), _range(_max - _min)
+  : Function(parameters),
+    _min(getParam<Real>("min")),
+    _max(getParam<Real>("max")),
+    _range(_max - _min)
 {
   mooseAssert(_range > 0.0, "Min > Max for FunctionWithRandomIC!");
   MooseRandom::seed(getParam<unsigned int>("seed"));

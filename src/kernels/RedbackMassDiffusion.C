@@ -31,18 +31,16 @@ RedbackMassDiffusion::RedbackMassDiffusion(const InputParameters & parameters)
 {
 }
 
-RedbackMassDiffusion::~RedbackMassDiffusion()
-{
-}
+RedbackMassDiffusion::~RedbackMassDiffusion() {}
 
 Real
 RedbackMassDiffusion::computeQpResidual()
 {
-  return (_time_factor / _Le[ _qp ]) * (_grad_u[ _qp ] - _gravity_term[ _qp ]) * _grad_test[ _i ][ _qp ];
+  return (_time_factor / _Le[_qp]) * (_grad_u[_qp] - _gravity_term[_qp]) * _grad_test[_i][_qp];
 }
 
 Real
 RedbackMassDiffusion::computeQpJacobian()
 {
-  return (_time_factor / _Le[ _qp ]) * _grad_phi[ _j ][ _qp ] * _grad_test[ _i ][ _qp ];
+  return (_time_factor / _Le[_qp]) * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }
