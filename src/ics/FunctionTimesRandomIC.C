@@ -28,8 +28,8 @@ validParams<FunctionTimesRandomIC>()
   return params;
 }
 
-FunctionTimesRandomIC::FunctionTimesRandomIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+FunctionTimesRandomIC::FunctionTimesRandomIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _min(getParam<Real>("min")),
     _max(getParam<Real>("max")),
     _range(_max - _min),

@@ -589,18 +589,18 @@ EllipseTest::isPointOutsideOfEllipseTestMajorAxisVertical()
 void
 EllipseTest::distanceCCTestShift()
 {
-  Real d, x2, y2;//, x3, y3;
+  Real d, x2, y2; //, x3, y3;
   Real shift = 0.5;
 
   // Case: circle, p_c < 0
   // top right quadrant
   d = Ellipse::distanceCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/2.0, /*y1=*/3.0, x2, y2, shift);
-  //Ellipse::getYieldPointCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/2.0, /*y1=*/3.0, x3, y3);
+  // Ellipse::getYieldPointCC(/*m=*/1.0, /*p_c=*/-3.0, /*x1=*/2.0, /*y1=*/3.0, x3, y3);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(3 * std::sqrt(2) - 1.5, d, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2) - 1.0, x2, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y2, 1e-5);
-  //CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2) - 1.5, x3, 1e-5);
-  //CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y3, 1e-5);
+  // CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2) - 1.5, x3, 1e-5);
+  // CPPUNIT_ASSERT_DOUBLES_EQUAL(1.5 / std::sqrt(2), y3, 1e-5);
 }
 
 /**
