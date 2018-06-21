@@ -23,25 +23,23 @@ validParams<RedbackThermalDiffusion>()
   return params;
 }
 
-RedbackThermalDiffusion::RedbackThermalDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
+RedbackThermalDiffusion::RedbackThermalDiffusion(const InputParameters & parameters)
+  : Kernel(parameters),
     _diffusivity(getMaterialProperty<Real>("thermal_diffusivity")),
     _time_factor(getParam<Real>("time_factor"))
 {
 }
 
-RedbackThermalDiffusion::~RedbackThermalDiffusion()
-{
-}
+RedbackThermalDiffusion::~RedbackThermalDiffusion() {}
 
 Real
 RedbackThermalDiffusion::computeQpResidual()
 {
-  return _time_factor * _diffusivity[ _qp ] * _grad_u[ _qp ] * _grad_test[ _i ][ _qp ];
+  return _time_factor * _diffusivity[_qp] * _grad_u[_qp] * _grad_test[_i][_qp];
 }
 
 Real
 RedbackThermalDiffusion::computeQpJacobian()
 {
-  return _time_factor * _diffusivity[ _qp ] * _grad_phi[ _j ][ _qp ] * _grad_test[ _i ][ _qp ];
+  return _time_factor * _diffusivity[_qp] * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }

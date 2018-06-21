@@ -14,9 +14,7 @@ class RedbackDiffVarsAux : public AuxKernel
 {
 public:
   RedbackDiffVarsAux(const InputParameters & parameters);
-  virtual ~RedbackDiffVarsAux()
-  {
-  }
+  virtual ~RedbackDiffVarsAux() {}
 
 protected:
   virtual Real computeValue();

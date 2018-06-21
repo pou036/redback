@@ -28,13 +28,14 @@ validParams<RankTwoScalarPostprocessor>()
   params.addRequiredParam<PostprocessorName>("index20", "Tensor's element");
   params.addRequiredParam<PostprocessorName>("index21", "Tensor's element");
   params.addRequiredParam<PostprocessorName>("index22", "Tensor's element");
-  params.addParam<MooseEnum>("scalar_type", RankTwoScalarTools::scalarOptions(), "Type of scalar output");
+  params.addParam<MooseEnum>(
+      "scalar_type", RankTwoScalarTools::scalarOptions(), "Type of scalar output");
 
   return params;
 }
 
-RankTwoScalarPostprocessor::RankTwoScalarPostprocessor(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+RankTwoScalarPostprocessor::RankTwoScalarPostprocessor(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _index00(getPostprocessorValue("index00")),
     _index01(getPostprocessorValue("index01")),
     _index02(getPostprocessorValue("index02")),
@@ -61,8 +62,8 @@ RankTwoScalarPostprocessor::execute()
 PostprocessorValue
 RankTwoScalarPostprocessor::getValue()
 {
-  RankTwoTensor tensor =
-    RankTwoTensor(_index00, _index01, _index02, _index10, _index11, _index12, _index20, _index21, _index22);
+  RankTwoTensor tensor = RankTwoTensor(
+      _index00, _index01, _index02, _index10, _index11, _index12, _index20, _index21, _index22);
   switch (_scalar_type)
   {
     case 0:

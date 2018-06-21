@@ -116,9 +116,17 @@ protected:
   // is dependant on the yield criterion. Therefore we define them as abstract
   // virtual functions here such that no implementation is needed in
   // RedbackMechMaterial.C
+  virtual void getJac(const RankTwoTensor &,
+                      const RankFourTensor &,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      RankFourTensor &) = 0;
   virtual void
-  getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) = 0;
-  virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, Real, Real, RankTwoTensor &) = 0;
+  getFlowTensor(const RankTwoTensor &, Real, Real, Real, Real, Real, RankTwoTensor &) = 0;
   virtual Real getFlowIncrement(Real, Real, Real, Real, Real) = 0;
   virtual void get_py_qy(Real, Real, Real &, Real &, Real, bool &) = 0;
 

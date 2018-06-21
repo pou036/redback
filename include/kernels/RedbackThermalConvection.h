@@ -7,9 +7,7 @@ class RedbackThermalConvection : public Kernel
 {
 public:
   RedbackThermalConvection(const InputParameters & parameters);
-  virtual ~RedbackThermalConvection()
-  {
-  }
+  virtual ~RedbackThermalConvection() {}
 
 protected:
   virtual Real computeQpResidual();
