@@ -494,7 +494,12 @@ Where $\dot{d}_{red}$ and $\dot{d}_{growth}$ are:
 %%% Rate of grain-size reduction %%%
 \begin{equation}
  \label{eq:d_red}
-\dot{d}_{red}=\frac{\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}
+\dot{d}_{red}=\frac{-\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}
+\end{equation}\\
+
+%%% Rate of grain-size reduction %%%
+\begin{equation}
+\dot{d}_{red}=-\dot{W}_{dis}\lambda \frac{d^2}{c\gamma}
 \end{equation}\\
 
 %%% Rate of grain-size growth %%%
@@ -507,7 +512,7 @@ Therefore; \:
 %%% Competion of grain-size rates with red & growth terms %%%
 \begin{equation}
  \label{eq:d_tot}
-\dot{d}_{tot} = \left(\frac{\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}\right) + \left(K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p}\right)
+\dot{d}_{tot} = \left(\frac{-\beta\lambda\sigma_{d}\dot{\varepsilon}d^2}{c\gamma}\right) + \left(K_g exp^{\left(\frac{-Q_g}{RT}\right)} p^{-1} d^{1-p}\right)
 \end{equation}\\
 
 If , \: 
