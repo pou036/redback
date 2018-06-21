@@ -12,13 +12,15 @@ InputParameters
 validParams<GenericConstantVector>()
 {
   InputParameters params = validParams<Material>();
-  params.addRequiredParam<RealVectorValue>("vector_values", "Vector of values defining the constant vector");
-  params.addRequiredParam<MaterialPropertyName>("vector_name", "Name of the vector material property to be created");
+  params.addRequiredParam<RealVectorValue>("vector_values",
+                                           "Vector of values defining the constant vector");
+  params.addRequiredParam<MaterialPropertyName>(
+      "vector_name", "Name of the vector material property to be created");
   return params;
 }
 
-GenericConstantVector::GenericConstantVector(const InputParameters & parameters) :
-    Material(parameters),
+GenericConstantVector::GenericConstantVector(const InputParameters & parameters)
+  : Material(parameters),
     _vector(getParam<RealVectorValue>("vector_values")),
     _prop(declareProperty<RealVectorValue>(getParam<MaterialPropertyName>("vector_name")))
 {
@@ -27,5 +29,5 @@ GenericConstantVector::GenericConstantVector(const InputParameters & parameters)
 void
 GenericConstantVector::computeQpProperties()
 {
-  _prop[ _qp ] = _vector;
+  _prop[_qp] = _vector;
 }

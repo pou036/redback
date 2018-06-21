@@ -17,12 +17,15 @@ validParams<FunctionJumpDirichletBC>()
 {
   InputParameters params = validParams<NodalBC>();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
-  params.addParam<PostprocessorName>("tangent_jump",0,
-  "jump value on the interface. Note that the tangent vector is oriented +90deg from the normal vector.");
-  params.addRequiredRangeCheckedParam<unsigned int>("component",
-                           "component >= 0 & component <= 2",
-                           "An integer corresponding to the direction the variable "
-                           "this kernel acts in. (0 for x, 1 for y, 2 for z)");
+  params.addParam<PostprocessorName>("tangent_jump",
+                                     0,
+                                     "jump value on the interface. Note that the tangent vector is "
+                                     "oriented +90deg from the normal vector.");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "component",
+      "component >= 0 & component <= 2",
+      "An integer corresponding to the direction the variable "
+      "this kernel acts in. (0 for x, 1 for y, 2 for z)");
   params.addClassDescription(
       "Imposes the essential boundary condition $u=g(t,\\vec{x})$, where $g$ "
       "is a (possibly) time and space-dependent MOOSE Function.");
@@ -31,10 +34,10 @@ validParams<FunctionJumpDirichletBC>()
 
 FunctionJumpDirichletBC::FunctionJumpDirichletBC(const InputParameters & parameters)
   : NodalBC(parameters),
-  _func(getFunction("function")),
-  _jump(getPostprocessorValue("tangent_jump")),
-  _component(getParam<unsigned int>("component")),
-  _normals(_assembly.normals())
+    _func(getFunction("function")),
+    _jump(getPostprocessorValue("tangent_jump")),
+    _component(getParam<unsigned int>("component")),
+    _normals(_assembly.normals())
 {
 }
 
@@ -47,6 +50,7 @@ FunctionJumpDirichletBC::f()
 Real
 FunctionJumpDirichletBC::computeQpResidual()
 {
-  RealVectorValue fault_tangent(-_normals[ _qp ](1), _normals[ _qp ](0)); // 90deg rotation of the normal vector
-  return _u[_qp] - (f()+_jump * fault_tangent(_component));
+  RealVectorValue fault_tangent(-_normals[_qp](1),
+                                _normals[_qp](0)); // 90deg rotation of the normal vector
+  return _u[_qp] - (f() + _jump * fault_tangent(_component));
 }

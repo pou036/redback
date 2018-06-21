@@ -28,31 +28,32 @@ validParams<Poromechanics>()
   return params;
 }
 
-Poromechanics::Poromechanics(const InputParameters & parameters) :
-    Kernel(parameters),
+Poromechanics::Poromechanics(const InputParameters & parameters)
+  : Kernel(parameters),
     _grad_disp_x(coupledGradient("disp_x")),
     _grad_disp_y(coupledGradient("disp_y")),
     _grad_disp_z(_mesh.dimension() == 3 ? coupledGradient("disp_z") : _grad_zero),
     _grad_disp_x_old(_fe_problem.isTransient() ? coupledGradientOld("disp_x") : _grad_zero),
     _grad_disp_y_old(_fe_problem.isTransient() ? coupledGradientOld("disp_y") : _grad_zero),
-    _grad_disp_z_old(_fe_problem.isTransient() && _mesh.dimension() == 3 ? coupledGradientOld("disp_z") : _grad_zero),
+    _grad_disp_z_old(_fe_problem.isTransient() && _mesh.dimension() == 3
+                         ? coupledGradientOld("disp_z")
+                         : _grad_zero),
     _peclet_number(getParam<Real>("Peclet_number")),
     _mixture_compressibility(getParam<Real>("mixture_compressibility"))
 {
 }
 
-Poromechanics::~Poromechanics()
-{
-}
+Poromechanics::~Poromechanics() {}
 
 Real
 Poromechanics::computeQpResidual()
 {
-  Real def_grad = _grad_disp_x[ _qp ](0) + _grad_disp_y[ _qp ](1) + _grad_disp_z[ _qp ](2);
-  Real def_grad_old = _grad_disp_x_old[ _qp ](0) + _grad_disp_y_old[ _qp ](1) + _grad_disp_z_old[ _qp ](2);
+  Real def_grad = _grad_disp_x[_qp](0) + _grad_disp_y[_qp](1) + _grad_disp_z[_qp](2);
+  Real def_grad_old =
+      _grad_disp_x_old[_qp](0) + _grad_disp_y_old[_qp](1) + _grad_disp_z_old[_qp](2);
   Real def_grad_rate = (def_grad - def_grad_old) / _dt;
 
-  return def_grad_rate * _peclet_number * _test[ _i ][ _qp ] / _mixture_compressibility;
+  return def_grad_rate * _peclet_number * _test[_i][_qp] / _mixture_compressibility;
 }
 
 Real

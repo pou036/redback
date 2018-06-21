@@ -36,7 +36,6 @@ public:
   virtual void threadJoin(const UserObject & y) override;
 
 protected:
-
   unsigned int _qp;
 
   const MaterialProperty<RankTwoTensor> & _tensor;

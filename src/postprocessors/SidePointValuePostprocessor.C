@@ -17,8 +17,7 @@ InputParameters
 validParams<SidePointValuePostprocessor>()
 {
   InputParameters params = validParams<SidePostprocessor>();
-  params.addParam<MaterialPropertyName>(
-      "rank_two_tensor", "The rank two material tensor name.");
+  params.addParam<MaterialPropertyName>("rank_two_tensor", "The rank two material tensor name.");
   params.addParam<bool>("normal", false, "If true, the normal value to the fault will be computed");
   params.addParam<bool>("show", false, "If true, the coordinates of the qps will be printed");
   params.addCoupledVar("pressure", 0.0, "Dimensionless pore pressure");
@@ -29,14 +28,14 @@ validParams<SidePointValuePostprocessor>()
 
 SidePointValuePostprocessor::SidePointValuePostprocessor(const InputParameters & parameters)
   : SidePostprocessor(parameters),
-  _qp(0),
-  _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
-  _normal(getParam<bool>("normal")),
-  _show(getParam<bool>("show")),
-  _has_pres(isCoupled("pressure")),
-  _pressure(_has_pres ? coupledValue("pressure") : _zero),
-  _point(getParam<Point>("point")),
-  _value(0)
+    _qp(0),
+    _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
+    _normal(getParam<bool>("normal")),
+    _show(getParam<bool>("show")),
+    _has_pres(isCoupled("pressure")),
+    _pressure(_has_pres ? coupledValue("pressure") : _zero),
+    _point(getParam<Point>("point")),
+    _value(0)
 {
 }
 
@@ -52,28 +51,29 @@ SidePointValuePostprocessor::execute()
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     if (_show)
-      std::cout<<"qpoint = ("<<_q_point[_qp](0)<<", "<<_q_point[_qp](1)<<", "<<_q_point[_qp](2)<<")"<<std::endl;
-    if (std::abs(_point(0)-_q_point[_qp](0))<tol &&
-        std::abs(_point(1)-_q_point[_qp](1))<tol &&
-        std::abs(_point(2)-_q_point[_qp](2))<tol)
+      std::cout << "qpoint = (" << _q_point[_qp](0) << ", " << _q_point[_qp](1) << ", "
+                << _q_point[_qp](2) << ")" << std::endl;
+    if (std::abs(_point(0) - _q_point[_qp](0)) < tol &&
+        std::abs(_point(1) - _q_point[_qp](1)) < tol &&
+        std::abs(_point(2) - _q_point[_qp](2)) < tol)
     {
-      std::cout<<"found the qp"<<std::endl;
+      std::cout << "found the qp" << std::endl;
       // traction ti = sigma_ij . n_i
       // traction ti = (sigma_ij' - pI) . n_i
       // ti = ti_t + ti_n
       // ti_t = ti - ||ti_n||.n_i
       // ti_t = ti - (ti . n_i).n_i
-      RankTwoTensor total_stress = _tensor[ _qp ];
-      total_stress.addIa(-_pressure[ _qp ]);
-      RealVectorValue traction = total_stress * _normals[ _qp ];
+      RankTwoTensor total_stress = _tensor[_qp];
+      total_stress.addIa(-_pressure[_qp]);
+      RealVectorValue traction = total_stress * _normals[_qp];
       if (_normal)
       {
-        _value = traction * _normals[ _qp ];
+        _value = traction * _normals[_qp];
         break;
       }
-      RealVectorValue tangent_traction = traction - (traction * _normals[ _qp ]) * _normals[ _qp ];
+      RealVectorValue tangent_traction = traction - (traction * _normals[_qp]) * _normals[_qp];
       _value = std::sqrt(tangent_traction.norm_sq());
-      std::cout<<_value<<std::endl;
+      std::cout << _value << std::endl;
     }
   }
 }
@@ -82,7 +82,7 @@ void
 SidePointValuePostprocessor::threadJoin(const UserObject & y)
 {
   const SidePointValuePostprocessor & pps = static_cast<const SidePointValuePostprocessor &>(y);
-  if (pps._value!=0)
+  if (pps._value != 0)
     _value = pps._value;
 }
 
