@@ -23,6 +23,7 @@ validParams<RankTwoProjectionAux>()
 RankTwoProjectionAux::RankTwoProjectionAux(const InputParameters & parameters) :
     AuxKernel(parameters),
     _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
+    _normal(getParam<bool>("normal")),
     _has_pres(isCoupled("pressure")),
     _pressure(_has_pres ? coupledValue("pressure") : _zero),
     _normals(_assembly.normals())

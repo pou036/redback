@@ -26,6 +26,7 @@
 
 // Boundary conditions
 #include "DarcyFluxBC.h"
+#include "FunctionJumpDirichletBC.h"
 #include "FunctionDirichletTransverseBC.h"
 #include "MatchedValueJumpBC.h"
 #include "PressureNeumannBC.h"
@@ -86,6 +87,7 @@
 #include "ElementFileSubdomain.h"
 
 // Postprocessors
+#include "SidePointValuePostprocessor.h"
 #include "RankTwoScalarPostprocessor.h"
 
 // Timesteppers
@@ -139,6 +141,7 @@ RedbackApp::registerObjects(Factory & factory)
 #undef registerObject
 #define registerObject(name) factory.reg<name>(stringifyName(name))
   registerBoundaryCondition(DarcyFluxBC);
+  registerBoundaryCondition(FunctionJumpDirichletBC);
   registerBoundaryCondition(FunctionDirichletTransverseBC);
   registerBoundaryCondition(MatchedValueJumpBC);
   registerBoundaryCondition(PressureNeumannBC);
@@ -190,6 +193,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerMeshModifier(ElementFileSubdomain);
 
+  registerPostprocessor(SidePointValuePostprocessor);
   registerPostprocessor(RankTwoScalarPostprocessor);
 
   registerExecutioner(ReturnMapIterDT);
