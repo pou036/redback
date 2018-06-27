@@ -30,14 +30,23 @@ public:
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type);
   virtual Real computeQpJacobian(Moose::DGJacobianType type);
+  virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar);
 
+  std::string _base_name0;
+  std::string _base_name1;
   const MaterialProperty<RankTwoTensor> & _stress0;
   const MaterialProperty<RankTwoTensor> & _stress1;
+  const MaterialProperty<RankFourTensor> & _Jacobian_mult0;
+  const MaterialProperty<RankFourTensor> & _Jacobian_mult1;
   const unsigned int _component;
   bool _has_pres0;
   const VariableValue & _pressure0;
   bool _has_pres1;
   const VariableValue & _pressure1;
+  const unsigned int _other_disp_master_num;
+  const unsigned int _other_disp_slave_num;
+  const unsigned int _pf_master_num;
+  const unsigned int _pf_slave_num;
 };
 
 #endif
