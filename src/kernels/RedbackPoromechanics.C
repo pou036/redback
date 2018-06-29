@@ -24,8 +24,8 @@ validParams<RedbackPoromechanics>()
   return params;
 }
 
-RedbackPoromechanics::RedbackPoromechanics(const InputParameters & parameters) :
-    Kernel(parameters),
+RedbackPoromechanics::RedbackPoromechanics(const InputParameters & parameters)
+  : Kernel(parameters),
     _poromech_kernel(getMaterialProperty<Real>("poromechanics_kernel")),
     _poromech_jac(getMaterialProperty<Real>("poromechanics_jacobian")),
     _temp_var(coupled("temperature")),
@@ -33,14 +33,12 @@ RedbackPoromechanics::RedbackPoromechanics(const InputParameters & parameters) :
 {
 }
 
-RedbackPoromechanics::~RedbackPoromechanics()
-{
-}
+RedbackPoromechanics::~RedbackPoromechanics() {}
 
 Real
 RedbackPoromechanics::computeQpResidual()
 {
-  return _time_factor * _poromech_kernel[ _qp ] * _test[ _i ][ _qp ];
+  return _time_factor * _poromech_kernel[_qp] * _test[_i][_qp];
   // TODO: add note in doco to tell users not to turn on term if compress=0
   // TODO: add check compress > 0
 }
@@ -56,7 +54,8 @@ RedbackPoromechanics::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _temp_var)
   {
-    return _time_factor * _poromech_kernel[ _qp ] * _poromech_jac[ _qp ] * _phi[ _j ][ _qp ] * _test[ _i ][ _qp ];
+    return _time_factor * _poromech_kernel[_qp] * _poromech_jac[_qp] * _phi[_j][_qp] *
+           _test[_i][_qp];
   }
   return 0;
 }

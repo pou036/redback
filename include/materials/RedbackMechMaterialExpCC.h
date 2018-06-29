@@ -31,13 +31,22 @@ public:
 protected:
   Real _slope_yield_surface; // coefficient for yield surface
 
+  virtual void getJac(const RankTwoTensor &,
+                      const RankFourTensor &,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      RankFourTensor &) override;
   virtual void
-  getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) override;
-  virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, Real, Real, RankTwoTensor &) override;
+  getFlowTensor(const RankTwoTensor &, Real, Real, Real, Real, Real, RankTwoTensor &) override;
   virtual Real getFlowIncrement(Real, Real, Real, Real, Real) override;
   virtual void get_py_qy(Real, Real, Real &, Real &, Real, bool &) override;
   virtual void form_damage_kernels(Real) override;
-  void getDerivativeFlowIncrement(Real &, Real &, const RankTwoTensor &, Real, Real, Real, Real, Real);
+  void
+  getDerivativeFlowIncrement(Real &, Real &, const RankTwoTensor &, Real, Real, Real, Real, Real);
 };
 
 #endif // REDBACKMECHMATERIALEXPCC_H

@@ -23,15 +23,16 @@ validParams<MatchedValueJumpBC>()
                         false,
                         "If true, the value you entered will be "
                         "multiplied by Pi/180");
-  params.addRequiredRangeCheckedParam<unsigned int>("component",
-                                                    "component >= 0 & component <= 2",
-                                                    "An integer corresponding to the direction the variable "
-                                                    "this kernel acts in. (0 for x, 1 for y, 2 for z)");
+  params.addRequiredRangeCheckedParam<unsigned int>(
+      "component",
+      "component >= 0 & component <= 2",
+      "An integer corresponding to the direction the variable "
+      "this kernel acts in. (0 for x, 1 for y, 2 for z)");
   return params;
 }
 
-MatchedValueJumpBC::MatchedValueJumpBC(const InputParameters & parameters) :
-    NodalBC(parameters),
+MatchedValueJumpBC::MatchedValueJumpBC(const InputParameters & parameters)
+  : NodalBC(parameters),
     _v(coupledValue("v")),
     _v_num(coupled("v")),
     _jump(getPostprocessorValue("tangent_jump")),
@@ -45,7 +46,7 @@ Real
 MatchedValueJumpBC::computeQpResidual()
 {
   RealVectorValue fault_tangent(cos(_angle), sin(_angle)); // only works for linear fault
-  return _u[ _qp ] - _v[ _qp ] + _jump * fault_tangent(_component);
+  return _u[_qp] - _v[_qp] + _jump * fault_tangent(_component);
 }
 
 Real

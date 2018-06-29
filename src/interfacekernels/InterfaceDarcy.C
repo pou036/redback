@@ -22,8 +22,8 @@ validParams<InterfaceDarcy>()
   return params;
 }
 
-InterfaceDarcy::InterfaceDarcy(const InputParameters & parameters) :
-    InterfaceKernel(parameters),
+InterfaceDarcy::InterfaceDarcy(const InputParameters & parameters)
+  : InterfaceKernel(parameters),
     _Le(getMaterialProperty<Real>("lewis_number")),
     _Le_fault(getParam<Real>("fault_lewis_number")),
     _gravity_term(getMaterialProperty<RealVectorValue>("fluid_gravity_term")),
@@ -39,24 +39,20 @@ InterfaceDarcy::InterfaceDarcy(const InputParameters & parameters) :
 Real
 InterfaceDarcy::computeQpResidual(Moose::DGResidualType type)
 {
-  Real res = (_neighbor_value[ _qp ] - _u[ _qp ]) / (_Le_fault * _thickness) +
-             _gravity_term[ _qp ] * _normals[ _qp ] * (1 / _Le[ _qp ] - 1 / _Le_fault);
+  Real res = (_neighbor_value[_qp] - _u[_qp]) / (_Le_fault * _thickness) +
+             _gravity_term[_qp] * _normals[_qp] * (1 / _Le[_qp] - 1 / _Le_fault);
 
   switch (type)
   {
     case Moose::Element:
-      return (res - _grad_u[ _qp ] * _normals[ _qp ] / _Le[ _qp ]) * _test[ _i ][ _qp ];
+      return (res - _grad_u[_qp] * _normals[_qp] / _Le[_qp]) * _test[_i][_qp];
 
     case Moose::Neighbor:
-      return (res - _grad_neighbor_value[ _qp ] * _normals[ _qp ] / _Le[ _qp ]) * _test_neighbor[ _i ][ _qp ];
+      return (res - _grad_neighbor_value[_qp] * _normals[_qp] / _Le[_qp]) * _test_neighbor[_i][_qp];
 
     default:
       mooseError("InterfaceDarcy type not supported.");
   }
 }
 
-Real
-InterfaceDarcy::computeQpJacobian(Moose::DGJacobianType /*type*/)
-{
-  return 0;
-}
+Real InterfaceDarcy::computeQpJacobian(Moose::DGJacobianType /*type*/) { return 0; }

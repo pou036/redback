@@ -19,7 +19,8 @@ InputParameters
 validParams<ReturnMapIterDT>()
 {
   InputParameters params = validParams<TimeStepper>();
-  params.addRequiredParam<PostprocessorName>("postprocessor", "This has to be an ElementExtremeValue postprocessor.");
+  params.addRequiredParam<PostprocessorName>(
+      "postprocessor", "This has to be an ElementExtremeValue postprocessor.");
   params.addParam<Real>("dt", "Initial value of dt");
   params.addRequiredParam<Real>("max_iter", "Maximum of return map iteration that are admissible.");
   params.addRequiredParam<Real>("min_iter", "Minimum of return map iteration that are admissible.");
@@ -29,8 +30,8 @@ validParams<ReturnMapIterDT>()
   return params;
 }
 
-ReturnMapIterDT::ReturnMapIterDT(const InputParameters & parameters) :
-    TimeStepper(parameters),
+ReturnMapIterDT::ReturnMapIterDT(const InputParameters & parameters)
+  : TimeStepper(parameters),
     PostprocessorInterface(this),
     _extreme_value(getPostprocessorValue("postprocessor")),
     _has_initial_dt(isParamValid("dt")),

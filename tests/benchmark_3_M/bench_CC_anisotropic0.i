@@ -172,7 +172,6 @@
   [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
-    block = '0 1'
   [../]
   [./volumetric_strain]
     order = CONSTANT
@@ -384,4 +383,3 @@
     disp_x = disp_x
   [../]
 []
-
