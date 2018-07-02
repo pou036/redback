@@ -134,7 +134,7 @@
   dt = 1
   l_max_its = 50
   nl_max_its = 10
-  solve_type = PJFNK
+  solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg cp 201'
   nl_abs_tol = 1e-5

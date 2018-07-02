@@ -68,8 +68,10 @@
     type = InterfaceStress
     variable = disp_x0
     neighbor_var = disp_x1
-    stress_master = 0_stress
-    stress_slave = 1_stress
+    base_name_master = 0
+    base_name_slave = 1
+    other_disp_master = 'disp_y0'
+    other_disp_slave = 'disp_y1'
     boundary = interface_bottom
     component = 0
   [../]
@@ -77,8 +79,10 @@
     type = InterfaceStress
     variable = disp_y0
     neighbor_var = disp_y1
-    stress_master = 0_stress
-    stress_slave = 1_stress
+    base_name_master = 0
+    base_name_slave = 1
+    other_disp_master = 'disp_x0'
+    other_disp_slave = 'disp_x1'
     boundary = interface_bottom
     component = 1
   [../]
@@ -198,7 +202,7 @@
   dt = 0.1
   l_max_its = 50
   nl_max_its = 10
-  solve_type = PJFNK
+  solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg cp 201'
   nl_abs_tol = 1e-8

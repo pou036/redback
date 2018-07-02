@@ -62,17 +62,28 @@ Real
 InterfaceStress::computeQpResidual(Moose::DGResidualType type)
 {
   // continuity of each component of traction: (sigma_ij' - p) . n_i
-  RankTwoTensor stress = _stress0[_qp] - _stress1[_qp];
-  stress.addIa(-_pressure0[_qp] + _pressure1[_qp]);
-  RealVectorValue res = stress * _normals[_qp];
+  RankTwoTensor total_stress;
+  RealVectorValue traction;
 
   switch (type)
   {
     case Moose::Element:
-      return res(_component) * _test[_i][_qp];
+    {
+      total_stress = _stress1[_qp];
+      total_stress.addIa(-_pressure1[_qp]);
+      traction = -total_stress * _normals[_qp];
+      // the term stress0*normal is already accounted for as natural BC
+      // which results in the appropriate traction continuity
+      return traction(_component) * _test[_i][_qp];
+    }
 
     case Moose::Neighbor:
-      return res(_component) * _test_neighbor[_i][_qp];
+    {
+      total_stress = _stress0[_qp];
+      total_stress.addIa(-_pressure0[_qp]);
+      traction = total_stress * _normals[_qp];
+      return traction(_component) * _test_neighbor[_i][_qp];
+    }
 
     default:
       mooseError("InterfaceStress type not supported.");
@@ -84,14 +95,10 @@ Real InterfaceStress::computeQpJacobian(Moose::DGJacobianType type)
   switch (type)
   {
     case Moose::ElementElement:
-      return ElasticityTensorTools::elasticJacobian(
-          _Jacobian_mult0[_qp], _component, _component,
-          _normals[_qp], _grad_phi[_j][_qp]) * _test[_i][_qp];
+      return 0;
 
     case Moose::NeighborNeighbor:
-      return -ElasticityTensorTools::elasticJacobian(
-                _Jacobian_mult1[_qp], _component, _component,
-                _normals[_qp], _grad_phi_neighbor[_j][_qp]) * _test_neighbor[_i][_qp];
+      return 0;
 
     case Moose::ElementNeighbor:
       return -ElasticityTensorTools::elasticJacobian(
@@ -115,37 +122,33 @@ InterfaceStress::computeQpOffDiagJacobian(Moose::DGJacobianType type,
     case Moose::ElementElement:
     {
       if (jvar == _other_disp_master_num)
-        return ElasticityTensorTools::elasticJacobian(
-            _Jacobian_mult0[_qp], _component, 1-_component,
-            _normals[_qp], _grad_phi[_j][_qp]) * _test[_i][_qp];
+        return 0;
       else if (jvar == _pf_master_num)
-        return 0; // TODO
+        return 0;
       else if (jvar == _pf_slave_num)
-        return 0; // TODO
+        return _test[_i][_qp] * _normals[_qp](_component);
     }
 
     case Moose::NeighborNeighbor:
     {
-//      if (jvar == _other_disp_slave_num)
-//        return -ElasticityTensorTools::elasticJacobian(
-//            _Jacobian_mult1[_qp], _component, 1-_component,
-//            _normals[_qp], _grad_phi_neighbor[_j][_qp]) * _test_neighbor[_i][_qp];
-//      else if (jvar == _pf_master_num)
-//        return 0; // TODO
-//      else if (jvar == _pf_slave_num)
-        return 0; // TODO
+      if (jvar == _other_disp_slave_num)
+        return 0;
+      else if (jvar == _pf_master_num)
+        return -_test_neighbor[_i][_qp] * _normals[_qp](_component);
+      else if (jvar == _pf_slave_num)
+        return 0;
     }
 
     case Moose::ElementNeighbor:
     {
-//      if (jvar == _other_disp_slave_num)
-//        return -ElasticityTensorTools::elasticJacobian(
-//            _Jacobian_mult1[_qp], _component, 1-_component,
-//            _normals[_qp], _grad_phi_neighbor[_j][_qp]) * _test[_i][_qp];
-//      else if (jvar == _pf_master_num)
-//        return 0; // TODO
-//      else if (jvar == _pf_slave_num)
-        return 0; // TODO
+      if (jvar == _other_disp_slave_num)
+        return -ElasticityTensorTools::elasticJacobian(
+            _Jacobian_mult1[_qp], _component, 1-_component,
+            _normals[_qp], _grad_phi_neighbor[_j][_qp]) * _test[_i][_qp];
+      else if (jvar == _pf_master_num)
+        return 0;
+      else if (jvar == _pf_slave_num)
+        return _test[_i][_qp] * _normals[_qp](_component);
     }
 
     case Moose::NeighborElement:
@@ -155,9 +158,9 @@ InterfaceStress::computeQpOffDiagJacobian(Moose::DGJacobianType type,
             _Jacobian_mult0[_qp], _component, 1-_component,
             _normals[_qp], _grad_phi[_j][_qp]) * _test_neighbor[_i][_qp];
       else if (jvar == _pf_master_num)
-        return 0; // TODO
+        return -_test_neighbor[_i][_qp] * _normals[_qp](_component);
       else if (jvar == _pf_slave_num)
-        return 0; // TODO
+        return 0;
     }
   }
   mooseError("Unsupported type '" + Moose::stringify(type) + "' in InterfaceStress::computeQpOffDiagJacobian");
