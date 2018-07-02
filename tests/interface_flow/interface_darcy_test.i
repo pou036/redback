@@ -132,6 +132,7 @@
 
 [Executioner]
   type = Steady
+  solve_type = NEWTON
 []
 
 [Outputs]

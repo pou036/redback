@@ -1,9 +1,3 @@
-# [Preconditioning]
-# [./SMP]
-# type = FDP
-# full = true
-# [../]
-# []
 [Mesh]
   type = GeneratedMesh
   uniform_refine = 0
@@ -13,16 +7,16 @@
 []
 
 [Variables]
-  [disp_x0]
+  [disp0_x]
     block = '0'
   []
-  [disp_x1]
+  [disp1_x]
     block = '1'
   []
-  [disp_y0]
+  [disp0_y]
     block = '0'
   []
-  [disp_y1]
+  [disp1_y]
     block = '1'
   []
   [porepressure]
@@ -30,12 +24,12 @@
 []
 
 [AuxVariables]
-  [stress_yy0]
+  [stress0_yy]
     block = '0'
     family = MONOMIAL
     order = CONSTANT
   []
-  [stress_yy1]
+  [stress1_yy]
     block = '1'
     family = MONOMIAL
     order = CONSTANT
@@ -43,19 +37,19 @@
 []
 
 [AuxKernels]
-  [stress_yy0]
+  [stress0_yy]
     type = RankTwoAux
     rank_two_tensor = 0_stress
     index_j = 1
     index_i = 1
-    variable = stress_yy0
+    variable = stress0_yy
   []
-  [stress_yy1]
+  [stress1_yy]
     type = RankTwoAux
     rank_two_tensor = 1_stress
     index_j = 1
     index_i = 1
-    variable = stress_yy1
+    variable = stress1_yy
   []
 []
 
@@ -95,27 +89,27 @@
 [InterfaceKernels]
   [interface_x]
     type = InterfaceStress
-    variable = disp_x0
-    neighbor_var = 'disp_x1'
+    variable = disp0_x
+    neighbor_var = 'disp1_x'
     boundary = 'interface_bottom'
     component = 0
     base_name_master = 0
     base_name_slave = 1
-    other_disp_master = 'disp_y0'
-    other_disp_slave = 'disp_y1'
+    other_disp_master = 'disp0_y'
+    other_disp_slave = 'disp1_y'
     pressure_master = 'porepressure'
     pressure_slave = 'porepressure'
   []
   [interface_y]
     type = InterfaceStress
-    variable = disp_y0
-    neighbor_var = 'disp_y1'
+    variable = disp0_y
+    neighbor_var = 'disp1_y'
     boundary = 'interface_bottom'
     component = 1
     base_name_master = 0
     base_name_slave = 1
-    other_disp_master = 'disp_x0'
-    other_disp_slave = 'disp_x1'
+    other_disp_master = 'disp0_x'
+    other_disp_slave = 'disp1_x'
     pressure_master = 'porepressure'
     pressure_slave = 'porepressure'
   []
@@ -153,12 +147,12 @@
   [small_strain0]
     type = ComputePlaneFiniteStrain
     block = '0'
-    displacements = 'disp_x0 disp_y0'
+    displacements = 'disp0_x disp0_y'
     base_name = 0
   []
   [small_strain1]
     type = ComputePlaneFiniteStrain
-    displacements = 'disp_x1 disp_y1'
+    displacements = 'disp1_x disp1_y'
     block = '1'
     base_name = 1
   []
@@ -206,25 +200,25 @@
   # [../]
   [uy_top]
     type = FunctionPresetBC
-    variable = disp_y1
+    variable = disp1_y
     boundary = 'top'
     function = loading_vel
   []
-  [no_disp_x0]
+  [no_disp0_x]
     type = PresetBC
-    variable = disp_x0
+    variable = disp0_x
     boundary = 'left_to_0'
     value = 0.0
   []
-  [no_disp_x1]
+  [no_disp1_x]
     type = PresetBC
-    variable = disp_x1
+    variable = disp1_x
     boundary = 'left_to_1'
     value = 0.0
   []
   [no_disp_y]
     type = PresetBC
-    variable = disp_y0
+    variable = disp0_y
     boundary = 'bottom'
     value = 0.0
   []
@@ -236,29 +230,29 @@
     [confinement0]
       function = confinement
       boundary = 'right_to_0'
-      displacements = 'disp_x0 disp_y0'
+      displacements = 'disp0_x disp0_y'
     []
     [confinement1]
       function = confinement
       boundary = 'right_to_1'
-      displacements = 'disp_x1 disp_y1'
+      displacements = 'disp1_x disp1_y'
     []
   []
   [matchx]
     type = MatchedValueJumpBC
-    variable = disp_x0
+    variable = disp0_x
     boundary = 'interface_bottom'
     fault_angle = '0'
-    v = 'disp_x1'
+    v = 'disp1_x'
     tangent_jump = 0
     component = 0
   []
   [matchy]
     type = MatchedValueJumpBC
-    variable = disp_y0
+    variable = disp0_y
     boundary = 'interface_bottom'
     fault_angle = '0'
-    v = 'disp_y1'
+    v = 'disp1_y'
     tangent_jump = 0
     component = 1
   []
@@ -312,35 +306,35 @@
 []
 
 [Kernels]
-  [disp_y0]
+  [disp0_y]
     type = StressDivergenceTensors
     component = 1
-    variable = disp_y0
-    displacements = 'disp_x0 disp_y0'
+    variable = disp0_y
+    displacements = 'disp0_x disp0_y'
     block = '0'
     base_name = 0
   []
-  [disp_x1]
+  [disp1_x]
     type = StressDivergenceTensors
     component = 0
-    variable = disp_x1
-    displacements = 'disp_x1 disp_y1'
+    variable = disp1_x
+    displacements = 'disp1_x disp1_y'
     block = '1'
     base_name = 1
   []
-  [disp_y1]
+  [disp1_y]
     type = StressDivergenceTensors
     component = 1
-    variable = disp_y1
-    displacements = 'disp_x1 disp_y1'
+    variable = disp1_y
+    displacements = 'disp1_x disp1_y'
     block = '1'
     base_name = 1
   []
-  [disp_x0]
+  [disp0_x]
     type = StressDivergenceTensors
     component = 0
-    variable = disp_x0
-    displacements = 'disp_x0 disp_y0'
+    variable = disp0_x
+    displacements = 'disp0_x disp0_y'
     block = '0'
     base_name = 0
   []
@@ -352,24 +346,24 @@
     type = PoroMechanicsCoupling
     component = 0
     porepressure = 'porepressure'
-    variable = disp_x0
+    variable = disp0_x
   []
   [poromech_y0]
     type = PoroMechanicsCoupling
     component = 1
     porepressure = 'porepressure'
-    variable = disp_y0
+    variable = disp0_y
   []
   [poromech_x1]
     type = PoroMechanicsCoupling
     component = 0
     porepressure = 'porepressure'
-    variable = disp_x1
+    variable = disp1_x
   []
   [poromech_y1]
     type = PoroMechanicsCoupling
     component = 1
     porepressure = 'porepressure'
-    variable = disp_y1
+    variable = disp1_y
   []
 []

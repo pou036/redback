@@ -125,6 +125,7 @@ gravity = '0.56 0.98 0'
 
 [Executioner]
   type = Steady
+  solve_type = NEWTON
 []
 
 [Outputs]

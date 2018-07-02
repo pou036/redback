@@ -51,13 +51,11 @@ SidePointValuePostprocessor::execute()
   for (_qp = 0; _qp < _qrule->n_points(); _qp++)
   {
     if (_show)
-      std::cout << "qpoint = (" << _q_point[_qp](0) << ", " << _q_point[_qp](1) << ", "
-                << _q_point[_qp](2) << ")" << std::endl;
+      printf("qpoint = (%f, %f, %f)\n", _q_point[_qp](0), _q_point[_qp](1), _q_point[_qp](2));
     if (std::abs(_point(0) - _q_point[_qp](0)) < tol &&
         std::abs(_point(1) - _q_point[_qp](1)) < tol &&
         std::abs(_point(2) - _q_point[_qp](2)) < tol)
     {
-      std::cout << "found the qp" << std::endl;
       // traction ti = sigma_ij . n_i
       // traction ti = (sigma_ij' - pI) . n_i
       // ti = ti_t + ti_n
@@ -73,7 +71,6 @@ SidePointValuePostprocessor::execute()
       }
       RealVectorValue tangent_traction = traction - (traction * _normals[_qp]) * _normals[_qp];
       _value = std::sqrt(tangent_traction.norm_sq());
-      std::cout << _value << std::endl;
     }
   }
 }
