@@ -45,7 +45,7 @@ InterfaceDarcy::computeQpResidual(Moose::DGResidualType type)
   {
     // continuity of flux
     case Moose::Element:
-      return - grad_interface * _test[_i][_qp];
+      return -grad_interface * _test[_i][_qp];
       // grad_u is the natural boundary condition
       // adding this residual imposes (grad_u - grad_interface)=0 at the interface
 
