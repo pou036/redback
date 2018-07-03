@@ -98,16 +98,6 @@
     boundary = 'right'
     value = 0
   [../]
-  [./middle_left]
-    type = DarcyFluxBC
-    variable = p_left
-    boundary = interface_left
-  [../]
-  [./middle_right]
-    type = DarcyFluxBC
-    variable = p_right
-    boundary = interface_right
-  [../]
 []
 
 [Postprocessors]

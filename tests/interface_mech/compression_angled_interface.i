@@ -3,198 +3,231 @@
   file = angled_interface.msh
 []
 
+[MeshModifiers]
+  [interface_bottom]
+    type = SideSetsBetweenSubdomains
+    master_block = 'bottom_block'
+    new_boundary = 'interface_bottom'
+    paired_block = 'top_block'
+  []
+  [interface_top]
+    type = SideSetsBetweenSubdomains
+    master_block = 'top_block'
+    new_boundary = 'interface_top'
+    paired_block = 'bottom_block'
+  []
+[]
+
 [Variables]
-  [./disp0_x]
+  [disp0_x]
     block = 'bottom_block'
-  [../]
-  [./disp1_x]
+  []
+  [disp1_x]
     block = 'top_block'
-  [../]
-  [./disp0_y]
+  []
+  [disp0_y]
     block = 'bottom_block'
-  [../]
-  [./disp1_y]
+  []
+  [disp1_y]
     block = 'top_block'
-  [../]
+  []
 []
 
 [AuxVariables]
-  [./stress0_yy]
+  [stress0_yy]
     block = 'bottom_block'
     family = MONOMIAL
     order = CONSTANT
-  [../]
-  [./stress1_yy]
+  []
+  [stress1_yy]
     block = 'top_block'
     family = MONOMIAL
     order = CONSTANT
-  [../]
+  []
 []
 
 [AuxKernels]
-  [./stress0_yy]
+  [stress0_yy]
     type = RankTwoAux
     rank_two_tensor = 0_stress
     index_j = 1
     index_i = 1
     variable = stress0_yy
-  [../]
-  [./stress1_yy]
+  []
+  [stress1_yy]
     type = RankTwoAux
     rank_two_tensor = 1_stress
     index_j = 1
     index_i = 1
     variable = stress1_yy
-  [../]
-[]
-
-[MeshModifiers]
-  [./interface_bottom]
-    type = SideSetsBetweenSubdomains
-    master_block = 'bottom_block'
-    new_boundary = 'interface_bottom'
-    paired_block = 'top_block'
-  [../]
-  [./interface_top]
-    type = SideSetsBetweenSubdomains
-    master_block = 'top_block'
-    new_boundary = 'interface_top'
-    paired_block = 'bottom_block'
-  [../]
+  []
 []
 
 [InterfaceKernels]
-  [./interface_x]
+  [interface_x]
     type = InterfaceStress
     variable = disp0_x
-    neighbor_var = disp1_x
+    neighbor_var = 'disp1_x'
+    boundary = 'interface_bottom'
+    component = 0
     base_name_master = 0
     base_name_slave = 1
     other_disp_master = 'disp0_y'
     other_disp_slave = 'disp1_y'
-    boundary = interface_bottom
-    component = 0
-  [../]
-  [./interface_y]
+  []
+  [interface_y]
     type = InterfaceStress
     variable = disp0_y
-    neighbor_var = disp1_y
+    neighbor_var = 'disp1_y'
+    boundary = 'interface_bottom'
+    component = 1
     base_name_master = 0
     base_name_slave = 1
     other_disp_master = 'disp0_x'
     other_disp_slave = 'disp1_x'
-    boundary = interface_bottom
+  []
+[]
+
+[Kernels]
+  [disp0_x]
+    type = StressDivergenceTensors
+    component = 0
+    variable = disp0_x
+    displacements = 'disp0_x disp0_y'
+    block = 'bottom_block'
+    base_name = 0
+  []
+  [disp0_y]
+    type = StressDivergenceTensors
     component = 1
-  [../]
+    variable = disp0_y
+    displacements = 'disp0_x disp0_y'
+    block = 'bottom_block'
+    base_name = 0
+  []
+  [disp1_x]
+    type = StressDivergenceTensors
+    component = 0
+    variable = disp1_x
+    displacements = 'disp1_x disp1_y'
+    block = 'top_block'
+    base_name = 1
+  []
+  [disp1_y]
+    type = StressDivergenceTensors
+    component = 1
+    variable = disp1_y
+    displacements = 'disp1_x disp1_y'
+    block = 'top_block'
+    base_name = 1
+  []
 []
 
 [Materials]
-  [./Elasticity_tensor]
+  [Elasticity_tensor]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 10000
-    block = bottom_block
+    block = 'bottom_block'
     base_name = 0
-  [../]
-  [./Elasticity_tensor1]
+  []
+  [Elasticity_tensor1]
     type = ComputeIsotropicElasticityTensor
     poissons_ratio = 0.3
     youngs_modulus = 10000
-    block = top_block
+    block = 'top_block'
     base_name = 1
-  [../]
-  [./mc]
+  []
+  [mc]
     type = ComputeMultiPlasticityStress
     ep_plastic_tolerance = 1E-9
     plastic_models = 'j2'
-    block = bottom_block
+    block = 'bottom_block'
     base_name = 0
-  [../]
-  [./mc1]
+  []
+  [mc1]
     type = ComputeMultiPlasticityStress
     ep_plastic_tolerance = 1E-9
     plastic_models = 'j2'
-    block = top_block
+    block = 'top_block'
     base_name = 1
-  [../]
-  [./small_strain0]
+  []
+  [finite_strain0]
     type = ComputePlaneFiniteStrain
-    block = bottom_block
+    block = 'bottom_block'
     displacements = 'disp0_x disp0_y'
     base_name = 0
-  [../]
-  [./small_strain1]
+  []
+  [finite_strain1]
     type = ComputePlaneFiniteStrain
     displacements = 'disp1_x disp1_y'
-    block = top_block
+    block = 'top_block'
     base_name = 1
-  [../]
+  []
+[]
+
+[UserObjects]
+  [str]
+    type = TensorMechanicsHardeningConstant
+    value = 1
+  []
+  [j2]
+    type = TensorMechanicsPlasticJ2
+    yield_strength = str
+    yield_function_tolerance = 1E-9
+    internal_constraint_tolerance = 1E-9
+  []
 []
 
 [Functions]
-  [./loading]
+  [loading_vel]
     type = ParsedFunction
-    value = '-5*t'
-  [../]
-  [./loading_vel]
-    type = ParsedFunction
-    value = 'if(t>0.001,-0.0002*t,0)'
-  [../]
-  [./loading_stress]
-    type = ParsedFunction
-    value = 'min(-5*t,confine)'
-    vals = '-0'
-    vars = 'confine'
-  [../]
-  [./confinement]
-    type = ConstantFunction
-    value = -0
-  [../]
+    value = '-0.0002*t'
+  []
 []
 
 [BCs]
-  [./uy_top]
+  [uy_top]
     type = FunctionPresetBC
     variable = disp1_y
     boundary = 'top'
     function = loading_vel
-  [../]
-  [./no_disp0_x]
+  []
+  [no_disp0_x]
     type = PresetBC
     variable = disp0_x
     boundary = 'left_to_0'
     value = 0.0
-  [../]
-  [./no_disp_y]
+  []
+  [no_disp_y]
     type = PresetBC
     variable = disp0_y
     boundary = 'bottom'
     value = 0.0
-  [../]
-  [./matchx]
+  []
+  [matchx]
     type = MatchedValueJumpBC
     variable = disp0_x
     boundary = 'interface_bottom'
     v = 'disp1_x'
     tangent_jump = -2e-5
     component = 0
-  [../]
-  [./matchy]
+  []
+  [matchy]
     type = MatchedValueJumpBC
     variable = disp0_y
     boundary = 'interface_bottom'
     v = 'disp1_y'
     tangent_jump = -2e-5
     component = 1
-  [../]
+  []
 []
 
 [Preconditioning]
-  # active = ''
-  [./SMP]
+  [SMP]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
@@ -216,52 +249,4 @@
 [Outputs]
   exodus = true
   file_base = compression_angled_interface
-[]
-
-[UserObjects]
-  [./str]
-    type = TensorMechanicsHardeningConstant
-    value = 1
-  [../]
-  [./j2]
-    type = TensorMechanicsPlasticJ2
-    yield_strength = str
-    yield_function_tolerance = 1E-9
-    internal_constraint_tolerance = 1E-9
-  [../]
-[]
-
-[Kernels]
-  [./disp0_y]
-    type = StressDivergenceTensors
-    component = 1
-    variable = disp0_y
-    displacements = 'disp0_x disp0_y'
-    block = bottom_block
-    base_name = 0
-  [../]
-  [./disp1_x]
-    type = StressDivergenceTensors
-    component = 0
-    variable = disp1_x
-    displacements = 'disp1_x disp1_y'
-    block = top_block
-    base_name = 1
-  [../]
-  [./disp1_y]
-    type = StressDivergenceTensors
-    component = 1
-    variable = disp1_y
-    displacements = 'disp1_x disp1_y'
-    block = top_block
-    base_name = 1
-  [../]
-  [./disp0_x]
-    type = StressDivergenceTensors
-    component = 0
-    variable = disp0_x
-    displacements = 'disp0_x disp0_y'
-    block = bottom_block
-    base_name = 0
-  [../]
 []

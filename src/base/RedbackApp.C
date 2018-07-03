@@ -25,7 +25,6 @@
 #include "RedbackMechAction.h"
 
 // Boundary conditions
-#include "DarcyFluxBC.h"
 #include "FunctionJumpDirichletBC.h"
 #include "FunctionDirichletTransverseBC.h"
 #include "MatchedValueJumpBC.h"
@@ -138,7 +137,6 @@ RedbackApp::registerObjects(Factory & factory)
 {
 #undef registerObject
 #define registerObject(name) factory.reg<name>(stringifyName(name))
-  registerBoundaryCondition(DarcyFluxBC);
   registerBoundaryCondition(FunctionJumpDirichletBC);
   registerBoundaryCondition(FunctionDirichletTransverseBC);
   registerBoundaryCondition(MatchedValueJumpBC);

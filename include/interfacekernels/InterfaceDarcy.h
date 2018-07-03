@@ -30,7 +30,6 @@ protected:
   virtual Real computeQpResidual(Moose::DGResidualType type);
   virtual Real computeQpJacobian(Moose::DGJacobianType type);
 
-  const MaterialProperty<Real> & _Le;
   const VariableValue & _Le_fault;
   const MaterialProperty<RealVectorValue> & _gravity_term;
   Real _thickness;

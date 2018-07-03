@@ -24,7 +24,6 @@ validParams<InterfaceDarcy>()
 
 InterfaceDarcy::InterfaceDarcy(const InputParameters & parameters)
   : InterfaceKernel(parameters),
-    _Le(getMaterialProperty<Real>("lewis_number")),
     _Le_fault(coupledValue("fault_lewis_number")),
     _gravity_term(getMaterialProperty<RealVectorValue>("fluid_gravity_term")),
     _thickness(getParam<Real>("fault_thickness"))
@@ -39,18 +38,19 @@ InterfaceDarcy::InterfaceDarcy(const InputParameters & parameters)
 Real
 InterfaceDarcy::computeQpResidual(Moose::DGResidualType type)
 {
-  Real grad_interface = (_neighbor_value[_qp] - _u[_qp]) / (_Le_fault[_qp] * _thickness) +
-                        _gravity_term[_qp] * _normals[_qp] * (1 / _Le[_qp] - 1 / _Le_fault[_qp]);
+  Real grad_interface = (_neighbor_value[_qp] - _u[_qp]) / (_Le_fault[_qp] * _thickness) -
+                        _gravity_term[_qp] * _normals[_qp] / _Le_fault[_qp];
 
   switch (type)
   {
     // continuity of flux
     case Moose::Element:
-      return (_grad_u[_qp] * _normals[_qp] / _Le[_qp] - grad_interface) * _test[_i][_qp];
+      return - grad_interface * _test[_i][_qp];
+      // grad_u is the natural boundary condition
+      // adding this residual imposes (grad_u - grad_interface)=0 at the interface
 
     case Moose::Neighbor:
-      return (grad_interface - _grad_neighbor_value[_qp] * _normals[_qp] / _Le[_qp]) *
-             _test_neighbor[_i][_qp];
+      return grad_interface * _test_neighbor[_i][_qp];
 
     default:
       mooseError("InterfaceDarcy type not supported.");
@@ -63,14 +63,10 @@ InterfaceDarcy::computeQpJacobian(Moose::DGJacobianType type)
   switch (type)
   {
     case Moose::ElementElement:
-      return (_phi[_j][_qp] / (_Le_fault[_qp] * _thickness) +
-              _grad_phi[_j][_qp] * _normals[_qp] / _Le[_qp]) *
-             _test[_i][_qp];
+      return _phi[_j][_qp] / (_Le_fault[_qp] * _thickness) * _test[_i][_qp];
 
     case Moose::NeighborNeighbor:
-      return (_phi_neighbor[_j][_qp] / (_Le_fault[_qp] * _thickness) -
-              _grad_phi_neighbor[_j][_qp] * _normals[_qp] / _Le[_qp]) *
-             _test_neighbor[_i][_qp];
+      return _phi_neighbor[_j][_qp] / (_Le_fault[_qp] * _thickness) * _test_neighbor[_i][_qp];
 
     case Moose::ElementNeighbor:
       return -_phi_neighbor[_j][_qp] / (_Le_fault[_qp] * _thickness) * _test[_i][_qp];

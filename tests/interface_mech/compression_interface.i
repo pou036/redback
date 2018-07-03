@@ -6,6 +6,39 @@
   ny = 4
 []
 
+[MeshModifiers]
+  [subdomain]
+    type = SubdomainBoundingBox
+    bottom_left = '0 0.5 0'
+    block_id = 1
+    top_right = '1 1 0'
+  []
+  [left_break]
+    type = BreakBoundaryOnSubdomain
+    depends_on = 'subdomain'
+    boundaries = 'left'
+  []
+  [right_break]
+    type = BreakBoundaryOnSubdomain
+    depends_on = 'subdomain'
+    boundaries = 'right'
+  []
+  [interface_bottom]
+    type = SideSetsBetweenSubdomains
+    master_block = '0'
+    depends_on = 'subdomain'
+    new_boundary = 'interface_bottom'
+    paired_block = '1'
+  []
+  [interface_top]
+    type = SideSetsBetweenSubdomains
+    master_block = '1'
+    depends_on = 'subdomain'
+    new_boundary = 'interface_top'
+    paired_block = '0'
+  []
+[]
+
 [Variables]
   [disp0_x]
     block = '0'
@@ -51,39 +84,6 @@
   []
 []
 
-[MeshModifiers]
-  [subdomain]
-    type = SubdomainBoundingBox
-    bottom_left = '0 0.5 0'
-    block_id = 1
-    top_right = '1 1 0'
-  []
-  [left_break]
-    type = BreakBoundaryOnSubdomain
-    depends_on = 'subdomain'
-    boundaries = 'left'
-  []
-  [right_break]
-    type = BreakBoundaryOnSubdomain
-    depends_on = 'subdomain'
-    boundaries = 'right'
-  []
-  [interface_bottom]
-    type = SideSetsBetweenSubdomains
-    master_block = '0'
-    depends_on = 'subdomain'
-    new_boundary = 'interface_bottom'
-    paired_block = '1'
-  []
-  [interface_top]
-    type = SideSetsBetweenSubdomains
-    master_block = '1'
-    depends_on = 'subdomain'
-    new_boundary = 'interface_top'
-    paired_block = '0'
-  []
-[]
-
 [InterfaceKernels]
   [interface_x]
     type = InterfaceStress
@@ -106,6 +106,41 @@
     base_name_slave = 1
     other_disp_master = 'disp0_x'
     other_disp_slave = 'disp1_x'
+  []
+[]
+
+[Kernels]
+  [disp0_x]
+    type = StressDivergenceTensors
+    component = 0
+    variable = disp0_x
+    displacements = 'disp0_x disp0_y'
+    block = '0'
+    base_name = 0
+  []
+  [disp0_y]
+    type = StressDivergenceTensors
+    component = 1
+    variable = disp0_y
+    displacements = 'disp0_x disp0_y'
+    block = '0'
+    base_name = 0
+  []
+  [disp1_x]
+    type = StressDivergenceTensors
+    component = 0
+    variable = disp1_x
+    displacements = 'disp1_x disp1_y'
+    block = '1'
+    base_name = 1
+  []
+  [disp1_y]
+    type = StressDivergenceTensors
+    component = 1
+    variable = disp1_y
+    displacements = 'disp1_x disp1_y'
+    block = '1'
+    base_name = 1
   []
 []
 
@@ -138,13 +173,13 @@
     block = '1'
     base_name = 1
   []
-  [small_strain0]
+  [finite_strain0]
     type = ComputePlaneFiniteStrain
     block = '0'
     displacements = 'disp0_x disp0_y'
     base_name = 0
   []
-  [small_strain1]
+  [finite_strain1]
     type = ComputePlaneFiniteStrain
     displacements = 'disp1_x disp1_y'
     block = '1'
@@ -152,41 +187,27 @@
   []
 []
 
-[Functions]
-  [loading]
-    type = ParsedFunction
-    value = '-5*t'
+[UserObjects]
+  [str]
+    type = TensorMechanicsHardeningConstant
+    value = 1
   []
+  [j2]
+    type = TensorMechanicsPlasticJ2
+    yield_strength = str
+    yield_function_tolerance = 1E-9
+    internal_constraint_tolerance = 1E-9
+  []
+[]
+
+[Functions]
   [loading_vel]
     type = ParsedFunction
-    value = 'if(t>0.001,0.0002*t,0)'
-  []
-  [loading_stress]
-    type = ParsedFunction
-    value = 'min(-5*t,confine)'
-    vals = '-0'
-    vars = 'confine'
-  []
-  [confinement]
-    type = ConstantFunction
-    value = -0
+    value = '0.0002*t'
   []
 []
 
 [BCs]
-  # pin particle along symmetry planes
-  # [./uz_front]
-  # type = FunctionPresetBC
-  # variable = disp_z
-  # boundary = front
-  # function = loading_vel
-  # [../]
-  # [./ux_right]
-  # type = FunctionPresetBC
-  # variable = disp_x
-  # boundary = right
-  # function = loading_vel
-  # [../]
   [uy_top]
     type = FunctionPresetBC
     variable = disp1_y
@@ -211,27 +232,10 @@
     boundary = 'bottom'
     value = 0.0
   []
-  [Pressure]
-    # [./loading]
-    # function = loading_stress
-    # boundary = 'top'
-    # [../]
-    [confinement0]
-      function = confinement
-      boundary = 'right_to_0'
-      displacements = 'disp0_x disp0_y'
-    []
-    [confinement1]
-      function = confinement
-      boundary = 'right_to_1'
-      displacements = 'disp1_x disp1_y'
-    []
-  []
   [matchx]
     type = MatchedValueJumpBC
     variable = disp0_x
     boundary = 'interface_bottom'
-    fault_angle = '0'
     v = 'disp1_x'
     tangent_jump = 0
     component = 0
@@ -240,7 +244,6 @@
     type = MatchedValueJumpBC
     variable = disp0_y
     boundary = 'interface_bottom'
-    fault_angle = '0'
     v = 'disp1_y'
     tangent_jump = 0
     component = 1
@@ -253,12 +256,6 @@
     full = true
   []
 []
-# [Preconditioning]
-#   [./SMP]
-#     type = FDP
-#     full = true
-#   [../]
-# []
 
 [Executioner]
   type = Transient
@@ -279,52 +276,4 @@
 [Outputs]
   exodus = true
   file_base = compression_interface
-[]
-
-[UserObjects]
-  [str]
-    type = TensorMechanicsHardeningConstant
-    value = 1
-  []
-  [j2]
-    type = TensorMechanicsPlasticJ2
-    yield_strength = str
-    yield_function_tolerance = 1E-9
-    internal_constraint_tolerance = 1E-9
-  []
-[]
-
-[Kernels]
-  [disp0_y]
-    type = StressDivergenceTensors
-    component = 1
-    variable = disp0_y
-    displacements = 'disp0_x disp0_y'
-    block = '0'
-    base_name = 0
-  []
-  [disp1_x]
-    type = StressDivergenceTensors
-    component = 0
-    variable = disp1_x
-    displacements = 'disp1_x disp1_y'
-    block = '1'
-    base_name = 1
-  []
-  [disp1_y]
-    type = StressDivergenceTensors
-    component = 1
-    variable = disp1_y
-    displacements = 'disp1_x disp1_y'
-    block = '1'
-    base_name = 1
-  []
-  [disp0_x]
-    type = StressDivergenceTensors
-    component = 0
-    variable = disp0_x
-    displacements = 'disp0_x disp0_y'
-    block = '0'
-    base_name = 0
-  []
 []

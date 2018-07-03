@@ -18,8 +18,8 @@ InputParameters
 validParams<InterfaceStress>()
 {
   InputParameters params = validParams<InterfaceKernel>();
-  params.addRequiredParam<std::string>("base_name_master", "Base name for master material");
-  params.addRequiredParam<std::string>("base_name_slave", "Base name for slave material");
+  params.addParam<std::string>("base_name_master", "Base name for master material");
+  params.addParam<std::string>("base_name_slave", "Base name for slave material");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "component",
       "component >= 0 & component <= 2",
@@ -40,10 +40,10 @@ InterfaceStress::InterfaceStress(const InputParameters & parameters)
                                                  : ""),
     _base_name1(isParamValid("base_name_slave") ? getParam<std::string>("base_name_slave") + "_"
                                                 : ""),
-    _stress0(getMaterialPropertyByName<RankTwoTensor>(_base_name0 + "stress")),
-    _stress1(getMaterialPropertyByName<RankTwoTensor>(_base_name1 + "stress")),
+    _stress0(getMaterialProperty<RankTwoTensor>(_base_name0 + "stress")),
+    _stress1(getNeighborMaterialProperty<RankTwoTensor>(_base_name1 + "stress")),
     _Jacobian_mult0(getMaterialProperty<RankFourTensor>(_base_name0 + "Jacobian_mult")),
-    _Jacobian_mult1(getMaterialProperty<RankFourTensor>(_base_name1 + "Jacobian_mult")),
+    _Jacobian_mult1(getNeighborMaterialProperty<RankFourTensor>(_base_name1 + "Jacobian_mult")),
     _component(getParam<unsigned int>("component")),
     _has_pres0(isCoupled("pressure_master")),
     _pressure0(_has_pres0 ? coupledValue("pressure_master") : _zero),
@@ -52,7 +52,7 @@ InterfaceStress::InterfaceStress(const InputParameters & parameters)
     _other_disp_master_num(coupled("other_disp_master")),
     _other_disp_slave_num(coupled("other_disp_slave")),
     _pf_master_num(coupled("pressure_master")),
-    _pf_slave_num(coupled("pressure_master"))
+    _pf_slave_num(coupled("pressure_slave"))
 {
   if (!parameters.isParamValid("boundary"))
   {
