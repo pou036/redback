@@ -17,10 +17,17 @@ validParams<FunctionJumpDirichletBC>()
 {
   InputParameters params = validParams<NodalBC>();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
-  params.addParam<PostprocessorName>("tangent_jump",
-                                     0,
-                                     "jump value on the interface. Note that the tangent vector is "
-                                     "oriented +90deg from the normal vector.");
+  params.addCoupledVar("tangent_jump",
+                       0.0,
+                       "The variable describing the tangential jump on the interface. Note that "
+                       "the tangent vector is "
+                       "oriented +90deg from the normal vector.");
+  params.addRequiredParam<Real>(
+      "fault_angle", "The (direct) angle of the fault in degrees/radians from the horizontal");
+  params.addParam<bool>("convert_to_radians",
+                        false,
+                        "If true, the value you entered will be "
+                        "multiplied by Pi/180");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "component",
       "component >= 0 & component <= 2",
@@ -35,9 +42,10 @@ validParams<FunctionJumpDirichletBC>()
 FunctionJumpDirichletBC::FunctionJumpDirichletBC(const InputParameters & parameters)
   : NodalBC(parameters),
     _func(getFunction("function")),
-    _jump(getPostprocessorValue("tangent_jump")),
-    _component(getParam<unsigned int>("component")),
-    _normals(_assembly.normals())
+    _tangent_jump(coupledValue("tangent_jump")),
+    _angle(getParam<bool>("convert_to_radians") ? getParam<Real>("fault_angle") * M_PI / 180.0
+                                                : getParam<Real>("fault_angle")),
+    _component(getParam<unsigned int>("component"))
 {
 }
 
@@ -50,7 +58,6 @@ FunctionJumpDirichletBC::f()
 Real
 FunctionJumpDirichletBC::computeQpResidual()
 {
-  RealVectorValue fault_tangent(-_normals[_qp](1),
-                                _normals[_qp](0)); // 90deg rotation of the normal vector
-  return _u[_qp] - (f() + _jump * fault_tangent(_component));
+  RealVectorValue fault_tangent(cos(_angle), sin(_angle)); // only works for linear fault
+  return _u[_qp] - (f() + _tangent_jump[_qp] * fault_tangent(_component));
 }

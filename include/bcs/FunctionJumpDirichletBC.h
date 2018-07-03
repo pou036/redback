@@ -38,9 +38,9 @@ protected:
 
   /// The function being used for evaluation
   Function & _func;
-  const PostprocessorValue & _jump;
+  const VariableValue & _tangent_jump;
+  Real _angle;
   const unsigned int _component;
-  const MooseArray<Point> & _normals;
 };
 
 #endif // FUNCTIONJUMPDIRICHLETBC_H

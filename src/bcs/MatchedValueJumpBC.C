@@ -18,10 +18,11 @@ validParams<MatchedValueJumpBC>()
   params.addRequiredCoupledVar("v", "The variable whose value we are to match.");
   params.addClassDescription("Implements a NodalBC which equates two different Variables' values "
                              "on a specified boundary.");
-  params.addParam<PostprocessorName>("tangent_jump",
-                                     0,
-                                     "jump value on the interface. Note that the tangent vector is "
-                                     "oriented +90deg from the normal vector.");
+  params.addCoupledVar("tangent_jump",
+                       0.0,
+                       "The variable describing the tangential jump on the interface. Note that "
+                       "the tangent vector is "
+                       "oriented +90deg from the normal vector.");
   params.addRequiredRangeCheckedParam<unsigned int>(
       "component",
       "component >= 0 & component <= 2",
@@ -34,7 +35,7 @@ MatchedValueJumpBC::MatchedValueJumpBC(const InputParameters & parameters)
   : NodalBC(parameters),
     _v(coupledValue("v")),
     _v_num(coupled("v")),
-    _jump(getPostprocessorValue("tangent_jump")),
+    _tangent_jump(coupledValue("tangent_jump")),
     _component(getParam<unsigned int>("component")),
     _normals(_assembly.normals())
 {
@@ -45,7 +46,7 @@ MatchedValueJumpBC::computeQpResidual()
 {
   RealVectorValue fault_tangent(-_normals[_qp](1),
                                 _normals[_qp](0)); // 90deg rotation of the normal vector
-  return _u[_qp] - _v[_qp] + _jump * fault_tangent(_component);
+  return _u[_qp] - _v[_qp] + _tangent_jump[_qp] * fault_tangent(_component);
 }
 
 Real

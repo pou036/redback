@@ -35,7 +35,7 @@ protected:
   /// The id of the coupled variable
   unsigned int _v_num;
 
-  const PostprocessorValue & _jump;
+  const VariableValue & _tangent_jump;
   const unsigned int _component;
   const MooseArray<Point> & _normals;
 };
