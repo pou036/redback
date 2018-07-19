@@ -1,4 +1,10 @@
 # Test of AuxKernel TractionProjectionAux.C against analytical solution
+# For a stress tensor sigma = / 0  0    \
+#                             | 0  1.154/
+# and surface angle of 10 degrees (theta = 10)
+# The normal (sigma) and shear (tau) stresses are then
+#   sigma = 1.154*cos(theta)*cos(theta)
+#   tau = 1.154*sin(theta)*cos(theta)
 [Mesh]
   type = GeneratedMesh
   uniform_refine = 0
