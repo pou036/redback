@@ -4,21 +4,21 @@
 /*          All contents are licensed under LGPL V2.1           */
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
-#ifndef RANKTWOPROJECTIONAUX_H
-#define RANKTWOPROJECTIONAUX_H
+#ifndef TRACTIONPROJECTIONAUX_H
+#define TRACTIONPROJECTIONAUX_H
 
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
 
-class RankTwoProjectionAux;
+class TractionProjectionAux;
 
 template <>
-InputParameters validParams<RankTwoProjectionAux>();
+InputParameters validParams<TractionProjectionAux>();
 
-class RankTwoProjectionAux : public AuxKernel
+class TractionProjectionAux : public AuxKernel
 {
 public:
-  RankTwoProjectionAux(const InputParameters & parameters);
+  TractionProjectionAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue();
@@ -27,7 +27,9 @@ protected:
   bool _normal;
   bool _has_pres;
   const VariableValue & _pressure;
-  const MooseArray<Point> & _normals;
+
+private:
+  Real _angle;
 };
 
-#endif // RANKTWOPROJECTIONAUX_H
+#endif // TRACTIONPROJECTIONAUX_H
