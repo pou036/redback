@@ -288,6 +288,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters)
   valid_params.push_back("confining_pressure");
   valid_params.push_back("gravity");
   valid_params.push_back("thermal_diffusivity");
+  valid_params.push_back("mu");
   unsigned int pos;
   for (unsigned int i = 0; i < _num_init_functions; i++)
   {
@@ -409,6 +410,16 @@ RedbackMaterial::stepInitQpProperties()
   {
     _thermal_diffusivity[_qp] = _thermal_diffusivity_param;
   }
+  pos = find(_init_from_functions__params.begin(), _init_from_functions__params.end(), "mu") -
+        _init_from_functions__params.begin();
+  if (pos < _num_init_functions)
+  {
+    _mu[_qp] = _init_functions[pos]->value(_t, _q_point[_qp]);
+  }
+  else
+  {
+    _mu[_qp] = _mu_param;
+  }
 
   switch (_continuation_method)
   {
@@ -431,13 +442,11 @@ RedbackMaterial::stepInitQpProperties()
   _lewis_number[_qp] = _ref_lewis_nb[_qp];
   _ar_F[_qp] = _ar_F_param;
   _ar_R[_qp] = _ar_R_param;
-  _mu[_qp] = _mu_param;
   _pressurization_coefficient[_qp] = _pressurization_coefficient_param;
   _solid_compressibility[_qp] = _solid_compressibility_param;
   _fluid_compressibility[_qp] = _fluid_compressibility_param;
   _solid_thermal_expansion[_qp] = _solid_thermal_expansion_param;
   _fluid_thermal_expansion[_qp] = _fluid_thermal_expansion_param;
-  _thermal_diffusivity[_qp] = _thermal_diffusivity_param;
   _mixture_density[_qp] =
       (1 - _phi0_param) * _solid_density_param + _phi0_param * _fluid_density_param;
   _mixture_gravity_term[_qp] = _mixture_density[_qp] * _gravity_param;
