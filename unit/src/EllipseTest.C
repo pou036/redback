@@ -16,13 +16,9 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION(EllipseTest);
 
-EllipseTest::EllipseTest()
-{
-}
+EllipseTest::EllipseTest() {}
 
-EllipseTest::~EllipseTest()
-{
-}
+EllipseTest::~EllipseTest() {}
 
 /**
  * Testing Ellipse::isPointOutsideOfEllipse
@@ -605,31 +601,40 @@ EllipseTest::distanceCCTestShift()
   // Case: ellipse, major axis horizontal, p_c < 0
   // top right quadrant
   d = Ellipse::distanceCC(/*m=*/0.5, /*p_c=*/-3.0, /*x1=*/1.5 + shift, /*y1=*/3.0, x2, y2, shift);
-  Ellipse::getYieldPointCC(/*m=*/0.5, /*p_c=*/-3.0, /*x1=*/1.5 + shift, /*y1=*/3.0, x3, y3, s, shift);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis horizontal, wrong d", 3.1210069, d, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis horizontal, wrong s", 3.31752131594, s, 1e-5);
+  Ellipse::getYieldPointCC(
+      /*m=*/0.5, /*p_c=*/-3.0, /*x1=*/1.5 + shift, /*y1=*/3.0, x3, y3, s, shift);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
-    "distanceCCTestShift, major axis horizontal, wrong x2", shift - 0.282058, x2, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis horizontal, wrong y2", 0.437784, y2, 1e-5);
+      "distanceCCTestShift, major axis horizontal, wrong d", 3.1210069, d, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
-    "distanceCCTestShift, major axis horizontal, wrong x3", shift - 0.0385555846931, x3, 1e-10);
+      "distanceCCTestShift, major axis horizontal, wrong s", 3.31752131594, s, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
-    "distanceCCTestShift, major axis horizontal, wrong y3", 0.168952819574, y3, 1e-10);
+      "distanceCCTestShift, major axis horizontal, wrong x2", shift - 0.282058, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+      "distanceCCTestShift, major axis horizontal, wrong y2", 0.437784, y2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+      "distanceCCTestShift, major axis horizontal, wrong x3", shift - 0.0385555846931, x3, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+      "distanceCCTestShift, major axis horizontal, wrong y3", 0.168952819574, y3, 1e-10);
 
   // Case: ellipse, major axis vertical, p_c < 0
   // top right quadrant
   d = Ellipse::distanceCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-0.5 + shift, /*y1=*/2.0, x2, y2, shift);
-  Ellipse::getYieldPointCC(/*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-0.5 + shift, /*y1=*/2.0, x3, y3, s, shift);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis vertical, wrong d", 0.2094051, d, 1e-5);
+  Ellipse::getYieldPointCC(
+      /*m=*/1.5, /*p_c=*/-3.0, /*x1=*/-0.5 + shift, /*y1=*/2.0, x3, y3, s, shift);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+      "distanceCCTestShift, major axis vertical, wrong d", 0.2094051, d, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis vertical, wrong s",
                                        0.209475269026,
                                        s,
                                        1e-5); // TODO (that's the value without shift)
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis vertical, wrong x2", -0.150317, x2, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis vertical, wrong y2", 1.854209, y2, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
-    "distanceCCTestShift, major axis vertical, wrong x3", -0.153371450454, x3, 1e-10);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceCCTestShift, major axis vertical, wrong y3", 1.85734897716, y3, 1e-10);
+      "distanceCCTestShift, major axis vertical, wrong x2", -0.150317, x2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+      "distanceCCTestShift, major axis vertical, wrong y2", 1.854209, y2, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+      "distanceCCTestShift, major axis vertical, wrong x3", -0.153371450454, x3, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+      "distanceCCTestShift, major axis vertical, wrong y3", 1.85734897716, y3, 1e-10);
 }
 
 /**
@@ -961,7 +966,7 @@ EllipseTest::getDafaliasEllipseAxesAndCentreTest()
 {
   Real horizontal_axis, vertical_axis, center_p, center_q;
   Ellipse::getDafaliasEllipseAxesAndCentre(
-    /*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, horizontal_axis, vertical_axis, center_p, center_q);
+      /*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, horizontal_axis, vertical_axis, center_p, center_q);
 
   CPPUNIT_ASSERT_DOUBLES_EQUAL(1.4142135, horizontal_axis, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL(0.979796, vertical_axis, 1e-5);
@@ -999,13 +1004,13 @@ EllipseTest::isPointOutsideOfRotatedEllipseTestMajorAxisHorizontal()
 {
   bool r;
   r = Ellipse::isPointOutsideOfRotatedEllipse(
-    /*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/2.0, /*y1*/ 1.5);
+      /*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/2.0, /*y1*/ 1.5);
   CPPUNIT_ASSERT(r == true);
   r = Ellipse::isPointOutsideOfRotatedEllipse(
-    /*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.5, /*y1*/ 1.51);
+      /*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.5, /*y1*/ 1.51);
   CPPUNIT_ASSERT(r == true);
   r = Ellipse::isPointOutsideOfRotatedEllipse(
-    /*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.5, /*y1*/ 1.49);
+      /*m=*/1.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.5, /*y1*/ 1.49);
   CPPUNIT_ASSERT(r == false);
 }
 
@@ -1018,16 +1023,16 @@ EllipseTest::isPointOutsideOfRotatedEllipseTestMajorAxisVertical()
 {
   bool r;
   r = Ellipse::isPointOutsideOfRotatedEllipse(
-    /*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.53, /*y1*/ 0.0);
+      /*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.53, /*y1*/ 0.0);
   CPPUNIT_ASSERT(r == true);
   r = Ellipse::isPointOutsideOfRotatedEllipse(
-    /*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.49, /*y1*/ 0.0);
+      /*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/1.49, /*y1*/ 0.0);
   CPPUNIT_ASSERT(r == false);
   r = Ellipse::isPointOutsideOfRotatedEllipse(
-    /*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/0.5, /*y1*/ 0.41);
+      /*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/0.5, /*y1*/ 0.41);
   CPPUNIT_ASSERT(r == true);
   r = Ellipse::isPointOutsideOfRotatedEllipse(
-    /*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/0.5, /*y1*/ 0.39);
+      /*m=*/0.4, /*p_0=*/2.0, /*alpha=*/0.2, /*y0=*/0.5, /*y1*/ 0.39);
   CPPUNIT_ASSERT(r == false);
 }
 
@@ -1079,37 +1084,48 @@ EllipseTest::distanceLneTest()
 
   // Cases: perfect ellipse (MCC)
   // Point on the p axis
-  Ellipse::getYieldPointLne(M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-5, /*q=*/0, p_y, q_y, s);
+  Ellipse::getYieldPointLne(
+      M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-5, /*q=*/0, p_y, q_y, s);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong s", 2, s, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong p_y", -3, p_y, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong q_y", 0, q_y, 1e-5);
   // Point above the top of the ellipse
-  Ellipse::getYieldPointLne(M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-1.5, /*q=*/2, p_y, q_y, s);
+  Ellipse::getYieldPointLne(
+      M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-1.5, /*q=*/2, p_y, q_y, s);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong s", 0.5, s, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong p_y", -1.5, p_y, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong q_y", 1.5, q_y, 1e-5);
   // Random point
-  Ellipse::getYieldPointLne(M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-0.5, /*q=*/2, p_y, q_y, s);
+  Ellipse::getYieldPointLne(
+      M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-0.5, /*q=*/2, p_y, q_y, s);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong s", 0.736068435865, s, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong p_y", -0.82917935249, p_y, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+      "distanceLneTest, MCC, wrong p_y", -0.82917935249, p_y, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong q_y", 1.3416401469, q_y, 1e-5);
 
   // Cases: not perfect ellipse
   alpha = 1;
   beta = 1;
   // Point on the p axis
-  Ellipse::getYieldPointLne(M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-5, /*q=*/0, p_y, q_y, s);
+  Ellipse::getYieldPointLne(
+      M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-5, /*q=*/0, p_y, q_y, s);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong s", 2, s, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong p_y", -3, p_y, 1e-5);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, MCC, wrong q_y", 0, q_y, 1e-5);
   // Random point on flat side
-  Ellipse::getYieldPointLne(M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-0.5, /*q=*/2, p_y, q_y, s);
+  Ellipse::getYieldPointLne(
+      M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-0.5, /*q=*/2, p_y, q_y, s);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, 1, wrong s", 1.00801542687608, s, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, 1, wrong p_y", -0.9088452102838, p_y, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, 1, wrong q_y", 1.08126052737926, q_y, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+      "distanceLneTest, 1, wrong p_y", -0.9088452102838, p_y, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+      "distanceLneTest, 1, wrong q_y", 1.08126052737926, q_y, 1e-5);
   // Random point on cap side
-  Ellipse::getYieldPointLne(M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-4, /*q=*/2, p_y, q_y, s);
+  Ellipse::getYieldPointLne(
+      M, M_e, M_c, alpha, beta, theta, p_t, p_c, /*p=*/-4, /*q=*/2, p_y, q_y, s);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, 1, wrong s", 1.7122202698807, s, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, 1, wrong p_y", -2.71410334843536, p_y, 1e-5);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("distanceLneTest, 1, wrong q_y", 0.87689101529589, q_y, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+      "distanceLneTest, 1, wrong p_y", -2.71410334843536, p_y, 1e-5);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+      "distanceLneTest, 1, wrong q_y", 0.87689101529589, q_y, 1e-5);
 }

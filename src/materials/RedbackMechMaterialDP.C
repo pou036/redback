@@ -77,17 +77,23 @@ RedbackMechMaterialDP::getFlowTensor(const RankTwoTensor & sig,
  * Compute flow increment for Drucker-Prager case
  */
 Real
-RedbackMechMaterialDP::getFlowIncrement(
-  Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real yield_stress, Real /*s*/)
+RedbackMechMaterialDP::getFlowIncrement(Real sig_eqv,
+                                        Real pressure,
+                                        Real q_yield_stress,
+                                        Real p_yield_stress,
+                                        Real yield_stress,
+                                        Real /*s*/)
 {
   Real flow_incr_vol =
-    _ref_pe_rate * _dt *
-    std::pow(macaulayBracket(((pressure - p_yield_stress) / yield_stress) * (_mu < 0 ? 1 : -1)), _exponent) *
-    _exponential;
-  Real flow_incr_dev =
-    _ref_pe_rate * _dt *
-    std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) * ((sig_eqv - q_yield_stress) / yield_stress)), _exponent) *
-    _exponential;
+      _ref_pe_rate * _dt *
+      std::pow(macaulayBracket(((pressure - p_yield_stress) / yield_stress) * (_mu < 0 ? 1 : -1)),
+               _exponent) *
+      _exponential;
+  Real flow_incr_dev = _ref_pe_rate * _dt *
+                       std::pow(macaulayBracket((q_yield_stress > 0 ? 1 : -1) *
+                                                ((sig_eqv - q_yield_stress) / yield_stress)),
+                                _exponent) *
+                       _exponential;
   //(q_yield_stress > 0 ? 1:-1) is the sign function
   return std::pow(flow_incr_vol * flow_incr_vol + flow_incr_dev * flow_incr_dev, 0.5);
   // TODO: change the formula to use dist_pq^m
@@ -132,7 +138,8 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
 
   sig_dev = sig.deviatoric();
 
-  getDerivativeFlowIncrement(dfi_dp, dfi_dseqv, sig, pressure, sig_eqv, yield_stress, q_yield_stress, p_yield_stress);
+  getDerivativeFlowIncrement(
+      dfi_dp, dfi_dseqv, sig, pressure, sig_eqv, yield_stress, q_yield_stress, p_yield_stress);
   getFlowTensor(sig, sig_eqv, pressure, q_yield_stress, p_yield_stress, yield_stress, flow_dirn);
 
   /* The following calculates the tensorial derivative (Jacobian) of the
@@ -164,7 +171,8 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dfi_dsig(i, j, k, l) = flow_dirn(i, j) * (f4 * sig_dev(k, l) * dfi_dseqv + dfi_dp * deltaFunc(k, l) / 3.0);
+          dfi_dsig(i, j, k, l) =
+              flow_dirn(i, j) * (f4 * sig_dev(k, l) * dfi_dseqv + dfi_dp * deltaFunc(k, l) / 3.0);
 
   // This loop calculates the second term. Read REDBACK's documentation
   // (same as J2 plasticity case)
@@ -172,7 +180,8 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
     for (j = 0; j < 3; ++j)
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
-          dfd_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) - f2 * deltaFunc(i, j) * deltaFunc(k, l) -
+          dfd_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) -
+                                 f2 * deltaFunc(i, j) * deltaFunc(k, l) -
                                  f3 * sig_dev(i, j) * sig_dev(k, l);
 
   dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr + dfi_dsig; // Jacobian
@@ -180,7 +189,7 @@ RedbackMechMaterialDP::getJac(const RankTwoTensor & sig,
 
 void
 RedbackMechMaterialDP::get_py_qy(
-  Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
+    Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
 {
   p_y = getPressureProjection(p /*p*/, q /*q*/, yield_stress /*yield stress*/);
   q_y = yield_stress + _mu * p_y; // yield deviatoric stress

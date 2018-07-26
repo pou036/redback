@@ -27,13 +27,13 @@ RedbackMechMaterialElastic::RedbackMechMaterialElastic(const InputParameters & p
 
 void
 RedbackMechMaterialElastic::returnMap(
-  const RankTwoTensor & sig_old,
-  const RankTwoTensor & delta_d,
-  const RankFourTensor & E_ijkl,
-  RankTwoTensor & dp, // Plastic rate of deformation tensor in unrotated configuration
-  RankTwoTensor & sig,
-  Real & /*p_y*/,
-  Real & /*q_y*/)
+    const RankTwoTensor & sig_old,
+    const RankTwoTensor & delta_d,
+    const RankFourTensor & E_ijkl,
+    RankTwoTensor & dp, // Plastic rate of deformation tensor in unrotated configuration
+    RankTwoTensor & sig,
+    Real & /*p_y*/,
+    Real & /*q_y*/)
 {
   sig = sig_old + E_ijkl * delta_d;
   dp.zero();
@@ -51,7 +51,7 @@ RedbackMechMaterialElastic::getFlowTensor(const RankTwoTensor & /*sig*/,
 }
 
 Real RedbackMechMaterialElastic::getFlowIncrement(
-  Real /*sig_eqv*/, Real /*p*/, Real /*q_y*/, Real /*p_y*/, Real /*yield_stress*/, Real /*s*/)
+    Real /*sig_eqv*/, Real /*p*/, Real /*q_y*/, Real /*p_y*/, Real /*yield_stress*/, Real /*s*/)
 {
   return 0;
 }
@@ -71,8 +71,13 @@ RedbackMechMaterialElastic::getJac(const RankTwoTensor & /*sig*/,
 }
 
 void
-RedbackMechMaterialElastic::get_py_qy(
-  Real /*p*/, Real /*q*/, Real & /*p_y*/, Real & /*q_y*/, Real /*yield_stress*/, bool & /*is_plastic*/, Real & /*s*/)
+RedbackMechMaterialElastic::get_py_qy(Real /*p*/,
+                                      Real /*q*/,
+                                      Real & /*p_y*/,
+                                      Real & /*q_y*/,
+                                      Real /*yield_stress*/,
+                                      bool & /*is_plastic*/,
+                                      Real & /*s*/)
 {
   mooseError("RedbackMechMaterialElastic::get_py_qy should not get called");
 }

@@ -20,7 +20,8 @@ validParams<RedbackMechMaterialJ2>()
   return params;
 }
 
-RedbackMechMaterialJ2::RedbackMechMaterialJ2(const InputParameters & parameters) : RedbackMechMaterial(parameters)
+RedbackMechMaterialJ2::RedbackMechMaterialJ2(const InputParameters & parameters)
+  : RedbackMechMaterial(parameters)
 {
 }
 
@@ -49,9 +50,10 @@ RedbackMechMaterialJ2::getFlowTensor(const RankTwoTensor & sig,
 
 Real
 RedbackMechMaterialJ2::getFlowIncrement(
-  Real sig_eqv, Real /*p*/, Real /*q_y*/, Real /*p_y*/, Real yield_stress, Real /*s*/)
+    Real sig_eqv, Real /*p*/, Real /*q_y*/, Real /*p_y*/, Real yield_stress, Real /*s*/)
 {
-  return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) * _exponential;
+  return _ref_pe_rate * _dt * std::pow(macaulayBracket(sig_eqv / yield_stress - 1.0), _exponent) *
+         _exponential;
 }
 
 /**
@@ -63,7 +65,8 @@ RedbackMechMaterialJ2::getDerivativeFlowIncrement(const RankTwoTensor & sig, Rea
 {
   // Derivative of getFlowIncrement with respect to equivalent stress
   return _ref_pe_rate * _dt * _exponent *
-         std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) * _exponential / yield_stress;
+         std::pow(macaulayBracket(getSigEqv(sig) / yield_stress - 1.0), _exponent - 1.0) *
+         _exponential / yield_stress;
 }
 
 // Jacobian for stress update algorithm
@@ -100,16 +103,17 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig,
     for (unsigned int j = 0; j < 3; ++j)
       for (unsigned int k = 0; k < 3; ++k)
         for (unsigned int l = 0; l < 3; ++l)
-          dfi_dsig(i, j, k, l) =
-            f3 * flow_dirn_dev(i, j) * flow_dirn_dev(k, l) * dfi_dseqv_dev; // d_flow_increment/d_sig
+          dfi_dsig(i, j, k, l) = f3 * flow_dirn_dev(i, j) * flow_dirn_dev(k, l) *
+                                 dfi_dseqv_dev; // d_flow_increment/d_sig
 
   RankFourTensor dft_dsig;
   for (unsigned int i = 0; i < 3; ++i)
     for (unsigned int j = 0; j < 3; ++j)
       for (unsigned int k = 0; k < 3; ++k)
         for (unsigned int l = 0; l < 3; ++l)
-          dft_dsig(i, j, k, l) = f1 * deltaFunc(i, k) * deltaFunc(j, l) - f2 * deltaFunc(i, j) * deltaFunc(k, l) -
-                                 f1 * flow_dirn_dev(i, j) * flow_dirn_dev(k, l); // d_flow_dirn/d_sig - 2nd part
+          dft_dsig(i, j, k, l) =
+              f1 * deltaFunc(i, k) * deltaFunc(j, l) - f2 * deltaFunc(i, j) * deltaFunc(k, l) -
+              f1 * flow_dirn_dev(i, j) * flow_dirn_dev(k, l); // d_flow_dirn/d_sig - 2nd part
 
   // d_flow_dirn/d_sig
   dresid_dsig = E_ijkl.invSymm() + dft_dsig * flow_incr_dev + dfi_dsig; // Jacobian
@@ -117,7 +121,7 @@ RedbackMechMaterialJ2::getJac(const RankTwoTensor & sig,
 
 void
 RedbackMechMaterialJ2::get_py_qy(
-  Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
+    Real p, Real q, Real & p_y, Real & q_y, Real yield_stress, bool & is_plastic, Real & s)
 {
   p_y = p;
   q_y = yield_stress;
