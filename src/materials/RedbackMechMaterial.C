@@ -712,6 +712,8 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   const Real tol3 = 1e-6;  // TODO: expose to user interface and/or make the tolerance relative
   Real err3 = 1.1 * tol3;
   bool is_plastic = false; // is this point in plastic regime or not?
+  bool is_first_plastic_determined = false;
+  bool is_first_plastic = false; // is_plastic the first time it's called
   Real s = 0;              // curvilinear arc-length between (p,q) and (p_y,q_y)
   RankFourTensor dr_dsig_inv = E_ijkl;
 
@@ -757,7 +759,12 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
     Real q = getSigEqv(sig_new);
     get_py_qy_damaged(p, q, p_y, q_y, yield_stress, is_plastic, s);
 
-    if (is_plastic)
+    if (!is_first_plastic_determined)
+    {
+      is_first_plastic = is_plastic;
+      is_first_plastic_determined = true;
+    }
+    if (is_first_plastic)
     {
       Real flow_incr = getFlowIncrement(q, p, q_y, p_y, yield_stress, s);
 
