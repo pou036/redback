@@ -231,6 +231,9 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters)
   _initial_stress.resize(num);
   for (unsigned i = 0; i < num; ++i)
     _initial_stress[i] = &getFunctionByName(fcn_names[i]);
+
+  // initialise damage dissipation
+  _damage_dissipation = 0;
 }
 
 MooseEnum
@@ -503,7 +506,9 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   Real def_grad = _grad_disp_x[_qp](0) + _grad_disp_y[_qp](1) + _grad_disp_z[_qp](2);
   Real def_grad_old =
       _grad_disp_x_old[_qp](0) + _grad_disp_y_old[_qp](1) + _grad_disp_z_old[_qp](2);
-  Real def_grad_rate = (def_grad - def_grad_old) / _dt;
+  Real def_grad_rate = 0.;
+  if (_dt > 0)
+    def_grad_rate = (def_grad - def_grad_old) / _dt;
 
   // Update mechanical porosity (elastic and plastic components)
   // TODO: set T0 properly (once only, at the very beginning). Until then, T = T
@@ -632,7 +637,11 @@ RedbackMechMaterial::computeQpStrain(const RankTwoTensor & Fhat)
   B.addIa(-0.75);
   _strain_increment[_qp] = -B*A;*/
 
-  RankTwoTensor D = _strain_increment[_qp] / _dt;
+  RankTwoTensor D;
+  if (_dt > 0)
+    D = _strain_increment[_qp] / _dt;
+  else
+    D.zero();
   _strain_rate[_qp] = D;
 
   // Calculate rotation R_incr
@@ -857,7 +866,9 @@ RedbackMechMaterial::formDamageDissipation(RankTwoTensor & /*sig*/)
   Real Psi0 = Psi0_vol + Psi0_dev;
 
   Real damage_potential = (1 - _damage[_qp]) * Psi0;
-  Real damage_rate = (_damage[_qp] - _damage_old[_qp]) / _dt;
+  Real damage_rate = 0.;
+  if (_dt > 0)
+    damage_rate = (_damage[_qp] - _damage_old[_qp]) / _dt;
 
   // _damage_dissipation is equal to (- d Psi / d D * D_dot) which in this code
   // is (damage_potential * damage_rate)

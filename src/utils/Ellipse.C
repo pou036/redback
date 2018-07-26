@@ -303,7 +303,7 @@ Ellipse::hyp2f1(Real a, Real b, Real c, Real z)
     C_n_minus_1 = C_n;
     C_n = C_n_plus_1;
     C_n_plus_1 *= (a + n) * (b + n) * z / ((c + n) * (n + 1));
-    // std::cout << "n="<<n<<", S_n="<<S_n<<", C_n_plus_1="<<C_n_plus_1<<std::endl;
+    // fprintf( "n=%d, S_n=%f, C_n_plus_1=%f", n, S_n, C_n_plus_1);
     n += 1;
   }
   if (n > n_max)
@@ -311,9 +311,8 @@ Ellipse::hyp2f1(Real a, Real b, Real c, Real z)
                " iterations. Approx. reached: hyp2f1(" + Moose::stringify(a) + ", " +
                Moose::stringify(b) + ", " + Moose::stringify(c) + ", " + Moose::stringify(z) +
                ") = " + Moose::stringify(S_n));
-  // std::cout << "hyp2f1 took " + Moose::stringify(n) + " iterations." << std::endl;
-  // std::cout << "hyp2f1(" << a << ", " << b << ", " << c << ", " << z << ") = "<< S_n <<
-  // std::endl;
+  // fprintf("hyp2f1 took %d iterations.", n);
+  // fprintf("hyp2f1(%f, %f, %f, %f) = %f", a,b,c,z, S_n); 
   return S_n;
 }
 
