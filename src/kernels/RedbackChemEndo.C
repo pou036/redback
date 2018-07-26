@@ -26,23 +26,22 @@ validParams<RedbackChemEndo>()
 RedbackChemEndo::RedbackChemEndo(const InputParameters & parameters)
   : Kernel(parameters),
     _chemical_endothermic_energy(getMaterialProperty<Real>("chemical_endothermic_energy")),
-    _chemical_endothermic_energy_jac(getMaterialProperty<Real>("chemical_endothermic_energy_jacobian")),
+    _chemical_endothermic_energy_jac(
+        getMaterialProperty<Real>("chemical_endothermic_energy_jacobian")),
     _time_factor(getParam<Real>("time_factor"))
 {
 }
 
-RedbackChemEndo::~RedbackChemEndo()
-{
-}
+RedbackChemEndo::~RedbackChemEndo() {}
 
 Real
 RedbackChemEndo::computeQpResidual()
 {
-  return _time_factor * _test[ _i ][ _qp ] * _chemical_endothermic_energy[ _qp ];
+  return _time_factor * _test[_i][_qp] * _chemical_endothermic_energy[_qp];
 }
 
 Real
 RedbackChemEndo::computeQpJacobian()
 {
-  return _time_factor * _test[ _i ][ _qp ] * _chemical_endothermic_energy_jac[ _qp ] * _phi[ _j ][ _qp ];
+  return _time_factor * _test[_i][_qp] * _chemical_endothermic_energy_jac[_qp] * _phi[_j][_qp];
 }

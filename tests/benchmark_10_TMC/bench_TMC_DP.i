@@ -143,7 +143,7 @@
 []
 
 [AuxVariables]
-  active = 'mech_porosity Mod_Gruntfest_number total_porosity mises_strain eqv_plastic_strain_rate volumetric_strain_rate mises_stress plastic_volumetric_strain mean_stress'
+  active = 'mech_porosity Mod_Gruntfest_number total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress plastic_volumetric_strain mean_stress'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -172,15 +172,13 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./eqv_plastic_strain_rate]
+  [./mises_strain_rate]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
-    block = '0 1'
   [../]
   [./plastic_volumetric_strain]
     order = CONSTANT
@@ -193,7 +191,6 @@
   [./mean_stress]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./total_porosity]
     order = FIRST
@@ -225,7 +222,7 @@
 []
 
 [AuxKernels]
-  active = 'mech_porosity plastic_volumetric_strain total_porosity mises_strain eqv_plastic_strain_rate volumetric_strain_rate mises_stress mean_stress Gruntfest_Number'
+  active = 'mech_porosity plastic_volumetric_strain total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -268,23 +265,20 @@
     variable = mises_strain
     property = eqv_plastic_strain
   [../]
-  [./eqv_plastic_strain_rate]
+  [./mises_strain_rate]
     type = MaterialRealAux
-    variable = eqv_plastic_strain_rate
-    block = 0
-    property = eqv_plastic_strain_rate
+    variable = mises_strain_rate
+    property = mises_strain_rate
   [../]
   [./Gruntfest_Number]
     type = MaterialRealAux
     variable = Mod_Gruntfest_number
     property = mod_gruntfest_number
-    block = 0
   [../]
   [./mean_stress]
     type = MaterialRealAux
     variable = mean_stress
     property = mean_stress
-    block = 0
   [../]
   [./plastic_volumetric_strain]
     type = MaterialRealAux
@@ -320,9 +314,9 @@
     variable = mises_strain
     point = '0 0 0'
   [../]
-  [./eqv_plastic_strain_rate]
+  [./mises_strain_rate]
     type = PointValue
-    variable = eqv_plastic_strain_rate
+    variable = mises_strain_rate
     point = '0 0 0'
   [../]
   [./temp_middle]
@@ -357,6 +351,8 @@
 
 [Executioner]
   # Preconditioned JFNK (default)
+  # petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
+  # petsc_options_value = 'hypre boomeramg cp 201'
   start_time = 0.0
   end_time = 1e-2
   dtmax = 1
@@ -365,8 +361,6 @@
   l_max_its = 200
   nl_max_its = 10
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg cp 201'
   nl_abs_tol = 1e-10 # 1e-10 to begin with
   reset_dt = true
   line_search = basic

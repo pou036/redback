@@ -165,7 +165,7 @@
     order = CONSTANT
     family = MONOMIAL
   []
-  [eqv_plastic_strain_rate]
+  [mises_strain_rate]
     order = CONSTANT
     family = MONOMIAL
   []
@@ -243,11 +243,11 @@
     variable = mises_strain
     property = mises_strain
   []
-  [eqv_plastic_strain_rate]
+  [mises_strain_rate]
     type = MaterialRealAux
-    variable = eqv_plastic_strain_rate
+    variable = mises_strain_rate
     block = '0'
-    property = eqv_plastic_strain_rate
+    property = mises_strain_rate
   []
   [Gruntfest_Number]
     type = MaterialRealAux
@@ -302,9 +302,9 @@
     variable = mises_strain
     point = '0 0 0'
   []
-  [eqv_plastic_strain_rate]
+  [mises_strain_rate]
     type = PointValue
-    variable = eqv_plastic_strain_rate
+    variable = mises_strain_rate
     point = '0 0 0'
   []
   [temp_middle]

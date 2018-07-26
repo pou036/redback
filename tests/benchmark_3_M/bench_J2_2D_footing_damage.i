@@ -103,7 +103,7 @@
 []
 
 [AuxVariables]
-  active = 'stress_yy eqv_plastic_strain_rate stress_xz stress_xx stress_xy mises_stress stress_zz eqv_plastic_strain stress_yz'
+  active = 'stress_yy mises_strain_rate stress_xz stress_xx stress_xy mises_stress stress_zz eqv_plastic_strain stress_yz'
   [./total_porosity]
     order = FIRST
     family = MONOMIAL
@@ -140,7 +140,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./eqv_plastic_strain_rate]
+  [./mises_strain_rate]
     order = CONSTANT
     family = MONOMIAL
   [../]
@@ -165,7 +165,7 @@
 []
 
 [AuxKernels]
-  active = 'stress_yy eqv_plastic_strain_rate stress_xz stress_xx stress_xy mises_stress stress_zz eqv_plastic_strain stress_yz'
+  active = 'stress_yy mises_strain_rate stress_xz stress_xx stress_xy mises_stress stress_zz eqv_plastic_strain stress_yz'
   [./total_porosity]
     type = RedbackTotalPorosityAux
     variable = total_porosity
@@ -223,10 +223,10 @@
     variable = mises_stress
     property = mises_stress
   [../]
-  [./eqv_plastic_strain_rate]
+  [./mises_strain_rate]
     type = MaterialRealAux
-    variable = eqv_plastic_strain_rate
-    property = eqv_plastic_strain_rate
+    variable = mises_strain_rate
+    property = mises_strain_rate
   [../]
 []
 

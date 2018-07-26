@@ -37,7 +37,7 @@ RedbackThermalConvection::RedbackThermalConvection(const InputParameters & param
 Real
 RedbackThermalConvection::computeQpResidual()
 {
-  return _test[ _i ][ _qp ] * (_time_factor * _mixture_convective_energy[ _qp ] * _grad_u[ _qp ]);
+  return _test[_i][_qp] * (_time_factor * _mixture_convective_energy[_qp] * _grad_u[_qp]);
 }
 
 Real

@@ -133,7 +133,7 @@ protected:
   Real _poisson_ratio;
   MaterialProperty<Real> & _mises_stress;
   MaterialProperty<Real> & _mean_stress;
-  MaterialProperty<Real> & _eqv_plastic_strain_rate;
+  MaterialProperty<Real> & _mises_strain_rate;
   MaterialProperty<Real> & _plastic_volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;
   MaterialProperty<Real> & _total_volumetric_strain;

@@ -143,7 +143,7 @@
 []
 
 [AuxVariables]
-  active = 'Mod_Gruntfest_number returnmap_iter mises_strain eqv_plastic_strain_rate mises_stress total_porosity'
+  active = 'Mod_Gruntfest_number returnmap_iter mises_strain mises_strain_rate mises_stress total_porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -172,7 +172,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./eqv_plastic_strain_rate]
+  [./mises_strain_rate]
     order = CONSTANT
     family = MONOMIAL
     block = 0
@@ -180,7 +180,6 @@
   [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
-    block = '0 1'
   [../]
   [./returnmap_iter]
     order = CONSTANT
@@ -210,7 +209,7 @@
 []
 
 [AuxKernels]
-  active = 'total_porosity mises_strain eqv_plastic_strain_rate mises_stress returnmap_iter Gruntfest_Number'
+  active = 'total_porosity mises_strain mises_strain_rate mises_stress returnmap_iter Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -253,11 +252,11 @@
     variable = mises_strain
     property = mises_strain
   [../]
-  [./eqv_plastic_strain_rate]
+  [./mises_strain_rate]
     type = MaterialRealAux
-    variable = eqv_plastic_strain_rate
+    variable = mises_strain_rate
     block = 0
-    property = eqv_plastic_strain_rate
+    property = mises_strain_rate
   [../]
   [./Gruntfest_Number]
     type = MaterialRealAux
@@ -291,7 +290,7 @@
   [../]
   [./strain_rate]
     type = PointValue
-    variable = eqv_plastic_strain_rate
+    variable = mises_strain_rate
     point = '0.5 0.5 0'
   [../]
   [./mises_stress]
@@ -323,6 +322,8 @@
 
 [Executioner]
   # Preconditioned JFNK (default)
+  # petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
+  # petsc_options_value = 'hypre boomeramg cp 201'
   start_time = 0.0
   end_time = 3e-2
   dtmax = 1
@@ -331,8 +332,6 @@
   num_steps = 1000000
   l_max_its = 500
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg cp 201'
   nl_abs_tol = 1e-10 # 1e-10 to begin with
   reset_dt = true
   line_search = basic

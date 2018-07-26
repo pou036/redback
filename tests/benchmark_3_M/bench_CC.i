@@ -163,7 +163,7 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./eqv_plastic_strain_rate]
+  [./mises_strain_rate]
     order = CONSTANT
     family = MONOMIAL
     block = '0'
@@ -171,7 +171,6 @@
   [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
-    block = '0 1'
   [../]
   [./plastic_volumetric_strain]
     order = CONSTANT
@@ -245,11 +244,11 @@
     variable = mises_strain
     property = mises_strain
   [../]
-  [./eqv_plastic_strain_rate]
+  [./mises_strain_rate]
     type = MaterialRealAux
-    variable = eqv_plastic_strain_rate
+    variable = mises_strain_rate
     block = '0'
-    property = eqv_plastic_strain_rate
+    property = mises_strain_rate
   [../]
   [./Gruntfest_Number]
     type = MaterialRealAux
@@ -304,9 +303,9 @@
     variable = mises_strain
     point = '0 0 0'
   [../]
-  [./eqv_plastic_strain_rate]
+  [./mises_strain_rate]
     type = PointValue
-    variable = eqv_plastic_strain_rate
+    variable = mises_strain_rate
     point = '0 0 0'
   [../]
   [./temp_middle]
@@ -345,6 +344,8 @@
 
 [Executioner]
   # Preconditioned JFNK (default)
+  # petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
+  # petsc_options_value = 'hypre boomeramg cp 201'
   type = Transient
   start_time = 0.0
   end_time = 0.006
@@ -353,8 +354,6 @@
   l_max_its = 200
   nl_max_its = 10
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg cp 201'
   nl_abs_tol = 1e-10  # 1e-10 to begin with
   reset_dt = true
   line_search = basic

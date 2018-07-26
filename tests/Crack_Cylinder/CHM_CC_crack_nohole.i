@@ -160,7 +160,7 @@
 []
 
 [AuxVariables]
-  active = 'mech_porosity Mod_Gruntfest_number solid_ratio total_porosity mises_strain Lewis_number eqv_plastic_strain_rate volumetric_strain_rate mises_stress plastic_volumetric_strain mean_stress chemical_porosity'
+  active = 'mech_porosity Mod_Gruntfest_number solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate volumetric_strain_rate mises_stress plastic_volumetric_strain mean_stress chemical_porosity'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -189,15 +189,13 @@
     order = CONSTANT
     family = MONOMIAL
   [../]
-  [./eqv_plastic_strain_rate]
+  [./mises_strain_rate]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
-    block = '0 1'
   [../]
   [./plastic_volumetric_strain]
     order = CONSTANT
@@ -274,7 +272,7 @@
 []
 
 [AuxKernels]
-  active = 'mech_porosity plastic_volumetric_strain solid_ratio total_porosity mises_strain Lewis_number eqv_plastic_strain_rate chemical_porosity volumetric_strain_rate mises_stress mean_stress Gruntfest_Number'
+  active = 'mech_porosity plastic_volumetric_strain solid_ratio total_porosity mises_strain Lewis_number mises_strain_rate chemical_porosity volumetric_strain_rate mises_stress mean_stress Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -319,11 +317,11 @@
     property = eqv_plastic_strain
     block = 0
   [../]
-  [./eqv_plastic_strain_rate]
+  [./mises_strain_rate]
     type = MaterialRealAux
-    variable = eqv_plastic_strain_rate
+    variable = mises_strain_rate
     block = 0
-    property = eqv_plastic_strain_rate
+    property = mises_strain_rate
   [../]
   [./Gruntfest_Number]
     type = MaterialRealAux

@@ -26,7 +26,8 @@ validParams<FunctionWithRandomIC>()
   params.addParam<Real>("min", 0.0, "Lower bound of the randomly generated values");
   params.addParam<Real>("max", 1.0, "Upper bound of the randomly generated values");
   params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");
-  params.addRequiredParam<FunctionName>("function", "The initial condition function (without randomness).");
+  params.addRequiredParam<FunctionName>("function",
+                                        "The initial condition function (without randomness).");
   return params;
 }
 
