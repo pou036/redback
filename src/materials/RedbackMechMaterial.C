@@ -140,6 +140,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters)
     _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("plastic_strain")),
     _eqv_plastic_strain(declareProperty<Real>("eqv_plastic_strain")),
     _eqv_plastic_strain_old(getMaterialPropertyOld<Real>("eqv_plastic_strain")),
+    _qmech(declareProperty<Real>("qmech")),
 
     // Copy-paste from FiniteStrainPlasticRateMaterial.C
     _ref_pe_rate(getParam<Real>("ref_pe_rate")),
@@ -217,6 +218,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters)
                                        // elasticity tensor.
   _Cijkl.fillFromInputVector(input_vector, (RankFourTensor::FillMethod)(int)fill_method);
 
+  _max_confining_pressure = 0;
   // Initial stress
   const std::vector<FunctionName> & fcn_names(
       getParam<std::vector<FunctionName>>("initial_stress"));
@@ -255,6 +257,7 @@ RedbackMechMaterial::initQpStatefulProperties()
         _stress[_qp](i, j) = _initial_stress[i * 3 + j]->value(_t, _q_point[_qp]);
   _plastic_strain[_qp].zero();
   _eqv_plastic_strain[_qp] = 0.0;
+  _qmech[ _qp ] = 0.0;
   _elasticity_tensor[_qp].zero();
   _Jacobian_mult[_qp].zero();
   _strain_rate[_qp].zero();
@@ -736,10 +739,26 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
 
   // The following expression should be further pursued for a forward
   // physics-based model
-  _exponential =
-      _exponential * std::exp(-_alpha_1[_qp] * _confining_pressure[_qp] -
-                              _pore_pres[_qp] * _alpha_2[_qp] *
-                                  (1 + _alpha_3[_qp] * std::log(_confining_pressure[_qp])));
+  _max_confining_pressure = fmax(_confining_pressure[ _qp ], _max_confining_pressure);
+  // qmech[_qp] = (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure -
+  // _alpha_2[_qp] * _pore_pres[_qp]); _qmech[_qp] = (_alpha_1[_qp] +_alpha_2[_qp] * _pore_pres[_qp]);
+  
+  // branch 94
+  _qmech[ _qp ] =
+  -_alpha_1[ _qp ]  - _alpha_2[ _qp ] * _pore_pres[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));  
+  //-_alpha_1[ _qp ] - _alpha_2[ _qp ] * _pore_pres[ _qp ];
+
+
+  //_qmech[ _qp ] = -((_alpha_1[ _qp ]+ _alpha_1[ _qp ] *_alpha_2[ _qp ] * _pore_pres[ _qp ] ) * std::log(_max_confining_pressure) + _alpha_3[ _qp ]);
+  
+  //_qmech[ _qp ] = - (-7.3 * std::log(_max_confining_pressure) - 34.776 + (158.81 * std::log(_max_confining_pressure) +220.19) * _pore_pres[_qp] + _alpha_3[ _qp ]);
+  
+  //-_alpha_1[ _qp ] * _max_confining_pressure - _alpha_2[ _qp ] * _pore_pres[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));  
+  
+  //(J) -((_alpha_1[ _qp ] * std::log(_max_confining_pressure) + _alpha_2[ _qp ]) - (-21.676* _alpha_1[ _qp ] + -534.52)  *_pore_pres[_qp]);
+  //-(_alpha_1[ _qp ] * _max_confining_pressure * _max_confining_pressure + _alpha_2[ _qp ] * _max_confining_pressure + _alpha_3[ _qp ]);
+  
+  _exponential = _exponential * std::exp(_qmech[ _qp ]);
 
   unsigned int iterisohard = 0;
   const unsigned int maxiterisohard = 20, maxiter = 50;

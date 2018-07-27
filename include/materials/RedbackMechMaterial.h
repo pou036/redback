@@ -97,6 +97,7 @@ protected:
   const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
   MaterialProperty<Real> & _eqv_plastic_strain;
   const MaterialProperty<Real> & _eqv_plastic_strain_old;
+  MaterialProperty<Real> & _qmech;
 
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
   // yield_stress);
@@ -203,7 +204,7 @@ protected:
   virtual void formBrittleDamage();
   virtual void formCreepDamage(Real);
 
-  Real _damage_dissipation;
+  Real _damage_dissipation, _max_confining_pressure;
 
   /// initial stress components
   std::vector<Function *> _initial_stress;
