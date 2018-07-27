@@ -6,7 +6,7 @@
     type = 'Exodiff'
     input = 'bench_THMC_J2.i'
     exodiff = 'bench_THMC_J2_out.e'
-    rel_err = 1e-4
+    rel_err = 5e-4
     #platform = '!LINUX'
   [../]
   [./test_11_THMC_DP] # can't put a dot in that name!
