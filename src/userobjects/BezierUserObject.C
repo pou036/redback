@@ -161,7 +161,7 @@ BezierUserObject::getTangents(std::vector<Real> x_array, std::vector<Real> y_arr
       tangents.push_back(0);
     //tangent at k+1
     tangents.push_back(2*a*x_array[k+1] + b);
-    // tangent on first point
+    // tangent on last point
     if (k==nb_segments-2)
       tangents.push_back(0);
   }

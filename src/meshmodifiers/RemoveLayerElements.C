@@ -27,7 +27,6 @@ validParams<RemoveLayerElements>()
   params.addRequiredParam<FileName>("file", "Name of the txt file with the porosity change");
   params.addRequiredParam<FileName>("upper_layer_file", "Name of the txt file with the next layer to erode");
   params.addRequiredParam<FileName>("lower_layer_file", "Name of the txt file with the last layer eroded");
-  params.addParam<Real>("first_layer_threshold", 0, "threshold below which we do not remove elements");
   return params;
 }
 
@@ -62,22 +61,6 @@ RemoveLayerElements::modify()
       break;
     }
     myfile.close();
-  }
-
-  Real first_layer_threshold = getParam<Real>("first_layer_threshold");
-
-  // do not change mesh for less than x porosity change
-  if (std::abs(porosity_change) < first_layer_threshold)
-  {
-    FileName file = getParam<FileName>("lower_layer_file");
-    FILE * output_file = fopen(file.c_str(), "w");
-    fputs("0", output_file);
-    fclose(output_file);
-    file = getParam<FileName>("upper_layer_file");
-    output_file = fopen(file.c_str(), "w");
-    fputs(std::to_string(first_layer_threshold).c_str(), output_file);
-    fclose(output_file);
-    return;
   }
 
   MeshBase & mesh = _mesh_ptr->getMesh();
@@ -115,8 +98,7 @@ RemoveLayerElements::modify()
   Real volume_changed = 0;
   Real volume_to_change;
 
-  int nb_loops = 0;
-  while (nb_loops < std::sqrt(N_elem))
+  while (frac_volume < 1.-1e-10)
   {
     frac_volume = 0;
     for (const auto & elem : mesh.active_element_ptr_range())
@@ -243,9 +225,8 @@ RemoveLayerElements::modify()
     FILE * output_file = fopen(file.c_str(), "w");
     fputs(std::to_string(volume_changed).c_str(), output_file);
     fclose(output_file);
-    nb_loops += 1;
   }
-  mooseError("MeshModifier RemoveLayerElements exceeded number of loops possible");
+  // mooseError("MeshModifier RemoveLayerElements exceeded number of loops possible");
 }
 
 std::vector<Elem *>
