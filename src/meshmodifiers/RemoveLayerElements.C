@@ -69,7 +69,7 @@ RemoveLayerElements::modify()
   SubdomainID master_id;
   SubdomainID paired_id;
   // separate between erosion and dilation
-  if (porosity_change > 0)
+  if (porosity_change >= 0)
   {
     master_id = _mesh_ptr->getSubdomainID(getParam<SubdomainName>("master_block"));
     paired_id = _mesh_ptr->getSubdomainID(getParam<SubdomainName>("paired_block"));
