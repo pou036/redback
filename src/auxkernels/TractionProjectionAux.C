@@ -12,11 +12,12 @@ InputParameters
 validParams<TractionProjectionAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addClassDescription("Compute normal or tangential projection of a traction (stress projected on a vector) in 2D");
-  params.addRequiredParam<MaterialPropertyName>("stress_tensor",
-                                                "The stress tensor name");
+  params.addClassDescription(
+      "Compute normal or tangential projection of a traction (stress projected on a vector) in 2D");
+  params.addRequiredParam<MaterialPropertyName>("stress_tensor", "The stress tensor name");
   params.addRequiredParam<Real>(
-      "surface_angle", "The (direct) angle of the surface in degrees/radians from the horizontal axis");
+      "surface_angle",
+      "The (direct) angle of the surface in degrees/radians from the horizontal axis");
   params.addParam<bool>(
       "normal", false, "True to compute normal value (to the vector), false for tangential.");
   params.addCoupledVar("pressure", 0.0, "Dimensionless pore pressure");
@@ -53,6 +54,6 @@ TractionProjectionAux::computeValue()
   if (_normal)
     return traction * fault_normal;
   RealVectorValue fault_tangent(cos(_angle), sin(_angle));
-  //return (traction - (traction * fault_normal) * fault_normal) * fault_tangent;
+  // return (traction - (traction * fault_normal) * fault_normal) * fault_tangent;
   return traction * fault_tangent;
 }

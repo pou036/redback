@@ -41,6 +41,7 @@
 
 // Interface kernels
 #include "InterfaceDarcy.h"
+#include "InterfaceDisp.h"
 #include "InterfaceStress.h"
 
 // Kernels
@@ -150,6 +151,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerInitialCondition(FunctionTimesRandomIC);
 
   registerInterfaceKernel(InterfaceDarcy);
+  registerInterfaceKernel(InterfaceDisp);
   registerInterfaceKernel(InterfaceStress);
 
   registerKernel(Poromechanics);
