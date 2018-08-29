@@ -168,6 +168,10 @@ RemoveLayerElements::modify()
       FILE * output_file = fopen(file.c_str(), "w");
       fputs(std::to_string(volume_changed+layer_volume).c_str(), output_file);
       fclose(output_file);
+      file = getParam<FileName>("lower_layer_file");
+      output_file = fopen(file.c_str(), "w");
+      fputs(std::to_string(volume_changed).c_str(), output_file);
+      fclose(output_file);
       return;
     }
     // if (layer_volume <= volume_to_change) break;
@@ -221,10 +225,6 @@ RemoveLayerElements::modify()
     }
 
     volume_changed += layer_volume;
-    FileName file = getParam<FileName>("lower_layer_file");
-    FILE * output_file = fopen(file.c_str(), "w");
-    fputs(std::to_string(volume_changed).c_str(), output_file);
-    fclose(output_file);
   }
   // mooseError("MeshModifier RemoveLayerElements exceeded number of loops possible");
 }

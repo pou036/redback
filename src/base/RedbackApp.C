@@ -94,6 +94,7 @@
 // UserObjects
 #include "BezierUserObject.h"
 #include "FunctionUserObject.h"
+#include "TimesFileUserObject.h"
 
 // Timesteppers
 #include "ReturnMapIterDT.h"
@@ -202,6 +203,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerUserObject(BezierUserObject);
   registerUserObject(FunctionUserObject);
+  registerUserObject(TimesFileUserObject);
 
   registerExecutioner(ReturnMapIterDT);
 

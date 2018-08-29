@@ -60,21 +60,35 @@ BezierUserObject::value(const Point & p) const
   Real x3 = _abcd_segments[k][3].first;
 
   Real t_i = 0;
+  Real t_i_old = 0;
+  Real t_i_older = 0;
   Real tol = 1e-10;
   Real f = x0*pow(1 - t_i,3) + x1*3*t_i*pow(1 - t_i,2) + 3*x2*(1 - t_i)*pow(t_i,2) + x3*pow(t_i,3) - x;
   Real f_prime;
-  while (std::abs(f) > tol)
+  int iter=0;
+  int max_iter=100;
+  while (std::abs(f) > tol && iter<max_iter)
   {
     f_prime = 3*(x1-x0)*pow(1-t_i,2)  + 6*(1-t_i)*t_i*(x2-x1) + 3*(x3-x2)*pow(t_i,2);
+    t_i_older = t_i_old;
+    t_i_old = t_i;
     t_i -= f / f_prime;
     t_i = std::fmax(std::fmin(t_i, 1), 0);
+    if (t_i==t_i_older) t_i=0.5*(t_i+t_i_old);
     f = x0*pow(1 - t_i,3) + x1*3*t_i*pow(1 - t_i,2) + 3*x2*(1 - t_i)*pow(t_i,2) + x3*pow(t_i,3) - x;
+    iter++;
+  }
+  if (iter==max_iter)
+  {
+    std::cout<<"x = "<<x<<", x0 = "<<x0<<", x1 = "<<x1<<", x2 = "<<x2<<", x3 = "<<x3<<std::endl;
+    mooseError("Newton-Raphson did not converge.");
   }
   Real y0 = _abcd_segments[k][0].second;
   Real y1 = _abcd_segments[k][1].second;
   Real y2 = _abcd_segments[k][2].second;
   Real y3 = _abcd_segments[k][3].second;
   return y0*pow(1 - t_i,3) + y1*3*t_i*pow(1 - t_i,2) + 3*y2*(1 - t_i)*pow(t_i,2) + y3*pow(t_i,3);
+
   //
   // //evaluate a point on a bezier-curve. t goes from 0 to 1.0
   // std::pair<Real,Real> ab = lerp(a,b,t); // point between a and b
