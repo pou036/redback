@@ -167,6 +167,10 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters)
 
     _damage_kernel(declareProperty<Real>("damage_kernel")),
     _damage_kernel_jac(declareProperty<Real>("damage_kernel_jacobian")),
+    _dummy1(declareProperty<Real>("dummy1")),
+    _dummy2(declareProperty<Real>("dummy2")),
+    _dummy3(declareProperty<Real>("dummy3")),
+    _dummy4(declareProperty<Real>("dummy4")),
     _damage_coeff(getParam<Real>("damage_coefficient")),
     _dmg_exponent(getParam<Real>("damage_exponent")),
     _healing_coeff(getParam<Real>("healing_coefficient")),
@@ -280,6 +284,10 @@ RedbackMechMaterial::initQpStatefulProperties()
   _mechanical_dissipation_jac_mech[_qp] = 0;
   _damage_kernel[_qp] = 0;
   _damage_kernel_jac[_qp] = 0;
+  _dummy1[_qp] = 0;
+  _dummy2[_qp] = 0;
+  _dummy3[_qp] = 0;
+  _dummy4[_qp] = 0;
   _mass_removal_rate[_qp] = 0;
 }
 
@@ -493,7 +501,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
   // Compute plastic strains
   RankTwoTensor instantaneous_strain_rate, total_volumetric_strain_rate;
-
+ 
   if (_dt == 0)
   {
     instantaneous_strain_rate.zero();
@@ -516,13 +524,20 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   // Update mechanical porosity (elastic and plastic components)
   // TODO: set T0 properly (once only, at the very beginning). Until then, T = T
   // - T0, P = P - P0
+  
   Real delta_phi_mech_el =
       (1.0 - _total_porosity[_qp]) * (_solid_compressibility[_qp] * (_pore_pres[_qp] - _P0_param) -
-                                      _solid_thermal_expansion[_qp] * (_T[_qp] - _T0_param) +
-                                      (_elastic_strain[_qp] - _elastic_strain_old[_qp]).trace());
+                                      _solid_thermal_expansion[_qp] * (_T[_qp] - _T0_param)) +
+                                      (_elastic_strain[_qp] - _elastic_strain_old[_qp]).trace();
   Real delta_phi_mech_pl =
-      (1.0 - _total_porosity[_qp]) * (_plastic_strain[_qp] - _plastic_strain_old[_qp]).trace();
+      (_plastic_strain[_qp] - _plastic_strain_old[_qp]).trace();
 
+  
+  _dummy1[_qp] = (1.0 - _total_porosity[_qp]) * _solid_compressibility[_qp] * (_pore_pres[_qp] - _P0_param);
+  _dummy2[_qp] = (1.0 - _total_porosity[_qp]) * _solid_thermal_expansion[_qp] * (_T[_qp] - _T0_param);
+  _dummy3[_qp] = delta_phi_mech_el;
+  _dummy4[_qp] = delta_phi_mech_pl;
+  
   _mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
 
   if (_has_D)
@@ -744,11 +759,14 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   // _alpha_2[_qp] * _pore_pres[_qp]); _qmech[_qp] = (_alpha_1[_qp] +_alpha_2[_qp] * _pore_pres[_qp]);
   
   // branch 94
-  _qmech[ _qp ] =
-  -_alpha_1[ _qp ]  - _alpha_2[ _qp ] * _pore_pres[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));  
-  //-_alpha_1[ _qp ] - _alpha_2[ _qp ] * _pore_pres[ _qp ];
+  _qmech[ _qp ] = -_alpha_1[ _qp ] - _alpha_2[ _qp ] * _pore_pres[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));  
 
+  //for isotropic
+  //_qmech[ _qp ] =
+  //-_alpha_1[ _qp ] * _max_confining_pressure * _max_confining_pressure - _alpha_2[ _qp ] * _pore_pres[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));  
 
+  //_qmech[ _qp ] = -_alpha_1[ _qp ] * std::exp(_max_confining_pressure) - _alpha_2[ _qp ] * _pore_pres[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));  
+  
   //_qmech[ _qp ] = -((_alpha_1[ _qp ]+ _alpha_1[ _qp ] *_alpha_2[ _qp ] * _pore_pres[ _qp ] ) * std::log(_max_confining_pressure) + _alpha_3[ _qp ]);
   
   //_qmech[ _qp ] = - (-7.3 * std::log(_max_confining_pressure) - 34.776 + (158.81 * std::log(_max_confining_pressure) +220.19) * _pore_pres[_qp] + _alpha_3[ _qp ]);
