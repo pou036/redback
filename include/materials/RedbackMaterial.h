@@ -102,6 +102,7 @@ protected:
   MaterialProperty<Real> & _alpha_1;
   MaterialProperty<Real> & _alpha_2;
   MaterialProperty<Real> & _alpha_3;
+  MaterialProperty<Real> & _alpha_4;
   MaterialProperty<Real> & _peclet_number;
   MaterialProperty<Real> & _delta;
   MaterialProperty<Real> & _initial_porosity;
