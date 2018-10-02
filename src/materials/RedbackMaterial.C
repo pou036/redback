@@ -42,6 +42,7 @@ validParams<RedbackMaterial>()
                         "in the redback paper");
   params.addParam<Real>(
       "alpha_3", 0.0, "Third parameter for activation volume, alpha_3 in the redback paper");
+  params.addParam<Real>("alpha_4", 1, "The porosity sensitivity exponent of the power-law with permeability");
   params.addParam<Real>("confining_pressure", 1, "Normalised confining pressure");
   params.addParam<Real>("biot_coefficient", 1.0, "Biot coefficient");
   params.addParam<bool>("is_mechanics_on", false, "is mechanics on?");
@@ -162,6 +163,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters)
     _alpha_1_param(getParam<Real>("alpha_1")),
     _alpha_2_param(getParam<Real>("alpha_2")),
     _alpha_3_param(getParam<Real>("alpha_3")),
+    _alpha_4_param(getParam<Real>("alpha_4")),
     _peclet_number_param(getParam<Real>("Peclet_number")),
     _ar_F_param(getParam<Real>("ar_F")),
     _ar_R_param(getParam<Real>("ar_R")),
@@ -200,6 +202,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters)
     _alpha_1(declareProperty<Real>("alpha_1")),
     _alpha_2(declareProperty<Real>("alpha_2")),
     _alpha_3(declareProperty<Real>("alpha_3")),
+    _alpha_4(declareProperty<Real>("alpha_4")),
     _peclet_number(declareProperty<Real>("Peclet_number")),
     _delta(declareProperty<Real>("delta")),
 
@@ -426,6 +429,7 @@ RedbackMaterial::stepInitQpProperties()
   _alpha_1[_qp] = _alpha_1_param;
   _alpha_2[_qp] = _alpha_2_param;
   _alpha_3[_qp] = _alpha_3_param;
+  _alpha_4[ _qp ] = _alpha_4_param;
   _peclet_number[_qp] = _peclet_number_param;
   _delta[_qp] = _delta_param;
   _lewis_number[_qp] = _ref_lewis_nb[_qp];
@@ -579,10 +583,14 @@ _ar_F[_qp] * _delta[_qp] * (1 - _total_porosity[_qp]) * (1 - _solid_ratio[_qp])
   }
   // Update Lewis number
   if (_phi0_param != _total_porosity[_qp])
-    _lewis_number[_qp] = _ref_lewis_nb[_qp] *
-                         std::pow((1 - _total_porosity[_qp]) / (1 - _phi0_param), 2) *
+  // {
+  //   _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((_phi0_param / _total_porosity[ _qp ]), _alpha_4[ _qp]);
+  // }
+    //_lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow(_phi0_param / _total_porosity[ _qp ], _alpha_4[ _qp]);
+  {
+    _lewis_number[ _qp ] = _ref_lewis_nb[ _qp ] * std::pow((1 - _total_porosity[ _qp ]) / (1 - _phi0_param), 2) *
                          std::pow(_phi0_param / _total_porosity[_qp], 3);
-
+  }
   if (_inverse_lewis_number_tilde[_qp] != 0)
   {
     // to include modifications from multi-app for example

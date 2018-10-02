@@ -146,6 +146,7 @@ protected:
   MaterialProperty<Real> & _mises_strain_rate;
   MaterialProperty<Real> & _plastic_volumetric_strain;
   MaterialProperty<Real> & _volumetric_strain_rate;
+  MaterialProperty<Real> & _elastic_volumetric_strain;
   MaterialProperty<Real> & _total_volumetric_strain;
   MaterialProperty<Real> & _mechanical_porosity;
   MaterialProperty<Real> & _mass_removal_rate;
@@ -190,6 +191,7 @@ protected:
   const MaterialProperty<Real> & _alpha_1;
   const MaterialProperty<Real> & _alpha_2;
   const MaterialProperty<Real> & _alpha_3;
+  const MaterialProperty<Real> & _alpha_4;
 
   const MaterialProperty<Real> & _delta;
   const MaterialProperty<Real> & _solid_thermal_expansion;
