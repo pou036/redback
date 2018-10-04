@@ -19,6 +19,8 @@ validParams<RedbackTotalPorosityAux>()
   InputParameters params = validParams<AuxKernel>();
   params.addParam<bool>("is_mechanics_on", false, "is mechanics on?");
   // params.addParam<bool>("is_chemistry_on", false, "is chemistry on?");
+  params.addParam<Real>("minimum_porosity", 0.0, "minimum value of porosity (must be positive)");
+  params.addParam<Real>("maximum_porosity", 1.0, "maximum value of porosity (must be positive)");
   params.addCoupledVar("mechanical_porosity", 0.0, "Mechanical porosity (as AuxKernel)");
   return params;
 }
@@ -26,6 +28,8 @@ validParams<RedbackTotalPorosityAux>()
 RedbackTotalPorosityAux::RedbackTotalPorosityAux(const InputParameters & parameters)
   : AuxKernel(parameters),
     _is_mechanics_on(getParam<bool>("is_mechanics_on")),
+    _minimum_porosity(getParam<Real>("minimum_porosity")),
+    _maximum_porosity(getParam<Real>("maximum_porosity")),
     _delta_porosity_mech(_is_mechanics_on ? coupledValue("mechanical_porosity") : _zero),
     _delta_porosity_chem(getMaterialProperty<Real>("chemical_porosity")),
     _initial_porosity(getMaterialProperty<Real>("initial_porosity")),
@@ -36,6 +40,10 @@ RedbackTotalPorosityAux::RedbackTotalPorosityAux(const InputParameters & paramet
     _mass_removal_rate(_is_mechanics_on ? getMaterialProperty<Real>("mass_removal_rate")
                                         : getZeroMaterialProperty<Real>("mass_removal_rate"))
 {
+  if (_minimum_porosity<0)
+    mooseError("Minimum porosity must be positive (or zero)");
+  if (_maximum_porosity>1)
+    mooseError("Maximum porosity must be less (of equal) than 1");
 }
 
 Real
@@ -50,6 +58,6 @@ RedbackTotalPorosityAux::computeValue()
                      _delta_porosity_chem[_qp] * (1 + _mass_removal_rate[_qp]) +
                      _delta_porosity_mech[_qp];
 
-  total_porosity = fmin(1.0, fmax(0.0, total_porosity));
+  total_porosity = fmin(_maximum_porosity, fmax(_minimum_porosity, total_porosity));
   return total_porosity;
 }

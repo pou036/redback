@@ -19,6 +19,8 @@ public:
 protected:
   virtual Real computeValue();
   bool _is_mechanics_on; //, _is_chemistry_on;
+  Real _minimum_porosity;
+  Real _maximum_porosity;
   Real _chemo_mechanical_porosity_coeff;
 
 private:
