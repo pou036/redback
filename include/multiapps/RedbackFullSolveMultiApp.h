@@ -31,15 +31,9 @@ public:
 
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
-  virtual void
-  incrementTStep() override
-  {
-  }
+  virtual void incrementTStep() override {}
 
-  virtual void
-  finishStep() override
-  {
-  }
+  virtual void finishStep() override {}
 
 private:
   Real ReadFile(FileName file_name);

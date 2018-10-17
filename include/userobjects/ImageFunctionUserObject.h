@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCTIONUSEROBJECT_H
-#define FUNCTIONUSEROBJECT_H
+#ifndef IMAGEFUNCTIONUSEROBJECT_H
+#define IMAGEFUNCTIONUSEROBJECT_H
 
 #include "GeneralUserObject.h"
 #include "GriddedData.h"
@@ -16,18 +16,18 @@
 // Forward declarations
 // class GriddedData;
 
-class FunctionUserObject;
+class ImageFunctionUserObject;
 
 template <>
-InputParameters validParams<FunctionUserObject>();
+InputParameters validParams<ImageFunctionUserObject>();
 
 /**
  * Computes the average value of a variable on each block
  */
-class FunctionUserObject : public GeneralUserObject
+class ImageFunctionUserObject : public GeneralUserObject
 {
 public:
-  FunctionUserObject(const InputParameters & parameters);
+  ImageFunctionUserObject(const InputParameters & parameters);
 
   /**
    * Given a block ID return the average value for a variable on that block
@@ -38,20 +38,21 @@ public:
    *
    * @return The average value of a variable on that block.
    */
-  Real value(Real t, const Point & p) const;
+  Real value(const Point & p) const;
 
   /**
    * Called on every "object" (like every element or node).
    * In this case, it is called at every quadrature point on every element.
    */
-  virtual void execute() override {}
-  virtual void initialize() override;
+  virtual void execute() override;
+  virtual void initialize() override {}
   virtual void finalize() override {}
 
 protected:
 private:
-  std::vector<Real> _positions;
-  std::vector<Real> _fcn;
+  FileName _file;
+  /// object to provide function evaluations at points on the grid
+  std::unique_ptr<GriddedData> _gridded_data;
   /// dimension of the grid
   unsigned int _dim;
 
@@ -66,7 +67,6 @@ private:
 
   /// the grid
   std::vector<std::vector<Real>> _grid;
-  std::vector<PostprocessorName> _ppn;
 
   /**
    * This does the core work.  Given a point, pt, defined

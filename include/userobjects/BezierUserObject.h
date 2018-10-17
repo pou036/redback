@@ -43,21 +43,15 @@ public:
    * Called on every "object" (like every element or node).
    * In this case, it is called at every quadrature point on every element.
    */
-  virtual void
-  execute() override
-  {
-  }
+  virtual void execute() override {}
   virtual void initialize() override;
-  virtual void
-  finalize() override
-  {
-  }
+  virtual void finalize() override {}
 
 protected:
 private:
   std::vector<Real> _points_x;
   std::vector<Real> _points_y;
-  std::vector<std::vector<std::pair<Real,Real>>> _abcd_segments;
+  std::vector<std::vector<std::pair<Real, Real>>> _abcd_segments;
   std::vector<PostprocessorName> _ppn;
 
   std::vector<Real> getTangents(std::vector<Real> x_array, std::vector<Real> y_array);

@@ -23,15 +23,17 @@ InputParameters
 validParams<PointValueFile>()
 {
   InputParameters params = validParams<GeneralPostprocessor>();
-  params.addRequiredParam<VariableName>("variable", "The name of the variable that this postprocessor operates on.");
-  params.addRequiredParam<Point>("point", "The physical point where the solution will be evaluated.");
+  params.addRequiredParam<VariableName>(
+      "variable", "The name of the variable that this postprocessor operates on.");
+  params.addRequiredParam<Point>("point",
+                                 "The physical point where the solution will be evaluated.");
   params.addRequiredParam<FileName>("file", "Name of the txt file to write the point value");
 
   return params;
 }
 
-PointValueFile::PointValueFile(const InputParameters & parameters) :
-    GeneralPostprocessor(parameters),
+PointValueFile::PointValueFile(const InputParameters & parameters)
+  : GeneralPostprocessor(parameters),
     _var_number(_subproblem.getVariable(_tid, parameters.get<VariableName>("variable")).number()),
     _system(_subproblem.getSystem(getParam<VariableName>("variable"))),
     _point(getParam<Point>("point")),
@@ -59,7 +61,8 @@ PointValueFile::execute()
     gatherMin(elem_id);
 
     if (elem_id == DofObject::invalid_id)
-      mooseError("No element located at ", _point, " in PointValueFile Postprocessor named: ", name());
+      mooseError(
+          "No element located at ", _point, " in PointValueFile Postprocessor named: ", name());
   }
 }
 

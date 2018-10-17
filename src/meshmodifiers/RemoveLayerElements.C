@@ -21,16 +21,20 @@ InputParameters
 validParams<RemoveLayerElements>()
 {
   InputParameters params = validParams<MeshModifier>();
-  params.addRequiredParam<SubdomainName>("master_block",
-                                         "The master block from which we select the boundary elements");
-  params.addRequiredParam<SubdomainName>("paired_block", "The paired block for which we add the boundary elements");
+  params.addRequiredParam<SubdomainName>(
+      "master_block", "The master block from which we select the boundary elements");
+  params.addRequiredParam<SubdomainName>("paired_block",
+                                         "The paired block for which we add the boundary elements");
   params.addRequiredParam<FileName>("file", "Name of the txt file with the porosity change");
-  params.addRequiredParam<FileName>("upper_layer_file", "Name of the txt file with the next layer to erode");
-  params.addRequiredParam<FileName>("lower_layer_file", "Name of the txt file with the last layer eroded");
+  params.addRequiredParam<FileName>("upper_layer_file",
+                                    "Name of the txt file with the next layer to erode");
+  params.addRequiredParam<FileName>("lower_layer_file",
+                                    "Name of the txt file with the last layer eroded");
   return params;
 }
 
-RemoveLayerElements::RemoveLayerElements(const InputParameters & parameters) : MeshModifier(parameters)
+RemoveLayerElements::RemoveLayerElements(const InputParameters & parameters)
+  : MeshModifier(parameters)
 {
 }
 
@@ -57,14 +61,14 @@ RemoveLayerElements::modify()
         mooseWarning("file is empty");
         break;
       }
-      porosity_change = std::stod(vstrings[ 0 ].c_str());
+      porosity_change = std::stod(vstrings[0].c_str());
       break;
     }
     myfile.close();
   }
 
   MeshBase & mesh = _mesh_ptr->getMesh();
-  //std::unique_ptr<MeshRefinement> mesh_refinement = libmesh_make_unique<MeshRefinement>(mesh);
+  // std::unique_ptr<MeshRefinement> mesh_refinement = libmesh_make_unique<MeshRefinement>(mesh);
 
   SubdomainID master_id;
   SubdomainID paired_id;
@@ -98,7 +102,7 @@ RemoveLayerElements::modify()
   Real volume_changed = 0;
   Real volume_to_change;
 
-  while (frac_volume < 1.-1e-10)
+  while (frac_volume < 1. - 1e-10)
   {
     frac_volume = 0;
     for (const auto & elem : mesh.active_element_ptr_range())
@@ -158,7 +162,7 @@ RemoveLayerElements::modify()
     // check if we need to remove the layer
     Real layer_volume = 0;
     for (unsigned int i = 0; i < elements.size(); i++)
-      layer_volume += elements[ i ]->volume();
+      layer_volume += elements[i]->volume();
     std::cout << "layer_volume = " << layer_volume << std::endl;
     // if (layer_volume < volume_change_threshold)
     //   return;
@@ -166,7 +170,7 @@ RemoveLayerElements::modify()
     {
       FileName file = getParam<FileName>("upper_layer_file");
       FILE * output_file = fopen(file.c_str(), "w");
-      fputs(std::to_string(volume_changed+layer_volume).c_str(), output_file);
+      fputs(std::to_string(volume_changed + layer_volume).c_str(), output_file);
       fclose(output_file);
       file = getParam<FileName>("lower_layer_file");
       output_file = fopen(file.c_str(), "w");
@@ -191,12 +195,12 @@ RemoveLayerElements::modify()
 
     // Assign new subdomain IDs and make sure elements in different types are not assigned with the
     // same subdomain ID
-    std::map<ElemType, std::set<SubdomainID> > type2blocks;
+    std::map<ElemType, std::set<SubdomainID>> type2blocks;
     for (unsigned int i = 0; i < elements.size(); i++)
     {
       // Get the element we need to assign, or skip it if we just have a
       // nullptr placeholder indicating a remote element.
-      Elem * elem = elements[ i ];
+      Elem * elem = elements[i];
       if (!elem)
         continue;
 
@@ -240,7 +244,7 @@ RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_
   // on a distributed mesh
   const processor_id_type my_n_proc = mesh.n_processors();
   const processor_id_type my_proc_id = mesh.processor_id();
-  typedef std::vector<std::pair<dof_id_type, unsigned int> > vec_type;
+  typedef std::vector<std::pair<dof_id_type, unsigned int>> vec_type;
   std::vector<vec_type> queries(my_n_proc);
 
   for (auto & elem : mesh.active_element_ptr_range())
@@ -258,7 +262,7 @@ RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_
       // neighbor remote elements.  We should query any such cases.
       if (neighbor == remote_elem)
       {
-        queries[ elem->processor_id() ].push_back(std::make_pair(elem->id(), side));
+        queries[elem->processor_id()].push_back(std::make_pair(elem->id(), side));
       }
       else if (neighbor != NULL && neighbor->subdomain_id() == paired_id)
       {
@@ -271,7 +275,8 @@ RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_
 
   if (!mesh.is_serial())
   {
-    Parallel::MessageTag queries_tag = mesh.comm().get_unique_tag(867), replies_tag = mesh.comm().get_unique_tag(5309);
+    Parallel::MessageTag queries_tag = mesh.comm().get_unique_tag(867),
+                         replies_tag = mesh.comm().get_unique_tag(5309);
 
     std::vector<Parallel::Request> side_requests(my_n_proc - 1), reply_requests(my_n_proc - 1);
 
@@ -281,9 +286,9 @@ RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_
       if (p == my_proc_id)
         continue;
 
-      Parallel::Request & request = side_requests[ p - (p > my_proc_id) ];
+      Parallel::Request & request = side_requests[p - (p > my_proc_id)];
 
-      mesh.comm().send(p, queries[ p ], request, queries_tag);
+      mesh.comm().send(p, queries[p], request, queries_tag);
     }
 
     // Reply to all requests
@@ -298,7 +303,7 @@ RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_
 
       mesh.comm().receive(source_pid, query, queries_tag);
 
-      Parallel::Request & request = reply_requests[ p - 1 ];
+      Parallel::Request & request = reply_requests[p - 1];
 
       for (const auto & q : query)
       {
@@ -308,11 +313,11 @@ RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_
 
         if (neighbor != NULL && neighbor->subdomain_id() == paired_id)
         {
-          responses[ p - 1 ].push_back(std::make_pair(elem->id(), side));
+          responses[p - 1].push_back(std::make_pair(elem->id(), side));
         }
       }
 
-      mesh.comm().send(source_pid, responses[ p - 1 ], request, replies_tag);
+      mesh.comm().send(source_pid, responses[p - 1], request, replies_tag);
     }
 
     // Process all incoming replies

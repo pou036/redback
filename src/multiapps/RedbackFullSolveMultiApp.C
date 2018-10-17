@@ -21,21 +21,22 @@ validParams<RedbackFullSolveMultiApp>()
 {
   InputParameters params = validParams<MultiApp>();
   params.addRequiredParam<FileName>("file", "Name of the txt file with the porosity change");
-  params.addParam<FileName>("times_file","", "Name of the txt file to write the time values");
-  params.addRequiredParam<FileName>("upper_layer_file", "Name of the txt file with the next layer to erode");
-  params.addRequiredParam<FileName>("lower_layer_file", "Name of the txt file with the last layer eroded");
+  params.addParam<FileName>("times_file", "", "Name of the txt file to write the time values");
+  params.addRequiredParam<FileName>("upper_layer_file",
+                                    "Name of the txt file with the next layer to erode");
+  params.addRequiredParam<FileName>("lower_layer_file",
+                                    "Name of the txt file with the last layer eroded");
   return params;
 }
 
-RedbackFullSolveMultiApp::RedbackFullSolveMultiApp(const InputParameters & parameters) :
-    MultiApp(parameters),
-    _times_file(getParam<FileName>("times_file"))
+RedbackFullSolveMultiApp::RedbackFullSolveMultiApp(const InputParameters & parameters)
+  : MultiApp(parameters), _times_file(getParam<FileName>("times_file"))
 {
   _porosity_change = 0;
   _porosity_change_old = 0;
 
   // write text
-  if (_times_file!="")
+  if (_times_file != "")
   {
     FILE * output_file = fopen(_times_file.c_str(), "w");
     fputs("", output_file);
@@ -51,16 +52,17 @@ RedbackFullSolveMultiApp::solveStep(Real /*dt*/, Real target_time, bool auto_adv
   Real lower_layer_threshold = ReadFile(getParam<FileName>("lower_layer_file"));
 
   // so that we don't run the subapp before we can remove the next layer
-  if (_porosity_change - _porosity_change_old >= 0 && std::abs(_porosity_change) < upper_layer_threshold)
+  if (_porosity_change - _porosity_change_old >= 0 &&
+      std::abs(_porosity_change) < upper_layer_threshold)
     return true;
-  if (_porosity_change - _porosity_change_old <= 0 && std::abs(_porosity_change) > lower_layer_threshold)
+  if (_porosity_change - _porosity_change_old <= 0 &&
+      std::abs(_porosity_change) > lower_layer_threshold)
     return true;
   // update the last time where we ran the subapp
   _porosity_change_old = _porosity_change;
 
-
   // write text
-  if (_times_file!="")
+  if (_times_file != "")
   {
     FILE * output_file = fopen(_times_file.c_str(), "a");
     fputs(" ", output_file);
@@ -68,7 +70,7 @@ RedbackFullSolveMultiApp::solveStep(Real /*dt*/, Real target_time, bool auto_adv
     fclose(output_file);
   }
 
-  //initial_setup
+  // initial_setup
   if (!_has_an_app)
   {
     std::cout << "doesn't have an app" << std::endl;
@@ -82,7 +84,7 @@ RedbackFullSolveMultiApp::solveStep(Real /*dt*/, Real target_time, bool auto_adv
   // If the user provided an unregistered app type, see if we can load it dynamically
   if (!AppFactory::instance().isRegistered(_app_type))
     _app.dynamicAppRegistration(
-      _app_type, getParam<std::string>("library_path"), getParam<std::string>("library_name"));
+        _app_type, getParam<std::string>("library_path"), getParam<std::string>("library_name"));
 
   for (unsigned int i = 0; i < _my_num_apps; i++)
     createApp(i, _app.getGlobalTimeOffset());
@@ -92,7 +94,7 @@ RedbackFullSolveMultiApp::solveStep(Real /*dt*/, Real target_time, bool auto_adv
   // Grab Executioner from each app
   for (unsigned int i = 0; i < _my_num_apps; i++)
   {
-    auto & app = _apps[ i ];
+    auto & app = _apps[i];
     Executioner * ex = app->getExecutioner();
 
     if (!ex)
@@ -100,10 +102,10 @@ RedbackFullSolveMultiApp::solveStep(Real /*dt*/, Real target_time, bool auto_adv
 
     ex->init();
 
-    _executioners[ i ] = ex;
+    _executioners[i] = ex;
   }
 
-  //solver
+  // solver
   if (!auto_advance)
     mooseError("RedbackFullSolveMultiApp is not compatible with auto_advance=false");
 
@@ -115,7 +117,7 @@ RedbackFullSolveMultiApp::solveStep(Real /*dt*/, Real target_time, bool auto_adv
   bool last_solve_converged = true;
   for (unsigned int i = 0; i < _my_num_apps; i++)
   {
-    Executioner * ex = _executioners[ i ];
+    Executioner * ex = _executioners[i];
     ex->execute();
     if (!ex->lastSolveConverged())
       last_solve_converged = false;
@@ -127,7 +129,7 @@ RedbackFullSolveMultiApp::solveStep(Real /*dt*/, Real target_time, bool auto_adv
 Real
 RedbackFullSolveMultiApp::ReadFile(FileName file_name)
 {
-  Real value=0;
+  Real value = 0;
   std::string line;
   std::ifstream myfile(file_name.c_str());
   if (myfile.is_open())

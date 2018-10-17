@@ -7,16 +7,16 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef POINTVALUEFILE_H
-#define POINTVALUEFILE_H
+#ifndef POINTVALUEFILEWRITER_H
+#define POINTVALUEFILEWRITER_H
 
 #include "GeneralPostprocessor.h"
 
 // Forward Declarations
-class PointValueFile;
+class PointValueFileWriter;
 
 template <>
-InputParameters validParams<PointValueFile>();
+InputParameters validParams<PointValueFileWriter>();
 
 /**
  * Compute the value of a variable at a specified location.
@@ -24,10 +24,10 @@ InputParameters validParams<PointValueFile>();
  * Warning: This postprocessor may result in undefined behavior if utilized with
  * non-continuous elements and the point being located lies on an element boundary.
  */
-class PointValueFile : public GeneralPostprocessor
+class PointValueFileWriter : public GeneralPostprocessor
 {
 public:
-  PointValueFile(const InputParameters & parameters);
+  PointValueFileWriter(const InputParameters & parameters);
 
   virtual void initialize() override {}
   virtual void execute() override;
@@ -45,9 +45,24 @@ protected:
   const Point & _point;
 
   /// The value of the variable at the desired location
-  Real _value;
+  Real _poro_value;
+  Real _old_poro_value;
 
   FileName _file_name;
+  FileName _working_file_name;
+  FileName _multiapp_file_name;
+  std::string _value_pore;
+  std::string _value_grain;
+  unsigned int _refinement;
+  unsigned int _size_CT;
+  Real _pore_volume;
+  Real _upper_layer_bound;
+  Real _lower_layer_bound;
+  std::string _data_axis_text;
+
+  void FileWriter(std::vector<std::vector<std::string>> data, FileName file);
+  std::vector<std::pair<int, int>> BoundaryElements(std::string boundary_element_value,
+                                                    std::vector<std::vector<std::string>> data);
 };
 
-#endif /* POINTVALUEFILE_H */
+#endif /* POINTVALUEFILEWRITER_H */

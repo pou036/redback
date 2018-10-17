@@ -7,35 +7,35 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef DYNAMICFUNCTIONAUX_H
-#define DYNAMICFUNCTIONAUX_H
+#ifndef IMAGEFUNCTIONAUX_H
+#define IMAGEFUNCTIONAUX_H
 
 #include "AuxKernel.h"
-#include "BezierUserObject.h"
+#include "ImageFunctionUserObject.h"
 
 // Forward Declarations
-class DynamicFunctionAux;
+class ImageFunctionAux;
 
 template <>
-InputParameters validParams<DynamicFunctionAux>();
+InputParameters validParams<ImageFunctionAux>();
 
 /**
  * Function auxiliary value
  */
-class DynamicFunctionAux : public AuxKernel
+class ImageFunctionAux : public AuxKernel
 {
 public:
   /**
    * Factory constructor, takes parameters so that all derived classes can be built using the same
    * constructor.
    */
-  DynamicFunctionAux(const InputParameters & parameters);
+  ImageFunctionAux(const InputParameters & parameters);
 
 protected:
   virtual Real computeValue() override;
 
   /// Function being used to compute the value of this kernel
-  const BezierUserObject & _func;
+  const ImageFunctionUserObject & _func;
 };
 
-#endif // DYNAMICFUNCTIONAUX_H
+#endif // IMAGEFUNCTIONAUX_H

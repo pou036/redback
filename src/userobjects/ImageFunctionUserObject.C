@@ -7,18 +7,28 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FunctionUserObject.h"
+#include "ImageFunctionUserObject.h"
 #include "GriddedData.h"
 
 template <>
 InputParameters
-validParams<FunctionUserObject>()
+validParams<ImageFunctionUserObject>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.addParam<std::vector<Real>>("positions", "The positions of the App locations (1D)");
-  params.addParam<std::vector<PostprocessorName>>("permeability_values",
-                                                  "The name of the postprocessor(s) that holds the "
-                                                  "permeability values.");
+  params.addRequiredParam<FileName>(
+      "data_file",
+      "File holding data for use with PiecewiseMultilinear.  Format: any empty line and any line "
+      "beginning with # are ignored, all other lines are assumed to contain relevant information.  "
+      "The file must begin with specification of the grid.  This is done through lines containing "
+      "the keywords: AXIS X; AXIS Y; AXIS Z; or AXIS T.  Immediately following the keyword line "
+      "must be a space-separated line of real numbers which define the grid along the specified "
+      "axis.  These data must be monotonically increasing.  After all the axes and their grids "
+      "have been specified, there must be a line that is DATA.  Following that line, function "
+      "values are given in the correct order (they may be on indivicual lines, or be "
+      "space-separated on a number of lines).  When the function is evaluated, f[i,j,k,l] "
+      "corresponds to the i + j*Ni + k*Ni*Nj + l*Ni*Nj*Nk data value.  Here i>=0 corresponding to "
+      "the index along the first AXIS, j>=0 corresponding to the index along the second AXIS, etc, "
+      "and Ni = number of grid points along the first AXIS, etc.");
   params.addClassDescription("PiecewiseMultilinear performs interpolation on 1D, 2D, 3D or 4D "
                              "data.  The data_file specifies the axes directions and the function "
                              "values.  If a point lies outside the data range, the appropriate end "
@@ -26,50 +36,62 @@ validParams<FunctionUserObject>()
   return params;
 }
 
-FunctionUserObject::FunctionUserObject(const InputParameters & params)
-  : GeneralUserObject(params), _positions(getParam<std::vector<Real>>("positions")), _fcn()
+ImageFunctionUserObject::ImageFunctionUserObject(const InputParameters & parameters)
+  : GeneralUserObject(parameters), _file(getParam<FileName>("data_file"))
 {
-  // variation of permeability in Y, 1D
-  _dim = 1;
-  _axes.clear();
-  _axes.push_back(1);
-  if (isParamValid("permeability_values"))
-    _ppn = params.get<std::vector<PostprocessorName>>("permeability_values");
-  _grid.clear();
-  _grid.resize(_dim);
-  _grid[_dim - 1] = _positions;
 }
 
 Real
-FunctionUserObject::value(Real t, const Point & p) const
+ImageFunctionUserObject::value(const Point & p) const
 {
   // convert the inputs to an input to the sample function using _axes
   std::vector<Real> pt_in_grid(_dim);
   for (unsigned int i = 0; i < _dim; ++i)
   {
-    if (_axes[i] < 3)
-      pt_in_grid[i] = p(_axes[i]);
-    else if (_axes[i] == 3) // the time direction
-      pt_in_grid[i] = t;
+    pt_in_grid[i] = p(_axes[i]);
   }
-  return sample(pt_in_grid);
+
+  std::vector<unsigned int> left(_dim);
+  std::vector<unsigned int> right(_dim);
+  std::vector<unsigned int> arg(_dim);
+  for (unsigned int i = 0; i < _dim; ++i)
+  {
+    getNeighborIndices(_grid[i], pt_in_grid[i], left[i], right[i]);
+    arg[i] = left[i];
+  }
+
+  return _gridded_data->evaluateFcn(arg);
 }
 
 void
-FunctionUserObject::initialize()
+ImageFunctionUserObject::execute()
 {
-  _fcn.clear();
-  const unsigned int len = _ppn.size();
-  for (unsigned int i = 0; i < len; ++i)
-    // transfer returns 0 if multiapp isn't solved, should put initial value of permeability instead
-    if (getPostprocessorValueByName(_ppn[i]) == 0)
-      _fcn.push_back(0.1);
-    else
-      _fcn.push_back(getPostprocessorValueByName(_ppn[i]));
+  std::cout << "reading ctscan file" << std::endl;
+
+  _gridded_data = libmesh_make_unique<GriddedData>(_file);
+  _dim = _gridded_data->getDim();
+
+  _gridded_data->getAxes(_axes);
+  _gridded_data->getGrid(_grid);
+
+  // GriddedData does not require monotonicity of axes, but we do
+  for (unsigned int i = 0; i < _dim; ++i)
+    for (unsigned int j = 1; j < _grid[i].size(); ++j)
+      if (_grid[i][j - 1] >= _grid[i][j])
+        mooseError("PiecewiseMultilinear needs monotonically-increasing axis data.  Axis ",
+                   i,
+                   " contains non-monotonicity at value ",
+                   _grid[i][j]);
+
+  // GriddedData does not demand that each axis is independent, but we do
+  std::set<int> s(_axes.begin(), _axes.end());
+  if (s.size() != _dim)
+    mooseError("PiecewiseMultilinear needs the AXES to be independent.  Check the AXIS lines in "
+               "your data file.");
 }
 
 Real
-FunctionUserObject::sample(const std::vector<Real> & pt) const
+ImageFunctionUserObject::sample(const std::vector<Real> & pt) const
 {
   /*
    * left contains the indices of the point to the 'left', 'down', etc, of pt
@@ -114,19 +136,7 @@ FunctionUserObject::sample(const std::vector<Real> & pt) const
         else // unusual "end condition" case.  weight by 0.5 because we will encounter this twice
           weight *= 0.5;
       }
-    if (arg.size() != _dim)
-      mooseError(
-          "Gridded data evaluateFcn called with ", arg.size(), " arguments, but expected ", _dim);
-    unsigned int index = arg[0];
-    for (unsigned int i = 1; i < _dim; ++i)
-      index += arg[i];
-    if (index >= _fcn.size())
-      mooseError("Gridded data evaluateFcn attempted to access index ",
-                 index,
-                 " of function, but it contains only ",
-                 _fcn.size(),
-                 " entries");
-    f += _fcn[index] * weight;
+    f += _gridded_data->evaluateFcn(arg) * weight;
   }
 
   /*
@@ -143,10 +153,10 @@ FunctionUserObject::sample(const std::vector<Real> & pt) const
 }
 
 void
-FunctionUserObject::getNeighborIndices(std::vector<Real> in_arr,
-                                       Real x,
-                                       unsigned int & lower_x,
-                                       unsigned int & upper_x) const
+ImageFunctionUserObject::getNeighborIndices(std::vector<Real> in_arr,
+                                            Real x,
+                                            unsigned int & lower_x,
+                                            unsigned int & upper_x) const
 {
   int N = in_arr.size();
   if (x <= in_arr[0])

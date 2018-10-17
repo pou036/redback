@@ -45,6 +45,7 @@
 #include "InterfaceStress.h"
 
 // Kernels
+#include "DarcyBrinkman.h"
 #include "RedbackChemEndo.h"
 #include "RedbackChemExo.h"
 #include "RedbackChemPressure.h"
@@ -86,21 +87,25 @@
 
 // MultiApps
 #include "RedbackFullSolveMultiApp.h"
+#include "RedbackTransientMultiApp.h"
 
 // Postprocessors
 #include "PointValueFile.h"
+#include "PointValueFileWriter.h"
 #include "RankTwoScalarPostprocessor.h"
 
 // UserObjects
 #include "BezierUserObject.h"
 #include "FunctionUserObject.h"
+#include "ImageFunctionUserObject.h"
 #include "TimesFileUserObject.h"
 
 // Timesteppers
 #include "ReturnMapIterDT.h"
 
 // AuxKernels
-#include "DynamicFunctionAux.h"
+#include "BezierFunctionAux.h"
+#include "ImageFunctionAux.h"
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
 #include "RedbackPolarTensorMaterialAux.h"
@@ -161,6 +166,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerInterfaceKernel(InterfaceDarcy);
   registerInterfaceKernel(InterfaceStress);
 
+  registerKernel(DarcyBrinkman);
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
@@ -197,17 +203,21 @@ RedbackApp::registerObjects(Factory & factory)
   registerMeshModifier(ElementFileSubdomain);
 
   registerMultiApp(RedbackFullSolveMultiApp);
+  registerMultiApp(RedbackTransientMultiApp);
 
   registerPostprocessor(PointValueFile);
+  registerPostprocessor(PointValueFileWriter);
   registerPostprocessor(RankTwoScalarPostprocessor);
 
   registerUserObject(BezierUserObject);
   registerUserObject(FunctionUserObject);
+  registerUserObject(ImageFunctionUserObject);
   registerUserObject(TimesFileUserObject);
 
   registerExecutioner(ReturnMapIterDT);
 
-  registerAux(DynamicFunctionAux);
+  registerAux(BezierFunctionAux);
+  registerAux(ImageFunctionAux);
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);
   registerAux(RedbackTotalPorosityAux);

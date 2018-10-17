@@ -7,30 +7,30 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "DynamicFunctionAux.h"
+#include "BezierFunctionAux.h"
 #include "BezierUserObject.h"
 
 template <>
 InputParameters
-validParams<DynamicFunctionAux>()
+validParams<BezierFunctionAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addClassDescription("Auxiliary Kernel that creates and updates a field variable by "
                              "sampling a function through space and time.");
-  params.addRequiredParam<UserObjectName>("dynamic_function", "The name of the UserObject");
+  params.addRequiredParam<UserObjectName>("bezier_function", "The name of the BezierUserObject");
   return params;
 }
 
-DynamicFunctionAux::DynamicFunctionAux(const InputParameters & parameters) :
-    AuxKernel(parameters), _func(getUserObject<BezierUserObject>("dynamic_function"))
+BezierFunctionAux::BezierFunctionAux(const InputParameters & parameters)
+  : AuxKernel(parameters), _func(getUserObject<BezierUserObject>("bezier_function"))
 {
 }
 
 Real
-DynamicFunctionAux::computeValue()
+BezierFunctionAux::computeValue()
 {
   if (isNodal())
     return _func.value(*_current_node);
   else
-    return _func.value(_q_point[ _qp ]);
+    return _func.value(_q_point[_qp]);
 }
