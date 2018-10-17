@@ -72,6 +72,7 @@
 #include "ImageProcessing.h"
 #include "RedbackFluidMaterial.h"
 #include "RedbackMaterial.h"
+#include "RedbackMechMaterialBezier.h"
 #include "RedbackMechMaterialCC.h"
 #include "RedbackMechMaterialCCanisotropic.h"
 #include "RedbackMechMaterialDP.h"
@@ -176,6 +177,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialDP);
   registerMaterial(RedbackMechMaterialCC);
+  registerMaterial(RedbackMechMaterialBezier);
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
   registerMaterial(RedbackMechMaterialExpCC);
