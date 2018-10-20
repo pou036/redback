@@ -152,7 +152,7 @@ BezierTest::overstressTestQH0NoTensileStrength()
 }
 
 void
-BezierTest::derivativeOverstressTest()
+BezierTest::derivativesOverstressTest()
 {
   bool is_plastic;
   Real p_y, q_y, s, t, p, q;
@@ -168,7 +168,7 @@ BezierTest::derivativeOverstressTest()
   beta_c = 0.8;
   alpha_t = 1.3;
   beta_t = 1.8;
-  Real derivatives[2];
+  Real derivatives[5];
 
   // Testing
   /*Real dp = 1e-5;
@@ -187,7 +187,10 @@ BezierTest::derivativeOverstressTest()
       beta_c, alpha_t, beta_t, p, q, is_plastic, s,
       p_y, q_y, quadrant, t, derivatives);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dp, case 1a", -1.11111111111111, derivatives[0], 1e-10);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dq, case 1a",  0., derivatives[1], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dq, case 1a", 0., derivatives[1], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dp2, case 1a", 0., derivatives[2], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dq2, case 1a", 0.805852690672, derivatives[3], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dpdq, case 1a", 0., derivatives[4], 1e-10);
 
   // Not along the p axis
   p = -1.9;
@@ -198,7 +201,10 @@ BezierTest::derivativeOverstressTest()
       beta_c, alpha_t, beta_t, p, q, is_plastic, s,
       p_y, q_y, quadrant, t, derivatives);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dp, case 1b", -1.076781552305, derivatives[0], 1e-10);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dq, case 1b",  0.282266045610, derivatives[1], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dq, case 1b", 0.282266045610, derivatives[1], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dp2, case 1a", 0.0294423616955, derivatives[2], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dq2, case 1a", 0.381573007574, derivatives[3], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dpdq, case 1a", 0.105992502104, derivatives[4], 1e-10);
 
   // In between quadrants
   p = -1.1;
@@ -210,6 +216,9 @@ BezierTest::derivativeOverstressTest()
       p_y, q_y, quadrant, t, derivatives);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dp, case 0", 0., derivatives[0], 1e-10);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dq, case 0",  1.11111111111111, derivatives[1], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dp2, case 0",  0.0265482166267, derivatives[2], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dq2, case 0",  0.00819389402057, derivatives[3], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dpdq, case 0",  0.014749009237, derivatives[4], 1e-10);
 
   // On the dilatant (tension) side
   // Along the p axis
@@ -222,6 +231,9 @@ BezierTest::derivativeOverstressTest()
       p_y, q_y, quadrant, t, derivatives);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dp, case 2a", 5, derivatives[0], 1e-10);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dq, case 2a", 0, derivatives[1], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dp2, case 2a", 0., derivatives[2], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dq2, case 2a", 0.159053039389, derivatives[3], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dpdq, case 2a", 0., derivatives[4], 1e-10);
   // Not along the p axis
   p = 0.;
   q = 1.;
@@ -232,8 +244,11 @@ BezierTest::derivativeOverstressTest()
       p_y, q_y, quadrant, t, derivatives);
   //std::cout << "First method, ds_dp="<<derivatives[0]<<", ds_dq="<<derivatives[1] <<std::endl;
   //std::cout << "Second method, ds_dp="<<other_derivatives[0]<<", ds_dq="<<other_derivatives[1] <<std::endl;
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dp, case 2a", 1.717864193706, derivatives[0], 1e-10);
-  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dq, case 2a", 1.188351947710, derivatives[1], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dp, case 2b", 1.717864193706, derivatives[0], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong ds_dq, case 2b", 1.188351947710, derivatives[1], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dp2, case 2b", 9.65186549938, derivatives[2], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dq2, case 2b", 0.0965186549938, derivatives[3], 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("wrong d2s_dpdq, case 2b", -0.965186549938, derivatives[4], 1e-10);
   // Testing manually...
   /*Bezier::getOverstress(p_H, q_H, p_M, q_M, p_t, p_c, alpha_c, beta_c,
         alpha_t, beta_t, p+dp, q, is_plastic, s1, p_y, q_y, quadrant, t);

@@ -121,8 +121,8 @@ RedbackMechMaterialBezier::getFlowTensor(const RankTwoTensor & sig,
  * Compute the flow increment for Bezier model
  */
 Real
-RedbackMechMaterialBezier::getFlowIncrement(Real sig_eqv,
-                                            Real pressure,
+RedbackMechMaterialBezier::getFlowIncrement(Real /*sig_eqv*/,
+                                            Real /*pressure*/,
                                             Real /*q_yield_stress*/,
                                             Real /*p_yield_stress*/,
                                             Real /*yield_stress*/,
@@ -153,7 +153,7 @@ RedbackMechMaterialBezier::getJac(const RankTwoTensor & sig,
   RankTwoTensor sig_dev, flow_dirn_vol, flow_dirn_dev, fij, flow_dirn,
     flow_tensor, dfi_dft;
   RankFourTensor dfd_dsig, dfi_dsig;
-  Real f0, f1, f2, f3;
+  Real f0, f1, f2, f3, f4;
   Real dfi_dp, dfi_dseqv, dfi_ds;
 
   sig_dev = sig.deviatoric();
@@ -194,8 +194,9 @@ RedbackMechMaterialBezier::getJac(const RankTwoTensor & sig,
               flow_dirn(i, j) * (f0 * sig_dev(k, l) * dfi_dseqv + dfi_dp * deltaFunc(k, l) / 3.0);
 
   f2 = f0 * _last_derivatives[1];
-  f1 = -f2 / 3.;
-  f3 = -(2./3.) * std::pow(f0, 3) * _last_derivatives[1];
+  f1 = _last_derivatives[2]/9 - f2/3.;
+  f3 = _last_derivatives[4] * f0/3.;
+  f4 = std::pow(f0, 2) * (_last_derivatives[3] - (2*f0/3.) * _last_derivatives[1]);
 
   // This loop calculates the second term (d n_ij / d sigma_kl)
   for (i = 0; i < 3; ++i)
@@ -204,7 +205,9 @@ RedbackMechMaterialBezier::getJac(const RankTwoTensor & sig,
         for (l = 0; l < 3; ++l)
           dfd_dsig(i, j, k, l) = f1 * deltaFunc(i, j) * deltaFunc(k, l)
                                + f2 * deltaFunc(i, k) * deltaFunc(j, l)
-                               + f3 * sig_dev(i, j) * sig_dev(k, l);
+                               + f3 * deltaFunc(i, j) * sig_dev(k, l)
+                               + f3 * sig_dev(i, j) * deltaFunc(k, l)
+                               + f4 * sig_dev(i, j) * sig_dev(k, l);
 
   dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr + dfi_dsig; // Jacobian
 }

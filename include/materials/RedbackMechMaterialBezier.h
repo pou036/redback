@@ -39,7 +39,7 @@ protected:
   bool _last_is_plastic;
   int _last_quadrant;
   Real _last_s, _last_t, _last_p_y, _last_q_y;
-  Real _last_derivatives[2];
+  Real _last_derivatives[5]; // ∂s/∂p, ∂s/∂q, ∂^2s/∂p^2, ∂^2s/∂q^2, ∂^2s/∂p∂q
 
   virtual void getJac(const RankTwoTensor &,
                       const RankFourTensor &,

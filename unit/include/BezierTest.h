@@ -14,7 +14,7 @@ class BezierTest : public CppUnit::TestFixture
 
   CPPUNIT_TEST(overstressTestQH0TensileStrength);
   CPPUNIT_TEST(overstressTestQH0NoTensileStrength);
-  CPPUNIT_TEST(derivativeOverstressTest);
+  CPPUNIT_TEST(derivativesOverstressTest);
 
   CPPUNIT_TEST_SUITE_END();
 
@@ -24,7 +24,7 @@ public:
 
   void overstressTestQH0TensileStrength();
   void overstressTestQH0NoTensileStrength();
-  void derivativeOverstressTest();
+  void derivativesOverstressTest();
 };
 
 #endif // BEZIERTEST_H

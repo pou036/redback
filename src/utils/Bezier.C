@@ -26,8 +26,8 @@ Bezier::getDerivativeOverstress(Real const p_H,
                                 Real const q,
                                 bool const is_plastic,
                                 Real const s,
-                                Real const p_y,
-                                Real const q_y,
+                                Real const /*p_y*/,
+                                Real const /*q_y*/,
                                 int const quadrant,
                                 Real const t,
                                 Real derivatives[2])
@@ -37,51 +37,46 @@ Bezier::getDerivativeOverstress(Real const p_H,
   {
     derivatives[0] = 0;
     derivatives[1] = 0;
+    derivatives[2] = 0;
+    derivatives[3] = 0;
+    derivatives[4] = 0;
     return;
   }
   // Now, in plasticity
   Real _magic_nb = 0.5446848561107274; // TODO: define once (static)
-  Real p_prime_y, q_prime_y, tmp;
+  Real p_prime_y, q_prime_y, p_second_y, q_second_y, tmp;
   if (quadrant == 1)
   {
     // In contractant regime
     p_prime_y = -3*t*(p_c - p_M)*(2*(1-t) + (3*t - 2)*_magic_nb*alpha_c);
     q_prime_y = 3*(t - 1)*q_M*((3*t-1)*_magic_nb*beta_c - 2*t);
-    tmp = (1+s) / (p_prime_y*(q_H - q) - q_prime_y*(p_H - p));
-    derivatives[0] = tmp*q_prime_y;
-    derivatives[1] = -tmp*p_prime_y;
-
-    // Testing composite derivative way...
-    /*Real D = std::pow(p_H - p_y, 2) + std::pow(q_H - q_y, 2);
-    Real ds_dt = -(((p - p_y)*p_prime_y + (q - q_y)*q_prime_y)/s - s*((p_H - p_y)*p_prime_y +(q_H - q_y)*q_prime_y))/D;
-    other_derivatives[0] = ds_dt / p_prime_y;
-    other_derivatives [1] = ds_dt / q_prime_y;*/
-    return;
+    p_second_y = -6*(p_c - p_M)*(1 - 2*t + (3*t - 1)*_magic_nb*alpha_c);
+    q_second_y = 6*q_M*(1 - 2*t + (3*t-2)*_magic_nb*beta_c);
   }
-  if (quadrant == 2)
+  else if (quadrant == 2)
   {
     // In dilatant regime
     p_prime_y = 3*(1 - t)*(p_M - p_t)*((3*t - 1)*_magic_nb*alpha_t - 2*t);
     q_prime_y = 3*t*q_M*(2*(t - 1) + (2 - 3*t)*_magic_nb*beta_t);
-    tmp = (1+s) / (p_prime_y*(q_H - q) - q_prime_y*(p_H - p));
-    derivatives[0] = tmp*q_prime_y;
-    derivatives[1] = -tmp*p_prime_y;
-    if (isnan(derivatives[0]) || isnan(derivatives[1])) // TODO: cleanup
-    {
-      std::cout << "  derivatives[0]="<<derivatives[0]<< ", derivatives[1]="<<derivatives[1]<<std::endl;
-    }
-    return;
+    p_second_y = -6*(p_M - p_t)*(1 - 2*t + (3*t - 2)*_magic_nb*alpha_t);
+    q_second_y = -6*q_M*(1 - 2*t + (3*t - 1)*_magic_nb*beta_t);
   }
   else
   {
     if (quadrant != 0)
-      mooseError("Wrong quadrant (", quadrant, ") provided to getDerivativeOverstress");
-    // In between quadrants
-    p_prime_y = -3*(p_c - p_M)*_magic_nb*alpha_c;
-    tmp = (1+s) / (p_prime_y*(q_H - q));
-    derivatives[0] = 0;
-    derivatives[1] = -tmp*p_prime_y;
+      mooseError("Wrong quadrant (", quadrant, " is neither 0,1,2) provided to getDerivativeOverstress");
+    p_prime_y = -3*(p_M - p_t)*_magic_nb*alpha_t;
+    q_prime_y = 0;
+    p_second_y = -6*(p_M - p_t)*(1 - 2*_magic_nb*alpha_t);
+    q_second_y = -6*q_M*(1 - _magic_nb*beta_t);
   }
+  tmp = p_prime_y*(q_H - q) - q_prime_y*(p_H - p);
+  derivatives[0] = (1+s)*q_prime_y/tmp;
+  derivatives[1] = -(1+s)*p_prime_y/tmp;
+  tmp = (p_prime_y*q_second_y - q_prime_y*p_second_y) / std::pow(tmp, 3);
+  derivatives[2] = std::pow(q_H - q, 2) * tmp;
+  derivatives[3] = std::pow(p_H - p, 2) * tmp;
+  derivatives[4] = -(p_H - p) * (q_H - q) * tmp;
 }
 
 /* Get overstress for point R(p,q)
@@ -109,11 +104,9 @@ Bezier::getOverstress(Real const p_H,
 {
   Real test;
   Real _magic_nb = 0.5446848561107274; // coefficient to match ellipse
-  //Real _inv_magic_nb = 1./_magic_nb;
 
   // Check on which quadrant the line (HR) intersects
   test = (p_M-p_H)*(q-q_H) - (q_M-q_H)*(p-p_H); // pos=compactant, neg=dilatant
-  //std::cout<< "Thomas, test quadrant="<<test<<std::endl;
   if (test == 0)
   {
     // Case (HM)//(HR), i.e. intersecting yield envelope where both quadrants join
@@ -121,7 +114,6 @@ Bezier::getOverstress(Real const p_H,
     Real HR_square = std::pow(p-p_H, 2) + std::pow(q-q_H, 2);
     if (HR_square > HM_square)
     {
-      //std::cout<< "  Thomas, plastic"<<std::endl;
       is_plastic = true;
       s = std::sqrt(HR_square)/std::sqrt(HM_square) - 1;
       quadrant = 0;
@@ -131,7 +123,6 @@ Bezier::getOverstress(Real const p_H,
     }
     else
     {
-      //std::cout<< "  Thomas, elastic"<<std::endl;
       is_plastic = false;
       s = 0;
     }
@@ -144,7 +135,6 @@ Bezier::getOverstress(Real const p_H,
     if (test < 0)
     {
       // elasticity for sure
-      //std::cout<< "  Thomas, elastic for sure, test="<<test<<std::endl;
       is_plastic = false;
       s = 0;
       return;
@@ -158,7 +148,6 @@ Bezier::getOverstress(Real const p_H,
     Real c = -3*_magic_nb*x*q_M*beta_c;
     Real d = p*q_H - p_H*q + p_c*y;
     t = getRootOfCubicEquation(a,b,c,d);
-    //std::cout<< "  Thomas, not elastic for sure, getRootOfCubicEquation="<<t<<std::endl;
     // Get yield point from t
     p_y = std::pow(t, 2)*p_M*(3*_magic_nb*(t-1)*alpha_c - 2*t + 3) - (t-1)*p_c*(3*_magic_nb*std::pow(t, 2)*alpha_c - 2*std::pow(t, 2) + t + 1);
     q_y = t*q_M*(3*_magic_nb*std::pow(t-1, 2)*beta_c + t*(3-2*t));
@@ -171,12 +160,9 @@ Bezier::getOverstress(Real const p_H,
       Real RY = std::sqrt(std::pow(p-p_y, 2) + std::pow(q-q_y, 2));
       s = RY/std::sqrt(HY_square);
       quadrant = 1;
-      //std::cout<< "  Thomas, plastic at the end, HR_square="<<HR_square<<", HY_square="<<HY_square<<std::endl;
-
     }
     else
     {
-      //std::cout<< "  Thomas, elastic at the end, HR_square="<<HR_square<<", HY_square="<<HY_square<<std::endl;
       is_plastic = false;
       s = 0;
     }
@@ -189,7 +175,6 @@ Bezier::getOverstress(Real const p_H,
     if (test < 0)
     {
       // elasticity for sure
-      //std::cout<< "  Thomas, elastic for sure, test="<<test<<std::endl;
       is_plastic = false;
       s = 0;
       return;
@@ -204,7 +189,6 @@ Bezier::getOverstress(Real const p_H,
     Real c = -3*_magic_nb*z*y*alpha_t;
     Real d = p*(q_H-q_M) + p_H*(q_M-q) + p_M*y;
     t = getRootOfCubicEquation(a,b,c,d);
-    //std::cout<< "  Thomas, not elastic for sure, getRootOfCubicEquation="<<t<<std::endl;
     // Get yield point from t
     p_y = std::pow(1-t, 3)*p_M + 3*t*std::pow(1-t, 2) *(p_M+alpha_t*_magic_nb*(p_t-p_M)) + 3*std::pow(t, 2) *(1-t)*p_t + std::pow(t, 3)*p_t;
     q_y = std::pow(1-t, 3)*q_M + 3*t*std::pow(1-t, 2) *q_M + 3*std::pow(t, 2)*(1-t)*beta_t*_magic_nb*q_M;
@@ -213,17 +197,13 @@ Bezier::getOverstress(Real const p_H,
     Real HR_square = std::pow(p-p_H, 2) + std::pow(q-q_H, 2);
     if (HR_square > HY_square)
     {
-      //std::cout<< "  Thomas, plastic"<<std::endl;
-
       is_plastic = true;
       Real RY = std::sqrt(std::pow(p-p_y, 2) + std::pow(q-q_y, 2));
       s = RY/std::sqrt(HY_square);
       quadrant = 2;
-      //std::cout<< "  Thomas, plastic at the end, HR_square="<<HR_square<<", HY_square="<<HY_square<<std::endl;
     }
     else
     {
-      //std::cout<< "  Thomas, elastic at the end, HR_square="<<HR_square<<", HY_square="<<HY_square<<std::endl;
       is_plastic = false;
       s = 0;
     }
@@ -238,7 +218,6 @@ Real
 Bezier::getRootOfCubicEquation(Real a, Real b, Real c, Real d)
 {
   Real t;
-  //std::cout<<"  getRootOfCubicEquation, a="<<a<<", b="<<b<<", c="<<c<<", d="<<d<<std::endl;
   // TODO: optimise (a=1), compare with https://www.particleincell.com/2013/cubic-line-intersection/
   Real Delta_0 = std::pow(b, 2) - 3*a*c;
   Real Delta_1 = 2*std::pow(b, 3) - 9*a*b*c + 27*std::pow(a, 2)*d;
@@ -250,7 +229,6 @@ Bezier::getRootOfCubicEquation(Real a, Real b, Real c, Real d)
     if (argument > 0)
     {
       Real C = std::pow(argument, 1./3);
-      //std::cout<<"  getRootOfCubicEquation single root, C="<<C<<std::endl;
       t = -1./(3*a) * (b + C + Delta_0/C);
       if (t < 0 || t> 1)
           mooseError("Root of cubic equation is outside [0,1]: ", t);
@@ -258,7 +236,6 @@ Bezier::getRootOfCubicEquation(Real a, Real b, Real c, Real d)
     else
     {
       t = 1;
-      //std::cout<<"  getRootOfCubicEquation single root, t=1 directly"<<std::endl;
     }
   }
   else
@@ -266,8 +243,6 @@ Bezier::getRootOfCubicEquation(Real a, Real b, Real c, Real d)
     // 3 distinct real roots or multiple roots
     std::complex<Real> _i_nb = std::complex<Real>(0, 1);
     std::complex<Real> C = std::pow((Delta_1 + std::sqrt(-Delta_mod)*_i_nb)/2., 1./3.);
-    //std::complex<Real> bidon = (Delta_1 + std::sqrt(-Delta_mod)*_i_nb)/2.;
-    //std::cout<<"  getRootOfCubicEquation 3 roots, Delta_1="<<Delta_1<<", Delta_mod="<<Delta_mod<<", C="<<C<<", bidon="<<bidon<<std::endl;
     Real t_0 = real(-1./(3*a) * (b + C + Delta_0/C));
     Real t_1 = real(-1./(3*a) * (b + 0.5*(-1.+std::sqrt(3)*_i_nb)*C + 2*Delta_0/(C*(-1.+std::sqrt(3)*_i_nb))));
     Real t_2 = real(-1./(3*a) * (b + 0.5*(-1.-std::sqrt(3)*_i_nb)*C + 2*Delta_0/(C*(-1.-std::sqrt(3)*_i_nb))));
