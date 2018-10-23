@@ -30,7 +30,7 @@ Bezier::getDerivativeOverstress(Real const p_H,
                                 Real const /*q_y*/,
                                 int const quadrant,
                                 Real const t,
-                                Real derivatives[2])
+                                Real derivatives[5])
 {
   // Elastic case
   if (!is_plastic)
@@ -102,7 +102,7 @@ Bezier::getOverstress(Real const p_H,
                       int & quadrant,
                       Real & t)
 {
-  Real test;
+  Real test, HY_square, HR_square, RY, x, y, z, a, b, c, d;
   Real _magic_nb = 0.5446848561107274; // coefficient to match ellipse
 
   // Check on which quadrant the line (HR) intersects
@@ -110,26 +110,28 @@ Bezier::getOverstress(Real const p_H,
   if (test == 0)
   {
     // Case (HM)//(HR), i.e. intersecting yield envelope where both quadrants join
-    Real HM_square = std::pow(p_M-p_H, 2) + std::pow(q_M-q_H, 2);
-    Real HR_square = std::pow(p-p_H, 2) + std::pow(q-q_H, 2);
-    if (HR_square > HM_square)
+    quadrant = 0;
+    t = 0;
+    p_y = p_M;
+    q_y = q_M;
+    HY_square = std::pow(p_M-p_H, 2) + std::pow(q_M-q_H, 2);
+    HR_square = std::pow(p-p_H, 2) + std::pow(q-q_H, 2);
+    if (HR_square > HY_square)
     {
       is_plastic = true;
-      s = std::sqrt(HR_square)/std::sqrt(HM_square) - 1;
-      quadrant = 0;
-      t = 0;
-      p_y = p_M;
-      q_y = q_M;
+      s = std::sqrt(HR_square)/std::sqrt(HY_square) - 1;
     }
     else
     {
       is_plastic = false;
       s = 0;
+      //s = std::sqrt(HR_square)/std::sqrt(HY_square) - 1;
     }
   }
   else if (test > 0)
   {
     // Intersecting in the compactant quadrant
+    quadrant = 1;
     // First, check easy case of elasticity (R below line (CM))
     test = (p_M-p)*q_M - (q_M-q)*(p_M-p_c);
     if (test < 0)
@@ -141,35 +143,37 @@ Bezier::getOverstress(Real const p_H,
     }
     // Now we need to compute the yield point to check if plasticity or not
     // First, get corresponding t
-    Real x = p - p_H;
-    Real y = q - q_H;
-    Real a = 2*x*q_M - (p_c-p_M)*y*(3*_magic_nb*alpha_c-2) - 3*_magic_nb*x*q_M*beta_c;
-    Real b = -3*x*q_M + 3*(p_c-p_M)*y*(_magic_nb*alpha_c-1)+6*_magic_nb*x*q_M*beta_c;
-    Real c = -3*_magic_nb*x*q_M*beta_c;
-    Real d = p*q_H - p_H*q + p_c*y;
+    x = p - p_H;
+    y = q - q_H;
+    a = 2*x*q_M - (p_c-p_M)*y*(3*_magic_nb*alpha_c-2) - 3*_magic_nb*x*q_M*beta_c;
+    b = -3*x*q_M + 3*(p_c-p_M)*y*(_magic_nb*alpha_c-1)+6*_magic_nb*x*q_M*beta_c;
+    c = -3*_magic_nb*x*q_M*beta_c;
+    d = p*q_H - p_H*q + p_c*y;
     t = getRootOfCubicEquation(a,b,c,d);
     // Get yield point from t
     p_y = std::pow(t, 2)*p_M*(3*_magic_nb*(t-1)*alpha_c - 2*t + 3) - (t-1)*p_c*(3*_magic_nb*std::pow(t, 2)*alpha_c - 2*std::pow(t, 2) + t + 1);
     q_y = t*q_M*(3*_magic_nb*std::pow(t-1, 2)*beta_c + t*(3-2*t));
     // Check plasticity
-    Real HY_square = std::pow(p_y-p_H, 2) + std::pow(q_y-q_H, 2);
-    Real HR_square = std::pow(p-p_H, 2) + std::pow(q-q_H, 2);
+    HY_square = std::pow(p_y-p_H, 2) + std::pow(q_y-q_H, 2);
+    HR_square = std::pow(p-p_H, 2) + std::pow(q-q_H, 2);
     if (HR_square > HY_square)
     {
       is_plastic = true;
-      Real RY = std::sqrt(std::pow(p-p_y, 2) + std::pow(q-q_y, 2));
+      RY = std::sqrt(std::pow(p-p_y, 2) + std::pow(q-q_y, 2));
       s = RY/std::sqrt(HY_square);
-      quadrant = 1;
     }
     else
     {
       is_plastic = false;
       s = 0;
+      //RY = std::sqrt(std::pow(p-p_y, 2) + std::pow(q-q_y, 2));
+      //s = -RY/std::sqrt(HY_square);
     }
   }
   else
   {
     // Intersecting in the dilatant regime
+    quadrant = 2;
     // First, check easy case of elasticity
     test = (p_t-p_M)*(q-q_M) + q_M*(p-p_M);
     if (test < 0)
@@ -181,31 +185,32 @@ Bezier::getOverstress(Real const p_H,
     }
     // Now we need to compute the yield point to check if plasticity or not
     // First, get corresponding t
-    Real x = p - p_H;
-    Real y = q - q_H;
-    Real z = p_M - p_t;
-    Real a = -2*x*q_M - z*y*(-2+3*_magic_nb*alpha_t) + 3*_magic_nb*x*q_M*beta_t;
-    Real b = 3*(x*q_M + z*y*(-1+2*_magic_nb*alpha_t) - _magic_nb*x*q_M*beta_t);
-    Real c = -3*_magic_nb*z*y*alpha_t;
-    Real d = p*(q_H-q_M) + p_H*(q_M-q) + p_M*y;
+    x = p - p_H;
+    y = q - q_H;
+    z = p_M - p_t;
+    a = -2*x*q_M - z*y*(-2+3*_magic_nb*alpha_t) + 3*_magic_nb*x*q_M*beta_t;
+    b = 3*(x*q_M + z*y*(-1+2*_magic_nb*alpha_t) - _magic_nb*x*q_M*beta_t);
+    c = -3*_magic_nb*z*y*alpha_t;
+    d = p*(q_H-q_M) + p_H*(q_M-q) + p_M*y;
     t = getRootOfCubicEquation(a,b,c,d);
     // Get yield point from t
-    p_y = std::pow(1-t, 3)*p_M + 3*t*std::pow(1-t, 2) *(p_M+alpha_t*_magic_nb*(p_t-p_M)) + 3*std::pow(t, 2) *(1-t)*p_t + std::pow(t, 3)*p_t;
+    p_y = std::pow(1-t, 3)*p_M + 3*t*std::pow(1-t, 2) *(p_M+alpha_t*_magic_nb*(p_t-p_M)) + 3*std::pow(t, 2)*(1-t)*p_t + std::pow(t, 3)*p_t;
     q_y = std::pow(1-t, 3)*q_M + 3*t*std::pow(1-t, 2) *q_M + 3*std::pow(t, 2)*(1-t)*beta_t*_magic_nb*q_M;
     // Check plasticity
-    Real HY_square = std::pow(p_y-p_H, 2) + std::pow(q_y-q_H, 2);
-    Real HR_square = std::pow(p-p_H, 2) + std::pow(q-q_H, 2);
+    HY_square = std::pow(p_y-p_H, 2) + std::pow(q_y-q_H, 2);
+    HR_square = std::pow(p-p_H, 2) + std::pow(q-q_H, 2);
     if (HR_square > HY_square)
     {
       is_plastic = true;
-      Real RY = std::sqrt(std::pow(p-p_y, 2) + std::pow(q-q_y, 2));
+      RY = std::sqrt(std::pow(p-p_y, 2) + std::pow(q-q_y, 2));
       s = RY/std::sqrt(HY_square);
-      quadrant = 2;
     }
     else
     {
       is_plastic = false;
       s = 0;
+      //RY = std::sqrt(std::pow(p-p_y, 2) + std::pow(q-q_y, 2));
+      //s = -RY/std::sqrt(HY_square);
     }
   }
 }

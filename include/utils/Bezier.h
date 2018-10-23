@@ -78,11 +78,11 @@ public:
     * @param q: q coordinate of point to project
     * @param is_plastic: boolean to state if point (p',q) is in plasticity
     * @param s: overstress (if in plasticity)
-    * @param p_y: p coordinate of "projection" (yield) point on the ellipse. Only set if is_plastic
-    * @param q_y: q coordinate of "projection" (yield) point on the ellipse. Only set if is_plastic
-    * @param quadrant: 1 for compactant, 2 for dilatant (if in plasticity), 0 in between. Only set if is_plastic
-    * @param t: parametric t of yield point on given quadrant.Only set if is_plastic
-    * @param derivatives: array[ds_dp, ds_dq] of derivatives of overstress w.r.t p and q
+    * @param p_y: p coordinate of "projection" (yield) point on the ellipse. Only used if is_plastic
+    * @param q_y: q coordinate of "projection" (yield) point on the ellipse. Only used if is_plastic
+    * @param quadrant: 1 for compactant, 2 for dilatant (if in plasticity), 0 in between. Only used if is_plastic
+    * @param t: parametric t of yield point on given quadrant.Only used if is_plastic
+    * @param derivatives: array[ds_dp, ds_dq, d2s_dp2, d2s_dq2, d2s_dpdq] of derivatives of overstress w.r.t p and q
     */
    static void getDerivativeOverstress(Real const p_H,
                                        Real const q_H,
@@ -102,7 +102,7 @@ public:
                                        Real const q_y,
                                        int const quadrant,
                                        Real const t,
-                                       Real derivatives[2]);
+                                       Real derivatives[5]);
 
   //static constexpr Real _magic_nb = 0.5446848561107274; // coefficient to match ellipse
   //static constexpr Real _inv_magic_nb = 1./_magic_nb;

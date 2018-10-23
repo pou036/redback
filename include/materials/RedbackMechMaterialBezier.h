@@ -31,9 +31,6 @@ protected:
   Real _coeff_t_vert; // multiplying factor for vertical tangent at p_t
   Real _coeff_t_hor;  // multiplying factor for horizontal tangent at Max point on tension side
 
-  int _quadrant;
-  Real _t;
-
   Real _last_p, _last_q; // (p,q) last used by Bezier::getOverstress()
   // Corresponding values obtained for (_last_p, _last_q)
   bool _last_is_plastic;

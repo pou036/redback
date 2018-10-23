@@ -37,6 +37,15 @@ BezierTest::overstressTestQH0TensileStrength()
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong parametric t", 0, t, 1e-10);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong p_y", -1, p_y, 1e-10);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong q_y", 0, q_y, 1e-5);
+  // At compression tip
+  Bezier::getOverstress(p_H, q_H, p_M, q_M, p_t, p_c, alpha_c, beta_c, alpha_t,
+      beta_t, /*p=*/p_c, /*q=*/0., is_plastic, s, p_y, q_y, quadrant, t);
+  CPPUNIT_ASSERT_MESSAGE("overstressTest, wrong is_plastic", is_plastic==false);
+  CPPUNIT_ASSERT_MESSAGE("overstressTest, wrong quadrant", quadrant==1);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong overstress s", 0, s, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong parametric t", 0, t, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong p_y", -1, p_y, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong q_y", 0, q_y, 1e-5);
   // Not along the p axis
   Bezier::getOverstress(p_H, q_H, p_M, q_M, p_t, p_c, alpha_c, beta_c, alpha_t,
       beta_t, /*p=*/-1.9, /*q=*/0.5, is_plastic, s, p_y, q_y, quadrant, t);
@@ -82,6 +91,15 @@ BezierTest::overstressTestQH0TensileStrength()
   CPPUNIT_ASSERT_MESSAGE("overstressTest, wrong is_plastic", is_plastic==true);
   CPPUNIT_ASSERT_MESSAGE("overstressTest, wrong quadrant", quadrant==2);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong overstress s", 0.5, s, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong parametric t", 1, t, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong p_y", 0.1, p_y, 1e-10);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong q_y", 0, q_y, 1e-10);
+  // At tension tip
+  Bezier::getOverstress(p_H, q_H, p_M, q_M, p_t, p_c, alpha_c, beta_c, alpha_t,
+      beta_t, /*p=*/p_t, /*q=*/0., is_plastic, s, p_y, q_y, quadrant, t);
+  CPPUNIT_ASSERT_MESSAGE("overstressTest, wrong is_plastic", is_plastic==false);
+  CPPUNIT_ASSERT_MESSAGE("overstressTest, wrong quadrant", quadrant==2);
+  CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong overstress s", 0, s, 1e-10);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong parametric t", 1, t, 1e-10);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong p_y", 0.1, p_y, 1e-10);
   CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("overstressTest, wrong q_y", 0, q_y, 1e-10);

@@ -84,7 +84,7 @@ RedbackMechMaterialBezier::getFlowTensor(const RankTwoTensor & sig,
                                          RankTwoTensor & flow_tensor)
 {
   RankTwoTensor sig_dev;
-  Real val;
+  Real val, norm;
 
   // Check first if we have already called Bezier functions
   if (p != _last_p || q != _last_q)
@@ -113,8 +113,9 @@ RedbackMechMaterialBezier::getFlowTensor(const RankTwoTensor & sig,
     val = _last_derivatives[1] * 3. / (2. * q);
   flow_tensor = sig_dev * val;
   flow_tensor.addIa(_last_derivatives[0]/3.);
-  // Normalise flow tensor
-  flow_tensor /= flow_tensor.L2norm();
+  // Normalise flow tensor (use formula rather than flow_tensor.L2norm())
+  norm = std::sqrt(std::pow(_last_derivatives[0], 2)/3. + 1.5*std::pow(_last_derivatives[1], 2));
+  flow_tensor /= norm;
 }
 
 /**
@@ -128,7 +129,7 @@ RedbackMechMaterialBezier::getFlowIncrement(Real /*sig_eqv*/,
                                             Real /*yield_stress*/,
                                             Real s)
 {
-  return _ref_pe_rate * _dt * std::pow(s, _exponent) * _exponential;
+  return _ref_pe_rate * _dt * std::pow(std::abs(s), _exponent) * _exponential;
 }
 
 void
@@ -153,8 +154,8 @@ RedbackMechMaterialBezier::getJac(const RankTwoTensor & sig,
   RankTwoTensor sig_dev, flow_dirn_vol, flow_dirn_dev, fij, flow_dirn,
     flow_tensor, dfi_dft;
   RankFourTensor dfd_dsig, dfi_dsig;
-  Real f0, f1, f2, f3, f4;
-  Real dfi_dp, dfi_dseqv, dfi_ds;
+  Real f0, f1, f2, f3, f4, f5, f6;
+  Real dfi_dp, dfi_dseqv, dfi_ds, norm;
 
   sig_dev = sig.deviatoric();
 
@@ -173,13 +174,16 @@ RedbackMechMaterialBezier::getJac(const RankTwoTensor & sig,
    * with respect to the stress tensor. See also REDBACK's documentation
    * */
 
+  norm = std::sqrt(std::pow(_last_derivatives[0], 2)/3.
+    + 1.5*std::pow(_last_derivatives[1], 2));
+
   // derivative of flow increment with respect to s (overstress)
-  dfi_ds = _exponent * _ref_pe_rate * _dt * std::pow(s, _exponent - 1)
+  dfi_ds = _exponent * _ref_pe_rate * _dt * std::pow(std::abs(s), _exponent - 1)
     * _exponential;
 
   // derivatives of flow increment with respect to p and q
   dfi_dp = dfi_ds * _last_derivatives[0];
-  dfi_dseqv = dfi_ds * sig_eqv / s * _last_derivatives[1];
+  dfi_dseqv = dfi_ds * _last_derivatives[1];
 
   f0 = 0.0;
   if (sig_eqv > 1e-10)
@@ -193,10 +197,14 @@ RedbackMechMaterialBezier::getJac(const RankTwoTensor & sig,
           dfi_dsig(i, j, k, l) =
               flow_dirn(i, j) * (f0 * sig_dev(k, l) * dfi_dseqv + dfi_dp * deltaFunc(k, l) / 3.0);
 
-  f2 = f0 * _last_derivatives[1];
-  f1 = _last_derivatives[2]/9 - f2/3.;
-  f3 = _last_derivatives[4] * f0/3.;
-  f4 = std::pow(f0, 2) * (_last_derivatives[3] - (2*f0/3.) * _last_derivatives[1]);
+  f2 = f0 * _last_derivatives[1] / norm;
+  f1 = _last_derivatives[2] / (9*norm) - f2/3.;
+  f3 = _last_derivatives[4] * f0 / (3*norm);
+  f4 = std::pow(f0, 2) * (_last_derivatives[3] - (2*f0/3.) * _last_derivatives[1]) / norm;
+  f5 = (_last_derivatives[0]*_last_derivatives[2]/9.
+    + _last_derivatives[1]*_last_derivatives[4]/2.) / std::pow(norm, 2);
+  f6 = f0 * (_last_derivatives[0]*_last_derivatives[4]/3.
+    + 3*_last_derivatives[1]*_last_derivatives[3]/2.) / std::pow(norm, 2);
 
   // This loop calculates the second term (d n_ij / d sigma_kl)
   for (i = 0; i < 3; ++i)
@@ -207,7 +215,9 @@ RedbackMechMaterialBezier::getJac(const RankTwoTensor & sig,
                                + f2 * deltaFunc(i, k) * deltaFunc(j, l)
                                + f3 * deltaFunc(i, j) * sig_dev(k, l)
                                + f3 * sig_dev(i, j) * deltaFunc(k, l)
-                               + f4 * sig_dev(i, j) * sig_dev(k, l);
+                               + f4 * sig_dev(i, j) * sig_dev(k, l)
+                               - f5 * flow_dirn(i, j) * deltaFunc(k, l)
+                               - f6 * flow_dirn(i, j) * sig_dev(k, l);
 
   dresid_dsig = E_ijkl.invSymm() + dfd_dsig * flow_incr + dfi_dsig; // Jacobian
 }
@@ -220,15 +230,13 @@ RedbackMechMaterialBezier::get_py_qy(
   Real p_c = -yield_stress;
   Bezier::getOverstress(_p_H, _q_H, _p_M, _q_M, _p_t, p_c, _coeff_c_hor,
     _coeff_c_vert, _coeff_t_hor, _coeff_t_vert, p, q, is_plastic, s,
-    p_y, p_y, _quadrant, _t);
+    p_y, q_y, _last_quadrant, _last_t);
   _last_p = p;
   _last_q = q;
   _last_is_plastic = is_plastic;
   _last_s = s;
   _last_p_y = p_y;
   _last_q_y = q_y;
-  _last_quadrant = _quadrant;
-  _last_t = _t;
   Bezier::getDerivativeOverstress(_p_H, _q_H, _p_M, _q_M, _p_t, p_c,
     _coeff_c_hor, _coeff_c_vert, _coeff_t_hor, _coeff_t_vert, p, q,
     _last_is_plastic, _last_s, _last_p_y, _last_q_y, _last_quadrant,
