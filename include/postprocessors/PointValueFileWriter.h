@@ -54,7 +54,9 @@ protected:
   std::string _value_pore;
   std::string _value_grain;
   unsigned int _refinement;
-  unsigned int _size_CT;
+  int _dim;
+  int _size_CT;
+  int _size_CT_z;
   Real _pore_volume;
   Real _upper_layer_bound;
   Real _lower_layer_bound;
