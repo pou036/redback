@@ -12,6 +12,7 @@
 
 #include "RedbackMechDissip.h"
 #include "MooseMesh.h"
+#include "PermutationTensor.h"
 
 template <>
 InputParameters
@@ -86,7 +87,7 @@ RedbackMechDissip::computeQpOffDiagJacobian(unsigned int jvar)
         for (unsigned int j = 0; j < LIBMESH_DIM; ++j){
           for (unsigned int l = 0; l < LIBMESH_DIM; ++l){
             sum -= (_dplastic_heat_dstrain[_qp] )(j,l) * PermutationTensor::eps(j, l, i);}}
-        
+
         sum *= _test[_i][_qp]*_phi[_j][_qp];
         sum -= _test[_i][_qp] * (_dplastic_heat_dcurvature[_qp] * _grad_phi[_j][_qp])(i);}}
 

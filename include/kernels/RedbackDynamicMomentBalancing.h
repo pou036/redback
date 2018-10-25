@@ -8,9 +8,11 @@
 #define RedbackDynamicMomentBalancing_H
 #include "RedbackMomentBalancing.h"
 
+//Forward Declarations
+class RedbackDynamicMomentBalancing;
 
-//template<>
-//InputParameters validParams<RedbackDynamicMomentBalancing>();
+template<>
+InputParameters validParams<RedbackDynamicMomentBalancing>();
 
 class RedbackDynamicMomentBalancing : public RedbackMomentBalancing
 {

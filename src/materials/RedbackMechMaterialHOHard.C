@@ -18,6 +18,7 @@
 #include "multisurfaceplasticityhard.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
+#include "PermutationTensor.h"
 
 /**
  * RedbackMechMaterialHO handles a high order material.
@@ -501,7 +502,7 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
 //for (unsigned int j = 0; j < NSTR ; ++j){
 //  char sprintf5 [50];
 //     std::sprintf(sprintf5," DSDE ( %u , %u) = %13.6e", i+1,j+1, DSDE[i*NSTR + j]);
-//     std::cout << sprintf5 <<std::endl;  
+//     std::cout << sprintf5 <<std::endl;
 //}}
 
   return_successful = (NILL==0);
@@ -541,7 +542,7 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
 //for (unsigned int j = 0; j < NSTR ; ++j){
 //  char sprintf5 [50];
 //     std::sprintf(sprintf5," DSDE ( %u , %u) = %13.6e", i+1,j+1, DSDE[i*NSTR + j]);
-//     std::cout << sprintf5 <<std::endl;   
+//     std::cout << sprintf5 <<std::endl;
 //}}
 // for (unsigned int i = 0; i < NSTR ; ++i)
 // {  char sprintf1 [50];

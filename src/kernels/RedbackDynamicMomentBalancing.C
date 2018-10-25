@@ -5,7 +5,7 @@
 /*             See LICENSE for full restrictions                */
 /****************************************************************/
 #include "RedbackDynamicMomentBalancing.h"
-
+#include "PermutationTensor.h"
 #include "Material.h"
 #include "RankFourTensor.h"
 #include "ElasticityTensorTools.h"

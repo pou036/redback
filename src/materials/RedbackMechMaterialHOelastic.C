@@ -15,6 +15,7 @@
 
 #include "Function.h"
 #include "RedbackMechMaterialHOelastic.h"
+#include "PermutationTensor.h"
 
 /**
  * RedbackMechMaterialHOelastic handles a high order material.

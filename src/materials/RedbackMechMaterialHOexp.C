@@ -18,6 +18,7 @@
 #include "multisurfaceplasticityhard.h"
 #include "NonlinearSystem.h"
 #include "FEProblem.h"
+#include "PermutationTensor.h"
 
 /**
  * RedbackMechMaterialHOexp handles a high order material.
@@ -90,7 +91,7 @@ RedbackMechMaterialHOexp::RedbackMechMaterialHOexp(const InputParameters & param
     _failure_surface(declareProperty<Real>("failure_surface")),
     _stress_older(declarePropertyOlder<RankTwoTensor>("stress")),
     _stress_couple_older(declarePropertyOlder<RankTwoTensor>("coupled_stress")),
-    _mechanical_dissipation_tot(declareProperty<Real>("mechanical_dissipation_tot")),    
+    _mechanical_dissipation_tot(declareProperty<Real>("mechanical_dissipation_tot")),
     _mechanical_dissipation_tot_old(declarePropertyOld<Real>("mechanical_dissipation_tot")),
     _plasticity_type(isParamValid("plasticity_type") ? getParam<std::string>("plasticity_type") + "_" : ""),
     _min_stepsize(getParam<Real>("min_stepsize")),
@@ -322,12 +323,12 @@ else {
 //Real Hs;
 /*
 if (( _eqv_plastic_strain_old[_qp] < 0.1) ){
- Hs = _hardening_mech_modulus;} 
+ Hs = _hardening_mech_modulus;}
  else {
  Hs = _hardening_mech_modulus / 2.0 ;}
 
 if (( _eqv_plastic_strain_old[_qp] < 0.2) ){
-   } 
+   }
  else {
  Hs = _hardening_mech_modulus / 4.0 ;}
 */
@@ -555,7 +556,7 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
 //for (unsigned int j = 0; j < NSTR ; ++j){
 //  char sprintf5 [50];
 //     std::sprintf(sprintf5," DSDE ( %u , %u) = %13.6e", i+1,j+1, DSDE[i*NSTR + j]);
-//     std::cout << sprintf5 <<std::endl;  
+//     std::cout << sprintf5 <<std::endl;
 //}}
 
   return_successful = (NILL==0);
@@ -596,7 +597,7 @@ while (time_simulated < 1.0 && step_size >= _min_stepsize)
 //for (unsigned int j = 0; j < NSTR ; ++j){
 //  char sprintf5 [50];
 //     std::sprintf(sprintf5," DSDE ( %u , %u) = %13.6e", i+1,j+1, DSDE[i*NSTR + j]);
-//     std::cout << sprintf5 <<std::endl;   
+//     std::cout << sprintf5 <<std::endl;
 //}}
 // for (unsigned int i = 0; i < NSTR ; ++i)
 // {  char sprintf1 [50];
@@ -964,7 +965,7 @@ RedbackMechMaterialHOexp::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Rea
       _dplastic_heat_dstrain[_qp] *= _gr[ _qp ];
    }
    //_dplastic_heat_dstrain[_qp] = RankTwoTensor();
-   
+
      if (_plastic_curvature[_qp] == _plastic_curvature_old[_qp])
     // no plastic deformation, so _elasticity_tensor = _Jacobian_mult
       _dplastic_heat_dcurvature[_qp] = RankTwoTensor();
@@ -996,5 +997,3 @@ RedbackMechMaterialHOexp::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Rea
  //_poromech_jac[ _qp ] = (1 / (1 + _delta[ _qp ] * _T[ _qp ]) / (1 + _delta[ _qp ] * _T[ _qp ]));
  _poromech_jac[ _qp ] = 1 / ( _beta_star * _dt);
 }
-
-
