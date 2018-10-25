@@ -14,9 +14,7 @@ class RedbackPolarTensorMaterialAux : public AuxKernel
 {
 public:
   RedbackPolarTensorMaterialAux(const InputParameters & parameters);
-  virtual ~RedbackPolarTensorMaterialAux()
-  {
-  }
+  virtual ~RedbackPolarTensorMaterialAux() {}
 
 protected:
   virtual Real computeValue();

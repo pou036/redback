@@ -24,8 +24,8 @@ validParams<RedbackMassConvection>()
   return params;
 }
 
-RedbackMassConvection::RedbackMassConvection(const InputParameters & parameters) :
-    Kernel(parameters),
+RedbackMassConvection::RedbackMassConvection(const InputParameters & parameters)
+  : Kernel(parameters),
     _grad_temp(coupledGradient("temperature")),
     //_dtemp_dot_dtemp(coupledDotDu("temperature")),
 
@@ -43,9 +43,9 @@ RedbackMassConvection::RedbackMassConvection(const InputParameters & parameters)
 Real
 RedbackMassConvection::computeQpResidual()
 {
-  return _time_factor * _test[ _i ][ _qp ] *
-         (_pressure_convective_mass[ _qp ] * _grad_u[ _qp ] -
-          _thermal_convective_mass[ _qp ] * _grad_temp[ _qp ]); // scalar product done by "*"
+  return _time_factor * _test[_i][_qp] *
+         (_pressure_convective_mass[_qp] * _grad_u[_qp] -
+          _thermal_convective_mass[_qp] * _grad_temp[_qp]); // scalar product done by "*"
 }
 
 Real
@@ -58,7 +58,7 @@ RedbackMassConvection::computeQpJacobian()
 }
 
 Real
-RedbackMassConvection::computeQpOffDiagJacobian(unsigned int jvar)
+RedbackMassConvection::computeQpOffDiagJacobian(unsigned int /*jvar*/)
 {
   /*if (jvar == _temp_var)
   {

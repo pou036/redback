@@ -16,8 +16,8 @@
 #define REDBACKMECHMATERIAL_H
 
 #include "Material.h"
-#include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "RankTwoTensor.h"
 #include "RotationTensor.h"
 //#include "FiniteStrainPlasticMaterial.h"
 
@@ -48,14 +48,14 @@ public:
 
 protected:
   // Copy-paste from TensorMechanicsMaterial.h
-  virtual void computeProperties();
+  virtual void computeProperties() override;
   virtual void stepInitQpProperties();
   virtual void computeQpElasticityTensor();
   virtual void computeStrain();
   virtual void computeQpStrain();
   virtual void computeQpStrain(const RankTwoTensor & Fhat); // from FiniteStrainMaterial.h
   virtual void computeQpStress();
-  virtual void initQpStatefulProperties(); // from FiniteStrainMaterial.h
+  virtual void initQpStatefulProperties() override;
 
   const VariableGradient & _grad_disp_x;
   const VariableGradient & _grad_disp_y;
@@ -85,18 +85,18 @@ protected:
   // Copy-paste from FiniteStrainMaterial.h
   MaterialProperty<RankTwoTensor> & _strain_rate;
   MaterialProperty<RankTwoTensor> & _strain_increment;
-  MaterialProperty<RankTwoTensor> & _total_strain_old;
-  MaterialProperty<RankTwoTensor> & _elastic_strain_old;
-  MaterialProperty<RankTwoTensor> & _stress_old;
+  const MaterialProperty<RankTwoTensor> & _total_strain_old;
+  const MaterialProperty<RankTwoTensor> & _elastic_strain_old;
+  const MaterialProperty<RankTwoTensor> & _stress_old;
   MaterialProperty<RankTwoTensor> & _rotation_increment;
   MaterialProperty<RankTwoTensor> & _dfgrd;
 
   // Copy-paste from FiniteStrainPlasticMaterial.h
   std::vector<Real> _yield_stress_vector;
   MaterialProperty<RankTwoTensor> & _plastic_strain;
-  MaterialProperty<RankTwoTensor> & _plastic_strain_old;
+  const MaterialProperty<RankTwoTensor> & _plastic_strain_old;
   MaterialProperty<Real> & _eqv_plastic_strain;
-  MaterialProperty<Real> & _eqv_plastic_strain_old;
+  const MaterialProperty<Real> & _eqv_plastic_strain_old;
 
   // virtual Real yieldFunction(const RankTwoTensor & stress, const Real
   // yield_stress);
@@ -116,11 +116,19 @@ protected:
   // is dependant on the yield criterion. Therefore we define them as abstract
   // virtual functions here such that no implementation is needed in
   // RedbackMechMaterial.C
+  virtual void getJac(const RankTwoTensor &,
+                      const RankFourTensor &,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      Real,
+                      RankFourTensor &) = 0;
   virtual void
-  getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) = 0;
-  virtual void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &) = 0;
+  getFlowTensor(const RankTwoTensor &, Real, Real, Real, Real, Real, RankTwoTensor &) = 0;
   virtual Real getFlowIncrement(Real, Real, Real, Real, Real) = 0;
-  virtual void get_py_qy(Real, Real, Real &, Real &, Real) = 0;
+  virtual void get_py_qy(Real, Real, Real &, Real &, Real, bool &) = 0;
 
   Real _ref_pe_rate;
   Real _exponent;
@@ -187,7 +195,7 @@ protected:
   Real _T0_param, _P0_param;
 
   virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
-  virtual void get_py_qy_damaged(Real, Real, Real &, Real &, Real);
+  virtual void get_py_qy_damaged(Real, Real, Real &, Real &, Real, bool &);
   virtual void form_damage_kernels(Real);
 
   virtual void formDamageDissipation(RankTwoTensor &);
@@ -200,7 +208,6 @@ protected:
   std::vector<Function *> _initial_stress;
   MaterialProperty<RankTwoTensor> & _dplastic_heat_dstrain;
   MaterialProperty<RankTwoTensor> & _dplastic_heat_dcurvature;
-
 };
 
 #endif // REDBACKMECHMATERIAL_H

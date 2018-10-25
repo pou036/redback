@@ -205,12 +205,10 @@
   [./mises_strain_rate]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
-    block = '0 1'
   [../]
   [./volumetric_strain]
     order = CONSTANT
@@ -474,7 +472,7 @@
 
 [Outputs]
   file_base = ring_shear_out
-  output_initial = true
+  # output_initial = true
   exodus = true
   print_linear_residuals = false
   csv = true

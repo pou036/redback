@@ -17,16 +17,21 @@ InputParameters
 validParams<RedbackPolarTensorMaterialAux>()
 {
   InputParameters params = validParams<AuxKernel>();
-  params.addRequiredParam<MaterialPropertyName>("rank_two_tensor", "The rank two material tensor name");
+  params.addRequiredParam<MaterialPropertyName>("rank_two_tensor",
+                                                "The rank two material tensor name");
   params.addRequiredRangeCheckedParam<unsigned int>(
-    "index_i", "index_i >= 0 & index_i <= 1", "An index i to select r (i=0) or theta (i=1) output");
+      "index_i",
+      "index_i >= 0 & index_i <= 1",
+      "An index i to select r (i=0) or theta (i=1) output");
   params.addRequiredRangeCheckedParam<unsigned int>(
-    "index_j", "index_j >= 0 & index_j <= 1", "An index j to select r (i=0) or theta (i=1) output");
+      "index_j",
+      "index_j >= 0 & index_j <= 1",
+      "An index j to select r (i=0) or theta (i=1) output");
   return params;
 }
 
-RedbackPolarTensorMaterialAux::RedbackPolarTensorMaterialAux(const InputParameters & parameters) :
-    AuxKernel(parameters),
+RedbackPolarTensorMaterialAux::RedbackPolarTensorMaterialAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
     _tensor(getMaterialProperty<RankTwoTensor>("rank_two_tensor")),
     _i(getParam<unsigned int>("index_i")),
     _j(getParam<unsigned int>("index_j"))
@@ -48,8 +53,8 @@ RedbackPolarTensorMaterialAux::computeValue()
   Real theta;
 
   // Real argument = y/x;
-  // Real theta = std::atan(argument)*(argument <0 ? -1: 1); //(argument < 0 ? libMesh::pi - std::atan(argument):
-  // std::atan(argument));
+  // Real theta = std::atan(argument)*(argument <0 ? -1: 1); //(argument < 0 ? libMesh::pi -
+  // std::atan(argument): std::atan(argument));
   if (r < epsilon)
     theta = 0;
   else

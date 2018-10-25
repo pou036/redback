@@ -13,17 +13,17 @@
 /****************************************************************/
 
 // CPPUnit includes
-#include "cppunit/XmlOutputter.h"
 #include "cppunit/CompilerOutputter.h"
-#include "cppunit/ui/text/TestRunner.h"
+#include "cppunit/XmlOutputter.h"
 #include "cppunit/extensions/TestFactoryRegistry.h"
+#include "cppunit/ui/text/TestRunner.h"
 
 // Moose includes
 #include "Moose.h"
 #include "MooseInit.h"
 
-#include "Factory.h"
 #include "AppFactory.h"
+#include "Factory.h"
 #include "RedbackApp.h"
 
 #include <fstream>
@@ -46,7 +46,7 @@ main(int argc, char ** argv)
 
   // If you run with --xml, output will be sent to an xml file instead of the
   // screen
-  if (argc == 2 && std::string(argv[ 1 ]) == std::string("--xml"))
+  if (argc == 2 && std::string(argv[1]) == std::string("--xml"))
   {
     runner.setOutputter(new CppUnit::XmlOutputter(&runner.result(), out));
     out.open("test_results.xml");

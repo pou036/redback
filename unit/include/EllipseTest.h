@@ -27,6 +27,7 @@ class EllipseTest : public CppUnit::TestFixture
   CPPUNIT_TEST_SUITE(EllipseTest);
 
   CPPUNIT_TEST(distanceCCTestCircle);
+  CPPUNIT_TEST(distanceCCTestShift);
   CPPUNIT_TEST(distanceCCTestMajorAxisHorizontal);
   CPPUNIT_TEST(distanceCCTestMajorAxisVertical);
   CPPUNIT_TEST(isPointOutsideOfEllipseTestCircle);
@@ -45,6 +46,7 @@ public:
   EllipseTest();
   ~EllipseTest();
 
+  void distanceCCTestShift();
   void distanceCCTestCircle();
   void distanceCCTestMajorAxisHorizontal();
   void distanceCCTestMajorAxisVertical();

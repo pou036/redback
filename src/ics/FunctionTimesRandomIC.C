@@ -10,8 +10,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "FunctionTimesRandomIC.h"
 #include "Function.h"
+#include "FunctionTimesRandomIC.h"
 #include "MooseRandom.h"
 
 #include "libmesh/point.h"
@@ -24,12 +24,13 @@ validParams<FunctionTimesRandomIC>()
   params.addParam<Real>("min", 0.0, "Lower bound of the randomly generated values");
   params.addParam<Real>("max", 1.0, "Upper bound of the randomly generated values");
   params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");
-  params.addRequiredParam<FunctionName>("function", "The initial condition function (without randomness).");
+  params.addRequiredParam<FunctionName>("function",
+                                        "The initial condition function (without randomness).");
   return params;
 }
 
-FunctionTimesRandomIC::FunctionTimesRandomIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+FunctionTimesRandomIC::FunctionTimesRandomIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _min(getParam<Real>("min")),
     _max(getParam<Real>("max")),
     _range(_max - _min),

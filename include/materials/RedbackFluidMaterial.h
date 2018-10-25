@@ -17,8 +17,8 @@
 
 //#include "FiniteStrainPlasticMaterial.h"
 #include "Material.h"
-#include "RankTwoTensor.h"
 #include "RankFourTensor.h"
+#include "RankTwoTensor.h"
 
 // Forward Declarations
 class RedbackFluidMaterial;
@@ -33,7 +33,7 @@ public:
 
 protected:
   virtual void stepInitQpProperties();
-  virtual void computeQpProperties();
+  virtual void computeQpProperties() override;
   virtual void computeRedbackTerms();
 
   bool _has_T;

@@ -10,8 +10,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "FunctionPointSource.h"
 #include "Function.h"
+#include "FunctionPointSource.h"
 
 template <>
 InputParameters
@@ -19,22 +19,24 @@ validParams<FunctionPointSource>()
 {
   InputParameters params = validParams<DiracKernel>();
   params.addRequiredParam<FunctionName>("function", "The input function (in time).");
-  params.addRequiredParam<std::vector<Real> >("point", "The x,y,z coordinates of the point");
+  params.addRequiredParam<std::vector<Real>>("point", "The x,y,z coordinates of the point");
   return params;
 }
 
-FunctionPointSource::FunctionPointSource(const InputParameters & parameters) :
-    DiracKernel(parameters), _func(getFunction("function")), _point_param(getParam<std::vector<Real> >("point"))
+FunctionPointSource::FunctionPointSource(const InputParameters & parameters)
+  : DiracKernel(parameters),
+    _func(getFunction("function")),
+    _point_param(getParam<std::vector<Real>>("point"))
 {
-  _p(0) = _point_param[ 0 ];
+  _p(0) = _point_param[0];
 
   if (_point_param.size() > 1)
   {
-    _p(1) = _point_param[ 1 ];
+    _p(1) = _point_param[1];
 
     if (_point_param.size() > 2)
     {
-      _p(2) = _point_param[ 2 ];
+      _p(2) = _point_param[2];
     }
   }
 }
@@ -54,5 +56,5 @@ FunctionPointSource::f()
 Real
 FunctionPointSource::computeQpResidual()
 {
-  return -_test[ _i ][ _qp ] * f(); //*_value;
+  return -_test[_i][_qp] * f(); //*_value;
 }

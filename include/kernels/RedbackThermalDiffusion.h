@@ -34,6 +34,8 @@ protected:
   
   const MaterialProperty<Real> & _thermal_diffusivity;
 
+  const MaterialProperty<Real> & _diffusivity;
+
 private:
   Real _time_factor;
 };

@@ -46,7 +46,7 @@
     C_ijkl = '576.923076923 384.615384615' # young = 1000, poisson = 0.3
     ref_pe_rate = 1
     slope_yield_surface = -0.6
-    yield_criterion = modified_Cam_Clay
+    # yield_criterion = modified_Cam_Clay
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
   [../]
@@ -175,12 +175,10 @@
   [./mises_strain_rate]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
-    block = '0 1'
   [../]
   [./volumetric_strain]
     order = CONSTANT
@@ -193,7 +191,6 @@
   [./mean_stress]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
   [../]
   [./total_porosity]
     order = FIRST
@@ -271,20 +268,17 @@
   [./mises_strain_rate]
     type = MaterialRealAux
     variable = mises_strain_rate
-    block = 0
     property = mises_strain_rate
   [../]
   [./Gruntfest_Number]
     type = MaterialRealAux
     variable = Mod_Gruntfest_number
     property = mod_gruntfest_number
-    block = 0
   [../]
   [./mean_stress]
     type = MaterialRealAux
     variable = mean_stress
     property = mean_stress
-    block = 0
   [../]
   [./volumetric_strain]
     type = MaterialRealAux
@@ -357,6 +351,8 @@
 
 [Executioner]
   # Preconditioned JFNK (default)
+  # petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
+  # petsc_options_value = 'hypre boomeramg cp 201'
   start_time = 0.0
   end_time = 4e-3
   dtmax = 1
@@ -365,8 +361,6 @@
   l_max_its = 200
   nl_max_its = 10
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg cp 201'
   nl_abs_tol = 1e-10 # 1e-10 to begin with
   reset_dt = true
   line_search = basic
@@ -378,7 +372,7 @@
 
 [Outputs]
   file_base = bench_TMC_CC_out
-  output_initial = true
+  # output_initial = true
   exodus = true
   print_linear_residuals = true
   [./console]

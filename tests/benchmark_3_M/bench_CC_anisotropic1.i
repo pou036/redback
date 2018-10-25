@@ -38,7 +38,7 @@
     C_ijkl = '576.923076923 384.615384615' # young = 1000, poisson = 0.3
     ref_pe_rate = 1
     slope_yield_surface = -0.6
-    yield_criterion = modified_Cam_Clay
+    # yield_criterion = modified_Cam_Clay
     yield_stress = '0. 1 1. 1'
     initial_anisotropy_param = 0.3
     total_porosity = total_porosity
@@ -136,7 +136,7 @@
 []
 
 [AuxVariables]
-  active = 'mech_porosity Mod_Gruntfest_number total_porosity returnmap_iter mises_strain mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
+  active = 'mech_porosity Mod_Gruntfest_number total_porosity returnmap_iter mises_strain mises_strain_rate mises_stress volumetric_strain mean_stress'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -173,7 +173,6 @@
   [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
-    block = '0 1'
   [../]
   [./volumetric_strain]
     order = CONSTANT
@@ -204,7 +203,7 @@
 []
 
 [AuxKernels]
-  active = 'mech_porosity volumetric_strain total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress returnmap_iter Gruntfest_Number'
+  active = 'mech_porosity volumetric_strain total_porosity mises_strain mises_strain_rate mises_stress mean_stress returnmap_iter Gruntfest_Number'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -295,7 +294,7 @@
 []
 
 [Postprocessors]
-  active = 'volumetric_strain mises_strain mises_strain_rate max_returnmap_iter volumetric_strain_rate mises_stress mean_stress'
+  active = 'volumetric_strain mises_strain mises_strain_rate max_returnmap_iter mises_stress mean_stress'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
@@ -374,7 +373,7 @@
 
 [Outputs]
   file_base = bench_CC_anisotropic1_out
-  output_initial = true
+  # output_initial = true
   exodus = true
   csv = true
   print_linear_residuals = true

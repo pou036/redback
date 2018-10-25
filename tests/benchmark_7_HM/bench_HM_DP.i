@@ -48,7 +48,7 @@
     C_ijkl = '576.923076923 384.615384615' # young = 1000, poisson = 0.3
     ref_pe_rate = 1
     slope_yield_surface = -0.6
-    yield_criterion = Drucker_Prager
+    # yield_criterion = Drucker_Prager
     yield_stress = '0. 1 1. 1'
     total_porosity = total_porosity
   [../]
@@ -192,7 +192,6 @@
   [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
-    block = '0 1'
   [../]
   [./volumetric_strain]
     order = CONSTANT
@@ -431,6 +430,8 @@
 
 [Executioner]
   # Preconditioned JFNK (default)
+  # petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
+  # petsc_options_value = 'hypre boomeramg cp 201'
   start_time = 0.0
   end_time = 3e-3
   dtmax = 1
@@ -439,8 +440,6 @@
   l_max_its = 200
   nl_max_its = 10
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg cp 201'
   nl_abs_tol = 1e-10 # 1e-10 to begin with
   reset_dt = true
   line_search = basic
@@ -452,7 +451,7 @@
 
 [Outputs]
   file_base = bench_HM_DP_out
-  output_initial = true
+  # output_initial = true
   exodus = true
   [./console]
     type = Console

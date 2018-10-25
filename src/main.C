@@ -1,8 +1,8 @@
-#include "RedbackApp.h"
-#include "MooseInit.h"
+#include "AppFactory.h"
 #include "Moose.h"
 #include "MooseApp.h"
-#include "AppFactory.h"
+#include "MooseInit.h"
+#include "RedbackApp.h"
 
 // Create a performance log
 PerfLog Moose::perf_log("Redback");
@@ -17,9 +17,10 @@ main(int argc, char * argv[])
   // Register this application's MooseApp and any it depends on
   RedbackApp::registerApps();
 
-  // This creates dynamic memory that we're responsible for deleting
+  // Create an instance of the application and store it in a smart pointer for easy cleanup
   std::shared_ptr<MooseApp> app = AppFactory::createAppShared("RedbackApp", argc, argv);
 
+  // Execute the application
   app->run();
 
   return 0;

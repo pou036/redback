@@ -1,15 +1,16 @@
+inactive = 'Functions'
 [Mesh]
   type = GeneratedMesh
   dim = 2
-  nx = 5
-  ny = 5
+  nx = 2
+  ny = 2
   xmin = -1.5
   xmax = 1.5
   ymin = -1
 []
 
 [Variables]
-  active = 'disp_z disp_y disp_x'
+  inactive = 'temp'
   [./disp_x]
     order = FIRST
     family = LAGRANGE
@@ -29,44 +30,43 @@
 [Materials]
   [./mat_mech]
     type = RedbackMechMaterialJ2
-    block = 0
-    disp_x = disp_x
-    disp_y = disp_y
-    disp_z = disp_z
+    block = '0'
+    disp_x = 'disp_x'
+    disp_y = 'disp_y'
+    disp_z = 'disp_z'
     exponent = 1
     fill_method = symmetric_isotropic
     C_ijkl = '576.923076923 384.615384615' # young = 1000, poisson = 0.3
     ref_pe_rate = 1
-    slope_yield_surface = -0.6
     yield_stress = '0. 1 1. 1'
-    total_porosity = total_porosity
+    total_porosity = 'total_porosity'
   [../]
   [./mat_nomech]
+    # exponent = 1
     type = RedbackMaterial
-    block = 0
+    block = '0'
     is_mechanics_on = false
     Aphi = 0
     ar = 1
     ar_F = 1
     ar_R = 1
-    exponent = 1
     gr = 0.1
     alpha_2 = 1
     ref_lewis_nb = 1
     phi0 = 0.1
-    total_porosity = total_porosity
+    total_porosity = 'total_porosity'
   [../]
 []
 
 [Functions]
-  active = 'downfunc'
+  inactive = 'upfunc downfunc spline_IC'
   [./upfunc]
     type = ParsedFunction
-    value = t
+    value = 't'
   [../]
   [./downfunc]
     type = ParsedFunction
-    value = -3e-2*t
+    value = '-3e-2*t'
   [../]
   [./spline_IC]
     type = ConstantFunction
@@ -74,65 +74,28 @@
 []
 
 [BCs]
-  active = 'constant_force_right left_disp rigth_disp_y left_disp_y'
   [./left_disp]
     type = DirichletBC
     variable = disp_x
-    boundary = 3
-    value = 0
-  [../]
-  [./right_disp]
-    type = FunctionPresetBC
-    variable = disp_x
-    boundary = 1
-    function = downfunc
-  [../]
-  [./bottom_temp]
-    type = NeumannBC
-    variable = temp
-    boundary = 0
-    value = -1
-  [../]
-  [./top_temp]
-    type = NeumannBC
-    variable = temp
-    boundary = 2
-    value = -1
-  [../]
-  [./left_disp_y]
-    type = DirichletBC
-    variable = disp_y
-    boundary = 3
-    value = 0
-  [../]
-  [./temp_mid_pts]
-    type = DirichletBC
-    variable = temp
-    boundary = '4 5 6 7'
-    value = 0
-  [../]
-  [./rigth_disp_y]
-    type = DirichletBC
-    variable = disp_y
-    boundary = 1
-    value = 0
-  [../]
-  [./temp_box]
-    type = DirichletBC
-    variable = temp
-    boundary = '0 1 2 3'
+    boundary = '3'
     value = 0
   [../]
   [./constant_force_right]
     type = NeumannBC
     variable = disp_x
-    boundary = 1
-    value = -2
+    boundary = '1'
+    value = -3
+  [../]
+  [./bottom_disp_y]
+    type = DirichletBC
+    variable = disp_y
+    boundary = 'bottom'
+    value = 0
   [../]
 []
 
 [AuxVariables]
-  active = 'mech_porosity Mod_Gruntfest_number total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress volumetric_strain mean_stress'
+  inactive = 'stress_zz peeq pe11 pe22 pe33'
   [./stress_zz]
     order = CONSTANT
     family = MONOMIAL
@@ -164,12 +127,11 @@
   [./mises_strain_rate]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
+    block = '0'
   [../]
   [./Mod_Gruntfest_number]
     order = CONSTANT
     family = MONOMIAL
-    block = '0 1'
   [../]
   [./volumetric_strain]
     order = CONSTANT
@@ -182,7 +144,7 @@
   [./mean_stress]
     order = CONSTANT
     family = MONOMIAL
-    block = 0
+    block = '0'
   [../]
   [./total_porosity]
     order = FIRST
@@ -195,7 +157,7 @@
 []
 
 [AuxKernels]
-  active = 'mech_porosity volumetric_strain total_porosity mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress Gruntfest_Number'
+  inactive = 'stress_zz pe11 pe22 pe33 eqv_plastic_strain'
   [./stress_zz]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -226,7 +188,7 @@
   [../]
   [./eqv_plastic_strain]
     type = FiniteStrainPlasticAux
-    variable = peeq
+    variable = 'peeq'
   [../]
   [./mises_stress]
     type = MaterialRealAux
@@ -241,20 +203,20 @@
   [./mises_strain_rate]
     type = MaterialRealAux
     variable = mises_strain_rate
-    block = 0
+    block = '0'
     property = mises_strain_rate
   [../]
   [./Gruntfest_Number]
     type = MaterialRealAux
     variable = Mod_Gruntfest_number
     property = mod_gruntfest_number
-    block = 0
+    block = '0'
   [../]
   [./mean_stress]
     type = MaterialRealAux
     variable = mean_stress
     property = mean_stress
-    block = 0
+    block = '0'
   [../]
   [./volumetric_strain]
     type = MaterialRealAux
@@ -269,18 +231,18 @@
   [./total_porosity]
     type = RedbackTotalPorosityAux
     variable = total_porosity
-    mechanical_porosity = mech_porosity
+    mechanical_porosity = 'mech_porosity'
   [../]
   [./mech_porosity]
     type = MaterialRealAux
     variable = mech_porosity
-    execute_on = timestep_end
+    execute_on = 'timestep_end'
     property = mechanical_porosity
   [../]
 []
 
 [Postprocessors]
-  active = 'volumetric_strain mises_strain mises_strain_rate volumetric_strain_rate mises_stress mean_stress'
+  inactive = 'temp_middle'
   [./mises_stress]
     type = PointValue
     variable = mises_stress
@@ -328,17 +290,17 @@
 
 [Executioner]
   # Preconditioned JFNK (default)
+  # petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
+  # petsc_options_value = 'hypre boomeramg cp 201'
+  type = Transient
   start_time = 0.0
   end_time = 0.005
   dtmax = 1
   dtmin = 1e-7
-  type = Transient
   l_max_its = 200
   nl_max_its = 10
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg cp 201'
-  nl_abs_tol = 1e-10 # 1e-10 to begin with
+  nl_abs_tol = 1e-10  # 1e-10 to begin with
   reset_dt = true
   line_search = basic
   [./TimeStepper]
@@ -348,8 +310,8 @@
 []
 
 [Outputs]
+  # output_initial = true
   file_base = bench_J2_out
-  output_initial = true
   exodus = true
   print_linear_residuals = true
   [./console]

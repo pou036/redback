@@ -23,8 +23,10 @@ validParams<RedbackDiffVarsAux>()
   return params;
 }
 
-RedbackDiffVarsAux::RedbackDiffVarsAux(const InputParameters & parameters) :
-    AuxKernel(parameters), _variable_1(coupledValue("variable_1")), _variable_2(coupledValue("variable_2"))
+RedbackDiffVarsAux::RedbackDiffVarsAux(const InputParameters & parameters)
+  : AuxKernel(parameters),
+    _variable_1(coupledValue("variable_1")),
+    _variable_2(coupledValue("variable_2"))
 {
 }
 
@@ -32,6 +34,6 @@ Real
 RedbackDiffVarsAux::computeValue()
 {
   Real difference;
-  difference = _variable_1[ _qp ] - _variable_2[ _qp ];
+  difference = _variable_1[_qp] - _variable_2[_qp];
   return difference;
 }

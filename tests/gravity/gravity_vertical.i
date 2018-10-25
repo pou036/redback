@@ -104,15 +104,17 @@
   [./dt]
     type = TimestepSize
   [../]
-  [./num_li]
-    type = NumLinearIterations
-  [../]
-  [./num_nli]
-    type = NumNonlinearIterations
-  [../]
+  #[./num_li]
+  #  type = NumLinearIterations
+  #[../]
+  #[./num_nli]
+  #  type = NumNonlinearIterations
+  #[../]
 []
 
 [Executioner]
+  # petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
+  # petsc_options_value = 'hypre boomeramg cp 201'
   start_time = 0.0
   end_time = 1e-3
   dtmax = 1
@@ -123,8 +125,6 @@
   l_max_its = 200
   nl_max_its = 10
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg cp 201'
   nl_abs_tol = 1e-8 # 1e-10 to begin with
   reset_dt = true
   line_search = basic
@@ -136,7 +136,7 @@
 
 [Outputs]
   file_base = gravity_vertical
-  output_initial = true
+  # output_initial = true
   exodus = true
   print_linear_residuals = true
   [./console]
@@ -144,4 +144,3 @@
     perf_log = true
   [../]
 []
-

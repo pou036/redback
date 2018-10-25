@@ -12,8 +12,8 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "ImageProcessing.h"
 #include "Function.h"
+#include "ImageProcessing.h"
 #include <fstream>
 
 template <>
@@ -25,11 +25,11 @@ validParams<ImageProcessing>()
   return params;
 }
 
-ImageProcessing::ImageProcessing(const InputParameters & parameters) :
-    Material(parameters), _func(getParam<FunctionName>("function"))
+ImageProcessing::ImageProcessing(const InputParameters & parameters)
+  : Material(parameters), _func(getParam<FunctionName>("function"))
 {
   _function.resize(1);
-  _function[ 0 ] = &getFunctionByName(_func);
+  _function[0] = &getFunctionByName(_func);
   idFile = fopen("idfile.txt", "w");
   fputs("", idFile);
   fclose(idFile);
@@ -50,7 +50,7 @@ ImageProcessing::computeQpProperties()
 void
 ImageProcessing::computeQpFunctions()
 {
-  if (_t_step == 1 && (*_function[ 0 ]).value(_t, _q_point[ _qp ]) == 0)
+  if (_t_step == 1 && (*_function[0]).value(_t, _q_point[_qp]) == 0)
   {
     idFile = fopen("idfile.txt", "a");
     std::ostringstream convert; // stream used for the conversion

@@ -96,7 +96,7 @@
   [./strain_rate]
     type = MaterialRealAux
     variable = strain_rate
-    property = mises_strain_rate
+    property = mises_strain_rate_nomech
   [../]
   [./solid_ratio]
     type = MaterialRealAux
@@ -244,4 +244,3 @@
     value = 0
   [../]
 []
-

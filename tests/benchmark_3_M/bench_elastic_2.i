@@ -32,12 +32,12 @@
     disp_x = disp_x
     disp_z = 0
     temperature = temp
-    #C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
+    # C_ijkl = '1.346e+03 5.769e+02 5.769e+02 1.346e+03 5.769e+02 1.346e+03 3.846e+02 3.846e+02 3.846e+2'
     yield_stress = '0. 1 1. 1'
     exponent = 1
     ref_pe_rate = 1
-    fill_method = symmetric_isotropic
-    C_ijkl = '576.923076923 384.615384615' # young = 1000, poisson = 0.3
+    youngs_modulus = 1000
+    poisson_ratio = 0.3
     total_porosity = total_porosity
   [../]
   [./mat1]
@@ -145,6 +145,8 @@
 
 [Executioner]
   # Preconditioned JFNK (default)
+  # petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
+  # petsc_options_value = 'hypre boomeramg cp 201'
   start_time = 0.0
   end_time = 5
   dtmax = 1
@@ -153,8 +155,6 @@
   num_steps = 3
   l_max_its = 500
   solve_type = PJFNK
-  petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
-  petsc_options_value = 'hypre boomeramg cp 201'
   nl_abs_tol = 1e-10 # 1e-10 to begin with
   reset_dt = true
   line_search = basic
@@ -166,13 +166,13 @@
 
 [Outputs]
   file_base = bench_elastic_2
-  output_initial = true
+  # output_initial = true
   exodus = true
   csv = true
   [./console]
     type = Console
     perf_log = true
-    linear_output = false
+    # linear_output = false
   [../]
 []
 
