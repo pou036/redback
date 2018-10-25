@@ -34,8 +34,14 @@ RedbackMechDissip::RedbackMechDissip(const InputParameters & parameters)
         hasMaterialProperty<Real>("mechanical_dissipation_jacobian_mech")
             ? getMaterialProperty<Real>("mechanical_dissipation_jacobian_mech")
             : getMaterialProperty<Real>("mechanical_dissipation_jacobian_no_mech")),
-    _dplastic_heat_dstrain(getMaterialProperty<RankTwoTensor>("dplastic_heat_dstrain")),
-    _dplastic_heat_dcurvature(getMaterialProperty<RankTwoTensor>("dplastic_heat_dcurvature")),
+    _dplastic_heat_dstrain(
+        hasMaterialProperty<RankTwoTensor>("dplastic_heat_dstrain")
+            ? getMaterialProperty<RankTwoTensor>("dplastic_heat_dstrain")
+            : getMaterialProperty<RankTwoTensor>("dplastic_heat_dstrain_no_mech")),
+    _dplastic_heat_dcurvature(
+        hasMaterialProperty<RankTwoTensor>("dplastic_heat_dcurvature")
+            ? getMaterialProperty<RankTwoTensor>("dplastic_heat_dcurvature")
+            : getMaterialProperty<RankTwoTensor>("dplastic_heat_dcurvature_no_mech")),
     _ndisp(coupledComponents("displacements")),
     _disp_var(_ndisp),
     _nwc(coupledComponents("rotations")),

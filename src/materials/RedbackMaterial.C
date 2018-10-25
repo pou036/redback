@@ -175,7 +175,6 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters)
     _eta2_param(getParam<Real>("eta2")),
     _Aphi_param(getParam<Real>("Aphi")),
     _pressurization_coefficient_param(getParam<Real>("pressurization_coefficient")),
-    _thermal_diffusivity_param(getParam<Real>("thermal_diffusivity")),
 
     _solid_compressibility_param(getParam<Real>("solid_compressibility")),
     _fluid_compressibility_param(getParam<Real>("fluid_compressibility")),
@@ -256,7 +255,6 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters)
     _mises_strain_rate_nomech(declareProperty<Real>("mises_strain_rate_nomech")),
 
     _pressurization_coefficient(declareProperty<Real>("pressurization_coefficient")),
-    _thermal_diffusivity(declareProperty<Real>("thermal_diffusivity")),
 
     _grad_temp(coupledGradient("temperature")),
     _grad_pore_pressure(coupledGradient("pore_pres")),
@@ -270,8 +268,10 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters)
     _solid_velocity(declareProperty<RealVectorValue>("solid_velocity")),
 
     _T0_param(getParam<Real>("temperature_reference")),
-    _P0_param(getParam<Real>("pressure_reference"))
+    _P0_param(getParam<Real>("pressure_reference")),
 
+    _dplastic_heat_dstrain_no_mech(declareProperty<RankTwoTensor>("dplastic_heat_dstrain_no_mech")),
+    _dplastic_heat_dcurvature_no_mech(declareProperty<RankTwoTensor>("dplastic_heat_dcurvature_no_mech"))
 {
   // Find functions to initialise parameters from
   unsigned int num_param_names = _init_from_functions__params.size();
@@ -445,6 +445,8 @@ RedbackMaterial::stepInitQpProperties()
       (1 - _phi0_param) * _solid_density_param + _phi0_param * _fluid_density_param;
   _mixture_gravity_term[_qp] = _mixture_density[_qp] * _gravity_param;
   _fluid_gravity_term[_qp] = _fluid_density_param * _gravity_param;
+  _dplastic_heat_dstrain_no_mech[_qp].zero();
+  _dplastic_heat_dcurvature_no_mech[_qp].zero();
 }
 
 void

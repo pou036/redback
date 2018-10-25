@@ -1,5 +1,5 @@
 # undrained oedometric test, similar to the one used in Redback
-# 
+#
 
 [Mesh]
   type = GeneratedMesh
@@ -54,13 +54,11 @@
     block = 0
     eta1 = 0
     gr = 0
-    total_porosity = 1
     solid_density = 0
     confining_pressure = 0
     delta = 0
     fluid_density = 0
     eta2 = 0
-    solid_compressibility = 0 # 1/(0.9*0.3)
     solid_thermal_expansion = 2.5E-3
     ref_lewis_nb = 1
   [../]
@@ -250,4 +248,3 @@
   file_base = bench_HM_diff
   csv = true
 []
-

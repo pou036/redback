@@ -49,8 +49,8 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    youngs_modulus = 5e4
-    poisson_ratio = 0.2
+    fill_method = symmetric_isotropic
+    C_ijkl = '31250 13888.8888889' # young = 5000, poisson = 0.2
     initial_stress = 'kxx 0 0  0 kxx 0  0 0 kzz'
   [../]
   [./mat_nomech]

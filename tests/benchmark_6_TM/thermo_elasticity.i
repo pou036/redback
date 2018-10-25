@@ -131,8 +131,8 @@
     disp_x = disp_x
     disp_y = disp_y
     disp_z = disp_z
-    youngs_modulus = 2.1e5
-    poisson_ratio = 0.3
+    fill_method = symmetric_isotropic
+    C_ijkl = '15000 121153.8461538462' # young = 2.1e5, poisson = 0.3
     total_porosity = 0
     temperature = temp
     temperature_reference = 298.0

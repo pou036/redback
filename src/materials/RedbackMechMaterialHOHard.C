@@ -740,7 +740,7 @@ int RedbackMechMaterialHOHard::cormoment(int num1, int num2){
 return result;
 }
 
-void RedbackMechMaterialHOHard::remplSigmaOld(RankTwoTensor & tens_old,  Real* vect, int  ini){
+void RedbackMechMaterialHOHard::remplSigmaOld(const RankTwoTensor & tens_old,  Real* vect, int  ini){
   for (unsigned i = 0; i < 3; ++i){
     vect[ini + i]=tens_old(i,i);
   }
@@ -753,7 +753,7 @@ void RedbackMechMaterialHOHard::remplSigmaOld(RankTwoTensor & tens_old,  Real* v
 }
 
 
-void RedbackMechMaterialHOHard::remplMomentOld(RankTwoTensor & tens_old, Real* vect, int  ini){
+void RedbackMechMaterialHOHard::remplMomentOld(const RankTwoTensor & tens_old, Real* vect, int  ini){
   vect[ini+9]=tens_old(0,0);
   vect[ini+10]=tens_old(0,1);
   vect[ini+11]=tens_old(0,2);
@@ -829,7 +829,13 @@ RedbackMechMaterialHOHard::returnMap(const RankTwoTensor & sig_old,
  * Get unitary flow tensor in deviatoric direction
  */
 void
-RedbackMechMaterialHOHard::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real pc, RankTwoTensor & flow_tensor)
+RedbackMechMaterialHOHard::getFlowTensor(const RankTwoTensor & sig,
+                                     Real /*q*/,
+                                     Real p,
+                                     Real /*q_y*/,
+                                     Real /*p_y*/,
+                                     Real yield_stress,
+                                     RankTwoTensor & flow_tensor)
 {
   flow_tensor.zero(); // TODO: not implemented yet
 }
@@ -840,13 +846,6 @@ RedbackMechMaterialHOHard::getFlowTensor(const RankTwoTensor & sig, Real q, Real
  */
 Real
 RedbackMechMaterialHOHard::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real pc)
-{
-  return 0; // TODO: not implemented yet
-}
-
-Real
-RedbackMechMaterialHOHard::getDerivativeFlowIncrement(
-  const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
 {
   return 0; // TODO: not implemented yet
 }
@@ -866,7 +865,7 @@ RedbackMechMaterialHOHard::getJac(const RankTwoTensor & sig,
 }
 
 void
-RedbackMechMaterialHOHard::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterialHOHard::get_py_qy(Real /*p*/, Real /*q*/, Real & p_y, Real & q_y, Real /*yield_stress*/, bool & /*is_plastic*/)
 {
   // TODO: not implemented yet
   p_y = 0;

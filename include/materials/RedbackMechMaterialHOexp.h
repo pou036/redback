@@ -33,32 +33,32 @@ public:
   RedbackMechMaterialHOexp(const InputParameters & parameters);
 
 protected:
-  virtual void initQpStatefulProperties();
-  virtual void computeQpStrain(const RankTwoTensor & Fhat);
-  virtual void computeQpStress();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpStrain(const RankTwoTensor & Fhat) override;
+  virtual void computeQpStress() override;
   int corsigma(int , int );
   int cormoment(int , int );
-  void remplSigmaOld(RankTwoTensor & , Real* vect, int );
-  void remplMomentOld(RankTwoTensor &, Real* vect, int );
+  void remplSigmaOld(const RankTwoTensor & , Real* vect, int );
+  void remplMomentOld(const RankTwoTensor &, Real* vect, int );
   void recupSigmaNew(RankTwoTensor &, Real* vect, int );
   void recupMomentNew(RankTwoTensor &, Real* vect, int );
 
 
-  virtual void computeQpElasticityTensor();
+  virtual void computeQpElasticityTensor() override;
 
-  void returnMap(const RankTwoTensor &,
+  virtual void returnMap(const RankTwoTensor &,
                  const RankTwoTensor &,
                  const RankFourTensor &,
                  RankTwoTensor &,
                  RankTwoTensor &,
                  Real &,
-                 Real &);
-  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
-  void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
-  Real getFlowIncrement(Real, Real, Real, Real, Real);
-  void get_py_qy(Real, Real, Real &, Real &, Real);
-  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real);
-  virtual void computeRedbackTerms(RankTwoTensor &, Real, Real);
+                 Real &) override;
+  virtual void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) override;
+  virtual void
+  getFlowTensor(const RankTwoTensor &, Real, Real, Real, Real, Real, RankTwoTensor &) override;
+  virtual Real getFlowIncrement(Real, Real, Real, Real, Real) override;
+  virtual void get_py_qy(Real, Real, Real &, Real &, Real, bool &) override;
+  virtual void computeRedbackTerms(RankTwoTensor &, Real, Real) override;
 
 
   MaterialProperty<RankTwoTensor> & _symmetric_strain;
@@ -114,7 +114,7 @@ protected:
 
   /// Minimum fraction of applied strain that may be applied during adaptive stepsizing
   Real _min_stepsize;
-  
+
   Real _plast_factor;
   /// Number of time division due to the non convergence of the routine for the return-map
   MaterialProperty<Real> & _iter;
@@ -148,7 +148,7 @@ private:
 
   /// determines the translation from B_ijkl to the Rank-4 tensor
   MooseEnum _fill_method_bending;
-  
+
   Real _cohesion, _friction_coefficient, _dilatancy_coefficient, _hardening_mech_modulus, _beta_star, _tolerance_tau;
   Real _shear_modulus, _bulk_modulus, _cosserat_shear_modulus, _cosserat_radius;
   Real _plastic_potential_multiplier;

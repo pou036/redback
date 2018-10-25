@@ -422,7 +422,13 @@ RedbackMechMaterialHOelastic::returnMap(const RankTwoTensor & sig_old,
  * Get unitary flow tensor in deviatoric direction
  */
 void
-RedbackMechMaterialHOelastic::getFlowTensor(const RankTwoTensor & sig, Real q, Real p, Real pc, RankTwoTensor & flow_tensor)
+RedbackMechMaterialHOelastic::getFlowTensor(const RankTwoTensor & sig,
+                                     Real /*q*/,
+                                     Real p,
+                                     Real /*q_y*/,
+                                     Real /*p_y*/,
+                                     Real yield_stress,
+                                     RankTwoTensor & flow_tensor)
 {
   flow_tensor.zero(); // TODO: not implemented yet
 }
@@ -433,13 +439,6 @@ RedbackMechMaterialHOelastic::getFlowTensor(const RankTwoTensor & sig, Real q, R
  */
 Real
 RedbackMechMaterialHOelastic::getFlowIncrement(Real sig_eqv, Real pressure, Real q_yield_stress, Real p_yield_stress, Real pc)
-{
-  return 0; // TODO: not implemented yet
-}
-
-Real
-RedbackMechMaterialHOelastic::getDerivativeFlowIncrement(
-  const RankTwoTensor & sig, Real pressure, Real sig_eqv, Real pc, Real q_yield_stress, Real p_yield_stress)
 {
   return 0; // TODO: not implemented yet
 }
@@ -459,12 +458,11 @@ RedbackMechMaterialHOelastic::getJac(const RankTwoTensor & sig,
 }
 
 void
-RedbackMechMaterialHOelastic::get_py_qy(Real p, Real q, Real & p_y, Real & q_y, Real yield_stress)
+RedbackMechMaterialHOelastic::get_py_qy(Real /*p*/, Real /*q*/, Real & p_y, Real & q_y, Real /*yield_stress*/, bool & /*is_plastic*/)
 {
   // TODO: not implemented yet
   p_y = 0;
   q_y = 0;
 }
-
 
 //#endif // COSSERAT_DYNLIB_EXISTS

@@ -32,23 +32,23 @@ public:
 
 protected:
   //virtual void stepInitQpProperties();
-  virtual void initQpStatefulProperties();
-  virtual void computeQpStrain(const RankTwoTensor & Fhat);
-  virtual void computeQpStress();
-  virtual void computeQpElasticityTensor();
+  virtual void initQpStatefulProperties() override;
+  virtual void computeQpStrain(const RankTwoTensor & Fhat) override;
+  virtual void computeQpStress() override;
+  virtual void computeQpElasticityTensor() override;
 
-  void returnMap(const RankTwoTensor &,
+  virtual void returnMap(const RankTwoTensor &,
                  const RankTwoTensor &,
                  const RankFourTensor &,
                  RankTwoTensor &,
                  RankTwoTensor &,
                  Real &,
-                 Real &);
-  void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &);
-  void getFlowTensor(const RankTwoTensor &, Real, Real, Real, RankTwoTensor &);
-  Real getFlowIncrement(Real, Real, Real, Real, Real);
-  void get_py_qy(Real, Real, Real &, Real &, Real);
-  Real getDerivativeFlowIncrement(const RankTwoTensor &, Real, Real, Real, Real, Real);
+                 Real &) override;
+  virtual void getJac(const RankTwoTensor &, const RankFourTensor &, Real, Real, Real, Real, Real, Real, RankFourTensor &) override;
+  virtual void
+  getFlowTensor(const RankTwoTensor &, Real, Real, Real, Real, Real, RankTwoTensor &) override;
+  virtual Real getFlowIncrement(Real, Real, Real, Real, Real) override;
+  virtual void get_py_qy(Real, Real, Real &, Real &, Real, bool &) override;
 
   MaterialProperty<RankTwoTensor> & _symmetric_strain;
   MaterialProperty<RankTwoTensor> & _antisymmetric_strain;

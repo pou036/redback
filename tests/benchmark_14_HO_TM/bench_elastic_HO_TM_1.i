@@ -1,5 +1,5 @@
 # A thermal loading of an elastic rod
-# 
+#
 
 [Mesh]
   type = GeneratedMesh
@@ -63,7 +63,6 @@
     delta = 0
     fluid_density = 0
     eta2 = 0
-    solid_compressibility = 0 # 1/(0.9*0.3)
     solid_thermal_expansion = 2.5E-3
     temperature = temp
   [../]
@@ -757,4 +756,3 @@
   file_base = bench_TM_elastic_1
   csv = true
 []
-

@@ -1,5 +1,5 @@
 # undrained oedometric test, similar to the one used in Redback
-# 
+#
 
 [Mesh]
   type = GeneratedMesh
@@ -49,7 +49,7 @@
     cohesion = 100
     C_ijkl = '1 1.5 0.75'
     plasticity_type = DeBorst_2D
-	beta_star = 2
+    beta_star = 2
   [../]
   [./mat_nomech]
     # 3.7037
@@ -64,7 +64,6 @@
     delta = 0
     fluid_density = 0
     eta2 = 0
-    solid_compressibility = 0 # 1/(0.9*0.3)
     solid_thermal_expansion = 2.5E-3
   [../]
 []
@@ -736,4 +735,3 @@
   file_base = bench_HM_elastic_1
   csv = true
 []
-

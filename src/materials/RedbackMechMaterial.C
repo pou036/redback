@@ -856,15 +856,14 @@ RedbackMechMaterial::formDamageDissipation(RankTwoTensor & /*sig*/)
    *  Then, the damage potential is defined as damage_potential = - d Psi / d D
    * =  (1-D) * Psi0
    */
-  Real bulk_modulus = _youngs_modulus * _poisson_ratio / (1 + _poisson_ratio) /
-                      (1 - 2 * _poisson_ratio);                      // First Lame modulus
-  Real shear_modulus = 0.5 * _youngs_modulus / (1 + _poisson_ratio); // Second Lame modulus (shear)
+  Real lambda = _Cijkl(0,0,1,1); // first Lamé coefficient
+  Real mu = _Cijkl(0,1,0,1); // second Lamé coefficient
 
   Real vol_elastic_strain = _elastic_strain[_qp].trace();
   Real dev_elastic_strain = std::pow(2.0 / 3.0, 0.5) * _elastic_strain[_qp].L2norm();
 
-  Real Psi0_vol = (2 / 3) * bulk_modulus * std::pow(vol_elastic_strain, 2);
-  Real Psi0_dev = (3 / 2) * shear_modulus * std::pow(dev_elastic_strain, 2);
+  Real Psi0_vol = (2 / 3) * lambda * std::pow(vol_elastic_strain, 2);
+  Real Psi0_dev = (3 / 2) * mu * std::pow(dev_elastic_strain, 2);
   Real Psi0 = Psi0_vol + Psi0_dev;\
 
   Real damage_potential = (1 - _damage[_qp]) * Psi0;

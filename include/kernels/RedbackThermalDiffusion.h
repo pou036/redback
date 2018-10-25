@@ -32,8 +32,6 @@ protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
   
-  const MaterialProperty<Real> & _thermal_diffusivity;
-
   const MaterialProperty<Real> & _diffusivity;
 
 private:
