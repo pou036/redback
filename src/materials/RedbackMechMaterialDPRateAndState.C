@@ -78,9 +78,7 @@ RedbackMechMaterialDPRateAndState::getFlowTensor(const RankTwoTensor & sig,
     val = 3.0 / (2.0 * q);
   flow_tensor = sig_dev * val;
   flow_tensor.addIa(-_slope_yield_surface / 3.0);
-  flow_tensor /= std::pow(2.0 / 3.0, 0.5) * flow_tensor.L2norm();
-  // flow_tensor /= std::pow(2.0/3.0,0.5)*flow_tensor.L2norm(); // TODO:
-  // debugging, returning a tensor of norm sqrt(3/2) to match the J2 case
+  flow_tensor /= std::pow(3.0 / 2.0 + _slope_yield_surface * _slope_yield_surface, 0.5);
 }
 
 /**
@@ -125,7 +123,7 @@ RedbackMechMaterialDPRateAndState::getJac(const RankTwoTensor & sig,
   RankTwoTensor sig_dev, fij, flow_dirn;
   RankTwoTensor dfi_dft;
   RankFourTensor dfd_dft, dfd_dsig, dfi_dsig;
-  Real f1, f2, f3;
+  Real f1, f2, f3, f4;
   Real dfi_dp, dfi_dseqv;
 
   sig_dev = sig.deviatoric();
@@ -149,11 +147,13 @@ RedbackMechMaterialDPRateAndState::getJac(const RankTwoTensor & sig,
   f1 = 0.0;
   f2 = 0.0;
   f3 = 0.0;
+  f4 = 0.0;
   if (sig_eqv > 1e-8)
   {
-    f1 = 3.0 / (2.0 * sig_eqv);
+    f1 = 3.0 / (2.0 * sig_eqv * std::pow(3.0 / 2.0 + _slope_yield_surface * _slope_yield_surface, 0.5));
     f2 = f1 / 3.0;
-    f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0));
+    f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0) * std::pow(3.0 / 2.0 + _slope_yield_surface * _slope_yield_surface, 0.5));
+    f4 = 3.0 / (2.0 * sig_eqv);
   }
 
   // This loop calculates the first term
@@ -162,7 +162,7 @@ RedbackMechMaterialDPRateAndState::getJac(const RankTwoTensor & sig,
       for (k = 0; k < 3; ++k)
         for (l = 0; l < 3; ++l)
           dfi_dsig(i, j, k, l) =
-              flow_dirn(i, j) * (f1 * sig_dev(k, l) * dfi_dseqv + dfi_dp * deltaFunc(k, l) / 3.0);
+              flow_dirn(i, j) * (f4 * sig_dev(k, l) * dfi_dseqv + dfi_dp * deltaFunc(k, l) / 3.0);
 
   // This loop calculates the second term. Read REDBACK's documentation
   // (same as J2 plasticity case)
