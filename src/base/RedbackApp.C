@@ -79,6 +79,7 @@
 #include "RedbackMechMaterialCC.h"
 #include "RedbackMechMaterialCCanisotropic.h"
 #include "RedbackMechMaterialDP.h"
+#include "RedbackMechMaterialDPRateAndState.h"
 #include "RedbackMechMaterialElastic.h"
 #include "RedbackMechMaterialExpCC.h"
 #include "RedbackMechMaterialJ2.h"
@@ -184,6 +185,7 @@ RedbackApp::registerObjects(Factory & factory)
   registerMaterial(RedbackMaterial);
   registerMaterial(RedbackMechMaterialJ2);
   registerMaterial(RedbackMechMaterialDP);
+  registerMaterial(RedbackMechMaterialDPRateAndState);
   registerMaterial(RedbackMechMaterialCC);
   registerMaterial(RedbackMechMaterialCCanisotropic);
   registerMaterial(RedbackMechMaterialElastic);
