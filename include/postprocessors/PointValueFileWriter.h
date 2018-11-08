@@ -54,17 +54,23 @@ protected:
   std::string _value_pore;
   std::string _value_grain;
   unsigned int _refinement;
-  int _dim;
-  int _size_CT;
-  int _size_CT_z;
+  int _size_x;
+  int _size_y;
+  int _size_z;
   Real _pore_volume;
   Real _upper_layer_bound;
   Real _lower_layer_bound;
-  std::string _data_axis_text;
+  std::string _data_x_axis_text;
+  std::string _data_y_axis_text;
+  std::string _data_z_axis_text;
+  std::vector<std::pair<int, int>> _boundary_elements;
+  std::string _boundary_element_value;
+  std::vector<std::vector<std::string>> _data;
 
-  void FileWriter(std::vector<std::vector<std::string>> data, FileName file);
-  std::vector<std::pair<int, int>> BoundaryElements(std::string boundary_element_value,
-                                                    std::vector<std::vector<std::string>> data);
+  void FileWriter();
+  void BoundaryElements();
+  bool CheckBoundary(int z, int y, int x);
+  void PushBoundaryElement(int z, int y, int x);
 };
 
 #endif /* POINTVALUEFILEWRITER_H */

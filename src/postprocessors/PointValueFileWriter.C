@@ -34,8 +34,10 @@ validParams<PointValueFileWriter>()
   params.addRequiredParam<std::string>("pore_value", "Value of the pore (string)");
   params.addRequiredParam<std::string>("grain_value", "Value of the grain (string)");
   params.addParam<unsigned int>(
-      "refinement_level", 0, "Number of elements wanted per pixel of the image");
-  params.addParam<int>("mesh_dimension", 2, "dimension of the mesh used");
+      "refinement_level", 1, "Number of elements wanted per pixel of the image");
+  params.addRequiredParam<int>("size_x", "Resolution in x");
+  params.addRequiredParam<int>("size_y", "Resolution in y");
+  params.addRequiredParam<int>("size_z", "Resolution in z. z=1 if 2D");
 
   return params;
 }
@@ -51,13 +53,15 @@ PointValueFileWriter::PointValueFileWriter(const InputParameters & parameters)
     _multiapp_file_name(getParam<FileName>("multiapp_file")),
     _value_pore(getParam<std::string>("pore_value")),
     _value_grain(getParam<std::string>("grain_value")),
-    _refinement(getParam<unsigned int>("refinement_level") + 1),
-    _dim(getParam<int>("mesh_dimension"))
+    _refinement(getParam<unsigned int>("refinement_level")),
+    _size_x(getParam<int>("size_x")),
+    _size_y(getParam<int>("size_y")),
+    _size_z(getParam<int>("size_z"))
 {
   // read the CTscan txt file and extract the information
   std::string line;
   std::ifstream myfile(_file_name);
-  std::vector<std::vector<std::string>> data;
+  _data.clear();
   if (myfile.is_open())
   {
     while (myfile.good())
@@ -67,7 +71,7 @@ PointValueFileWriter::PointValueFileWriter(const InputParameters & parameters)
       std::istream_iterator<std::string> begin(ss);
       std::istream_iterator<std::string> end;
       std::vector<std::string> vstrings(begin, end);
-      data.push_back(vstrings);
+      _data.push_back(vstrings);
     }
     myfile.close();
   }
@@ -75,90 +79,90 @@ PointValueFileWriter::PointValueFileWriter(const InputParameters & parameters)
     mooseError("Unable to open file");
 
   // keeping only necessary data
-  data.erase(data.end() - 1);
-  data.erase(data.begin(), data.begin() + 2*_dim+1);
+  _data.erase(_data.end() - 1);
+  _data.erase(_data.begin(), _data.begin() + (_size_z>1?7:5));
 
-  // calculating _size_CT in both direction of CTscan
-  _size_CT = data[0].size();
-  std::cout << "_size_CT = " << _size_CT << std::endl;
-
-  if (_dim==3)
-    _size_CT_z=_size_CT;
-  else
-    _size_CT_z=1;
+  // assert size match the user's
+  mooseAssert(_size_x == _data[0].size(),"x resolution provided does not match the x resolution of the file.");
+  mooseAssert(_size_y*_size_z == _data.size(),"y*z resolution provided does not match the y*z resolution of the file.");
 
   std::vector<std::vector<std::string>> data_refined;
   if (_refinement > 1)
   {
+    // don't refine in z if 2D
+    int refinement_z = (_size_z>1?_refinement:1);
     // uniform refinement
-    data_refined.resize(_refinement * data.size());
-    for (int z = 0; z < _size_CT_z; ++z)
+    data_refined.resize(_size_y*_refinement * _size_z*refinement_z);
+    for (int z = 0; z < _size_z; ++z)
     {
-      for (int y = 0; y < _size_CT; ++y)
+      for (int y = 0; y < _size_y; ++y)
       {
-        for (int x = 0; x < _size_CT; ++y)
+        for (int x = 0; x < _size_x; ++x)
           for (int i = 0; i < _refinement; ++i)
-            data_refined[z*_refinement*_size_CT*_refinement+_refinement*y].push_back(data[z*_size_CT+y][x]);
+            data_refined[z*refinement_z*_size_y*_refinement+_refinement*y].push_back(_data[z*_size_y+y][x]);
         for (int j = 1; j < _refinement; ++j)
-          data_refined[z*_refinement*_size_CT*_refinement+_refinement * y + j] = data_refined[z*_refinement*_size_CT*_refinement+_refinement*y];
+          data_refined[z*refinement_z*_size_y*_refinement+_refinement * y + j] = data_refined[z*refinement_z*_size_y*_refinement+_refinement*y];
       }
-      for (int k = 1; k < _refinement; ++k)
-        for (int y = 0; y < _refinement*_size_CT; ++y)
-          data_refined[(z*_refinement+k)*_size_CT*_refinement+y] = data_refined[z*_refinement*_size_CT*_refinement+y];
+        for (int k = 1; k < refinement_z; ++k)
+          for (int y = 0; y < _refinement*_size_y; ++y)
+            data_refined[(z*refinement_z+k)*_size_y*_refinement+y] = data_refined[z*refinement_z*_size_y*_refinement+y];
     }
-
-    // calculating _size_CT in both direction of CTscan
-    _size_CT = data_refined[0].size();
-    std::cout << "_size_CT = " << _size_CT << std::endl;
-
-    if (_dim==3)
-      _size_CT_z=_size_CT;
+    _data = data_refined;
+    // reevaluating _size_ after refinement
+    _size_x = _data[0].size();
+    _size_y *= _refinement;
+    if (_size_z>1)
+      _size_z *= _refinement;
+    std::cout << "_size_x = " << _size_x << std::endl;
+    std::cout << "_size_y = " << _size_y << std::endl;
+    std::cout << "_size_z = " << _size_z << std::endl;
   }
-  else
-    data_refined = data;
 
   // calculating the pore_volume
-  for (int z = 0; z < _size_CT_z; ++z)
-    for (int y = 0; y < _size_CT; ++y)
-      for (int x = 0; x < _size_CT; ++x)
-        if (data_refined[z*_size_CT+y][x] == _value_pore)
-          _pore_volume += std::pow(1 / (float)_size_CT, _dim);
+  for (int z = 0; z < _size_z; ++z)
+    for (int y = 0; y < _size_y; ++y)
+      for (int x = 0; x < _size_x; ++x)
+        if (_data[z*_size_y+y][x] == _value_pore)
+          _pore_volume += 1 / (float)(_size_x*_size_y*_size_z);
   std::cout << "_pore_volume = " << _pore_volume << std::endl;
 
   // init value
   _poro_value = _pore_volume;
 
   // init _upper_layer_bound
-  std::vector<std::pair<int, int>> boundary_elements = BoundaryElements(_value_grain, data_refined);
-  std::cout << "done with boundary elements"<< std::endl;
-
-  Real layer_volume = std::pow(1 / (float)_size_CT, _dim) * boundary_elements.size();
+  _boundary_element_value=_value_grain;
+  BoundaryElements();
+  Real layer_volume = 1 / (float)(_size_x*_size_y*_size_z) * _boundary_elements.size();
   _upper_layer_bound = _pore_volume + layer_volume;
   std::cout << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
 
   // init _lower_layer_bound
-  boundary_elements = BoundaryElements(_value_pore, data_refined);
-  layer_volume = std::pow(1 / (float)_size_CT, _dim) * boundary_elements.size();
-  _lower_layer_bound = _pore_volume - layer_volume;
+  _lower_layer_bound = _pore_volume;
   std::cout << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
 
-  // position along x or y axis for writing data file
-  std::vector<Real> data_axis;
-  for (int i = 0; i < _size_CT; ++i)
-    data_axis.push_back(i * 1. / (float)_size_CT);
-  // convert data to text
   std::stringstream ss;
-  for (size_t i = 0; i < data_axis.size(); ++i)
-    ss << data_axis[i] << " ";
-  _data_axis_text = ss.str();
+  // position along x/y/z axis for writing data file
+  for (int i = 0; i < _size_x; ++i)
+    ss << i / (float)_size_x << " ";
+  _data_x_axis_text = ss.str();
+
+  ss.str(std::string());
+  for (int i = 0; i < _size_y; ++i)
+    ss << i / (float)_size_y << " ";
+  _data_y_axis_text = ss.str();
+
+  ss.str(std::string());
+  for (int i = 0; i < _size_z; ++i)
+    ss << i / (float)_size_z << " ";
+  _data_z_axis_text = ss.str();
+
   // write file
-  FileWriter(data_refined, _working_file_name);
+  FileWriter();
 
   std::cout << "done with constructor"<< std::endl;
 }
 
-void
-PointValueFileWriter::execute()
+void PointValueFileWriter::execute()
 {
   _old_poro_value = _poro_value;
   _poro_value = _system.point_value(_var_number, _point, false);
@@ -187,8 +191,7 @@ PointValueFileWriter::execute()
   }
 }
 
-Real
-PointValueFileWriter::getValue()
+Real PointValueFileWriter::getValue()
 {
   // define precipitation
   bool precip = false;
@@ -217,7 +220,7 @@ PointValueFileWriter::getValue()
   // read the CTscan txt file and extract the information
   std::string line;
   std::ifstream myfile(_working_file_name);
-  std::vector<std::vector<std::string>> data;
+  _data.clear();
   if (myfile.is_open())
   {
     while (myfile.good())
@@ -227,7 +230,7 @@ PointValueFileWriter::getValue()
       std::istream_iterator<std::string> begin(ss);
       std::istream_iterator<std::string> end;
       std::vector<std::string> vstrings(begin, end);
-      data.push_back(vstrings);
+      _data.push_back(vstrings);
     }
     myfile.close();
   }
@@ -235,39 +238,29 @@ PointValueFileWriter::getValue()
     mooseError("Unable to open file");
 
   // keeping only necessary data
-  data.erase(data.end() - 1);
-  data.erase(data.begin(), data.begin() + 2*_dim+1);
+  _data.erase(_data.end() - 1);
+  _data.erase(_data.begin(), _data.begin() + (_size_z>1?7:5));
 
   // how to check which elements are boundary, precip or disso
-  std::string boundary_element_value = _value_grain;
+  _boundary_element_value = _value_grain;
   std::string new_value = _value_pore;
   if (precip == true)
   {
-    boundary_element_value = _value_pore;
+    _boundary_element_value = _value_pore;
     new_value = _value_grain;
   }
 
   Real layer_volume;
-  std::vector<std::pair<int, int>> boundary_elements;
   while (_pore_volume < 1. - 1e-10 && _pore_volume > 0. + 1e-10)
   {
-    boundary_elements = BoundaryElements(boundary_element_value, data);
+    BoundaryElements();
 
     // Calculating the volume of the boundary elements layer
-    layer_volume = std::pow(1 / (float)_size_CT, _dim) * boundary_elements.size();
+    layer_volume = 1 / (float)(_size_x*_size_y*_size_z) * _boundary_elements.size();
     std::cout << "layer_volume = " << layer_volume << std::endl;
 
     // break of loop if layer is too big to remove
-    if (precip == true)
-    {
-      if (_pore_volume - layer_volume <= _poro_value)
-      {
-        _lower_layer_bound = _pore_volume - layer_volume;
-        std::cout << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
-        break;
-      }
-    }
-    else if (_pore_volume + layer_volume > _poro_value)
+    if (precip == false && _pore_volume + layer_volume > _poro_value)
     {
       _upper_layer_bound = _pore_volume + layer_volume;
       std::cout << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
@@ -277,112 +270,115 @@ PointValueFileWriter::getValue()
     }
 
     // assign new value to the boundary elements
-    for (int i = 0; i < boundary_elements.size(); ++i)
-      data[boundary_elements[i].first][boundary_elements[i].second] = new_value;
+    for (int i = 0; i < _boundary_elements.size(); ++i)
+      _data[_boundary_elements[i].first][_boundary_elements[i].second] = new_value;
 
     // updating _pore_volume
     if (precip == true)
     {
       _upper_layer_bound = _pore_volume;
-      std::cout << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
       _pore_volume -= layer_volume;
+      if(_poro_value > _pore_volume)
+      {
+        std::cout << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
+        _lower_layer_bound = _pore_volume;
+        std::cout << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
+        break;
+      }
     }
     else
-    {
       _pore_volume += layer_volume;
-    }
     std::cout << "_pore_volume = " << _pore_volume << std::endl;
   }
 
   // write file
-  FileWriter(data, _working_file_name);
+  FileWriter();
 
   std::cout << "... erosion done" << std::endl;
 
   return _poro_value;
 }
 
-void
-PointValueFileWriter::FileWriter(std::vector<std::vector<std::string>> data, FileName file)
+void PointValueFileWriter::FileWriter()
 {
   // convert data to text
   std::vector<std::string> data_text;
-  for (size_t z = 0; z < _size_CT_z; ++z)
+  for (size_t z = 0; z < _size_z; ++z)
   {
-    for (size_t y = 0; y < _size_CT; ++y)
+    for (size_t y = 0; y < _size_y; ++y)
     {
       std::stringstream ss;
-      for (size_t x = 0; x < _size_CT; ++x)
+      for (size_t x = 0; x < _size_x; ++x)
       {
-        ss << data[z*_size_CT+y][x] << " ";
+        ss << _data[z*_size_y+y][x] << " ";
       }
       data_text.push_back(ss.str());
     }
   }
 
   // write text
-  FILE * output_file = fopen(file.c_str(), "w");
+  FILE * output_file = fopen(_working_file_name.c_str(), "w");
   fputs("AXIS X\n", output_file);
-  fputs(_data_axis_text.c_str(), output_file);
+  fputs(_data_x_axis_text.c_str(), output_file);
   fputs("\nAXIS Y\n", output_file);
-  fputs(_data_axis_text.c_str(), output_file);
-  if (_dim==3)
+  fputs(_data_y_axis_text.c_str(), output_file);
+  if (_size_z>1)
   {
     fputs("\nAXIS Z\n", output_file);
-    fputs(_data_axis_text.c_str(), output_file);
+    fputs(_data_z_axis_text.c_str(), output_file);
   }
   fputs("\nDATA\n", output_file);
-  for (size_t z = 0; z < _size_CT_z; ++z)
+  for (size_t z = 0; z < _size_z; ++z)
   {
-    for (size_t y = 0; y < _size_CT; ++y)
+    for (size_t y = 0; y < _size_y; ++y)
     {
-      fputs(data_text[z*_size_CT+y].c_str(), output_file);
+      fputs(data_text[z*_size_y+y].c_str(), output_file);
       fputs("\n", output_file);
     }
   }
   fclose(output_file);
 }
 
-std::vector<std::pair<int, int>>
-PointValueFileWriter::BoundaryElements(std::string boundary_element_value,
-                                       std::vector<std::vector<std::string>> data)
+void PointValueFileWriter::BoundaryElements()
 {
-  std::vector<std::pair<int, int>> boundary_elements;
-  bool boundary;
-  for (int z = 0; z < _size_CT_z; ++z)
-  {
-    for (int y = 0; y < _size_CT; ++y)
-    {
-      for (int x = 0; x < _size_CT; ++x)
-      {
-        if (data[z*_size_CT+y][x] == boundary_element_value)
-        {
-          boundary = false;
-          if (z - 1 >= 0)
-            if (data[(z - 1)*_size_CT+y][x] != boundary_element_value)
-              boundary = true;
-          if (z + 1 < _size_CT_z)
-            if (data[(z + 1)*_size_CT+y][x] != boundary_element_value)
-              boundary = true;
-          if (y - 1 >= 0)
-            if (data[z*_size_CT+y - 1][x] != boundary_element_value)
-              boundary = true;
-          if (y + 1 < _size_CT)
-            if (data[z*_size_CT+y + 1][x] != boundary_element_value)
-              boundary = true;
-          if (x - 1 >= 0)
-            if (data[z*_size_CT+y][x - 1] != boundary_element_value)
-              boundary = true;
-          if (x + 1 < _size_CT)
-            if (data[z*_size_CT+y][x + 1] != boundary_element_value)
-              boundary = true;
-          if (boundary == true &&
-              std::find(boundary_elements.begin(), boundary_elements.end(), std::make_pair(z*_size_CT+y, x)) ==
-                  boundary_elements.end())
-            boundary_elements.push_back(std::make_pair(z*_size_CT+y, x));
-        }
-      }
-    }
-  }
-  return boundary_elements;
+  _boundary_elements.clear();
+  for (int z = 0; z < _size_z; ++z)
+    for (int y = 0; y < _size_y; ++y)
+      for (int x = 0; x < _size_x; ++x)
+        if (_data[z*_size_y+y][x] != _boundary_element_value)
+          for (int axe = 0; axe < 3; ++axe)
+            for (int dir = -1; dir < 2; dir+=2)
+              if (CheckBoundary(z+(axe==2?dir:0), y+(axe==1?dir:0), x+(axe==0?dir:0)))
+              {
+                //direct neighbor element is a boundary element
+                PushBoundaryElement(z+(axe==2?dir:0), y+(axe==1?dir:0), x+(axe==0?dir:0));
+                for (int axe2 = 0; axe2 < 3; ++axe2)
+                  if (axe2!=axe)
+                    for (int dir2 = -1; dir2 < 2; dir2+=2)
+                      if (CheckBoundary(z+(axe2==2?dir2:0), y+(axe2==1?dir2:0), x+(axe2==0?dir2:0)))
+                      {
+                        //2D diagonal neighbor element is a boundary element
+                        PushBoundaryElement(z+(axe2==2?dir2:0)+(axe==2?dir:0), y+(axe2==1?dir2:0)+(axe==1?dir:0), x+(axe2==0?dir2:0)+(axe==0?dir:0));
+                        for (int axe3 = 0; axe3 < 3; ++axe3)
+                          if (axe3!=axe && axe3!=axe2)
+                            for (int dir3 = -1; dir3 < 2; dir3+=2)
+                              if (CheckBoundary(z+(axe3==2?dir3:0), y+(axe3==1?dir3:0), x+(axe3==0?dir3:0)))
+                                //3D diagonal  neighbor element is a boundary element
+                                PushBoundaryElement(z+(axe3==2?dir3:0)+(axe2==2?dir2:0)+(axe==2?dir:0), y+(axe3==1?dir3:0)+(axe2==1?dir2:0)+(axe==1?dir:0), x+(axe3==0?dir3:0)+(axe2==0?dir2:0)+(axe==0?dir:0));
+                      }
+              }
+  std::cout << "_boundary_elements.size() = " << _boundary_elements.size() << std::endl;
+}
+
+bool PointValueFileWriter::CheckBoundary(int z, int y, int x)
+{
+  if(z >= 0 && z < _size_z && y >= 0 && y < _size_y && x >= 0 && x < _size_x && _data[z*_size_y+y][x] == _boundary_element_value)
+    return true;
+  return false;
+}
+
+void PointValueFileWriter::PushBoundaryElement(int z, int y, int x)
+{
+  if (std::find(_boundary_elements.begin(), _boundary_elements.end(), std::make_pair(z*_size_y+y,x)) == _boundary_elements.end())
+    _boundary_elements.push_back(std::make_pair(z*_size_y+y,x));
 }
