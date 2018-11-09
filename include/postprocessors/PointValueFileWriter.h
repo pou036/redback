@@ -57,6 +57,7 @@ protected:
   int _size_x;
   int _size_y;
   int _size_z;
+  std::string _neighbours;
   Real _pore_volume;
   Real _upper_layer_bound;
   Real _lower_layer_bound;

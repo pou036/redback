@@ -38,6 +38,8 @@ validParams<PointValueFileWriter>()
   params.addRequiredParam<int>("size_x", "Resolution in x");
   params.addRequiredParam<int>("size_y", "Resolution in y");
   params.addRequiredParam<int>("size_z", "Resolution in z. z=1 if 2D");
+  MooseEnum neighbours = MooseEnum("direct diag2D diag3D", "diag2D");
+  params.addParam<MooseEnum>("neighbours", neighbours, "type of neighbours detection");
 
   return params;
 }
@@ -56,7 +58,8 @@ PointValueFileWriter::PointValueFileWriter(const InputParameters & parameters)
     _refinement(getParam<unsigned int>("refinement_level")),
     _size_x(getParam<int>("size_x")),
     _size_y(getParam<int>("size_y")),
-    _size_z(getParam<int>("size_z"))
+    _size_z(getParam<int>("size_z")),
+    _neighbours(getParam<MooseEnum>("neighbours"))
 {
   // read the CTscan txt file and extract the information
   std::string line;
@@ -80,38 +83,43 @@ PointValueFileWriter::PointValueFileWriter(const InputParameters & parameters)
 
   // keeping only necessary data
   _data.erase(_data.end() - 1);
-  _data.erase(_data.begin(), _data.begin() + (_size_z>1?7:5));
+  _data.erase(_data.begin(), _data.begin() + (_size_z > 1 ? 7 : 5));
 
   // assert size match the user's
-  mooseAssert(_size_x == _data[0].size(),"x resolution provided does not match the x resolution of the file.");
-  mooseAssert(_size_y*_size_z == _data.size(),"y*z resolution provided does not match the y*z resolution of the file.");
+  mooseAssert(_size_x == _data[0].size(),
+              "x resolution provided does not match the x resolution of the file.");
+  mooseAssert(_size_y * _size_z == _data.size(),
+              "y*z resolution provided does not match the y*z resolution of the file.");
 
   std::vector<std::vector<std::string>> data_refined;
   if (_refinement > 1)
   {
     // don't refine in z if 2D
-    int refinement_z = (_size_z>1?_refinement:1);
+    int refinement_z = (_size_z > 1 ? _refinement : 1);
     // uniform refinement
-    data_refined.resize(_size_y*_refinement * _size_z*refinement_z);
+    data_refined.resize(_size_y * _refinement * _size_z * refinement_z);
     for (int z = 0; z < _size_z; ++z)
     {
       for (int y = 0; y < _size_y; ++y)
       {
         for (int x = 0; x < _size_x; ++x)
           for (int i = 0; i < _refinement; ++i)
-            data_refined[z*refinement_z*_size_y*_refinement+_refinement*y].push_back(_data[z*_size_y+y][x]);
+            data_refined[z * refinement_z * _size_y * _refinement + _refinement * y].push_back(
+                _data[z * _size_y + y][x]);
         for (int j = 1; j < _refinement; ++j)
-          data_refined[z*refinement_z*_size_y*_refinement+_refinement * y + j] = data_refined[z*refinement_z*_size_y*_refinement+_refinement*y];
+          data_refined[z * refinement_z * _size_y * _refinement + _refinement * y + j] =
+              data_refined[z * refinement_z * _size_y * _refinement + _refinement * y];
       }
-        for (int k = 1; k < refinement_z; ++k)
-          for (int y = 0; y < _refinement*_size_y; ++y)
-            data_refined[(z*refinement_z+k)*_size_y*_refinement+y] = data_refined[z*refinement_z*_size_y*_refinement+y];
+      for (int k = 1; k < refinement_z; ++k)
+        for (int y = 0; y < _refinement * _size_y; ++y)
+          data_refined[(z * refinement_z + k) * _size_y * _refinement + y] =
+              data_refined[z * refinement_z * _size_y * _refinement + y];
     }
     _data = data_refined;
     // reevaluating _size_ after refinement
     _size_x = _data[0].size();
     _size_y *= _refinement;
-    if (_size_z>1)
+    if (_size_z > 1)
       _size_z *= _refinement;
     std::cout << "_size_x = " << _size_x << std::endl;
     std::cout << "_size_y = " << _size_y << std::endl;
@@ -122,17 +130,17 @@ PointValueFileWriter::PointValueFileWriter(const InputParameters & parameters)
   for (int z = 0; z < _size_z; ++z)
     for (int y = 0; y < _size_y; ++y)
       for (int x = 0; x < _size_x; ++x)
-        if (_data[z*_size_y+y][x] == _value_pore)
-          _pore_volume += 1 / (float)(_size_x*_size_y*_size_z);
+        if (_data[z * _size_y + y][x] == _value_pore)
+          _pore_volume += 1 / (float)(_size_x * _size_y * _size_z);
   std::cout << "_pore_volume = " << _pore_volume << std::endl;
 
   // init value
   _poro_value = _pore_volume;
 
   // init _upper_layer_bound
-  _boundary_element_value=_value_grain;
+  _boundary_element_value = _value_grain;
   BoundaryElements();
-  Real layer_volume = 1 / (float)(_size_x*_size_y*_size_z) * _boundary_elements.size();
+  Real layer_volume = 1 / (float)(_size_x * _size_y * _size_z) * _boundary_elements.size();
   _upper_layer_bound = _pore_volume + layer_volume;
   std::cout << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
 
@@ -159,10 +167,11 @@ PointValueFileWriter::PointValueFileWriter(const InputParameters & parameters)
   // write file
   FileWriter();
 
-  std::cout << "done with constructor"<< std::endl;
+  std::cout << "done with constructor" << std::endl;
 }
 
-void PointValueFileWriter::execute()
+void
+PointValueFileWriter::execute()
 {
   _old_poro_value = _poro_value;
   _poro_value = _system.point_value(_var_number, _point, false);
@@ -191,7 +200,8 @@ void PointValueFileWriter::execute()
   }
 }
 
-Real PointValueFileWriter::getValue()
+Real
+PointValueFileWriter::getValue()
 {
   // define precipitation
   bool precip = false;
@@ -239,7 +249,7 @@ Real PointValueFileWriter::getValue()
 
   // keeping only necessary data
   _data.erase(_data.end() - 1);
-  _data.erase(_data.begin(), _data.begin() + (_size_z>1?7:5));
+  _data.erase(_data.begin(), _data.begin() + (_size_z > 1 ? 7 : 5));
 
   // how to check which elements are boundary, precip or disso
   _boundary_element_value = _value_grain;
@@ -254,9 +264,17 @@ Real PointValueFileWriter::getValue()
   while (_pore_volume < 1. - 1e-10 && _pore_volume > 0. + 1e-10)
   {
     BoundaryElements();
+    if (_boundary_elements.size() == 0)
+    {
+      _upper_layer_bound = _pore_volume;
+      std::cout << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
+      _lower_layer_bound = _pore_volume;
+      std::cout << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
+      break;
+    }
 
     // Calculating the volume of the boundary elements layer
-    layer_volume = 1 / (float)(_size_x*_size_y*_size_z) * _boundary_elements.size();
+    layer_volume = 1 / (float)(_size_x * _size_y * _size_z) * _boundary_elements.size();
     std::cout << "layer_volume = " << layer_volume << std::endl;
 
     // break of loop if layer is too big to remove
@@ -278,7 +296,7 @@ Real PointValueFileWriter::getValue()
     {
       _upper_layer_bound = _pore_volume;
       _pore_volume -= layer_volume;
-      if(_poro_value > _pore_volume)
+      if (_poro_value > _pore_volume)
       {
         std::cout << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
         _lower_layer_bound = _pore_volume;
@@ -299,7 +317,8 @@ Real PointValueFileWriter::getValue()
   return _poro_value;
 }
 
-void PointValueFileWriter::FileWriter()
+void
+PointValueFileWriter::FileWriter()
 {
   // convert data to text
   std::vector<std::string> data_text;
@@ -310,7 +329,7 @@ void PointValueFileWriter::FileWriter()
       std::stringstream ss;
       for (size_t x = 0; x < _size_x; ++x)
       {
-        ss << _data[z*_size_y+y][x] << " ";
+        ss << _data[z * _size_y + y][x] << " ";
       }
       data_text.push_back(ss.str());
     }
@@ -322,7 +341,7 @@ void PointValueFileWriter::FileWriter()
   fputs(_data_x_axis_text.c_str(), output_file);
   fputs("\nAXIS Y\n", output_file);
   fputs(_data_y_axis_text.c_str(), output_file);
-  if (_size_z>1)
+  if (_size_z > 1)
   {
     fputs("\nAXIS Z\n", output_file);
     fputs(_data_z_axis_text.c_str(), output_file);
@@ -332,53 +351,75 @@ void PointValueFileWriter::FileWriter()
   {
     for (size_t y = 0; y < _size_y; ++y)
     {
-      fputs(data_text[z*_size_y+y].c_str(), output_file);
+      fputs(data_text[z * _size_y + y].c_str(), output_file);
       fputs("\n", output_file);
     }
   }
   fclose(output_file);
 }
 
-void PointValueFileWriter::BoundaryElements()
+void
+PointValueFileWriter::BoundaryElements()
 {
   _boundary_elements.clear();
   for (int z = 0; z < _size_z; ++z)
     for (int y = 0; y < _size_y; ++y)
       for (int x = 0; x < _size_x; ++x)
-        if (_data[z*_size_y+y][x] != _boundary_element_value)
+        if (_data[z * _size_y + y][x] != _boundary_element_value)
           for (int axe = 0; axe < 3; ++axe)
-            for (int dir = -1; dir < 2; dir+=2)
-              if (CheckBoundary(z+(axe==2?dir:0), y+(axe==1?dir:0), x+(axe==0?dir:0)))
+            for (int dir = -1; dir < 2; dir += 2)
+              if (CheckBoundary(
+                      z + (axe == 2 ? dir : 0), y + (axe == 1 ? dir : 0), x + (axe == 0 ? dir : 0)))
               {
-                //direct neighbor element is a boundary element
-                PushBoundaryElement(z+(axe==2?dir:0), y+(axe==1?dir:0), x+(axe==0?dir:0));
-                for (int axe2 = 0; axe2 < 3; ++axe2)
-                  if (axe2!=axe)
-                    for (int dir2 = -1; dir2 < 2; dir2+=2)
-                      if (CheckBoundary(z+(axe2==2?dir2:0), y+(axe2==1?dir2:0), x+(axe2==0?dir2:0)))
-                      {
-                        //2D diagonal neighbor element is a boundary element
-                        PushBoundaryElement(z+(axe2==2?dir2:0)+(axe==2?dir:0), y+(axe2==1?dir2:0)+(axe==1?dir:0), x+(axe2==0?dir2:0)+(axe==0?dir:0));
-                        for (int axe3 = 0; axe3 < 3; ++axe3)
-                          if (axe3!=axe && axe3!=axe2)
-                            for (int dir3 = -1; dir3 < 2; dir3+=2)
-                              if (CheckBoundary(z+(axe3==2?dir3:0), y+(axe3==1?dir3:0), x+(axe3==0?dir3:0)))
-                                //3D diagonal  neighbor element is a boundary element
-                                PushBoundaryElement(z+(axe3==2?dir3:0)+(axe2==2?dir2:0)+(axe==2?dir:0), y+(axe3==1?dir3:0)+(axe2==1?dir2:0)+(axe==1?dir:0), x+(axe3==0?dir3:0)+(axe2==0?dir2:0)+(axe==0?dir:0));
-                      }
+                // direct neighbor element is a boundary element
+                PushBoundaryElement(
+                    z + (axe == 2 ? dir : 0), y + (axe == 1 ? dir : 0), x + (axe == 0 ? dir : 0));
+                if (_neighbours == "diag2D" || _neighbours == "diag3D")
+                  for (int axe2 = 0; axe2 < 3; ++axe2)
+                    if (axe2 != axe)
+                      for (int dir2 = -1; dir2 < 2; dir2 += 2)
+                        if (CheckBoundary(z + (axe2 == 2 ? dir2 : 0),
+                                          y + (axe2 == 1 ? dir2 : 0),
+                                          x + (axe2 == 0 ? dir2 : 0)))
+                        {
+                          // 2D diagonal neighbor element is a boundary element
+                          PushBoundaryElement(z + (axe2 == 2 ? dir2 : 0) + (axe == 2 ? dir : 0),
+                                              y + (axe2 == 1 ? dir2 : 0) + (axe == 1 ? dir : 0),
+                                              x + (axe2 == 0 ? dir2 : 0) + (axe == 0 ? dir : 0));
+                          if (_neighbours == "diag3D")
+                            for (int axe3 = 0; axe3 < 3; ++axe3)
+                              if (axe3 != axe && axe3 != axe2)
+                                for (int dir3 = -1; dir3 < 2; dir3 += 2)
+                                  if (CheckBoundary(z + (axe3 == 2 ? dir3 : 0),
+                                                    y + (axe3 == 1 ? dir3 : 0),
+                                                    x + (axe3 == 0 ? dir3 : 0)))
+                                    // 3D diagonal  neighbor element is a boundary element
+                                    PushBoundaryElement(
+                                        z + (axe3 == 2 ? dir3 : 0) + (axe2 == 2 ? dir2 : 0) +
+                                            (axe == 2 ? dir : 0),
+                                        y + (axe3 == 1 ? dir3 : 0) + (axe2 == 1 ? dir2 : 0) +
+                                            (axe == 1 ? dir : 0),
+                                        x + (axe3 == 0 ? dir3 : 0) + (axe2 == 0 ? dir2 : 0) +
+                                            (axe == 0 ? dir : 0));
+                        }
               }
   std::cout << "_boundary_elements.size() = " << _boundary_elements.size() << std::endl;
 }
 
-bool PointValueFileWriter::CheckBoundary(int z, int y, int x)
+bool
+PointValueFileWriter::CheckBoundary(int z, int y, int x)
 {
-  if(z >= 0 && z < _size_z && y >= 0 && y < _size_y && x >= 0 && x < _size_x && _data[z*_size_y+y][x] == _boundary_element_value)
+  if (z >= 0 && z < _size_z && y >= 0 && y < _size_y && x >= 0 && x < _size_x &&
+      _data[z * _size_y + y][x] == _boundary_element_value)
     return true;
   return false;
 }
 
-void PointValueFileWriter::PushBoundaryElement(int z, int y, int x)
+void
+PointValueFileWriter::PushBoundaryElement(int z, int y, int x)
 {
-  if (std::find(_boundary_elements.begin(), _boundary_elements.end(), std::make_pair(z*_size_y+y,x)) == _boundary_elements.end())
-    _boundary_elements.push_back(std::make_pair(z*_size_y+y,x));
+  if (std::find(_boundary_elements.begin(),
+                _boundary_elements.end(),
+                std::make_pair(z * _size_y + y, x)) == _boundary_elements.end())
+    _boundary_elements.push_back(std::make_pair(z * _size_y + y, x));
 }
