@@ -71,6 +71,7 @@ protected:
 
   void FileWriter();
   void BoundaryElements();
+  void Neighbours(int z, int y, int x);
   bool CheckBoundary(int z, int y, int x);
   void PushBoundaryElement(int z, int y, int x);
 };

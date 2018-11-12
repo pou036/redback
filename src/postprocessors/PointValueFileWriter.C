@@ -371,52 +371,114 @@ PointValueFileWriter::BoundaryElements()
   for (int z = 0; z < _size_z; ++z)
     for (int y = 0; y < _size_y; ++y)
       for (int x = 0; x < _size_x; ++x)
-        if (_data[z * _size_y + y][x] != _boundary_element_value)
-          for (int axe = 0; axe < 3; ++axe)
-            for (int dir = -1; dir < 2; dir += 2)
-              if (CheckBoundary(
-                      z + (axe == 2 ? dir : 0), y + (axe == 1 ? dir : 0), x + (axe == 0 ? dir : 0)))
-              {
-                // direct neighbor element is a boundary element
-                PushBoundaryElement(
-                    z + (axe == 2 ? dir : 0), y + (axe == 1 ? dir : 0), x + (axe == 0 ? dir : 0));
-                if (_neighbours == "diag2D" || _neighbours == "diag3D")
-                  for (int axe2 = 0; axe2 < 3; ++axe2)
-                    if (axe2 != axe)
-                      for (int dir2 = -1; dir2 < 2; dir2 += 2)
-                        if (CheckBoundary(z + (axe2 == 2 ? dir2 : 0),
-                                          y + (axe2 == 1 ? dir2 : 0),
-                                          x + (axe2 == 0 ? dir2 : 0)))
-                        {
-                          // 2D diagonal neighbor element is a boundary element
-                          PushBoundaryElement(z + (axe2 == 2 ? dir2 : 0) + (axe == 2 ? dir : 0),
-                                              y + (axe2 == 1 ? dir2 : 0) + (axe == 1 ? dir : 0),
-                                              x + (axe2 == 0 ? dir2 : 0) + (axe == 0 ? dir : 0));
-                          if (_neighbours == "diag3D")
-                            for (int axe3 = 0; axe3 < 3; ++axe3)
-                              if (axe3 != axe && axe3 != axe2)
-                                for (int dir3 = -1; dir3 < 2; dir3 += 2)
-                                  if (CheckBoundary(z + (axe3 == 2 ? dir3 : 0),
-                                                    y + (axe3 == 1 ? dir3 : 0),
-                                                    x + (axe3 == 0 ? dir3 : 0)))
-                                    // 3D diagonal  neighbor element is a boundary element
-                                    PushBoundaryElement(
-                                        z + (axe3 == 2 ? dir3 : 0) + (axe2 == 2 ? dir2 : 0) +
-                                            (axe == 2 ? dir : 0),
-                                        y + (axe3 == 1 ? dir3 : 0) + (axe2 == 1 ? dir2 : 0) +
-                                            (axe == 1 ? dir : 0),
-                                        x + (axe3 == 0 ? dir3 : 0) + (axe2 == 0 ? dir2 : 0) +
-                                            (axe == 0 ? dir : 0));
-                        }
-              }
+        if (_data[z * _size_y + y][x] == _boundary_element_value)
+          Neighbours(z, y, x);
   std::cout << "_boundary_elements.size() = " << _boundary_elements.size() << std::endl;
 }
+
+void
+PointValueFileWriter::Neighbours(int z, int y, int x)
+{
+  if (_neighbours == "diag3D")
+  {
+    for (int dir = -1; dir < 2; ++dir)
+      for (int dir2 = -1; dir2 < 2; ++dir2)
+        for (int dir3 = -1; dir3 < 2; ++dir3)
+          if (CheckBoundary(z + dir, y + dir2, x + dir3))
+          {
+            PushBoundaryElement(z, y, x);
+            return;
+          }
+  }
+  else
+  {
+    for (int dir = -1; dir < 2; dir += 2)
+      for (int axe = 0; axe < 3; ++axe)
+        if (CheckBoundary(
+                z + (axe == 2 ? dir : 0), y + (axe == 1 ? dir : 0), x + (axe == 0 ? dir : 0)))
+        {
+          PushBoundaryElement(z, y, x);
+          return;
+        }
+    if (_neighbours == "diag2D")
+      for (int dir = -1; dir < 2; dir += 2)
+        for (int dir2 = -1; dir2 < 2; dir2 += 2)
+        {
+          if (CheckBoundary(z, y + dir, x + dir2))
+          {
+            PushBoundaryElement(z, y, x);
+            return;
+          }
+          if (CheckBoundary(z + dir, y, x + dir2))
+          {
+            PushBoundaryElement(z, y, x);
+            return;
+          }
+          if (CheckBoundary(z + dir, y + dir2, x))
+          {
+            PushBoundaryElement(z, y, x);
+            return;
+          }
+        }
+  }
+}
+
+// void
+// PointValueFileWriter::BoundaryElements()
+// {
+//   _boundary_elements.clear();
+//   for (int z = 0; z < _size_z; ++z)
+//     for (int y = 0; y < _size_y; ++y)
+//       for (int x = 0; x < _size_x; ++x)
+//         if (_data[z * _size_y + y][x] != _boundary_element_value)
+//           for (int axe = 0; axe < 3; ++axe)
+//             for (int dir = -1; dir < 2; dir += 2)
+//               if (CheckBoundary(
+//                       z + (axe == 2 ? dir : 0), y + (axe == 1 ? dir : 0), x + (axe == 0 ? dir :
+//                       0)))
+//               {
+//                 // direct neighbor element is a boundary element
+//                 PushBoundaryElement(
+//                     z + (axe == 2 ? dir : 0), y + (axe == 1 ? dir : 0), x + (axe == 0 ? dir :
+//                     0));
+//                 if (_neighbours == "diag2D" || _neighbours == "diag3D")
+//                   for (int axe2 = 0; axe2 < 3; ++axe2)
+//                     if (axe2 != axe)
+//                       for (int dir2 = -1; dir2 < 2; dir2 += 2)
+//                         if (CheckBoundary(z + (axe2 == 2 ? dir2 : 0),
+//                                           y + (axe2 == 1 ? dir2 : 0),
+//                                           x + (axe2 == 0 ? dir2 : 0)))
+//                         {
+//                           // 2D diagonal neighbor element is a boundary element
+//                           PushBoundaryElement(z + (axe2 == 2 ? dir2 : 0) + (axe == 2 ? dir : 0),
+//                                               y + (axe2 == 1 ? dir2 : 0) + (axe == 1 ? dir : 0),
+//                                               x + (axe2 == 0 ? dir2 : 0) + (axe == 0 ? dir : 0));
+//                           if (_neighbours == "diag3D")
+//                             for (int axe3 = 0; axe3 < 3; ++axe3)
+//                               if (axe3 != axe && axe3 != axe2)
+//                                 for (int dir3 = -1; dir3 < 2; dir3 += 2)
+//                                   if (CheckBoundary(z + (axe3 == 2 ? dir3 : 0),
+//                                                     y + (axe3 == 1 ? dir3 : 0),
+//                                                     x + (axe3 == 0 ? dir3 : 0)))
+//                                     // 3D diagonal  neighbor element is a boundary element
+//                                     PushBoundaryElement(
+//                                         z + (axe3 == 2 ? dir3 : 0) + (axe2 == 2 ? dir2 : 0) +
+//                                             (axe == 2 ? dir : 0),
+//                                         y + (axe3 == 1 ? dir3 : 0) + (axe2 == 1 ? dir2 : 0) +
+//                                             (axe == 1 ? dir : 0),
+//                                         x + (axe3 == 0 ? dir3 : 0) + (axe2 == 0 ? dir2 : 0) +
+//                                             (axe == 0 ? dir : 0));
+//                         }
+//               }
+//   std::cout << "_boundary_elements.size() = " << _boundary_elements.size() << std::endl;
+// }
 
 bool
 PointValueFileWriter::CheckBoundary(int z, int y, int x)
 {
   if (z >= 0 && z < _size_z && y >= 0 && y < _size_y && x >= 0 && x < _size_x &&
-      _data[z * _size_y + y][x] == _boundary_element_value)
+      _data[z * _size_y + y][x] != _boundary_element_value)
+    // checking if neighbor is not boundary_element
     return true;
   return false;
 }
