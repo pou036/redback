@@ -58,15 +58,16 @@ protected:
   int _size_y;
   int _size_z;
   std::string _neighbours;
+  std::vector<std::vector<std::string>> _data;
   Real _pore_volume;
+  std::string _boundary_element_value;
+  bool _precip_old;
+  std::vector<std::pair<int, int>> _boundary_elements;
   Real _upper_layer_bound;
   Real _lower_layer_bound;
   std::string _data_x_axis_text;
   std::string _data_y_axis_text;
   std::string _data_z_axis_text;
-  std::vector<std::pair<int, int>> _boundary_elements;
-  std::string _boundary_element_value;
-  std::vector<std::vector<std::string>> _data;
 
   void FileWriter();
   void BoundaryElements();
