@@ -19,6 +19,10 @@ validParams<RedbackMaterial>()
 {
   InputParameters params = validParams<Material>();
 
+  params.addParam<Real>("DPG_lambda", 0.0, "Lambda parameter for cnoidal equation using DPG");
+  params.addParam<Real>("DPG_mu", 0.0, "Mu parameter for cnoidal equation using DPG");
+  params.addParam<Real>("DPG_m", 0.0, "Exponent m parameter for cnoidal equation using DPG");
+  params.addParam<Real>("DPG_beta", 0.0, "Beta parameter for cnoidal equation using DPG");
   params.addParam<std::vector<std::string>>(
       "init_from_functions__params", "The names of the parameters to be initialised as functions.");
   params.addParam<std::vector<FunctionName>>(
@@ -153,6 +157,12 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters)
     _init_from_functions__function_names(
         getParam<std::vector<FunctionName>>("init_from_functions__function_names")),
     _phi0_param(getParam<Real>("phi0")),
+
+    _dpg_lambda_param(getParam<Real>("DPG_lambda")),
+    _dpg_mu_param(getParam<Real>("DPG_mu")),
+    _dpg_m_param(getParam<Real>("DPG_m")),
+    _dpg_beta_param(getParam<Real>("DPG_beta")),
+
     _gr_param(getParam<Real>("gr")),
     _ref_lewis_nb_param(getParam<Real>("ref_lewis_nb")),
     _ar_param(getParam<Real>("ar")),
@@ -191,6 +201,11 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters)
     _mixture_gravity_term(
         declareProperty<RealVectorValue>("mixture_gravity_term")),               // rho_mixture * g
     _fluid_gravity_term(declareProperty<RealVectorValue>("fluid_gravity_term")), // rho_fluid * g
+
+    _dpg_lambda(declareProperty<Real>("DPG_lambda")),
+    _dpg_mu(declareProperty<Real>("DPG_mu")),
+    _dpg_m(declareProperty<Real>("DPG_m")),
+    _dpg_beta(declareProperty<Real>("DPG_beta")),
 
     _gr(declareProperty<Real>("gr")),
     _ref_lewis_nb(declareProperty<Real>("ref_lewis_nb")),
@@ -315,7 +330,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters)
 MooseEnum
 RedbackMaterial::continuationMethodEnum()
 {
-  return MooseEnum("Gruntfest Lewis");
+  return MooseEnum("Gruntfest Lewis DPG_lambda DPG_mu");
 }
 
 MooseEnum
@@ -410,6 +425,11 @@ RedbackMaterial::stepInitQpProperties()
     _thermal_diffusivity[_qp] = _thermal_diffusivity_param;
   }
 
+  _dpg_lambda[_qp] = _dpg_lambda_param;
+  _dpg_mu[_qp] = _dpg_mu_param;
+  _dpg_m[_qp] = _dpg_m_param;
+  _dpg_beta[_qp] = _dpg_beta_param;
+
   switch (_continuation_method)
   {
     case Gruntfest:
@@ -417,6 +437,12 @@ RedbackMaterial::stepInitQpProperties()
       break;
     case Lewis:
       _ref_lewis_nb[_qp] *= _continuation_parameter[0];
+      break;
+    case DPG_lambda:
+      _dpg_lambda[_qp] *= _continuation_parameter[0];
+      break;
+    case DPG_mu:
+      _dpg_mu[_qp] *= _continuation_parameter[0];
       break;
     default:
       mooseError("Continuation method not implemented yet");

@@ -26,7 +26,15 @@ validParams<RedbackContinuation>()
   params.addParam<Real>("continuation_parameter_old", 0.0, "Old value of continuation parameter");
   params.addParam<Real>(
       "continuation_parameter_older", 0.0, "Older value of continuation parameter");
-  params.addCoupledVar("directional_derivative", 0.0, "The directional derivative function");
+  //params.addCoupledVar("directional_derivative", 0.0, "The directional derivative function");
+  params.addParam<PostprocessorName>("directional_derivative_nodal",
+        "Postprocessor name for nodal part of directional derivative");
+  params.addParam<PostprocessorName>("directional_derivative_elemental",
+        "Postprocessor name for elemental part of (average value of) directional derivative");
+  //params.addParam<PostprocessorName>("number_of_nodes",
+  //      "Postprocessor name to get number of nodes");
+  //params.addParam<PostprocessorName>("number_of_elements",
+  //      "Postprocessor name to get number of elements");)
   return params;
 }
 
@@ -36,17 +44,67 @@ RedbackContinuation::RedbackContinuation(const InputParameters & parameters)
     _ds_old_param(getParam<Real>("ds_old")),
     _continuation_parameter_old_param(getParam<Real>("continuation_parameter_old")),
     _continuation_parameter_older_param(getParam<Real>("continuation_parameter_older")),
-    _directional_derivative(coupledScalarValue("directional_derivative"))
+    //_directional_derivative(coupledScalarValue("directional_derivative"))
+    //_num_nodes(isParamValid("number_of_nodes")
+    //  ? &getPostprocessorValue("number_of_nodes")
+    //  : NULL),
+    //_num_elements(isParamValid("number_of_elements")
+    //  ? &getPostprocessorValue("number_of_elements")
+    //  : NULL),
+    _dd_nodal(isParamValid("directional_derivative_nodal")
+      ? &getPostprocessorValue("directional_derivative_nodal")
+      : NULL),
+    _dd_elemental(isParamValid("directional_derivative_elemental")
+      ? &getPostprocessorValue("directional_derivative_elemental")
+      : NULL)
 {
+  _are_nodal_vars_involved = (NULL != _dd_nodal);
+  _are_elemental_vars_involved = (NULL != _dd_elemental);
+  //if (NULL == _num_nodes)
+  //  mooseError("ScalarKernel RedbackContinuation requires postprocessor \"number_of_nodes\"");
+  //if (NULL == _num_elements)
+  //  mooseError("ScalarKernel RedbackContinuation requires postprocessor \"number_of_elements\"");
 }
 
 Real
 RedbackContinuation::computeQpResidual()
 {
-  Real lambda_dot_old_param =
-      (_continuation_parameter_old_param - _continuation_parameter_older_param) / _ds_old_param;
-  return _directional_derivative[0] +
-         lambda_dot_old_param * (_u[_i] - _continuation_parameter_old_param) - _ds_param;
+  Real my_sum = 0;
+  if (_are_nodal_vars_involved)
+    my_sum += *_dd_nodal;
+  if (_are_elemental_vars_involved)
+    my_sum += *_dd_elemental;
+  Real lambda_dot_old_param = (_continuation_parameter_old_param -
+    _continuation_parameter_older_param) / _ds_old_param;
+  my_sum += lambda_dot_old_param * (_u[_i] - _continuation_parameter_old_param);
+  return my_sum - _ds_param;
+
+  /*
+  if (_are_nodal_vars_involved)
+  {
+    my_sum += *_dd_nodal;
+//    std::cout << "  ScalarKernel RedbackContinuation::nodal="<< *_dd_nodal << std::endl;
+  }
+  if (_are_elemental_vars_involved)
+  {
+    my_sum += *_dd_elemental;
+//    std::cout << "  ScalarKernel RedbackContinuation::elemental="<< *_dd_elemental << std::endl;
+  }
+  Real lambda_comp = lambda_dot_old_param * (_u[_i] - _continuation_parameter_old_param);
+  std::cout << "  ScalarKernel RedbackContinuation::lambda_comp="<< lambda_comp << std::endl;
+  my_sum += lambda_comp;
+//  std::cout << "  ScalarKernel RedbackContinuation::my_sum="<< my_sum << std::endl;
+
+//  Real thomas = (_are_nodal_vars_involved ? *_dd_nodal: 0.0) +
+//      (_are_elemental_vars_involved ? *_dd_elemental : 0.0) +
+//      lambda_dot_old_param * (_u[_i] - _continuation_parameter_old_param) - _ds_param;
+//  std::cout << "ScalarKernel RedbackContinuation::computeQpResidual(), thomas="<< thomas << std::endl<< std::endl;
+
+  return my_sum;
+//  return (_are_nodal_vars_involved ? *_dd_nodal: 0) +
+//         (_are_elemental_vars_involved ? *_dd_elemental : 0) +
+//         lambda_dot_old_param * (_u[_i] - _continuation_parameter_old_param) - _ds_param;
+ */
 }
 
 Real

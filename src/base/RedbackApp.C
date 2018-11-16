@@ -44,6 +44,16 @@
 #include "InterfaceStress.h"
 
 // Kernels
+#include "DPG1.h"
+#include "DPG2.h"
+#include "DPG3.h"
+#include "DPG4.h"
+#include "DPG5.h"
+#include "DPGmypb1.h"
+#include "DPGmypb1Ta.h"
+#include "DPGmypb1Tb.h"
+#include "DPGmypb11.h"
+#include "DPGmypb11T.h"
 #include "RedbackChemEndo.h"
 #include "RedbackChemExo.h"
 #include "RedbackChemPressure.h"
@@ -89,6 +99,7 @@
 #include "ReturnMapIterDT.h"
 
 // AuxKernels
+#include "RedbackContinuationAux.h"
 #include "RedbackContinuationTangentAux.h"
 #include "RedbackDiffVarsAux.h"
 #include "RedbackPolarTensorMaterialAux.h"
@@ -147,6 +158,17 @@ RedbackApp::registerObjects(Factory & factory)
   registerInterfaceKernel(InterfaceDarcy);
   registerInterfaceKernel(InterfaceStress);
 
+  registerKernel(DPG1);
+  registerKernel(DPG2);
+  registerKernel(DPG3);
+  registerKernel(DPG4);
+  registerKernel(DPG5);
+  registerKernel(DPGmypb1);
+  registerKernel(DPGmypb1Ta);
+  registerKernel(DPGmypb1Tb);
+  registerKernel(DPGmypb11);
+  registerKernel(DPGmypb11T);
+
   registerKernel(RedbackChemEndo);
   registerKernel(RedbackChemExo);
   registerKernel(RedbackChemPressure);
@@ -185,6 +207,7 @@ RedbackApp::registerObjects(Factory & factory)
 
   registerExecutioner(ReturnMapIterDT);
 
+  registerAux(RedbackContinuationAux);
   registerAux(RedbackContinuationTangentAux);
   registerAux(RedbackDiffVarsAux);
   registerAux(RedbackTotalPorosityAux);

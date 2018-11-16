@@ -36,7 +36,9 @@ public:
   enum ContinuationMethod
   {
     Gruntfest,
-    Lewis
+    Lewis,
+    DPG_lambda,
+    DPG_mu
   };
 
   /// Static method for use in validParams for getting the density method
@@ -79,7 +81,9 @@ protected:
   std::vector<Function *> _init_functions;
   unsigned int _num_init_functions;
 
-  Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param;
+  Real _phi0_param;
+  Real _dpg_lambda_param, _dpg_mu_param, _dpg_m_param, _dpg_beta_param;
+  Real _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param;
   Real _confining_pressure_param, _biot_coeff_param, _alpha_1_param, _alpha_2_param, _alpha_3_param,
       _peclet_number_param; //_ar_c_param, _da_param, _mu_param,
   Real _ar_F_param, _ar_R_param, _chemical_ar_F_factor, _da_endo_param, _da_exo_param, _mu_param,
@@ -93,6 +97,11 @@ protected:
 
   MaterialProperty<RealVectorValue> & _mixture_gravity_term;
   MaterialProperty<RealVectorValue> & _fluid_gravity_term;
+
+  MaterialProperty<Real> & _dpg_lambda;
+  MaterialProperty<Real> & _dpg_mu;
+  MaterialProperty<Real> & _dpg_m;
+  MaterialProperty<Real> & _dpg_beta;
 
   MaterialProperty<Real> & _gr;
   MaterialProperty<Real> & _ref_lewis_nb;
