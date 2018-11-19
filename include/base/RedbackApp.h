@@ -1,3 +1,15 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
+/*                                                              */
+/*              (c) 2014 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #ifndef REDBACKAPP_H
 #define REDBACKAPP_H
 
@@ -15,7 +27,7 @@ public:
   virtual ~RedbackApp();
 
   static void registerApps();
-  static void registerObjects(Factory & factory);
+  static void registerAll(Factory & f, ActionFactory & af, Syntax & s);
   static void associateSyntax(Syntax & syntax, ActionFactory & action_factory);
 };
 

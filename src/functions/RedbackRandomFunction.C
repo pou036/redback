@@ -13,6 +13,8 @@
 #include "MooseRandom.h"
 #include "RedbackRandomFunction.h"
 
+registerMooseObject("RedbackApp", RedbackRandomFunction);
+
 template <>
 InputParameters
 validParams<RedbackRandomFunction>()

@@ -12,6 +12,8 @@
 
 #include "RedbackTotalPorosityAux.h"
 
+registerMooseObject("RedbackApp", RedbackTotalPorosityAux);
+
 template <>
 InputParameters
 validParams<RedbackTotalPorosityAux>()

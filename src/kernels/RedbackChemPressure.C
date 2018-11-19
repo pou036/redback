@@ -12,6 +12,8 @@
 
 #include "RedbackChemPressure.h"
 
+registerMooseObject("RedbackApp", RedbackChemPressure);
+
 template <>
 InputParameters
 validParams<RedbackChemPressure>()

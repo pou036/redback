@@ -1,9 +1,15 @@
 /****************************************************************/
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
 /*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
+/*              (c) 2014 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 #ifndef COMPUTEPLASTICSTRAINRATE_H
 #define COMPUTEPLASTICSTRAINRATE_H
 

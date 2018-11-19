@@ -12,6 +12,8 @@
 
 #include "RedbackMassDiffusion.h"
 
+registerMooseObject("RedbackApp", RedbackMassDiffusion);
+
 template <>
 InputParameters
 validParams<RedbackMassDiffusion>()
