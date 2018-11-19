@@ -13,6 +13,8 @@
 #include "Function.h"
 #include "FunctionPointSource.h"
 
+registerMooseObject("RedbackApp", FunctionPointSource);
+
 template <>
 InputParameters
 validParams<FunctionPointSource>()

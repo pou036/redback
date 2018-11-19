@@ -12,6 +12,8 @@
 
 #include "RedbackThermalDiffusion.h"
 
+registerMooseObject("RedbackApp", RedbackThermalDiffusion);
+
 template <>
 InputParameters
 validParams<RedbackThermalDiffusion>()

@@ -1,7 +1,21 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
+/*                                                              */
+/*              (c) 2014 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #include "RedbackFluidStressDivergenceTensors.h"
 
 #include "ElasticityTensorTools.h"
 #include "Material.h"
+
+registerMooseObject("RedbackApp", RedbackFluidStressDivergenceTensors);
 
 template <>
 InputParameters

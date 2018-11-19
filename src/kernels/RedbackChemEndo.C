@@ -12,6 +12,8 @@
 
 #include "RedbackChemEndo.h"
 
+registerMooseObject("RedbackApp", RedbackChemEndo);
+
 template <>
 InputParameters
 validParams<RedbackChemEndo>()

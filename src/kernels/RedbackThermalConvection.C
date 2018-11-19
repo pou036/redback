@@ -12,6 +12,8 @@
 
 #include "RedbackThermalConvection.h"
 
+registerMooseObject("RedbackApp", RedbackThermalConvection);
+
 template <>
 InputParameters
 validParams<RedbackThermalConvection>()
