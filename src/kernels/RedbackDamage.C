@@ -12,6 +12,8 @@
 
 #include "RedbackDamage.h"
 
+registerMooseObject("RedbackApp", RedbackDamage);
+
 template <>
 InputParameters
 validParams<RedbackDamage>()

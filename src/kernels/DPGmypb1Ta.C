@@ -1,8 +1,19 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
+/*                                                              */
+/*              (c) 2018 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
 // Kernel for the term (-\kappa\nabla \tilde{u} + b \tilde{u},\tau)
 
 #include "DPGmypb1Ta.h"
 
-//registerMooseObject("RedbackApp", DPGmypb1Ta);
+registerMooseObject("RedbackApp", DPGmypb1Ta);
 
 template <>
 InputParameters

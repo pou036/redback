@@ -13,6 +13,8 @@
 // AuxKernel to compute difference of 2 (aux)variables
 #include "RedbackContinuationAux.h"
 
+registerMooseObject("RedbackApp", RedbackContinuationAux);
+
 template <>
 InputParameters
 validParams<RedbackContinuationAux>()

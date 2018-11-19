@@ -12,6 +12,8 @@
 
 #include "RedbackMechDissip.h"
 
+registerMooseObject("RedbackApp", RedbackMechDissip);
+
 template <>
 InputParameters
 validParams<RedbackMechDissip>()
