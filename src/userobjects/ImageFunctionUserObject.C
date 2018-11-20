@@ -10,6 +10,8 @@
 #include "ImageFunctionUserObject.h"
 #include "GriddedData.h"
 
+registerMooseObject("RedbackApp", ImageFunctionUserObject);
+
 template <>
 InputParameters
 validParams<ImageFunctionUserObject>()

@@ -10,6 +10,8 @@
 #include "BezierFunctionAux.h"
 #include "BezierUserObject.h"
 
+registerMooseObject("RedbackApp", BezierFunctionAux);
+
 template <>
 InputParameters
 validParams<BezierFunctionAux>()

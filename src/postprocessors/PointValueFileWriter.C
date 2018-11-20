@@ -18,6 +18,8 @@
 
 #include "libmesh/system.h"
 
+registerMooseObject("RedbackApp", PointValueFileWriter);
+
 template <>
 InputParameters
 validParams<PointValueFileWriter>()

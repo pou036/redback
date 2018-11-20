@@ -18,6 +18,8 @@
 
 #include "libmesh/system.h"
 
+registerMooseObject("RedbackApp", PointValueFile);
+
 template <>
 InputParameters
 validParams<PointValueFile>()

@@ -9,6 +9,8 @@
 
 #include "TimesFileUserObject.h"
 
+registerMooseObject("RedbackApp", TimesFileUserObject);
+
 template <>
 InputParameters
 validParams<TimesFileUserObject>()

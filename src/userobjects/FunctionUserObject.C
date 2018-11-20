@@ -10,6 +10,8 @@
 #include "FunctionUserObject.h"
 #include "GriddedData.h"
 
+registerMooseObject("RedbackApp", FunctionUserObject);
+
 template <>
 InputParameters
 validParams<FunctionUserObject>()

@@ -10,6 +10,8 @@
 #include "ImageFunctionAux.h"
 #include "ImageFunctionUserObject.h"
 
+registerMooseObject("RedbackApp", ImageFunctionAux);
+
 template <>
 InputParameters
 validParams<ImageFunctionAux>()

@@ -12,6 +12,8 @@
 
 #include "DarcyBrinkman.h"
 
+registerMooseObject("RedbackApp", DarcyBrinkman);
+
 template <>
 InputParameters
 validParams<DarcyBrinkman>()

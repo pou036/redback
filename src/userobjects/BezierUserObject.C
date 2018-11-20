@@ -10,6 +10,8 @@
 #include "BezierUserObject.h"
 #include "GriddedData.h"
 
+registerMooseObject("RedbackApp", BezierUserObject);
+
 template <>
 InputParameters
 validParams<BezierUserObject>()

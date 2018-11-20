@@ -16,6 +16,8 @@
 // #include "libmesh/mesh_refinement.h"
 #include "libmesh/remote_elem.h"
 
+registerMooseObject("RedbackApp", RemoveLayerElements);
+
 template <>
 InputParameters
 validParams<RemoveLayerElements>()

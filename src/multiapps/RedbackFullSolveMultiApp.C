@@ -15,6 +15,8 @@
 // libMesh
 #include "libmesh/mesh_tools.h"
 
+registerMooseObject("RedbackApp", RedbackFullSolveMultiApp);
+
 template <>
 InputParameters
 validParams<RedbackFullSolveMultiApp>()
