@@ -11,6 +11,8 @@
 #include "Function.h"
 #include "Assembly.h"
 
+registerMooseObject("RedbackApp", FunctionJumpDirichletBC);
+
 template <>
 InputParameters
 validParams<FunctionJumpDirichletBC>()

@@ -7,6 +7,8 @@
 
 #include "GenericConstantVector.h"
 
+registerMooseObject("RedbackApp", GenericConstantVector);
+
 template <>
 InputParameters
 validParams<GenericConstantVector>()

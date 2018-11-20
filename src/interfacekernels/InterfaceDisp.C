@@ -9,6 +9,8 @@
 
 #include "InterfaceDisp.h"
 
+registerMooseObject("RedbackApp", InterfaceDisp);
+
 template <>
 InputParameters
 validParams<InterfaceDisp>()

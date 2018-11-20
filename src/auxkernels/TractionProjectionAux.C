@@ -7,6 +7,8 @@
 
 #include "TractionProjectionAux.h"
 
+registerMooseObject("RedbackApp", TractionProjectionAux);
+
 template <>
 InputParameters
 validParams<TractionProjectionAux>()

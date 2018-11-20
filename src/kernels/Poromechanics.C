@@ -13,6 +13,8 @@
 #include "MooseMesh.h"
 #include "Poromechanics.h"
 
+registerMooseObject("RedbackApp", Poromechanics);
+
 template <>
 InputParameters
 validParams<Poromechanics>()

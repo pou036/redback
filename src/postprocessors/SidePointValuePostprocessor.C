@@ -12,6 +12,8 @@
 
 #include "libmesh/quadrature.h"
 
+registerMooseObject("RedbackApp", SidePointValuePostprocessor);
+
 template <>
 InputParameters
 validParams<SidePointValuePostprocessor>()
