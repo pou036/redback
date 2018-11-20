@@ -20,6 +20,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 ################################## MODULES ####################################
 #HEAT_CONDUCTION   := yes
 TENSOR_MECHANICS  := yes
+NAVIER_STOKES     := yes
 MISC              := yes
 include           $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################

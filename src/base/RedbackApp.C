@@ -19,6 +19,7 @@
 
 // Modules
 #include "TensorMechanicsApp.h"
+#include "NavierStokesApp.h"
 
 // Actions
 //#include "RankTwoScalarAction.h"

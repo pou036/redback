@@ -23,6 +23,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 ################################## MODULES ####################################
 ALL_MODULES := no
 TENSOR_MECHANICS := yes
+NAVIER_STOKES    := yes
 include $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
