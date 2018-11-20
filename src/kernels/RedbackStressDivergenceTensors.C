@@ -15,6 +15,8 @@
 #include "ElasticityTensorTools.h"
 #include "Material.h"
 
+registerMooseObject("RedbackApp", RedbackStressDivergenceTensors);
+
 template <>
 InputParameters
 validParams<RedbackStressDivergenceTensors>()

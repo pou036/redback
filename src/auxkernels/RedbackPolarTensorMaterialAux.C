@@ -12,6 +12,8 @@
 
 #include "RedbackPolarTensorMaterialAux.h"
 
+registerMooseObject("RedbackApp", RedbackPolarTensorMaterialAux);
+
 template <>
 InputParameters
 validParams<RedbackPolarTensorMaterialAux>()

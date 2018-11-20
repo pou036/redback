@@ -16,6 +16,8 @@
 
 #include "libmesh/point.h"
 
+registerMooseObject("RedbackApp", FunctionTimesRandomIC);
+
 template <>
 InputParameters
 validParams<FunctionTimesRandomIC>()
