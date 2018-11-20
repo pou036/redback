@@ -9,96 +9,21 @@
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
+
 // Main Application
-#include "ActionFactory.h"
-#include "AppFactory.h"
-#include "Moose.h"
-#include "MooseSyntax.h"
 #include "RedbackApp.h"
+#include "Moose.h"
+#include "AppFactory.h"
+#include "ModulesApp.h"
+#include "MooseSyntax.h"
 
 // Modules
 #include "TensorMechanicsApp.h"
 
 // Actions
-#include "RankTwoScalarAction.h"
-#include "RedbackAction.h"
-#include "RedbackMechAction.h"
-
-// Boundary conditions
-#include "FunctionJumpDirichletBC.h"
-#include "FunctionDirichletTransverseBC.h"
-#include "MatchedValueJumpBC.h"
-#include "PressureNeumannBC.h"
-
-// Functions
-#include "RedbackRandomFunction.h"
-
-// Initial conditions
-#include "FunctionLogNormalDistributionIC.h"
-#include "FunctionNormalDistributionIC.h"
-#include "FunctionTimesRandomIC.h"
-#include "FunctionWithRandomIC.h"
-
-// Interface kernels
-#include "InterfaceDarcy.h"
-#include "InterfaceDisp.h"
-
-// Kernels
-#include "Poromechanics.h"
-#include "RedbackChemEndo.h"
-#include "RedbackChemExo.h"
-#include "RedbackChemPressure.h"
-#include "RedbackDamage.h"
-#include "RedbackFluidDivergence.h"
-#include "RedbackFluidStressDivergenceTensors.h"
-#include "RedbackMassConvection.h"
-#include "RedbackMassDiffusion.h"
-#include "RedbackMassDiffusionCoeff.h"
-#include "RedbackMechDissip.h"
-#include "RedbackNavier.h"
-#include "RedbackPoromechanics.h"
-#include "RedbackStressDivergenceTensors.h"
-#include "RedbackThermalConvection.h"
-#include "RedbackThermalDiffusion.h"
-#include "RedbackThermalPressurization.h"
-#include "RedbackVariableEqualsFunction.h"
-
-// Scalar Kernels
-#include "RedbackContinuation.h"
-
-// Dirac Kernels
-#include "FunctionPointSource.h"
-
-// Materials
-#include "ComputePlasticStrainRate.h"
-#include "GenericConstantVector.h"
-#include "ImageProcessing.h"
-#include "RedbackFluidMaterial.h"
-#include "RedbackMaterial.h"
-#include "RedbackMechMaterialCC.h"
-#include "RedbackMechMaterialCCanisotropic.h"
-#include "RedbackMechMaterialDP.h"
-#include "RedbackMechMaterialDPRateAndState.h"
-#include "RedbackMechMaterialElastic.h"
-#include "RedbackMechMaterialExpCC.h"
-#include "RedbackMechMaterialJ2.h"
-
-// MeshModifiers
-#include "ElementFileSubdomain.h"
-
-// Postprocessors
-#include "SidePointValuePostprocessor.h"
-#include "RankTwoScalarPostprocessor.h"
-
-// Timesteppers
-#include "ReturnMapIterDT.h"
-
-// AuxKernels
-#include "TractionProjectionAux.h"
-#include "RedbackContinuationTangentAux.h"
-#include "RedbackDiffVarsAux.h"
-#include "RedbackPolarTensorMaterialAux.h"
-#include "RedbackTotalPorosityAux.h"
+//#include "RankTwoScalarAction.h"
+//#include "RedbackAction.h"
+//#include "RedbackMechAction.h"
 
 template <>
 InputParameters
@@ -110,112 +35,48 @@ validParams<RedbackApp>()
 
 RedbackApp::RedbackApp(InputParameters parameters) : MooseApp(parameters)
 {
-  srand(processor_id());
-
-  Moose::registerObjects(_factory);
-  TensorMechanicsApp::registerObjects(_factory);
-  RedbackApp::registerObjects(_factory);
-
-  Moose::associateSyntax(_syntax, _action_factory);
-  TensorMechanicsApp::associateSyntax(_syntax, _action_factory);
-  RedbackApp::associateSyntax(_syntax, _action_factory);
+  RedbackApp::registerAll(_factory, _action_factory, _syntax);
 }
 
 RedbackApp::~RedbackApp() {}
 
 void
-RedbackApp::registerApps()
+RedbackApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
-#undef registerApp
-#define registerApp(name) AppFactory::instance().reg<name>(#name)
-  registerApp(RedbackApp);
-#undef registerApp
-#define registerApp(name) AppFactory::instance().regLegacy<name>(#name)
-}
+  Registry::registerObjectsTo(f, {"RedbackApp"});
+  Registry::registerActionsTo(af, {"RedbackApp"});
 
-void
-RedbackApp::registerObjects(Factory & factory)
-{
-#undef registerObject
-#define registerObject(name) factory.reg<name>(stringifyName(name))
-  registerBoundaryCondition(FunctionJumpDirichletBC);
-  registerBoundaryCondition(FunctionDirichletTransverseBC);
-  registerBoundaryCondition(MatchedValueJumpBC);
-  registerBoundaryCondition(PressureNeumannBC);
+  ModulesApp::registerAll(f, af, s);
 
-  registerFunction(RedbackRandomFunction);
-
-  registerInitialCondition(FunctionNormalDistributionIC);
-  registerInitialCondition(FunctionLogNormalDistributionIC);
-  registerInitialCondition(FunctionWithRandomIC);
-  registerInitialCondition(FunctionTimesRandomIC);
-
-  registerInterfaceKernel(InterfaceDarcy);
-  registerInterfaceKernel(InterfaceDisp);
-
-  registerKernel(Poromechanics);
-  registerKernel(RedbackChemEndo);
-  registerKernel(RedbackChemExo);
-  registerKernel(RedbackChemPressure);
-  registerKernel(RedbackFluidDivergence);
-  registerKernel(RedbackFluidStressDivergenceTensors);
-  registerKernel(RedbackMassConvection);
-  registerKernel(RedbackMassDiffusion);
-  registerKernel(RedbackMassDiffusionCoeff);
-  registerKernel(RedbackMechDissip);
-  registerKernel(RedbackNavier);
-  registerKernel(RedbackPoromechanics);
-  registerKernel(RedbackStressDivergenceTensors);
-  registerKernel(RedbackThermalConvection);
-  registerKernel(RedbackThermalDiffusion);
-  registerKernel(RedbackThermalPressurization);
-  registerKernel(RedbackDamage);
-  registerKernel(RedbackVariableEqualsFunction);
-
-  registerScalarKernel(RedbackContinuation);
-
-  registerDiracKernel(FunctionPointSource);
-
-  registerMaterial(ComputePlasticStrainRate);
-  registerMaterial(RedbackFluidMaterial);
-  registerMaterial(ImageProcessing);
-  registerMaterial(GenericConstantVector);
-  registerMaterial(RedbackMaterial);
-  registerMaterial(RedbackMechMaterialJ2);
-  registerMaterial(RedbackMechMaterialDP);
-  registerMaterial(RedbackMechMaterialDPRateAndState);
-  registerMaterial(RedbackMechMaterialCC);
-  registerMaterial(RedbackMechMaterialCCanisotropic);
-  registerMaterial(RedbackMechMaterialElastic);
-  registerMaterial(RedbackMechMaterialExpCC);
-
-  registerMeshModifier(ElementFileSubdomain);
-
-  registerPostprocessor(SidePointValuePostprocessor);
-  registerPostprocessor(RankTwoScalarPostprocessor);
-
-  registerExecutioner(ReturnMapIterDT);
-
-  registerAux(TractionProjectionAux);
-  registerAux(RedbackContinuationTangentAux);
-  registerAux(RedbackDiffVarsAux);
-  registerAux(RedbackTotalPorosityAux);
-  registerAux(RedbackPolarTensorMaterialAux);
-#undef registerObject
-#define registerObject(name) factory.regLegacy<name>(stringifyName(name))
+  /* register custom execute flags, action syntax, etc. here */
+  RedbackApp::associateSyntax(s, af);
 }
 
 void
 RedbackApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
 {
-#undef registerAction
-#define registerAction(tplt, action) action_factory.reg<tplt>(stringifyName(tplt), action)
-  syntax.registerActionSyntax("RankTwoScalarAction", "RankTwoScalarAction/*");
-  registerAction(RankTwoScalarAction, "add_postprocessor");
-  syntax.registerActionSyntax("RedbackMechAction", "RedbackMechAction/*");
-  registerAction(RedbackMechAction, "add_kernel");
-// syntax.registerActionSyntax("RedbackAction", "RedbackAction/*");
-// registerAction(RedbackMechAction, "add_aux_variable");
-#undef registerAction
-#define registerAction(tplt, action) action_factory.regLegacy<tplt>(stringifyName(tplt), action)
+  Registry::registerActionsTo(action_factory, {"RedbackApp"});
+
+  registerSyntax("RankTwoScalarAction", "RankTwoScalarAction/*");
+  registerSyntax("RedbackMechAction", "RedbackMechAction/*");
+}
+
+void
+RedbackApp::registerApps()
+{
+  registerApp(RedbackApp);
+}
+
+/***************************************************************************************************
+ *********************** Dynamic Library Entry Points - DO NOT MODIFY ******************************
+ **************************************************************************************************/
+extern "C" void
+RedbackApp__registerAll(Factory & f, ActionFactory & af, Syntax & s)
+{
+  RedbackApp::registerAll(f, af, s);
+}
+extern "C" void
+RedbackApp__registerApps()
+{
+  RedbackApp::registerApps();
 }

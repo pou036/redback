@@ -12,6 +12,8 @@
 
 #include "RedbackPoromechanics.h"
 
+registerMooseObject("RedbackApp", RedbackPoromechanics);
+
 template <>
 InputParameters
 validParams<RedbackPoromechanics>()

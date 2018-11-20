@@ -16,6 +16,8 @@
 
 #include "libmesh/point.h"
 
+registerMooseObject("RedbackApp", FunctionNormalDistributionIC);
+
 template <>
 InputParameters
 validParams<FunctionNormalDistributionIC>()

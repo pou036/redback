@@ -14,6 +14,8 @@
 #include "RedbackMechMaterialCCanisotropic.h"
 #include <cmath> //used for fabs
 
+registerMooseObject("RedbackApp", RedbackMechMaterialCCanisotropic);
+
 template <>
 InputParameters
 validParams<RedbackMechMaterialCCanisotropic>()
