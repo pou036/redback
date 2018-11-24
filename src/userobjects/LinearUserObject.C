@@ -7,29 +7,31 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "FunctionUserObject.h"
+#include "LinearUserObject.h"
 #include "GriddedData.h"
 
-registerMooseObject("RedbackApp", FunctionUserObject);
+registerMooseObject("RedbackApp", LinearUserObject);
 
 template <>
 InputParameters
-validParams<FunctionUserObject>()
+validParams<LinearUserObject>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.addParam<std::vector<Real>>("positions", "The positions of the App locations (1D)");
+  params.addParam<std::vector<Real>>("positions", "The positions of the anchor points");
+  params.addParam<Real>("initial_value", "The initial value of permeability");
   params.addParam<std::vector<PostprocessorName>>("permeability_values",
                                                   "The name of the postprocessor(s) that holds the "
                                                   "permeability values.");
-  params.addClassDescription("PiecewiseMultilinear performs interpolation on 1D, 2D, 3D or 4D "
-                             "data.  The data_file specifies the axes directions and the function "
-                             "values.  If a point lies outside the data range, the appropriate end "
-                             "value is used.");
+  params.addClassDescription(
+      "Bezier interpolation of permeability from postprocessors value in 1D.");
   return params;
 }
 
-FunctionUserObject::FunctionUserObject(const InputParameters & params)
-  : GeneralUserObject(params), _positions(getParam<std::vector<Real>>("positions")), _fcn()
+LinearUserObject::LinearUserObject(const InputParameters & params)
+  : GeneralUserObject(params),
+  _positions(getParam<std::vector<Real>>("positions")),
+  _fcn(),
+  _initial_value(getParam<Real>("initial_value"))
 {
   // variation of permeability in Y, 1D
   _dim = 1;
@@ -43,7 +45,7 @@ FunctionUserObject::FunctionUserObject(const InputParameters & params)
 }
 
 Real
-FunctionUserObject::value(Real t, const Point & p) const
+LinearUserObject::value(Real t, const Point & p) const
 {
   // convert the inputs to an input to the sample function using _axes
   std::vector<Real> pt_in_grid(_dim);
@@ -58,20 +60,20 @@ FunctionUserObject::value(Real t, const Point & p) const
 }
 
 void
-FunctionUserObject::initialize()
+LinearUserObject::initialize()
 {
   _fcn.clear();
   const unsigned int len = _ppn.size();
   for (unsigned int i = 0; i < len; ++i)
     // transfer returns 0 if multiapp isn't solved, should put initial value of permeability instead
     if (getPostprocessorValueByName(_ppn[i]) == 0)
-      _fcn.push_back(0.1);
+      _fcn.push_back(_initial_value);
     else
       _fcn.push_back(getPostprocessorValueByName(_ppn[i]));
 }
 
 Real
-FunctionUserObject::sample(const std::vector<Real> & pt) const
+LinearUserObject::sample(const std::vector<Real> & pt) const
 {
   /*
    * left contains the indices of the point to the 'left', 'down', etc, of pt
@@ -145,7 +147,7 @@ FunctionUserObject::sample(const std::vector<Real> & pt) const
 }
 
 void
-FunctionUserObject::getNeighborIndices(std::vector<Real> in_arr,
+LinearUserObject::getNeighborIndices(std::vector<Real> in_arr,
                                        Real x,
                                        unsigned int & lower_x,
                                        unsigned int & upper_x) const

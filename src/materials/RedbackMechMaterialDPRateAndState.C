@@ -12,6 +12,8 @@
 
 #include "RedbackMechMaterialDPRateAndState.h"
 
+registerMooseObject("RedbackApp", RedbackMechMaterialDPRateAndState);
+
 template <>
 InputParameters
 validParams<RedbackMechMaterialDPRateAndState>()
@@ -24,11 +26,12 @@ validParams<RedbackMechMaterialDPRateAndState>()
   return params;
 }
 
-RedbackMechMaterialDPRateAndState::RedbackMechMaterialDPRateAndState(const InputParameters & parameters)
+RedbackMechMaterialDPRateAndState::RedbackMechMaterialDPRateAndState(
+    const InputParameters & parameters)
   : RedbackMechMaterial(parameters),
-  _slope_yield_surface(getParam<Real>("slope_yield_surface")),
-  _a(getParam<Real>("a")),
-  _b(getParam<Real>("b"))
+    _slope_yield_surface(getParam<Real>("slope_yield_surface")),
+    _a(getParam<Real>("a")),
+    _b(getParam<Real>("b"))
 {
 }
 
@@ -62,12 +65,12 @@ RedbackMechMaterialDPRateAndState::getPressureProjection(Real pressure, Real sig
 
 void
 RedbackMechMaterialDPRateAndState::getFlowTensor(const RankTwoTensor & sig,
-                                     Real q,
-                                     Real /*p*/,
-                                     Real /*q_y*/,
-                                     Real /*p_y*/,
-                                     Real /*yield_stress*/,
-                                     RankTwoTensor & flow_tensor)
+                                                 Real q,
+                                                 Real /*p*/,
+                                                 Real /*q_y*/,
+                                                 Real /*p_y*/,
+                                                 Real /*yield_stress*/,
+                                                 RankTwoTensor & flow_tensor)
 {
   RankTwoTensor sig_dev;
   Real val;
@@ -85,39 +88,44 @@ RedbackMechMaterialDPRateAndState::getFlowTensor(const RankTwoTensor & sig,
  * Compute flow increment for Drucker-Prager case
  */
 Real
-RedbackMechMaterialDPRateAndState::getFlowIncrement(
-    Real sig_eqv, Real pressure, Real /*q_yield_stress*/, Real /*p_yield_stress*/, Real /*yield_stress*/)
+RedbackMechMaterialDPRateAndState::getFlowIncrement(Real sig_eqv,
+                                                    Real pressure,
+                                                    Real /*q_yield_stress*/,
+                                                    Real /*p_yield_stress*/,
+                                                    Real /*yield_stress*/)
 {
-  if (sig_eqv/pressure < _slope_yield_surface)
+  if (sig_eqv / pressure < _slope_yield_surface)
     return 0.0;
-  return _ref_pe_rate * _dt * exp(-_slope_yield_surface/(_a-_b) + sig_eqv/(pressure*(_a-_b)));
+  return _ref_pe_rate * _dt *
+         exp(-_slope_yield_surface / (_a - _b) + sig_eqv / (pressure * (_a - _b)));
 }
 
 void
 RedbackMechMaterialDPRateAndState::getDerivativeFlowIncrement(Real & dfi_dp,
-                                                  Real & dfi_dq,
-                                                  const RankTwoTensor & /*sig*/,
-                                                  Real pressure,
-                                                  Real sig_eqv,
-                                                  Real /*yield_stress*/,
-                                                  Real /*q_yield_stress*/,
-                                                  Real /*p_yield_stress*/)
+                                                              Real & dfi_dq,
+                                                              const RankTwoTensor & /*sig*/,
+                                                              Real pressure,
+                                                              Real sig_eqv,
+                                                              Real /*yield_stress*/,
+                                                              Real /*q_yield_stress*/,
+                                                              Real /*p_yield_stress*/)
 {
-  Real factor = _ref_pe_rate * _dt * exp(-_slope_yield_surface/(_a-_b));
-  dfi_dp = - factor * sig_eqv/((_a-_b) * pow(pressure,2)) * exp(sig_eqv/(pressure*(_a-_b)));
-  dfi_dq = factor/((_a-_b) * pressure) * exp(sig_eqv/(pressure*(_a-_b)));
+  Real factor = _ref_pe_rate * _dt * exp(-_slope_yield_surface / (_a - _b));
+  dfi_dp =
+      -factor * sig_eqv / ((_a - _b) * pow(pressure, 2)) * exp(sig_eqv / (pressure * (_a - _b)));
+  dfi_dq = factor / ((_a - _b) * pressure) * exp(sig_eqv / (pressure * (_a - _b)));
 }
 
 void
 RedbackMechMaterialDPRateAndState::getJac(const RankTwoTensor & sig,
-                              const RankFourTensor & E_ijkl,
-                              Real flow_incr,
-                              Real sig_eqv,
-                              Real pressure,
-                              Real p_yield_stress,
-                              Real q_yield_stress,
-                              Real yield_stress,
-                              RankFourTensor & dresid_dsig)
+                                          const RankFourTensor & E_ijkl,
+                                          Real flow_incr,
+                                          Real sig_eqv,
+                                          Real pressure,
+                                          Real p_yield_stress,
+                                          Real q_yield_stress,
+                                          Real yield_stress,
+                                          RankFourTensor & dresid_dsig)
 {
   unsigned i, j, k, l;
   RankTwoTensor sig_dev, fij, flow_dirn;
@@ -150,9 +158,11 @@ RedbackMechMaterialDPRateAndState::getJac(const RankTwoTensor & sig,
   f4 = 0.0;
   if (sig_eqv > 1e-8)
   {
-    f1 = 3.0 / (2.0 * sig_eqv * std::pow(3.0 / 2.0 + _slope_yield_surface * _slope_yield_surface, 0.5));
+    f1 = 3.0 /
+         (2.0 * sig_eqv * std::pow(3.0 / 2.0 + _slope_yield_surface * _slope_yield_surface, 0.5));
     f2 = f1 / 3.0;
-    f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0) * std::pow(3.0 / 2.0 + _slope_yield_surface * _slope_yield_surface, 0.5));
+    f3 = 9.0 / (4.0 * std::pow(sig_eqv, 3.0) *
+                std::pow(3.0 / 2.0 + _slope_yield_surface * _slope_yield_surface, 0.5));
     f4 = 3.0 / (2.0 * sig_eqv);
   }
 

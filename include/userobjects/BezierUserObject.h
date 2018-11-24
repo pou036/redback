@@ -51,6 +51,7 @@ protected:
 private:
   std::vector<Real> _points_x;
   std::vector<Real> _points_y;
+  Real _initial_value;
   std::vector<std::vector<std::pair<Real, Real>>> _abcd_segments;
   std::vector<PostprocessorName> _ppn;
 

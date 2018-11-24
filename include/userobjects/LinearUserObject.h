@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef FUNCTIONUSEROBJECT_H
-#define FUNCTIONUSEROBJECT_H
+#ifndef LINEARUSEROBJECT_H
+#define LINEARUSEROBJECT_H
 
 #include "GeneralUserObject.h"
 #include "GriddedData.h"
@@ -16,18 +16,18 @@
 // Forward declarations
 // class GriddedData;
 
-class FunctionUserObject;
+class LinearUserObject;
 
 template <>
-InputParameters validParams<FunctionUserObject>();
+InputParameters validParams<LinearUserObject>();
 
 /**
  * Computes the average value of a variable on each block
  */
-class FunctionUserObject : public GeneralUserObject
+class LinearUserObject : public GeneralUserObject
 {
 public:
-  FunctionUserObject(const InputParameters & parameters);
+  LinearUserObject(const InputParameters & parameters);
 
   /**
    * Given a block ID return the average value for a variable on that block
@@ -52,6 +52,7 @@ protected:
 private:
   std::vector<Real> _positions;
   std::vector<Real> _fcn;
+  Real _initial_value;
   /// dimension of the grid
   unsigned int _dim;
 

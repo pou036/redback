@@ -681,10 +681,10 @@ _ar_F[_qp] * _delta[_qp] * (1 - _total_porosity[_qp]) * (1 - _solid_ratio[_qp])
                                                                   // equation. TODO: disable for
                                                                   // incompressible case
     _thermal_convective_mass[_qp] =
-        _peclet_number[_qp] * ((one_minus_phi_lambda_s / beta_star_m) * _solid_velocity[_qp] +
-                               (phi_lambda_f / beta_star_m) *
-                                   _fluid_velocity[_qp]); // convective term multiplying the thermal
-                                                          // flux in the mass equation
+        _peclet_number[_qp] *
+        ((one_minus_phi_lambda_s / beta_star_m) * _solid_velocity[_qp] +
+         (phi_lambda_f / beta_star_m) * _fluid_velocity[_qp]); // convective term multiplying the
+                                                               // thermal flux in the mass equation
 
     //_convective_mass_jac_vec[_qp] = _pressure_convective_mass[_qp] -
     //(_fluid_compressibility[_qp]*_grad_pore_pressure[_qp] -

@@ -57,6 +57,9 @@ protected:
   int _size_x;
   int _size_y;
   int _size_z;
+  int _nx;
+  int _ny;
+  int _nz;
   std::string _neighbours;
   std::vector<std::vector<std::string>> _data;
   Real _pore_volume;

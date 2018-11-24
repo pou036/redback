@@ -17,19 +17,21 @@ InputParameters
 validParams<BezierUserObject>()
 {
   InputParameters params = validParams<GeneralUserObject>();
-  params.addParam<std::vector<Real>>("positions", "The positions of the App locations (1D)");
+  params.addParam<std::vector<Real>>("positions", "The positions of the anchor points");
+  params.addParam<Real>("initial_value", "The initial value of permeability");
   params.addParam<std::vector<PostprocessorName>>("permeability_values",
                                                   "The name of the postprocessor(s) that holds the "
                                                   "permeability values.");
-  params.addClassDescription("PiecewiseMultilinear performs interpolation on 1D, 2D, 3D or 4D "
-                             "data.  The data_file specifies the axes directions and the function "
-                             "values.  If a point lies outside the data range, the appropriate end "
-                             "value is used.");
+  params.addClassDescription(
+      "Bezier interpolation of permeability from postprocessors value in 1D.");
   return params;
 }
 
 BezierUserObject::BezierUserObject(const InputParameters & params)
-  : GeneralUserObject(params), _points_x(getParam<std::vector<Real>>("positions")), _points_y()
+  : GeneralUserObject(params),
+    _points_x(getParam<std::vector<Real>>("positions")),
+    _points_y(),
+    _initial_value(getParam<Real>("initial_value"))
 {
   if (isParamValid("permeability_values"))
     _ppn = params.get<std::vector<PostprocessorName>>("permeability_values");
@@ -118,7 +120,7 @@ BezierUserObject::initialize()
   for (unsigned int i = 0; i < len; ++i)
     // transfer returns 0 if multiapp isn't solved, should put initial value of permeability instead
     if (getPostprocessorValueByName(_ppn[i]) == 0)
-      _points_y.push_back(0.1);
+      _points_y.push_back(_initial_value);
     else
       _points_y.push_back(getPostprocessorValueByName(_ppn[i]));
 
