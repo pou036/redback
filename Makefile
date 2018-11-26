@@ -3,7 +3,7 @@
 ###############################################################################
 #
 # Optional Environment variables
-# MOOSE_DIR        - Root directory of the MOOSE project 
+# MOOSE_DIR        - Root directory of the MOOSE project
 #
 ###############################################################################
 
@@ -23,6 +23,7 @@ include $(FRAMEWORK_DIR)/moose.mk
 ################################## MODULES ####################################
 ALL_MODULES := no
 TENSOR_MECHANICS := yes
+PHASE_FIELD := yes
 include $(MOOSE_DIR)/modules/modules.mk
 ###############################################################################
 
