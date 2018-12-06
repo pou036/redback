@@ -23,7 +23,7 @@ validParams<LinearUserObject>()
                                                   "The name of the postprocessor(s) that holds the "
                                                   "permeability values.");
   params.addClassDescription(
-      "Bezier interpolation of permeability from postprocessors value in 1D.");
+      "Linear interpolation of permeability from postprocessors value in 1D.");
   return params;
 }
 

@@ -64,7 +64,6 @@ protected:
   std::vector<std::vector<std::string>> _data;
   Real _pore_volume;
   std::string _boundary_element_value;
-  bool _precip_old;
   std::vector<std::pair<int, int>> _boundary_elements;
   Real _upper_layer_bound;
   Real _lower_layer_bound;

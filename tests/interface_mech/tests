@@ -1,4 +1,5 @@
 [Tests]
+  #still need _doing_dg = true line 475 of NonlinearSystemBase
   [./test_interface_mech]
     type = 'Exodiff'
     input = 'compression_interface.i'

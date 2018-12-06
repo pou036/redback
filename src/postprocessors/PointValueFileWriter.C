@@ -147,7 +147,6 @@ PointValueFileWriter::PointValueFileWriter(const InputParameters & parameters)
 
   // init _upper_layer_bound
   _boundary_element_value = _value_grain;
-  _precip_old = false;
   BoundaryElements();
   Real layer_volume = 1 / (float)(_nx * _ny * _nz) * _boundary_elements.size();
   _upper_layer_bound = _pore_volume + layer_volume;
@@ -273,9 +272,8 @@ PointValueFileWriter::getValue()
   bool first_loop = true;
   while (_pore_volume < 1. - 1e-10 && _pore_volume > 0. + 1e-10)
   {
-    if (_precip_old != precip || !first_loop)
+    if (precip || !first_loop)
       BoundaryElements();
-    _precip_old = precip;
     first_loop = false;
 
     if (_boundary_elements.size() == 0)

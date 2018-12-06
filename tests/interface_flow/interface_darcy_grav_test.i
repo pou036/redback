@@ -6,111 +6,84 @@ gravity = '0.56 0.98 0'
 []
 
 [MeshModifiers]
-  [./interface_left]
-    type = SideSetsBetweenSubdomains
-    master_block = 'left_block'
-    new_boundary = 'interface_left'
-    paired_block = 'right_block'
-  [../]
-  [./interface_right]
-    type = SideSetsBetweenSubdomains
-    master_block = 'right_block'
-    new_boundary = 'interface_right'
-    paired_block = 'left_block'
-  [../]
+  [break]
+    type = BreakMeshByBlock
+    split_interface = false
+  []
 []
 
 [Variables]
-  [./p_left]
-    order = FIRST
-    family = LAGRANGE
-    block = left_block
-  [../]
-  [./p_right]
-    order = FIRST
-    family = LAGRANGE
-    block = right_block
-  [../]
+  [p]
+  []
 []
 
 [AuxVariables]
-  [./lewis_fault]
-  [../]
+  [lewis_fault]
+  []
 []
 
 [Kernels]
-  [./diff_left]
+  [diff]
     type = RedbackMassDiffusion
-    variable = p_left
-    block = 'left_block'
-  [../]
-  [./diff_right]
-    type = RedbackMassDiffusion
-    variable = p_right
-    block = 'right_block'
-  [../]
+    variable = p
+  []
 []
 
 [InterfaceKernels]
-  [./interface]
+  [interface]
     type = InterfaceDarcy
-    variable = p_left
-    neighbor_var = 'p_right'
-    boundary = 'interface_left'
+    variable = p
+    neighbor_var = p
+    boundary = interface
     fault_lewis_number = lewis_fault
     fault_thickness = 0.1
-  [../]
+  []
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = RedbackMaterial
     ref_lewis_nb = 1
     gravity = ${gravity}
-  [../]
+  []
 []
 
 [ICs]
-  [./lewis_fault]
+  [lewis_fault]
     type = ConstantIC
     variable = lewis_fault
     value = 10
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
-    variable = p_left
+    variable = p
     boundary = 'left'
     value = 1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
-    variable = p_right
+    variable = p
     boundary = 'right'
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
   [p_left]
     type = SideAverageValue
-    variable = 'p_left'
-    boundary = 'interface_left'
-  []
-  [p_right]
-    type = SideAverageValue
-    variable = 'p_right'
-    boundary = 'interface_right'
+    variable = p
+    boundary = interface
   []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]

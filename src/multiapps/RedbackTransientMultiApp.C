@@ -23,6 +23,9 @@
 #include "libmesh/mesh_tools.h"
 #include "libmesh/numeric_vector.h"
 
+#include <chrono>
+#include <thread>
+
 registerMooseObject("RedbackApp", RedbackTransientMultiApp);
 
 template <>
@@ -200,6 +203,10 @@ RedbackTransientMultiApp::restore()
 bool
 RedbackTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance)
 {
+  using namespace std::this_thread; // sleep_for, sleep_until
+  using namespace std::chrono; // nanoseconds, system_clock, seconds
+  sleep_for(milliseconds(10));
+
   Real run_multiapp = ReadFile(_multiapp_file);
   // so that we don't run the subapp before we can remove the next layer
   if (run_multiapp == 0)

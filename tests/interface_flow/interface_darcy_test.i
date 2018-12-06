@@ -1,123 +1,96 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 4
-  xmax = 2
+  type = FileMesh
+  file = gold/interface_darcy_test_in.e
+  # type = GeneratedMesh
+  # dim = 2
+  # nx = 4
+  # xmax = 2
 []
 
 [MeshModifiers]
-  [./subdomain]
-    type = SubdomainBoundingBox
-    bottom_left = '1.0 0 0'
-    block_id = 1
-    top_right = '2.0 1.0 0'
-  [../]
-  [./interface_left]
-    type = SideSetsBetweenSubdomains
-    master_block = '0'
-    depends_on = 'subdomain'
-    new_boundary = 'interface_left'
-    paired_block = '1'
-  [../]
-  [./interface_right]
-    type = SideSetsBetweenSubdomains
-    master_block = '1'
-    depends_on = 'subdomain'
-    new_boundary = 'interface_right'
-    paired_block = '0'
-  [../]
+  # [subdomain]
+  #   type = SubdomainBoundingBox
+  #   bottom_left = '0 0.5 0'
+  #   block_id = 1
+  #   top_right = '1 1 0'
+  # []
+  [break]
+    type = BreakMeshByBlock
+    split_interface = false
+  []
 []
 
 [Variables]
-  [./p_left]
-    order = FIRST
-    family = LAGRANGE
-    block = '0'
-  [../]
-  [./p_right]
-    order = FIRST
-    family = LAGRANGE
-    block = '1'
-  [../]
+  [p]
+  []
 []
 
 [AuxVariables]
-  [./lewis_fault]
-  [../]
+  [lewis_fault]
+  []
 []
 
 [Kernels]
-  [./diff_left]
+  [diff]
     type = RedbackMassDiffusion
-    variable = p_left
-    block = '0'
-  [../]
-  [./diff_right]
-    type = RedbackMassDiffusion
-    variable = p_right
-    block = '1'
-  [../]
+    variable = p
+  []
 []
 
 [InterfaceKernels]
-  [./interface]
+  [interface]
     type = InterfaceDarcy
-    variable = p_left
-    neighbor_var = 'p_right'
-    boundary = 'interface_left'
+    variable = p
+    neighbor_var = p
+    boundary = interface
     fault_lewis_number = lewis_fault
     fault_thickness = 0.1
-  [../]
+  []
 []
 
 [Materials]
-  [./mat]
+  [mat]
     type = RedbackMaterial
     ref_lewis_nb = 1
-  [../]
+  []
 []
 
 [ICs]
-  [./lewis_fault]
+  [lewis_fault]
     type = ConstantIC
     variable = lewis_fault
     value = 10
-  [../]
+  []
 []
 
 [BCs]
-  [./left]
+  [left]
     type = DirichletBC
-    variable = p_left
+    variable = p
     boundary = 'left'
     value = 1
-  [../]
-  [./right]
+  []
+  [right]
     type = DirichletBC
-    variable = p_right
+    variable = p
     boundary = 'right'
     value = 0
-  [../]
+  []
 []
 
 [Postprocessors]
-  [./p_left]
+  [p]
     type = NodalVariableValue
     nodeid = 5
-    variable = p_left
-  [../]
-  [./p_right]
-    type = NodalVariableValue
-    nodeid = 5
-    variable = p_right
-  [../]
+    variable = p
+  []
 []
 
 [Preconditioning]
-  [./smp]
+  [smp]
     type = SMP
     full = true
-  [../]
+  []
 []
 
 [Executioner]
