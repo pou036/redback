@@ -14,13 +14,10 @@
 #define REDBACKFLUIDSTRESSDIVERGENCETENSORS_H
 
 #include "Kernel.h"
-//#include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 
 // Forward Declarations
 class RedbackFluidStressDivergenceTensors;
-// class RankFourTensor;
-class RankTwoTensor;
 
 template <>
 InputParameters validParams<RedbackFluidStressDivergenceTensors>();
