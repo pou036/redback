@@ -5,8 +5,6 @@
 
 // Forward Declarations
 class DarcyBrinkman;
-// class RankFourTensor;
-class RankTwoTensor;
 
 template <>
 InputParameters validParams<DarcyBrinkman>();
