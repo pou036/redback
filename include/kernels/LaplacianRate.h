@@ -10,9 +10,10 @@
 #ifndef LAPLACIANRATE_H
 #define LAPLACIANRATE_H
 
-#include "Kernel.h"
+#include "TimeKernel.h"
 
 class LaplacianRate;
+class Function;
 
 template <>
 InputParameters validParams<LaplacianRate>();
@@ -29,11 +30,10 @@ protected:
   virtual Real computeQpJacobian() override;
 
 //private:
-const MaterialProperty<Real> & _epsilon;
-const VariableGradient & _grad_u_dot;
+// Real _mu;
+  Function & _mu_function;
 
-//Real _epsilon;
-
+  const VariableGradient & _grad_u_dot;
 };
 
 #endif /* DIFFUSION_H */

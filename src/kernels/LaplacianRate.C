@@ -8,6 +8,7 @@
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
 #include "LaplacianRate.h"
+#include "Function.h"
 
 registerMooseObject("RedbackApp", LaplacianRate);
 
@@ -16,24 +17,23 @@ InputParameters
 validParams<LaplacianRate>()
 {
   InputParameters params = validParams<Kernel>();
-  params.addClassDescription("The Laplacian of the rate of the order parameter");
-  params.addParam<MaterialPropertyName>("epsilon_name","The parameter multiplying the Laplacian rate");
-  //params.addRequiredParam<Real>("epsilon_name","The parameter multiplying the Laplacian rate");
-    params.set<Real>("value") = 0.0;
+  params.addClassDescription("The Laplacian of the rate of the variable");
+  // params.addParam<Real>("mu_name","The parameter multiplying the Laplacian rate");
+  params.addParam<FunctionName>("mu_function", "1", "A function that describes the coefficient mu");
   return params;
 }
 
 LaplacianRate::LaplacianRate(const InputParameters & parameters) : Kernel(parameters),
-  _epsilon(getMaterialProperty<Real>("epsilon_name")),
+  _mu_function(getFunction("mu_function")),
+ // _mu(getParam<Real>("mu_name")),
   _grad_u_dot(_var.gradSlnDot())
-  //_epsilon(getParam<Real>("epsilon"))
 {
 }
 
 Real
 LaplacianRate::computeQpResidual()
 {
-  return _epsilon[_qp] * _grad_u_dot[_qp] * _grad_test[_i][_qp];
+  return _mu_function.value(_t, _q_point[_qp]) * _grad_u_dot[_qp] * _grad_test[_i][_qp];
 }
 Real
 LaplacianRate::computeQpJacobian()
