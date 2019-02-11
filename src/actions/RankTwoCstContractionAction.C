@@ -17,6 +17,8 @@
 #include "Parser.h"
 #include "RankTwoCstContractionAction.h"
 
+registerMooseAction("RedbackApp", RankTwoCstContractionAction, "add_postprocessor");
+
 template <>
 InputParameters
 validParams<RankTwoCstContractionAction>()

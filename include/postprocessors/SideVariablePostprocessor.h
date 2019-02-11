@@ -24,7 +24,8 @@ class SideVariablePostprocessor;
 template <>
 InputParameters validParams<SideVariablePostprocessor>();
 
-class SideVariablePostprocessor : public SidePostprocessor, public MooseVariableInterface
+class SideVariablePostprocessor : public SidePostprocessor,
+                                  public MooseVariableInterface<Real>
 {
 public:
   SideVariablePostprocessor(const InputParameters & parameters);

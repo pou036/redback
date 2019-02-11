@@ -7,6 +7,8 @@
 
 #include "RankTwoDoubleContraction.h"
 
+registerMooseObject("RedbackApp", RankTwoDoubleContraction);
+
 template <>
 InputParameters
 validParams<RankTwoDoubleContraction>()

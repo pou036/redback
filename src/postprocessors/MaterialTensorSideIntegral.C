@@ -8,6 +8,8 @@
 #include "MaterialTensorSideIntegral.h"
 #include "RankTwoScalarTools.h"
 
+registerMooseObject("RedbackApp", MaterialTensorSideIntegral);
+
 template <>
 InputParameters
 validParams<MaterialTensorSideIntegral>()

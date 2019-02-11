@@ -17,6 +17,8 @@
 #include <algorithm>
 #include <limits>
 
+registerMooseObject("RedbackApp", SideExtremeValue);
+
 template <>
 InputParameters
 validParams<SideExtremeValue>()

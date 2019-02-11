@@ -14,6 +14,8 @@
 
 #include "SideIntegralVoidPostprocessor.h"
 
+registerMooseObject("RedbackApp", SideIntegralVoidPostprocessor);
+
 template <>
 InputParameters
 validParams<SideIntegralVoidPostprocessor>()

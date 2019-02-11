@@ -13,6 +13,8 @@
 /****************************************************************/
 #include "RankTwoContractionPostprocessor.h"
 
+registerMooseObject("RedbackApp", RankTwoContractionPostprocessor);
+
 template <>
 InputParameters
 validParams<RankTwoContractionPostprocessor>()
