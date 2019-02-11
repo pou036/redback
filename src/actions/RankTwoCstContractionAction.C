@@ -49,7 +49,7 @@ RankTwoCstContractionAction::act()
   MaterialPropertyName tensor = getParam<MaterialPropertyName>("rank_two_tensor");
   std::string postprocessor = "MaterialTensorIntegral";
   if (getParam<bool>("compute_on_boundary"))
-    std::string postprocessor = "MaterialTensorSideIntegral";
+    postprocessor = "MaterialTensorSideIntegral";
 
   for (int j = 0; j < LIBMESH_DIM; j++)
   {

@@ -46,7 +46,7 @@ RankTwoContractionAction::act()
   std::vector<MaterialPropertyName> tensors = getParam<std::vector<MaterialPropertyName> >("rank_two_tensor");
   std::string postprocessor = "MaterialTensorIntegral";
   if (getParam<bool>("compute_on_boundary"))
-    std::string postprocessor = "MaterialTensorSideIntegral";
+    postprocessor = "MaterialTensorSideIntegral";
 
   for (int i = 0; i < 2; i++)
   {
