@@ -1,39 +1,40 @@
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*              (c) 2014 CSIRO and UNSW Australia               */
 /*                   ALL RIGHTS RESERVED                        */
 /*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
+/*            Prepared by CSIRO and UNSW Australia              */
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
 #include "ElementFileSubdomain.h"
 #include "MooseMesh.h"
+#include "libmesh/elem.h"
 #include <fstream>
+
+registerMooseObject("RedbackApp", ElementFileSubdomain);
 
 template <>
 InputParameters
 validParams<ElementFileSubdomain>()
 {
   InputParameters params = validParams<MeshModifier>();
-  params.addRequiredParam<std::vector<SubdomainID> >("subdomain_ids", "New subdomain IDs of all elements");
-  params.addParam<std::vector<dof_id_type> >("element_ids", "New subdomain IDs of all elements");
+  params.addRequiredParam<std::vector<SubdomainID>>("subdomain_ids",
+                                                    "New subdomain IDs of all elements");
+  params.addParam<std::vector<dof_id_type>>("element_ids", "New subdomain IDs of all elements");
   params.addParam<FileName>("file", "Name of the txt file with the elements");
   return params;
 }
 
-ElementFileSubdomain::ElementFileSubdomain(const InputParameters & parameters) : MeshModifier(parameters)
+ElementFileSubdomain::ElementFileSubdomain(const InputParameters & parameters)
+  : MeshModifier(parameters)
 {
 }
 
-ElementFileSubdomain::~ElementFileSubdomain()
-{
-}
+ElementFileSubdomain::~ElementFileSubdomain() {}
 
 void
 ElementFileSubdomain::modify()
@@ -46,7 +47,7 @@ ElementFileSubdomain::modify()
   // Reference the the libMesh::MeshBase
   MeshBase & mesh = _mesh_ptr->getMesh();
 
-  std::vector<SubdomainID> bids = getParam<std::vector<SubdomainID> >("subdomain_ids");
+  std::vector<SubdomainID> bids = getParam<std::vector<SubdomainID>>("subdomain_ids");
 
   // Generate a list of elements to which new subdomain IDs are to be assigned
   std::vector<Elem *> elements;
@@ -68,7 +69,7 @@ ElementFileSubdomain::modify()
 
         for (unsigned int i = 0; i < vstrings.size(); ++i)
         {
-          elemids.push_back((dof_id_type)atoi(vstrings[ i ].c_str()));
+          elemids.push_back((dof_id_type)atoi(vstrings[i].c_str()));
         }
       }
       myfile.close();
@@ -76,13 +77,13 @@ ElementFileSubdomain::modify()
     else
     {
       mooseWarning("Unable to open file");
-      elemids = getParam<std::vector<dof_id_type> >("element_ids");
+      elemids = getParam<std::vector<dof_id_type>>("element_ids");
     }
     // std::vector<dof_id_type> elemids = getParam<std::vector<dof_id_type>
     // >("element_ids");
     for (dof_id_type i = 0; i < elemids.size(); ++i)
     {
-      Elem * elem = mesh.query_elem(elemids[ i ]);
+      Elem * elem = mesh.query_elem(elemids[i]);
       if (!elem)
         mooseError("invalid element ID is in element_ids");
       else
@@ -111,19 +112,21 @@ ElementFileSubdomain::modify()
 
   // Assign new subdomain IDs and make sure elements in different types are not
   // assigned with the same subdomain ID
-  std::map<ElemType, std::set<SubdomainID> > type2blocks;
+  std::map<ElemType, std::set<SubdomainID>> type2blocks;
   for (dof_id_type e = 0; e < elements.size(); ++e)
   {
-    Elem * elem = elements[ e ];
+    Elem * elem = elements[e];
     ElemType type = elem->type();
     SubdomainID newid;
     if (bids.size() == 1)
-      newid = bids[ 0 ];
+      newid = bids[0];
     else
-      newid = bids[ e ];
+      newid = bids[e];
 
     bool has_type = false;
-    for (std::map<ElemType, std::set<SubdomainID> >::iterator it = type2blocks.begin(); it != type2blocks.end(); ++it)
+    for (std::map<ElemType, std::set<SubdomainID>>::iterator it = type2blocks.begin();
+         it != type2blocks.end();
+         ++it)
     {
       if (it->first == type)
       {
@@ -138,7 +141,7 @@ ElementFileSubdomain::modify()
     {
       std::set<SubdomainID> blocks;
       blocks.insert(newid);
-      type2blocks.insert(std::pair<ElemType, std::set<SubdomainID> >(type, blocks));
+      type2blocks.insert(std::pair<ElemType, std::set<SubdomainID>>(type, blocks));
     }
 
     elem->subdomain_id() = newid;

@@ -12,6 +12,8 @@
 
 #include "RedbackDamage.h"
 
+registerMooseObject("RedbackApp", RedbackDamage);
+
 template <>
 InputParameters
 validParams<RedbackDamage>()
@@ -23,26 +25,24 @@ validParams<RedbackDamage>()
   return params;
 }
 
-RedbackDamage::RedbackDamage(const InputParameters & parameters) :
-    Kernel(parameters),
+RedbackDamage::RedbackDamage(const InputParameters & parameters)
+  : Kernel(parameters),
     _damage_kernel(getMaterialProperty<Real>("damage_kernel")),
     _damage_kernel_jac(getMaterialProperty<Real>("damage_kernel_jacobian")),
     _time_factor(getParam<Real>("time_factor"))
 {
 }
 
-RedbackDamage::~RedbackDamage()
-{
-}
+RedbackDamage::~RedbackDamage() {}
 
 Real
 RedbackDamage::computeQpResidual()
 {
-  return -_time_factor * _test[ _i ][ _qp ] * _damage_kernel[ _qp ];
+  return -_time_factor * _test[_i][_qp] * _damage_kernel[_qp];
 }
 
 Real
 RedbackDamage::computeQpJacobian()
 {
-  return -_time_factor * _test[ _i ][ _qp ] * _damage_kernel_jac[ _qp ] * _phi[ _j ][ _qp ];
+  return -_time_factor * _test[_i][_qp] * _damage_kernel_jac[_qp] * _phi[_j][_qp];
 }

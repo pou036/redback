@@ -1,3 +1,15 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
+/*                                                              */
+/*              (c) 2014 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #ifndef REDBACKTHERMALCONVECTION_H
 #define REDBACKTHERMALCONVECTION_H
 
@@ -7,9 +19,7 @@ class RedbackThermalConvection : public Kernel
 {
 public:
   RedbackThermalConvection(const InputParameters & parameters);
-  virtual ~RedbackThermalConvection()
-  {
-  }
+  virtual ~RedbackThermalConvection() {}
 
 protected:
   virtual Real computeQpResidual();

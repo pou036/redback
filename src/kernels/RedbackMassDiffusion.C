@@ -12,6 +12,8 @@
 
 #include "RedbackMassDiffusion.h"
 
+registerMooseObject("RedbackApp", RedbackMassDiffusion);
+
 template <>
 InputParameters
 validParams<RedbackMassDiffusion>()
@@ -23,26 +25,24 @@ validParams<RedbackMassDiffusion>()
   return params;
 }
 
-RedbackMassDiffusion::RedbackMassDiffusion(const InputParameters & parameters) :
-    Kernel(parameters),
+RedbackMassDiffusion::RedbackMassDiffusion(const InputParameters & parameters)
+  : Kernel(parameters),
     _Le(getMaterialProperty<Real>("lewis_number")),
     _gravity_term(getMaterialProperty<RealVectorValue>("fluid_gravity_term")),
     _time_factor(getParam<Real>("time_factor"))
 {
 }
 
-RedbackMassDiffusion::~RedbackMassDiffusion()
-{
-}
+RedbackMassDiffusion::~RedbackMassDiffusion() {}
 
 Real
 RedbackMassDiffusion::computeQpResidual()
 {
-  return (_time_factor / _Le[ _qp ]) * (_grad_u[ _qp ] - _gravity_term[ _qp ]) * _grad_test[ _i ][ _qp ];
+  return (_time_factor / _Le[_qp]) * (_grad_u[_qp] - _gravity_term[_qp]) * _grad_test[_i][_qp];
 }
 
 Real
 RedbackMassDiffusion::computeQpJacobian()
 {
-  return (_time_factor / _Le[ _qp ]) * _grad_phi[ _j ][ _qp ] * _grad_test[ _i ][ _qp ];
+  return (_time_factor / _Le[_qp]) * _grad_phi[_j][_qp] * _grad_test[_i][_qp];
 }

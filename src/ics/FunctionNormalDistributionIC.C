@@ -16,29 +16,36 @@
 
 #include "libmesh/point.h"
 
+registerMooseObject("RedbackApp", FunctionNormalDistributionIC);
+
 template <>
 InputParameters
 validParams<FunctionNormalDistributionIC>()
 {
   InputParameters params = validParams<InitialCondition>();
   params.addRequiredParam<Real>("mean", "Mean value of normal distribution function");
-  params.addRequiredParam<Real>("standard_deviation", "Standard deviation of normal distribution function");
+  params.addRequiredParam<Real>("standard_deviation",
+                                "Standard deviation of normal distribution function");
   params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");
-  params.addParam<Real>("minimum", -1e99, "minimum value (if you want to cap the range of available values)");
-  params.addParam<Real>("maximum", 1e99, "minimum value (if you want to cap the range of available values)");
+  params.addParam<Real>(
+      "minimum", -1e99, "minimum value (if you want to cap the range of available values)");
+  params.addParam<Real>(
+      "maximum", 1e99, "minimum value (if you want to cap the range of available values)");
   return params;
 }
 
-FunctionNormalDistributionIC::FunctionNormalDistributionIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+FunctionNormalDistributionIC::FunctionNormalDistributionIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _mean(getParam<Real>("mean")),
     _stddev(getParam<Real>("standard_deviation")),
     _min(getParam<Real>("minimum")),
     _max(getParam<Real>("maximum"))
 {
-  mooseAssert(_stddev > 0.0, "standard_deviation must be positive for FunctionNormalDistributionIC!");
+  mooseAssert(_stddev > 0.0,
+              "standard_deviation must be positive for FunctionNormalDistributionIC!");
   // Real range = _max - _min;
-  // mooseAssert(range >= 0.0, "The maximum value must be greater than the minimum in FunctionNormalDistributionIC");
+  // mooseAssert(range >= 0.0, "The maximum value must be greater than the minimum in
+  // FunctionNormalDistributionIC");
   MooseRandom::seed(getParam<unsigned int>("seed"));
 }
 

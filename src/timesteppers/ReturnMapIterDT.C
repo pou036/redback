@@ -1,25 +1,26 @@
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*              (c) 2014 CSIRO and UNSW Australia               */
 /*                   ALL RIGHTS RESERVED                        */
 /*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
+/*            Prepared by CSIRO and UNSW Australia              */
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
 #include "ReturnMapIterDT.h"
 
+registerMooseObject("RedbackApp", ReturnMapIterDT);
+
 template <>
 InputParameters
 validParams<ReturnMapIterDT>()
 {
   InputParameters params = validParams<TimeStepper>();
-  params.addRequiredParam<PostprocessorName>("postprocessor", "This has to be an ElementExtremeValue postprocessor.");
+  params.addRequiredParam<PostprocessorName>(
+      "postprocessor", "This has to be an ElementExtremeValue postprocessor.");
   params.addParam<Real>("dt", "Initial value of dt");
   params.addRequiredParam<Real>("max_iter", "Maximum of return map iteration that are admissible.");
   params.addRequiredParam<Real>("min_iter", "Minimum of return map iteration that are admissible.");
@@ -29,8 +30,8 @@ validParams<ReturnMapIterDT>()
   return params;
 }
 
-ReturnMapIterDT::ReturnMapIterDT(const InputParameters & parameters) :
-    TimeStepper(parameters),
+ReturnMapIterDT::ReturnMapIterDT(const InputParameters & parameters)
+  : TimeStepper(parameters),
     PostprocessorInterface(this),
     _extreme_value(getPostprocessorValue("postprocessor")),
     _has_initial_dt(isParamValid("dt")),

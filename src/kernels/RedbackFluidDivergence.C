@@ -1,18 +1,18 @@
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*              (c) 2014 CSIRO and UNSW Australia               */
 /*                   ALL RIGHTS RESERVED                        */
 /*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
+/*            Prepared by CSIRO and UNSW Australia              */
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
 #include "RedbackFluidDivergence.h"
+
+registerMooseObject("RedbackApp", RedbackFluidDivergence);
 
 template <>
 InputParameters
@@ -29,8 +29,8 @@ validParams<RedbackFluidDivergence>()
   return params;
 }
 
-RedbackFluidDivergence::RedbackFluidDivergence(const InputParameters & parameters) :
-    Kernel(parameters),
+RedbackFluidDivergence::RedbackFluidDivergence(const InputParameters & parameters)
+  : Kernel(parameters),
     _div_fluid_kernel(getMaterialProperty<Real>("divergence_fluid_velocity_kernel")),
     //_time_factor(getParam<Real>("time_factor")),
 
@@ -41,9 +41,7 @@ RedbackFluidDivergence::RedbackFluidDivergence(const InputParameters & parameter
 {
 }
 
-RedbackFluidDivergence::~RedbackFluidDivergence()
-{
-}
+RedbackFluidDivergence::~RedbackFluidDivergence() {}
 
 Real
 RedbackFluidDivergence::computeQpResidual()
@@ -51,7 +49,7 @@ RedbackFluidDivergence::computeQpResidual()
   // we solve -div u so that our matrix is symmetric
   // it works in MOOSE if they integrate_p_by_parts
   // because we don't it might not make a difference
-  return -_test[ _i ][ _qp ] * _div_fluid_kernel[ _qp ];
+  return -_test[_i][_qp] * _div_fluid_kernel[_qp];
   // return -_time_factor * _test[ _i ][ _qp ] * _div_fluid_kernel[ _qp ];
 }
 
@@ -66,13 +64,13 @@ Real
 RedbackFluidDivergence::computeQpOffDiagJacobian(unsigned jvar)
 {
   if (jvar == _x_vel_var_number)
-    return -_grad_phi[ _j ][ _qp ](0) * _test[ _i ][ _qp ];
+    return -_grad_phi[_j][_qp](0) * _test[_i][_qp];
 
   else if (jvar == _y_vel_var_number)
-    return -_grad_phi[ _j ][ _qp ](1) * _test[ _i ][ _qp ];
+    return -_grad_phi[_j][_qp](1) * _test[_i][_qp];
 
   else if (jvar == _z_vel_var_number)
-    return -_grad_phi[ _j ][ _qp ](2) * _test[ _i ][ _qp ];
+    return -_grad_phi[_j][_qp](2) * _test[_i][_qp];
   else
     return 0;
 }

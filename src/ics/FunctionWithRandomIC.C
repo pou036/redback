@@ -1,13 +1,11 @@
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*              (c) 2014 CSIRO and UNSW Australia               */
 /*                   ALL RIGHTS RESERVED                        */
 /*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
+/*            Prepared by CSIRO and UNSW Australia              */
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
@@ -18,6 +16,8 @@
 
 #include "libmesh/point.h"
 
+registerMooseObject("RedbackApp", FunctionWithRandomIC);
+
 template <>
 InputParameters
 validParams<FunctionWithRandomIC>()
@@ -26,12 +26,13 @@ validParams<FunctionWithRandomIC>()
   params.addParam<Real>("min", 0.0, "Lower bound of the randomly generated values");
   params.addParam<Real>("max", 1.0, "Upper bound of the randomly generated values");
   params.addParam<unsigned int>("seed", 0, "Seed value for the random number generator");
-  params.addRequiredParam<FunctionName>("function", "The initial condition function (without randomness).");
+  params.addRequiredParam<FunctionName>("function",
+                                        "The initial condition function (without randomness).");
   return params;
 }
 
-FunctionWithRandomIC::FunctionWithRandomIC(const InputParameters & parameters) :
-    InitialCondition(parameters),
+FunctionWithRandomIC::FunctionWithRandomIC(const InputParameters & parameters)
+  : InitialCondition(parameters),
     _min(getParam<Real>("min")),
     _max(getParam<Real>("max")),
     _range(_max - _min),

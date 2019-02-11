@@ -1,13 +1,11 @@
 /****************************************************************/
 /*               DO NOT MODIFY THIS HEADER                      */
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
 /*                                                              */
-/*           (c) 2010 Battelle Energy Alliance, LLC             */
+/*              (c) 2014 CSIRO and UNSW Australia               */
 /*                   ALL RIGHTS RESERVED                        */
 /*                                                              */
-/*          Prepared by Battelle Energy Alliance, LLC           */
-/*            Under Contract No. DE-AC07-05ID14517              */
-/*            With the U. S. Department of Energy               */
+/*            Prepared by CSIRO and UNSW Australia              */
 /*                                                              */
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
@@ -15,6 +13,8 @@
 #include "Function.h"
 #include "ImageProcessing.h"
 #include <fstream>
+
+registerMooseObject("RedbackApp", ImageProcessing);
 
 template <>
 InputParameters
@@ -25,11 +25,11 @@ validParams<ImageProcessing>()
   return params;
 }
 
-ImageProcessing::ImageProcessing(const InputParameters & parameters) :
-    Material(parameters), _func(getParam<FunctionName>("function"))
+ImageProcessing::ImageProcessing(const InputParameters & parameters)
+  : Material(parameters), _func(getParam<FunctionName>("function"))
 {
   _function.resize(1);
-  _function[ 0 ] = &getFunctionByName(_func);
+  _function[0] = &getFunctionByName(_func);
   idFile = fopen("idfile.txt", "w");
   fputs("", idFile);
   fclose(idFile);
@@ -50,7 +50,7 @@ ImageProcessing::computeQpProperties()
 void
 ImageProcessing::computeQpFunctions()
 {
-  if (_t_step == 1 && (*_function[ 0 ]).value(_t, _q_point[ _qp ]) == 0)
+  if (_t_step == 1 && (*_function[0]).value(_t, _q_point[_qp]) == 0)
   {
     idFile = fopen("idfile.txt", "a");
     std::ostringstream convert; // stream used for the conversion

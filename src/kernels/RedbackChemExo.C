@@ -12,6 +12,8 @@
 
 #include "RedbackChemExo.h"
 
+registerMooseObject("RedbackApp", RedbackChemExo);
+
 template <>
 InputParameters
 validParams<RedbackChemExo>()
@@ -23,26 +25,25 @@ validParams<RedbackChemExo>()
   return params;
 }
 
-RedbackChemExo::RedbackChemExo(const InputParameters & parameters) :
-    Kernel(parameters),
+RedbackChemExo::RedbackChemExo(const InputParameters & parameters)
+  : Kernel(parameters),
     _chemical_exothermic_energy(getMaterialProperty<Real>("chemical_exothermic_energy")),
-    _chemical_exothermic_energy_jac(getMaterialProperty<Real>("chemical_exothermic_energy_jacobian")),
+    _chemical_exothermic_energy_jac(
+        getMaterialProperty<Real>("chemical_exothermic_energy_jacobian")),
     _time_factor(getParam<Real>("time_factor"))
 {
 }
 
-RedbackChemExo::~RedbackChemExo()
-{
-}
+RedbackChemExo::~RedbackChemExo() {}
 
 Real
 RedbackChemExo::computeQpResidual()
 {
-  return -_time_factor * _test[ _i ][ _qp ] * _chemical_exothermic_energy[ _qp ];
+  return -_time_factor * _test[_i][_qp] * _chemical_exothermic_energy[_qp];
 }
 
 Real
 RedbackChemExo::computeQpJacobian()
 {
-  return -_time_factor * _test[ _i ][ _qp ] * _chemical_exothermic_energy_jac[ _qp ] * _phi[ _j ][ _qp ];
+  return -_time_factor * _test[_i][_qp] * _chemical_exothermic_energy_jac[_qp] * _phi[_j][_qp];
 }

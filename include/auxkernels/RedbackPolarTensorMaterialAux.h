@@ -1,3 +1,15 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
+/*                                                              */
+/*              (c) 2014 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #ifndef REDBACKPOLARTENSORMATERIALAUX_H
 #define REDBACKPOLARTENSORMATERIALAUX_H
 
@@ -14,9 +26,7 @@ class RedbackPolarTensorMaterialAux : public AuxKernel
 {
 public:
   RedbackPolarTensorMaterialAux(const InputParameters & parameters);
-  virtual ~RedbackPolarTensorMaterialAux()
-  {
-  }
+  virtual ~RedbackPolarTensorMaterialAux() {}
 
 protected:
   virtual Real computeValue();

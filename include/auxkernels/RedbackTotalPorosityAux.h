@@ -1,3 +1,15 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
+/*                                                              */
+/*              (c) 2014 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #ifndef REDBACKTOTALPOROSITYAUX_H
 #define REDBACKTOTALPOROSITYAUX_H
 
@@ -14,9 +26,7 @@ class RedbackTotalPorosityAux : public AuxKernel
 {
 public:
   RedbackTotalPorosityAux(const InputParameters & parameters);
-  virtual ~RedbackTotalPorosityAux()
-  {
-  }
+  virtual ~RedbackTotalPorosityAux() {}
 
 protected:
   virtual Real computeValue();

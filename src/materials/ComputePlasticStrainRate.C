@@ -1,11 +1,18 @@
 /****************************************************************/
-/* MOOSE - Multiphysics Object Oriented Simulation Environment  */
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
 /*                                                              */
-/*          All contents are licensed under LGPL V2.1           */
-/*             See LICENSE for full restrictions                */
+/*              (c) 2014 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
 #include "ComputePlasticStrainRate.h"
+
+registerMooseObject("RedbackApp", ComputePlasticStrainRate);
 
 template <>
 InputParameters
@@ -19,8 +26,8 @@ validParams<ComputePlasticStrainRate>()
   return params;
 }
 
-ComputePlasticStrainRate::ComputePlasticStrainRate(const InputParameters & parameters) :
-    DerivativeMaterialInterface<Material>(parameters),
+ComputePlasticStrainRate::ComputePlasticStrainRate(const InputParameters & parameters)
+  : DerivativeMaterialInterface<Material>(parameters),
     _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : ""),
     _plastic_strain(getMaterialProperty<RankTwoTensor>("plastic_strain")),
     _plastic_strain_old(getMaterialPropertyOld<RankTwoTensor>("plastic_strain")),
@@ -31,5 +38,8 @@ ComputePlasticStrainRate::ComputePlasticStrainRate(const InputParameters & param
 void
 ComputePlasticStrainRate::computeQpProperties()
 {
-  _plastic_strain_rate[ _qp ] = (_plastic_strain[ _qp ] - _plastic_strain_old[ _qp ]) / _dt;
+  if (_dt > 0)
+    _plastic_strain_rate[_qp] = (_plastic_strain[_qp] - _plastic_strain_old[_qp]) / _dt;
+  else
+    _plastic_strain_rate[_qp].zero();
 }

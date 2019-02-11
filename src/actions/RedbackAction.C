@@ -1,3 +1,15 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
+/*                                                              */
+/*              (c) 2014 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #include "RedbackAction.h"
 
 #include "FEProblem.h"
@@ -15,7 +27,7 @@ validParams<RedbackAction>()
   params.addParam<NonlinearVariableName>("temp", "", "The temperature");
   params.addParam<NonlinearVariableName>("pore_pres", "", "The pore fluid pressure");
   params.addParam<std::string>(
-    "appended_property_name", "", "Name appended to material properties to make them unique");
+      "appended_property_name", "", "Name appended to material properties to make them unique");
 
   // changed this from true to false
   params.set<bool>("use_displaced_mesh") = true;
@@ -23,8 +35,8 @@ validParams<RedbackAction>()
   return params;
 }
 
-RedbackAction::RedbackAction(InputParameters params) :
-    Action(params),
+RedbackAction::RedbackAction(InputParameters params)
+  : Action(params),
     _disp_x(getParam<NonlinearVariableName>("disp_x")),
     _disp_y(getParam<NonlinearVariableName>("disp_y")),
     _disp_z(getParam<NonlinearVariableName>("disp_z")),
