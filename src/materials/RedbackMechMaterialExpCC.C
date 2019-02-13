@@ -14,6 +14,8 @@
 #include "RedbackMechMaterialExpCC.h"
 #include <cmath> //used for fabs
 
+registerMooseObject("RedbackApp", RedbackMechMaterialExpCC);
+
 template <>
 InputParameters
 validParams<RedbackMechMaterialExpCC>()

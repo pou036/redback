@@ -13,6 +13,8 @@
 #include "Function.h"
 #include "RedbackMaterial.h"
 
+registerMooseObject("RedbackApp", RedbackMaterial);
+
 template <>
 InputParameters
 validParams<RedbackMaterial>()

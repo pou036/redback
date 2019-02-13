@@ -12,6 +12,8 @@
 
 #include "RedbackThermalPressurization.h"
 
+registerMooseObject("RedbackApp", RedbackThermalPressurization);
+
 template <>
 InputParameters
 validParams<RedbackThermalPressurization>()

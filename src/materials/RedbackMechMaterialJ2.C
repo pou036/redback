@@ -12,6 +12,8 @@
 
 #include "RedbackMechMaterialJ2.h"
 
+registerMooseObject("RedbackApp", RedbackMechMaterialJ2);
+
 template <>
 InputParameters
 validParams<RedbackMechMaterialJ2>()

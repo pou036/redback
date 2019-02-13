@@ -12,6 +12,8 @@
 
 #include "RedbackMechMaterialElastic.h"
 
+registerMooseObject("RedbackApp", RedbackMechMaterialElastic);
+
 template <>
 InputParameters
 validParams<RedbackMechMaterialElastic>()

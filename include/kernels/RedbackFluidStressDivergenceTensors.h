@@ -1,14 +1,23 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
+/*                                                              */
+/*              (c) 2014 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #ifndef REDBACKFLUIDSTRESSDIVERGENCETENSORS_H
 #define REDBACKFLUIDSTRESSDIVERGENCETENSORS_H
 
 #include "Kernel.h"
-//#include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 
 // Forward Declarations
 class RedbackFluidStressDivergenceTensors;
-// class RankFourTensor;
-class RankTwoTensor;
 
 template <>
 InputParameters validParams<RedbackFluidStressDivergenceTensors>();

@@ -1,8 +1,22 @@
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
+/*                                                              */
+/*              (c) 2014 CSIRO and UNSW Australia               */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*            Prepared by CSIRO and UNSW Australia              */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
+
 #include "RedbackMechAction.h"
 
 #include "FEProblem.h"
 #include "Factory.h"
 #include "Parser.h"
+
+registerMooseAction("RedbackApp", RedbackMechAction, "add_kernel");
 
 template <>
 InputParameters
@@ -41,86 +55,89 @@ RedbackMechAction::RedbackMechAction(InputParameters params)
 void
 RedbackMechAction::act()
 {
-  // Determine whether RZ
-  bool rz = false;
-  unsigned int dim = 1;
-  std::vector<std::string> keys;
-  std::vector<VariableName> vars;
-  std::string type("RedbackStressDivergenceTensors");
-
-  /* if (_problem->coordSystem() == Moose::COORD_RZ)
+  if (_current_task == "add_kernel")
   {
-    rz = true;
-    dim = 2;
-    keys.push_back("disp_r");
-    keys.push_back("disp_z");
-    vars.push_back(_disp_r);
-    vars.push_back(_disp_z);
-    type = "StressDivergenceRZ";
-    }*/
+    // Determine whether RZ
+    bool rz = false;
+    unsigned int dim = 1;
+    std::vector<std::string> keys;
+    std::vector<VariableName> vars;
+    std::string type("RedbackStressDivergenceTensors");
 
-  if (!rz && _disp_x == "")
-    mooseError("disp_x must be specified");
-
-  if (!rz)
-  {
-    keys.push_back("disp_x");
-    vars.push_back(_disp_x);
-    if (_disp_y != "")
+    /* if (_problem->coordSystem() == Moose::COORD_RZ)
     {
-      ++dim;
-      keys.push_back("disp_y");
-      vars.push_back(_disp_y);
-      if (_disp_z != "")
+      rz = true;
+      dim = 2;
+      keys.push_back("disp_r");
+      keys.push_back("disp_z");
+      vars.push_back(_disp_r);
+      vars.push_back(_disp_z);
+      type = "StressDivergenceRZ";
+      }*/
+
+    if (!rz && _disp_x == "")
+      mooseError("disp_x must be specified");
+
+    if (!rz)
+    {
+      keys.push_back("disp_x");
+      vars.push_back(_disp_x);
+      if (_disp_y != "")
       {
         ++dim;
-        keys.push_back("disp_z");
-        vars.push_back(_disp_z);
+        keys.push_back("disp_y");
+        vars.push_back(_disp_y);
+        if (_disp_z != "")
+        {
+          ++dim;
+          keys.push_back("disp_z");
+          vars.push_back(_disp_z);
+        }
       }
     }
-  }
 
-  unsigned int num_coupled(dim);
-  if (_temp != "")
-  {
-    ++num_coupled;
-    keys.push_back("temp");
-    vars.push_back(_temp);
-  }
-  if (_pore_pres != "")
-  {
-    ++num_coupled;
-    keys.push_back("pore_pres");
-    vars.push_back(_pore_pres);
-  }
+    unsigned int num_coupled(dim);
+    if (_temp != "")
+    {
+      ++num_coupled;
+      keys.push_back("temp");
+      vars.push_back(_temp);
+    }
+    if (_pore_pres != "")
+    {
+      ++num_coupled;
+      keys.push_back("pore_pres");
+      vars.push_back(_pore_pres);
+    }
 
-  // Create divergence objects
-  std::string short_name(_name);
-  // Chop off "TensorMechanics/"
-  short_name.erase(0, 15);
+    // Create divergence objects
+    std::string short_name(_name);
+    // Chop off "TensorMechanics/"
+    short_name.erase(0, 15);
 
-  InputParameters params = _factory.getValidParams(type);
-  for (unsigned int j = 0; j < num_coupled; ++j)
-  {
-    params.addCoupledVar(keys[j], "");
-    params.set<std::vector<VariableName>>(keys[j]) = std::vector<VariableName>(1, vars[j]);
-  }
+    InputParameters params = _factory.getValidParams(type);
+    for (unsigned int j = 0; j < num_coupled; ++j)
+    {
+      params.addCoupledVar(keys[j], "");
+      params.set<std::vector<VariableName>>(keys[j]) = std::vector<VariableName>(1, vars[j]);
+    }
 
-  params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
-  params.set<std::string>("appended_property_name") =
-      getParam<std::string>("appended_property_name");
+    params.set<bool>("use_displaced_mesh") = getParam<bool>("use_displaced_mesh");
+    params.set<std::string>("appended_property_name") =
+        getParam<std::string>("appended_property_name");
 
-  for (unsigned int i = 0; i < dim; ++i)
-  {
-    std::stringstream name;
-    name << "Kernels/";
-    name << short_name;
-    name << i;
+    for (unsigned int i = 0; i < dim; ++i)
+    {
+      std::stringstream name;
+      name << "Kernels/";
+      name << short_name;
+      name << i;
 
-    params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
-    params.set<unsigned int>("component") = i;
-    params.set<NonlinearVariableName>("variable") = vars[i];
+      params.set<std::vector<SubdomainName>>("block") = _subdomain_names;
+      params.set<unsigned int>("component") = i;
+      params.set<NonlinearVariableName>("variable") = vars[i];
 
-    _problem->addKernel(type, name.str(), params);
+      _problem->addKernel(type, name.str(), params);
+    }
   }
 }
