@@ -175,9 +175,9 @@
     type = SMP
     full = true
     solve_type = PJFNK
-    petsc_options = '-ksp_converged_reason -snes_converged_reason' #-snes_monitor -snes_linesearch_monitor -ksp_monitor'
-    petsc_options_iname = '-ksp_type -pc_type  -snes_atol -snes_rtol -snes_max_it -ksp_max_it -ksp_atol -sub_pc_type -sub_pc_factor_shift_type'
-    petsc_options_value = 'gmres        asm        1E-8      1E-15        200        100         1e-3        lu                   NONZERO'
+    #petsc_options = '-ksp_converged_reason -snes_converged_reason' #-snes_monitor -snes_linesearch_monitor -ksp_monitor'
+    #petsc_options_iname = '-ksp_type -pc_type  -snes_atol -snes_rtol -snes_max_it -ksp_max_it -ksp_atol -sub_pc_type -sub_pc_factor_shift_type'
+    #petsc_options_value = 'gmres        asm        1E-8      1E-15        200        100         1e-3        lu                   NONZERO'
   [../]
 []
 
