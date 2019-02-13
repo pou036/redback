@@ -76,33 +76,6 @@ RedbackContinuation::computeQpResidual()
     _continuation_parameter_older_param) / _ds_old_param;
   my_sum += lambda_dot_old_param * (_u[_i] - _continuation_parameter_old_param);
   return my_sum - _ds_param;
-
-  /*
-  if (_are_nodal_vars_involved)
-  {
-    my_sum += *_dd_nodal;
-//    std::cout << "  ScalarKernel RedbackContinuation::nodal="<< *_dd_nodal << std::endl;
-  }
-  if (_are_elemental_vars_involved)
-  {
-    my_sum += *_dd_elemental;
-//    std::cout << "  ScalarKernel RedbackContinuation::elemental="<< *_dd_elemental << std::endl;
-  }
-  Real lambda_comp = lambda_dot_old_param * (_u[_i] - _continuation_parameter_old_param);
-  std::cout << "  ScalarKernel RedbackContinuation::lambda_comp="<< lambda_comp << std::endl;
-  my_sum += lambda_comp;
-//  std::cout << "  ScalarKernel RedbackContinuation::my_sum="<< my_sum << std::endl;
-
-//  Real thomas = (_are_nodal_vars_involved ? *_dd_nodal: 0.0) +
-//      (_are_elemental_vars_involved ? *_dd_elemental : 0.0) +
-//      lambda_dot_old_param * (_u[_i] - _continuation_parameter_old_param) - _ds_param;
-//  std::cout << "ScalarKernel RedbackContinuation::computeQpResidual(), thomas="<< thomas << std::endl<< std::endl;
-
-  return my_sum;
-//  return (_are_nodal_vars_involved ? *_dd_nodal: 0) +
-//         (_are_elemental_vars_involved ? *_dd_elemental : 0) +
-//         lambda_dot_old_param * (_u[_i] - _continuation_parameter_old_param) - _ds_param;
- */
 }
 
 Real

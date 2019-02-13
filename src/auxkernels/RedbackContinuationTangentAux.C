@@ -62,7 +62,6 @@ RedbackContinuationTangentAux::RedbackContinuationTangentAux(const InputParamete
     else
       _are_elemental_vars_involved = true;
   }
-  //std::cout << "Does DD have nodal vars? " << _are_nodal_vars_involved << ", elemental vars? " << _are_elemental_vars_involved << std::endl;
 }
 
 RedbackContinuationTangentAux::~RedbackContinuationTangentAux() {}
