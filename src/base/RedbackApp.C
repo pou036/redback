@@ -60,6 +60,7 @@ RedbackApp::associateSyntax(Syntax & syntax, ActionFactory & action_factory)
   registerSyntax("RankTwoContractionAction", "RankTwoContractionAction/*");
   registerSyntax("RankTwoCstContractionAction", "RankTwoCstContractionAction/*");
   registerSyntax("RankTwoScalarAction", "RankTwoScalarAction/*");
+  registerSyntax("RankTwoScalarVoidAction", "RankTwoScalarVoidAction/*");
   registerSyntax("RedbackMechAction", "RedbackMechAction/*");
 }
 

@@ -48,26 +48,43 @@ RankTwoContractionAction::act()
   if (getParam<bool>("compute_on_boundary"))
     postprocessor = "MaterialTensorSideIntegral";
 
-  for (int i = 0; i < 2; i++)
+  for (int i = 0; i < 1; i++)
   {
     for (int j = 0; j < LIBMESH_DIM; j++)
     {
       for (int k = 0; k < LIBMESH_DIM; k++)
       {
-        InputParameters pp_params = _factory.getValidParams(postprocessor);
+        InputParameters pp_params = _factory.getValidParams("MaterialTensorIntegral");
         pp_params.set<MaterialPropertyName>("rank_two_tensor") = tensors[ i ];
         pp_params.set<unsigned int>("index_i") = j;
         pp_params.set<unsigned int>("index_j") = k;
         pp_params.set<std::vector<OutputName> >("outputs") = { "none" };
-        if (getParam<bool>("compute_on_boundary") && isParamValid("boundary"))
-          pp_params.set<std::vector<BoundaryName> >("boundary") = getParam<std::vector<BoundaryName> >("boundary");
-        else if (isParamValid("block"))
-          pp_params.set<std::vector<SubdomainName> >("block") = getParam<std::vector<SubdomainName> >("block");
-        _problem->addPostprocessor(postprocessor,
+        pp_params.set<std::vector<SubdomainName> >("block") = getParam<std::vector<SubdomainName> >("block");
+        _problem->addPostprocessor("MaterialTensorIntegral",
                                    _base_name + std::string("RankTwoContractionAction_") + std::string(tensors[ i ]) +
                                      std::to_string(j) + std::to_string(k),
                                    pp_params);
       }
+    }
+  }
+
+  for (int j = 0; j < LIBMESH_DIM; j++)
+  {
+    for (int k = 0; k < LIBMESH_DIM; k++)
+    {
+      InputParameters pp_params = _factory.getValidParams(postprocessor);
+      pp_params.set<MaterialPropertyName>("rank_two_tensor") = tensors[ 1 ];
+      pp_params.set<unsigned int>("index_i") = j;
+      pp_params.set<unsigned int>("index_j") = k;
+      pp_params.set<std::vector<OutputName> >("outputs") = { "none" };
+      if (getParam<bool>("compute_on_boundary") && isParamValid("boundary"))
+        pp_params.set<std::vector<BoundaryName> >("boundary") = getParam<std::vector<BoundaryName> >("boundary");
+      else if (isParamValid("block"))
+        pp_params.set<std::vector<SubdomainName> >("block") = getParam<std::vector<SubdomainName> >("block");
+      _problem->addPostprocessor(postprocessor,
+                                 _base_name + std::string("RankTwoContractionAction_") + std::string(tensors[ 1 ]) +
+                                   std::to_string(j) + std::to_string(k),
+                                 pp_params);
     }
   }
 
