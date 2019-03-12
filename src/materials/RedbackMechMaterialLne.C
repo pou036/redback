@@ -14,6 +14,8 @@
 #include "RedbackMechMaterialLne.h"
 #include <cmath> //used for fabs
 
+registerMooseObject("RedbackApp", RedbackMechMaterialLne);
+
 template <>
 InputParameters
 validParams<RedbackMechMaterialLne>()
