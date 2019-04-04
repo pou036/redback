@@ -11,10 +11,6 @@
 /****************************************************************/
 #include "DPGIndicator20.h"
 
-// MOOSE includes
-//#include "MooseVariableFE.h"
-//#include "libmesh/quadrature.h"
-
 registerMooseObject("RedbackApp", DPGIndicator20);
 
 template <>
@@ -47,7 +43,7 @@ DPGIndicator20::computeIndicator()
   {
     sum += _JxW[_qp] * _coord[_qp] * computeQpIntegral();
   }
-  _field_var.setNodalValue(sum/_current_elem->volume());
+  _field_var.setNodalValue(sum);
 }
 
 Real
