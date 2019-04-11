@@ -40,9 +40,9 @@ DPGmypb11T::DPGmypb11T(const InputParameters & parameters):
 Real
 DPGmypb11T::computeQpResidual()
 {
-  return -_scalar_var[_qp]*(
-      - _lambda[_qp]*std::pow(1+_test[_i][_qp], _m[_qp])*std::exp(-_alpha_2[_qp]*_test[_i][_qp])
-      + _mu[_qp]*std::exp(_beta[_qp]*_test[_i][_qp]));
+  return _scalar_var[_qp]*(
+      _lambda[_qp]*std::pow(1+_test[_i][_qp], _m[_qp])*std::exp(-_alpha_2[_qp]*_test[_i][_qp])
+      - _mu[_qp]*std::exp(_beta[_qp]*_test[_i][_qp]));
 }
 
 Real
@@ -57,9 +57,9 @@ DPGmypb11T::computeQpOffDiagJacobian(unsigned int jvar)
 {
   if (jvar == _coupled_var)
   {
-    return -_phi_var[_j][_qp]*(
-        - _lambda[_qp]*std::pow(1+_test[_i][_qp], _m[_qp])*std::exp(-_alpha_2[_qp]*_test[_i][_qp])
-        + _mu[_qp]*std::exp(_beta[_qp]*_test[_i][_qp]));
+    return _phi_var[_j][_qp]*(
+        _lambda[_qp]*std::pow(1+_test[_i][_qp], _m[_qp])*std::exp(-_alpha_2[_qp]*_test[_i][_qp])
+        - _mu[_qp]*std::exp(_beta[_qp]*_test[_i][_qp]));
   }
   return 0;
 }

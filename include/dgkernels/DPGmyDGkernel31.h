@@ -9,29 +9,33 @@
 /*                                                              */
 /*        See COPYRIGHT for full restrictions                   */
 /****************************************************************/
-#ifndef DPGMYDGKERNEL21_H
-#define DPGMYDGKERNEL21_H
+#ifndef DPGMYDGKERNEL31_H
+#define DPGMYDGKERNEL31_H
 
 #include "DGKernel.h"
 
 // Forward Declarations
-class DPGmyDGkernel21;
+class DPGmyDGkernel31;
 
 template <>
-InputParameters validParams<DPGmyDGkernel21>();
+InputParameters validParams<DPGmyDGkernel31>();
 
-class DPGmyDGkernel21 : public DGKernel
+class DPGmyDGkernel31 : public DGKernel
 {
 public:
-  DPGmyDGkernel21(const InputParameters & parameters);
+  DPGmyDGkernel31(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
   virtual Real computeQpJacobian(Moose::DGJacobianType type) override;
+  virtual Real computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar) override;
 
 private:
-  const VariableValue & _kappa;
-  const VariableValue & _kappa_neighbor;
+  unsigned int _k_var; // index of _coupled_variable
+  const VariableValue & _coupled_variable;
+  const VariableValue & _coupled_neighbor_variable;
+  const VariablePhiValue & _phi_cvariable;
+  const VariablePhiValue & _phi_cvar_neighbor;
 };
 
 #endif

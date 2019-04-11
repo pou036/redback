@@ -28,7 +28,7 @@ validParams<DPGmypb11>()
 DPGmypb11::DPGmypb11(const InputParameters & parameters):
   Kernel(parameters),
   _scalar_var(coupledValue("coupled_variable")),
-  _coupled_var(coupled("coupled_variable")),
+  _k_var(coupled("coupled_variable")),
   _phi_var(_assembly.phi(*getVar("coupled_variable",0))),
   _lambda(getMaterialProperty<Real>("DPG_lambda")),
   _alpha_2(getMaterialProperty<Real>("alpha_2")),
@@ -41,9 +41,9 @@ DPGmypb11::DPGmypb11(const InputParameters & parameters):
 Real
 DPGmypb11::computeQpResidual()
 {
-  return -_test[_i][_qp]*(
-    - _lambda[_qp]*std::pow(1+_scalar_var[_qp], _m[_qp])*std::exp(-_alpha_2[_qp]*_scalar_var[_qp])
-    + _mu[_qp]*std::exp(_beta[_qp]*_scalar_var[_qp]));
+  return _test[_i][_qp]*(
+    _lambda[_qp]*std::pow(1+_scalar_var[_qp], _m[_qp])*std::exp(-_alpha_2[_qp]*_scalar_var[_qp])
+    - _mu[_qp]*std::exp(_beta[_qp]*_scalar_var[_qp]));
 }
 
 Real
@@ -56,12 +56,12 @@ DPGmypb11::computeQpJacobian()
 Real
 DPGmypb11::computeQpOffDiagJacobian(unsigned int jvar)
 {
-  if (jvar == _coupled_var)
+  if (jvar == _k_var)
   {
-    return -_test[_i][_qp]*(
-      - _lambda[_qp]*std::pow(1+_scalar_var[_qp], _m[_qp]-1)*std::exp(-_alpha_2[_qp]*_scalar_var[_qp])
+    return _test[_i][_qp]*(
+      _lambda[_qp]*std::pow(1+_scalar_var[_qp], _m[_qp]-1)*std::exp(-_alpha_2[_qp]*_scalar_var[_qp])
         * (_m[_qp] - _alpha_2[_qp]*(1+_scalar_var[_qp]))*_phi_var[_j][_qp]
-      + _mu[_qp]*_beta[_qp]*std::exp(_beta[_qp]*_scalar_var[_qp])*_phi_var[_j][_qp]);
+      - _mu[_qp]*_beta[_qp]*std::exp(_beta[_qp]*_scalar_var[_qp])*_phi_var[_j][_qp]);
   }
   return 0;
 }

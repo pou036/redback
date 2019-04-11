@@ -20,16 +20,6 @@ class DPGmyDGkernel20;
 template <>
 InputParameters validParams<DPGmyDGkernel20>();
 
-/**
- * DG kernel for advection
- *
- * General DG kernel that this class can handle is:
- * \f$ 0.5 <abs(b.n_e) * [u], [\tilde{u}]> \f$
- *
- * \f$ [a] = [ a_1 - a_2 ] \f$
- * \f$ {a} = 0.5 * (a_1 + a_2) \f$
- *
- */
 class DPGmyDGkernel20 : public DGKernel
 {
 public:

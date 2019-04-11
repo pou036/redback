@@ -38,7 +38,8 @@ DPGmyDGkernel22T::DPGmyDGkernel22T(const InputParameters & parameters)
     _coupled_variable(coupledValue("coupled_variable")),
     _coupled_neighbor_variable(coupledNeighborValue("coupled_variable")),
     _phi_cvariable(_assembly.phi(*getVar("coupled_variable",0))),
-    _phi_cvar_neighbor(_assembly.phiNeighbor(*getVar("coupled_variable",0)))
+    //_phi_cvar_neighbor(_assembly.phiNeighbor(*getVar("coupled_variable",0)))
+    _phi_cvar_neighbor(_assembly.phi(*getVar("coupled_variable",0))) //TODO: should use line above but crashing!
 {
 }
 
@@ -98,6 +99,8 @@ DPGmyDGkernel22T::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned 
           * _phi_cvar_neighbor[_j][_qp];
         break;
     }
+
+    return  r;
   }
   return 0;
 }

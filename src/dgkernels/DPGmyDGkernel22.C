@@ -37,8 +37,11 @@ DPGmyDGkernel22::DPGmyDGkernel22(const InputParameters & parameters)
     _k_var(coupled("coupled_variable")),
     _grad_coupled_variable(coupledGradient("coupled_variable")),
     _grad_cvar_neighbor(coupledNeighborGradient("coupled_variable")),
-    _grad_phi_cvariable(_assembly.gradPhi(*getVar("coupled_variable",0))),
-    _grad_phi_cvar_neighbor(_assembly.gradPhiNeighbor(*getVar("coupled_variable",0)))
+    //_grad_phi_cvariable(_assembly.gradPhi(*getVar("coupled_variable",0))),
+    _grad_phi_cvariable(_assembly.feGradPhi<Real>(getVar("coupled_variable", 0)->feType())),
+    //_grad_phi_cvar_neighbor(_assembly.gradPhiNeighbor(*getVar("coupled_variable",0)))
+    //_grad_phi_cvar_neighbor(_assembly.feGradPhiNeighbor<Real>(getVar("coupled_variable", 0)->feType()))
+    _grad_phi_cvar_neighbor(_assembly.feGradPhi<Real>(getVar("coupled_variable", 0)->feType())) //TODO: should use line above but crashing!
 {
 }
 
@@ -74,10 +77,10 @@ DPGmyDGkernel22::computeQpJacobian(Moose::DGJacobianType /*type*/)
 Real
 DPGmyDGkernel22::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned int jvar)
 {
+  Real r = 0;
+
   if (jvar == _k_var)
   {
-    Real r = 0;
-
     switch (type)
     {
       case Moose::ElementElement:
@@ -101,5 +104,6 @@ DPGmyDGkernel22::computeQpOffDiagJacobian(Moose::DGJacobianType type, unsigned i
         break;
     }
   }
-  return 0;
+
+  return  r;
 }

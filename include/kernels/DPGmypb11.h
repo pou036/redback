@@ -20,7 +20,7 @@ protected:
 
 private:
   const VariableValue & _scalar_var;
-  unsigned int _coupled_var; // index of coupled variable
+  unsigned int _k_var; // index of coupled variable
   const VariablePhiValue & _phi_var;
   const MaterialProperty<Real> & _lambda;
   const MaterialProperty<Real> & _alpha_2;
