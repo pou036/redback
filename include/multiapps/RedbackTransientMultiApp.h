@@ -7,8 +7,8 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef REDBACKRedbackTransientMultiApp_H
-#define REDBACKRedbackTransientMultiApp_H
+#ifndef REDBACKTRANSIENTMULTIAPP_H
+#define REDBACKTRANSIENTMULTIAPP_H
 
 #include "MultiApp.h"
 
@@ -40,7 +40,7 @@ public:
 
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
-  virtual void incrementTStep(Real target_time) override;
+  virtual void incrementTStep() override;
 
   virtual void finishStep() override;
 
@@ -119,4 +119,4 @@ public:
   ~MultiAppSolveFailure() throw() {}
 };
 
-#endif // REDBACKRedbackTransientMultiApp_H
+#endif // REDBACKTRANSIENTMULTIAPP_H

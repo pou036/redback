@@ -230,7 +230,7 @@ RedbackTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
   {
     int rank;
     int ierr;
-    ierr = MPI_Comm_rank(_orig_comm, &rank);
+    ierr = MPI_Comm_rank(_communicator.get(), &rank);
     mooseCheckMPIErr(ierr);
 
     for (unsigned int i = 0; i < _my_num_apps; i++)
@@ -537,21 +537,14 @@ RedbackTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
 }
 
 void
-RedbackTransientMultiApp::incrementTStep(Real target_time)
+RedbackTransientMultiApp::incrementTStep()
 {
   if (!_sub_cycling)
   {
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
       Transient * ex = _transient_executioners[i];
-
-      // The App might have a different local time from the rest of the problem
-      Real app_time_offset = _apps[i]->getGlobalTimeOffset();
-
-      // Only increment the step if we are after (target_time) the
-      // start_time (app_time_offset) of this sub_app.
-      if (app_time_offset < target_time)
-        ex->incrementStepOrReject();
+      ex->incrementStepOrReject();
     }
   }
 }
