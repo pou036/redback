@@ -12,6 +12,7 @@
 
 #include "ElementFileSubdomain.h"
 #include "MooseMesh.h"
+#include "libmesh/elem.h"
 #include <fstream>
 
 registerMooseObject("RedbackApp", ElementFileSubdomain);
