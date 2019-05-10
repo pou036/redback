@@ -471,6 +471,12 @@ RedbackMaterial::computeQpProperties()
 void
 RedbackMaterial::computeRedbackTerms()
 {
+  //macaulaybracket
+  Real macaulay = _gr[_qp] / 0.4 - 1.0;
+  if (macaulay < 0.0)
+    macaulay = 0.0;
+  Real ref_pe_rate = 0.00001;
+
   Real omega_rel, temporary, phi_prime, s_prime;
   Real beta_star_m, one_minus_phi_beta_star_s, phi_beta_star_f;
 
@@ -482,17 +488,21 @@ RedbackMaterial::computeRedbackTerms()
   // Compute Mises strain
   _mises_strain[_qp] = _exponential * _dt;
   // Compute Mises strain rate
-  _mises_strain_rate_nomech[_qp] = _exponential;
+  _mises_strain_rate_nomech[_qp] = ref_pe_rate * _exponential *
+              std::exp(-_alpha_1[_qp] * _confining_pressure[_qp] -
+              _pore_pres[_qp] * _alpha_2[_qp] *
+              (1 + _alpha_3[_qp] * std::log(_confining_pressure[_qp]))) *
+              macaulay; //_exponential;
 
   if (!_is_mechanics_on)
   {
     // Compute Mechanical Dissipation
-    _mechanical_dissipation_no_mech[_qp] =
-        _gr[_qp] * std::exp(_ar[_qp]) *
-        std::exp(-_alpha_1[_qp] * _confining_pressure[_qp] -
-                 _pore_pres[_qp] * _alpha_2[_qp] *
-                     (1 + _alpha_3[_qp] * std::log(_confining_pressure[_qp]))) *
-        std::exp(_ar[_qp] * _delta[_qp] * _T[_qp] / (1 + _delta[_qp] * _T[_qp]));
+    _mechanical_dissipation_no_mech[_qp] = 9500. * std::exp(_ar[_qp]) * _mises_strain_rate_nomech[_qp] * _gr[_qp];
+        // _gr[_qp] * std::exp(_ar[_qp]) *
+        // std::exp(-_alpha_1[_qp] * _confining_pressure[_qp] -
+        //          _pore_pres[_qp] * _alpha_2[_qp] *
+        //              (1 + _alpha_3[_qp] * std::log(_confining_pressure[_qp]))) *
+        // std::exp(_ar[_qp] * _delta[_qp] * _T[_qp] / (1 + _delta[_qp] * _T[_qp]));
 
     // Compute Mechanical Dissipation Jacobian
     _mechanical_dissipation_jac_no_mech[_qp] = _mechanical_dissipation_no_mech[_qp] * _ar[_qp] *
