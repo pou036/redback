@@ -217,7 +217,9 @@ RedbackTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
 
   _auto_advance = auto_advance;
 
-  _console << "Solving MultiApp " << name() << std::endl;
+  _console << COLOR_CYAN << "Solving MultiApp '" << name() << "' with target time " << target_time
+           << " and dt " << dt << " with auto-advance " << (auto_advance ? "on" : "off")
+           << COLOR_DEFAULT << std::endl;
 
   // "target_time" must always be in global time
   target_time += _app.getGlobalTimeOffset();
@@ -235,7 +237,6 @@ RedbackTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
 
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
-
       FEProblemBase & problem = appProblemBase(_first_local_app + i);
 
       Transient * ex = _transient_executioners[i];
@@ -385,7 +386,9 @@ RedbackTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
 
         // If we were looking for a steady state, but didn't reach one, we still need to output one
         // more time, regardless of interval
-        if (!at_steady)
+        // Note: if we turn off the output for all time steps for sub-scycling, we still need to
+        // have one output at the end.
+        if ((!at_steady && _detect_steady_state) || !_output_sub_cycles)
           problem.outputStep(EXEC_FORCED);
 
       } // sub_cycling
@@ -458,7 +461,7 @@ RedbackTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
             }
           }
         }
-        else
+        else // auto_advance == false
         {
           if (!ex->lastSolveConverged())
           {
@@ -537,14 +540,21 @@ RedbackTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
 }
 
 void
-RedbackTransientMultiApp::incrementTStep()
+RedbackTransientMultiApp::incrementTStep(Real target_time)
 {
   if (!_sub_cycling)
   {
     for (unsigned int i = 0; i < _my_num_apps; i++)
     {
       Transient * ex = _transient_executioners[i];
-      ex->incrementStepOrReject();
+
+      // The App might have a different local time from the rest of the problem
+      Real app_time_offset = _apps[i]->getGlobalTimeOffset();
+
+      // Only increment the step if we are after (target_time) the
+      // start_time (app_time_offset) of this sub_app.
+      if (app_time_offset < target_time)
+        ex->incrementStepOrReject();
     }
   }
 }
@@ -658,7 +668,10 @@ void RedbackTransientMultiApp::setupApp(unsigned int i,
 
   ex->preExecute();
   if (!_app.isRecovering())
+  {
+    problem.timeStep()++;
     problem.advanceState();
+  }
   _transient_executioners[i] = ex;
 }
 
