@@ -59,7 +59,7 @@ protected:
   Real _min;
   Real _max;
   Real _range;
-  Function & _func;
+  const Function & _func;
 };
 
 #endif // FUNCTIONWITHRANDOMIC_H

@@ -29,7 +29,7 @@ class RedbackRandomFunction : public Function
 public:
   RedbackRandomFunction(const InputParameters & parameters);
 
-  virtual Real value(Real t, const Point & p);
+  virtual Real value(Real t, const Point & p) const;
 
 protected:
   Real _min;
