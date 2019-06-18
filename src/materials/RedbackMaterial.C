@@ -475,7 +475,8 @@ RedbackMaterial::computeRedbackTerms()
   Real macaulay = _gr[_qp] / 0.4 - 1.0;
   if (macaulay < 0.0)
     macaulay = 0.0;
-  Real ref_pe_rate = 0.00001;
+  Real ref_pe_rate = 0.0001;
+  Real Gr = 950.;
 
   Real omega_rel, temporary, phi_prime, s_prime;
   Real beta_star_m, one_minus_phi_beta_star_s, phi_beta_star_f;
@@ -497,7 +498,7 @@ RedbackMaterial::computeRedbackTerms()
   if (!_is_mechanics_on)
   {
     // Compute Mechanical Dissipation
-    _mechanical_dissipation_no_mech[_qp] = 9500. * std::exp(_ar[_qp]) * _mises_strain_rate_nomech[_qp] * _gr[_qp];
+    _mechanical_dissipation_no_mech[_qp] = Gr * std::exp(_ar[_qp]) * _mises_strain_rate_nomech[_qp] * _gr[_qp];
         // _gr[_qp] * std::exp(_ar[_qp]) *
         // std::exp(-_alpha_1[_qp] * _confining_pressure[_qp] -
         //          _pore_pres[_qp] * _alpha_2[_qp] *
