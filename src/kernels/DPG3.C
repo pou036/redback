@@ -12,6 +12,7 @@
 // Kernel for the term (-\nabla.\sigma,\tilde{w})
 
 #include "DPG3.h"
+#include "Assembly.h"
 
 registerMooseObject("RedbackApp", DPG3);
 
@@ -38,6 +39,7 @@ DPG3::DPG3(const InputParameters & parameters):
   _grad_coupled_var_y(coupledGradient("coupled_variable_y")),
   _grad_coupled_var_z(coupledGradient("coupled_variable_z")),
   _grad_phi_x(_assembly.gradPhi(*getVar("coupled_variable_x",0))),
+  //_grad_phi_x(_assembly.feGradPhi<Real>(getVar("coupled_variable_x", 0)->feType())),
   _grad_phi_y(_is_y_coupled ? _assembly.gradPhi(*getVar("coupled_variable_y",0)) : _grad_phi_zero),
   _grad_phi_z(_is_z_coupled ? _assembly.gradPhi(*getVar("coupled_variable_z",0)) : _grad_phi_zero)
 {

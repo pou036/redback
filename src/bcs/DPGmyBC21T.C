@@ -11,6 +11,7 @@
 /****************************************************************/
 // BC for the term 0.5*<(abs(b.n)-b.n)*v,\tilde{u}>
 #include "DPGmyBC21T.h"
+#include "Assembly.h"
 #include "Function.h"
 
 registerMooseObject("MooseApp", DPGmyBC21T);

@@ -13,6 +13,7 @@
 // (- \lambda(1+u)^m e^{-\alpha u} + \mu e^{\beta u}, \tilde{w})
 
 #include "DPGmypb11.h"
+#include "Assembly.h"
 
 registerMooseObject("RedbackApp", DPGmypb11);
 

@@ -12,6 +12,7 @@
 // Kernel for the term (\nabla.\tau,{\nabla\tilde{\tau_k}}_k)
 
 #include "DPG4.h"
+#include "Assembly.h"
 
 registerMooseObject("RedbackApp", DPG4);
 

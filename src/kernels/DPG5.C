@@ -12,6 +12,7 @@
 // Kernel for the term -(w,{\nabla\tilde{\sigma_k})_k)
 
 #include "DPG5.h"
+#include "Assembly.h"
 
 registerMooseObject("RedbackApp", DPG5);
 

@@ -12,6 +12,7 @@
 // Kernel for the term ({\tau-\kappa\nabla u + b u}_k,\tilde{\tau}_k)
 
 #include "DPGmypb1.h"
+#include "Assembly.h"
 
 registerMooseObject("RedbackApp", DPGmypb1);
 

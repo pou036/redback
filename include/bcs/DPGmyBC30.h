@@ -32,7 +32,7 @@ protected:
 private:
   unsigned int _k_var; // index of _coupled_variable
   const VariableGradient & _grad_coupled_variable;
-  Function & _func;
+  const Function & _func;
   const VariablePhiGradient & _grad_phi_cvariable;
 };
 

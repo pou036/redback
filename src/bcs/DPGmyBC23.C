@@ -11,6 +11,7 @@
 /****************************************************************/
 // BC for the term <(k/h)*\tilde{u},v-g>
 #include "DPGmyBC23.h"
+#include "Assembly.h"
 #include "Function.h"
 
 registerMooseObject("MooseApp", DPGmyBC23);

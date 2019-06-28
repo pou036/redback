@@ -12,6 +12,7 @@
 // Kernel for the term (\nabla.(b v-\kappa\nabla u),\tilde{u})
 
 #include "DPGmypb21.h"
+#include "Assembly.h"
 
 registerMooseObject("RedbackApp", DPGmypb21);
 

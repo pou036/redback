@@ -12,6 +12,7 @@
 // Kernel for the term (\nabla v,\nabla\tilde{u})
 
 #include "DPG7.h"
+#include "Assembly.h"
 
 registerMooseObject("RedbackApp", DPG7);
 

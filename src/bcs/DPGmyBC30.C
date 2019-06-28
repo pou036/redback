@@ -11,6 +11,7 @@
 /****************************************************************/
 // BC for the term -<\nabla(v-g)*n,\tilde{u}>
 #include "DPGmyBC30.h"
+#include "Assembly.h"
 #include "Function.h"
 
 registerMooseObject("MooseApp", DPGmyBC30);

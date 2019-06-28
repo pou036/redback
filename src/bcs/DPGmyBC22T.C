@@ -11,6 +11,7 @@
 /****************************************************************/
 // BC for the term <-\kappa\nabla v.n,\{\tilde{u}\}>
 #include "DPGmyBC22T.h"
+#include "Assembly.h"
 #include "Function.h"
 
 registerMooseObject("MooseApp", DPGmyBC22T);

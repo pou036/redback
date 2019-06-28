@@ -33,7 +33,7 @@ protected:
 private:
   const VariableValue & _coupled_variable;
   unsigned int _k_var; // index of _coupled_variable
-  Function & _func;
+  const Function & _func;
   const VariablePhiValue & _phi_coupled_variable;
   const VariableValue & _kappa;
 };

@@ -14,6 +14,7 @@
 #include "DPGmyDGkernel31.h"
 
 // MOOSE includes
+#include "Assembly.h"
 #include "MooseVariableFE.h"
 
 #include "libmesh/utility.h"
