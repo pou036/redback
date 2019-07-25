@@ -228,7 +228,7 @@ PointValueFileWriter::getValue()
   {
     fputs(std::to_string(0).c_str(), output_file);
     fclose(output_file);
-    return _poro_value;
+    return _pore_volume;
   }
   fputs(std::to_string(1).c_str(), output_file);
   fclose(output_file);
@@ -326,7 +326,7 @@ PointValueFileWriter::getValue()
 
   std::cout << "... erosion done" << std::endl;
 
-  return _poro_value;
+  return _pore_volume;
 }
 
 void
