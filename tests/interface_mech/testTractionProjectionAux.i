@@ -1,5 +1,13 @@
+# Test of AuxKernel TractionProjectionAux.C against analytical solution
+# For a stress tensor sigma = / 0  0    \
+#                             | 0  1.154/
+# and surface angle of 10 degrees (theta = 10)
+# The normal (sigma) and shear (tau) stresses are then
+#   sigma = 1.154*cos(theta)*cos(theta)
+#   tau = 1.154*sin(theta)*cos(theta)
 [Mesh]
   type = GeneratedMesh
+  uniform_refine = 0
   dim = 2
   nx = 4
   ny = 4
@@ -13,13 +21,52 @@
 []
 
 [AuxVariables]
+  [stress_tangential]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+  [stress_normal]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+  [stress_xx]
+    family = MONOMIAL
+    order = CONSTANT
+  []
   [stress_yy]
+    family = MONOMIAL
+    order = CONSTANT
+  []
+  [stress_xy]
     family = MONOMIAL
     order = CONSTANT
   []
 []
 
 [AuxKernels]
+  [stress_tangential]
+    type = TractionProjectionAux
+    stress_tensor = stress
+    variable = stress_tangential
+    surface_angle = 10
+    convert_to_radians = true
+    normal = false
+  []
+  [stress_normal]
+    type = TractionProjectionAux
+    stress_tensor = stress
+    variable = stress_normal
+    surface_angle = 10
+    convert_to_radians = true
+    normal = true
+  []
+  [stress_xx]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_j = 0
+    index_i = 0
+    variable = stress_xx
+  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
@@ -27,19 +74,26 @@
     index_i = 1
     variable = stress_yy
   []
+  [stress_xy]
+    type = RankTwoAux
+    rank_two_tensor = stress
+    index_j = 1
+    index_i = 0
+    variable = stress_xy
+  []
 []
 
 [Kernels]
-  [disp_y]
-    type = StressDivergenceTensors
-    component = 1
-    variable = disp_y
-    displacements = 'disp_x disp_y'
-  []
   [disp_x]
     type = StressDivergenceTensors
     component = 0
     variable = disp_x
+    displacements = 'disp_x disp_y'
+  []
+  [disp_y]
+    type = StressDivergenceTensors
+    component = 1
+    variable = disp_y
     displacements = 'disp_x disp_y'
   []
 []
@@ -55,7 +109,7 @@
     ep_plastic_tolerance = 1E-9
     plastic_models = 'j2'
   []
-  [finite_strain]
+  [finite_strain0]
     type = ComputePlaneFiniteStrain
     displacements = 'disp_x disp_y'
   []
@@ -127,5 +181,5 @@
 
 [Outputs]
   exodus = true
-  file_base = compression
+  file_base = testTractionProjectionAux
 []
