@@ -76,7 +76,7 @@
     poissons_ratio = 0.3
     youngs_modulus = 10000
   []
-  [mc]
+  [el]
     type = ComputeFiniteStrainElasticStress
   []
   [finite_strain]
