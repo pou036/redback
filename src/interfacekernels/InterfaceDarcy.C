@@ -60,6 +60,8 @@ InterfaceDarcy::computeQpResidual(Moose::DGResidualType type)
     default:
       mooseError("InterfaceDarcy type not supported.");
   }
+  // should not reach this line
+  return 0;
 }
 
 Real
