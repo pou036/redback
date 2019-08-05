@@ -35,9 +35,17 @@ Physical Line("top") = {4};
 //+
 Physical Line("bottom") = {1};
 //+
-Physical Line("left") = {6, 5};
+Physical Line("left_to_0") = {6};
 //+
-Physical Line("right") = {2, 3};
+Physical Line("left_to_1") = {5};
+//+
+Physical Line("right_to_0") = {2};
+//+
+Physical Line("right_to_1") = {3};
+//+
+Physical Line("interface") = {7};
+//+
+Physical Surface("block") = {1};
 //+
 Line Loop(2) = {5, -7, 3, 4};
 //+

@@ -177,7 +177,6 @@ peacock_*.e
 tests/*/*.trace
 
 !/tests/interface_mech/*.msh
-!/tests/interface_flow/*.msh
 !/tests/transverseBC/*.msh
 !/meshes/2d_footing_pb_coarse.msh
 theory.synctex.gz

@@ -10,33 +10,33 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef INTERFACEDARCY_H
-#define INTERFACEDARCY_H
+#ifndef INTERFACESTRESS_H
+#define INTERFACESTRESS_H
 
 #include "InterfaceKernel.h"
+#include "RankTwoTensor.h"
 
 // Forward Declarations
-class InterfaceDarcy;
+class InterfaceStress;
 
 template <>
-InputParameters validParams<InterfaceDarcy>();
+InputParameters validParams<InterfaceStress>();
 
 /**
  * DG kernel for interfacing diffusion between two variables on adjacent blocks
  */
-class InterfaceDarcy : public InterfaceKernel
+class InterfaceStress : public InterfaceKernel
 {
 public:
-  InterfaceDarcy(const InputParameters & parameters);
+  InterfaceStress(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type);
   virtual Real computeQpJacobian(Moose::DGJacobianType type);
 
-  const MaterialProperty<Real> & _Le;
-  Real _Le_fault;
-  const MaterialProperty<RealVectorValue> & _gravity_term;
-  Real _thickness;
+  const MaterialProperty<RankTwoTensor> & _stress0;
+  const MaterialProperty<RankTwoTensor> & _stress1;
+  const unsigned int _component;
 };
 
 #endif
