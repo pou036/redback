@@ -8,6 +8,11 @@
     type = BreakMeshByBlock
     split_interface = false
   []
+  [bottom_corner]
+    type = AddExtraNodeset
+    new_boundary = '10'
+    nodes = '11'
+  []
 []
 
 [Variables]
