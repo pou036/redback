@@ -4,7 +4,6 @@
     type = 'Exodiff'
     input = 'compression_interface.i'
     exodiff = 'compression_interface.e'
-    #skip = "Waiting to reconcile with PR#11587"
   [../]
   [./test_interface_poromech]
     type = 'Exodiff'

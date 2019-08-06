@@ -60,26 +60,12 @@
     convert_to_radians = true
     normal = true
   []
-  [stress_xx]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_j = 0
-    index_i = 0
-    variable = stress_xx
-  []
   [stress_yy]
     type = RankTwoAux
     rank_two_tensor = stress
     index_j = 1
     index_i = 1
     variable = stress_yy
-  []
-  [stress_xy]
-    type = RankTwoAux
-    rank_two_tensor = stress
-    index_j = 1
-    index_i = 0
-    variable = stress_xy
   []
 []
 
