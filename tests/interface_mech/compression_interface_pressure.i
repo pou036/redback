@@ -1,14 +1,31 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  nx = 4
-  ny = 4
+  type = FileMesh
+  file = gold/compression_interface_in.e
+  # type = GeneratedMesh
+  # dim = 2
+  # nx = 4
+  # ny = 4
+[]
+
+[MeshModifiers]
+  # [subdomain]
+  #   type = SubdomainBoundingBox
+  #   bottom_left = '0 0.5 0'
+  #   block_id = 1
+  #   top_right = '1 1 0'
+  # []
+  [break]
+    type = BreakMeshByBlock
+    split_interface = false
+  []
 []
 
 [Variables]
   [disp_x]
   []
   [disp_y]
+  []
+  [porepressure]
   []
 []
 
@@ -29,6 +46,25 @@
   []
 []
 
+[InterfaceKernels]
+  [interfacex]
+    type = InterfaceDisp
+    variable = disp_x
+    neighbor_var = disp_x
+    penalty = 1e6
+    boundary = interface
+    component = 0
+  []
+  [interfacey]
+    type = InterfaceDisp
+    variable = disp_y
+    neighbor_var = disp_y
+    penalty = 1e6
+    boundary = interface
+    component = 1
+  []
+[]
+
 [Kernels]
   [disp_y]
     type = StressDivergenceTensors
@@ -42,6 +78,22 @@
     variable = disp_x
     displacements = 'disp_x disp_y'
   []
+  [diff_pressure]
+    type = Diffusion
+    variable = porepressure
+  []
+  [poromech_x]
+    type = PoroMechanicsCoupling
+    component = 0
+    porepressure = 'porepressure'
+    variable = disp_x
+  []
+  [poromech_y]
+    type = PoroMechanicsCoupling
+    component = 1
+    porepressure = 'porepressure'
+    variable = disp_y
+  []
 []
 
 [Materials]
@@ -50,27 +102,17 @@
     poissons_ratio = 0.3
     youngs_modulus = 10000
   []
-  [mc]
-    type = ComputeMultiPlasticityStress
-    ep_plastic_tolerance = 1E-9
-    plastic_models = 'j2'
+  [el]
+    type = ComputeFiniteStrainElasticStress
   []
   [finite_strain]
     type = ComputePlaneFiniteStrain
     displacements = 'disp_x disp_y'
   []
-[]
-
-[UserObjects]
-  [str]
-    type = TensorMechanicsHardeningConstant
-    value = 1
-  []
-  [j2]
-    type = TensorMechanicsPlasticJ2
-    yield_strength = str
-    yield_function_tolerance = 1E-9
-    internal_constraint_tolerance = 1E-9
+  [biot_coeff]
+    type = GenericConstantMaterial
+    prop_values = '1'
+    prop_names = 'biot_coefficient'
   []
 []
 
@@ -100,6 +142,12 @@
     boundary = 'bottom'
     value = 0.0
   []
+  [pp_bottom]
+    type = DirichletBC
+    variable = porepressure
+    boundary = 'bottom'
+    value = 0.1
+  []
 []
 
 [Preconditioning]
@@ -117,8 +165,8 @@
   solve_type = NEWTON
   petsc_options_iname = '-pc_type -pc_hypre_type -snes_linesearch_type -ksp_gmres_restart'
   petsc_options_value = 'hypre boomeramg cp 201'
-  nl_abs_tol = 1e-5
-  nl_rel_tol = 1e-5
+  nl_abs_tol = 1e-7
+  nl_rel_tol = 1e-7
   reset_dt = true
   line_search = basic
   start_time = 0.0
@@ -127,5 +175,5 @@
 
 [Outputs]
   exodus = true
-  file_base = compression
+  file_base = compression_interface_pressure
 []
