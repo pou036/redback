@@ -28,10 +28,10 @@ public:
 
 private:
   /// generate the new boundary interface
-  void addInterfaceBoundary();
+  void addInterfaceBoundary(BoundaryName);
   /// test if node/element on given side of segment
   bool isNodeOnThatSideOfSegment(const Node &, const Node &, const Node &, const std::vector<Real>);
-  bool isElementOnThatSideOfSegment(const MeshBase &, const Elem *, const dof_id_type, const dof_id_type, const std::vector<Real>);
+  bool isElementOnThatSideOfSegment(const MeshBase &, const Elem *, const dof_id_type, const dof_id_type, const std::set<int>, const std::vector<Real>);
   std::vector<Real> getMeshNormalVector(const MeshBase &);
 
   std::set<std::pair<subdomain_id_type, subdomain_id_type>> _neighboring_block_list;
