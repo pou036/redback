@@ -69,47 +69,6 @@ InterfaceFromSideset::modify()
 
   _mesh_ptr->buildBndElemList();
 
-
-  if (false)
-  {
-    // THOMAS PLAYING: printing info to check if I can parse structure properly
-    /*auto & sideset_names = getParam<std::vector<BoundaryName>>("sidesets");
-    for (auto & sideset_name : sideset_names)
-      printf("Set in the sidesets: %s\n", sideset_name.c_str());*/
-    for (auto it = _mesh_ptr->bndElemsBegin(); it != _mesh_ptr->bndElemsEnd(); ++it)
-      if (sideset_ids.count((*it)->_bnd_id) > 0)
-      {
-        Elem * elem = (*it)->_elem;
-        auto s = (*it)->_side;
-        SubdomainID curr_subdomain = elem->subdomain_id();
-        int elem_id = elem->id();
-        int nnodes =  elem->n_nodes();
-        printf("  Element %d, in block: %d, side:%d, elem->n_nodes()=%d:\n",elem_id, curr_subdomain, s, nnodes);
-        std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(s);
-        for (int n = 0; n < nodes_on_side.size(); ++n)
-        {
-          printf("     nodeid  = %d on side\n",elem->node_id(nodes_on_side[n]));
-        }
-        for (MooseIndex(elem->n_vertices()) n = 0; n < elem->n_vertices(); ++n)
-        {
-          int nodeid = elem->node_id(n);
-          const Node & node = mesh.node_ref(nodeid);
-          printf("     nodeid  = %d, coords=",nodeid);
-          for (unsigned int i = 0; i < LIBMESH_DIM; ++i)
-          {
-            Real coord = (node)(i);
-            printf("%f, ",coord);
-          }
-          printf("\n");
-        }
-      }
-    }
-
-
-
-
-
-
   // Identify node IDs on given boundaries
   std::set<int> boundary_node_ids;
   for (auto it = _mesh_ptr->bndElemsBegin(); it != _mesh_ptr->bndElemsEnd(); ++it)
@@ -211,7 +170,11 @@ InterfaceFromSideset::modify()
               boundary_node_ids.insert(new_node->id());
             treated_node_ids.insert(new_node->id());  // to avoid looping on new node
             sideset_node_ids.insert(new_node->id());
-            new_node_to_elem_map[new_node->id()] = (node_to_elem_map.find(current_node_id))->second;
+            std::map<dof_id_type, std::vector<dof_id_type>>::const_iterator
+            node_to_elem_pair = node_to_elem_map.find(current_node_id);
+            if (node_to_elem_pair==node_to_elem_map.end())
+              node_to_elem_pair = new_node_to_elem_map.find(current_node_id);
+            new_node_to_elem_map[new_node->id()] = node_to_elem_pair->second;
             for (auto & sideset_name2 : sideset_names)
               if (sideset_name2 != sideset_name)
                 nb_neighbors_on_sideset[sideset_name2][new_node->id()] =
@@ -227,11 +190,6 @@ InterfaceFromSideset::modify()
             auto other_node_id = elem->node_id(nodes_on_side[(n+1)%2]);
 
             // retrieve connected elements from the map
-            std::map<dof_id_type, std::vector<dof_id_type>>::const_iterator node_to_elem_pair;
-            if (node_to_elem_map.find(current_node_id)==node_to_elem_map.end())
-              node_to_elem_pair = new_node_to_elem_map.find(current_node_id);
-            else
-              node_to_elem_pair = node_to_elem_map.find(current_node_id);
             const std::vector<dof_id_type> & connected_elems =
                 node_to_elem_pair->second;
             for (auto elem_id : connected_elems)
