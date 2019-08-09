@@ -2,7 +2,7 @@
 # with simple X fractures (touching all sides)
 
 [Mesh]
-  file = ../../meshes/fractureX.msh
+  file = fractureX.msh
 []
 
 [MeshModifiers]

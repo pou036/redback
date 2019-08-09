@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = ../../meshes/fractureXincluded.msh
+  file = fractureXincluded.msh
 []
 
 [MeshModifiers]
