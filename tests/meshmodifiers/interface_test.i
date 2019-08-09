@@ -1,6 +1,6 @@
 [Mesh]
   type = FileMesh
-  file = test.msh
+  file = test2.msh
 []
 
 [MeshModifiers]
@@ -13,7 +13,7 @@
   [break]
     type = InterfaceFromSideset
     boundaries = 'top bottom left right'
-    sidesets =  'ss3'
+    sidesets =  'ss2 ss3'
     split_interface = false
   []
 []
@@ -36,13 +36,21 @@
 []
 
 [InterfaceKernels]
-  [interface]
+  [interface_ss2]
     type = InterfaceDarcy
     variable = p
     neighbor_var = p
-    boundary = interface
+    boundary = interface_ss2
     fault_lewis_number = lewis_fault
     fault_thickness = 0.1
+  []
+  [interface_ss3]
+    type = InterfaceDarcy
+    variable = p
+    neighbor_var = p
+    boundary = interface_ss3
+    fault_lewis_number = lewis_fault
+    fault_thickness = 0.05
   []
 []
 
@@ -70,13 +78,13 @@
   [left]
     type = DirichletBC
     variable = p
-    boundary = 'left_line'
+    boundary = 'left'
     value = 1
   []
   [right]
     type = DirichletBC
     variable = p
-    boundary = 'right_line'
+    boundary = 'right'
     value = 0
   []
 []

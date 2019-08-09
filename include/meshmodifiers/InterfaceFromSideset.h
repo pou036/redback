@@ -34,7 +34,6 @@ private:
   bool isElementOnThatSideOfSegment(const MeshBase &, const Elem *, const dof_id_type, const dof_id_type, const std::set<int>, const std::vector<Real>);
   std::vector<Real> getMeshNormalVector(const MeshBase &);
 
-  std::set<std::pair<subdomain_id_type, subdomain_id_type>> _neighboring_block_list;
   std::map<std::pair<subdomain_id_type, subdomain_id_type>,
            std::set<std::pair<dof_id_type, unsigned int>>>
       _new_boundary_sides_map;

@@ -24,7 +24,7 @@ validParams<InterfaceFromSideset>()
   InputParameters params = validParams<BreakMeshByBlockBase>();
   params.addRequiredParam<std::vector<BoundaryName>>(
         "sidesets", "The names of sidesets from which to create the new interface(s). "
-        "They must be straight and NOT have branches");
+        "They MUST be straight and NOT have branches");
   params.addRequiredParam<std::vector<BoundaryName>>(
         "boundaries", "The names of sidesets forming the outside '"
             "boundaries of the whole mesh");
@@ -118,15 +118,38 @@ InterfaceFromSideset::modify()
       Elem * elem = (*it)->_elem;
       auto s = (*it)->_side;
       std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(s);
-      for (int n = 0; n < nodes_on_side.size(); ++n)
+      for (unsigned int n = 0; n < nodes_on_side.size(); ++n)
         boundary_node_ids.insert(elem->node_id(nodes_on_side[n]));
     }
+
+  // identify nodes "not at the edge" for each sideset
+  std::map<BoundaryName, std::map<int,int>> nb_neighbors_on_sideset;
+  for (auto & sideset_name : sideset_names)
+  {
+    auto sidedset_id = _mesh_ptr->getBoundaryID(sideset_name);
+    for (auto it = _mesh_ptr->bndElemsBegin(); it != _mesh_ptr->bndElemsEnd(); ++it)
+      if ((*it)->_bnd_id == sidedset_id)
+      {
+        Elem * elem = (*it)->_elem;
+        auto s = (*it)->_side;
+        std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(s);
+        for (unsigned int n = 0; n < nodes_on_side.size(); ++n)
+        {
+          auto current_node_id = elem->node_id(nodes_on_side[n]);
+          if (nb_neighbors_on_sideset[sideset_name].count(current_node_id) == 0)
+            nb_neighbors_on_sideset[sideset_name][current_node_id] = 1;
+          else
+            nb_neighbors_on_sideset[sideset_name][current_node_id] += 1;
+        }
+      }
+  }
 
   // Find normal vector to plane of mesh by looking at first element
   auto normal_vec = getMeshNormalVector(mesh);
 
   // initialize the node to elemen map
   const auto & node_to_elem_map = _mesh_ptr->nodeToElemMap();
+  std::map<dof_id_type, std::vector<dof_id_type>> new_node_to_elem_map;
 
   // loop on each provided sideset
   for (auto & sideset_name : sideset_names)
@@ -136,24 +159,16 @@ InterfaceFromSideset::modify()
     std::set<int> treated_node_ids;
     _new_boundary_sides_map.clear();
 
-    // identify all nodes and nodes "not at the edge" of sideset
+    // identify all nodes on this sideset
     std::set<int> sideset_node_ids;
-    std::map<int,int> nb_neighbors_on_sideset;
     for (auto it = _mesh_ptr->bndElemsBegin(); it != _mesh_ptr->bndElemsEnd(); ++it)
       if ((*it)->_bnd_id == sidedset_id)
       {
         Elem * elem = (*it)->_elem;
         auto s = (*it)->_side;
         std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(s);
-        for (int n = 0; n < nodes_on_side.size(); ++n)
-        {
-          auto current_node_id = elem->node_id(nodes_on_side[n]);
-          sideset_node_ids.insert(current_node_id);
-          if (nb_neighbors_on_sideset.count(current_node_id) == 0)
-            nb_neighbors_on_sideset[current_node_id] = 1;
-          else
-            nb_neighbors_on_sideset[current_node_id] += 1;
-        }
+        for (unsigned int n = 0; n < nodes_on_side.size(); ++n)
+          sideset_node_ids.insert(elem->node_id(nodes_on_side[n]));
       }
 
     // loop on all elements involved in that sideset
@@ -163,7 +178,7 @@ InterfaceFromSideset::modify()
         Elem * elem = (*it)->_elem;
         auto s = (*it)->_side;
         std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(s);
-        for (int n = 0; n < nodes_on_side.size(); ++n)
+        for (unsigned int n = 0; n < nodes_on_side.size(); ++n)
         {
           auto current_node_id = elem->node_id(nodes_on_side[n]);
           if (treated_node_ids.find(current_node_id) != treated_node_ids.end())
@@ -172,8 +187,8 @@ InterfaceFromSideset::modify()
           // Find out if we need to duplicate this node or not
           const bool is_node_on_boundary =
             boundary_node_ids.find(current_node_id) != boundary_node_ids.end();
-          const bool has_two_neighbours = nb_neighbors_on_sideset[current_node_id]>2;
-          //printf("  Node %d has %d neighbors on sideset\n", current_node_id, nb_neighbors_on_sideset[current_node_id]);
+          const bool has_two_neighbours = nb_neighbors_on_sideset[sideset_name][current_node_id]>2;
+          //printf("  Node %d has %d neighbors on sideset\n", current_node_id, nb_neighbors_on_sideset[sideset_name][current_node_id]);
           bool do_duplicate = false;
           if (is_node_on_boundary)
             do_duplicate = true;
@@ -196,6 +211,11 @@ InterfaceFromSideset::modify()
               boundary_node_ids.insert(new_node->id());
             treated_node_ids.insert(new_node->id());  // to avoid looping on new node
             sideset_node_ids.insert(new_node->id());
+            new_node_to_elem_map[new_node->id()] = (node_to_elem_map.find(current_node_id))->second;
+            for (auto & sideset_name2 : sideset_names)
+              if (sideset_name2 != sideset_name)
+                nb_neighbors_on_sideset[sideset_name2][new_node->id()] =
+                  nb_neighbors_on_sideset[sideset_name2][current_node_id];
 
             // Add sideset/boundary info to the new node
             std::vector<boundary_id_type> node_boundary_ids =
@@ -207,7 +227,11 @@ InterfaceFromSideset::modify()
             auto other_node_id = elem->node_id(nodes_on_side[(n+1)%2]);
 
             // retrieve connected elements from the map
-            auto node_to_elem_pair = node_to_elem_map.find(current_node_id);
+            std::map<dof_id_type, std::vector<dof_id_type>>::const_iterator node_to_elem_pair;
+            if (node_to_elem_map.find(current_node_id)==node_to_elem_map.end())
+              node_to_elem_pair = new_node_to_elem_map.find(current_node_id);
+            else
+              node_to_elem_pair = node_to_elem_map.find(current_node_id);
             const std::vector<dof_id_type> & connected_elems =
                 node_to_elem_pair->second;
             for (auto elem_id : connected_elems)
@@ -239,18 +263,12 @@ InterfaceFromSideset::modify()
               {
                 Elem * current_elem = mesh.elem_ptr(elem_id);
                 Elem * connected_elem = mesh.elem_ptr(connected_elem_id);
-                //printf("     Testing pair  %d - %d\n",elem_id, connected_elem_id);
-                //bool is_elem_on_that_side =  elem_ids_on_that_side.find(elem_id) != elem_ids_on_that_side.end();
-                //bool is_con_elem_on_other_side  = elem_ids_on_other_side.find(connected_elem_id) != elem_ids_on_other_side.end();
-                //printf("        is_elem_on_that_side=%d ,  is_con_elem_on_other_side=%d\n",is_elem_on_that_side, is_con_elem_on_other_side);
                 if (current_elem != connected_elem &&
                   (elem_ids_on_that_side.find(elem_id) != elem_ids_on_that_side.end())  &&
                   (elem_ids_on_other_side.find(connected_elem_id) != elem_ids_on_other_side.end()))
                 {
-                  //printf("      selected pair\n");
                   if (current_elem->has_neighbor(connected_elem))
                   {
-                    //printf("      add pair  to mapping\n");
                     std::pair<subdomain_id_type, subdomain_id_type> blocks_pair =
                         std::make_pair(current_elem->subdomain_id(), connected_elem->subdomain_id());
                     _new_boundary_sides_map[blocks_pair].insert(std::make_pair(
@@ -302,7 +320,7 @@ InterfaceFromSideset::isElementOnThatSideOfSegment(
   bool result = true; // element is on "that" (one) side of segment
   for (MooseIndex(elem->n_vertices()) i_v = 0; i_v < elem->n_vertices(); ++i_v)
   {
-    int node_id = elem->node_id(i_v);
+    dof_id_type node_id = elem->node_id(i_v);
     bool is_node_on_sideset = (sideset_node_ids.find(node_id) != sideset_node_ids.end());
     if ((node_id != node_id1) && (node_id != node_id2) && !is_node_on_sideset)
     {
