@@ -24,4 +24,16 @@
     input = 'testInterfaceFromSidesetDiffusion3.i'
     exodiff = 'testInterfaceFromSidesetDiffusion3.e'
   [../]
+  [./test_interfaceFromSideset_diff4]
+    # Testing diffusion on Y reaching sides from left to right
+    type = 'Exodiff'
+    input = 'testInterfaceFromSidesetDiffusion4.i'
+    exodiff = 'testInterfaceFromSidesetDiffusion4.e'
+  [../]
+  [./test_interfaceFromSideset_diff5]
+    # Testing diffusion on Y reaching sides from right to left
+    type = 'Exodiff'
+    input = 'testInterfaceFromSidesetDiffusion5.i'
+    exodiff = 'testInterfaceFromSidesetDiffusion5.e'
+  [../]
 []
