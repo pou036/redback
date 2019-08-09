@@ -1,11 +1,11 @@
 [Tests]
-  [./test_interfaceFromSideset]
-    # Should produce the same mesh as BreakMeshByBlock meshmodifier
-    type = 'Exodiff'
-    input = 'testinterfaceFromSideset.i'
-    exodiff = 'goldBreakMeshByBlock_in.e'
-    cli_args = '--mesh-only=goldBreakMeshByBlock_in.e'
-  [../]
+ # [./test_interfaceFromSideset]
+ #   # Should produce the same mesh as BreakMeshByBlock meshmodifier
+ #   type = 'Exodiff'
+ #   input = 'testinterfaceFromSideset.i'
+ #   exodiff = 'goldBreakMeshByBlock_in.e'
+ #   cli_args = '--mesh-only=goldBreakMeshByBlock_in.e'
+ # [../]
   [./test_interfaceFromSideset_diff1]
     # Testing diffusion on X reaching sides from left to right
     type = 'Exodiff'
