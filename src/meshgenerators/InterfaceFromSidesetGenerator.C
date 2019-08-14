@@ -10,18 +10,23 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#include "InterfaceFromSideset.h"
-#include "MooseMesh.h"
+#include "InterfaceFromSidesetGenerator.h"
+#include "CastUniquePointer.h"
 
+#include "libmesh/distributed_mesh.h"
 #include "libmesh/elem.h"
+#include "MooseMeshUtils.h"
 
-registerMooseObject("RedbackApp", InterfaceFromSideset);
+#include <typeinfo>
+
+registerMooseObject("RedbackApp", InterfaceFromSidesetGenerator);
 
 template <>
 InputParameters
-validParams<InterfaceFromSideset>()
+validParams<InterfaceFromSidesetGenerator>()
 {
-  InputParameters params = validParams<BreakMeshByBlockBase>();
+  InputParameters params = validParams<BreakMeshByBlockGeneratorBase>();
+  params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::vector<BoundaryName>>(
         "sidesets", "The names of sidesets from which to create the new interface(s). "
         "They MUST be straight and NOT have branches");
@@ -35,45 +40,69 @@ validParams<InterfaceFromSideset>()
   return params;
 }
 
-InterfaceFromSideset::InterfaceFromSideset(const InputParameters & parameters)
-  : BreakMeshByBlockBase(parameters),
+InterfaceFromSidesetGenerator::InterfaceFromSidesetGenerator(const InputParameters & parameters)
+  : BreakMeshByBlockGeneratorBase(parameters),
+    _input(getMesh("input")),
     _sidesets(getParam<std::vector<BoundaryName>>("sidesets")),
     _boundaries(getParam<std::vector<BoundaryName>>("boundaries"))
 {
+  if (typeid(_input).name() == typeid(DistributedMesh).name())
+    mooseError("BreakMeshByBlockGenerator only works with ReplicatedMesh.");
   if (!isParamValid("sidesets"))
     mooseError("Invalid sidesets provided");
 }
 
-void
-InterfaceFromSideset::modify()
+std::unique_ptr<MeshBase>
+InterfaceFromSidesetGenerator::generate()
 {
+  std::unique_ptr<MeshBase> mesh = std::move(_input);
 
-  // TODO remove when distributed MESH capabilities are implemented
-  _mesh_ptr->errorIfDistributedMesh("InterfaceFromSideset only works on a REPLICATED mesh");
-  checkInputParameter();
-
-  // save reference to mesh
-  MeshBase & mesh = _mesh_ptr->getMesh();
+  // initialize the node to element map
+  std::map<dof_id_type, std::vector<dof_id_type>> node_to_elem_map;
+  for (const auto & elem : mesh->active_element_ptr_range())
+    for (unsigned int n = 0; n < elem->n_nodes(); n++)
+      node_to_elem_map[elem->node_id(n)].push_back(elem->id());
+  std::map<dof_id_type, std::vector<dof_id_type>> new_node_to_elem_map;
 
   // Get sidesets IDs
-  std::set<BoundaryID> sideset_ids;
+  std::set<boundary_id_type> sideset_ids;
   auto & sideset_names = getParam<std::vector<BoundaryName>>("sidesets");
   for (auto & sideset_name : sideset_names)
-    sideset_ids.insert(_mesh_ptr->getBoundaryID(sideset_name));
+    sideset_ids.insert(MooseMeshUtils::getBoundaryIDs(*mesh, {sideset_name}, true)[0]);
+  // TODO can we use a vector instead of a set?
+  //std::vector<boundary_id_type> boundary_ids = MooseMeshUtils::getBoundaryIDs(mesh, sideset_names, true);
+
 
   // Get boundaries IDs
-  std::set<BoundaryID> boundary_ids;
+  std::set<boundary_id_type> boundary_ids;
   auto & boundary_names = getParam<std::vector<BoundaryName>>("boundaries");
   for (auto & boundary_name : boundary_names)
-    boundary_ids.insert(_mesh_ptr->getBoundaryID(boundary_name));
+    boundary_ids.insert(MooseMeshUtils::getBoundaryIDs(*mesh, {boundary_name}, true)[0]);
 
-  _mesh_ptr->buildBndElemList();
+  // Equivalent to MooseMesh::buildBndElemList()
+  auto & boundary_info = mesh->get_boundary_info();
+  auto bc_tuples = boundary_info.build_active_side_list();
+  int n = bc_tuples.size();
+  std::vector<std::unique_ptr<BndElement>> bnd_elems;
+  std::map<boundary_id_type, std::set<dof_id_type>> bnd_elem_ids;
+  bnd_elems.reserve(n);
+  for (const auto & t : bc_tuples)
+  {
+    auto elem_id = std::get<0>(t);
+    auto side_id = std::get<1>(t);
+    auto bc_id = std::get<2>(t);
+
+    std::unique_ptr<BndElement> bndElem =
+        libmesh_make_unique<BndElement>(mesh->elem_ptr(elem_id), side_id, bc_id);
+    bnd_elems.push_back(std::move(bndElem));
+    bnd_elem_ids[bc_id].insert(elem_id);
+  }
 
   // Identify node IDs on given boundaries and all sidesets
   std::set<int> boundary_node_ids;
   std::set<int> allsidesets_node_ids;
   std::map<BoundaryName, std::set<int>> sidesets_node_ids;
-  for (auto it = _mesh_ptr->bndElemsBegin(); it != _mesh_ptr->bndElemsEnd(); ++it)
+  for (auto it = bnd_elems.begin(); it != bnd_elems.end(); ++it)
   {
     if (boundary_ids.count((*it)->_bnd_id) > 0)
     {
@@ -85,8 +114,8 @@ InterfaceFromSideset::modify()
     }
     for (auto & sideset_name : sideset_names)
     {
-      auto sidedset_id = _mesh_ptr->getBoundaryID(sideset_name);
-      if ((*it)->_bnd_id == sidedset_id)
+      auto sideset_id = mesh->get_boundary_info().get_id_by_name(sideset_name);
+      if ((*it)->_bnd_id == sideset_id)
       {
         Elem * elem = (*it)->_elem;
         auto s = (*it)->_side;
@@ -104,9 +133,9 @@ InterfaceFromSideset::modify()
   std::map<BoundaryName, std::map<int,int>> nb_neighbors_on_sideset;
   for (auto & sideset_name : sideset_names)
   {
-    auto sidedset_id = _mesh_ptr->getBoundaryID(sideset_name);
-    for (auto it = _mesh_ptr->bndElemsBegin(); it != _mesh_ptr->bndElemsEnd(); ++it)
-      if ((*it)->_bnd_id == sidedset_id)
+    auto sideset_id = mesh->get_boundary_info().get_id_by_name(sideset_name);
+    for (auto it = bnd_elems.begin(); it != bnd_elems.end(); ++it)
+      if ((*it)->_bnd_id == sideset_id)
       {
         Elem * elem = (*it)->_elem;
         auto s = (*it)->_side;
@@ -123,17 +152,13 @@ InterfaceFromSideset::modify()
   }
 
   // Find normal vector to plane of mesh by looking at first element
-  auto normal_vec = getMeshNormalVector(mesh);
-
-  // initialize the node to elemen map
-  const auto & node_to_elem_map = _mesh_ptr->nodeToElemMap();
-  std::map<dof_id_type, std::vector<dof_id_type>> new_node_to_elem_map;
+  auto normal_vec = getMeshNormalVector(*mesh);
 
   // loop on each provided sideset
   for (auto & sideset_name : sideset_names)
   {
-    auto sidedset_id = _mesh_ptr->getBoundaryID(sideset_name);
-    printf("\nLoop on sideset '%s' (ID %d)\n",sideset_name.c_str(), sidedset_id);
+    auto sideset_id = mesh->get_boundary_info().get_id_by_name(sideset_name);
+    printf("\nLoop on sideset '%s' (ID %d)\n",sideset_name.c_str(), sideset_id);
     std::set<int> treated_node_ids;
     _new_boundary_sides_map.clear();
 
@@ -145,8 +170,8 @@ InterfaceFromSideset::modify()
             sidesets_node_ids[sideset_name2].end());
 
     // loop on all elements involved in that sideset
-    for (auto it = _mesh_ptr->bndElemsBegin(); it != _mesh_ptr->bndElemsEnd(); ++it)
-      if ((*it)->_bnd_id == sidedset_id)
+    for (auto it = bnd_elems.begin(); it != bnd_elems.end(); ++it)
+      if ((*it)->_bnd_id == sideset_id)
       {
         Elem * elem = (*it)->_elem;
         auto s = (*it)->_side;
@@ -174,15 +199,15 @@ InterfaceFromSideset::modify()
           {
             // node to be duplicated
             printf("  Node %d needs to be duplicated", current_node_id);
-            const Node * current_node = mesh.node_ptr(current_node_id);
-            std::set<BoundaryID> elem_ids_on_that_side;
-            std::set<BoundaryID> elem_ids_on_other_side;
+            const Node * current_node = mesh->node_ptr(current_node_id);
+            std::set<boundary_id_type> elem_ids_on_that_side;
+            std::set<boundary_id_type> elem_ids_on_other_side;
 
             // add new node
             Node * new_node = nullptr;
-            new_node = Node::build(*current_node, mesh.n_nodes()).release();
+            new_node = Node::build(*current_node, mesh->n_nodes()).release();
             new_node->processor_id() = current_node->processor_id();
-            mesh.add_node(new_node);
+            mesh->add_node(new_node);
             printf(" -> node %d\n", new_node->id());
             if (is_node_on_boundary)
               boundary_node_ids.insert(new_node->id());
@@ -206,8 +231,8 @@ InterfaceFromSideset::modify()
 
             // Add sideset/boundary info to the new node
             std::vector<boundary_id_type> node_boundary_ids =
-                mesh.boundary_info->boundary_ids(current_node);
-            mesh.boundary_info->add_node(new_node, node_boundary_ids);
+                mesh->boundary_info->boundary_ids(current_node);
+            mesh->boundary_info->add_node(new_node, node_boundary_ids);
 
             if (nodes_on_side.size()!=2)
               mooseError("Implementation restriction: sides must contain 2 nodes");
@@ -218,10 +243,10 @@ InterfaceFromSideset::modify()
                 node_to_elem_pair->second;
             for (auto elem_id : connected_elems)
             {
-              Elem * current_elem = mesh.elem_ptr(elem_id);
+              Elem * current_elem = mesh->elem_ptr(elem_id);
               // Find which side is it from our segment
               bool is_on_that_side = isElementOnThatSideOfSegment(
-                mesh, current_elem, current_node_id, other_node_id,
+                *mesh, current_elem, current_node_id, other_node_id,
                 sidesets_node_ids[sideset_name], normal_vec);
               if (is_on_that_side)
               {
@@ -243,8 +268,8 @@ InterfaceFromSideset::modify()
             {
               for (auto connected_elem_id : connected_elems)
               {
-                Elem * current_elem = mesh.elem_ptr(elem_id);
-                Elem * connected_elem = mesh.elem_ptr(connected_elem_id);
+                Elem * current_elem = mesh->elem_ptr(elem_id);
+                Elem * connected_elem = mesh->elem_ptr(connected_elem_id);
                 if (current_elem != connected_elem &&
                   (elem_ids_on_that_side.find(elem_id) != elem_ids_on_that_side.end())  &&
                   (elem_ids_on_other_side.find(connected_elem_id) != elem_ids_on_other_side.end()))
@@ -265,13 +290,14 @@ InterfaceFromSideset::modify()
           treated_node_ids.insert(current_node_id);
         }
       }
-    addInterfaceBoundary(sideset_name);
+    addInterfaceBoundary(*mesh, sideset_name);
   }
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
 bool
-InterfaceFromSideset::isElementOnThatSideOfSegment(
-    const MeshBase & mesh,
+InterfaceFromSidesetGenerator::isElementOnThatSideOfSegment(
+    MeshBase & mesh,
     const Elem * elem,
     const dof_id_type node_id1,
     const dof_id_type node_id2,
@@ -316,7 +342,7 @@ InterfaceFromSideset::isElementOnThatSideOfSegment(
 }
 
 bool
-InterfaceFromSideset::isNodeOnThatSideOfSegment(
+InterfaceFromSidesetGenerator::isNodeOnThatSideOfSegment(
     const Node & nodetest,
     const Node & node1,
     const Node & node2,
@@ -344,7 +370,7 @@ InterfaceFromSideset::isNodeOnThatSideOfSegment(
 }
 
 std::vector<Real>
-InterfaceFromSideset::getMeshNormalVector(const MeshBase & mesh)
+InterfaceFromSidesetGenerator::getMeshNormalVector(MeshBase & mesh)
 {
   // Find normal vector to plane of mesh by looking at first element
   std::vector<Real> normal_vec(LIBMESH_DIM, 0.);
@@ -363,11 +389,13 @@ InterfaceFromSideset::getMeshNormalVector(const MeshBase & mesh)
 }
 
 void
-InterfaceFromSideset::addInterfaceBoundary(BoundaryName sideset_name)
+InterfaceFromSidesetGenerator::addInterfaceBoundary(
+    MeshBase & mesh,
+    BoundaryName sideset_name)
 {
-  BoundaryInfo & boundary_info = _mesh_ptr->getMesh().get_boundary_info();
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
-  BoundaryID boundaryID = findFreeBoundaryId();
+  boundary_id_type boundaryID = findFreeBoundaryId(mesh);
   std::string boundaryName = _interface_name + "_" + sideset_name;
 
   // loop over boundary sides
@@ -379,7 +407,8 @@ InterfaceFromSideset::addInterfaceBoundary(BoundaryName sideset_name)
     if (_split_interface)
     {
       mooseError("split_interface not tested yet...");
-      findBoundaryNameAndInd(boundary_side_map.first.first,
+      findBoundaryNameAndInd(mesh,
+                             boundary_side_map.first.first,
                              boundary_side_map.first.second,
                              boundaryName,
                              boundaryID,

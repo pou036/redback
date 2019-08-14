@@ -12,27 +12,30 @@
 
 #pragma once
 
-#include "BreakMeshByBlockBase.h"
+#include "BreakMeshByBlockGeneratorBase.h"
 
-class InterfaceFromSideset;
+class InterfaceFromSidesetGenerator;
 
 template <>
-InputParameters validParams<InterfaceFromSideset>();
+InputParameters validParams<InterfaceFromSidesetGenerator>();
 
-class InterfaceFromSideset : public BreakMeshByBlockBase
+class InterfaceFromSidesetGenerator : public BreakMeshByBlockGeneratorBase
 {
 public:
-  InterfaceFromSideset(const InputParameters & parameters);
+  InterfaceFromSidesetGenerator(const InputParameters & parameters);
 
-  virtual void modify() override;
+  std::unique_ptr<MeshBase> generate() override;
+
+protected:
+  std::unique_ptr<MeshBase> & _input;
 
 private:
   /// generate the new boundary interface
-  void addInterfaceBoundary(BoundaryName);
+  void addInterfaceBoundary(MeshBase & mesh, BoundaryName);
   /// test if node/element on given side of segment
   bool isNodeOnThatSideOfSegment(const Node &, const Node &, const Node &, const std::vector<Real>);
-  bool isElementOnThatSideOfSegment(const MeshBase &, const Elem *, const dof_id_type, const dof_id_type, const std::set<int>, const std::vector<Real>);
-  std::vector<Real> getMeshNormalVector(const MeshBase &);
+  bool isElementOnThatSideOfSegment(MeshBase & mesh, const Elem *, const dof_id_type, const dof_id_type, const std::set<int>, const std::vector<Real>);
+  std::vector<Real> getMeshNormalVector(MeshBase & mesh);
 
   std::map<std::pair<subdomain_id_type, subdomain_id_type>,
            std::set<std::pair<dof_id_type, unsigned int>>>
