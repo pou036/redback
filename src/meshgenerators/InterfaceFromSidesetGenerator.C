@@ -32,11 +32,13 @@ validParams<InterfaceFromSidesetGenerator>()
         "They MUST be straight and NOT have branches");
   params.addRequiredParam<std::vector<BoundaryName>>(
         "boundaries", "The names of sidesets forming the outside '"
-            "boundaries of the whole mesh");
-
+        "boundaries of the whole mesh");
+  params.addParam<bool>("create_lower_D_blocks", false,
+        "Boolean to create or not lower dimensional blocks");
+  params.addParam<bool>("verbose", false,
+        "Boolean to print info to console (for debugging purposes)");
   params.addClassDescription("Transform sidesets into interfaces. "
-                             "At the moment"
-                             "this only works on REPLICATED 2D mesh");
+        "At the moment this only works on REPLICATED 2D mesh (does it?)");
   return params;
 }
 
@@ -44,13 +46,25 @@ InterfaceFromSidesetGenerator::InterfaceFromSidesetGenerator(const InputParamete
   : BreakMeshByBlockGeneratorBase(parameters),
     _input(getMesh("input")),
     _sidesets(getParam<std::vector<BoundaryName>>("sidesets")),
-    _boundaries(getParam<std::vector<BoundaryName>>("boundaries"))
+    _boundaries(getParam<std::vector<BoundaryName>>("boundaries")),
+    _do_lower_d_blocks(getParam<bool>("create_lower_D_blocks")),
+    _verbose(getParam<bool>("verbose"))
 {
   if (typeid(_input).name() == typeid(DistributedMesh).name())
     mooseError("BreakMeshByBlockGenerator only works with ReplicatedMesh.");
   if (!isParamValid("sidesets"))
     mooseError("Invalid sidesets provided");
 }
+
+// Used to temporarily store information about which lower-dimensional
+// sides to add and what subdomain id to use for the added sides.
+struct ElemSideDouble
+{
+  ElemSideDouble(Elem * elem_in, unsigned short int side_in) : elem(elem_in), side(side_in) {}
+
+  Elem * elem;
+  unsigned short int side;
+};
 
 std::unique_ptr<MeshBase>
 InterfaceFromSidesetGenerator::generate()
@@ -158,7 +172,8 @@ InterfaceFromSidesetGenerator::generate()
   for (auto & sideset_name : sideset_names)
   {
     auto sideset_id = mesh->get_boundary_info().get_id_by_name(sideset_name);
-    printf("\nLoop on sideset '%s' (ID %d)\n",sideset_name.c_str(), sideset_id);
+    if (_verbose)
+      printf("\nLoop on sideset '%s' (ID %d)\n",sideset_name.c_str(), sideset_id);
     std::set<int> treated_node_ids;
     _new_boundary_sides_map.clear();
 
@@ -198,7 +213,8 @@ InterfaceFromSidesetGenerator::generate()
           if (do_duplicate)
           {
             // node to be duplicated
-            printf("  Node %d needs to be duplicated", current_node_id);
+            if (_verbose)
+              printf("  Node %d needs to be duplicated", current_node_id);
             const Node * current_node = mesh->node_ptr(current_node_id);
             std::set<boundary_id_type> elem_ids_on_that_side;
             std::set<boundary_id_type> elem_ids_on_other_side;
@@ -208,7 +224,8 @@ InterfaceFromSidesetGenerator::generate()
             new_node = Node::build(*current_node, mesh->n_nodes()).release();
             new_node->processor_id() = current_node->processor_id();
             mesh->add_node(new_node);
-            printf(" -> node %d\n", new_node->id());
+            if (_verbose)
+              printf(" -> node %d (in elements", new_node->id());
             if (is_node_on_boundary)
               boundary_node_ids.insert(new_node->id());
             treated_node_ids.insert(new_node->id());  // to avoid looping on new node
@@ -256,12 +273,16 @@ InterfaceFromSidesetGenerator::generate()
                   if (current_elem->node_id(node_id) == current_node_id)
                   {
                     current_elem->set_node(node_id) = new_node;
+                    if (_verbose)
+                      printf(" %d", current_elem->id());
                     break;
                   }
               }
               else
                 elem_ids_on_other_side.insert(elem_id);
             }
+            if (_verbose)
+              printf(")\n"); // end of print info for new node created
 
             // create blocks pair and assign element side to new interface boundary map
             for (auto elem_id : connected_elems)
@@ -286,12 +307,17 @@ InterfaceFromSidesetGenerator::generate()
             }
           }
           else
-            printf("  Node %d does NOT need to be duplicated\n", current_node_id);
+            if (_verbose)
+              printf("  Node %d does NOT need to be duplicated\n", current_node_id);
           treated_node_ids.insert(current_node_id);
         }
       }
     addInterfaceBoundary(*mesh, sideset_name);
   }
+  // create lower dimensional entities if needed
+  if (_do_lower_d_blocks)
+    addLowerDElements(*mesh);
+
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
@@ -393,6 +419,10 @@ InterfaceFromSidesetGenerator::addInterfaceBoundary(
     MeshBase & mesh,
     BoundaryName sideset_name)
 {
+  bool distributed = false;
+  if (typeid(mesh).name() == typeid(std::unique_ptr<DistributedMesh>).name())
+    distributed = true;
+
   BoundaryInfo & boundary_info = mesh.get_boundary_info();
 
   boundary_id_type boundaryID = findFreeBoundaryId(mesh);
@@ -421,4 +451,124 @@ InterfaceFromSidesetGenerator::addInterfaceBoundary(
     for (auto & element_side : boundary_side_map.second)
       boundary_info.add_side(element_side.first, element_side.second, boundaryID);
   }
+}
+
+void
+InterfaceFromSidesetGenerator::addLowerDElements(MeshBase & mesh)
+{
+  bool distributed = false;
+  if (typeid(mesh).name() == typeid(std::unique_ptr<DistributedMesh>).name())
+    distributed = true;
+
+  BoundaryInfo & boundary_info = mesh.get_boundary_info();
+  auto side_list = boundary_info.build_side_list();
+  std::sort(side_list.begin(),
+            side_list.end(),
+            [](std::tuple<dof_id_type, unsigned short int, boundary_id_type> a,
+               std::tuple<dof_id_type, unsigned short int, boundary_id_type> b) {
+              auto a_elem_id = std::get<0>(a);
+              auto b_elem_id = std::get<0>(b);
+              if (a_elem_id == b_elem_id)
+              {
+                auto a_side_id = std::get<1>(a);
+                auto b_side_id = std::get<1>(b);
+                if (a_side_id == b_side_id)
+                  return std::get<2>(a) < std::get<2>(b);
+                else
+                  return a_side_id < b_side_id;
+              }
+              else
+                return a_elem_id < b_elem_id;
+            });
+
+  // Get sidesets IDs
+  //std::set<boundary_id_type> sideset_ids;
+  auto & sideset_names = getParam<std::vector<BoundaryName>>("sidesets");
+  for (auto & sideset_name : sideset_names)
+  {
+    //sideset_ids.insert(MooseMeshUtils::getBoundaryIDs(mesh, {sideset_name}, true)[0]);
+    boundary_id_type sideset_id = MooseMeshUtils::getBoundaryIDs(mesh, {sideset_name}, true)[0];
+    std::vector<ElemSideDouble> element_sides_on_sideset;
+    for (const auto & triple : side_list)
+      //if (sideset_ids.count(std::get<2>(triple)))
+      if (sideset_id == std::get<2>(triple))
+        element_sides_on_sideset.push_back(
+            ElemSideDouble(mesh.elem_ptr(std::get<0>(triple)), std::get<1>(triple)));
+
+    dof_id_type max_elem_id = mesh.max_elem_id();
+    mesh.comm().max(max_elem_id);
+    auto max_elems_to_add = element_sides_on_sideset.size();
+    mesh.comm().max(max_elems_to_add);
+
+    subdomain_id_type new_block_id = findFreeBlockId(mesh);
+
+    for (MooseIndex(element_sides_on_sideset) i = 0; i < element_sides_on_sideset.size(); ++i)
+    {
+      Elem * elem = element_sides_on_sideset[i].elem;
+      if (distributed && elem->processor_id() != processor_id())
+        continue;
+
+      unsigned int side = element_sides_on_sideset[i].side;
+
+      /*
+      int elem_id = elem->id();
+      int nnodes =  elem->n_nodes();
+      printf("  Sideset '%s', Element %d, side:%d, elem->n_nodes()=%d:\n",
+          sideset_name.c_str(), elem_id, side, nnodes);
+      std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(side);
+      for (int n = 0; n < nodes_on_side.size(); ++n)
+      {
+        printf("     nodeid  = %d on side\n",elem->node_id(nodes_on_side[n]));
+      }
+      */
+
+      // Build a non-proxy element from this side.
+      std::unique_ptr<Elem> side_elem(elem->build_side_ptr(side, /*proxy=*/false));
+
+      // The side will be added with the same processor id as the parent.
+      side_elem->processor_id() = elem->processor_id();
+
+      // Add subdomain ID
+      side_elem->subdomain_id() = new_block_id;
+
+      // Also assign the side's interior parent, so it is always
+      // easy to figure out the Elem we came from.
+      side_elem->set_interior_parent(elem);
+
+      // Add id for distributed
+      if (distributed)
+        side_elem->set_id(max_elem_id + processor_id() * max_elems_to_add + i);
+
+      // Finally, add the lower-dimensional element to the Mesh.
+      mesh.add_elem(side_elem.release());
+    };
+
+    // Assign block name, if provided
+    std::string new_block_name("lowerD_");
+    new_block_name += sideset_name.c_str();
+    mesh.subdomain_name(new_block_id) = new_block_name;
+  }
+}
+
+subdomain_id_type
+InterfaceFromSidesetGenerator::findFreeBlockId(MeshBase & mesh)
+{
+  auto blocks = MooseMeshUtils::getSubdomainIDs(mesh, {"ANY_BLOCK_ID"});
+  std::set<subdomain_id_type> current_block_ids(blocks.begin(), blocks.end());
+  bool free_block_not_found = true;
+  subdomain_id_type free_id;
+  for (free_id = 0; free_id < std::numeric_limits<subdomain_id_type>::max(); free_id++)
+  {
+    if (current_block_ids.count(free_id) == 0)
+    {
+      // bid is not in the set, block ID is free
+      free_block_not_found = false;
+      break;
+    }
+  }
+
+  if (free_block_not_found)
+    mooseError("Too many blocks. Maximum limit exceeded!");
+
+  return free_id;
 }

@@ -36,4 +36,25 @@
     input = 'testInterfaceFromSidesetDiffusion5.i'
     exodiff = 'testInterfaceFromSidesetDiffusion5.e'
   [../]
+  [./test_lowerD_interface1]
+    # Testing diffusion on X with lower D blocks, left & right blocks
+    # Note: can't use exodiff since we have 2 lowerD blocks superposed!
+    type = 'CSVDiff'
+    input = 'testLowerDInterface1.i'
+    csvdiff = 'testLowerDInterface1.csv'
+  [../]
+  [./test_lowerD_interface2]
+    # Testing diffusion on X with lower D blocks, bottom & top blocks
+    # Note: can't use exodiff since we have 2 lowerD blocks superposed!
+    type = 'CSVDiff'
+    input = 'testLowerDInterface2.i'
+    csvdiff = 'testLowerDInterface2.csv'
+  [../]
+  [./test_lowerD_interface3]
+    # Testing diffusion on X with lower D blocks, no matrix diffusion
+    # Note: can't use exodiff since we have 2 lowerD blocks superposed!
+    type = 'CSVDiff'
+    input = 'testLowerDInterface3.i'
+    csvdiff = 'testLowerDInterface3.csv'
+  [../]
 []

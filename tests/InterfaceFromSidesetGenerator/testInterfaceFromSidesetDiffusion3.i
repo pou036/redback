@@ -10,6 +10,7 @@
     boundaries = 'top bottom left right'
     sidesets =  'ss2 ss3'
     split_interface = false
+    create_lower_D_blocks = false
   []
 []
 

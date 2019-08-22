@@ -29,9 +29,14 @@ public:
 protected:
   std::unique_ptr<MeshBase> & _input;
 
+  /// this method finds the first free block id
+  subdomain_id_type findFreeBlockId(MeshBase & mesh);
+
 private:
   /// generate the new boundary interface
   void addInterfaceBoundary(MeshBase & mesh, BoundaryName);
+  /// add lower dimensional elements on interfaces
+  void addLowerDElements(MeshBase & mesh);
   /// test if node/element on given side of segment
   bool isNodeOnThatSideOfSegment(const Node &, const Node &, const Node &, const std::vector<Real>);
   bool isElementOnThatSideOfSegment(MeshBase & mesh, const Elem *, const dof_id_type, const dof_id_type, const std::set<int>, const std::vector<Real>);
@@ -44,5 +49,10 @@ private:
   std::vector<BoundaryName> _sidesets;
   /// The sidesets delimiting the border of the whole mesh
   std::vector<BoundaryName> _boundaries;
+
+  /// does user want interfaces as lower dimensional blocks?
+  const bool _do_lower_d_blocks;
+  /// Verbose flag for debugging prints to appear on console
+  const bool _verbose;
 };
 

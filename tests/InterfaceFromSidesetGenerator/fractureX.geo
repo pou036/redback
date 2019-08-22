@@ -53,6 +53,11 @@ Physical Curve("top") = {10,11,12};
 Physical Curve("right") = {9};
 Physical Curve("left") = {1};
 
-
-
+/*
+Physical Point("X_top_left") = {9};
+Physical Point("X_top_right") = {7};
+Physical Point("X_bottom_left") = {6};
+Physical Point("X_bottom_right") = {8};
+Physical Point("X_centre") = {5};
+*/
 
