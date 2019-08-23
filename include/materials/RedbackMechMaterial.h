@@ -211,7 +211,7 @@ protected:
   Real _damage_dissipation, _max_confining_pressure;
 
   /// initial stress components
-  std::vector<Function *> _initial_stress;
+  std::vector<const Function *> _initial_stress;
 };
 
 #endif // REDBACKMECHMATERIAL_H
