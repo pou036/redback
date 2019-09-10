@@ -1,0 +1,60 @@
+[Tests]
+ # [./test_interfaceFromSideset]
+ #   # Should produce the same mesh as BreakMeshByBlock meshmodifier
+ #   type = 'Exodiff'
+ #   input = 'testinterfaceFromSideset.i'
+ #   exodiff = 'goldBreakMeshByBlock_in.e'
+ #   cli_args = '--mesh-only=goldBreakMeshByBlock_in.e'
+ # [../]
+  [./test_BreakMeshBySideset_diff1]
+    # Testing diffusion on X reaching sides from left to right
+    type = 'Exodiff'
+    input = 'testBreakMeshBySidesetDiffusion1.i'
+    exodiff = 'testBreakMeshBySidesetDiffusion1.e'
+  [../]
+  [./test_BreakMeshBySideset_diff2]
+    # Testing diffusion on X reaching sides from right to left
+    type = 'Exodiff'
+    input = 'testBreakMeshBySidesetDiffusion2.i'
+    exodiff = 'testBreakMeshBySidesetDiffusion2.e'
+  [../]
+  [./test_BreakMeshBySideset_diff3]
+    # Testing diffusion on X not reaching sides
+    type = 'Exodiff'
+    input = 'testBreakMeshBySidesetDiffusion3.i'
+    exodiff = 'testBreakMeshBySidesetDiffusion3.e'
+  [../]
+  [./test_BreakMeshBySideset_diff4]
+    # Testing diffusion on Y reaching sides from left to right
+    type = 'Exodiff'
+    input = 'testBreakMeshBySidesetDiffusion4.i'
+    exodiff = 'testBreakMeshBySidesetDiffusion4.e'
+  [../]
+  [./test_BreakMeshBySideset_diff5]
+    # Testing diffusion on Y reaching sides from right to left
+    type = 'Exodiff'
+    input = 'testBreakMeshBySidesetDiffusion5.i'
+    exodiff = 'testBreakMeshBySidesetDiffusion5.e'
+  [../]
+#  [./test_BreakMeshBySideset_lowerD_1]
+#    # Testing diffusion on X with lower D blocks, left & right blocks
+#    # Note: can't use exodiff since we have 2 lowerD blocks superposed!
+#    type = 'CSVDiff'
+#    input = 'testLowerDInterface1.i'
+#    csvdiff = 'testLowerDInterface1.csv'
+#  [../]
+#  [./test_BreakMeshBySideset_lowerD_2]
+#    # Testing diffusion on X with lower D blocks, bottom & top blocks
+#    # Note: can't use exodiff since we have 2 lowerD blocks superposed!
+#    type = 'CSVDiff'
+#    input = 'testLowerDInterface2.i'
+#    csvdiff = 'testLowerDInterface2.csv'
+#  [../]
+#  [./test_BreakMeshBySideset_lowerD_3]
+#    # Testing diffusion on X with lower D blocks, no matrix diffusion
+#    # Note: can't use exodiff since we have 2 lowerD blocks superposed!
+#    type = 'CSVDiff'
+#    input = 'testLowerDInterface3.i'
+#    csvdiff = 'testLowerDInterface3.csv'
+#  [../]
+[]
