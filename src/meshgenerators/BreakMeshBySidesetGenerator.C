@@ -16,8 +16,6 @@
 #include "libmesh/distributed_mesh.h"
 #include "libmesh/elem.h"
 #include "MooseMeshUtils.h"
-#include <chrono> // for sleep
-#include <thread> // for sleep
 
 #include <typeinfo>
 
@@ -34,6 +32,8 @@ validParams<BreakMeshBySidesetGenerator>()
   params.addRequiredParam<std::vector<BoundaryName>>(
         "boundaries", "The names of sidesets forming the outside '"
         "boundaries of the whole mesh");
+  params.addParam<bool>("verbose", false,
+        "Boolean to print info to console (for debugging purposes)");
   params.addClassDescription("Break boundaries based on the subdomains to which their sides are "
                              "attached. Naming convention for the new boundaries will be the old "
                              "boundary name plus \"_to_\" plus the subdomain name. At the moment"
@@ -45,7 +45,8 @@ BreakMeshBySidesetGenerator::BreakMeshBySidesetGenerator(const InputParameters &
   : BreakMeshByBlockGeneratorBase(parameters),
     _input(getMesh("input")),
     _sidesets(getParam<std::vector<BoundaryName>>("sidesets")),
-    _boundaries(getParam<std::vector<BoundaryName>>("boundaries"))
+    _boundaries(getParam<std::vector<BoundaryName>>("boundaries")),
+    _verbose(getParam<bool>("verbose"))
 {
   if (typeid(_input).name() == typeid(DistributedMesh).name())
     mooseError("BreakMeshBySidesetGenerator only works with ReplicatedMesh.");
@@ -78,10 +79,8 @@ BreakMeshBySidesetGenerator::assignNeighborColor(
     std::set<dof_id_type> & ss_split_node_ids,
     std::set<dof_id_type> & duplicated_node_ids)
 {
-  printf("  Entering assignNeighborColor for elem %d w.r.t elem ref %d\n",elem->id(), elem_ref->id());
   // find new color
   auto s = elem->which_neighbor_am_i(elem_ref);
-  printf("    common side of elem %d (ref) and %d is %d\n", elem_ref->id(), elem->id(), s);
   std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(s);
   bool is_on_same_side = false;
   for (int n = 0; n < nodes_on_side.size(); ++n)
@@ -97,21 +96,13 @@ BreakMeshBySidesetGenerator::assignNeighborColor(
       // node is on sideset and in the splitting list -> next candidate
       if (node_id != node_ref.id() && ss_split_node_ids.count(node_id)>0
           && duplicated_node_ids.count(node_id)==0)
-      {
         remaining_split_node_ids.insert(node_id);
-        printf("      -> identified next node to try: %d\n",node_id);
-      }
-      else
-        printf("      -> passed by node: %d on ss...\n",node_id);
     }
   }
   if (std::find(elem_ids_colored.begin(), elem_ids_colored.end(), elem->id()) != elem_ids_colored.end())
-  {
-    printf("  -> already colored\n");
     return;
-  }
+
   bool new_color = (is_on_same_side) ? ref_color : !ref_color;
-  printf("    new_color of element %d is %d\n",elem->id(), new_color);
   // update color map
   if (elt_colors.count(elem->id()) == 0)
     elt_colors[elem->id()] = {{sideset_id,new_color}};
@@ -119,7 +110,6 @@ BreakMeshBySidesetGenerator::assignNeighborColor(
     elt_colors[elem->id()].insert(std::pair<boundary_id_type,bool>(sideset_id,new_color));
   // this element is done, add it from the list of elements done
   elem_ids_colored.insert(elem->id());
-  printf("    At insertion time, elt_colors[%d][%d]=%d\n",elem->id(),sideset_id,elt_colors[elem->id()][sideset_id]);
 }
 
 std::unique_ptr<MeshBase>
@@ -181,9 +171,11 @@ BreakMeshBySidesetGenerator::generate()
 
   // Identify node IDs on given sidesets and their borders
   std::set<int> allsidesets_node_ids;
-  std::map<BoundaryName, std::set<dof_id_type>> sidesets_node_ids; // TODO: do we need this?
+  std::map<BoundaryName, std::set<dof_id_type>> sidesets_node_ids;
   std::map<BoundaryName, std::set<dof_id_type>> ss_border_node_ids; // sideset border node IDs
   std::map<BoundaryName, std::set<dof_id_type>> ss_inside_node_ids; // sideset inside node IDs
+  if (_verbose)
+    printf("Identifying dimensionality of sidesets and getting all node IDs...\n");
   for (auto & sideset_name : sideset_names)
   {
     auto sideset_id = mesh->get_boundary_info().get_id_by_name(sideset_name);
@@ -196,9 +188,9 @@ BreakMeshBySidesetGenerator::generate()
       dim_ss = 3;
     else
       dim_ss = 2;
-    printf("Loop on sideset '%s' (ID %d) -> dim=%d\n",sideset_name.c_str(), sideset_id, dim_ss);
+    if (_verbose)
+      printf("  Loop on sideset '%s' (ID %d) -> dim=%d\n",sideset_name.c_str(), sideset_id, dim_ss);
 
-    //std::map<std::vector<unsigned int>, int> face_node_ids; // {vector[node_ids]:nb_seen,} to check later which ones are on border
     std::set<std::vector<unsigned int>> face_node_ids;
     for (auto it = bnd_elems.begin(); it != bnd_elems.end(); ++it)
       if ((*it)->_bnd_id == sideset_id)
@@ -256,40 +248,43 @@ BreakMeshBySidesetGenerator::generate()
   }
 
   // identify element "colors" (which side of sideset they are)
+  if (_verbose)
+    printf("Identifying element 'colors'...\n");
   std::map<dof_id_type, std::map<boundary_id_type, bool>> elt_colors; // {elt_id:{sideset_id:boolean}}
   std::set<dof_id_type> split_node_ids; // all nodes to be split
   for (auto & sideset_name : sideset_names)
   {
-    printf("\nDoing sideset %s...\n",sideset_name.c_str());
+    if (_verbose)
+      printf("Processing sideset %s...\n",sideset_name.c_str());
     auto sideset_id = mesh->get_boundary_info().get_id_by_name(sideset_name);
+    std::map<dof_id_type, std::set<BoundaryName>> node_bounding_ss_names; // {node_id:[bounding sideset names]} for T-junction case
     // identify all nodes needing splitting on that sideset
     // include all nodes not on border
     std::set<dof_id_type> ss_split_node_ids(ss_inside_node_ids[sideset_name]);
-    printf("  split nodes include all inside nodes: [");
-    for (auto & node_id : ss_inside_node_ids[sideset_name])
-      printf("%d, ",node_id);
-    printf("]\n");
     // include also nodes on border that are ...
     for (auto & node_id : ss_border_node_ids[sideset_name])
     {
       // ... inside other set's interior ("T junction")...
-      // => no need,  those nodes will be tagged for splitting in other sidesets
-//      for (auto & other_sideset_name : sideset_names)
-//      {
-//        if (other_sideset_name == sideset_name)
-//          continue;
-//        if (ss_inside_node_ids[other_sideset_name].count(node_id)>0)
-//        {
-//          ss_split_node_ids.insert(node_id);
-//          printf("  node %d on border of ss '%s' but also inside %s\n", node_id, sideset_name.c_str(), other_sideset_name.c_str());
-//        }
-//      }
+      // (needed even though that node will be tagged for splitting in other sideset)
+      for (auto & other_sideset_name : sideset_names)
+      {
+        if (other_sideset_name != sideset_name)
+          if (ss_inside_node_ids[other_sideset_name].count(node_id)>0)
+          {
+            ss_split_node_ids.insert(node_id);
+            node_bounding_ss_names[node_id].insert(other_sideset_name);
+          }
+      }
       // ... or on boundary
       if (boundary_node_ids.count(node_id)>0)
-      {
         ss_split_node_ids.insert(node_id);
-        printf("  node %d on border of ss '%s' but also on boundary\n", node_id, sideset_name.c_str());
-      }
+    }
+    if (_verbose)
+    {
+      printf("  List of nodes to split: [");
+      for (auto & node_id : ss_split_node_ids)
+        printf("%d, ",node_id);
+      printf("]\n");
     }
     // add to total list of nodes to split
     split_node_ids.insert(ss_split_node_ids.begin(), ss_split_node_ids.end());
@@ -298,8 +293,6 @@ BreakMeshBySidesetGenerator::generate()
     std::set<dof_id_type> elem_ids_colored;
     std::set<dof_id_type> remaining_split_node_ids {*ss_split_node_ids.begin()};
     std::set<dof_id_type> duplicated_node_ids;
-    int nb_nodes_split = 0;
-    //for (auto & node_id : ss_split_node_ids)
     while (remaining_split_node_ids.size() > 0)
     {
       // Pick next node to treat (paint elements around that node)
@@ -309,15 +302,9 @@ BreakMeshBySidesetGenerator::generate()
       duplicated_node_ids.insert(node_id);
 
       // Painting elements around that node
-      printf("Painting elements around node %d\n",node_id);
       const Node & node_ref = mesh->node_ref(node_id);
       std::vector<dof_id_type> elt_ids_around_node = node_to_elem_map[node_id];
-      int nb_elts_around_node = elt_ids_around_node.size();
       std::set<dof_id_type> refed_elt_ids; // element IDs already used as reference
-      printf("  %d elts around that node: [",nb_elts_around_node);
-      for (const auto x : elt_ids_around_node)
-        printf("%d,",x);
-      printf("]\n");
       // Pick reference element already seen if possible
       dof_id_type elt_ref_id;
       bool ref_color;
@@ -329,38 +316,57 @@ BreakMeshBySidesetGenerator::generate()
           elt_ref_id = elem_id;
           found_elt_ref_id = true;
           ref_color = elt_colors[elt_ref_id][sideset_id];
-          printf("  found ref elem id: %d (color %d)\n", elt_ref_id,ref_color);
           break;
         }
       }
       if (!found_elt_ref_id)
       {
-        printf("  Could not pick proper ref element, picking randomly..\n");
-        elt_ref_id = elt_ids_around_node.back();
-        elt_ids_around_node.pop_back();
+        // if not found (for first node)
+        if (node_bounding_ss_names[node_id].empty())
+        {
+          // pick one randomly
+          elt_ref_id = elt_ids_around_node.back();
+          elt_ids_around_node.pop_back();
+        }
+        else
+        {
+          // need to ensure the reference element has 2 nodes on sideset_name
+          int test_count = 0;
+          for (const auto & elem_id : elt_ids_around_node)
+          {
+            Elem * test_elem_ref = mesh->elem_ptr(elem_id);
+            const Node * const * nodes_ptr = test_elem_ref->get_nodes();
+            unsigned int n_nodes = test_elem_ref->n_nodes();
+            for (unsigned int n=0; n<n_nodes; n++)
+            {
+              const Node * node = nodes_ptr[n];
+              if (sidesets_node_ids[sideset_name].count(node->id())>0)
+                test_count += 1;
+            }
+            if (test_count > 1)
+            {
+              elt_ref_id = elem_id;
+              elt_ids_around_node.erase(std::remove(elt_ids_around_node.begin(),
+                  elt_ids_around_node.end(), elem_id), elt_ids_around_node.end());
+              break;
+            }
+          }
+          if (test_count == 0)
+            mooseError("Could not find reference element around node %d",node_id);
+        }
         ref_color = true;
         if (elt_colors.count(elt_ref_id) == 0)
-        {
           elt_colors[elt_ref_id] = {{sideset_id, ref_color}};
-        }
         else if (elt_colors[elt_ref_id].count(sideset_id) == 0)
-        {
           elt_colors[elt_ref_id].insert(std::pair<boundary_id_type,bool>(sideset_id,ref_color));
-        }
       }
       Elem * elem_ref = mesh->elem_ptr(elt_ref_id);
       elem_ids_colored.insert(elt_ref_id);
       refed_elt_ids.insert(elt_ref_id);
-      printf("  initial ref elem id is finally %d, color=%d\n", elt_ref_id, ref_color);
       std::set<std::pair<subdomain_id_type, bool>> elt_ref_pairs = {std::make_pair(elt_ref_id,ref_color)};
 
       while (!elt_ref_pairs.empty())
       {
-        // print  all elements (DEBUG)
-        printf("  elt_ref_pairs : [");
-        for (auto x: elt_ref_pairs)
-          printf("%d, ", x.first);
-        printf("]\n");
         // take next elt_ref_id and its color
         auto it = elt_ref_pairs.begin();
         std::pair<subdomain_id_type, bool> ref_pair = *it;
@@ -370,7 +376,6 @@ BreakMeshBySidesetGenerator::generate()
         elt_ref_pairs.erase(it);
         elt_ids_around_node.erase(std::remove(elt_ids_around_node.begin(),
             elt_ids_around_node.end(), elt_ref_id), elt_ids_around_node.end());
-        printf("  REF picked is %d (color %d)\n",elt_ref_id,ref_color);
 
         // find neighboring elements (common edge)
         std::set<dof_id_type> next_ids_to_try;
@@ -379,16 +384,29 @@ BreakMeshBySidesetGenerator::generate()
           Elem * elem_i = mesh->elem_ptr(elem_id);
           if (elem_ref->contains_edge_of(elem_i))
           {
-            next_ids_to_try.insert(elem_id);
-            printf("  next elem id to try: %d\n", elem_id);
+            // check if that edge is a bounding limit (i.e has 2 nodes on bounds)
+            auto s = elem_ref->which_neighbor_am_i(elem_i);
+            std::vector<unsigned int> nodes_on_side = elem_ref->nodes_on_side(s);
+            int nb_nodes_on_bound = 0;
+            for (int n = 0; n < nodes_on_side.size(); ++n)
+            {
+              dof_id_type tmp_node_id = elem_ref->node_id(nodes_on_side[n]);
+              for (auto & other_sideset_name : node_bounding_ss_names[node_id])
+              {
+                if (sidesets_node_ids[other_sideset_name].count(tmp_node_id)>0)
+                  nb_nodes_on_bound += 1;
+              }
+            }
+            if (nb_nodes_on_bound < 2)
+            {
+              // that edge is not a bounding limit
+              next_ids_to_try.insert(elem_id);
+            }
           }
-          else
-            printf("  (elem id %d has no common edge)\n", elem_id);
         }
         // Paint neighbouring elements
         for (const auto elem_id : next_ids_to_try)
         {
-          printf("  Painting neighbor elt: %d\n",elem_id);
           if (refed_elt_ids.find(elem_id) == refed_elt_ids.end())
           {
             Elem * elem_neighbor = mesh->elem_ptr(elem_id);
@@ -397,40 +415,33 @@ BreakMeshBySidesetGenerator::generate()
                 ref_color, elt_colors, node_ref, remaining_split_node_ids,
                 sidesets_node_ids[sideset_name], sideset_id,
                 ss_split_node_ids, duplicated_node_ids);
-            printf("  Inserting in elt_ref_pairs: (%d,  %d)\n",elem_id,elt_colors[elem_id][sideset_id]);
-            printf("    elt_colors[%d][%d]=%d\n",elem_id,sideset_id,elt_colors[elem_id][sideset_id]);
 
             // add that element to reference list
             // (needed even if elem_id was already painted, as other elements
             //  might only be accessible through that element)
             elt_ref_pairs.insert(std::make_pair(elem_id, elt_colors[elem_id][sideset_id]));
           }
-          else
-          {
-            printf("  -> already ref'ed\n");
-          }
         }
       }
       // this node is done
-      nb_nodes_split += 1;
-      //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 
-    // DEBUG, checking if colors detection worked...
-    printf("Processed %d nodes, size of ss_split_node_ids = %lu\n",nb_nodes_split, ss_split_node_ids.size());
-    printf("Colors for sideset '%s' (ID %d)\n",sideset_name.c_str(),sideset_id);
-    for (auto& x: elt_colors)
+    if (_verbose)
     {
-      if (elt_colors[x.first].count(sideset_id) > 0)
-        printf("   element %d: %d\n",x.first, x.second[sideset_id]);
+      printf("  Colors for sideset '%s' (ID %d):\n",sideset_name.c_str(),sideset_id);
+      for (auto & x: elt_colors)
+      {
+        if (elt_colors[x.first].count(sideset_id) > 0)
+          printf("    element %d: %d\n",x.first, x.second[sideset_id]);
+      }
     }
-    printf("\n");
   }
 
   // splitting loop
+  if (_verbose)
+    printf("\nSplitting nodes...\n");
   for (auto current_node_id : split_node_ids)
   {
-    //const dof_id_type current_node_id = node_it->first;
     const Node * current_node = mesh->node_ptr(current_node_id);
 
     if (current_node != nullptr)
@@ -442,7 +453,7 @@ BreakMeshBySidesetGenerator::generate()
       std::map<boundary_id_type, std::set<bool>> involved_ss_colors; // {ss_id:set(colors)};
       for (auto elem_id = connected_elems.begin(); elem_id != connected_elems.end(); elem_id++)
       {
-        for (auto& ssid_color: elt_colors[*elem_id]) // for ss_id in elt_colors[elem_id].keys():
+        for (auto & ssid_color: elt_colors[*elem_id]) // for ss_id in elt_colors[elem_id].keys():
         { // ssid_color.first=ss_id, ssid_color.second=elt_colors[elem_id][ss_id]
           if (involved_ss_colors.count(ssid_color.first) == 0)
             involved_ss_colors[ssid_color.first] = {ssid_color.second};
@@ -451,7 +462,7 @@ BreakMeshBySidesetGenerator::generate()
         }
       }
       std::set<boundary_id_type> relevant_ss_ids;
-      for (auto& x: involved_ss_colors)
+      for (auto & x: involved_ss_colors)
       { // x.first=ss_id, x.second=set of involved colors
         if (x.second.size() == 2)
           relevant_ss_ids.insert(x.first);
@@ -467,11 +478,13 @@ BreakMeshBySidesetGenerator::generate()
       // check if current_node need to be duplicated
       if (node_multiplicity > 1)
       {
+        if (_verbose)
+          printf("  node %d -> %d new node%s:", current_node->id(),
+              node_multiplicity-1,(node_multiplicity>2 ? "s" : ""));
 
         // find reference_color (e.g. the first color alphabetically)
         auto color_it = connected_colors.begin();
         std::string reference_color_s = *color_it;
-        // TODO: check if reference color is indeed the first in alphabet...
 
         // multiplicity counter to keep track of how many nodes we added
         unsigned int multiplicity_counter = node_multiplicity;
@@ -480,19 +493,18 @@ BreakMeshBySidesetGenerator::generate()
           // all the duplicate nodes are added and assigned
           if (multiplicity_counter == 0)
             break;
-
           Elem * current_elem = mesh->elem_ptr(elem_id);
           std::string elem_color_s = getColorString(elt_colors[elem_id],
               relevant_ss_ids);
-//          if (color_s_seen.count(elem_color_s) == 0)
+
           if (elem_color_s != reference_color_s)
           {
             // assign the newly added node to current_elem
             Node * new_node = nullptr;
 
-//            color_s_seen.insert(elem_color_s);
             std::vector<boundary_id_type> node_boundary_ids;
 
+            bool is_node_split = false;
             for (unsigned int node_id = 0; node_id < current_elem->n_nodes(); ++node_id)
               if (current_elem->node_id(node_id) ==
                   current_node->id()) // if current node == node on element
@@ -509,31 +521,42 @@ BreakMeshBySidesetGenerator::generate()
                 multiplicity_counter--; // node created, update multiplicity counter
 
                 current_elem->set_node(node_id) = new_node;
-                break; // once the proper node has been fixed in one element we can break the loop
+                if (_verbose)
+                  printf(" %d (elements [%d, ", new_node->id(), current_elem->id());
+                is_node_split = true;
+                break; // once proper node fixed in one element, break loop
               }
 
-            for (auto connected_elem_id : connected_elems)
+            if (is_node_split)
             {
-              Elem * connected_elem = mesh->elem_ptr(connected_elem_id);
-
-              // Assign the newly added node to other connected elements with the same color_s
-              std::string con_elem_color_s = getColorString(
-                  elt_colors[connected_elem->id()],
-                  relevant_ss_ids);
-              if (con_elem_color_s == elem_color_s &&
-                  connected_elem != current_elem)
+              for (auto connected_elem_id : connected_elems)
               {
-                for (unsigned int node_id = 0; node_id < connected_elem->n_nodes(); ++node_id)
-                  if (connected_elem->node_id(node_id) ==
-                      current_node->id()) // if current node == node on element
-                  {
-                    connected_elem->set_node(node_id) = new_node;
-                    break;
-                  }
+                Elem * connected_elem = mesh->elem_ptr(connected_elem_id);
+                // Assign the newly added node to other connected elements with the same color_s
+                std::string con_elem_color_s = getColorString(
+                    elt_colors[connected_elem->id()],
+                    relevant_ss_ids);
+                if (con_elem_color_s == elem_color_s &&
+                    connected_elem != current_elem)
+                {
+                  for (unsigned int node_id = 0; node_id < connected_elem->n_nodes(); ++node_id)
+                    if (connected_elem->node_id(node_id) ==
+                        current_node->id()) // if current node == node on element
+                    {
+                      connected_elem->set_node(node_id) = new_node;
+                      if (_verbose)
+                        printf("%d, ", connected_elem_id);
+                      break;
+                    }
+                }
               }
+              if (_verbose)
+                printf("]), ");
             }
           }
         }
+        if (_verbose)
+          printf("\n");
 
         // assign element side to new interface boundary map
         for (auto elem_id : connected_elems)
@@ -622,10 +645,8 @@ BreakMeshBySidesetGenerator::addInterfaceBoundary(MeshBase & mesh)
   std::string boundaryName = _interface_name;
 
   // loop over boundary sides
-  printf("\naddInterfaceBoundary\n");
   for (auto & boundary_side_map : _new_boundary_sides_map2)
   {
-    printf("boundary_side_map: %s\n",boundary_side_map.first.c_str());
     // find the appropriate boundary name and id
     //  given master and slave block ID
     if (_split_interface)
@@ -639,9 +660,6 @@ BreakMeshBySidesetGenerator::addInterfaceBoundary(MeshBase & mesh)
 
     // loop over all the side belonging to each sideset and add it to the proper interface
     for (auto & element_side : boundary_side_map.second)
-    {
-      printf("  element %d (side %d)\n",element_side.first,element_side.second);
       boundary_info.add_side(element_side.first, element_side.second, boundaryID);
-    }
   }
 }

@@ -67,5 +67,6 @@ private:
 
   std::map<std::string, std::set<std::pair<dof_id_type, unsigned int>>>
       _new_boundary_sides_map2;
-
+  /// Verbose flag for debugging prints to appear on console
+  const bool _verbose;
 };
