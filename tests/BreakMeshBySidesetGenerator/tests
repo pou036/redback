@@ -36,6 +36,12 @@
     input = 'testBreakMeshBySidesetDiffusion5.i'
     exodiff = 'testBreakMeshBySidesetDiffusion5.e'
   [../]
+  [./test_BreakMeshBySideset_diff_spline1]
+    # Testing diffusion on Y reaching sides from right to left
+    type = 'Exodiff'
+    input = 'testBreakMeshBySidesetDiffusionSpline1.i'
+    exodiff = 'testBreakMeshBySidesetDiffusionSpline1.e'
+  [../]
 #  [./test_BreakMeshBySideset_lowerD_1]
 #    # Testing diffusion on X with lower D blocks, left & right blocks
 #    # Note: can't use exodiff since we have 2 lowerD blocks superposed!
