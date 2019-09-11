@@ -9,11 +9,12 @@
     input = fmg
   []
   [ifsg]
-    type = InterfaceFromSidesetGenerator
+    type = BreakMeshBySidesetGenerator
     sidesets = 'ss2 ss3'
     create_lower_D_blocks = true
     boundaries = 'bottom top left right'
     input = fmg
+    verbose = true
   []
   [x_top_left]
     type = ExtraNodesetGenerator
@@ -25,7 +26,7 @@
     type = ExtraNodesetGenerator
     new_boundary = '78'
     input = x_top_left
-    nodes = '36'
+    nodes = '35'
   []
   [x_bottom_right]
     type = ExtraNodesetGenerator
@@ -37,7 +38,7 @@
     type = ExtraNodesetGenerator
     new_boundary = '80'
     input = x_bottom_right
-    nodes = '37'
+    nodes = '36'
   []
 []
 

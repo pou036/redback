@@ -27,6 +27,8 @@ public:
 
 protected:
   std::unique_ptr<MeshBase> & _input;
+  /// this method finds the first free block id
+  subdomain_id_type findFreeBlockId(MeshBase & mesh);
 
 private:
   /// find interface name and ID
@@ -54,6 +56,8 @@ private:
       boundary_id_type,
       std::set<dof_id_type> &,
       std::set<dof_id_type> &);
+  /// add lower dimensional elements on interfaces
+  void addLowerDElements(MeshBase & mesh);
 
   std::set<std::pair<subdomain_id_type, subdomain_id_type>> _neighboring_block_list;
   std::map<std::pair<subdomain_id_type, subdomain_id_type>,
@@ -67,6 +71,8 @@ private:
 
   std::map<std::string, std::set<std::pair<dof_id_type, unsigned int>>>
       _new_boundary_sides_map2;
+  /// does user want interfaces as lower dimensional blocks?
+  const bool _do_lower_d_blocks;
   /// Verbose flag for debugging prints to appear on console
   const bool _verbose;
 };

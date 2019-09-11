@@ -9,11 +9,12 @@
     input = fmg
   []
   [ifsg]
-    type = InterfaceFromSidesetGenerator
+    type = BreakMeshBySidesetGenerator
     sidesets = 'ss2 ss3'
     create_lower_D_blocks = true
     boundaries = 'bottom top left right'
     input = fmg
+    verbose = true
   []
   [x_top_left]
     type = ExtraNodesetGenerator
@@ -25,7 +26,7 @@
     type = ExtraNodesetGenerator
     new_boundary = '78'
     input = x_top_left
-    nodes = '36'
+    nodes = '35'
   []
   [x_bottom_right]
     type = ExtraNodesetGenerator
@@ -37,7 +38,7 @@
     type = ExtraNodesetGenerator
     new_boundary = '80'
     input = x_bottom_right
-    nodes = '37'
+    nodes = '36'
   []
 []
 
@@ -66,7 +67,7 @@
 []
 
 [BCs]
-  inactive = 'X_top_left2 X_bottom_right1'
+  inactive = 'X_top_left1 X_bottom_right2'
   [X_top_left1]
     type = PresetBC
     variable = T
@@ -94,14 +95,14 @@
 []
 
 [Executioner]
+  type = Steady # Transient
   # dt = 0.01
   # end_time = 1
   # inactive = 'TimeStepper'
   # [TimeStepper]
-  # type = FunctionDT
-  # function = timestep_fct
+  #   type = FunctionDT
+  #   function = timestep_fct
   # []
-  type = Steady # Transient
 []
 
 [Variables]
@@ -112,7 +113,7 @@
 [Outputs]
   exodus = true
   csv = true
-  file_base = testLowerDInterface1
+  file_base = testLowerDInterface2
 []
 
 [Functions]
