@@ -575,6 +575,8 @@ BreakMeshBySidesetGenerator::generate()
         {
           for (auto connected_elem_id : connected_elems)
           {
+            if (elem_id<=connected_elem_id)
+              continue;
             Elem * current_elem = mesh->elem_ptr(elem_id);
             Elem * connected_elem = mesh->elem_ptr(connected_elem_id);
 
