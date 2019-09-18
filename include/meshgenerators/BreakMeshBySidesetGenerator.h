@@ -73,6 +73,8 @@ private:
       _new_boundary_sides_map2;
   /// does user want interfaces as lower dimensional blocks?
   const bool _do_lower_d_blocks;
+  /// does user want nodes split at T-junctions?
+  const bool _connect_t_junctions;
   /// Verbose flag for debugging prints to appear on console
   const bool _verbose;
 };

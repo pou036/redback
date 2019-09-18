@@ -36,6 +36,14 @@
     input = 'testBreakMeshBySidesetDiffusion5.i'
     exodiff = 'testBreakMeshBySidesetDiffusion5.e'
   [../]
+  [./test_BreakMeshBySideset_Tjunction]
+    # Testing diffusion on X reaching sides from left to right
+    # with 2 non-connecting T-junctions for one of the faults
+    # (broken in 2 halves) around the connection with the other one
+    type = 'Exodiff'
+    input = 'testBreakMeshBySidesetDiffusion6.i'
+    exodiff = 'testBreakMeshBySidesetDiffusion6.e'
+  [../]
   [./test_BreakMeshBySideset_diff_spline1]
     # Testing diffusion on Y reaching sides from right to left
     type = 'Exodiff'

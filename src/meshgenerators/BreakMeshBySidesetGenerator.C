@@ -34,6 +34,8 @@ validParams<BreakMeshBySidesetGenerator>()
         "boundaries of the whole mesh");
   params.addParam<bool>("create_lower_D_blocks", false,
         "Boolean to create or not lower dimensional blocks");
+  params.addParam<bool>("connect_T_junctions", true,
+        "Boolean to connect T-junctions or not (i.e. split nodes");
   params.addParam<bool>("verbose", false,
         "Boolean to print info to console (for debugging purposes)");
   params.addClassDescription("Break sidesets as interfaces and create "
@@ -48,6 +50,7 @@ BreakMeshBySidesetGenerator::BreakMeshBySidesetGenerator(const InputParameters &
     _sidesets(getParam<std::vector<BoundaryName>>("sidesets")),
     _boundaries(getParam<std::vector<BoundaryName>>("boundaries")),
     _do_lower_d_blocks(getParam<bool>("create_lower_D_blocks")),
+    _connect_t_junctions(getParam<bool>("connect_T_junctions")),
     _verbose(getParam<bool>("verbose"))
 {
   if (typeid(_input).name() == typeid(DistributedMesh).name())
@@ -186,6 +189,7 @@ BreakMeshBySidesetGenerator::generate()
   std::map<BoundaryName, std::set<dof_id_type>> sidesets_node_ids;
   std::map<BoundaryName, std::set<dof_id_type>> ss_border_node_ids; // sideset border node IDs
   std::map<BoundaryName, std::set<dof_id_type>> ss_inside_node_ids; // sideset inside node IDs
+  std::map<BoundaryName, std::set<dof_id_type>> ss_split_node_ids; // sideset split node IDs
   if (_verbose)
     printf("Identifying dimensionality of sidesets and getting all node IDs...\n");
   for (auto & sideset_name : sideset_names)
@@ -272,38 +276,43 @@ BreakMeshBySidesetGenerator::generate()
     std::map<dof_id_type, std::set<BoundaryName>> node_bounding_ss_names; // {node_id:[bounding sideset names]} for T-junction case
     // identify all nodes needing splitting on that sideset
     // include all nodes not on border
-    std::set<dof_id_type> ss_split_node_ids(ss_inside_node_ids[sideset_name]);
+    ss_split_node_ids[sideset_name].insert(ss_inside_node_ids[sideset_name].begin(),
+        ss_inside_node_ids[sideset_name].end());
     // include also nodes on border that are ...
     for (auto & node_id : ss_border_node_ids[sideset_name])
     {
       // ... inside other set's interior ("T junction")...
-      // (needed even though that node will be tagged for splitting in other sideset)
-      for (auto & other_sideset_name : sideset_names)
+      if (_connect_t_junctions)
       {
-        if (other_sideset_name != sideset_name)
-          if (ss_inside_node_ids[other_sideset_name].count(node_id)>0)
-          {
-            ss_split_node_ids.insert(node_id);
-            node_bounding_ss_names[node_id].insert(other_sideset_name);
-          }
+        // (needed even though that node will be tagged for splitting in other sideset)
+        for (auto & other_sideset_name : sideset_names)
+        {
+          if (other_sideset_name != sideset_name)
+            if (ss_inside_node_ids[other_sideset_name].count(node_id)>0)
+            {
+              ss_split_node_ids[sideset_name].insert(node_id);
+              node_bounding_ss_names[node_id].insert(other_sideset_name);
+            }
+        }
       }
       // ... or on boundary
       if (boundary_node_ids.count(node_id)>0)
-        ss_split_node_ids.insert(node_id);
+        ss_split_node_ids[sideset_name].insert(node_id);
     }
     if (_verbose)
     {
       printf("  List of nodes to split: [");
-      for (auto & node_id : ss_split_node_ids)
+      for (auto & node_id : ss_split_node_ids[sideset_name])
         printf("%d, ",node_id);
       printf("]\n");
     }
     // add to total list of nodes to split
-    split_node_ids.insert(ss_split_node_ids.begin(), ss_split_node_ids.end());
+    split_node_ids.insert(ss_split_node_ids[sideset_name].begin(),
+        ss_split_node_ids[sideset_name].end());
 
     // identify element colors for that sideset
     std::set<dof_id_type> elem_ids_colored;
-    std::set<dof_id_type> remaining_split_node_ids {*ss_split_node_ids.begin()};
+    std::set<dof_id_type> remaining_split_node_ids {*ss_split_node_ids[sideset_name].begin()};
     std::set<dof_id_type> duplicated_node_ids;
     while (remaining_split_node_ids.size() > 0)
     {
@@ -426,7 +435,7 @@ BreakMeshBySidesetGenerator::generate()
             assignNeighborColor(elem_neighbor, elem_ref, elem_ids_colored,
                 ref_color, elt_colors, node_ref, remaining_split_node_ids,
                 sidesets_node_ids[sideset_name], sideset_id,
-                ss_split_node_ids, duplicated_node_ids);
+                ss_split_node_ids[sideset_name], duplicated_node_ids);
 
             // add that element to reference list
             // (needed even if elem_id was already painted, as other elements
@@ -465,8 +474,12 @@ BreakMeshBySidesetGenerator::generate()
       std::map<boundary_id_type, std::set<bool>> involved_ss_colors; // {ss_id:set(colors)};
       for (auto elem_id = connected_elems.begin(); elem_id != connected_elems.end(); elem_id++)
       {
-        for (auto & ssid_color: elt_colors[*elem_id]) // for ss_id in elt_colors[elem_id].keys():
+        for (auto & ssid_color: elt_colors[*elem_id])
         { // ssid_color.first=ss_id, ssid_color.second=elt_colors[elem_id][ss_id]
+          auto sideset_name = mesh->get_boundary_info().get_sideset_name(ssid_color.first);
+          if (!_connect_t_junctions &&
+              (ss_split_node_ids[sideset_name].find(current_node_id)==ss_split_node_ids[sideset_name].end()))
+            continue;
           if (involved_ss_colors.count(ssid_color.first) == 0)
             involved_ss_colors[ssid_color.first] = {ssid_color.second};
           else
