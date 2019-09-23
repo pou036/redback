@@ -60,9 +60,6 @@ private:
   void addLowerDElements(MeshBase & mesh);
 
   std::set<std::pair<subdomain_id_type, subdomain_id_type>> _neighboring_block_list;
-  std::map<std::pair<subdomain_id_type, subdomain_id_type>,
-           std::set<std::pair<dof_id_type, unsigned int>>>
-      _new_boundary_sides_map;
 
   /// The sidesets on which to transform to interfaces
   std::vector<BoundaryName> _sidesets;
