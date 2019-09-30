@@ -118,6 +118,106 @@ BreakMeshBySidesetGenerator::assignNeighborColor(
   elem_ids_colored.insert(elem->id());
 }
 
+void
+BreakMeshBySidesetGenerator::getSplitNodesOnBoundary(
+    std::map<BoundaryName, std::set<dof_id_type>> & ss_b_split_node_ids,
+    const std::vector<BoundaryName> & sideset_names,
+    MeshBase & mesh,
+    const std::vector<std::unique_ptr<BndElement>> & bnd_elems,
+    const std::set<boundary_id_type> & boundary_ids)
+{
+  // Identify node IDs on given boundaries
+  std::set<int> boundary_node_ids;
+  for (auto it = bnd_elems.begin(); it != bnd_elems.end(); ++it)
+  {
+    if (boundary_ids.count((*it)->_bnd_id) > 0)
+    {
+      Elem * elem = (*it)->_elem;
+      auto s = (*it)->_side;
+      std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(s);
+      for (unsigned int n = 0; n < nodes_on_side.size(); ++n)
+        boundary_node_ids.insert(elem->node_id(nodes_on_side[n]));
+    }
+  }
+
+  std::map<BoundaryName, std::set<std::vector<dof_id_type>>> edges_map; // {sideset_name:set([edge_node_ids)]}
+  for (auto & sideset_name : sideset_names)
+  {
+    auto sideset_id = mesh.get_boundary_info().get_id_by_name(sideset_name);
+    for (auto it = bnd_elems.begin(); it != bnd_elems.end(); ++it)
+      if ((*it)->_bnd_id == sideset_id)
+      {
+        Elem * elem = (*it)->_elem;
+        auto s = (*it)->_side;
+
+        // get element dimensionality
+        int dim = (elem->n_faces() > 0 ? 2 : 1);
+        if (dim == 1)
+        {
+          // 1D, get all nodes on side
+          std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(s);
+          for (unsigned int n = 0; n < nodes_on_side.size(); ++n)
+            if (boundary_node_ids.find(elem->node_id(nodes_on_side[n]))
+                != boundary_node_ids.end())
+              ss_b_split_node_ids[sideset_name].insert(elem->node_id(nodes_on_side[n]));
+        } else {
+          // 2D surface. We'll need to find the 1D intersection with
+          // boundaries, so collect corresponding edges.
+          std::unique_ptr<Elem> face = elem->side_ptr(s);
+          for (unsigned short int edge_i = 0; edge_i < face->n_edges(); edge_i++)
+          {
+            std::vector<unsigned int> nodes_on_edge = face->nodes_on_side(edge_i);
+            bool is_edge_on_boundary = true;
+            for (unsigned int n = 0; n < nodes_on_edge.size(); ++n)
+              if (boundary_node_ids.find(face->node_id(nodes_on_edge[n]))
+                  == boundary_node_ids.end())
+              {
+                is_edge_on_boundary = false;
+                break;
+              }
+            if (is_edge_on_boundary)
+            {
+              std::vector<dof_id_type> edge_node_ids;
+              for (unsigned int n = 0; n < nodes_on_edge.size(); ++n)
+                edge_node_ids.push_back(face->node_id(nodes_on_edge[n]));
+              sort(edge_node_ids.begin(), edge_node_ids.end());
+              edges_map[sideset_name].insert(edge_node_ids);
+            }
+          }
+        }
+      }
+
+    // Add nodes to split from the interior of 1D intersection between
+    // 2D sidesets and boundaries
+    // TODO: only working if 2 nodes only on edge
+    if (_verbose)
+      printf("Number of edges for sideset %s on boundary: %lu\n",
+          sideset_name.c_str(), edges_map[sideset_name].size());
+    std::set<dof_id_type> node_ids_seen;
+    for(auto const& edge_node_ids: edges_map[sideset_name])
+    {
+      for (unsigned int n = 0; n < edge_node_ids.size(); ++n)
+      {
+        if (node_ids_seen.find(edge_node_ids[n]) != node_ids_seen.end())
+          ss_b_split_node_ids[sideset_name].insert(edge_node_ids[n]);
+        node_ids_seen.insert(edge_node_ids[n]);
+      }
+    }
+
+    // Output list of node IDs to split on boundary
+    if (_verbose)
+    {
+      // ouput to console as well
+      printf("Nodes to split on boundary for sideset %s:", sideset_name.c_str());
+      if (ss_b_split_node_ids[sideset_name].size() == 0)
+        printf(" NONE");
+      for (auto const & node_id: ss_b_split_node_ids[sideset_name])
+        printf(" %d", node_id);
+      printf("\n");
+    }
+  }
+}
+
 // Used to temporarily store information about which lower-dimensional
 // sides to add and what subdomain id to use for the added sides.
 struct ElemSideDouble
@@ -171,19 +271,9 @@ BreakMeshBySidesetGenerator::generate()
   for (auto & boundary_name : boundary_names)
     boundary_ids.insert(MooseMeshUtils::getBoundaryIDs(*mesh, {boundary_name}, true)[0]);
 
-  // Identify node IDs on given boundaries
-  std::set<int> boundary_node_ids;
-  for (auto it = bnd_elems.begin(); it != bnd_elems.end(); ++it)
-  {
-    if (boundary_ids.count((*it)->_bnd_id) > 0)
-    {
-      Elem * elem = (*it)->_elem;
-      auto s = (*it)->_side;
-      std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(s);
-      for (unsigned int n = 0; n < nodes_on_side.size(); ++n)
-        boundary_node_ids.insert(elem->node_id(nodes_on_side[n]));
-    }
-  }
+  // Get list of nodes to split on boundaries
+  std::map<BoundaryName, std::set<dof_id_type>> ss_b_split_node_ids; // split node IDs on boundary per sideset
+  getSplitNodesOnBoundary(ss_b_split_node_ids, sideset_names, *mesh, bnd_elems, boundary_ids);
 
   // Identify node IDs on given sidesets and their borders
   std::set<int> allsidesets_node_ids;
@@ -239,10 +329,6 @@ BreakMeshBySidesetGenerator::generate()
               edge_node_ids.push_back(face->node_id(nodes_on_edge[n]));
             sort(edge_node_ids.begin(), edge_node_ids.end());
             elt_edges.insert(edge_node_ids);
-//            printf("  seeing the edge [");
-//            for (unsigned int n = 0; n < edge_node_ids.size(); ++n)
-//              printf("%u, ",edge_node_ids[n]);
-//            printf("]\n");
           }
           unique_faces[face_node_ids] = elt_edges;
         } else
@@ -257,11 +343,6 @@ BreakMeshBySidesetGenerator::generate()
           edges_node_ids.insert(edge_node_ids);
         }
       }
-
-//    printf("Nodes anywhere on the sideset: \n");
-//    for(auto const& elt: sidesets_node_ids[sideset_name])
-//      printf("%d, ",elt);
-//    printf("\n");
 
     if (dim_ss==2)
     {
@@ -285,7 +366,6 @@ BreakMeshBySidesetGenerator::generate()
       }
     } else
     {
-      mooseError("BreakMeshBySidesetGenerator 3D case not implemented yet");
       // 3D, count edge occurrences on unique faces on sideset
       std::map<std::vector<unsigned int>, int> edge_nb;
       for(auto const& x: unique_faces) // face, edges
@@ -312,15 +392,6 @@ BreakMeshBySidesetGenerator::generate()
           ss_border_node_ids[sideset_name].end(),
           std::inserter(ss_inside_node_ids[sideset_name],
               ss_inside_node_ids[sideset_name].end()));
-
-//      printf("Nodes on the border of sideset: \n");
-//      for(auto const& elt: ss_border_node_ids[sideset_name])
-//        printf("%d, ",elt);
-//      printf("\n");
-//      printf("Nodes on the inside of sideset: \n");
-//      for(auto const& elt: ss_inside_node_ids[sideset_name])
-//        printf("%d, ",elt);
-//      printf("\n");
     }
   }
 
@@ -339,16 +410,13 @@ BreakMeshBySidesetGenerator::generate()
     // include all nodes not on border
     ss_split_node_ids[sideset_name].insert(ss_inside_node_ids[sideset_name].begin(),
         ss_inside_node_ids[sideset_name].end());
-//    printf("Inside nodes: [");
-//    for (auto & node_id : ss_split_node_ids[sideset_name])
-//      printf("%d, ",node_id);
-//    printf("]\n");
     // include also nodes on border that are ...
     for (auto & node_id : ss_border_node_ids[sideset_name])
     {
       // ... inside other set's interior ("T junction")...
       if (_connect_t_junctions)
       {
+        // TODO: for 3D, only connect the *interior* nodes of 1D T-junction
         // (needed even though that node will be tagged for splitting in other sideset)
         for (auto & other_sideset_name : sideset_names)
         {
@@ -360,8 +428,10 @@ BreakMeshBySidesetGenerator::generate()
             }
         }
       }
-      // ... or on boundary
-      if (boundary_node_ids.count(node_id)>0)
+      // ... or on boundary nodes
+      if(std::find(ss_b_split_node_ids[sideset_name].begin(),
+          ss_b_split_node_ids[sideset_name].end(), node_id)
+          != ss_b_split_node_ids[sideset_name].end())
         ss_split_node_ids[sideset_name].insert(node_id);
     }
     if (_verbose)
@@ -386,7 +456,6 @@ BreakMeshBySidesetGenerator::generate()
       auto node_id = *it;
       remaining_split_node_ids.erase(it);
       duplicated_node_ids.insert(node_id);
-//      printf("Identify colors around node %d\n",node_id);
 
       // Painting elements around that node
       const Node & node_ref = mesh->node_ref(node_id);
@@ -451,7 +520,6 @@ BreakMeshBySidesetGenerator::generate()
       elem_ids_colored.insert(elt_ref_id);
       refed_elt_ids.insert(elt_ref_id);
       std::set<std::pair<subdomain_id_type, bool>> elt_ref_pairs = {std::make_pair(elt_ref_id,ref_color)};
-//      printf("Picked ref element %d with color %d\n",elt_ref_id,ref_color);
 
       while (!elt_ref_pairs.empty())
       {
@@ -470,13 +538,10 @@ BreakMeshBySidesetGenerator::generate()
         for (const auto & elem_id : elt_ids_around_node)
         {
           Elem * elem_i = mesh->elem_ptr(elem_id);
-//          printf("Assessing element %d...\n",elem_id);
           auto s = elem_ref->which_neighbor_am_i(elem_i);
           if (s != libMesh::invalid_uint)
           {
             // elem_id and elt_ref_id have a common side s
-//            printf("  -> Element %d has common side with element %d\n",elem_id, elt_ref_id);
-//            // check if that face is a bounding limit (i.e has 1 face on bounds)
             std::vector<unsigned int> nodes_on_side = elem_ref->nodes_on_side(s);
             bool is_face_on_bounds = false;
             for (auto & other_sideset_name : node_bounding_ss_names[node_id])
@@ -684,11 +749,6 @@ BreakMeshBySidesetGenerator::generate()
                     _new_boundary_sides_map2[ss_name].insert(
                         std::make_pair(current_elem->id(),
                             current_elem->which_neighbor_am_i(connected_elem)));
-//                    printf("interface pair elements: %d - %d\n", current_elem->id(),connected_elem->id());
-//                    printf("  nodes on element %d: [",current_elem->id());
-//                    for (int i = 0; i < current_elem->n_nodes(); ++i)
-//                          printf("%d, ",current_elem->node_id(i));
-//                    printf("]\n");
                    }
                 }
               }
@@ -705,6 +765,9 @@ BreakMeshBySidesetGenerator::generate()
   // create lower dimensional entities if needed
   if (_do_lower_d_blocks)
     addLowerDElements(*mesh);
+
+  if (_verbose)
+    printf("Finished BreakMeshBySidesetGenerator successfully\n");
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }
@@ -806,7 +869,7 @@ BreakMeshBySidesetGenerator::addLowerDElements(MeshBase & mesh)
               else
                 return a_elem_id < b_elem_id;
             });
-  // TODO: I don't  understand why/if we need the sort()...
+  // TODO: do we really need the sort()?
   // Get sidesets IDs
   auto & sideset_names = getParam<std::vector<BoundaryName>>("sidesets");
   for (auto & sideset_name : sideset_names)
@@ -832,12 +895,6 @@ BreakMeshBySidesetGenerator::addLowerDElements(MeshBase & mesh)
         continue;
 
       unsigned int side = element_sides_on_sideset[i].side;
-
-//      printf("Lower D sideset '%s' nodes on side of element %d: [", sideset_name.c_str(),elem->id());
-//      std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(side);
-//      for (int n = 0; n < nodes_on_side.size(); ++n)
-//        printf("%d, ",elem->node_id(nodes_on_side[n]));
-//      printf("]\n");
 
       // Build a non-proxy element from this side.
       std::unique_ptr<Elem> side_elem(elem->build_side_ptr(side, /*proxy=*/false));

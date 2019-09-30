@@ -56,6 +56,13 @@ private:
       boundary_id_type,
       std::set<dof_id_type> &,
       std::set<dof_id_type> &);
+  /// get IDs of nodes to split on boundary per sideset
+  void getSplitNodesOnBoundary(
+      std::map<BoundaryName, std::set<dof_id_type>> &,
+      const std::vector<BoundaryName> &,
+      MeshBase &,
+      const std::vector<std::unique_ptr<BndElement>> &,
+      const std::set<boundary_id_type> &);
   /// add lower dimensional elements on interfaces
   void addLowerDElements(MeshBase & mesh);
 

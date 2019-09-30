@@ -71,4 +71,34 @@
     input = 'testLowerDInterface3.i'
     csvdiff = 'testLowerDInterface3.csv'
   [../]
+  [./test_BreakMeshBySideset_3D_0a]
+    # Testing in 3D, single fault (rectangle), not intersecting boundaries
+    # (note: can't use exodiff because of split nodes having same coords)
+    type = 'CSVDiff'
+    input = 'test3D_0a.i'
+    csvdiff = 'test3D_0a_sampler_0001.csv'
+  [../]
+  [./test_BreakMeshBySideset_3D_0b]
+    # Testing in 3D, single fault (rectangle), intersecting boundaries
+    # (note: can't use exodiff because of split nodes having same coords)
+    type = 'CSVDiff'
+    input = 'test3D_0b.i'
+    csvdiff = 'test3D_0b_sampler_0001.csv'
+  [../]
+  [./test_BreakMeshBySideset_3D_1a]
+    # Testing in 3D, 2 faults (rectangle and oval), intersecting each
+    # other but not the boundary
+    # (note: can't use exodiff because of split nodes having same coords)
+    type = 'CSVDiff'
+    input = 'test3D_1a.i'
+    csvdiff = 'test3D_1a_sampler_0001.csv'
+  [../]
+  [./test_BreakMeshBySideset_3D_1b]
+    # Testing in 3D, 2 faults (rectangle and oval), intersecting each
+    # other, as well as the boundary
+    # (note: can't use exodiff because of split nodes having same coords)
+    type = 'CSVDiff'
+    input = 'test3D_1b.i'
+    csvdiff = 'test3D_1b_sampler_0001.csv'
+  [../]
 []
