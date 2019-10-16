@@ -151,10 +151,10 @@ BreakMeshBySidesetGenerator::getSplitNodesOnBoundary(
         auto s = (*it)->_side;
 
         // get element dimensionality
-        int dim = (elem->n_faces() > 0 ? 2 : 1);
-        if (dim == 1)
+        unsigned short dim = elem->dim();
+        if (dim == 2)
         {
-          // 1D, get all nodes on side
+          // 2D mesh => 1D segment on sideset, get all nodes on side
           std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(s);
           for (unsigned int n = 0; n < nodes_on_side.size(); ++n)
             if (boundary_node_ids.find(elem->node_id(nodes_on_side[n])) != boundary_node_ids.end())
@@ -162,8 +162,8 @@ BreakMeshBySidesetGenerator::getSplitNodesOnBoundary(
         }
         else
         {
-          // 2D surface. We'll need to find the 1D intersection with
-          // boundaries, so collect corresponding edges.
+          // 3D mesh => 2D surface on sideset: need to find the 1D intersection
+          // with boundaries, so collect corresponding edges.
           std::unique_ptr<Elem> face = elem->side_ptr(s);
           for (unsigned short int edge_i = 0; edge_i < face->n_edges(); edge_i++)
           {
@@ -217,6 +217,96 @@ BreakMeshBySidesetGenerator::getSplitNodesOnBoundary(
         printf(" %d", node_id);
       printf("\n");
     }
+  }
+}
+
+void
+BreakMeshBySidesetGenerator::getSplitNodesOnTJunction(
+    std::set<dof_id_type> & t_junc_split_node_ids,
+    const BoundaryName & sideset_name,
+    const boundary_id_type sideset_id,
+    const std::set<dof_id_type> & ss_border_node_ids,
+    const std::set<dof_id_type> & other_ss_interior_node_ids,
+    const BoundaryName & other_ss_name,
+    const std::vector<std::unique_ptr<BndElement>> & bnd_elems)
+{
+  std::set<std::vector<dof_id_type>> edges_set; // {ss_name:set([edge_node_ids)]}
+  for (auto it = bnd_elems.begin(); it != bnd_elems.end(); ++it)
+    if ((*it)->_bnd_id == sideset_id)
+    {
+      Elem * elem = (*it)->_elem;
+      auto s = (*it)->_side;
+
+      // get element dimensionality
+      unsigned short dim = elem->dim();
+      if (dim == 3)
+      {
+        // 3D mesh => 2D surface on sideset: need to find the 1D intersection
+        // with other sideset, so collect corresponding edges.
+        std::unique_ptr<Elem> face = elem->side_ptr(s);
+        for (unsigned short int edge_i = 0; edge_i < face->n_edges(); edge_i++)
+        {
+          std::vector<unsigned int> nodes_on_edge = face->nodes_on_side(edge_i);
+          // Only deal with edges on sideset border
+          bool is_edge_on_border = true;
+          for (unsigned int n = 0; n < nodes_on_edge.size(); ++n)
+            if (ss_border_node_ids.find(face->node_id(nodes_on_edge[n])) ==
+                ss_border_node_ids.end())
+            {
+              is_edge_on_border = false;
+              break;
+            }
+          if (!is_edge_on_border)
+            continue;
+          // Now check if edge is on interior of other sideset
+          bool is_edge_on_other_ss = true;
+          for (unsigned int n = 0; n < nodes_on_edge.size(); ++n)
+            if (other_ss_interior_node_ids.find(face->node_id(nodes_on_edge[n])) ==
+                other_ss_interior_node_ids.end())
+            {
+              is_edge_on_other_ss = false;
+              break;
+            }
+          if (is_edge_on_other_ss)
+          {
+            std::vector<dof_id_type> edge_node_ids;
+            for (unsigned int n = 0; n < nodes_on_edge.size(); ++n)
+              edge_node_ids.push_back(face->node_id(nodes_on_edge[n]));
+            sort(edge_node_ids.begin(), edge_node_ids.end());
+            edges_set.insert(edge_node_ids);
+          }
+        }
+      }
+    }
+
+  // Add nodes to split from the interior of 1D intersection between
+  // 2D sideset and other sideset
+  // TODO: only working if 2 nodes only on edge
+  if (_verbose)
+    printf("Number of edges for sideset %s on other sideset %s: %lu\n",
+        sideset_name.c_str(), other_ss_name.c_str(), edges_set.size());
+  std::set<dof_id_type> node_ids_seen;
+  for (auto const & edge_node_ids : edges_set)
+  {
+    for (unsigned int n = 0; n < edge_node_ids.size(); ++n)
+    {
+      if (node_ids_seen.find(edge_node_ids[n]) != node_ids_seen.end())
+        t_junc_split_node_ids.insert(edge_node_ids[n]);
+      node_ids_seen.insert(edge_node_ids[n]);
+    }
+  }
+
+  // Output list of node IDs to split on boundary
+  if (_verbose)
+  {
+    // ouput to console as well
+    printf("Nodes to split on sideset %s border also on other sideset %s",
+        sideset_name.c_str(), other_ss_name.c_str());
+    if (t_junc_split_node_ids.size() == 0)
+      printf(" NONE");
+    for (auto const & node_id : t_junc_split_node_ids)
+      printf(" %d", node_id);
+    printf("\n");
   }
 }
 
@@ -416,6 +506,22 @@ BreakMeshBySidesetGenerator::generate()
     auto sideset_id = mesh->get_boundary_info().get_id_by_name(sideset_name);
     std::map<dof_id_type, std::set<BoundaryName>>
         node_bounding_ss_names; // {node_id:[bounding sideset names]} for T-junction case
+    // Get list of nodes to split: on *interior* of 1D T-junction
+    std::map<BoundaryName, std::set<dof_id_type>> t_junc_split_node_ids;
+    if (_connect_t_junctions && mesh->mesh_dimension()==3)
+    {
+      for (auto & other_sideset_name : sideset_names)
+      {
+        if (other_sideset_name != sideset_name)
+        {
+          getSplitNodesOnTJunction(t_junc_split_node_ids[other_sideset_name],
+              sideset_name, sideset_id, ss_border_node_ids[sideset_name],
+              ss_inside_node_ids[other_sideset_name],
+              other_sideset_name, bnd_elems);
+        }
+      }
+    }
+
     // identify all nodes needing splitting on that sideset
     // include all nodes not on border
     ss_split_node_ids[sideset_name].insert(ss_inside_node_ids[sideset_name].begin(),
@@ -426,16 +532,32 @@ BreakMeshBySidesetGenerator::generate()
       // ... inside other set's interior ("T junction")...
       if (_connect_t_junctions)
       {
-        // TODO: for 3D, only connect the *interior* nodes of 1D T-junction
         // (needed even though that node will be tagged for splitting in other sideset)
         for (auto & other_sideset_name : sideset_names)
         {
           if (other_sideset_name != sideset_name)
-            if (ss_inside_node_ids[other_sideset_name].count(node_id) > 0)
+          {
+            switch (mesh->mesh_dimension())
             {
-              ss_split_node_ids[sideset_name].insert(node_id);
-              node_bounding_ss_names[node_id].insert(other_sideset_name);
+            case 2: // 2D case
+              if (ss_inside_node_ids[other_sideset_name].count(node_id) > 0)
+              {
+                ss_split_node_ids[sideset_name].insert(node_id);
+                node_bounding_ss_names[node_id].insert(other_sideset_name);
+              }
+              break;
+            case 3: // 3D case:
+              if (t_junc_split_node_ids[other_sideset_name].count(node_id) > 0)
+              {
+                ss_split_node_ids[sideset_name].insert(node_id);
+                node_bounding_ss_names[node_id].insert(other_sideset_name);
+              }
+              break;
+            default:
+              mooseError("Case mesh dim = %d not handled", mesh->mesh_dimension());
+              break;
             }
+          }
         }
       }
       // ... or on boundary nodes

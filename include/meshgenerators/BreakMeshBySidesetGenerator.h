@@ -59,6 +59,15 @@ private:
                                MeshBase &,
                                const std::vector<std::unique_ptr<BndElement>> &,
                                const std::set<boundary_id_type> &);
+  /// get IDs of nodes to split on T-junctions (3D case) between a sideset
+  //  and another sideset. These are nodes on the interior of 1D intersection
+  void getSplitNodesOnTJunction(std::set<dof_id_type> &,
+                                const BoundaryName &,
+                                const boundary_id_type,
+                                const std::set<dof_id_type> &,
+                                const std::set<dof_id_type> &,
+                                const BoundaryName &,
+                                const std::vector<std::unique_ptr<BndElement>> &);
   /// add lower dimensional elements on interfaces
   void addLowerDElements(MeshBase & mesh);
 
