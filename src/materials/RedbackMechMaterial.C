@@ -198,6 +198,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters)
     _lewis_number(getMaterialProperty<Real>("lewis_number")),
     _ar(getMaterialProperty<Real>("ar")),
     _confining_pressure(getMaterialProperty<Real>("confining_pressure")),
+    _initial_porosity(getMaterialProperty<Real>("initial_porosity")),
     _alpha_1(getMaterialProperty<Real>("alpha_1")),
     _alpha_2(getMaterialProperty<Real>("alpha_2")),
     _alpha_3(getMaterialProperty<Real>("alpha_3")),
@@ -544,8 +545,9 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   _dummy2[_qp] = (1.0 - _total_porosity[_qp]) * _solid_thermal_expansion[_qp] * (_T[_qp] - _T0_param);
   _dummy3[_qp] = delta_phi_mech_el;
   _dummy4[_qp] = delta_phi_mech_pl;
-  
-  _mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
+
+  //_mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
+  _mechanical_porosity[_qp] = (1.0-_initial_porosity[_qp])*(1-std::exp(-_total_volumetric_strain[_qp]));
 
   if (_has_D)
   {
