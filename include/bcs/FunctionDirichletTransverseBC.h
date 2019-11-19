@@ -45,7 +45,7 @@ protected:
   const VariableValue & _u_old;
 
   /// Function being used for evaluation of this BC
-  Function & _func;
+  const Function & _func;
 
   /// Center point to calculate transversal direction for boundary point.
   const RealVectorValue & _center;

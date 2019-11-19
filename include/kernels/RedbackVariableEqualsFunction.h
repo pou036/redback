@@ -29,7 +29,7 @@ public:
 protected:
   virtual Real computeQpResidual();
   virtual Real computeQpJacobian();
-  Function & _func;
+  const Function & _func;
 };
 
 #endif // REDBACKVARIABLEEQUALSFUNCTION_H

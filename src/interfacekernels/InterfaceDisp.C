@@ -55,6 +55,8 @@ InterfaceDisp::computeQpResidual(Moose::DGResidualType type)
     case Moose::Neighbor:
       return _test_neighbor[_i][_qp] * -_penalty * r;
   }
+  // Should not reach this line
+  return 0;
 }
 
 Real

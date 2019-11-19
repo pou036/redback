@@ -74,7 +74,7 @@ protected:
   // initialisation as float)
   std::vector<std::string> _init_from_functions__params;
   std::vector<FunctionName> _init_from_functions__function_names;
-  std::vector<Function *> _init_functions;
+  std::vector<const Function *> _init_functions;
   unsigned int _num_init_functions;
 
   Real _phi0_param, _gr_param, _ref_lewis_nb_param, _ar_param, _delta_param;

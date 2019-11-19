@@ -38,7 +38,7 @@ protected:
   Real f();
 
   // Real _value;
-  Function & _func;
+  const Function & _func;
   std::vector<Real> _point_param;
   Point _p;
 };

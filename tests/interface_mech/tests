@@ -4,7 +4,12 @@
     type = 'Exodiff'
     input = 'compression_interface.i'
     exodiff = 'compression_interface.e'
-    skip = "Waiting to reconcile with PR#11587"
+  [../]
+  [./test_interface_poromech]
+    type = 'Exodiff'
+    input = 'compression_interface_pressure.i'
+    exodiff = 'compression_interface_pressure.e'
+    #skip = "Waiting to reconcile with PR#11587"
   [../]
   [./test_interface_poromech]
     type = 'Exodiff'
@@ -16,7 +21,12 @@
     type = 'Exodiff'
     input = 'compression_angled_interface.i'
     exodiff = 'compression_angled_interface.e'
-    skip = "Waiting to reconcile with PR#11587"
+    #skip = "Waiting to reconcile with PR#11587"
+  [../]
+  [./test_traction_auxkernel]
+    type = 'Exodiff'
+    input = 'testTractionProjectionAux.i'
+    exodiff = 'testTractionProjectionAux.e'
   [../]
   [./test_traction_auxkernel]
     type = 'Exodiff'

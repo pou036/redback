@@ -8,6 +8,11 @@
     type = BreakMeshByBlock
     split_interface = false
   []
+  [bottom_corner]
+    type = AddExtraNodeset
+    new_boundary = '10'
+    nodes = '11'
+  []
 []
 
 [Variables]
@@ -76,27 +81,12 @@
     poissons_ratio = 0.3
     youngs_modulus = 10000
   []
-  [mc]
-    type = ComputeMultiPlasticityStress
-    ep_plastic_tolerance = 1E-9
-    plastic_models = 'j2'
+  [el]
+    type = ComputeFiniteStrainElasticStress
   []
   [finite_strain]
     type = ComputePlaneFiniteStrain
     displacements = 'disp_x disp_y'
-  []
-[]
-
-[UserObjects]
-  [str]
-    type = TensorMechanicsHardeningConstant
-    value = 1
-  []
-  [j2]
-    type = TensorMechanicsPlasticJ2
-    yield_strength = str
-    yield_function_tolerance = 1E-9
-    internal_constraint_tolerance = 1E-9
   []
 []
 
