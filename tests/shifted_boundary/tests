@@ -1,0 +1,7 @@
+[Tests]
+  [./test_shifted_boundary]
+    type = 'Exodiff'
+    input = 'poiseuille_tube3D.i'
+    exodiff = 'poiseuille_tube3D.e'
+  [../]
+[]
