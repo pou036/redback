@@ -9,6 +9,7 @@
 
 #include "AuxKernel.h"
 #include <igl/readSTL.h>
+#include <igl/AABB.h>
 
 class DistanceToInterfaceAux;
 
@@ -27,6 +28,7 @@ protected:
 
   Eigen::MatrixXd _V;
   Eigen::MatrixXi _F;
+  igl::AABB<Eigen::MatrixXd,3> _tree;
   Eigen::MatrixXd _N;
 };
 
