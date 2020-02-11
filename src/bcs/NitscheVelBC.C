@@ -7,46 +7,41 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "PenaltyShiftedDirichletBC.h"
+#include "NitscheVelBC.h"
 
-registerMooseObject("MooseApp", PenaltyShiftedDirichletBC);
+registerMooseObject("RedbackApp", NitscheVelBC);
 
-defineLegacyParams(PenaltyShiftedDirichletBC);
+defineLegacyParams(NitscheVelBC);
 
 InputParameters
-PenaltyShiftedDirichletBC::validParams()
+NitscheVelBC::validParams()
 {
   InputParameters params = IntegratedBC::validParams();
   params.addClassDescription("Enforces a Dirichlet boundary condition "
                              "in a weak sense by penalizing differences between the current "
                              "solution and the Dirichlet data.");
-  params.addParam<Real>("penalty", 1.0, "Penalty scalar");
-  params.addParam<Real>("mesh_size", 1.0, "Mesh dimension in one direction");
-  params.addParam<Real>("nb_elements", 1.0, "Number of elements in one direction");
   params.addParam<Real>("value", 0.0, "Boundary value of the variable");
   params.addCoupledVar("distance", 0.0, "distance to interface");
   params.declareControllable("value");
   return params;
 }
 
-PenaltyShiftedDirichletBC::PenaltyShiftedDirichletBC(const InputParameters & parameters)
+NitscheVelBC::NitscheVelBC(const InputParameters & parameters)
   : IntegratedBC(parameters),
-  _p(getParam<Real>("penalty")),
-  _mesh_size(getParam<Real>("mesh_size")),
-  _nb_elem(getParam<Real>("nb_elements")),
+  _mu(getMaterialProperty<Real>("mu")),
   _v(getParam<Real>("value")),
   _d_to_stl(coupledVectorValue("distance"))
 {
 }
 
 Real
-PenaltyShiftedDirichletBC::computeQpResidual()
+NitscheVelBC::computeQpResidual()
 {
-  return 2*_p*_nb_elem/_mesh_size * _test[_i][_qp] * (-_v + _u[_qp] + _grad_u[_qp] * _d_to_stl[_qp]);
+  return - _mu[_qp] * _grad_test[_i][_qp] * _normals[_qp] * (-_v + _u[_qp] + _grad_u[_qp] * _d_to_stl[_qp]);
 }
 
 Real
-PenaltyShiftedDirichletBC::computeQpJacobian()
+NitscheVelBC::computeQpJacobian()
 {
-  return 2*_p*_nb_elem/_mesh_size * _test[_i][_qp] * (_phi[_j][_qp] + _grad_phi[_j][_qp] * _d_to_stl[_qp]);
+  return - _mu[_qp] * _grad_test[_i][_qp] * _normals[_qp] * (_phi[_j][_qp] + _grad_phi[_j][_qp] * _d_to_stl[_qp]);
 }

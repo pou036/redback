@@ -11,10 +11,10 @@
 
 #include "IntegratedBC.h"
 
-class PenaltyShiftedDirichletBC;
+class NitschePresBC;
 
 template <>
-InputParameters validParams<PenaltyShiftedDirichletBC>();
+InputParameters validParams<NitschePresBC>();
 
 /**
  * Weakly enforce a Dirichlet BC using a penalty term. This class is
@@ -36,21 +36,23 @@ InputParameters validParams<PenaltyShiftedDirichletBC>();
  * g = Dirichlet data (given)
  * Gamma = the part of the boundary where the penalty BC is applied.
  */
-class PenaltyShiftedDirichletBC : public IntegratedBC
+class NitschePresBC : public IntegratedBC
 {
 public:
   static InputParameters validParams();
 
-  PenaltyShiftedDirichletBC(const InputParameters & parameters);
+  NitschePresBC(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
   virtual Real computeQpJacobian() override;
+  virtual Real computeQpOffDiagJacobian(unsigned jvar) override;
 
 private:
-  Real _p;
-  Real _mesh_size;
-  Real _nb_elem;
+  unsigned _component;
   const Real & _v;
   const VectorVariableValue & _d_to_stl;
+  const VariableValue & _vel;
+  const VariableGradient & _grad_vel;
+  unsigned _vel_var_number;
 };
