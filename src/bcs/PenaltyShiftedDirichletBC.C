@@ -42,11 +42,11 @@ PenaltyShiftedDirichletBC::PenaltyShiftedDirichletBC(const InputParameters & par
 Real
 PenaltyShiftedDirichletBC::computeQpResidual()
 {
-  return 2*_p*_nb_elem/_mesh_size * _test[_i][_qp] * (-_v + _u[_qp] + _grad_u[_qp] * _d_to_stl[_qp]);
+  return 2*_p*_nb_elem/_mesh_size * (_test[_i][_qp] + _grad_test[_i][_qp] * _d_to_stl[_qp]) * (-_v + _u[_qp] + _grad_u[_qp] * _d_to_stl[_qp]);
 }
 
 Real
 PenaltyShiftedDirichletBC::computeQpJacobian()
 {
-  return 2*_p*_nb_elem/_mesh_size * _test[_i][_qp] * (_phi[_j][_qp] + _grad_phi[_j][_qp] * _d_to_stl[_qp]);
+  return 2*_p*_nb_elem/_mesh_size * (_test[_i][_qp] + _grad_test[_i][_qp] * _d_to_stl[_qp]) * (_phi[_j][_qp] + _grad_phi[_j][_qp] * _d_to_stl[_qp]);
 }
