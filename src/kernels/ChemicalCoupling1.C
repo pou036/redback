@@ -7,35 +7,35 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#include "ChemicalCoupling.h"
+#include "ChemicalCoupling1.h"
 
-registerMooseObject("RedbackApp", ChemicalCoupling);
+registerMooseObject("RedbackApp", ChemicalCoupling1);
 
 template <>
 InputParameters
-validParams<ChemicalCoupling>()
+validParams<ChemicalCoupling1>()
 {
   InputParameters params = validParams<Kernel>();
   params.addRequiredCoupledVar("c", "chemical concentration");
-  params.addParam<Real>("lambda","chemical coupling coefficient");
+  params.addParam<Real>("beta","chemical coupling coefficient");
   return params;
 }
 
-ChemicalCoupling::ChemicalCoupling(const InputParameters & parameters)
+ChemicalCoupling1::ChemicalCoupling1(const InputParameters & parameters)
   : Kernel(parameters),
-    _lambda(getParam<Real>("lambda")),
+    _beta(getParam<Real>("beta")),
     _c(coupledValue("c"))
 {
 }
 
 Real
-ChemicalCoupling::computeQpResidual()
+ChemicalCoupling1::computeQpResidual()
 {
-  return _test[_i][_qp] * 6 * _u[_qp] * (1 - _u[_qp]) * _lambda * _c[_qp];
+  return _test[_i][_qp] * 6 * _u[_qp] * (1 - _u[_qp]) * _beta * _c[_qp];
 }
 
 Real
-ChemicalCoupling::computeQpJacobian()
+ChemicalCoupling1::computeQpJacobian()
 {
   return 0;
 }

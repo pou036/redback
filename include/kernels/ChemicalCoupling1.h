@@ -7,29 +7,29 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef ChemicalCoupling_H
-#define ChemicalCoupling_H
+#ifndef ChemicalCoupling1_H
+#define ChemicalCoupling1_H
 
 #include "Kernel.h"
 
-class ChemicalCoupling;
+class ChemicalCoupling1;
 
 template <>
-InputParameters validParams<ChemicalCoupling>();
+InputParameters validParams<ChemicalCoupling1>();
 
-class ChemicalCoupling : public Kernel
+class ChemicalCoupling1 : public Kernel
 {
 public:
-  ChemicalCoupling(const InputParameters & parameters);
+  ChemicalCoupling1(const InputParameters & parameters);
 
 protected:
   virtual Real computeQpResidual() override;
 
   virtual Real computeQpJacobian() override;
 
-  Real _lambda;
+  Real _beta;
 
   const VariableValue & _c;
 };
 
-#endif // ChemicalCoupling_H
+#endif // ChemicalCoupling1_H
