@@ -80,22 +80,24 @@ RedbackMechDissip::computeQpJacobian()
 Real
 RedbackMechDissip::computeQpOffDiagJacobian(unsigned int jvar)
 {
+  Real sum = 0.0;
   for (unsigned int i = 0; i < _ndisp; ++i)
     if (jvar == _disp_var[i])
-      return -_test[_i][_qp] * (_dplastic_heat_dstrain[_qp] * _grad_phi[_j][_qp])(i);
+      return sum = -_test[_i][_qp] * (_dplastic_heat_dstrain[_qp] * _grad_phi[_j][_qp])(i);
 
-  Real sum = 0.0;
+
   for (unsigned int i = 0; i < _nwc; ++i)
   {
     if (jvar == _wc_var[i])
     {
-      for (unsigned int j = 0; j < LIBMESH_DIM; ++j)
-        for (unsigned int l = 0; l < LIBMESH_DIM; ++l)
-          sum -= (_dplastic_heat_dstrain[_qp] )(j,l) * PermutationTensor::eps(j, l, i);
+      for (unsigned int j = 0; j < LIBMESH_DIM; ++j){
+        for (unsigned int l = 0; l < LIBMESH_DIM; ++l){
+          sum -= (_dplastic_heat_dstrain[_qp] )(j,l) * PermutationTensor::eps(j, l, i);}
 
       sum *= _test[_i][_qp] * _phi[_j][_qp];
-      sum -= _test[_i][_qp] * (_dplastic_heat_dcurvature[_qp] * _grad_phi[_j][_qp])(i);
+      sum -= _test[_i][_qp] * (_dplastic_heat_dcurvature[_qp] * _grad_phi[_j][_qp])(i);}
     }
   }
   return sum;
+
 }

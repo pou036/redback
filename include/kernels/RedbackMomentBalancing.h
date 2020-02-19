@@ -11,8 +11,8 @@
 
 //Forward Declarations
 class RedbackMomentBalancing;
-class RankFourTensor;
-class RankTwoTensor;
+//class RankFourTensor;
+//class RankTwoTensor;
 
 template<>
 InputParameters validParams<RedbackMomentBalancing>();

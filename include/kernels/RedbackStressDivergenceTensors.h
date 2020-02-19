@@ -9,8 +9,8 @@
 
 // Forward Declarations
 class RedbackStressDivergenceTensors;
-class RankFourTensor;
-class RankTwoTensor;
+//class RankFourTensor;
+//class RankTwoTensor;
 
 template <>
 InputParameters validParams<RedbackStressDivergenceTensors>();
