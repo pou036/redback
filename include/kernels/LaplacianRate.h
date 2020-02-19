@@ -31,7 +31,7 @@ protected:
 
 //private:
 // Real _mu;
-  Function & _mu_function;
+  const Function & _mu_function;
 
   const VariableGradient & _grad_u_dot;
 };
