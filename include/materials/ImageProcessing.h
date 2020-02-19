@@ -42,7 +42,7 @@ protected:
   virtual void computeQpProperties() override;
 
   FunctionName _func;
-  std::vector<Function *> _function;
+  std::vector<const Function *> _function;
   FILE * idFile;
 
 private:

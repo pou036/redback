@@ -38,7 +38,7 @@ RedbackRandomFunction::RedbackRandomFunction(const InputParameters & parameters)
 }
 
 Real
-RedbackRandomFunction::value(Real /*t*/, const Point & /*p*/)
+RedbackRandomFunction::value(Real /*t*/, const Point & /*p*/) const
 {
   // Random number between 0 and 1
   Real rand_num = MooseRandom::rand();
