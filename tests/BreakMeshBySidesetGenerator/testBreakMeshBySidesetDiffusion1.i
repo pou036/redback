@@ -1,15 +1,21 @@
-[Mesh]
-  type = FileMesh
-  file = fractureXincluded.msh
-[]
+[MeshGenerators]
+  [./fmg]
+    type = FileMeshGenerator
+    file = fractureX.msh
+  []
 
-[MeshModifiers]
-  [break]
-    type = InterfaceFromSideset
+  [./breakmesh]
+    type = BreakMeshBySidesetGenerator
+    input = fmg
     boundaries = 'top bottom left right'
     sidesets =  'ss2 ss3'
     split_interface = false
+    #create_lower_D_blocks = false
   []
+[]
+
+[Mesh]
+  type = MeshGeneratorMesh
 []
 
 [Variables]
@@ -45,6 +51,6 @@
 []
 
 [Outputs]
-  file_base = testInterfaceFromSidesetDiffusion3
+  file_base = testBreakMeshBySidesetDiffusion1
   exodus = true
 []

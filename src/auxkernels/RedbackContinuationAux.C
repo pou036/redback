@@ -21,12 +21,15 @@ validParams<RedbackContinuationAux>()
 {
   InputParameters params = validParams<AuxKernel>();
   params.addParam<Real>("ds_old", 1.0, "Old continuation increment");
-  params.addCoupledVar("sum_vars", "Coupled variables to sum "
-    "(nodal or elemental)");
-  params.addCoupledVar("sum_vars_old", "Old coupled variables to sum "
-    "(nodal or elemental). Must be in same order as 'sum_vars'");
-  params.addCoupledVar("sum_vars_older", "Older coupled variables to sum "
-    "(nodal or elemental). Must be in same order as 'sum_vars'");
+  params.addCoupledVar("sum_vars",
+                       "Coupled variables to sum "
+                       "(nodal or elemental)");
+  params.addCoupledVar("sum_vars_old",
+                       "Old coupled variables to sum "
+                       "(nodal or elemental). Must be in same order as 'sum_vars'");
+  params.addCoupledVar("sum_vars_older",
+                       "Older coupled variables to sum "
+                       "(nodal or elemental). Must be in same order as 'sum_vars'");
   return params;
 }
 
@@ -43,8 +46,13 @@ RedbackContinuationAux::RedbackContinuationAux(const InputParameters & parameter
   // Check user passed correct number of variables & old & older
   if (_nb_sum_vars_old != _nb_sum_vars || _nb_sum_vars_older != _nb_sum_vars)
     mooseError("RedbackContinuationTangentAux requires three inputs "
-      "of same size: 'sum_vars' (size ", _nb_sum_vars,"), 'sum_vars_old' (size ",
-      _nb_sum_vars_old, "), 'sum_vars_older' (size ", _nb_sum_vars_older,").");
+               "of same size: 'sum_vars' (size ",
+               _nb_sum_vars,
+               "), 'sum_vars_old' (size ",
+               _nb_sum_vars_old,
+               "), 'sum_vars_older' (size ",
+               _nb_sum_vars_older,
+               ").");
 
   // Get pointers to variables and
   // find if we have nodal or elemental coupled variables
@@ -67,7 +75,8 @@ RedbackContinuationAux::computeValue()
 {
   Real sum = 0;
   for (unsigned int k = 0; k < _nb_sum_vars; k++)
-    sum += ((*_sum_vars[k])[_qp] - (*_sum_vars_old[k])[_qp]) * ((*_sum_vars_old[k])[_qp] - (*_sum_vars_older[k])[_qp]);
+    sum += ((*_sum_vars[k])[_qp] - (*_sum_vars_old[k])[_qp]) *
+           ((*_sum_vars_old[k])[_qp] - (*_sum_vars_older[k])[_qp]);
   sum = sum / _ds_old_param;
   return sum;
 }

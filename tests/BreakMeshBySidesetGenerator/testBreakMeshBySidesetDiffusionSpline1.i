@@ -1,15 +1,21 @@
-[Mesh]
-  type = FileMesh
-  file = fractureX.msh
-[]
+[MeshGenerators]
+  [./fmg]
+    type = FileMeshGenerator
+    file = fractureXincluded_splines.msh
+  []
 
-[MeshModifiers]
-  [break]
-    type = InterfaceFromSideset
+  [./breakmesh]
+    type = BreakMeshBySidesetGenerator
+    input = fmg
     boundaries = 'top bottom left right'
     sidesets =  'ss2 ss3'
     split_interface = false
+    #create_lower_D_blocks = false
   []
+[]
+
+[Mesh]
+  type = MeshGeneratorMesh
 []
 
 [Variables]
@@ -29,13 +35,13 @@
     type = DirichletBC
     variable = dymmy_var
     boundary = 'left'
-    value = 0
+    value = 1
   []
   [right]
     type = DirichletBC
     variable = dymmy_var
     boundary = 'right'
-    value = 1
+    value = 0
   []
 []
 
@@ -45,6 +51,6 @@
 []
 
 [Outputs]
-  file_base = testInterfaceFromSidesetDiffusion2
+  file_base = testBreakMeshBySidesetDiffusionSpline1
   exodus = true
 []
