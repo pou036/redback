@@ -46,13 +46,19 @@ Physical Surface("blockC") = {3};
 Physical Surface("blockD") = {4};
 
 
-Physical Curve("ss2") = {5,6};
+Physical Curve("ss1") = {5};
+Physical Curve("ss2") = {6};
 Physical Curve("ss3") = {7,8};
 Physical Curve("bottom") = {2,3,4};
-Physical Curve("top") = {10,11};
+Physical Curve("top") = {10,11,12};
 Physical Curve("right") = {9};
 Physical Curve("left") = {1};
 
-
-
+/*
+Physical Point("X_top_left") = {9};
+Physical Point("X_top_right") = {7};
+Physical Point("X_bottom_left") = {6};
+Physical Point("X_bottom_right") = {8};
+Physical Point("X_centre") = {5};
+*/
 
