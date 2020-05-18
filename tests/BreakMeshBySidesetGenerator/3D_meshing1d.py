@@ -67,7 +67,7 @@ def generate3DMesh(mesh_filename='out.msh', params={}, do_show=False):
   fault_dimtags.extend(dimtags_rect2)
   subtags_rect1 = [elt[1] for elt in dimtags_rect1]
   subtags_rect2 = [elt[1] for elt in dimtags_rect2]
-  
+
   # intersect them with box
   outDimTags, outDimTagsMap = factory.intersect(
     [(3, tag_box)], fault_dimtags, -1, removeObject=False, removeTool=False) # intersect(objectDimTags, toolDimTags, tag=-1, removeObject=True, removeTool=True)
@@ -75,7 +75,7 @@ def generate3DMesh(mesh_filename='out.msh', params={}, do_show=False):
 
   # embed intersecting lines in outer box first
   outDimTags, outDimTagsMap = factory.fragment([(3,tag_box)], fault_dimtags) #  fragment(objectDimTags, toolDimTags, tag=-1, removeObject=True, removeTool=True)
-  
+
   factory.synchronize() # needed to refresh all elements
   #bnd = model.getBoundary([(3, tag_box)], combined=False, oriented=False, recursive=False)
 
