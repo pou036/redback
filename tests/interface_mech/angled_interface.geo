@@ -31,6 +31,8 @@ Line(7) = {6, 5};
 //+
 //Line{7} In Surface{1};
 //+
+Physical Point("top_left_corner") = {4};
+//+
 Physical Line("top") = {4};
 //+
 Physical Line("bottom") = {1};
