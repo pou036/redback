@@ -110,6 +110,12 @@
     boundary = 'bottom'
     value = 0.0
   []
+  [no_disp_x]
+    boundary = 'top_left_corner'
+    type = PresetBC
+    variable = disp_x
+    value = 0.0
+  []
 []
 
 [Preconditioning]
