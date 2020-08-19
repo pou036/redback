@@ -12,6 +12,7 @@
 
 #include "Function.h"
 #include "RedbackMaterial.h"
+#include "libmesh/quadrature_trap.h"
 
 registerMooseObject("RedbackApp", RedbackMaterial);
 
@@ -60,6 +61,9 @@ validParams<RedbackMaterial>()
       "inverse_lewis_number_tilde",
       0.0,
       "Varying component of (inverse of) Lewis number, coming from mutli-app for example");
+  params.addCoupledVar("lewis_transversal",
+                       "Lewis in transversal direction "
+                       "of the inferface (only when used on lower dimensional subdomain)");
   params.addCoupledVar("continuation_parameter", 1.0, "The continuation parameter");
   params.addParam<MooseEnum>(
       "continuation_variable",
@@ -147,6 +151,8 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters)
                                                      // coupled! Check that
                                                      // (TODO)
     _inverse_lewis_number_tilde(coupledValue("inverse_lewis_number_tilde")),
+    _has_lewis_trans(isCoupled("lewis_transversal")),
+    _lewis_t(_has_lewis_trans ? coupledValue("lewis_transversal") : _zero),
     _concentration(coupledValue("concentration")),
     _continuation_parameter(coupledScalarValue("continuation_parameter")),
 
@@ -273,7 +279,6 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters)
 
     _T0_param(getParam<Real>("temperature_reference")),
     _P0_param(getParam<Real>("pressure_reference"))
-
 {
   // Find functions to initialise parameters from
   unsigned int num_param_names = _init_from_functions__params.size();
@@ -658,12 +663,32 @@ _ar_F[_qp] * _delta[_qp] * (1 - _total_porosity[_qp]) * (1 - _solid_ratio[_qp])
 
     // Forming the velocities through mechanics and Darcy's flow law
     if (_total_porosity[_qp] != 0)
-      _fluid_velocity[_qp] = _solid_velocity[_qp] -
-                             beta_star_m *
-                                 (_grad_pore_pressure[_qp] - fluid_density * normalized_gravity) /
-                                 (_peclet_number[_qp] * _lewis_number[_qp] *
-                                  _total_porosity[_qp]); // solving Darcy's flux
-                                                         // for the fluid velocity
+    {
+      RealVectorValue grad_pp_grav = _grad_pore_pressure[_qp] - fluid_density * normalized_gravity;
+      Real factor = beta_star_m / (_peclet_number[_qp] * _total_porosity[_qp]);
+      // solving Darcy's flux for the fluid velocity
+      _fluid_velocity[_qp] = _solid_velocity[_qp] - factor * grad_pp_grav / _lewis_number[_qp];
+
+      if (_has_lewis_trans == true)
+      {
+        const auto dim = _current_elem->dim() + 1; // should be mesh->mesh_dimension();
+        FEType fe_type(_current_elem->default_order(), LAGRANGE);
+        std::unique_ptr<FEBase> fe_face(FEBase::build(dim, fe_type));
+        QTrap qface(dim - 1);
+        fe_face->attach_quadrature_rule(&qface);
+        const std::vector<Point> & normals = fe_face->get_normals();
+        const Elem * interior_parent = _current_elem->interior_parent();
+        mooseAssert(interior_parent,
+                    "No interior parent exists for element "
+                        << _current_elem->id()
+                        << ". There may be a problem with your sideset set-up.");
+        auto s = interior_parent->which_side_am_i(_current_elem);
+        fe_face->reinit(interior_parent, s);
+
+        _fluid_velocity[_qp] += factor * (1. / _lewis_number[_qp] - 1. / _lewis_t[_qp]) *
+                                (grad_pp_grav * normals[0]) * normals[0];
+      }
+    }
     else
       _fluid_velocity[_qp] = _solid_velocity[_qp];
 
@@ -680,10 +705,10 @@ _ar_F[_qp] * _delta[_qp] * (1 - _total_porosity[_qp]) * (1 - _solid_ratio[_qp])
                                                                   // equation. TODO: disable for
                                                                   // incompressible case
     _thermal_convective_mass[_qp] =
-        _peclet_number[_qp] * ((one_minus_phi_lambda_s / beta_star_m) * _solid_velocity[_qp] +
-                               (phi_lambda_f / beta_star_m) *
-                                   _fluid_velocity[_qp]); // convective term multiplying the thermal
-                                                          // flux in the mass equation
+        _peclet_number[_qp] *
+        ((one_minus_phi_lambda_s / beta_star_m) * _solid_velocity[_qp] +
+         (phi_lambda_f / beta_star_m) * _fluid_velocity[_qp]); // convective term multiplying the
+                                                               // thermal flux in the mass equation
 
     //_convective_mass_jac_vec[_qp] = _pressure_convective_mass[_qp] -
     //(_fluid_compressibility[_qp]*_grad_pore_pressure[_qp] -

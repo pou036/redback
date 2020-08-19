@@ -67,6 +67,9 @@ protected:
   const VariableValue & _pore_pres; //, & _pore_pres_old;
   const VariableValue & _total_porosity;
   const VariableValue & _inverse_lewis_number_tilde;
+  bool _has_lewis_trans;
+  const VariableValue & _lewis_t;
+
   const VariableValue & _concentration;
   const VariableValue & _continuation_parameter; // Coupled scalar variable value
 
