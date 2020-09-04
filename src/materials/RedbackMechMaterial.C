@@ -506,7 +506,7 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
 
   // Compute plastic strains
   RankTwoTensor instantaneous_strain_rate, total_volumetric_strain_rate;
- 
+
   if (_dt == 0)
   {
     instantaneous_strain_rate.zero();
@@ -529,22 +529,23 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   // Update mechanical porosity (elastic and plastic components)
   // TODO: set T0 properly (once only, at the very beginning). Until then, T = T
   // - T0, P = P - P0
-  
+
   Real delta_phi_mech_el =
       (1.0 - _total_porosity[_qp]) * /*(_solid_compressibility[_qp] * (_pore_pres[_qp] - _P0_param) -
                                       _solid_thermal_expansion[_qp] * (_T[_qp] - _T0_param)) + */
                                       (_elastic_strain[_qp]/* - _elastic_strain_old[_qp] */).trace();
-  
+
   //Real delta_phi_mech_el = (_elastic_strain[_qp] - _elastic_strain_old[_qp]).trace();
-  
+
   Real delta_phi_mech_pl =
       (1.0 - _total_porosity[_qp]) * (_plastic_strain[_qp]/* - _plastic_strain_old[_qp]*/).trace();
 
-  
-  _dummy1[_qp] = (1.0 - _total_porosity[_qp]) * _solid_compressibility[_qp] * (_pore_pres[_qp] - _P0_param);
-  _dummy2[_qp] = (1.0 - _total_porosity[_qp]) * _solid_thermal_expansion[_qp] * (_T[_qp] - _T0_param);
-  _dummy3[_qp] = delta_phi_mech_el;
-  _dummy4[_qp] = delta_phi_mech_pl;
+  _dummy1[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
+
+  // _dummy1[_qp] = (1.0 - _total_porosity[_qp]) * _solid_compressibility[_qp] * (_pore_pres[_qp] - _P0_param);
+  // _dummy2[_qp] = (1.0 - _total_porosity[_qp]) * _solid_thermal_expansion[_qp] * (_T[_qp] - _T0_param);
+  // _dummy3[_qp] = delta_phi_mech_el;
+  // _dummy4[_qp] = delta_phi_mech_pl;
 
   //_mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
   _mechanical_porosity[_qp] = (1.0-_initial_porosity[_qp])*(1-std::exp(-_total_volumetric_strain[_qp]));
@@ -594,6 +595,8 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
       _mechanical_dissipation_mech[_qp] / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]);
 
   _poromech_kernel[_qp] = def_grad_rate * _peclet_number[_qp] / _mixture_compressibility[_qp];
+  _dummy3[_qp] = def_grad_rate;
+  _dummy4[_qp] = _poromech_kernel[_qp];
   if (_has_T)
   {
     _poromech_jac[_qp] = (1 / (1 + _delta[_qp] * _T[_qp]) / (1 + _delta[_qp] * _T[_qp]));
@@ -766,25 +769,25 @@ RedbackMechMaterial::returnMap(const RankTwoTensor & sig_old,
   _max_confining_pressure = fmax(_confining_pressure[ _qp ], _max_confining_pressure);
   // qmech[_qp] = (1.0+_alpha_3[_qp]*std::log(_max_confining_pressure)) * (-_alpha_1[_qp] * _max_confining_pressure -
   // _alpha_2[_qp] * _pore_pres[_qp]); _qmech[_qp] = (_alpha_1[_qp] +_alpha_2[_qp] * _pore_pres[_qp]);
-  
+
   // branch 94
-  //_qmech[ _qp ] = -_alpha_1[ _qp ] - _alpha_2[ _qp ] * _pore_pres[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));  
+  //_qmech[ _qp ] = -_alpha_1[ _qp ] - _alpha_2[ _qp ] * _pore_pres[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));
 
   //for isotropic -- remember that since alpha1 includes effect of ref_pe_rate and arrhenius, alpha1*pc doesn't work...
   _qmech[ _qp ] =
-  -_alpha_1[ _qp ] - _alpha_3[ _qp ] * _max_confining_pressure - _alpha_2[ _qp ] * _pore_pres[ _qp ]; //* (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));  
+  -_alpha_1[ _qp ] - _alpha_3[ _qp ] * _max_confining_pressure - _alpha_2[ _qp ] * _pore_pres[ _qp ]; //* (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));
 
-  //_qmech[ _qp ] = -_alpha_1[ _qp ] * std::exp(_max_confining_pressure) - _alpha_2[ _qp ] * _pore_pres[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));  
-  
+  //_qmech[ _qp ] = -_alpha_1[ _qp ] * std::exp(_max_confining_pressure) - _alpha_2[ _qp ] * _pore_pres[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));
+
   //_qmech[ _qp ] = -((_alpha_1[ _qp ]+ _alpha_1[ _qp ] *_alpha_2[ _qp ] * _pore_pres[ _qp ] ) * std::log(_max_confining_pressure) + _alpha_3[ _qp ]);
-  
+
   //_qmech[ _qp ] = - (-7.3 * std::log(_max_confining_pressure) - 34.776 + (158.81 * std::log(_max_confining_pressure) +220.19) * _pore_pres[_qp] + _alpha_3[ _qp ]);
-  
-  //-_alpha_1[ _qp ] * _max_confining_pressure - _alpha_2[ _qp ] * _pore_pres[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));  
-  
+
+  //-_alpha_1[ _qp ] * _max_confining_pressure - _alpha_2[ _qp ] * _pore_pres[ _qp ] * (1 + _alpha_3[ _qp ] * std::log(_max_confining_pressure));
+
   //(J) -((_alpha_1[ _qp ] * std::log(_max_confining_pressure) + _alpha_2[ _qp ]) - (-21.676* _alpha_1[ _qp ] + -534.52)  *_pore_pres[_qp]);
   //-(_alpha_1[ _qp ] * _max_confining_pressure * _max_confining_pressure + _alpha_2[ _qp ] * _max_confining_pressure + _alpha_3[ _qp ]);
-  
+
   _exponential = _exponential * std::exp(_qmech[ _qp ]);
 
   unsigned int iterisohard = 0;
