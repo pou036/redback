@@ -130,9 +130,10 @@ validParams<RedbackMaterial>()
                                    "vector pointing downwards.  Eg "
                                    "(0,0,-9.81)");
 
-  params.addParam<Real>(
-      "temperature_reference", 0.0, "Reference temperature used for thermal expansion");
-  params.addParam<Real>("pressure_reference", 0.0, "Reference pressure used for compressibility");
+  params.addCoupledVar("temperature_reference", 0.0,
+        "Reference temperature used for thermal expansion");
+  params.addCoupledVar("pressure_reference", 0.0,
+        "Reference pressure used for compressibility");
 
   return params;
 }
@@ -274,8 +275,8 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters)
     _dispz_dot(isCoupled("disp_z") ? coupledDot("disp_z") : _zero),
     _solid_velocity(declareProperty<RealVectorValue>("solid_velocity")),
 
-    _T0_param(getParam<Real>("temperature_reference")),
-    _P0_param(getParam<Real>("pressure_reference"))
+    _T0(coupledValue("temperature_reference")),
+    _P0(coupledValue("pressure_reference"))
 {
   // Find functions to initialise parameters from
   unsigned int num_param_names = _init_from_functions__params.size();
@@ -608,8 +609,8 @@ _ar_F[_qp] * _delta[_qp] * (1 - _total_porosity[_qp]) * (1 - _solid_ratio[_qp])
   beta_star_m =
       one_minus_phi_beta_star_s + phi_beta_star_f; // normalized compressibility of the mixture
   _mixture_compressibility[_qp] = beta_star_m;
-  if (_mixture_compressibility[_qp] == 0)
-    mooseError("The mixture compressiblity cannot be zero!");
+  //if (_mixture_compressibility[_qp] == 0)
+  //  mooseError("The mixture compressiblity cannot be zero!");
 
   // convective terms
   if (_are_convective_terms_on)
@@ -624,11 +625,11 @@ _ar_F[_qp] * _delta[_qp] * (1 - _total_porosity[_qp]) * (1 - _solid_ratio[_qp])
       case linear:
         // Linear approximation of the EOS (Equation Of State)
         solid_density = _solid_density_param *
-                        (1 + _solid_compressibility[_qp] * (_pore_pres[_qp] - _P0_param) -
-                         _solid_thermal_expansion[_qp] * (_T[_qp] - _T0_param));
+                        (1 + _solid_compressibility[_qp] * (_pore_pres[_qp] - _P0[_qp]) -
+                         _solid_thermal_expansion[_qp] * (_T[_qp] - _T0[_qp]));
         fluid_density = _fluid_density_param *
-                        (1 + _fluid_compressibility[_qp] * (_pore_pres[_qp] - _P0_param) -
-                         _fluid_thermal_expansion[_qp] * (_T[_qp] - _T0_param));
+                        (1 + _fluid_compressibility[_qp] * (_pore_pres[_qp] - _P0[_qp]) -
+                         _fluid_thermal_expansion[_qp] * (_T[_qp] - _T0[_qp]));
         break;
       default:
         mooseError("density method not implemented yet, use linear");

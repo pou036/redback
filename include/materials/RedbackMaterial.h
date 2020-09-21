@@ -164,7 +164,10 @@ protected:
   const VariableValue & _dispz_dot;
   MaterialProperty<RealVectorValue> & _solid_velocity;
 
-  Real _T0_param, _P0_param;
+  //Real _T0_param, _P0_param;
+  const VariableValue & _T0;
+  const VariableValue & _P0;
+
 };
 
 #endif // REDBACKMATERIAL_H
