@@ -179,6 +179,7 @@ protected:
   const MaterialProperty<Real> & _lewis_number;
   const MaterialProperty<Real> & _ar;
   const MaterialProperty<Real> & _confining_pressure;
+  const MaterialProperty<Real> & _initial_porosity;
   const MaterialProperty<Real> & _alpha_1;
   const MaterialProperty<Real> & _alpha_2;
   const MaterialProperty<Real> & _alpha_3;

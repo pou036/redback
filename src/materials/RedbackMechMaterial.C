@@ -192,6 +192,7 @@ RedbackMechMaterial::RedbackMechMaterial(const InputParameters & parameters)
     _lewis_number(getMaterialProperty<Real>("lewis_number")),
     _ar(getMaterialProperty<Real>("ar")),
     _confining_pressure(getMaterialProperty<Real>("confining_pressure")),
+    _initial_porosity(getMaterialProperty<Real>("initial_porosity")),
     _alpha_1(getMaterialProperty<Real>("alpha_1")),
     _alpha_2(getMaterialProperty<Real>("alpha_2")),
     _alpha_3(getMaterialProperty<Real>("alpha_3")),
@@ -513,14 +514,20 @@ RedbackMechMaterial::computeRedbackTerms(RankTwoTensor & sig, Real q_y, Real p_y
   // Update mechanical porosity (elastic and plastic components)
   // TODO: set T0 properly (once only, at the very beginning). Until then, T = T
   // - T0, P = P - P0
-  Real delta_phi_mech_el =
-      (1.0 - _total_porosity[_qp]) * (_solid_compressibility[_qp] * (_pore_pres[_qp] - _P0_param) -
-                                      _solid_thermal_expansion[_qp] * (_T[_qp] - _T0_param) +
-                                      (_elastic_strain[_qp] - _elastic_strain_old[_qp]).trace());
-  Real delta_phi_mech_pl =
-      (1.0 - _total_porosity[_qp]) * (_plastic_strain[_qp] - _plastic_strain_old[_qp]).trace();
+//  Real delta_phi_mech_el =
+//      (1.0 - _total_porosity[_qp]) * (_solid_compressibility[_qp] * (_pore_pres[_qp] - _P0_param) -
+//                                      _solid_thermal_expansion[_qp] * (_T[_qp] - _T0_param) +
+//                                      (_elastic_strain[_qp] - _elastic_strain_old[_qp]).trace());
+//  Real delta_phi_mech_pl =
+//      (1.0 - _total_porosity[_qp]) * (_plastic_strain[_qp] - _plastic_strain_old[_qp]).trace();
+//
+//  _mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
 
-  _mechanical_porosity[_qp] = delta_phi_mech_el + delta_phi_mech_pl;
+
+  if (true)
+  { // option 2, Fafa's tests
+    _mechanical_porosity[_qp] = (1.0-_initial_porosity[_qp])*(1-std::exp(-_total_volumetric_strain[_qp]));
+  }
 
   if (_has_D)
   {
