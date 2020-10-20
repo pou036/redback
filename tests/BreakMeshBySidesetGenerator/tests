@@ -102,43 +102,43 @@
     csvdiff = 'test3D_1b_sampler_0001.csv'
   [../]
   [./test_BreakMeshBySideset_3D_1c1]
-    # Testing in 3D, 2 intersecting faults (not all connecting to boundaries) with 
+    # Testing in 3D, 2 intersecting faults (not all connecting to boundaries) with
     #  * connect-T-junctions = false
     #  * create_lower_D_blocks = true
     # (note: can't use exodiff because of split nodes having same coords)
     type = 'CSVDiff'
     input = 'test3D_1c.i'
-    cli_args = 'Outputs/file_base=test3D_1c1 MeshGenerators/breakmesh/connect_T_junctions=false'
+    cli_args = 'Outputs/file_base=test3D_1c1 Mesh/breakmesh/connect_T_junctions=false'
     csvdiff = 'test3D_1c1_sampler_0001.csv'
   [../]
   [./test_BreakMeshBySideset_3D_1c2]
-    # Testing in 3D, 2 intersecting faults (not all connecting to boundaries) with 
+    # Testing in 3D, 2 intersecting faults (not all connecting to boundaries) with
     #  * connect-T-junctions = false
     #  * create_lower_D_blocks = true
     # (note: can't use exodiff because of split nodes having same coords)
     type = 'CSVDiff'
     input = 'test3D_1c.i'
-    cli_args = 'Outputs/file_base=test3D_1c2 MeshGenerators/breakmesh/connect_T_junctions=false'
+    cli_args = 'Outputs/file_base=test3D_1c2 Mesh/breakmesh/connect_T_junctions=false'
     csvdiff = 'test3D_1c2_sampler_0001.csv'
   [../]
   [./test_BreakMeshBySideset_3D_1d1]
-    # Testing in 3D, 2 intersecting faults (connecting to boundaries) with 
+    # Testing in 3D, 2 intersecting faults (connecting to boundaries) with
     #  * connect-T-junctions = false
     #  * create_lower_D_blocks = false
     # (note: can't use exodiff because of split nodes having same coords)
     type = 'CSVDiff'
     input = 'test3D_1d.i'
-    cli_args = 'Outputs/file_base=test3D_1d1 MeshGenerators/breakmesh/connect_T_junctions=false'
+    cli_args = 'Outputs/file_base=test3D_1d1 Mesh/breakmesh/connect_T_junctions=false'
     csvdiff = 'test3D_1d1_sampler_0001.csv'
   [../]
   [./test_BreakMeshBySideset_3D_1d2]
-    # Testing in 3D, 2 intersecting faults (connecting to boundaries) with 
+    # Testing in 3D, 2 intersecting faults (connecting to boundaries) with
     #  * create_lower_D_blocks = false
     #  * connect-T-junctions = true
     # (note: can't use exodiff because of split nodes having same coords)
     type = 'CSVDiff'
     input = 'test3D_1d.i'
-    cli_args = 'Outputs/file_base=test3D_1d2 MeshGenerators/breakmesh/connect_T_junctions=true'
+    cli_args = 'Outputs/file_base=test3D_1d2 Mesh/breakmesh/connect_T_junctions=true'
     csvdiff = 'test3D_1d2_sampler_0001.csv'
   [../]
 []

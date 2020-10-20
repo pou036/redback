@@ -1,23 +1,23 @@
 [Mesh]
-  type = GeneratedMesh
-  dim = 2
-  ny = 2
-  nx = 3
-  xmax = 3
-  ymax = 2
-  elem_type = QUAD9
-[]
-
-[MeshModifiers]
+  [./generate]
+    type = GeneratedMeshGenerator
+    dim = 2
+    ny = 2
+    nx = 3
+    xmax = 3
+    ymax = 2
+    elem_type = QUAD9
+  [../]
   [./fluid]
-    type = SubdomainBoundingBox
+    type = SubdomainBoundingBoxGenerator
+    input = generate
     bottom_left = '0 0 0'
     top_right = '3 1 0'
     block_id = 1
   [../]
   [./sideset]
-    type = SideSetsBetweenSubdomains
-    depends_on = fluid
+    type = SideSetsBetweenSubdomainsGenerator
+    input = fluid
     master_block = 1
     new_boundary = 10
     paired_block = 0

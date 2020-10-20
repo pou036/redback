@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = fractureX.msh
@@ -12,10 +12,6 @@
     split_interface = false
     #create_lower_D_blocks = false
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]
