@@ -1,13 +1,12 @@
 [Mesh]
-  type = FileMesh
-  file = gold/compression_interface_in.e
-  # type = GeneratedMesh
-  # dim = 2
-  # nx = 4
-  # ny = 4
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = gold/compression_interface_in.e
+    # type = GeneratedMesh
+    # dim = 2
+    # nx = 4
+    # ny = 4
+  []
   # [subdomain]
   #   type = SubdomainBoundingBox
   #   bottom_left = '0 0.5 0'
@@ -15,7 +14,8 @@
   #   top_right = '1 1 0'
   # []
   [break]
-    type = BreakMeshByBlock
+    type = BreakMeshByBlockGenerator
+    input = file
     split_interface = false
   []
 []

@@ -1,13 +1,13 @@
 gravity = '0.56 0.98 0'
 
 [Mesh]
-  type = FileMesh
-  file = angled_interface.msh
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = angled_interface.msh
+  []
   [break]
-    type = BreakMeshByBlock
+    type = BreakMeshByBlockGenerator
+    input = file
     split_interface = false
   []
 []

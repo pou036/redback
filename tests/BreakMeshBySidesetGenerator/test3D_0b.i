@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = 3Dcase0b_coarse.msh
@@ -13,10 +13,6 @@
     create_lower_D_blocks = true
     verbose = true
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

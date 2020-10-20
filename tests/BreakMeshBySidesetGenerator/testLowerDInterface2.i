@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   inactive = 'bmbbg'
   [fmg]
     type = FileMeshGenerator
@@ -40,10 +40,6 @@
     input = x_bottom_right
     nodes = '36'
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Kernels]

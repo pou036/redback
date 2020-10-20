@@ -1,37 +1,41 @@
 [Mesh]
-  type = FileMesh
-  file = Cylinder_hollow_perturb.msh
-  boundary_name = 'bottom top inside outside'
-  boundary_id = '109 110 112 111'
+  [./file]
+    type = FileMeshGenerator
+    file = Cylinder_hollow_perturb.msh
+    boundary_name = 'bottom top inside outside'
+    boundary_id = '109 110 112 111'
+  [../]
+  [./top_point]
+    type = ExtraNodesetGenerator
+    input = file
+    new_boundary = 207
+    coord = '0 1.0 0'
+  [../]
+  [./bottom_point]
+    type = ExtraNodesetGenerator
+    input = top_point
+    new_boundary = 209
+    coord = '0 -1.0 0'
+  [../]
+  [./left_point]
+    type = ExtraNodesetGenerator
+    input = bottom_point
+    new_boundary = 205
+    coord = '-1.0 0 0'
+  [../]
+  [./right_point]
+    type = ExtraNodesetGenerator
+    input = left_point
+    new_boundary = 203
+    coord = '1.0 0 0'
+  [../]
 []
+
 
 [GlobalParams]
   displacements = 'disp_x disp_y disp_z'
   porepressure = porepressure
   block = 0
-[]
-
-[MeshModifiers]
-  [./top_point]
-    type = AddExtraNodeset
-    new_boundary = 207
-    coord = '0 1.0 0'
-  [../]
-  [./bottom_point]
-    type = AddExtraNodeset
-    new_boundary = 209
-    coord = '0 -1.0 0'
-  [../]
-  [./left_point]
-    type = AddExtraNodeset
-    new_boundary = 205
-    coord = '-1.0 0 0'
-  [../]
-  [./right_point]
-    type = AddExtraNodeset
-    new_boundary = 203
-    coord = '1.0 0 0'
-  [../]
 []
 
 [Variables]
@@ -283,4 +287,3 @@
     variable = temperature
   [../]
 []
-

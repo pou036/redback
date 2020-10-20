@@ -14,7 +14,7 @@
 #define ELEMENTFILESUBDOMAIN_H
 
 // MOOSE includes
-#include "MeshModifier.h"
+#include "MeshGenerator.h"
 
 // Forward declerations
 class ElementFileSubdomain;
@@ -25,7 +25,7 @@ InputParameters validParams<ElementFileSubdomain>();
 /**
  * MeshModifier for assigning subdomain IDs of all elements
  */
-class ElementFileSubdomain : public MeshModifier
+class ElementFileSubdomain : public MeshGenerator
 {
 public:
   /**
@@ -42,7 +42,11 @@ public:
   /**
    * Perform the actual element subdomain ID assignment
    */
-  virtual void modify();
+  std::unique_ptr<MeshBase> generate() override;
+
+protected:
+  std::unique_ptr<MeshBase> & _input;
+
 };
 
 #endif // ELEMENTFILESUBDOMAIN_H

@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = 3Dcase1a_fine.msh
@@ -14,10 +14,6 @@
     connect_T_junctions = false # MUST be false to get proper interface until T-junctions implemented properly in 3D
     verbose = true
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]
