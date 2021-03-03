@@ -1,15 +1,16 @@
 [Mesh]
-  type = FileMesh
-  file = angled_interface.msh
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = angled_interface.msh
+  []
   [break]
-    type = BreakMeshByBlock
+    type = BreakMeshByBlockGenerator
+    input = file
     split_interface = false
   []
   [bottom_corner]
-    type = AddExtraNodeset
+    type = ExtraNodesetGenerator
+    input = break
     new_boundary = '10'
     nodes = '11'
   []
@@ -108,6 +109,12 @@
     type = PresetBC
     variable = disp_y
     boundary = 'bottom'
+    value = 0.0
+  []
+  [no_disp_x]
+    boundary = 'top_left_corner'
+    type = PresetBC
+    variable = disp_x
     value = 0.0
   []
 []

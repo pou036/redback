@@ -28,10 +28,10 @@ public:
 protected:
   Real _ds_param, _ds_old_param, _continuation_parameter_old_param,
       _continuation_parameter_older_param;
-  //VariableValue & _directional_derivative;
-  //const PostprocessorValue * const _num_nodes;
-  //const PostprocessorValue * const _num_elements;
-  const PostprocessorValue * const _dd_nodal; // nodal part of directional derivative
+  // VariableValue & _directional_derivative;
+  // const PostprocessorValue * const _num_nodes;
+  // const PostprocessorValue * const _num_elements;
+  const PostprocessorValue * const _dd_nodal;     // nodal part of directional derivative
   const PostprocessorValue * const _dd_elemental; // elemental part of directional derivative
   bool _are_nodal_vars_involved, _are_elemental_vars_involved;
 
