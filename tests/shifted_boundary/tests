@@ -1,7 +1,12 @@
 [Tests]
   [./test_shifted_boundary]
     type = 'Exodiff'
-    input = 'poiseuille_tube3D.i'
-    exodiff = 'poiseuille_tube3D.e'
+    input = 'poiseuille_tube3D_shifted.i'
+    exodiff = 'poiseuille_tube3D_shifted.e'
+  [../]
+  [./test_displaced_boundary]
+    type = 'Exodiff'
+    input = 'poiseuille_tube3D_displaced.i'
+    exodiff = 'poiseuille_tube3D_displaced.e'
   [../]
 []

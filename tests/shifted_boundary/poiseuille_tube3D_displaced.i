@@ -9,35 +9,35 @@
 []
 
 [Mesh]
-  type = GeneratedMesh
-  dim = 3
-  nx = 20
-  ny = 20
-  nz = 5
-  zmax = 0.2
-  elem_type = HEX
   boundary_name = tube
   boundary_id = 10
   displacements = 'dist_x dist_y dist_z'
-[]
-
-[MeshModifiers]
+  [./mesh]
+    type = GeneratedMeshGenerator
+    dim = 3
+    nx = 20
+    ny = 20
+    nz = 5
+    zmax = 0.2
+    elem_type = HEX
+  [../]
   [./image]
-    type = ImageSubdomain
+    type = ImageSubdomainGenerator
     file = tube/tube.png
     threshold = 100
+    input = mesh
   [../]
   [./interface]
-    type = SideSetsBetweenSubdomains
-    master_block = 0
+    type = SideSetsBetweenSubdomainsGenerator
+    primary_block = 0
     new_boundary = 10
     paired_block = 1
-    depends_on = image
+    input = image
   [../]
   [./delete]
-    type = BlockDeleter
-    depends_on = interface
-    block_id = 1
+    type = BlockDeletionGenerator
+    input = interface
+    block = 1
   [../]
 []
 
@@ -224,11 +224,6 @@
     value_type = max
     variable = vel_z
   [../]
-  [mem]
-    type = MemoryUsage
-    mem_type = physical_memory
-    execute_on = 'INITIAL TIMESTEP_END'
-  []
 []
 
 [Executioner]
