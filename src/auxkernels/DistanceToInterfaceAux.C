@@ -26,7 +26,8 @@ DistanceToInterfaceAux::DistanceToInterfaceAux(const InputParameters & parameter
   : VectorAuxKernel(parameters),
     _stl_name(getParam<std::string>("stl_name"))
 {
-  igl::readSTL(_stl_name, _V, _F, _N);
+  std::istringstream iss (_stl_name);
+  igl::readSTL(iss, _V, _F, _N);
   _tree.init(_V,_F);
 }
 
