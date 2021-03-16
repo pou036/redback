@@ -113,13 +113,13 @@
     value = 0
   [../]
   [./fixed_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = 'left right'
     value = 0.0
   [../]
   [./fixed_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     boundary = bottom
     value = 0.0

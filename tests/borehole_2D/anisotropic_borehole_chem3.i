@@ -95,13 +95,13 @@
 [BCs]
   active = 'Pressure confine_x confine_y hole_rotat_x hole_rotat_y'
   [./confine_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     boundary = '101 102'
     value = 0
   [../]
   [./confine_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     value = 0
     boundary = '103 104'
