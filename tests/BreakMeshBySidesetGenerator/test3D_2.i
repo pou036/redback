@@ -1,5 +1,5 @@
 #  Trap charging in  3D on simplified geometry
-[MeshGenerators]
+[Mesh]
   [fmg]
     type = FileMeshGenerator
     file = 3Dcase2.msh
@@ -19,10 +19,6 @@
     boundaries = 'bottom'
     input = breakmesh
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

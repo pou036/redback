@@ -1,23 +1,23 @@
 [Mesh]
-  type = FileMesh
-  file = gold/interface_darcy_test_in.e
-  # type = GeneratedMesh
-  # dim = 2
-  # nx = 4
-  # xmax = 2
-[]
-
-[MeshModifiers]
+  [./file]
+    type = FileMeshGenerator
+    file = gold/interface_darcy_test_in.e
+    # type = GeneratedMesh
+    # dim = 2
+    # nx = 4
+    # xmax = 2
+  [../]
   # [subdomain]
   #   type = SubdomainBoundingBox
   #   bottom_left = '0 0.5 0'
   #   block_id = 1
   #   top_right = '1 1 0'
   # []
-  [break]
-    type = BreakMeshByBlock
+  [./break]
+    type = BreakMeshByBlockGenerator
+    input = file
     split_interface = false
-  []
+  [../]
 []
 
 [Variables]
