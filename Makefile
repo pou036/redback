@@ -37,5 +37,5 @@ include            $(FRAMEWORK_DIR)/app.mk
 ###############################################################################
 # Additional special case targets should be added here
 
-LIBIGL_DIR := $(MOOSE_DIR)/../libigl/include
+LIBIGL_DIR := $(HOME)/projects/libigl/include
 app_INCLUDES += -I$(LIBIGL_DIR)
