@@ -65,25 +65,25 @@
 [BCs]
   inactive = 'X_top_left2 X_bottom_right1'
   [X_top_left1]
-    type = PresetBC
+    type = DirichletBC
     variable = T
     boundary = '77'
     value = 1
   []
   [X_top_left2]
-    type = PresetBC
+    type = DirichletBC
     variable = T
     boundary = '78'
     value = 1
   []
   [X_bottom_right1]
-    type = PresetBC
+    type = DirichletBC
     variable = T
     boundary = '79'
     value = 1
   []
   [X_bottom_right2]
-    type = PresetBC
+    type = DirichletBC
     variable = T
     boundary = '80'
     value = 1

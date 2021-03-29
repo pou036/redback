@@ -67,19 +67,19 @@
 
 [BCs]
   [./fixed_outer_x]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_x
     value = 0
     boundary = '207 209'
   [../]
   [./fixed_outer_y]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_y
     value = 0
     boundary = '203 205'
   [../]
   [./plane_strain]
-    type = PresetBC
+    type = DirichletBC
     variable = disp_z
     value = 0
     boundary = 'top bottom'

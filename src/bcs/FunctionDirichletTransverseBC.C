@@ -24,7 +24,7 @@ template <>
 InputParameters
 validParams<FunctionDirichletTransverseBC>()
 {
-  InputParameters params = validParams<PresetNodalBC>();
+  InputParameters params = validParams<DirichletBCBase>();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addRequiredParam<RealVectorValue>(
       "center", "Center point to calculate transversal direction for boundary point.");
@@ -38,7 +38,7 @@ validParams<FunctionDirichletTransverseBC>()
 }
 
 FunctionDirichletTransverseBC::FunctionDirichletTransverseBC(const InputParameters & parameters)
-  : PresetNodalBC(parameters),
+  : DirichletBCBase(parameters),
     _u_old(valueOld()),
     _func(getFunction("function")),
     _center(getParam<RealVectorValue>("center")),
