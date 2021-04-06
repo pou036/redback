@@ -81,13 +81,13 @@ RedbackPlasticDruckerPrager::yieldFunction(const RankTwoTensor & stress, Real in
   Real bbb;
   bothAB(intnl, aaa, bbb);
   // return std::sqrt(stress.secondInvariant()) + stress.trace() * bbb - aaa;
-  return std::sqrt(3.0 * stress.secondInvariant()) - stress.trace()/3.0 * bbb - aaa;
+  return std::sqrt(3.0 * stress.secondInvariant()) + stress.trace()/3.0 * bbb - aaa;
 }
 
 RankTwoTensor
 RedbackPlasticDruckerPrager::df_dsig(const RankTwoTensor & stress, Real bbb) const
 {
-  return 0.5 * stress.dsecondInvariant() * std::sqrt(3.0 / stress.secondInvariant()) -
+  return 0.5 * stress.dsecondInvariant() * std::sqrt(3.0 / stress.secondInvariant()) +
   // return 0.5 * stress.dsecondInvariant() / std::sqrt(stress.secondInvariant()) +
          stress.dtrace()/3.0 * bbb;
 }
@@ -108,7 +108,7 @@ RedbackPlasticDruckerPrager::dyieldFunction_dintnl(const RankTwoTensor & stress,
   Real daaa;
   Real dbbb;
   dbothAB(intnl, daaa, dbbb);
-  return -stress.trace()/3.0 * dbbb - daaa;
+  return stress.trace()/3.0 * dbbb - daaa;
 }
 
 RankTwoTensor
@@ -138,7 +138,7 @@ RedbackPlasticDruckerPrager::dflowPotential_dintnl(const RankTwoTensor & stress,
 {
   Real dbbb;
   donlyB(intnl, dilation, dbbb);
-  return -stress.dtrace()/3.0 * dbbb;
+  return stress.dtrace()/3.0 * dbbb;
 }
 
 std::string
