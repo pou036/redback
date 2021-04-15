@@ -24,6 +24,8 @@ template <>
 InputParameters
 validParams<PointValueFileWriter>()
 {
+  // File that does homogeneous erosion of a binary CT-scan file and write resulting microstructure in another filename
+  // The amount of erosion is given by a PointValue Postprocessor
   InputParameters params = validParams<GeneralPostprocessor>();
   params.addRequiredParam<VariableName>(
       "variable", "The name of the variable that this postprocessor operates on.");
@@ -129,9 +131,9 @@ PointValueFileWriter::PointValueFileWriter(const InputParameters & parameters)
     _ny *= _refinement;
     if (_nz > 1)
       _nz *= _refinement;
-    std::cout << "_nx = " << _nx << std::endl;
-    std::cout << "_ny = " << _ny << std::endl;
-    std::cout << "_nz = " << _nz << std::endl;
+    _console << "_nx = " << _nx << std::endl;
+    _console << "_ny = " << _ny << std::endl;
+    _console << "_nz = " << _nz << std::endl;
   }
 
   // calculating the pore_volume
@@ -140,7 +142,7 @@ PointValueFileWriter::PointValueFileWriter(const InputParameters & parameters)
       for (int x = 0; x < _nx; ++x)
         if (_data[z * _ny + y][x] == _value_pore)
           _pore_volume += 1 / (float)(_nx * _ny * _nz);
-  std::cout << "_pore_volume = " << _pore_volume << std::endl;
+  _console << "_pore_volume = " << _pore_volume << std::endl;
 
   // init value
   _poro_value = _pore_volume;
@@ -150,11 +152,11 @@ PointValueFileWriter::PointValueFileWriter(const InputParameters & parameters)
   BoundaryElements();
   Real layer_volume = 1 / (float)(_nx * _ny * _nz) * _boundary_elements.size();
   _upper_layer_bound = _pore_volume + layer_volume;
-  std::cout << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
+  _console << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
 
   // init _lower_layer_bound
   _lower_layer_bound = _pore_volume;
-  std::cout << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
+  _console << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
 
   std::stringstream ss;
   // position along x/y/z axis for writing data file
@@ -175,7 +177,7 @@ PointValueFileWriter::PointValueFileWriter(const InputParameters & parameters)
   // write file
   FileWriter();
 
-  std::cout << "done with constructor" << std::endl;
+  _console << "done with constructor" << std::endl;
 }
 
 void
@@ -184,8 +186,8 @@ PointValueFileWriter::execute()
   _old_poro_value = _poro_value;
   _poro_value = _system.point_value(_var_number, _point, false);
 
-  std::cout << "_old_poro_value = " << _old_poro_value << std::endl;
-  std::cout << "_poro_value = " << _poro_value << std::endl;
+  _console << "_old_poro_value = " << _old_poro_value << std::endl;
+  _console << "_poro_value = " << _poro_value << std::endl;
 
   /**
    * If we get exactly zero, we don't know if the locator couldn't find an element, or
@@ -216,10 +218,10 @@ PointValueFileWriter::getValue()
   if (_poro_value - _old_poro_value < 0)
     precip = true;
 
-  std::cout << "precip = " << precip << std::endl;
-  std::cout << "_poro_value = " << _poro_value << std::endl;
-  std::cout << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
-  std::cout << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
+  _console << "precip = " << precip << std::endl;
+  _console << "_poro_value = " << _poro_value << std::endl;
+  _console << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
+  _console << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
 
   // write to run multiapp or not
   FILE * output_file = fopen(_multiapp_file_name.c_str(), "w");
@@ -233,7 +235,7 @@ PointValueFileWriter::getValue()
   fputs(std::to_string(1).c_str(), output_file);
   fclose(output_file);
 
-  std::cout << "running code for erosion..." << std::endl;
+  _console << "running code for erosion..." << std::endl;
 
   // read the CTscan txt file and extract the information
   std::string line;
@@ -279,23 +281,23 @@ PointValueFileWriter::getValue()
     if (_boundary_elements.size() == 0)
     {
       _upper_layer_bound = _pore_volume;
-      std::cout << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
+      _console << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
       _lower_layer_bound = _pore_volume;
-      std::cout << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
+      _console << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
       break;
     }
 
     // Calculating the volume of the boundary elements layer
     layer_volume = 1 / (float)(_nx * _ny * _nz) * _boundary_elements.size();
-    std::cout << "layer_volume = " << layer_volume << std::endl;
+    _console << "layer_volume = " << layer_volume << std::endl;
 
     // break of loop if layer is too big to remove
     if (precip == false && _pore_volume + layer_volume > _poro_value)
     {
       _upper_layer_bound = _pore_volume + layer_volume;
-      std::cout << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
+      _console << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
       _lower_layer_bound = _pore_volume;
-      std::cout << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
+      _console << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
       break;
     }
 
@@ -310,21 +312,21 @@ PointValueFileWriter::getValue()
       _pore_volume -= layer_volume;
       if (_poro_value > _pore_volume)
       {
-        std::cout << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
+        _console << "_upper_layer_bound = " << _upper_layer_bound << std::endl;
         _lower_layer_bound = _pore_volume;
-        std::cout << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
+        _console << "_lower_layer_bound = " << _lower_layer_bound << std::endl;
         break;
       }
     }
     else
       _pore_volume += layer_volume;
-    std::cout << "_pore_volume = " << _pore_volume << std::endl;
+    _console << "_pore_volume = " << _pore_volume << std::endl;
   }
 
   // write file
   FileWriter();
 
-  std::cout << "... erosion done" << std::endl;
+  _console << "... erosion done" << std::endl;
 
   return _pore_volume;
 }
@@ -379,7 +381,7 @@ PointValueFileWriter::BoundaryElements()
       for (int x = 0; x < _nx; ++x)
         if (_data[z * _ny + y][x] == _boundary_element_value)
           Neighbours(z, y, x);
-  std::cout << "_boundary_elements.size() = " << _boundary_elements.size() << std::endl;
+  _console << "_boundary_elements.size() = " << _boundary_elements.size() << std::endl;
 }
 
 void
@@ -476,7 +478,7 @@ PointValueFileWriter::Neighbours(int z, int y, int x)
 //                                             (axe == 0 ? dir : 0));
 //                         }
 //               }
-//   std::cout << "_boundary_elements.size() = " << _boundary_elements.size() << std::endl;
+//   _console << "_boundary_elements.size() = " << _boundary_elements.size() << std::endl;
 // }
 
 bool

@@ -31,6 +31,7 @@ protected:
   Real _mises_0;
   Real _Ar;
   bool _activation;
+  const VariableValue & _u_old;
 };
 
 #endif // RATEANDSTATEAUX_H

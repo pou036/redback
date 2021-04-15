@@ -35,7 +35,8 @@ RateAndStateAux::RateAndStateAux(const InputParameters & parameters)
     _creeping_vel(getParam<Real>("creeping_vel")),
     _vel_0(getParam<Real>("vel_0")),
     _mises_0(getParam<Real>("mises_0")),
-    _Ar(getParam<Real>("Ar"))
+    _Ar(getParam<Real>("Ar")),
+    _u_old(uOld())
 {
   _activation = false;
 }
