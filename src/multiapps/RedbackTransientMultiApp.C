@@ -28,12 +28,14 @@
 
 registerMooseObject("RedbackApp", RedbackTransientMultiApp);
 
-template <>
+defineLegacyParams(RedbackTransientMultiApp);
 InputParameters
-validParams<RedbackTransientMultiApp>()
+RedbackTransientMultiApp::validParams()
 {
-  InputParameters params = validParams<MultiApp>();
-  params += validParams<TransientInterface>();
+  InputParameters params = MultiApp::validParams();
+  params += TransientInterface::validParams();
+  params.addClassDescription("MultiApp for performing coupled simulations with the master and "
+                             "sub-application both progressing in time.");
 
   params.addParam<bool>("sub_cycling",
                         false,
@@ -79,12 +81,6 @@ validParams<RedbackTransientMultiApp>()
       false,
       "If true this will allow failed solves to attempt to 'catch up' using smaller timesteps.");
 
-  params.addParam<bool>("keep_solution_during_restore",
-                        false,
-                        "This is useful when doing Picard with catch_up steps.  It takes the "
-                        "solution from the final catch_up step and re-uses it as the initial guess "
-                        "for the next picard iteration");
-
   params.addParam<Real>("max_catch_up_steps",
                         2,
                         "Maximum number of steps to allow an app to take "
@@ -108,7 +104,6 @@ RedbackTransientMultiApp::RedbackTransientMultiApp(const InputParameters & param
     _failures(0),
     _catch_up(getParam<bool>("catch_up")),
     _max_catch_up_steps(getParam<Real>("max_catch_up_steps")),
-    _keep_solution_during_restore(getParam<bool>("keep_solution_during_restore")),
     _first(declareRecoverableData<bool>("first", true)),
     _auto_advance(false),
     _print_sub_cycles(getParam<bool>("print_sub_cycles")),
@@ -116,27 +111,38 @@ RedbackTransientMultiApp::RedbackTransientMultiApp(const InputParameters & param
 {
   // Transfer interpolation only makes sense for sub-cycling solves
   if (_interpolate_transfers && !_sub_cycling)
-    mooseError("MultiApp ",
+    paramError("interpolate_transfers",
+               "MultiApp ",
                name(),
                " is set to interpolate_transfers but is not sub_cycling!  That is not valid!");
 
   // Subcycling overrides catch up, we don't want to confuse users by allowing them to set both.
   if (_sub_cycling && _catch_up)
-    mooseError("MultiApp ",
+    paramError("catch_up",
+               "MultiApp ",
                name(),
-               " sub_cycling and catch_up cannot both be set to true simultaneously.");
+               " \"sub_cycling\" and \"catch_up\" cannot both be set to true simultaneously.");
 
   if (_sub_cycling && _keep_solution_during_restore)
-    mooseError("In MultiApp ",
+    paramError("keep_solution_during_restore",
+               "In MultiApp ",
                name(),
                " it doesn't make any sense to keep a solution during restore when doing "
-               "sub_cycling.  Consider trying catch_up steps instead");
+               "sub_cycling.  Consider trying \"catch_up\" steps instead");
 
   if (!_catch_up && _keep_solution_during_restore)
-    mooseError("In MultiApp ",
+    paramError("keep_solution_during_restore",
+               "In MultiApp ",
                name(),
-               " `keep_solution_during_restore` requires `catch_up = true`.  Either disable "
-               "`keep_solution_during_restart` or set `catch_up = true`");
+               " \"keep_solution_during_restore\" requires \"catch_up = true\".  Either disable "
+               "\"keep_solution_during_restart\" or set \"catch_up = true\"");
+
+  if (_sub_cycling && _tolerate_failure)
+    paramInfo("tolerate_failure",
+              "In MultiApp ",
+              name(),
+              " both \"sub_cycling\" and \"tolerate_failure\" are set to true. \"tolerate_failure\""
+              " will be ignored.");
 }
 
 NumericVector<Number> &
@@ -168,35 +174,6 @@ RedbackTransientMultiApp::initialSetup()
     // Grab Transient Executioners from each app
     for (unsigned int i = 0; i < _my_num_apps; i++)
       setupApp(i);
-  }
-}
-
-void
-RedbackTransientMultiApp::restore()
-{
-  // Must be restarting / recovering so hold off on restoring
-  // Instead - the restore will happen in createApp()
-  // Note that _backups was already populated by dataLoad()
-  if (_apps.empty())
-    return;
-
-  if (_keep_solution_during_restore)
-  {
-    _end_solutions.resize(_my_num_apps);
-
-    for (unsigned int i = 0; i < _my_num_apps; i++)
-      _end_solutions[i] =
-          _apps[i]->getExecutioner()->feProblem().getNonlinearSystem().solution().clone();
-  }
-
-  MultiApp::restore();
-
-  if (_keep_solution_during_restore)
-  {
-    for (unsigned int i = 0; i < _my_num_apps; i++)
-      _apps[i]->getExecutioner()->feProblem().getNonlinearSystem().solution() = *_end_solutions[i];
-
-    _end_solutions.clear();
   }
 }
 
@@ -245,7 +222,7 @@ RedbackTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
       Real app_time_offset = _apps[i]->getGlobalTimeOffset();
 
       // Maybe this MultiApp was already solved
-      if ((ex->getTime() + app_time_offset + 2e-14 >= target_time) ||
+      if ((ex->getTime() + app_time_offset + ex->timestepTol() >= target_time) ||
           (ex->getTime() >= ex->endTime()))
         continue;
 
@@ -273,7 +250,7 @@ RedbackTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
           ConstElemRange & elem_range = *problem.mesh().getActiveLocalElementRange();
           Threads::parallel_reduce(elem_range, aldit);
 
-          _transferred_dofs = aldit._all_dof_indices;
+          _transferred_dofs = aldit.getDofIndices();
         }
 
         // Disable/enable output for sub cycling
@@ -286,13 +263,20 @@ RedbackTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
 
         bool at_steady = false;
 
-        if (_first && !_app.isRecovering())
+        // ADL: During restart, there is already an FEProblemBase::advanceState that occurs at the
+        // end of RedbackTransientMultiApp::setupApp. advanceState, along with copying the solutions
+        // backwards in time/state, also *moves* (note it doesn't copy!) stateful material
+        // properties backwards (through swapping). So if restarting from a full-solve steady
+        // multi-app for example, then after one advance state, we will have good information in old
+        // and no information in current. But then if we advance again we no longer have good data
+        // in the old material properties, so don't advance here if we're restarting
+        if (_first && !_app.isRecovering() && !_app.isRestarting())
           problem.advanceState();
 
         bool local_first = _first;
 
         // Now do all of the solves we need
-        while ((!at_steady && ex->getTime() + app_time_offset + 2e-14 < target_time) ||
+        while ((!at_steady && ex->getTime() + app_time_offset + ex->timestepTol() < target_time) ||
                !ex->lastSolveConverged())
         {
           if (local_first != true)
@@ -400,9 +384,14 @@ RedbackTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
       }
       else
       {
-        _console << "Solving Normal Step!" << std::endl;
-
-        if (_first && !_app.isRecovering())
+        // ADL: During restart, there is already an FEProblemBase::advanceState that occurs at the
+        // end of RedbackTransientMultiApp::setupApp. advanceState, along with copying the solutions
+        // backwards in time/state, also *moves* (note it doesn't copy!) stateful material
+        // properties backwards (through swapping). So if restarting from a full-solve steady
+        // multi-app for example, then after one advance state, we will have good information in old
+        // and no information in current. But then if we advance again we no longer have good data
+        // in the old material properties, so don't advance here if we're restarting
+        if (_first && !_app.isRecovering() && !_app.isRestarting())
           problem.advanceState();
 
         if (auto_advance)
@@ -552,15 +541,15 @@ RedbackTransientMultiApp::incrementTStep(Real target_time)
       Real app_time_offset = _apps[i]->getGlobalTimeOffset();
 
       // Only increment the step if we are after (target_time) the
-      // start_time (app_time_offset) of this sub_app.
-      if (app_time_offset < target_time)
+      // start_time (added to app_time_offset) of this sub_app.
+      if (_apps[i]->getStartTime() + app_time_offset < target_time)
         ex->incrementStepOrReject();
     }
   }
 }
 
 void
-RedbackTransientMultiApp::finishStep()
+RedbackTransientMultiApp::finishStep(bool recurse_through_multiapp_levels)
 {
   if (!_sub_cycling)
   {
@@ -569,6 +558,13 @@ RedbackTransientMultiApp::finishStep()
       Transient * ex = _transient_executioners[i];
       ex->endStep();
       ex->postStep();
+      if (recurse_through_multiapp_levels)
+      {
+        ex->feProblem().finishMultiAppStep(EXEC_TIMESTEP_BEGIN,
+                                           /*recurse_through_multiapp_levels=*/true);
+        ex->feProblem().finishMultiAppStep(EXEC_TIMESTEP_END,
+                                           /*recurse_through_multiapp_levels=*/true);
+      }
     }
   }
 }
@@ -610,7 +606,8 @@ RedbackTransientMultiApp::computeDT()
   return smallest_dt;
 }
 
-void RedbackTransientMultiApp::resetApp(
+void
+RedbackTransientMultiApp::resetApp(
     unsigned int global_app,
     Real /*time*/) // FIXME: Note that we are passing in time but also grabbing it below
 {
@@ -636,8 +633,8 @@ void RedbackTransientMultiApp::resetApp(
   }
 }
 
-void RedbackTransientMultiApp::setupApp(unsigned int i,
-                                        Real /*time*/) // FIXME: Should we be passing time?
+void
+RedbackTransientMultiApp::setupApp(unsigned int i, Real /*time*/) // FIXME: Should we be passing time?
 {
   auto & app = _apps[i];
   Transient * ex = dynamic_cast<Transient *>(app->getExecutioner());
@@ -650,10 +647,8 @@ void RedbackTransientMultiApp::setupApp(unsigned int i,
   // Update the file numbers for the outputs from the parent application
   app->getOutputWarehouse().setFileNumbers(_app.getOutputFileNumbers());
 
-  // Call initialization method of Executioner (Note, this preforms the output of the initial time
-  // step, if desired)
-  ex->init();
-
+  // Add these vectors before we call init on the executioner because that will try to restore these
+  // vectors in a restart context
   if (_interpolate_transfers)
   {
     AuxiliarySystem & aux_system = problem.getAuxiliarySystem();
@@ -665,6 +660,10 @@ void RedbackTransientMultiApp::setupApp(unsigned int i,
     // This will be where we'll transfer the value to for the "target" time
     libmesh_aux_system.add_vector("transfer", false);
   }
+
+  // Call initialization method of Executioner (Note, this preforms the output of the initial time
+  // step, if desired)
+  ex->init();
 
   ex->preExecute();
   if (!_app.isRecovering())

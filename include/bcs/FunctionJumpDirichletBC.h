@@ -37,7 +37,7 @@ protected:
   virtual Real computeQpResidual() override;
 
   /// The function being used for evaluation
-  Function & _func;
+  const Function & _func;
   const VariableValue & _tangent_jump;
   Real _angle;
   const unsigned int _component;

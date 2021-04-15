@@ -1,11 +1,14 @@
-//* This file is part of the MOOSE framework
-//* https://www.mooseframework.org
-//*
-//* All rights reserved, see COPYRIGHT for full restrictions
-//* https://github.com/idaholab/moose/blob/master/COPYRIGHT
-//*
-//* Licensed under LGPL 2.1, please see LICENSE for details
-//* https://www.gnu.org/licenses/lgpl-2.1.html
+/****************************************************************/
+/*               DO NOT MODIFY THIS HEADER                      */
+/*     REDBACK - Rock mEchanics with Dissipative feedBACKs      */
+/*                                                              */
+/*                     (c) 2019 CSIRO                           */
+/*                   ALL RIGHTS RESERVED                        */
+/*                                                              */
+/*                    Prepared by CSIRO                         */
+/*                                                              */
+/*            See COPYRIGHT for full restrictions               */
+/****************************************************************/
 
 #include "InputParameters.h"
 #include "MooseMesh.h"
@@ -22,7 +25,7 @@ template <>
 InputParameters
 validParams<RemoveLayerElements>()
 {
-  InputParameters params = validParams<MeshModifier>();
+  InputParameters params = validParams<MeshGenerator>();
   params.addRequiredParam<SubdomainName>(
       "master_block", "The master block from which we select the boundary elements");
   params.addRequiredParam<SubdomainName>("paired_block",
@@ -36,12 +39,13 @@ validParams<RemoveLayerElements>()
 }
 
 RemoveLayerElements::RemoveLayerElements(const InputParameters & parameters)
-  : MeshModifier(parameters)
+  : MeshGenerator(parameters),
+    _input(getMesh("input"))
 {
 }
 
-void
-RemoveLayerElements::modify()
+std::unique_ptr<MeshBase>
+RemoveLayerElements::generate()
 {
   FileName file = getParam<FileName>("file");
   Real porosity_change = 0;
@@ -69,7 +73,7 @@ RemoveLayerElements::modify()
     myfile.close();
   }
 
-  MeshBase & mesh = _mesh_ptr->getMesh();
+  std::unique_ptr<MeshBase> mesh = std::move(_input);
   // std::unique_ptr<MeshRefinement> mesh_refinement = libmesh_make_unique<MeshRefinement>(mesh);
 
   SubdomainID master_id;
@@ -77,13 +81,13 @@ RemoveLayerElements::modify()
   // separate between erosion and dilation
   if (porosity_change >= 0)
   {
-    master_id = _mesh_ptr->getSubdomainID(getParam<SubdomainName>("master_block"));
-    paired_id = _mesh_ptr->getSubdomainID(getParam<SubdomainName>("paired_block"));
+    master_id = mesh->getSubdomainID(getParam<SubdomainName>("master_block"));
+    paired_id = mesh->getSubdomainID(getParam<SubdomainName>("paired_block"));
   }
   else
   {
-    paired_id = _mesh_ptr->getSubdomainID(getParam<SubdomainName>("master_block"));
-    master_id = _mesh_ptr->getSubdomainID(getParam<SubdomainName>("paired_block"));
+    paired_id = mesh->getSubdomainID(getParam<SubdomainName>("master_block"));
+    master_id = mesh->getSubdomainID(getParam<SubdomainName>("paired_block"));
   }
 
   Real total_volume = 1; // 0
@@ -178,7 +182,7 @@ RemoveLayerElements::modify()
       output_file = fopen(file.c_str(), "w");
       fputs(std::to_string(volume_changed).c_str(), output_file);
       fclose(output_file);
-      return;
+      return dynamic_pointer_cast<MeshBase>(mesh);
     }
     // if (layer_volume <= volume_to_change) break;
 
@@ -233,6 +237,7 @@ RemoveLayerElements::modify()
     volume_changed += layer_volume;
   }
   // mooseError("MeshModifier RemoveLayerElements exceeded number of loops possible");
+  return dynamic_pointer_cast<MeshBase>(mesh);
 }
 
 std::vector<Elem *>
@@ -240,7 +245,7 @@ RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_
 {
   std::vector<Elem *> elements;
 
-  MeshBase & mesh = _mesh_ptr->getMesh();
+  // MeshBase & mesh = _mesh_ptr->getMesh();
 
   // Prepare to query about sides adjacent to remote elements if we're
   // on a distributed mesh

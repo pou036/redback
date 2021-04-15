@@ -7,8 +7,7 @@
 //* Licensed under LGPL 2.1, please see LICENSE for details
 //* https://www.gnu.org/licenses/lgpl-2.1.html
 
-#ifndef REDBACKTRANSIENTMULTIAPP_H
-#define REDBACKTRANSIENTMULTIAPP_H
+#pragma once
 
 #include "MultiApp.h"
 
@@ -29,6 +28,8 @@ InputParameters validParams<RedbackTransientMultiApp>();
 class RedbackTransientMultiApp : public MultiApp
 {
 public:
+  static InputParameters validParams();
+
   RedbackTransientMultiApp(const InputParameters & parameters);
 
   virtual NumericVector<Number> & appTransferVector(unsigned int app,
@@ -36,13 +37,11 @@ public:
 
   virtual void initialSetup() override;
 
-  virtual void restore() override;
-
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
 
   virtual void incrementTStep(Real target_time) override;
 
-  virtual void finishStep() override;
+  virtual void finishStep(bool recurse_through_multiapp_levels = false) override;
 
   virtual bool needsRestoration() override;
 
@@ -78,8 +77,6 @@ private:
 
   bool _catch_up;
   Real _max_catch_up_steps;
-
-  bool _keep_solution_during_restore;
 
   /// Is it our first time through the execution loop?
   bool & _first;
@@ -118,5 +115,3 @@ public:
 
   ~MultiAppSolveFailure() throw() {}
 };
-
-#endif // REDBACKTRANSIENTMULTIAPP_H
