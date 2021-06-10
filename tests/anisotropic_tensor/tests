@@ -1,0 +1,8 @@
+[Tests]
+  [./test_anisotropic_tensor] # can't put a dot in that name!
+    type = 'Exodiff'
+    input = 'anisotropic_tensor_aux_test.i'
+    exodiff = 'anisotropic_tensor_aux.e'
+    rel_err = 1e-8
+  [../]
+[]
