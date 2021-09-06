@@ -1,9 +1,10 @@
 [Mesh]
-  file = ../../meshes/fractureXtruncated.msh
-[]
-
-[MeshModifiers]
+  [file]
+    type = FileMeshGenerator
+    file = ../../meshes/fractureXtruncated.msh
+  []
   [New_0]
-    type = BreakMeshByBlock
+    type = BreakMeshByBlockGenerator
+    input = file
   []
 []

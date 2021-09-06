@@ -18,7 +18,7 @@
 #ifndef FUNCTIONDIRICHLETTRANSVERSEBC
 #define FUNCTIONDIRICHLETTRANSVERSEBC
 
-#include "PresetNodalBC.h"
+#include "DirichletBCBase.h"
 
 // Forward Declarations
 class FunctionDirichletTransverseBC;
@@ -31,7 +31,7 @@ InputParameters validParams<FunctionDirichletTransverseBC>();
  * Defines a boundary condition that forces the value to be a user specified
  * function at the boundary.
  */
-class FunctionDirichletTransverseBC : public PresetNodalBC
+class FunctionDirichletTransverseBC : public DirichletBCBase
 {
 public:
   FunctionDirichletTransverseBC(const InputParameters & parameters);

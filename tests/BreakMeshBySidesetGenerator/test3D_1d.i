@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [./fmg]
     type = FileMeshGenerator
     file = 3Dcase1d_structured_2x2x2.msh
@@ -14,10 +14,6 @@
     connect_T_junctions = true
     verbose = true
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]

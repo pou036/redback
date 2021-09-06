@@ -1,4 +1,4 @@
-[MeshGenerators]
+[Mesh]
   [fmg]
     type = FileMeshGenerator
     file = fractureXsplit.msh
@@ -12,10 +12,6 @@
     split_interface = false
     connect_T_junctions = false
   []
-[]
-
-[Mesh]
-  type = MeshGeneratorMesh
 []
 
 [Variables]
