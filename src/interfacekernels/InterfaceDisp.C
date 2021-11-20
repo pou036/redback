@@ -11,11 +11,10 @@
 
 registerMooseObject("RedbackApp", InterfaceDisp);
 
-template <>
 InputParameters
-validParams<InterfaceDisp>()
+InterfaceDisp::validParams()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = InterfaceKernel::validParams();
   params.addParam<Real>(
       "penalty", 1, "The penalty that penalizes jump between master and neighbor variables.");
   params.addCoupledVar("tangent_jump",

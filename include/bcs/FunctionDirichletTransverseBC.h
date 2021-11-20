@@ -20,12 +20,7 @@
 
 #include "DirichletBCBase.h"
 
-// Forward Declarations
-class FunctionDirichletTransverseBC;
 class Function;
-
-template <>
-InputParameters validParams<FunctionDirichletTransverseBC>();
 
 /**
  * Defines a boundary condition that forces the value to be a user specified
@@ -35,6 +30,8 @@ class FunctionDirichletTransverseBC : public DirichletBCBase
 {
 public:
   FunctionDirichletTransverseBC(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   /**

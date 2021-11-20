@@ -14,11 +14,10 @@
 
 registerMooseObject("RedbackApp", RedbackFluidMaterial);
 
-template <>
 InputParameters
-validParams<RedbackFluidMaterial>()
+RedbackFluidMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addCoupledVar("temperature", 0.0, "Dimensionless temperature");
   params.addCoupledVar("pore_pres", 0.0, "Dimensionless pore pressure");

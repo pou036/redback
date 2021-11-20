@@ -17,11 +17,10 @@
 
 registerMooseObject("RedbackApp", InterfaceDarcy);
 
-template <>
 InputParameters
-validParams<InterfaceDarcy>()
+InterfaceDarcy::validParams()
 {
-  InputParameters params = validParams<InterfaceKernel>();
+  InputParameters params = InterfaceKernel::validParams();
   params.addRequiredCoupledVar("fault_lewis_number", "Lewis number of the fault.");
   params.addParam<Real>("fault_thickness", 1., "The neighboring diffusion coefficient.");
   return params;

@@ -20,13 +20,12 @@
 
 registerMooseObject("RedbackApp", PointValueFileWriter);
 
-template <>
 InputParameters
-validParams<PointValueFileWriter>()
+PointValueFileWriter::validParams()
 {
   // File that does homogeneous erosion of a binary CT-scan file and write resulting microstructure in another filename
   // The amount of erosion is given by a PointValue Postprocessor
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<VariableName>(
       "variable", "The name of the variable that this postprocessor operates on.");
   params.addRequiredParam<Point>("point",

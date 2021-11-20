@@ -14,11 +14,10 @@
 
 registerMooseObject("RedbackApp", RedbackFluidDivergence);
 
-template <>
 InputParameters
-validParams<RedbackFluidDivergence>()
+RedbackFluidDivergence::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   // params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
 
   params.addRequiredCoupledVar("fluid_vel_x", "x-velocity");

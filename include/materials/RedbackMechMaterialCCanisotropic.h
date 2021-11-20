@@ -15,16 +15,12 @@
 
 #include "RedbackMechMaterialCC.h"
 
-// Forward Declarations
-class RedbackMechMaterialCCanisotropic;
-
-template <>
-InputParameters validParams<RedbackMechMaterialCCanisotropic>();
-
 class RedbackMechMaterialCCanisotropic : public RedbackMechMaterialCC
 {
 public:
   RedbackMechMaterialCCanisotropic(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   Real _initial_anisotropy_param; // Initial coefficient alpha of anisotropy

@@ -13,15 +13,12 @@
 
 #include "BreakMeshByBlockGeneratorBase.h"
 
-class BreakMeshBySidesetGenerator;
-
-template <>
-InputParameters validParams<BreakMeshBySidesetGenerator>();
-
 class BreakMeshBySidesetGenerator : public BreakMeshByBlockGeneratorBase
 {
 public:
   BreakMeshBySidesetGenerator(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   std::unique_ptr<MeshBase> generate() override;
 

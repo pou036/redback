@@ -16,12 +16,6 @@
 // MOOSE includes
 #include "MeshGenerator.h"
 
-// Forward declerations
-class ElementFileSubdomain;
-
-template <>
-InputParameters validParams<ElementFileSubdomain>();
-
 /**
  * MeshModifier for assigning subdomain IDs of all elements
  */
@@ -33,6 +27,8 @@ public:
    * @param parameters The input parameters
    */
   ElementFileSubdomain(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   /**
    * Class destructor

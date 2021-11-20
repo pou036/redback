@@ -35,11 +35,10 @@ function of equivalent
 plastic strain has to be specified by the user.
 */
 
-template <>
 InputParameters
-validParams<RedbackMechMaterial>()
+RedbackMechMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   // Copy-paste from TensorMechanicsMaterial.C
   params.addRequiredCoupledVar("disp_x", "The x displacement");

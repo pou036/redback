@@ -16,16 +16,12 @@
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
 
-// Forward declarations
-class RedbackDiffVarsAux;
-
-template <>
-InputParameters validParams<RedbackDiffVarsAux>();
-
 class RedbackDiffVarsAux : public AuxKernel
 {
 public:
   RedbackDiffVarsAux(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackDiffVarsAux() {}
 
 protected:
