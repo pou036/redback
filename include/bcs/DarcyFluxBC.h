@@ -15,11 +15,6 @@
 
 #include "FluxBC.h"
 
-class DarcyFluxBC;
-
-template <>
-InputParameters validParams<DarcyFluxBC>();
-
 /**
  * A FluxBC which is consistent with the boundary terms arising from
  * the Diffusion Kernel. The flux vector in this case is simply
@@ -36,6 +31,8 @@ class DarcyFluxBC : public FluxBC
 {
 public:
   DarcyFluxBC(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual RealGradient computeQpFluxResidual() override;

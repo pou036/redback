@@ -14,11 +14,10 @@
 
 registerMooseObject("RedbackApp", RedbackMechMaterialElastic);
 
-template <>
 InputParameters
-validParams<RedbackMechMaterialElastic>()
+RedbackMechMaterialElastic::validParams()
 {
-  InputParameters params = validParams<RedbackMechMaterial>();
+  InputParameters params = RedbackMechMaterial::validParams();
   return params;
 }
 

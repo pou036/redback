@@ -14,11 +14,10 @@
 
 registerMooseObject("RedbackApp", RedbackContinuation);
 
-template <>
 InputParameters
-validParams<RedbackContinuation>()
+RedbackContinuation::validParams()
 {
-  InputParameters params = validParams<ODEKernel>();
+  InputParameters params = ODEKernel::validParams();
   params.addParam<Real>("ds", 1.0, "Continuation increment");
   params.addParam<Real>("ds_old", 1.0, "Old continuation increment");
   params.addParam<Real>("continuation_parameter_old", 0.0, "Old value of continuation parameter");

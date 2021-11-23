@@ -18,16 +18,12 @@
 #include "RankFourTensor.h"
 #include "RankTwoTensor.h"
 
-// Forward Declarations
-class RedbackFluidMaterial;
-
-template <>
-InputParameters validParams<RedbackFluidMaterial>();
-
 class RedbackFluidMaterial : public Material
 {
 public:
   RedbackFluidMaterial(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual void stepInitQpProperties();

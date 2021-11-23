@@ -15,15 +15,12 @@
 
 #include "Kernel.h"
 
-class RedbackNavier;
-
-template <>
-InputParameters validParams<RedbackNavier>();
-
 class RedbackNavier : public Kernel
 {
 public:
   RedbackNavier(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackNavier();
 
 protected:

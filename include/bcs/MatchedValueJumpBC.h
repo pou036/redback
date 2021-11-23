@@ -15,12 +15,6 @@
 
 #include "NodalBC.h"
 
-// Forward Declarations
-class MatchedValueJumpBC;
-
-template <>
-InputParameters validParams<MatchedValueJumpBC>();
-
 /**
  * Implements a simple coupled boundary condition where u=v on the boundary.
  */
@@ -28,6 +22,8 @@ class MatchedValueJumpBC : public NodalBC
 {
 public:
   MatchedValueJumpBC(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual() override;

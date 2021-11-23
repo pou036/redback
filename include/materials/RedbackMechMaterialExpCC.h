@@ -15,16 +15,12 @@
 
 #include "RedbackMechMaterial.h"
 
-// Forward Declarations
-class RedbackMechMaterialExpCC;
-
-template <>
-InputParameters validParams<RedbackMechMaterialExpCC>();
-
 class RedbackMechMaterialExpCC : public RedbackMechMaterial
 {
 public:
   RedbackMechMaterialExpCC(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   Real _slope_yield_surface; // coefficient for yield surface

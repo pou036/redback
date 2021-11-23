@@ -18,11 +18,10 @@
 
 registerMooseObject("RedbackApp", FunctionLogNormalDistributionIC);
 
-template <>
 InputParameters
-validParams<FunctionLogNormalDistributionIC>()
+FunctionLogNormalDistributionIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredParam<Real>(
       "mean", "Mean value of lognormal distribution function (NOT, of the log10 of it!)");
   params.addRequiredParam<Real>(

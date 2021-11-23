@@ -18,11 +18,10 @@
 
 registerMooseAction("RedbackApp", RedbackMechAction, "add_kernel");
 
-template <>
 InputParameters
-validParams<RedbackMechAction>()
+RedbackMechAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addParam<NonlinearVariableName>("disp_x", "", "The x displacement");
   params.addParam<NonlinearVariableName>("disp_y", "", "The y displacement");
   params.addParam<NonlinearVariableName>("disp_z", "", "The z displacement");
