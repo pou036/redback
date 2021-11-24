@@ -9,11 +9,10 @@
 
 registerMooseObject("RedbackApp", TractionProjectionAux);
 
-template <>
 InputParameters
-validParams<TractionProjectionAux>()
+TractionProjectionAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription(
       "Compute normal or tangential projection of a traction (stress projected on a vector) in 2D");
   params.addRequiredParam<MaterialPropertyName>("stress_tensor", "The stress tensor name");

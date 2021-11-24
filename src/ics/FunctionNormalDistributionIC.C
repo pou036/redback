@@ -18,11 +18,10 @@
 
 registerMooseObject("RedbackApp", FunctionNormalDistributionIC);
 
-template <>
 InputParameters
-validParams<FunctionNormalDistributionIC>()
+FunctionNormalDistributionIC::validParams()
 {
-  InputParameters params = validParams<InitialCondition>();
+  InputParameters params = InitialCondition::validParams();
   params.addRequiredParam<Real>("mean", "Mean value of normal distribution function");
   params.addRequiredParam<Real>("standard_deviation",
                                 "Standard deviation of normal distribution function");

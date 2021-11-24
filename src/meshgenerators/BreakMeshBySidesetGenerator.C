@@ -21,11 +21,10 @@
 
 registerMooseObject("RedbackApp", BreakMeshBySidesetGenerator);
 
-template <>
 InputParameters
-validParams<BreakMeshBySidesetGenerator>()
+BreakMeshBySidesetGenerator::validParams()
 {
-  InputParameters params = validParams<BreakMeshByBlockGeneratorBase>();
+  InputParameters params = BreakMeshByBlockGeneratorBase::validParams();
   params.addRequiredParam<MeshGeneratorName>("input", "The mesh we want to modify");
   params.addRequiredParam<std::vector<BoundaryName>>(
       "sidesets", "The names of sidesets from which to create the new interface(s).");

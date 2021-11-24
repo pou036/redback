@@ -14,11 +14,10 @@
 
 registerMooseObject("RedbackApp", PressureNeumannBC);
 
-template <>
 InputParameters
-validParams<PressureNeumannBC>()
+PressureNeumannBC::validParams()
 {
-  InputParameters params = validParams<IntegratedBC>();
+  InputParameters params = IntegratedBC::validParams();
   params.addRequiredCoupledVar("coupled_var", "The variable whose value we are to match.");
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction the variable "

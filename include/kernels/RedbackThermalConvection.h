@@ -19,6 +19,8 @@ class RedbackThermalConvection : public Kernel
 {
 public:
   RedbackThermalConvection(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackThermalConvection() {}
 
 protected:
@@ -35,8 +37,5 @@ protected:
 private:
   Real _time_factor;
 };
-
-template <>
-InputParameters validParams<RedbackThermalConvection>();
 
 #endif // REDBACKTHERMALCONVECTION_H

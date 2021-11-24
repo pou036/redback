@@ -15,11 +15,6 @@
 
 #include "Kernel.h"
 
-class RedbackThermalPressurization;
-
-template <>
-InputParameters validParams<RedbackThermalPressurization>();
-
 /**
  * Kernel that is calling coupledDot
  */
@@ -27,6 +22,8 @@ class RedbackThermalPressurization : public Kernel
 {
 public:
   RedbackThermalPressurization(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackThermalPressurization();
 
 protected:

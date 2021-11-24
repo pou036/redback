@@ -16,11 +16,10 @@
 
 registerMooseObject("RedbackApp", ImageProcessing);
 
-template <>
 InputParameters
-validParams<ImageProcessing>()
+ImageProcessing::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<FunctionName>("function", "Name of the function");
   return params;
 }

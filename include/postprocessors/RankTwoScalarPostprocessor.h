@@ -16,15 +16,12 @@
 #include "GeneralPostprocessor.h"
 #include "RankTwoTensor.h"
 
-class RankTwoScalarPostprocessor;
-
-template <>
-InputParameters validParams<RankTwoScalarPostprocessor>();
-
 class RankTwoScalarPostprocessor : public GeneralPostprocessor
 {
 public:
   RankTwoScalarPostprocessor(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   virtual void initialize() override;
   virtual void execute() override;

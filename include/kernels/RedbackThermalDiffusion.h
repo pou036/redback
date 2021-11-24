@@ -15,15 +15,12 @@
 
 #include "Kernel.h"
 
-class RedbackThermalDiffusion;
-
-template <>
-InputParameters validParams<RedbackThermalDiffusion>();
-
 class RedbackThermalDiffusion : public Kernel
 {
 public:
   RedbackThermalDiffusion(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackThermalDiffusion();
 
 protected:

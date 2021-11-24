@@ -15,15 +15,12 @@
 
 #include "Kernel.h"
 
-class RedbackChemExo;
-
-template <>
-InputParameters validParams<RedbackChemExo>();
-
 class RedbackChemExo : public Kernel
 {
 public:
   RedbackChemExo(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackChemExo();
 
 protected:

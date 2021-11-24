@@ -16,11 +16,10 @@
 
 registerMooseObject("RedbackApp", RedbackMechMaterialExpCC);
 
-template <>
 InputParameters
-validParams<RedbackMechMaterialExpCC>()
+RedbackMechMaterialExpCC::validParams()
 {
-  InputParameters params = validParams<RedbackMechMaterial>();
+  InputParameters params = RedbackMechMaterial::validParams();
   // TODO: Check sign of slope_yield_surface
   //  if (_slope_yield_surface == 0)
   //    mooseError("modified Cam-Clay cannot deal with 0 CSL slope
