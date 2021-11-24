@@ -67,6 +67,7 @@ protected:
   const VariableValue & _pore_pres; //, & _pore_pres_old;
   const VariableValue & _total_porosity;
   const VariableValue & _inverse_lewis_number_tilde;
+  const VariableValue & _inverse_lewis_factor;
   bool _has_lewis_trans;
   const VariableValue & _lewis_t;
 

@@ -60,6 +60,8 @@ validParams<RedbackMaterial>()
       "inverse_lewis_number_tilde",
       0.0,
       "Varying component of (inverse of) Lewis number, coming from mutli-app for example");
+  params.addCoupledVar(
+      "inverse_lewis_factor", 1.0, "multiplying permeability (inverse of Lewis) factor");
   params.addCoupledVar("lewis_transversal",
                        "Lewis in transversal direction "
                        "of the inferface (only when used on lower dimensional subdomain)");
@@ -151,6 +153,7 @@ RedbackMaterial::RedbackMaterial(const InputParameters & parameters)
                                                      // coupled! Check that
                                                      // (TODO)
     _inverse_lewis_number_tilde(coupledValue("inverse_lewis_number_tilde")),
+    _inverse_lewis_factor(coupledValue("inverse_lewis_factor")),
     _has_lewis_trans(isCoupled("lewis_transversal")),
     _lewis_t(_has_lewis_trans ? coupledValue("lewis_transversal") : _zero),
     _concentration(coupledValue("concentration")),
@@ -596,6 +599,11 @@ _ar_F[_qp] * _delta[_qp] * (1 - _total_porosity[_qp]) * (1 - _solid_ratio[_qp])
     // to include modifications from multi-app for example
     Real inverse_lewis_number = 1 / _lewis_number[_qp] + _inverse_lewis_number_tilde[_qp];
     _lewis_number[_qp] = 1 / inverse_lewis_number;
+  }
+  if (_inverse_lewis_factor[_qp] != 0)
+  {
+    // to multiply permeability by a factor (e.g. for faults damage zones)
+    _lewis_number[_qp] = _lewis_number[_qp] / _inverse_lewis_factor[_qp];
   }
 
   // Forming the compressibilities of the phases
