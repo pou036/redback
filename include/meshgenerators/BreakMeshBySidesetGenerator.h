@@ -47,6 +47,7 @@ private:
                            const Node &,
                            std::set<dof_id_type> &,
                            std::set<dof_id_type> &,
+                           std::set<std::vector<unsigned int>> &,
                            boundary_id_type,
                            std::set<dof_id_type> &,
                            std::set<dof_id_type> &);

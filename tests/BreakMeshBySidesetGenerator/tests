@@ -141,4 +141,12 @@
     cli_args = 'Outputs/file_base=test3D_1d2 Mesh/breakmesh/connect_T_junctions=true'
     csvdiff = 'test3D_1d2_sampler_0001.csv'
   [../]
+  [./test_BreakMeshBySideset_3D_2]
+    # Testing in 3D, curved faults
+    # (note: can't use exodiff because of split nodes having same coords)
+    type = 'CSVDiff'
+    input = 'test3D_2a.i'
+    cli_args = 'Outputs/file_base=test3D_2 Mesh/breakmesh/connect_T_junctions=true'
+    csvdiff = 'test3D_2_nodal_sample_0001.csv'
+  [../]
 []

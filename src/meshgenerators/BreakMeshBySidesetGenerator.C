@@ -78,6 +78,7 @@ BreakMeshBySidesetGenerator::assignNeighborColor(
     const Node & node_ref,
     std::set<dof_id_type> & remaining_split_node_ids,
     std::set<dof_id_type> & ss_node_ids,
+    std::set<std::vector<unsigned int>> & ss_facenode_ids,
     boundary_id_type sideset_id,
     std::set<dof_id_type> & ss_split_node_ids,
     std::set<dof_id_type> & duplicated_node_ids)
@@ -85,10 +86,13 @@ BreakMeshBySidesetGenerator::assignNeighborColor(
   // find new color
   auto s = elem->which_neighbor_am_i(elem_ref);
   std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(s);
+  std::vector<unsigned int> face_node_ids;
   bool is_on_same_side = false;
+  // first, if one node on common side is not on sideset, then elts on same side
   for (int n = 0; n < nodes_on_side.size(); ++n)
   {
     dof_id_type node_id = elem->node_id(nodes_on_side[n]);
+    face_node_ids.push_back(node_id);
     if (ss_node_ids.count(node_id) == 0)
     {
       is_on_same_side = true;
@@ -102,6 +106,17 @@ BreakMeshBySidesetGenerator::assignNeighborColor(
         remaining_split_node_ids.insert(node_id);
     }
   }
+  // second, if all nodes on common side are on sideset, need to check face itself
+  // (the sideset can be curved and have all nodes on it, yet not that face)
+  // That's the real check, only keeping previous check until speed assessed (TODO)
+  if (!is_on_same_side) {
+    sort(face_node_ids.begin(), face_node_ids.end());
+    if (ss_facenode_ids.count(face_node_ids) == 0) {
+      // despite having all nodes on sideset, the face it actually not
+      is_on_same_side = true;
+    }
+  }
+
   if (std::find(elem_ids_colored.begin(), elem_ids_colored.end(), elem->id()) !=
       elem_ids_colored.end())
     return;
@@ -368,10 +383,15 @@ BreakMeshBySidesetGenerator::generate()
 
   // Identify node IDs on given sidesets and their borders
   std::set<int> allsidesets_node_ids;
-  std::map<BoundaryName, std::set<dof_id_type>> sidesets_node_ids;
+  std::map<BoundaryName, std::set<dof_id_type>> sidesets_node_ids; // TODO: superseded by sidesets_facenode_ids??
   std::map<BoundaryName, std::set<dof_id_type>> ss_border_node_ids; // sideset border node IDs
   std::map<BoundaryName, std::set<dof_id_type>> ss_inside_node_ids; // sideset inside node IDs
   std::map<BoundaryName, std::set<dof_id_type>> ss_split_node_ids;  // sideset split node IDs
+  std::map<BoundaryName, int> ss_dim;  // sideset dimensionality
+  std::map<BoundaryName, std::set<std::vector<unsigned int>>> sidesets_facenode_ids; // key:sidesetname, value=set{faces} with faces=[sorted node ids]
+  std::set<std::vector<unsigned int>> all_ss_faces; // for 3D: all sidesets faces
+    // (as vectors of sorted node IDs), used to make sure we don't add extra
+    // faces not originally on sidesets
   if (_verbose)
     _console << "Identifying dimensionality of sidesets and getting all node IDs..." << std::endl;
   for (auto & sideset_name : sideset_names)
@@ -386,6 +406,7 @@ BreakMeshBySidesetGenerator::generate()
       dim_ss = 3;
     else
       dim_ss = 2;
+    ss_dim[sideset_name] = dim_ss;
     if (_verbose)
       _console << "  Loop on sideset '" << sideset_name << "' (ID " << sideset_id
                << ") -> dim=" << dim_ss << std::endl;
@@ -409,6 +430,7 @@ BreakMeshBySidesetGenerator::generate()
           face_node_ids.push_back(elem->node_id(nodes_on_side[n]));
         }
         sort(face_node_ids.begin(), face_node_ids.end());
+        sidesets_facenode_ids[sideset_name].insert(face_node_ids);
         // get node IDs on sideset border
         if (dim_ss == 3)
         {
@@ -493,14 +515,14 @@ BreakMeshBySidesetGenerator::generate()
 
   // identify element "colors" (which side of sideset they are)
   if (_verbose)
-    _console << "Identifying element 'colors'..." << std::endl;
+    _console << std::endl << "Identifying element 'colors'..." << std::endl;
   std::map<dof_id_type, std::map<boundary_id_type, bool>>
       elt_colors;                       // {elt_id:{sideset_id:boolean}}
   std::set<dof_id_type> split_node_ids; // all nodes to be split
   for (auto & sideset_name : sideset_names)
   {
     if (_verbose)
-      _console << "Processing sideset " << sideset_name << "..." << std::endl;
+      _console << "Processing sideset '" << sideset_name << "'..." << std::endl;
     auto sideset_id = mesh->get_boundary_info().get_id_by_name(sideset_name);
     std::map<dof_id_type, std::set<BoundaryName>>
         node_bounding_ss_names; // {node_id:[bounding sideset names]} for T-junction case
@@ -580,7 +602,9 @@ BreakMeshBySidesetGenerator::generate()
 
     // identify element colors for that sideset
     std::set<dof_id_type> elem_ids_colored;
-    std::set<dof_id_type> remaining_split_node_ids{*ss_split_node_ids[sideset_name].begin()};
+    std::set<dof_id_type> remaining_split_node_ids{};
+    if (ss_split_node_ids[sideset_name].size() > 0)
+      remaining_split_node_ids.insert(*ss_split_node_ids[sideset_name].begin());
     std::set<dof_id_type> duplicated_node_ids;
     while (remaining_split_node_ids.size() > 0)
     {
@@ -619,7 +643,7 @@ BreakMeshBySidesetGenerator::generate()
         }
         else
         {
-          // need to ensure the reference element has 2 nodes on sideset_name
+          // need to ensure the reference element has 2 (2D) or 3 (3D) nodes on sideset_name
           int test_count = 0;
           for (const auto & elem_id : elt_ids_around_node)
           {
@@ -632,7 +656,7 @@ BreakMeshBySidesetGenerator::generate()
               if (sidesets_node_ids[sideset_name].count(node->id()) > 0)
                 test_count += 1;
             }
-            if (test_count > 1)
+            if (test_count > ss_dim[sideset_name]-1)
             {
               elt_ref_id = elem_id;
               elt_ids_around_node.erase(
@@ -641,7 +665,7 @@ BreakMeshBySidesetGenerator::generate()
               break;
             }
           }
-          if (test_count == 0)
+          if (test_count < ss_dim[sideset_name])
             mooseError("Could not find reference element around node %d", node_id);
         }
         ref_color = true;
@@ -670,7 +694,7 @@ BreakMeshBySidesetGenerator::generate()
             elt_ids_around_node.end());
 
         // find neighboring elements
-        std::set<dof_id_type> next_ids_to_try;
+        std::set<dof_id_type> next_ids_to_try; // elt ids to try painting next
         for (const auto & elem_id : elt_ids_around_node)
         {
           Elem * elem_i = mesh->elem_ptr(elem_id);
@@ -720,6 +744,7 @@ BreakMeshBySidesetGenerator::generate()
                                 node_ref,
                                 remaining_split_node_ids,
                                 sidesets_node_ids[sideset_name],
+                                sidesets_facenode_ids[sideset_name],
                                 sideset_id,
                                 ss_split_node_ids[sideset_name],
                                 duplicated_node_ids);
@@ -746,9 +771,9 @@ BreakMeshBySidesetGenerator::generate()
     }
   }
 
-  // splitting loop
+  // splitting nodes loop
   if (_verbose)
-    _console << "Splitting nodes..." << std::endl;
+    _console << std::endl << "Splitting nodes..." << std::endl;
   for (auto current_node_id : split_node_ids)
   {
     const Node * current_node = mesh->node_ptr(current_node_id);
@@ -774,6 +799,7 @@ BreakMeshBySidesetGenerator::generate()
             involved_ss_colors[ssid_color.first].insert(ssid_color.second);
         }
       }
+      // sidesets wanting to split that node (used to find node multiplicity)
       std::set<boundary_id_type> relevant_ss_ids;
       for (auto & x : involved_ss_colors)
       { // x.first=ss_id, x.second=set of involved colors
@@ -910,7 +936,7 @@ BreakMeshBySidesetGenerator::generate()
     addLowerDElements(*mesh);
 
   if (_verbose)
-    _console << "Finished BreakMeshBySidesetGenerator successfully" << std::endl;
+    _console << "Finished BreakMeshBySidesetGenerator successfully" << std::endl << std::endl;
 
   return dynamic_pointer_cast<MeshBase>(mesh);
 }

@@ -32,10 +32,10 @@ def generate3DMesh(mesh_filename='out.msh', params={}, do_show=False):
               "Mesh.ElementOrder"]:
     if key in params:
       value = params[key]
-      print  'Taking "{0}" from params'.format(key)
+      print('Taking "{0}" from params'.format(key))
     else:
       value = defaults[key]
-      print  'Taking "{0}" from default'.format(key)
+      print('Taking "{0}" from default'.format(key))
     gmsh.option.setNumber(key, value)
 
   model.add("my_model") # otherwise, a new unnamed model will be created on the fly
@@ -51,23 +51,23 @@ def generate3DMesh(mesh_filename='out.msh', params={}, do_show=False):
   factory.synchronize() # needed before meshing
 
   # add rectangular faults
-  tag_rect1 = factory.addRectangle(0., 0.1, 0.5, 0.8, 0.9, -1, 0) # x, y, z, dx, dy, tag=-1, roundedRadius=0.
+  tag_rect1 = factory.addRectangle(0., 0.1, 0.5, 1.8, 0.9, -1, 0) # x, y, z, dx, dy, tag=-1, roundedRadius=0.
   tag_rect2 = factory.addRectangle(0., 0.1, 0.5, 0.8, 0.9, -1, 0) # x, y, z, dx, dy, tag=-1, roundedRadius=0.
   factory.rotate([(2, tag_rect2)], 0.5, 0, 0.5, 0,1,0, math.pi/2.) # (dimTags, x, y, z, ax, ay, az, angle)
-
+  
   # fuse all 2D features together
   outDimTags, outDimTagsMap = factory.fragment(
     [(2,tag_rect1), (2,tag_rect2)], []) #  fragment(objectDimTags, toolDimTags, tag=-1, removeObject=True, removeTool=True)
   # recover tags from fault fragments
   dimtags_rect1 = outDimTagsMap[0]
   dimtags_rect2 = outDimTagsMap[1]
-  print 'dimtags_rect1:',dimtags_rect1
-  print 'dimtags_rect2:',dimtags_rect2
+  print('dimtags_rect1:',dimtags_rect1)
+  print('dimtags_rect2:',dimtags_rect2)
   fault_dimtags = copy.deepcopy(dimtags_rect1)
   fault_dimtags.extend(dimtags_rect2)
   subtags_rect1 = [elt[1] for elt in dimtags_rect1]
   subtags_rect2 = [elt[1] for elt in dimtags_rect2]
-
+  
   # intersect them with box
   outDimTags, outDimTagsMap = factory.intersect(
     [(3, tag_box)], fault_dimtags, -1, removeObject=False, removeTool=False) # intersect(objectDimTags, toolDimTags, tag=-1, removeObject=True, removeTool=True)
@@ -108,7 +108,7 @@ def generate3DMesh(mesh_filename='out.msh', params={}, do_show=False):
   mesh.generate(3) # (dim)
 
   gmsh.write(mesh_filename)
-  print 'Generated mesh "{0}"'.format(mesh_filename)
+  print('Generated mesh "{0}"'.format(mesh_filename))
 
   if do_show:
     gmsh.fltk.run()  # start gmsh
@@ -124,4 +124,4 @@ if __name__ == "__main__":
     "Mesh.CharacteristicLengthMax":lc,
   }
   generate3DMesh(mesh_filename='3Dcase1c.msh', params=params, do_show=True)
-  print 'Finished'
+  print('Finished')
