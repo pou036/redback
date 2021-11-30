@@ -181,6 +181,7 @@ tests/*/*.trace
 !/tests/interface_flow/*.msh
 !/tests/transverseBC/*.msh
 !/tests/BreakMeshBySidesetGenerator/*.msh
+!tests/BreakMeshBySidesetGenerator/3Dcase2b.e
 !/tests/InterfaceFromSidesetGenerator/*.msh
 !/meshes/2d_footing_pb_coarse.msh
 theory.synctex.gz
