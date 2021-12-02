@@ -177,16 +177,10 @@ BreakMeshBySidesetGenerator::getSplitNodesOnBoundary(
     const std::vector<std::unique_ptr<BndElement>> & bnd_elems,
     const std::set<boundary_id_type> & boundary_ids)
 {
-  // Get dimensionality from first element (TODO: assuming all the same!)
-  auto it = bnd_elems.begin();
-  Elem * first_elem = (*it)->_elem;
-  unsigned short dim = first_elem->dim();
-  _console << std::endl << "Thomas debugging, dim=" << dim << std::endl;
-
   std::set<int> boundary_node_ids; // enough for 2D, set of boundary node_ids
   std::set<std::vector<unsigned int>> boundary_edges; // neede for 3D, set of boundary edges (as sorted list of node_ids)
 
-  if (dim == 3)
+  if (mesh.mesh_dimension() == 3)
   {
     // Identify edges (sorted list of node IDs) on given model boundaries
     for (auto it = bnd_elems.begin(); it != bnd_elems.end(); ++it)
@@ -207,7 +201,7 @@ BreakMeshBySidesetGenerator::getSplitNodesOnBoundary(
         }
       }
     }
-  } else if (dim ==2)
+  } else if (mesh.mesh_dimension() ==2)
   {
     // Identify node IDs on given boundaries
     for (auto it = bnd_elems.begin(); it != bnd_elems.end(); ++it)
@@ -223,7 +217,7 @@ BreakMeshBySidesetGenerator::getSplitNodesOnBoundary(
     }
   }
   else
-    mooseError("Case mesh dim = %d not handled in getSplitNodesOnBoundary", dim);
+    mooseError("Case mesh dim = %d not handled in getSplitNodesOnBoundary", mesh.mesh_dimension());
 
   std::map<BoundaryName, std::set<std::vector<dof_id_type>>> edges_map; // {sideset_name:set([edge_node_ids)]}
   for (auto & sideset_name : sideset_names)
@@ -235,7 +229,7 @@ BreakMeshBySidesetGenerator::getSplitNodesOnBoundary(
         Elem * elem = (*it)->_elem;
         auto s = (*it)->_side;
 
-        if (dim == 2)
+        if (mesh.mesh_dimension() == 2)
         {
           // 2D mesh => 1D segment on sideset, get all nodes on side
           std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(s);
@@ -243,7 +237,7 @@ BreakMeshBySidesetGenerator::getSplitNodesOnBoundary(
             if (boundary_node_ids.find(elem->node_id(nodes_on_side[n])) != boundary_node_ids.end())
               ss_b_split_node_ids[sideset_name].insert(elem->node_id(nodes_on_side[n]));
         }
-        else if (dim ==3)
+        else if (mesh.mesh_dimension() ==3)
         {
           // 3D mesh => 2D surface on sideset: need to find the 1D intersection
           // with boundaries, so collect corresponding edges.
@@ -269,7 +263,7 @@ BreakMeshBySidesetGenerator::getSplitNodesOnBoundary(
           }
         }
         else
-          mooseError("Case mesh dim = %d not handled in getSplitNodesOnBoundary", dim);
+          mooseError("Case mesh dim = %d not handled in getSplitNodesOnBoundary", mesh.mesh_dimension());
       }
 
     // Add nodes to split from the interior of 1D intersection between
@@ -426,7 +420,6 @@ BreakMeshBySidesetGenerator::generate()
   auto bc_tuples = boundary_info.build_active_side_list();
   int n = bc_tuples.size();
   std::vector<std::unique_ptr<BndElement>> bnd_elems;
-  std::map<boundary_id_type, std::set<dof_id_type>> bnd_elem_ids;
   bnd_elems.reserve(n);
   for (const auto & t : bc_tuples)
   {
@@ -437,7 +430,6 @@ BreakMeshBySidesetGenerator::generate()
     std::unique_ptr<BndElement> bndElem =
         libmesh_make_unique<BndElement>(mesh->elem_ptr(elem_id), side_id, bc_id);
     bnd_elems.push_back(std::move(bndElem));
-    bnd_elem_ids[bc_id].insert(elem_id);
   }
 
   // Get boundaries IDs
@@ -457,7 +449,6 @@ BreakMeshBySidesetGenerator::generate()
   std::map<BoundaryName, std::set<dof_id_type>> ss_border_node_ids; // sideset border node IDs
   std::map<BoundaryName, std::set<dof_id_type>> ss_inside_node_ids; // sideset inside node IDs
   std::map<BoundaryName, std::set<dof_id_type>> ss_split_node_ids;  // sideset split node IDs
-  std::map<BoundaryName, int> ss_dim;  // sideset dimensionality
   std::map<BoundaryName, std::set<std::vector<unsigned int>>> sidesets_facenode_ids; // key:sidesetname, value=set{faces} with faces=[sorted node ids]
   std::set<std::vector<unsigned int>> all_ss_faces; // for 3D: all sidesets faces
     // (as vectors of sorted node IDs), used to make sure we don't add extra
@@ -467,19 +458,9 @@ BreakMeshBySidesetGenerator::generate()
   for (auto & sideset_name : sideset_names)
   {
     auto sideset_id = mesh->get_boundary_info().get_id_by_name(sideset_name);
-
-    // Find if 2D or 3D based on first element only (assuming all the same..)
-    auto it = bnd_elems.begin();
-    Elem * elem = (*it)->_elem;
-    int dim_ss = -1; // dimensionality of sidesets (assuming elements the same)
-    if (elem->n_faces() > 0)
-      dim_ss = 3;
-    else
-      dim_ss = 2;
-    ss_dim[sideset_name] = dim_ss;
     if (_verbose)
       _console << "  Loop on sideset '" << sideset_name << "' (ID " << sideset_id
-               << ") -> dim=" << dim_ss << std::endl;
+               << ") -> dim=" << mesh->mesh_dimension() << std::endl;
 
     std::set<std::vector<unsigned int>> edges_node_ids; // node IDs on all edges of sideset
     std::map<std::vector<unsigned int>, std::set<std::vector<unsigned int>>>
@@ -502,7 +483,7 @@ BreakMeshBySidesetGenerator::generate()
         sort(face_node_ids.begin(), face_node_ids.end());
         sidesets_facenode_ids[sideset_name].insert(face_node_ids);
         // get node IDs on sideset border
-        if (dim_ss == 3)
+        if (mesh->mesh_dimension() == 3)
         {
           // 3D case: store (unique, as map key) face and corresponding edges
           std::unique_ptr<Elem> face = elem->side_ptr(s);
@@ -531,7 +512,7 @@ BreakMeshBySidesetGenerator::generate()
         }
       }
 
-    if (dim_ss == 2)
+    if (mesh->mesh_dimension() == 2)
     {
       // count node_id occurrences on the sideset
       std::map<unsigned int, int> node_ids_nb;
@@ -583,7 +564,7 @@ BreakMeshBySidesetGenerator::generate()
     }
   }
 
-  // identify element "colors" (which side of sideset they are)
+  // identify nodes to split and element "colors" (which side of sideset they are)
   if (_verbose)
     _console << std::endl << "Identifying element 'colors'..." << std::endl;
   std::map<dof_id_type, std::map<boundary_id_type, bool>>
