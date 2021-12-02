@@ -146,7 +146,6 @@
     # (note: can't use exodiff because of split nodes having same coords)
     type = 'CSVDiff'
     input = 'test3D_2a.i'
-    # cli_args = 'Outputs/file_base=test3D_2 Mesh/breakmesh/connect_T_junctions=true'
     csvdiff = 'test3D_2a_nodal_sample_0001.csv'
   [../]
   [./test_BreakMeshBySideset_3D_2b]
@@ -154,7 +153,14 @@
     # (note: can't use exodiff because of split nodes having same coords)
     type = 'CSVDiff'
     input = 'test3D_2b.i'
-    # cli_args = 'Outputs/file_base=test3D_2 Mesh/breakmesh/connect_T_junctions=true'
     csvdiff = 'test3D_2b_nodal_sample_0001.csv'
+  [../]
+  [./test_BreakMeshBySideset_3D_3a]
+    # Testing in 3D, isElementCandidateForColoring() needed, no T-junctions
+    # (note: can't use exodiff because of split nodes having same coords)
+    type = 'CSVDiff'
+    input = 'test3D_3a.i'
+    cli_args = 'Mesh/breakmesh/connect_T_junctions=false'
+    csvdiff = 'test3D_3a_nodal_sample_0001.csv'
   [../]
 []

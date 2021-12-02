@@ -38,6 +38,11 @@ private:
   void addInterfaceBoundary(MeshBase & mesh);
   /// get string representing "color"
   std::string getColorString(std::map<boundary_id_type, bool> &, std::set<boundary_id_type> &);
+  /// check if element is good candidate for being color tested
+  bool isElementCandidateForColoring(const Elem *,
+                                     const Elem *,
+                                     std::set<std::vector<unsigned int>> &,
+                                     std::set<dof_id_type> &);
   /// assign "color" of neighbor element
   void assignNeighborColor(const Elem *,
                            const Elem *,

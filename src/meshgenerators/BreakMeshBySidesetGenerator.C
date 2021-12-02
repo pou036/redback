@@ -68,6 +68,44 @@ BreakMeshBySidesetGenerator::getColorString(std::map<boundary_id_type, bool> & m
   return s;
 }
 
+bool
+BreakMeshBySidesetGenerator::isElementCandidateForColoring(
+    const Elem * elem,
+    const Elem * elem_ref,
+    std::set<std::vector<unsigned int>> & ss_facenode_ids,
+    std::set<dof_id_type> & unseen_split_nodes)
+{
+  // next_elem_id is a good candidate if it has a common face with elem_ref...
+  auto s = elem->which_neighbor_am_i(elem_ref);
+  if (s != libMesh::invalid_uint)
+  {
+    // ... as well as a face on sideset...
+    // TODO: speed up by pre-computing all elements with face on sideset initially
+    for (int k_side = 0; k_side < elem->n_sides(); ++k_side)
+    {
+      std::vector<unsigned int> nodes_on_side = elem->nodes_on_side(k_side);
+      std::vector<unsigned int> face_node_ids;
+      for (int n = 0; n < nodes_on_side.size(); ++n)
+      {
+        dof_id_type n_id = elem->node_id(nodes_on_side[n]);
+        face_node_ids.push_back(n_id);
+      }
+      sort(face_node_ids.begin(), face_node_ids.end());
+      if (ss_facenode_ids.count(face_node_ids) > 0)
+      {
+        // ... and if a node on that face is in unseen_split_nodes
+        for (int n = 0; n < nodes_on_side.size(); ++n)
+        {
+          dof_id_type n_id = elem->node_id(nodes_on_side[n]);
+          if (unseen_split_nodes.find(n_id) != unseen_split_nodes.end())
+            return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 void
 BreakMeshBySidesetGenerator::assignNeighborColor(
     const Elem * elem,
@@ -635,8 +673,12 @@ BreakMeshBySidesetGenerator::generate()
     // identify element colors for that sideset
     std::set<dof_id_type> elem_ids_colored;
     std::set<dof_id_type> remaining_split_node_ids{};
+    std::set<dof_id_type> unseen_split_nodes(ss_split_node_ids[sideset_name]); // split node IDs not seen in remaining_split_node_ids yet
     if (ss_split_node_ids[sideset_name].size() > 0)
+    {
       remaining_split_node_ids.insert(*ss_split_node_ids[sideset_name].begin());
+      unseen_split_nodes.erase(*ss_split_node_ids[sideset_name].begin());
+    }
     std::set<dof_id_type> duplicated_node_ids;
     while (remaining_split_node_ids.size() > 0)
     {
@@ -666,40 +708,9 @@ BreakMeshBySidesetGenerator::generate()
       }
       if (!found_elt_ref_id)
       {
-        // if not found (for first node)
-        if (node_bounding_ss_names[node_id].empty())
-        {
-          // pick one randomly
-          elt_ref_id = elt_ids_around_node.back();
-          elt_ids_around_node.pop_back();
-        }
-        else
-        {
-          // need to ensure the reference element has 2 (2D) or 3 (3D) nodes on sideset_name
-          int test_count = 0;
-          for (const auto & elem_id : elt_ids_around_node)
-          {
-            Elem * test_elem_ref = mesh->elem_ptr(elem_id);
-            const Node * const * nodes_ptr = test_elem_ref->get_nodes();
-            unsigned int n_nodes = test_elem_ref->n_nodes();
-            for (unsigned int n = 0; n < n_nodes; n++)
-            {
-              const Node * node = nodes_ptr[n];
-              if (sidesets_node_ids[sideset_name].count(node->id()) > 0)
-                test_count += 1;
-            }
-            if (test_count > ss_dim[sideset_name]-1)
-            {
-              elt_ref_id = elem_id;
-              elt_ids_around_node.erase(
-                  std::remove(elt_ids_around_node.begin(), elt_ids_around_node.end(), elem_id),
-                  elt_ids_around_node.end());
-              break;
-            }
-          }
-          if (test_count < ss_dim[sideset_name])
-            mooseError("Could not find reference element around node %d", node_id);
-        }
+        // if not found (for first node), pick one randomly
+        elt_ref_id = elt_ids_around_node.back();
+        elt_ids_around_node.pop_back();
         ref_color = true;
         if (elt_colors.count(elt_ref_id) == 0)
           elt_colors[elt_ref_id] = {{sideset_id, ref_color}};
@@ -725,7 +736,7 @@ BreakMeshBySidesetGenerator::generate()
             std::remove(elt_ids_around_node.begin(), elt_ids_around_node.end(), elt_ref_id),
             elt_ids_around_node.end());
 
-        // find neighboring elements
+        // find neighboring elements that involve node_ref
         std::set<dof_id_type> next_ids_to_try; // elt ids to try painting next
         for (const auto & elem_id : elt_ids_around_node)
         {
@@ -744,12 +755,14 @@ BreakMeshBySidesetGenerator::generate()
                 dof_id_type tmp_node_id = elem_ref->node_id(nodes_on_side[n]);
                 if (sidesets_node_ids[other_sideset_name].count(tmp_node_id) == 0)
                 {
+                  // 1 node not on sideset is sufficient for face not to be on sideset
                   is_face_on_ss = false;
                   break;
                 }
               }
               if (is_face_on_ss)
               {
+                // TODO actually not enough, need to check properly that face is on other_sideset_name, as done in assignNeighborColor
                 is_face_on_bounds = true;
                 break;
               }
@@ -758,6 +771,27 @@ BreakMeshBySidesetGenerator::generate()
             {
               // that side is not a bounding limit
               next_ids_to_try.insert(elem_id);
+            }
+          }
+        }
+        // Add neighboring elements with a face (1) on sideset and (2) including a node marked to split
+        for (unsigned int k = 0; k < elem_ref->n_nodes(); k++)
+        {
+          unsigned int next_node_id = elem_ref->node_id(k);
+          if (next_node_id != node_id)
+          {
+            for (const auto next_elem_id : node_to_elem_map[next_node_id])
+            {
+              //Elem * next_elem = mesh->elem_ptr(next_elem_id);
+              bool is_next_elem_candidate = isElementCandidateForColoring(
+                  mesh->elem_ptr(next_elem_id),
+                  elem_ref,
+                  sidesets_facenode_ids[sideset_name],
+                  unseen_split_nodes);
+              if (is_next_elem_candidate)
+              {
+                next_ids_to_try.insert(next_elem_id);
+              }
             }
           }
         }
@@ -785,6 +819,16 @@ BreakMeshBySidesetGenerator::generate()
             // (needed even if elem_id was already painted, as other elements
             //  might only be accessible through that element)
             elt_ref_pairs.insert(std::make_pair(elem_id, elt_colors[elem_id][sideset_id]));
+            // Check which nodes of that element to add to unseen_split_nodes
+            for (unsigned int k = 0; k < elem_neighbor->n_nodes(); k++)
+            {
+              unsigned int next_node_id = elem_neighbor->node_id(k);
+              if (unseen_split_nodes.find(next_node_id) != unseen_split_nodes.end())
+              {
+                remaining_split_node_ids.insert(next_node_id);
+                unseen_split_nodes.erase(next_node_id);
+              }
+            }
           }
         }
       }
@@ -950,6 +994,8 @@ BreakMeshBySidesetGenerator::generate()
                     std::string ss_name = mesh->get_boundary_info().get_sideset_name(ss_id);
                     _new_boundary_sides_map2[ss_name].insert(std::make_pair(
                         current_elem->id(), current_elem->which_neighbor_am_i(connected_elem)));
+                    if (_verbose)
+                      _console << "    _new_boundary_sides_map2["<<ss_name<< "] elems "<<current_elem->id()<<" <-> " <<current_elem->which_neighbor_am_i(connected_elem)<<std::endl;
                   }
                 }
               }
