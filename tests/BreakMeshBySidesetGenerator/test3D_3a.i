@@ -11,7 +11,7 @@
     sidesets =  'oval_fault_1 oval_fault_2'
     split_interface = false
     create_lower_D_blocks = true
-    connect_T_junctions = false
+    connect_T_junctions = true
     verbose = true
   []
 []
@@ -23,12 +23,12 @@
 
 [AuxVariables]
   [lewis_fault1_trans]
-    initial_condition = '0.1' # 1/D=1/10
+    initial_condition = '10' # '0.1' # 1/D=1/10
   []
 []
 
 [Kernels]
-  inactive = 'dT_dt_matrix dT_dt_fracs'
+  # inactive = 'dT_dt_matrix dT_dt_fracs'
   [dT_dt_matrix]
     type = TimeDerivative
     variable = dummy_var
@@ -76,20 +76,22 @@
   [left]
     type = DirichletBC
     variable = dummy_var
-    boundary = 'bottom'
+    boundary = 'left'
     value = 1
   []
   [right]
     type = DirichletBC
     variable = dummy_var
-    boundary = 'top'
+    boundary = 'right'
     value = 0
   []
 []
 
 [Executioner]
-  type = Steady
+  type = Transient # Steady
   solve_type = NEWTON
+  dt = 0.2
+  num_steps = 3
   petsc_options_iname = '-pc_type -pc_factor_mat_solver_package'
   # petsc_options_value = ' lu       mumps'
   petsc_options_value = ' lu       superlu_dist'
@@ -101,10 +103,21 @@
   csv = true
 []
 
-[VectorPostprocessors]
-  [nodal_sample]
-    type = NodalValueSampler
-    sort_by = id
-    variable = 'dummy_var'
+[Postprocessors]
+  [num_elems]
+    type = NumElems
+  []
+  [num_nodes]
+    type = NumNodes
+  []
+  [value_behind_face]
+    type = PointValue
+    point = '0.701 0.5 0.5' # not on any points, just behind face
+    variable = dummy_var
+  []
+  [value_farther]
+    type = PointValue
+    point = '0.8 0.5 0.5' # not on any points, a bit farther, still behind face
+    variable = dummy_var
   []
 []

@@ -11,6 +11,8 @@
     sidesets =  'ss2 ss3'
     split_interface = false
     #create_lower_D_blocks = false
+    connect_T_junctions = true
+    verbose = true
   []
 []
 

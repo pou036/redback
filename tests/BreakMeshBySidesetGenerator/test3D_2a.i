@@ -96,22 +96,28 @@
 
 [Outputs]
   file_base = test3D_2a
-  exodus = false
+  exodus = true
   csv = true
 []
 
-[VectorPostprocessors]
-  # [sampler]
-  #   type = LineValueSampler
-  #   variable = 'dummy_var'
-  #   start_point = '0.1 0.1 0.1'
-  #   end_point = '0.9 0.9 0.9'
-  #   num_points = 10
-  #   sort_by = z
-  # []
-  [nodal_sample]
-    type = NodalValueSampler
-    sort_by = id
-    variable = 'dummy_var'
+[Postprocessors]
+  [num_elems]
+    type = NumElems
+  []
+  [num_nodes]
+    type = NumNodes
+  []
+  [value]
+    type = PointValue
+    point = '0.2 0.6 -0.25' # not on any points, just behind face
+    variable = dummy_var
   []
 []
+
+# [VectorPostprocessors]
+#   [nodal_sample]
+#     type = NodalValueSampler
+#     sort_by = id
+#     variable = 'dummy_var'
+#   []
+# []

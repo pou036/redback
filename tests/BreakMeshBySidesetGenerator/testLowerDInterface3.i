@@ -63,7 +63,7 @@
 []
 
 [BCs]
-  inactive = 'X_top_left2 X_bottom_right1'
+  inactive = 'X_top_left1 X_bottom_right2'
   [X_top_left1]
     type = DirichletBC
     variable = T

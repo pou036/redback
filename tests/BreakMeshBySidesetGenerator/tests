@@ -53,6 +53,7 @@
   [./test_BreakMeshBySideset_lowerD_1]
     # Testing diffusion on X with lower D blocks, left & right blocks
     # Note: can't use exodiff since we have 2 lowerD blocks superposed!
+    # Note: not very good test as node IDs could be flipped...
     type = 'CSVDiff'
     input = 'testLowerDInterface1.i'
     csvdiff = 'testLowerDInterface1.csv'
@@ -60,6 +61,7 @@
   [./test_BreakMeshBySideset_lowerD_2]
     # Testing diffusion on X with lower D blocks, bottom & top blocks
     # Note: can't use exodiff since we have 2 lowerD blocks superposed!
+    # Note: not very good test as node IDs could be flipped...
     type = 'CSVDiff'
     input = 'testLowerDInterface2.i'
     csvdiff = 'testLowerDInterface2.csv'
@@ -67,6 +69,7 @@
   [./test_BreakMeshBySideset_lowerD_3]
     # Testing diffusion on X with lower D blocks, no matrix diffusion
     # Note: can't use exodiff since we have 2 lowerD blocks superposed!
+    # Note: not very good test as node IDs could be flipped...
     type = 'CSVDiff'
     input = 'testLowerDInterface3.i'
     csvdiff = 'testLowerDInterface3.csv'
@@ -146,21 +149,33 @@
     # (note: can't use exodiff because of split nodes having same coords)
     type = 'CSVDiff'
     input = 'test3D_2a.i'
-    csvdiff = 'test3D_2a_nodal_sample_0001.csv'
+    cli_args = 'Outputs/exodus=false'
+    csvdiff = 'test3D_2a.csv'
   [../]
   [./test_BreakMeshBySideset_3D_2b]
     # Testing in 3D, curved faults intersecting, with model boundary tags
     # (note: can't use exodiff because of split nodes having same coords)
     type = 'CSVDiff'
     input = 'test3D_2b.i'
-    csvdiff = 'test3D_2b_nodal_sample_0001.csv'
+    cli_args = 'Outputs/exodus=false'
+    csvdiff = 'test3D_2b.csv'
   [../]
   [./test_BreakMeshBySideset_3D_3a]
-    # Testing in 3D, isElementCandidateForColoring() needed, no T-junctions
+    # Testing in 3D, two ellipses touching, no T-junctions
     # (note: can't use exodiff because of split nodes having same coords)
     type = 'CSVDiff'
     input = 'test3D_3a.i'
-    cli_args = 'Mesh/breakmesh/connect_T_junctions=false'
-    csvdiff = 'test3D_3a_nodal_sample_0001.csv'
+    cli_args = 'Mesh/breakmesh/connect_T_junctions=false Outputs/exodus=false'
+    csvdiff = 'test3D_3a.csv'
+    rel_err = 1.0E-5
+  [../]
+  [./test_BreakMeshBySideset_3D_3b]
+    # Testing in 3D, two ellipses touching, with T-junctions
+    # (note: can't use exodiff because of split nodes having same coords)
+    type = 'CSVDiff'
+    input = 'test3D_3a.i'
+    cli_args = 'Outputs/file_base=test3D_3b Mesh/breakmesh/connect_T_junctions=true Outputs/exodus=false'
+    csvdiff = 'test3D_3b.csv'
+    rel_err = 1.0E-5
   [../]
 []

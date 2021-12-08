@@ -246,3 +246,4 @@ src/materials/RedbackMechMaterial.C_DEBUG
 src/materials/RedbackMechMaterial_19.C.hidden
 src/materials/RedbackMechMaterial_MCCtest.C.hidden
 src/materials/RedbackMechMaterialCC.C_DEBUG
+tests/DPG

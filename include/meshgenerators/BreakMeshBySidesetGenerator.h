@@ -36,28 +36,23 @@ private:
                                BoundaryInfo & boundary_info);
   /// generate the new boundary interface
   void addInterfaceBoundary(MeshBase & mesh);
+  /// get reference element ID from reference node ID
+  dof_id_type getElementRefFromNodeRef(MeshBase &,
+                                       Elem *,
+                                       dof_id_type,
+                                       std::vector<dof_id_type> &,
+                                       std::set<std::vector<unsigned int>> &);
+  /// Check if element is beyond sidesets marking T-junctions
+  bool isElementBeyondTJunction(bool,
+                                const BoundaryName &,
+                                const std::vector<BoundaryName> &,
+                                std::map<BoundaryName, std::set<std::vector<unsigned int>>> &,
+                                const std::vector<unsigned int> &);
   /// get string representing "color"
   std::string getColorString(std::map<boundary_id_type, bool> &, std::set<boundary_id_type> &);
-  /// check if element is good candidate for being color tested
-  bool isElementCandidateForColoring(const Elem *,
-                                     const Elem *,
-                                     std::set<std::vector<unsigned int>> &,
-                                     std::set<dof_id_type> &);
-  /// assign "color" of neighbor element
-  void assignNeighborColor(const Elem *,
-                           const Elem *,
-                           std::set<dof_id_type> &,
-                           bool,
-                           std::map<dof_id_type, std::map<boundary_id_type, bool>> &,
-                           const Node &,
-                           std::set<dof_id_type> &,
-                           std::set<dof_id_type> &,
-                           std::set<std::vector<unsigned int>> &,
-                           boundary_id_type,
-                           std::set<dof_id_type> &,
-                           std::set<dof_id_type> &);
   /// get IDs of nodes to split on boundary per sideset
   void getSplitNodesOnBoundary(std::map<BoundaryName, std::set<dof_id_type>> &,
+                               std::set<dof_id_type> &,
                                const std::vector<BoundaryName> &,
                                MeshBase &,
                                const std::vector<std::unique_ptr<BndElement>> &,
@@ -70,6 +65,7 @@ private:
                                 const std::set<dof_id_type> &,
                                 const std::set<dof_id_type> &,
                                 const BoundaryName &,
+                                const std::set<dof_id_type> &,
                                 const std::vector<std::unique_ptr<BndElement>> &);
   /// add lower dimensional elements on interfaces
   void addLowerDElements(MeshBase & mesh);
