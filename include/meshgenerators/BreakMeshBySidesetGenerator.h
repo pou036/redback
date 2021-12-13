@@ -38,10 +38,9 @@ private:
   void addInterfaceBoundary(MeshBase & mesh);
   /// get reference element ID from reference node ID
   dof_id_type getElementRefFromNodeRef(MeshBase &,
-                                       Elem *,
-                                       dof_id_type,
-                                       std::vector<dof_id_type> &,
-                                       std::set<std::vector<unsigned int>> &);
+                                       const dof_id_type,
+                                       const std::vector<dof_id_type> &,
+                                       const std::set<std::vector<unsigned int>> &);
   /// Check if element is beyond sidesets marking T-junctions
   bool isElementBeyondTJunction(bool,
                                 const BoundaryName &,
