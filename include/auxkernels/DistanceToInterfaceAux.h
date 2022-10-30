@@ -11,15 +11,12 @@
 #include <igl/readSTL.h>
 #include <igl/AABB.h>
 
-class DistanceToInterfaceAux;
-
-template <>
-InputParameters validParams<DistanceToInterfaceAux>();
-
 class DistanceToInterfaceAux : public VectorAuxKernel
 {
 public:
   DistanceToInterfaceAux(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual RealVectorValue computeValue() override;

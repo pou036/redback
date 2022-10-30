@@ -166,16 +166,16 @@
     boundary = 'tube'
     value = 0.0
   [../]
-  [./x_natural_bc]
-    type = INSMomentumNoBCBCLaplaceForm
-    variable = vel_x
-    boundary = 'top bottom'
-    component = 0
-    u = vel_x
-    v = vel_y
-    w = vel_z
-    p = p
-  [../]
+  # [./x_natural_bc]
+  #   type = INSMomentumNoBCBCLaplaceForm
+  #   variable = vel_x
+  #   boundary = 'top bottom'
+  #   component = 0
+  #   u = vel_x
+  #   v = vel_y
+  #   w = vel_z
+  #   p = p
+  # [../]
   [./x_nitsche_vel]
     type = NitscheVelBC
     variable = vel_x

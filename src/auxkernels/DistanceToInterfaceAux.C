@@ -11,11 +11,10 @@
 
 registerMooseObject("RedbackApp", DistanceToInterfaceAux);
 
-template <>
 InputParameters
-validParams<DistanceToInterfaceAux>()
+DistanceToInterfaceAux::validParams()
 {
-  InputParameters params = validParams<VectorAuxKernel>();
+  InputParameters params = VectorAuxKernel::validParams();
   params.addClassDescription(
       "Compute the minimal distance to the stl interface at every point of the sideset");
   params.addRequiredParam<std::string>("stl_name","name of the stl file (with the extension)");
