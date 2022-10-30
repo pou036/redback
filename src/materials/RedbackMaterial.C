@@ -16,11 +16,10 @@
 
 registerMooseObject("RedbackApp", RedbackMaterial);
 
-template <>
 InputParameters
-validParams<RedbackMaterial>()
+RedbackMaterial::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
 
   params.addParam<std::vector<std::string>>(
       "init_from_functions__params", "The names of the parameters to be initialised as functions.");

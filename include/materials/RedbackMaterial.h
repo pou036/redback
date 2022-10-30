@@ -16,16 +16,12 @@
 //#include "FiniteStrainPlasticMaterial.h"
 #include "Material.h"
 
-// Forward Declarations
-class RedbackMaterial;
-
-template <>
-InputParameters validParams<RedbackMaterial>();
-
 class RedbackMaterial : public Material
 {
 public:
   RedbackMaterial(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   /// Static method for use in validParams for getting the continuation method
   static MooseEnum continuationMethodEnum();

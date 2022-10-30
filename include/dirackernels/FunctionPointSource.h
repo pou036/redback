@@ -16,12 +16,7 @@
 // Moose Includes
 #include "DiracKernel.h"
 
-// Forward Declarations
-class FunctionPointSource;
 class Function;
-
-template <>
-InputParameters validParams<FunctionPointSource>();
 
 /**
  * TOOD
@@ -30,6 +25,8 @@ class FunctionPointSource : public DiracKernel
 {
 public:
   FunctionPointSource(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   virtual void addPoints();
   virtual Real computeQpResidual();

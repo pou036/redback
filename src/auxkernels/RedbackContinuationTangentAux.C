@@ -15,11 +15,10 @@
 
 registerMooseObject("RedbackApp", RedbackContinuationTangentAux);
 
-template <>
 InputParameters
-validParams<RedbackContinuationTangentAux>()
+RedbackContinuationTangentAux::validParams()
 {
-  InputParameters params = validParams<AuxNodalScalarKernel>();
+  InputParameters params = AuxNodalScalarKernel::validParams();
   params.addParam<Real>("ds_old", 1.0, "Old continuation increment");
 
   params.addCoupledVar("sum_vars",

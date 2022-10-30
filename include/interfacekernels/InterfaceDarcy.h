@@ -15,12 +15,6 @@
 
 #include "InterfaceKernel.h"
 
-// Forward Declarations
-class InterfaceDarcy;
-
-template <>
-InputParameters validParams<InterfaceDarcy>();
-
 /**
  * DG kernel for interfacing diffusion between two variables on adjacent blocks
  */
@@ -28,6 +22,8 @@ class InterfaceDarcy : public InterfaceKernel
 {
 public:
   InterfaceDarcy(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type);

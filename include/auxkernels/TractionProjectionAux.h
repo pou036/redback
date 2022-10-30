@@ -10,15 +10,12 @@
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
 
-class TractionProjectionAux;
-
-template <>
-InputParameters validParams<TractionProjectionAux>();
-
 class TractionProjectionAux : public AuxKernel
 {
 public:
   TractionProjectionAux(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeValue();

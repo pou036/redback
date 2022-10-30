@@ -15,16 +15,12 @@
 
 #include "RedbackMechMaterial.h"
 
-// Forward Declarations
-class RedbackMechMaterialJ2;
-
-template <>
-InputParameters validParams<RedbackMechMaterialJ2>();
-
 class RedbackMechMaterialJ2 : public RedbackMechMaterial
 {
 public:
   RedbackMechMaterialJ2(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual void getJac(const RankTwoTensor &,

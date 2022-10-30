@@ -19,12 +19,6 @@
 #include "RotationTensor.h"
 //#include "FiniteStrainPlasticMaterial.h"
 
-// Forward Declarations
-class RedbackMechMaterial;
-
-template <>
-InputParameters validParams<RedbackMechMaterial>();
-
 /**
  * This class copy-pastes the stack from tensorMechanics module
  * TODO: add required features to moose and use proper tensorMechanics module
@@ -33,6 +27,8 @@ class RedbackMechMaterial : public Material
 {
 public:
   RedbackMechMaterial(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   static MooseEnum damageMethodEnum();
   enum DamageMethod

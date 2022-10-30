@@ -15,15 +15,12 @@
 
 #include "Kernel.h"
 
-class RedbackMassDiffusion;
-
-template <>
-InputParameters validParams<RedbackMassDiffusion>();
-
 class RedbackMassDiffusion : public Kernel
 {
 public:
   RedbackMassDiffusion(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackMassDiffusion();
 
 protected:

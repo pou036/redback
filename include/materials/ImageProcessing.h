@@ -15,12 +15,6 @@
 
 #include "Material.h"
 
-// Forward Declarations
-class ImageProcessing;
-
-template <>
-InputParameters validParams<ImageProcessing>();
-
 /**
  * This material automatically declares as material properties whatever is
  *passed to it
@@ -36,6 +30,8 @@ class ImageProcessing : public Material
 {
 public:
   ImageProcessing(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual void initQpStatefulProperties() override;

@@ -16,16 +16,12 @@
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
 
-// Forward declarations
-class RedbackPolarTensorMaterialAux;
-
-template <>
-InputParameters validParams<RedbackPolarTensorMaterialAux>();
-
 class RedbackPolarTensorMaterialAux : public AuxKernel
 {
 public:
   RedbackPolarTensorMaterialAux(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackPolarTensorMaterialAux() {}
 
 protected:

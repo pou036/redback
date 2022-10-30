@@ -18,11 +18,10 @@
 
 registerMooseObject("RedbackApp", ElementFileSubdomain);
 
-template <>
 InputParameters
-validParams<ElementFileSubdomain>()
+ElementFileSubdomain::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<std::vector<SubdomainID>>("subdomain_ids",
                                                     "New subdomain IDs of all elements");
   params.addParam<std::vector<dof_id_type>>("element_ids", "New subdomain IDs of all elements");

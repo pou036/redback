@@ -16,11 +16,10 @@
 
 registerMooseObject("RedbackApp", RedbackMechMaterialCCanisotropic);
 
-template <>
 InputParameters
-validParams<RedbackMechMaterialCCanisotropic>()
+RedbackMechMaterialCCanisotropic::validParams()
 {
-  InputParameters params = validParams<RedbackMechMaterialCC>();
+  InputParameters params = RedbackMechMaterialCC::validParams();
   params.addParam<Real>(
       "initial_anisotropy_param", 0, "Initial anisotropy coefficient (from Dafalias 2013)");
 

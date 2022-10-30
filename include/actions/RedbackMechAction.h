@@ -15,15 +15,12 @@
 
 #include "Action.h"
 
-class RedbackMechAction;
-
-template <>
-InputParameters validParams<RedbackMechAction>();
-
 class RedbackMechAction : public Action
 {
 public:
   RedbackMechAction(InputParameters params);
+
+  static InputParameters validParams();
 
   virtual void act();
 

@@ -15,12 +15,6 @@
 
 #include "Function.h"
 
-// Forward Declarations
-class RedbackRandomFunction;
-
-template <>
-InputParameters validParams<RedbackRandomFunction>();
-
 /**
  * Defines random function
  */
@@ -28,6 +22,8 @@ class RedbackRandomFunction : public Function
 {
 public:
   RedbackRandomFunction(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   virtual Real value(Real t, const Point & p) const;
 

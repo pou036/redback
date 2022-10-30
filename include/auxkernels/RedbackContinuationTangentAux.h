@@ -15,11 +15,6 @@
 
 #include "AuxNodalScalarKernel.h"
 
-class RedbackContinuationTangentAux;
-
-template <>
-InputParameters validParams<RedbackContinuationTangentAux>();
-
 /**
  *
  */
@@ -27,6 +22,8 @@ class RedbackContinuationTangentAux : public AuxNodalScalarKernel
 {
 public:
   RedbackContinuationTangentAux(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackContinuationTangentAux();
 
   virtual void compute();
