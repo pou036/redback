@@ -11,8 +11,6 @@
 
 registerMooseObject("RedbackApp", NitscheVelBC);
 
-defineLegacyParams(NitscheVelBC);
-
 InputParameters
 NitscheVelBC::validParams()
 {

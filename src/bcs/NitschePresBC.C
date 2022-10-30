@@ -11,8 +11,6 @@
 
 registerMooseObject("RedbackApp", NitschePresBC);
 
-defineLegacyParams(NitschePresBC);
-
 InputParameters
 NitschePresBC::validParams()
 {
