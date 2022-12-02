@@ -11,7 +11,6 @@
 /****************************************************************/
 
 #include "InputParameters.h"
-#include "MooseMesh.h"
 #include "MooseTypes.h"
 #include "RemoveLayerElements.h"
 #include <fstream>
@@ -81,19 +80,19 @@ RemoveLayerElements::generate()
   // separate between erosion and dilation
   if (porosity_change >= 0)
   {
-    master_id = mesh->getSubdomainID(getParam<SubdomainName>("master_block"));
-    paired_id = mesh->getSubdomainID(getParam<SubdomainName>("paired_block"));
+    master_id = _mesh->getSubdomainID(getParam<SubdomainName>("master_block"));
+    paired_id = _mesh->getSubdomainID(getParam<SubdomainName>("paired_block"));
   }
   else
   {
-    paired_id = mesh->getSubdomainID(getParam<SubdomainName>("master_block"));
-    master_id = mesh->getSubdomainID(getParam<SubdomainName>("paired_block"));
+    paired_id = _mesh->getSubdomainID(getParam<SubdomainName>("master_block"));
+    master_id = _mesh->getSubdomainID(getParam<SubdomainName>("paired_block"));
   }
 
   Real total_volume = 1; // 0
   Real frac_volume = 0;
   int N_elem = 0;
-  for (const auto & elem : mesh.active_element_ptr_range())
+  for (const auto & elem : mesh->active_element_ptr_range())
   {
     // total_volume+=elem->volume();
     N_elem += 1;
@@ -111,7 +110,7 @@ RemoveLayerElements::generate()
   while (frac_volume < 1. - 1e-10)
   {
     frac_volume = 0;
-    for (const auto & elem : mesh.active_element_ptr_range())
+    for (const auto & elem : mesh->active_element_ptr_range())
     {
       if (elem->subdomain_id() == paired_id)
         frac_volume += elem->volume();
@@ -243,18 +242,19 @@ RemoveLayerElements::generate()
 std::vector<Elem *>
 RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_id)
 {
+  std::unique_ptr<MeshBase> mesh = std::move(_input);
   std::vector<Elem *> elements;
 
   // MeshBase & mesh = _mesh_ptr->getMesh();
 
   // Prepare to query about sides adjacent to remote elements if we're
   // on a distributed mesh
-  const processor_id_type my_n_proc = mesh.n_processors();
-  const processor_id_type my_proc_id = mesh.processor_id();
+  const processor_id_type my_n_proc = mesh->n_processors();
+  const processor_id_type my_proc_id = mesh->processor_id();
   typedef std::vector<std::pair<dof_id_type, unsigned int>> vec_type;
   std::vector<vec_type> queries(my_n_proc);
 
-  for (auto & elem : mesh.active_element_ptr_range())
+  for (auto & elem : mesh->active_element_ptr_range())
   {
     // We only need to loop over elements in the master subdomain
     if (elem->subdomain_id() != master_id)
@@ -280,10 +280,10 @@ RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_
     }
   }
 
-  if (!mesh.is_serial())
+  if (!mesh->is_serial())
   {
-    Parallel::MessageTag queries_tag = mesh.comm().get_unique_tag(867),
-                         replies_tag = mesh.comm().get_unique_tag(5309);
+    Parallel::MessageTag queries_tag = mesh->comm().get_unique_tag(867),
+                         replies_tag = mesh->comm().get_unique_tag(5309);
 
     std::vector<Parallel::Request> side_requests(my_n_proc - 1), reply_requests(my_n_proc - 1);
 
@@ -295,7 +295,7 @@ RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_
 
       Parallel::Request & request = side_requests[p - (p > my_proc_id)];
 
-      mesh.comm().send(p, queries[p], request, queries_tag);
+      mesh->comm().send(p, queries[p], request, queries_tag);
     }
 
     // Reply to all requests
@@ -305,16 +305,16 @@ RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_
     {
       vec_type query;
 
-      Parallel::Status status(mesh.comm().probe(Parallel::any_source, queries_tag));
+      Parallel::Status status(mesh->comm().probe(Parallel::any_source, queries_tag));
       const processor_id_type source_pid = cast_int<processor_id_type>(status.source());
 
-      mesh.comm().receive(source_pid, query, queries_tag);
+      mesh->comm().receive(source_pid, query, queries_tag);
 
       Parallel::Request & request = reply_requests[p - 1];
 
       for (const auto & q : query)
       {
-        const Elem * elem = mesh.elem_ptr(q.first);
+        const Elem * elem = mesh->elem_ptr(q.first);
         const unsigned int side = q.second;
         const Elem * neighbor = elem->neighbor_ptr(side);
 
@@ -324,7 +324,7 @@ RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_
         }
       }
 
-      mesh.comm().send(source_pid, responses[p - 1], request, replies_tag);
+      mesh->comm().send(source_pid, responses[p - 1], request, replies_tag);
     }
 
     // Process all incoming replies
@@ -339,7 +339,7 @@ RemoveLayerElements::BoundaryElements(SubdomainID master_id, SubdomainID paired_
 
       for (const auto & r : response)
       {
-        Elem * elem = mesh.elem_ptr(r.first);
+        Elem * elem = mesh->elem_ptr(r.first);
         if (std::find(elements.begin(), elements.end(), elem) == elements.end())
           elements.push_back(elem);
       }

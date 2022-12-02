@@ -13,7 +13,7 @@
 #include "AllLocalDofIndicesThread.h"
 #include "AuxiliarySystem.h"
 #include "Console.h"
-#include "LayeredSideFluxAverage.h"
+#include "LayeredSideDiffusiveFluxAverage.h"
 #include "MooseMesh.h"
 #include "Output.h"
 #include "TimeStepper.h"
@@ -28,7 +28,6 @@
 
 registerMooseObject("RedbackApp", RedbackTransientMultiApp);
 
-defineLegacyParams(RedbackTransientMultiApp);
 InputParameters
 RedbackTransientMultiApp::validParams()
 {
@@ -246,7 +245,7 @@ RedbackTransientMultiApp::solveStep(Real dt, Real target_time, bool auto_advance
           transfer_old.close();
 
           // Snag all of the local dof indices for all of these variables
-          AllLocalDofIndicesThread aldit(libmesh_aux_system, _transferred_vars);
+          AllLocalDofIndicesThread aldit(problem, _transferred_vars);
           ConstElemRange & elem_range = *problem.mesh().getActiveLocalElementRange();
           Threads::parallel_reduce(elem_range, aldit);
 

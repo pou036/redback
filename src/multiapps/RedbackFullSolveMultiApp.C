@@ -9,7 +9,7 @@
 
 #include "AppFactory.h"
 #include "Executioner.h"
-#include "LayeredSideFluxAverage.h"
+#include "LayeredSideDiffusiveFluxAverage.h"
 #include "RedbackFullSolveMultiApp.h"
 
 // libMesh

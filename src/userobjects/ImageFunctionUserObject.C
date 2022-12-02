@@ -53,9 +53,9 @@ ImageFunctionUserObject::value(const Point & p) const
     pt_in_grid[i] = p(_axes[i]);
   }
 
-  std::vector<unsigned int> left(_dim);
-  std::vector<unsigned int> right(_dim);
-  std::vector<unsigned int> arg(_dim);
+  GriddedData::GridIndex left(_dim);
+  GriddedData::GridIndex right(_dim);
+  GriddedData::GridIndex arg(_dim);
   for (unsigned int i = 0; i < _dim; ++i)
   {
     getNeighborIndices(_grid[i], pt_in_grid[i], left[i], right[i]);
@@ -115,7 +115,7 @@ ImageFunctionUserObject::sample(const std::vector<Real> & pt) const
    */
   Real f = 0;
   Real weight;
-  std::vector<unsigned int> arg(_dim);
+  GriddedData::GridIndex arg(_dim);
   for (unsigned int i = 0; i < std::pow(2.0, int(_dim));
        ++i) // number of points in hypercube = 2^_dim
   {

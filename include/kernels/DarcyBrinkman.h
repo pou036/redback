@@ -3,16 +3,11 @@
 
 #include "Kernel.h"
 
-// Forward Declarations
-class DarcyBrinkman;
-
-template <>
-InputParameters validParams<DarcyBrinkman>();
-
 class DarcyBrinkman : public Kernel
 {
 public:
   DarcyBrinkman(const InputParameters & parameters);
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual();
