@@ -15,11 +15,6 @@
 
 #include "IntegratedBC.h"
 
-class PressureNeumannBC;
-
-template <>
-InputParameters validParams<PressureNeumannBC>();
-
 /**
  * Implements a simple constant Neumann BC where grad(u)=value on the boundary.
  * Uses the term produced from integrating the diffusion operator by parts.
@@ -32,6 +27,8 @@ public:
    * constructor.
    */
   PressureNeumannBC(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual() override;

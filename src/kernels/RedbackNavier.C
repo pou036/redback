@@ -14,11 +14,10 @@
 
 registerMooseObject("RedbackApp", RedbackNavier);
 
-template <>
 InputParameters
-validParams<RedbackNavier>()
+RedbackNavier::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredParam<unsigned int>("component",
                                         "An integer corresponding to the direction the variable "
                                         "this kernel acts in. (0 for x, 1 for y, 2 for z)");

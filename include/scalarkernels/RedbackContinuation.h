@@ -15,15 +15,12 @@
 
 #include "ODEKernel.h"
 
-class RedbackContinuation;
-
-template <>
-InputParameters validParams<RedbackContinuation>();
-
 class RedbackContinuation : public ODEKernel
 {
 public:
   RedbackContinuation(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   Real _ds_param, _ds_old_param, _continuation_parameter_old_param,

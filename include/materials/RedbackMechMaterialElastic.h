@@ -15,16 +15,12 @@
 
 #include "RedbackMechMaterial.h"
 
-// Forward Declarations
-class RedbackMechMaterialElastic;
-
-template <>
-InputParameters validParams<RedbackMechMaterialElastic>();
-
 class RedbackMechMaterialElastic : public RedbackMechMaterial
 {
 public:
   RedbackMechMaterialElastic(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual void returnMap(const RankTwoTensor &,

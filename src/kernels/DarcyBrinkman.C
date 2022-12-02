@@ -14,12 +14,22 @@
 
 registerMooseObject("RedbackApp", DarcyBrinkman);
 
-template <>
 InputParameters
+<<<<<<< HEAD:src/kernels/DarcyBrinkman.C
 validParams<DarcyBrinkman>()
 {
   InputParameters params = validParams<Kernel>();
   params.addCoupledVar("permeability", 1.0, "the permeability of the solid phase");
+=======
+DarcyFluxBC::validParams()
+{
+  InputParameters params = FluxBC::validParams();
+  params.addClassDescription(
+      "Computes a boundary residual contribution consistent with the Diffusion Kernel. "
+      "Does not impose a boundary condition; instead computes the boundary "
+      "contribution corresponding to the current value of grad(u) and accumulates "
+      "it in the residual vector.");
+>>>>>>> master:src/bcs/DarcyFluxBC.C
   return params;
 }
 

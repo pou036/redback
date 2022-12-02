@@ -12,12 +12,6 @@
 
 #include "GeneralPostprocessor.h"
 
-// Forward Declarations
-class PointValueFileWriter;
-
-template <>
-InputParameters validParams<PointValueFileWriter>();
-
 /**
  * Compute the value of a variable at a specified location.
  *
@@ -28,6 +22,8 @@ class PointValueFileWriter : public GeneralPostprocessor
 {
 public:
   PointValueFileWriter(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   virtual void initialize() override {}
   virtual void execute() override;

@@ -15,11 +15,10 @@
 
 registerMooseObject("RedbackApp", MatchedValueJumpBC);
 
-template <>
 InputParameters
-validParams<MatchedValueJumpBC>()
+MatchedValueJumpBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addRequiredCoupledVar("v", "The variable whose value we are to match.");
   params.addClassDescription("Implements a NodalBC which equates two different Variables' values "
                              "on a specified boundary.");

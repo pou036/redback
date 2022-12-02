@@ -16,16 +16,12 @@
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
 
-// Forward declarations
-class RedbackTotalPorosityAux;
-
-template <>
-InputParameters validParams<RedbackTotalPorosityAux>();
-
 class RedbackTotalPorosityAux : public AuxKernel
 {
 public:
   RedbackTotalPorosityAux(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackTotalPorosityAux() {}
 
 protected:

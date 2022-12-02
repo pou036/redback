@@ -16,15 +16,12 @@
 #include "Kernel.h"
 #include "RankTwoTensor.h"
 
-class RedbackMechDissip;
-
-template <>
-InputParameters validParams<RedbackMechDissip>();
-
 class RedbackMechDissip : public Kernel
 {
 public:
   RedbackMechDissip(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackMechDissip();
 
 protected:

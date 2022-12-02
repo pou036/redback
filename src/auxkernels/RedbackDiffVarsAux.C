@@ -15,11 +15,10 @@
 
 registerMooseObject("RedbackApp", RedbackDiffVarsAux);
 
-template <>
 InputParameters
-validParams<RedbackDiffVarsAux>()
+RedbackDiffVarsAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addCoupledVar("variable_1", 0.0, "First variable");
   params.addCoupledVar("variable_2", 0.0, "Second variable");
   return params;

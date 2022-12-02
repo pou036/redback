@@ -16,11 +16,6 @@
 #include "PostprocessorInterface.h"
 #include "TimeStepper.h"
 
-class ReturnMapIterDT;
-
-template <>
-InputParameters validParams<ReturnMapIterDT>();
-
 /**
  * Computes the value of dt based on a value provided by a postprocessor. If
  * this value is above an upper threshold the time step is decreased by a user
@@ -31,6 +26,8 @@ class ReturnMapIterDT : public TimeStepper, public PostprocessorInterface
 {
 public:
   ReturnMapIterDT(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeInitialDT();

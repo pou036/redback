@@ -26,11 +26,10 @@
 //#include "RedbackAction.h"
 //#include "RedbackMechAction.h"
 
-template <>
 InputParameters
-validParams<RedbackApp>()
+RedbackApp::validParams()
 {
-  InputParameters params = validParams<MooseApp>();
+  InputParameters params = MooseApp::validParams();
   return params;
 }
 

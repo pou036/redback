@@ -13,15 +13,12 @@
 // Including the "Diffusion" Kernel here so we can extend it
 #include "Diffusion.h"
 
-class CoeffParamDiffusion;
-
-template <>
-InputParameters validParams<CoeffParamDiffusion>();
-
 class CoeffParamDiffusion : public Diffusion
 {
 public:
   CoeffParamDiffusion(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~CoeffParamDiffusion();
 
 protected:

@@ -15,15 +15,12 @@
 
 #include "Kernel.h"
 
-class RedbackFluidDivergence;
-
-template <>
-InputParameters validParams<RedbackFluidDivergence>();
-
 class RedbackFluidDivergence : public Kernel
 {
 public:
   RedbackFluidDivergence(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackFluidDivergence();
 
 protected:
