@@ -14,12 +14,6 @@
 // MOOSE includes
 #include "MeshGenerator.h"
 
-// Forward declerations
-class RemoveLayerElements;
-
-template <>
-InputParameters validParams<RemoveLayerElements>();
-
 /**
  * MeshModifier for assigning subdomain IDs of all elements
  */
@@ -27,6 +21,7 @@ class RemoveLayerElements : public MeshGenerator
 {
 public:
   RemoveLayerElements(const InputParameters & parameters);
+  static InputParameters validParams();
 
   std::unique_ptr<MeshBase> generate() override;
 

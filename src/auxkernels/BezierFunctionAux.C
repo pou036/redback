@@ -12,11 +12,10 @@
 
 registerMooseObject("RedbackApp", BezierFunctionAux);
 
-template <>
 InputParameters
-validParams<BezierFunctionAux>()
+BezierFunctionAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Auxiliary Kernel that creates and updates a field variable by "
                              "sampling a function through space and time.");
   params.addRequiredParam<UserObjectName>("bezier_function", "The name of the BezierUserObject");

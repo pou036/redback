@@ -17,16 +17,11 @@
 
 #include "RedbackMechMaterial.h"
 
-// Forward Declarations
-class RedbackMechMaterialDPRateAndState;
-
-template <>
-InputParameters validParams<RedbackMechMaterialDPRateAndState>();
-
 class RedbackMechMaterialDPRateAndState : public RedbackMechMaterial
 {
 public:
   RedbackMechMaterialDPRateAndState(const InputParameters & parameters);
+  static InputParameters validParams();
 
 protected:
   Real _slope_yield_surface; // coefficient for yield surface

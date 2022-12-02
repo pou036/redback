@@ -13,12 +13,7 @@
 
 #include "libmesh/numeric_vector.h"
 
-// Forward declarations
-class RedbackTransientMultiApp;
 class Transient;
-
-template <>
-InputParameters validParams<RedbackTransientMultiApp>();
 
 /**
  * MultiApp Implementation for Transient Apps.

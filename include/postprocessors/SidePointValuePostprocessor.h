@@ -13,12 +13,6 @@
 #include "SidePostprocessor.h"
 #include "RankTwoTensor.h"
 
-// Forward Declarations
-class SidePointValuePostprocessor;
-
-template <>
-InputParameters validParams<SidePointValuePostprocessor>();
-
 /**
  * This postprocessor computes a volume integral of the specified variable.
  *
@@ -29,6 +23,7 @@ class SidePointValuePostprocessor : public SidePostprocessor
 {
 public:
   SidePointValuePostprocessor(const InputParameters & parameters);
+  static InputParameters validParams();
 
   virtual void initialize() override;
   virtual void execute() override;

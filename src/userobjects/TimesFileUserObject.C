@@ -11,11 +11,10 @@
 
 registerMooseObject("RedbackApp", TimesFileUserObject);
 
-template <>
 InputParameters
-validParams<TimesFileUserObject>()
+TimesFileUserObject::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<PostprocessorName>(
       "postprocessor_value", "The name of the postprocessor that holds the current value.");
   params.addRequiredParam<FileName>("times_file", "Name of the txt file to write the time values");

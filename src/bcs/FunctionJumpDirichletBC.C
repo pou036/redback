@@ -13,11 +13,10 @@
 
 registerMooseObject("RedbackApp", FunctionJumpDirichletBC);
 
-template <>
 InputParameters
-validParams<FunctionJumpDirichletBC>()
+FunctionJumpDirichletBC::validParams()
 {
-  InputParameters params = validParams<NodalBC>();
+  InputParameters params = NodalBC::validParams();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addCoupledVar("tangent_jump",
                        0.0,

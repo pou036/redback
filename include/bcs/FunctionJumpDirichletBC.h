@@ -12,12 +12,7 @@
 
 #include "NodalBC.h"
 
-// Forward Declarations
-class FunctionJumpDirichletBC;
 class Function;
-
-template <>
-InputParameters validParams<FunctionJumpDirichletBC>();
 
 /**
  * Defines a boundary condition that forces the value to be a user specified
@@ -27,6 +22,7 @@ class FunctionJumpDirichletBC : public NodalBC
 {
 public:
   FunctionJumpDirichletBC(const InputParameters & parameters);
+  static InputParameters validParams();
 
 protected:
   /**

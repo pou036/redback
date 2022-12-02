@@ -9,15 +9,11 @@
 
 #include "AuxKernel.h"
 
-class RateAndStateAux;
-
-template <>
-InputParameters validParams<RateAndStateAux>();
-
 class RateAndStateAux : public AuxKernel
 {
 public:
   RateAndStateAux(const InputParameters & parameters);
+  static InputParameters validParams();
 
 protected:
   virtual Real computeValue();

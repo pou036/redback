@@ -13,12 +13,6 @@
 #include "AuxKernel.h"
 #include "LinearUserObject.h"
 
-// Forward Declarations
-class LinearFunctionAux;
-
-template <>
-InputParameters validParams<LinearFunctionAux>();
-
 /**
  * Function auxiliary value
  */
@@ -30,6 +24,7 @@ public:
    * constructor.
    */
   LinearFunctionAux(const InputParameters & parameters);
+  static InputParameters validParams();
 
 protected:
   virtual Real computeValue() override;

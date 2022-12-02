@@ -14,11 +14,10 @@
 
 registerMooseObject("RedbackApp", SidePointValuePostprocessor);
 
-template <>
 InputParameters
-validParams<SidePointValuePostprocessor>()
+SidePointValuePostprocessor::validParams()
 {
-  InputParameters params = validParams<SidePostprocessor>();
+  InputParameters params = SidePostprocessor::validParams();
   params.addParam<MaterialPropertyName>("rank_two_tensor", "The rank two material tensor name.");
   params.addParam<bool>("normal", false, "If true, the normal value to the fault will be computed");
   params.addParam<bool>("show", false, "If true, the coordinates of the qps will be printed");

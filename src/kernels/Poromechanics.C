@@ -15,11 +15,10 @@
 
 registerMooseObject("RedbackApp", Poromechanics);
 
-template <>
 InputParameters
-validParams<Poromechanics>()
+Poromechanics::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addRequiredCoupledVar("disp_x", "The x displacement");
   params.addRequiredCoupledVar("disp_y", "The y displacement");
   params.addCoupledVar("disp_z", 0.0, "The z displacement");

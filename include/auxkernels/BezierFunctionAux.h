@@ -13,12 +13,6 @@
 #include "AuxKernel.h"
 #include "BezierUserObject.h"
 
-// Forward Declarations
-class BezierFunctionAux;
-
-template <>
-InputParameters validParams<BezierFunctionAux>();
-
 /**
  * Function auxiliary value
  */
@@ -30,6 +24,7 @@ public:
    * constructor.
    */
   BezierFunctionAux(const InputParameters & parameters);
+  static InputParameters validParams();
 
 protected:
   virtual Real computeValue() override;

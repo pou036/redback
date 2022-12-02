@@ -13,12 +13,6 @@
 #include "AuxKernel.h"
 #include "ImageFunctionUserObject.h"
 
-// Forward Declarations
-class ImageFunctionAux;
-
-template <>
-InputParameters validParams<ImageFunctionAux>();
-
 /**
  * Function auxiliary value
  */
@@ -30,6 +24,7 @@ public:
    * constructor.
    */
   ImageFunctionAux(const InputParameters & parameters);
+  static InputParameters validParams();
 
 protected:
   virtual Real computeValue() override;

@@ -13,14 +13,6 @@
 #include "GeneralUserObject.h"
 #include "GriddedData.h"
 
-// Forward declarations
-// class GriddedData;
-
-class LinearUserObject;
-
-template <>
-InputParameters validParams<LinearUserObject>();
-
 /**
  * Computes the average value of a variable on each block
  */
@@ -28,6 +20,7 @@ class LinearUserObject : public GeneralUserObject
 {
 public:
   LinearUserObject(const InputParameters & parameters);
+  static InputParameters validParams();
 
   /**
    * Given a block ID return the average value for a variable on that block

@@ -20,11 +20,10 @@
 
 registerMooseObject("RedbackApp", PointValueFile);
 
-template <>
 InputParameters
-validParams<PointValueFile>()
+PointValueFile::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<VariableName>(
       "variable", "The name of the variable that this postprocessor operates on.");
   params.addRequiredParam<Point>("point",

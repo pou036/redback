@@ -10,11 +10,6 @@
 
 #include "Material.h"
 
-class GenericConstantVector;
-
-template <>
-InputParameters validParams<GenericConstantVector>();
-
 /**
  * Declares a constant material property of type RankTwoTensor.
  */
@@ -22,6 +17,7 @@ class GenericConstantVector : public Material
 {
 public:
   GenericConstantVector(const InputParameters & parameters);
+  static InputParameters validParams();
 
 protected:
   virtual void computeQpProperties() override;

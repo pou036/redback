@@ -12,11 +12,10 @@
 
 registerMooseObject("RedbackApp", LinearUserObject);
 
-template <>
 InputParameters
-validParams<LinearUserObject>()
+LinearUserObject::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addParam<std::vector<Real>>("positions", "The positions of the anchor points");
   params.addParam<Real>("initial_value", "The initial value of permeability");
   params.addParam<std::vector<PostprocessorName>>("permeability_values",

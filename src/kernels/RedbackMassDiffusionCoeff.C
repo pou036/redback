@@ -12,11 +12,10 @@
 
 #include "RedbackMassDiffusionCoeff.h"
 
-template <>
 InputParameters
-validParams<RedbackMassDiffusionCoeff>()
+RedbackMassDiffusionCoeff::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addCoupledVar("lewis_number", "Lewis number");
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");
 

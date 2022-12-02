@@ -20,11 +20,10 @@
 
 registerMooseObject("RedbackApp", RemoveLayerElements);
 
-template <>
 InputParameters
-validParams<RemoveLayerElements>()
+RemoveLayerElements::validParams()
 {
-  InputParameters params = validParams<MeshGenerator>();
+  InputParameters params = MeshGenerator::validParams();
   params.addRequiredParam<SubdomainName>(
       "master_block", "The master block from which we select the boundary elements");
   params.addRequiredParam<SubdomainName>("paired_block",

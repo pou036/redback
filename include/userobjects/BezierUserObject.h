@@ -12,14 +12,6 @@
 
 #include "GeneralUserObject.h"
 
-// Forward declarations
-// class GriddedData;
-
-class BezierUserObject;
-
-template <>
-InputParameters validParams<BezierUserObject>();
-
 /**
  * Computes the average value of a variable on each block
  */
@@ -27,6 +19,7 @@ class BezierUserObject : public GeneralUserObject
 {
 public:
   BezierUserObject(const InputParameters & parameters);
+  static InputParameters validParams();
 
   /**
    * Given a block ID return the average value for a variable on that block

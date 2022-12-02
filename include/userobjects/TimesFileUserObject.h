@@ -12,14 +12,6 @@
 
 #include "GeneralUserObject.h"
 
-// Forward declarations
-// class GriddedData;
-
-class TimesFileUserObject;
-
-template <>
-InputParameters validParams<TimesFileUserObject>();
-
 /**
  * Computes the average value of a variable on each block
  */
@@ -27,6 +19,7 @@ class TimesFileUserObject : public GeneralUserObject
 {
 public:
   TimesFileUserObject(const InputParameters & parameters);
+  static InputParameters validParams();
 
   virtual void execute() override;
   virtual void initialize() override {}

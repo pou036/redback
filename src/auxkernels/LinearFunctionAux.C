@@ -12,11 +12,10 @@
 
 registerMooseObject("RedbackApp", LinearFunctionAux);
 
-template <>
 InputParameters
-validParams<LinearFunctionAux>()
+LinearFunctionAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Auxiliary Kernel that creates and updates a field variable by "
                              "sampling a function through space and time.");
   params.addRequiredParam<UserObjectName>("linear_function", "The name of the LinearUserObject");

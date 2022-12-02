@@ -12,11 +12,10 @@
 
 registerMooseObject("RedbackApp", ImageFunctionAux);
 
-template <>
 InputParameters
-validParams<ImageFunctionAux>()
+ImageFunctionAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Auxiliary Kernel that creates and updates a field variable by "
                              "sampling a function through space and time.");
   params.addRequiredParam<UserObjectName>("image_function",

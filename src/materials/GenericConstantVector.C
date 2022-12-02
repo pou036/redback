@@ -9,11 +9,10 @@
 
 registerMooseObject("RedbackApp", GenericConstantVector);
 
-template <>
 InputParameters
-validParams<GenericConstantVector>()
+GenericConstantVector::validParams()
 {
-  InputParameters params = validParams<Material>();
+  InputParameters params = Material::validParams();
   params.addRequiredParam<RealVectorValue>("vector_values",
                                            "Vector of values defining the constant vector");
   params.addRequiredParam<MaterialPropertyName>(

@@ -17,11 +17,6 @@
 
 #include "Kernel.h"
 
-class Poromechanics;
-
-template <>
-InputParameters validParams<Poromechanics>();
-
 /**
  * Kernel that is calling coupledDot
  */
@@ -29,6 +24,7 @@ class Poromechanics : public Kernel
 {
 public:
   Poromechanics(const InputParameters & parameters);
+  static InputParameters validParams();
   virtual ~Poromechanics();
 
 protected:

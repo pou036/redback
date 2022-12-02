@@ -17,11 +17,10 @@
 
 registerMooseObject("RedbackApp", RedbackFullSolveMultiApp);
 
-template <>
 InputParameters
-validParams<RedbackFullSolveMultiApp>()
+RedbackFullSolveMultiApp::validParams()
 {
-  InputParameters params = validParams<MultiApp>();
+  InputParameters params = MultiApp::validParams();
   params.addRequiredParam<FileName>("file", "Name of the txt file with the porosity change");
   params.addParam<FileName>("times_file", "", "Name of the txt file to write the time values");
   params.addRequiredParam<FileName>("upper_layer_file",

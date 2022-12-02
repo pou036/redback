@@ -17,15 +17,11 @@
 
 #include "Kernel.h"
 
-class RedbackMassDiffusionCoeff;
-
-template <>
-InputParameters validParams<RedbackMassDiffusionCoeff>();
-
 class RedbackMassDiffusionCoeff : public Kernel
 {
 public:
   RedbackMassDiffusionCoeff(const InputParameters & parameters);
+  static InputParameters validParams();
   virtual ~RedbackMassDiffusionCoeff();
 
 protected:

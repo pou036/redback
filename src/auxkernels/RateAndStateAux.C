@@ -9,11 +9,10 @@
 
 registerMooseObject("RedbackApp", RateAndStateAux);
 
-template <>
 InputParameters
-validParams<RateAndStateAux>()
+RateAndStateAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Compute fault slippage according to rate and state law");
   params.addRequiredParam<PostprocessorName>("mises_stress", "Von Mises stress postprocessor.");
   params.addRequiredParam<PostprocessorName>("mises_stress_old", "Von Mises stress postprocessor.");

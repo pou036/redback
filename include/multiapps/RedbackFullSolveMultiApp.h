@@ -12,13 +12,7 @@
 
 #include "MultiApp.h"
 
-// Forward declarations
-class RedbackFullSolveMultiApp;
 class Executioner;
-
-template <>
-InputParameters validParams<RedbackFullSolveMultiApp>();
-
 /**
  * This type of MultiApp will completely solve itself the first time it is asked to take a step.
  *
@@ -28,9 +22,10 @@ class RedbackFullSolveMultiApp : public MultiApp
 {
 public:
   RedbackFullSolveMultiApp(const InputParameters & parameters);
+  static InputParameters validParams();
 
   virtual bool solveStep(Real dt, Real target_time, bool auto_advance = true) override;
-  
+
 private:
   Real ReadFile(FileName file_name);
   std::vector<Executioner *> _executioners;

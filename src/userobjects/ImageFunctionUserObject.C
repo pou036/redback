@@ -12,11 +12,10 @@
 
 registerMooseObject("RedbackApp", ImageFunctionUserObject);
 
-template <>
 InputParameters
-validParams<ImageFunctionUserObject>()
+ImageFunctionUserObject::validParams()
 {
-  InputParameters params = validParams<GeneralUserObject>();
+  InputParameters params = GeneralUserObject::validParams();
   params.addRequiredParam<FileName>(
       "data_file",
       "File holding data for use with PiecewiseMultilinear.  Format: any empty line and any line "
