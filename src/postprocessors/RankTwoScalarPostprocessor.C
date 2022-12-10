@@ -15,11 +15,10 @@
 
 registerMooseObject("RedbackApp", RankTwoScalarPostprocessor);
 
-template <>
 InputParameters
-validParams<RankTwoScalarPostprocessor>()
+RankTwoScalarPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<PostprocessorName>("index00", "Tensor's element");
   params.addRequiredParam<PostprocessorName>("index01", "Tensor's element");
   params.addRequiredParam<PostprocessorName>("index02", "Tensor's element");

@@ -16,15 +16,12 @@
 #include "Kernel.h"
 #include "RankTwoTensor.h"
 
-class RedbackDamage;
-
-template <>
-InputParameters validParams<RedbackDamage>();
-
 class RedbackDamage : public Kernel
 {
 public:
   RedbackDamage(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackDamage();
 
 protected:

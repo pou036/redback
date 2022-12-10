@@ -14,11 +14,10 @@
 
 registerMooseObject("RedbackApp", RedbackThermalPressurization);
 
-template <>
 InputParameters
-validParams<RedbackThermalPressurization>()
+RedbackThermalPressurization::validParams()
 {
-  InputParameters params = validParams<Kernel>();
+  InputParameters params = Kernel::validParams();
   params.addCoupledVar(
       "temperature", 0.0, "Temperature variable."); // TODO: check "required" fields across redback
   params.addParam<Real>("time_factor", 1.0, "Time rescaling factor (global parameter!)");

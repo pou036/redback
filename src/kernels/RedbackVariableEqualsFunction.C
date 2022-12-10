@@ -15,11 +15,10 @@
 
 registerMooseObject("RedbackApp", RedbackVariableEqualsFunction);
 
-template <>
 InputParameters
-validParams<RedbackVariableEqualsFunction>()
+RedbackVariableEqualsFunction::validParams()
 {
-  InputParameters params = validParams<TimeKernel>();
+  InputParameters params = TimeKernel::validParams();
   params.addRequiredParam<FunctionName>("function",
                                         "The function to assign values to the variable.");
   return params;

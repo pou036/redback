@@ -15,15 +15,12 @@
 
 #include "MooseApp.h"
 
-class RedbackApp;
-
-template <>
-InputParameters validParams<RedbackApp>();
-
 class RedbackApp : public MooseApp
 {
 public:
   RedbackApp(InputParameters parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackApp();
 
   static void registerApps();

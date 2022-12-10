@@ -15,16 +15,12 @@
 
 #include "TimeKernel.h"
 
-// Forward Declaration
-class RedbackVariableEqualsFunction;
-
-template <>
-InputParameters validParams<RedbackVariableEqualsFunction>();
-
 class RedbackVariableEqualsFunction : public TimeKernel
 {
 public:
   RedbackVariableEqualsFunction(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual();

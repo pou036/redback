@@ -14,11 +14,10 @@
 
 registerMooseObject("RedbackApp", ReturnMapIterDT);
 
-template <>
 InputParameters
-validParams<ReturnMapIterDT>()
+ReturnMapIterDT::validParams()
 {
-  InputParameters params = validParams<TimeStepper>();
+  InputParameters params = TimeStepper::validParams();
   params.addRequiredParam<PostprocessorName>(
       "postprocessor", "This has to be an ElementExtremeValue postprocessor.");
   params.addParam<Real>("dt", "Initial value of dt");

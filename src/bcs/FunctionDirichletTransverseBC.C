@@ -20,11 +20,10 @@
 
 registerMooseObject("RedbackApp", FunctionDirichletTransverseBC);
 
-template <>
 InputParameters
-validParams<FunctionDirichletTransverseBC>()
+FunctionDirichletTransverseBC::validParams()
 {
-  InputParameters params = validParams<DirichletBCBase>();
+  InputParameters params = DirichletBCBase::validParams();
   params.addRequiredParam<FunctionName>("function", "The forcing function.");
   params.addRequiredParam<RealVectorValue>(
       "center", "Center point to calculate transversal direction for boundary point.");

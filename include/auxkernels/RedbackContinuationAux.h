@@ -4,16 +4,12 @@
 #include "AuxKernel.h"
 #include "RankTwoTensor.h"
 
-// Forward declarations
-class RedbackContinuationAux;
-
-template <>
-InputParameters validParams<RedbackContinuationAux>();
-
 class RedbackContinuationAux : public AuxKernel
 {
 public:
   RedbackContinuationAux(const InputParameters & parameters);
+  static InputParameters validParams();
+
   virtual ~RedbackContinuationAux() {}
 
 protected:

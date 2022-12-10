@@ -18,11 +18,10 @@
 
 registerMooseAction("RedbackApp", RankTwoScalarAction, "add_postprocessor");
 
-template <>
 InputParameters
-validParams<RankTwoScalarAction>()
+RankTwoScalarAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<std::vector<MaterialPropertyName>>("rank_two_tensor",
                                                              "The rank two material tensors name");
   params.addRequiredParam<MultiMooseEnum>(

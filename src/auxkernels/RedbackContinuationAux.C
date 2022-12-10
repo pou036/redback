@@ -15,11 +15,10 @@
 
 registerMooseObject("RedbackApp", RedbackContinuationAux);
 
-template <>
 InputParameters
-validParams<RedbackContinuationAux>()
+RedbackContinuationAux::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addParam<Real>("ds_old", 1.0, "Old continuation increment");
   params.addCoupledVar("sum_vars",
                        "Coupled variables to sum "

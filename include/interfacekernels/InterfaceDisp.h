@@ -13,11 +13,6 @@
 #include "InterfaceKernel.h"
 #include "Receiver.h"
 
-class InterfaceDisp;
-
-template <>
-InputParameters validParams<InterfaceDisp>();
-
 /**
  * Imposes the jump between the displacements variables
  */
@@ -25,6 +20,8 @@ class InterfaceDisp : public InterfaceKernel
 {
 public:
   InterfaceDisp(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpResidual(Moose::DGResidualType type) override;
