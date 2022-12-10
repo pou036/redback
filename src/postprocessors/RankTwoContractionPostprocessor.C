@@ -15,11 +15,10 @@
 
 registerMooseObject("RedbackApp", RankTwoContractionPostprocessor);
 
-template <>
 InputParameters
-validParams<RankTwoContractionPostprocessor>()
+RankTwoContractionPostprocessor::validParams()
 {
-  InputParameters params = validParams<GeneralPostprocessor>();
+  InputParameters params = GeneralPostprocessor::validParams();
   params.addRequiredParam<PostprocessorName>("1_index00", "First tensor's element");
   params.addRequiredParam<PostprocessorName>("1_index01", "First tensor's element");
   params.addRequiredParam<PostprocessorName>("1_index02", "First tensor's element");

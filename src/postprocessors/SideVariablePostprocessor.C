@@ -19,11 +19,10 @@
 
 #include "libmesh/quadrature.h"
 
-template <>
 InputParameters
-validParams<SideVariablePostprocessor>()
+SideVariablePostprocessor::validParams()
 {
-  InputParameters params = validParams<SidePostprocessor>();
+  InputParameters params = SidePostprocessor::validParams();
   params.addRequiredCoupledVar("variable", "The name of the variable that this postprocessor operates on");
   return params;
 }

@@ -18,17 +18,13 @@
 #include "MooseVariableInterface.h"
 #include "SidePostprocessor.h"
 
-// Forward Declarations
-class SideVariablePostprocessor;
-
-template <>
-InputParameters validParams<SideVariablePostprocessor>();
-
 class SideVariablePostprocessor : public SidePostprocessor,
                                   public MooseVariableInterface<Real>
 {
 public:
   SideVariablePostprocessor(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
   virtual void execute() override;
 

@@ -16,11 +16,10 @@
 
 registerMooseObject("RedbackApp", SideIntegralVoidPostprocessor);
 
-template <>
 InputParameters
-validParams<SideIntegralVoidPostprocessor>()
+SideIntegralVoidPostprocessor::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
   params.addRequiredCoupledVar("variable",
                                "The name of the variable that this boundary condition applies to");
   params.addRequiredRangeCheckedParam<unsigned int>(

@@ -10,11 +10,10 @@
 
 registerMooseObject("RedbackApp", MaterialTensorSideIntegral);
 
-template <>
 InputParameters
-validParams<MaterialTensorSideIntegral>()
+MaterialTensorSideIntegral::validParams()
 {
-  InputParameters params = validParams<SideIntegralPostprocessor>();
+  InputParameters params = SideIntegralPostprocessor::validParams();
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor", "The rank two material tensor name");
   params.addRequiredRangeCheckedParam<unsigned int>(
     "index_i", "index_i >= 0 & index_i <= 2", "The index i of ij for the tensor to output (0, 1, 2)");

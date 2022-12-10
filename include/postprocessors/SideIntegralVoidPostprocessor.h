@@ -18,12 +18,6 @@
 #include "SideIntegralPostprocessor.h"
 #include "MooseVariableInterface.h"
 
-// Forward Declarations
-class SideIntegralVoidPostprocessor;
-
-template <>
-InputParameters validParams<SideIntegralVoidPostprocessor>();
-
 /**
  * This postprocessor computes a volume integral of the specified variable.
  *
@@ -35,6 +29,7 @@ class SideIntegralVoidPostprocessor : public SideIntegralPostprocessor,
 {
 public:
   SideIntegralVoidPostprocessor(const InputParameters & parameters);
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpIntegral() override;

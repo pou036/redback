@@ -17,15 +17,11 @@
 #include "GeneralPostprocessor.h"
 #include "RankTwoTensor.h"
 
-class RankTwoContractionPostprocessor;
-
-template <>
-InputParameters validParams<RankTwoContractionPostprocessor>();
-
 class RankTwoContractionPostprocessor : public GeneralPostprocessor
 {
 public:
   RankTwoContractionPostprocessor(const InputParameters & parameters);
+  static InputParameters validParams();
 
   virtual void initialize() override;
   virtual void execute() override;

@@ -17,13 +17,6 @@
 
 #include "SideVariablePostprocessor.h"
 
-// Forward Declarations
-class SideExtremeValue;
-
-// Input parameters
-template <>
-InputParameters validParams<SideExtremeValue>();
-
 /// A postprocessor for collecting the nodal min or max value
 class SideExtremeValue : public SideVariablePostprocessor
 {
@@ -40,6 +33,7 @@ public:
    * @param parameters The input parameters
    */
   SideExtremeValue(const InputParameters & parameters);
+  static InputParameters validParams();
 
   virtual void initialize() override;
   virtual Real getValue() override;

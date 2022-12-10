@@ -11,12 +11,6 @@
 #include "RankTwoTensor.h"
 #include "SideIntegralPostprocessor.h"
 
-// Forward Declarations
-class MaterialTensorSideIntegral;
-
-template <>
-InputParameters validParams<MaterialTensorSideIntegral>();
-
 /**
  * This postprocessor computes an element integral of a
  * component of a material tensor as specified by the user-supplied indices.
@@ -25,6 +19,7 @@ class MaterialTensorSideIntegral : public SideIntegralPostprocessor
 {
 public:
   MaterialTensorSideIntegral(const InputParameters & parameters);
+  static InputParameters validParams();
 
 protected:
   virtual Real computeQpIntegral();
