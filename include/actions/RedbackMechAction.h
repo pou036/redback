@@ -18,7 +18,7 @@
 class RedbackMechAction : public Action
 {
 public:
-  RedbackMechAction(InputParameters params);
+  RedbackMechAction(const InputParameters & params);
 
   static InputParameters validParams();
 
