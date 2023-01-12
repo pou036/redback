@@ -20,7 +20,7 @@
 class RankTwoContractionAction : public Action
 {
 public:
-  RankTwoContractionAction(InputParameters params);
+  RankTwoContractionAction(const InputParameters & params);
 
   MultiMooseEnum scalarOptions();
   virtual void act() override;

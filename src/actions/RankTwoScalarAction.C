@@ -41,7 +41,7 @@ RankTwoScalarAction::validParams()
   return params;
 }
 
-RankTwoScalarAction::RankTwoScalarAction(InputParameters params) : Action(params) {}
+RankTwoScalarAction::RankTwoScalarAction(const InputParameters & params) : Action(params) {}
 
 void
 RankTwoScalarAction::act()

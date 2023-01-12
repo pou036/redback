@@ -18,7 +18,7 @@
 class RankTwoScalarVoidAction : public Action
 {
 public:
-  RankTwoScalarVoidAction(InputParameters params);
+  RankTwoScalarVoidAction(const InputParameters & params);
 
   MultiMooseEnum scalarOptions();
   virtual void act() override;

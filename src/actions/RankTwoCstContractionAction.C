@@ -38,7 +38,7 @@ validParams<RankTwoCstContractionAction>()
   return params;
 }
 
-RankTwoCstContractionAction::RankTwoCstContractionAction(InputParameters params) :
+RankTwoCstContractionAction::RankTwoCstContractionAction(const InputParameters & params) :
     Action(params), _base_name(isParamValid("base_name") ? getParam<std::string>("base_name") + "_" : "")
 {
 }

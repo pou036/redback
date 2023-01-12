@@ -35,7 +35,7 @@ validParams<RankTwoScalarVoidAction>()
   return params;
 }
 
-RankTwoScalarVoidAction::RankTwoScalarVoidAction(InputParameters params) : Action(params) {}
+RankTwoScalarVoidAction::RankTwoScalarVoidAction(const InputParameters & params) : Action(params) {}
 
 void
 RankTwoScalarVoidAction::act()
