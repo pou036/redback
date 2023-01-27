@@ -3,6 +3,10 @@
 # This generates the file containing the mesh with 2blocks (and possibly the level of refinement/adaptivity that we want).
 
 [Mesh]
+  block_name = 'pores grains'
+  block_id = '0 1'
+  boundary_name = grains_edges
+  boundary_id = 10
   [./generate]
     #type = FileMesh
     #file = image_mesh_canvas.e
@@ -12,10 +16,6 @@
     ny = 20
     nz = 20
     elem_type = HEX
-    block_name = 'pores grains'
-    block_id = '0 1'
-    boundary_name = grains_edges
-    boundary_id = 10
   [../]
   [./image]
     type = ImageSubdomainGenerator
@@ -31,10 +31,9 @@
   [./interface]
     type = SideSetsBetweenSubdomainsGenerator
     input = image
-    master_block = 0
+    primary_block = 0
     paired_block = 1
     new_boundary = 10
-    depends_on = image
   [../]
   #deletes one of the blocks
   #[./delete]
