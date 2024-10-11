@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include "TensorMechanicsPlasticModel.h"
-#include "TensorMechanicsHardeningModel.h"
+#include "SolidMechanicsPlasticModel.h"
+#include "SolidMechanicsHardeningModel.h"
 
 /**
  * Rate-independent non-associative Drucker Prager
@@ -19,7 +19,7 @@
  * with aaa = "cohesion" (a non-negative number)
  * and bbb = tan(friction angle) (a positive number)
  */
-class RedbackPlasticDruckerPrager : public TensorMechanicsPlasticModel
+class RedbackPlasticDruckerPrager : public SolidMechanicsPlasticModel
 {
 public:
   static InputParameters validParams();
@@ -62,13 +62,13 @@ public:
 
 protected:
   /// Hardening model for cohesion
-  const TensorMechanicsHardeningModel & _mc_cohesion;
+  const SolidMechanicsHardeningModel & _mc_cohesion;
 
   /// Hardening model for tan(phi)
-  const TensorMechanicsHardeningModel & _mc_phi;
+  const SolidMechanicsHardeningModel & _mc_phi;
 
   /// Hardening model for tan(psi)
-  const TensorMechanicsHardeningModel & _mc_psi;
+  const SolidMechanicsHardeningModel & _mc_psi;
 
   virtual Real yieldFunction(const RankTwoTensor & stress, Real intnl) const override;
 

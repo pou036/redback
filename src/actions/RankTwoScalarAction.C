@@ -21,6 +21,8 @@ registerMooseAction("RedbackApp", RankTwoScalarAction, "add_postprocessor");
 InputParameters
 RankTwoScalarAction::validParams()
 {
+  // action to compute the homogenised invariant of a tensorial material property over a block or boundary
+  // as an integral (need to divide manually by volume)
   InputParameters params = Action::validParams();
   params.addRequiredParam<std::vector<MaterialPropertyName>>("rank_two_tensor",
                                                              "The rank two material tensors name");
@@ -33,11 +35,10 @@ RankTwoScalarAction::validParams()
   params.addParam<std::vector<SubdomainName>>(
       "block", "The list of block ids (SubdomainID) that this object will be applied");
   params.addParam<bool>(
-    "compute_on_boundary", false, "Allows macro dissipation to be computed on boundaries instead of blocks");
+    "compute_on_boundary", false, "Allows invariant to be computed on boundaries instead of blocks");
   params.addParam<std::vector<BoundaryName> >(
     "boundary", "The list of boundary IDs from the mesh that this object will be applied");
-// TODO: create function to divide the integral by the volme / allow to do surfacic
-
+// TODO: create function to divide the integral by the volume
   return params;
 }
 
@@ -94,6 +95,7 @@ RankTwoScalarAction::act()
     }
   }
 
+  // TODO: create function to divide the integral by the volume
   // InputParameters pp_params = _factory.getValidParams("VolumePostprocessor");
   // if (isParamValid("block"))
   // {

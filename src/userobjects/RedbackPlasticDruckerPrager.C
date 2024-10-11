@@ -16,7 +16,8 @@ registerMooseObject("RedbackApp", RedbackPlasticDruckerPrager);
 InputParameters
 RedbackPlasticDruckerPrager::validParams()
 {
-  InputParameters params = TensorMechanicsPlasticModel::validParams();
+  // based on PlasticDruckerPrager but with the most common definition of the yield criterion for rock mechanics
+  InputParameters params = SolidMechanicsPlasticModel::validParams();
   MooseEnum mc_interpolation_scheme("outer_tip=0 inner_tip=1 lode_zero=2 inner_edge=3 native=4",
                                     "lode_zero");
   params.addParam<MooseEnum>(
@@ -32,16 +33,16 @@ RedbackPlasticDruckerPrager::validParams()
       "parameters entered.");
   params.addRequiredParam<UserObjectName>(
       "mc_cohesion",
-      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "A SolidMechanicsHardening UserObject that defines hardening of the "
       "Mohr-Coulomb cohesion.  Physically this should not be negative.");
   params.addRequiredParam<UserObjectName>(
       "mc_friction_angle",
-      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "A SolidMechanicsHardening UserObject that defines hardening of the "
       "Mohr-Coulomb friction angle (in radians).  Physically this should be "
       "between 0 and Pi/2.");
   params.addRequiredParam<UserObjectName>(
       "mc_dilation_angle",
-      "A TensorMechanicsHardening UserObject that defines hardening of the "
+      "A SolidMechanicsHardening UserObject that defines hardening of the "
       "Mohr-Coulomb dilation angle (in radians).  Usually the dilation angle "
       "is not greater than the friction angle, and it is between 0 and Pi/2.");
   params.addClassDescription(
@@ -51,10 +52,10 @@ RedbackPlasticDruckerPrager::validParams()
 
 RedbackPlasticDruckerPrager::RedbackPlasticDruckerPrager(
     const InputParameters & parameters)
-  : TensorMechanicsPlasticModel(parameters),
-    _mc_cohesion(getUserObject<TensorMechanicsHardeningModel>("mc_cohesion")),
-    _mc_phi(getUserObject<TensorMechanicsHardeningModel>("mc_friction_angle")),
-    _mc_psi(getUserObject<TensorMechanicsHardeningModel>("mc_dilation_angle")),
+  : SolidMechanicsPlasticModel(parameters),
+    _mc_cohesion(getUserObject<SolidMechanicsHardeningModel>("mc_cohesion")),
+    _mc_phi(getUserObject<SolidMechanicsHardeningModel>("mc_friction_angle")),
+    _mc_psi(getUserObject<SolidMechanicsHardeningModel>("mc_dilation_angle")),
     _mc_interpolation_scheme(getParam<MooseEnum>("mc_interpolation_scheme")),
     _zero_cohesion_hardening(_mc_cohesion.modelName().compare("Constant") == 0),
     _zero_phi_hardening(_mc_phi.modelName().compare("Constant") == 0),
