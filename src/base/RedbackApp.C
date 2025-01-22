@@ -29,6 +29,8 @@ InputParameters
 RedbackApp::validParams()
 {
   InputParameters params = MooseApp::validParams();
+  params.set<bool>("use_legacy_material_output") = false;
+  params.set<bool>("use_legacy_initial_residual_evaluation_behavior") = false;
   return params;
 }
 
@@ -42,10 +44,9 @@ RedbackApp::~RedbackApp() {}
 void
 RedbackApp::registerAll(Factory & f, ActionFactory & af, Syntax & s)
 {
+  ModulesApp::registerAllObjects<RedbackApp>(f, af, s);
   Registry::registerObjectsTo(f, {"RedbackApp"});
   Registry::registerActionsTo(af, {"RedbackApp"});
-
-  ModulesApp::registerAll(f, af, s);
 
   /* register custom execute flags, action syntax, etc. here */
   RedbackApp::associateSyntax(s, af);
