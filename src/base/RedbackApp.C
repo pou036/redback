@@ -18,12 +18,12 @@
 #include "MooseSyntax.h"
 
 // Modules
-#include "TensorMechanicsApp.h"
+#include "SolidMechanicsApp.h"
 
 // Actions
-//#include "RankTwoScalarAction.h"
-//#include "RedbackAction.h"
-//#include "RedbackMechAction.h"
+// #include "RankTwoScalarAction.h"
+// #include "RedbackAction.h"
+// #include "RedbackMechAction.h"
 
 InputParameters
 RedbackApp::validParams()
