@@ -77,7 +77,7 @@ RankTwoContractionPostprocessor::execute()
 }
 
 PostprocessorValue
-RankTwoContractionPostprocessor::getValue()
+RankTwoContractionPostprocessor::getValue() const
 {
   RankTwoTensor tensor_1 = RankTwoTensor(
     _1_index00, _1_index01, _1_index02, _1_index10, _1_index11, _1_index12, _1_index20, _1_index21, _1_index22);
