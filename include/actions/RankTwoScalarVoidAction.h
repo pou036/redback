@@ -10,20 +10,21 @@
 /*            See COPYRIGHT for full restrictions               */
 /****************************************************************/
 
-#ifndef RANKTWOSCALARACTION_H
-#define RANKTWOSCALARACTION_H
+#ifndef RANKTWOSCALARVOIDACTION_H
+#define RANKTWOSCALARVOIDACTION_H
 
 #include "Action.h"
 
-class RankTwoScalarAction : public Action
+class RankTwoScalarVoidAction : public Action
 {
 public:
-  RankTwoScalarAction(const InputParameters & params);
-
-  static InputParameters validParams();
+  RankTwoScalarVoidAction(const InputParameters & params);
 
   MultiMooseEnum scalarOptions();
   virtual void act() override;
 };
 
-#endif // RANKTWOSCALARACTION_H
+template <>
+InputParameters validParams<RankTwoScalarVoidAction>();
+
+#endif // RANKTWOSCALARVOIDACTION_H
