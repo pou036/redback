@@ -21,7 +21,7 @@
     type = ImageSubdomainGenerator
     input = generate
     file_suffix = png
-    threshold = 90
+    threshold = 6e4
     #the image folder and the images selected
     file_base = stack/test_0
     #file_range = '32'

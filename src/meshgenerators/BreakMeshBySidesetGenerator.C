@@ -1067,13 +1067,13 @@ BreakMeshBySidesetGenerator::addLowerDElements(MeshBase & mesh)
 subdomain_id_type
 BreakMeshBySidesetGenerator::findFreeBlockId(MeshBase & mesh)
 {
-  auto blocks = MooseMeshUtils::getSubdomainIDs(mesh, {"ANY_BLOCK_ID"});
-  std::set<subdomain_id_type> current_block_ids(blocks.begin(), blocks.end());
+  std::set<subdomain_id_type> currentBlockIds;
+  mesh.subdomain_ids(currentBlockIds);
   bool free_block_not_found = true;
   subdomain_id_type free_id;
   for (free_id = 0; free_id < std::numeric_limits<subdomain_id_type>::max(); free_id++)
   {
-    if (current_block_ids.count(free_id) == 0)
+    if (currentBlockIds.count(free_id) == 0)
     {
       // bid is not in the set, block ID is free
       free_block_not_found = false;
