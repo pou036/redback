@@ -9,11 +9,10 @@
 
 registerMooseObject("RedbackApp", RankTwoDoubleContraction);
 
-template <>
 InputParameters
-validParams<RankTwoDoubleContraction>()
+RankTwoDoubleContraction::validParams()
 {
-  InputParameters params = validParams<AuxKernel>();
+  InputParameters params = AuxKernel::validParams();
   params.addClassDescription("Compute a tensorial product of two RankTwoTensors");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor1", "The first rank two material tensor name");
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor2", "The second rank two material tensor name");

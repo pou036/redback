@@ -12,13 +12,12 @@
 
 class RankTwoDoubleContraction;
 
-template <>
-InputParameters validParams<RankTwoDoubleContraction>();
-
 class RankTwoDoubleContraction : public AuxKernel
 {
 public:
   RankTwoDoubleContraction(const InputParameters & parameters);
+
+  static InputParameters validParams();
 
 protected:
   virtual Real computeValue();
