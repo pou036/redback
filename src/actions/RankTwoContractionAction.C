@@ -19,11 +19,10 @@
 
 registerMooseAction("RedbackApp", RankTwoContractionAction, "add_postprocessor");
 
-template <>
 InputParameters
-validParams<RankTwoContractionAction>()
+RankTwoContractionAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<std::vector<MaterialPropertyName> >("rank_two_tensor", "The rank two material tensors name");
   params.addParam<bool>(
     "compute_on_boundary", false, "Allows macro dissipation to be computed on boundaries instead of blocks");
