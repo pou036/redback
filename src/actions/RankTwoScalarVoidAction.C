@@ -18,11 +18,10 @@
 
 registerMooseAction("RedbackApp", RankTwoScalarVoidAction, "add_postprocessor");
 
-template <>
 InputParameters
-validParams<RankTwoScalarVoidAction>()
+RankTwoScalarVoidAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<MultiMooseEnum>(
       "scalar_type",
       MultiMooseEnum("VonMisesStress EffectiveStrain Hydrostatic L2norm "

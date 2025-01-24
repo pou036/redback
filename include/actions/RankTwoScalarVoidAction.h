@@ -20,11 +20,10 @@ class RankTwoScalarVoidAction : public Action
 public:
   RankTwoScalarVoidAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
   MultiMooseEnum scalarOptions();
   virtual void act() override;
 };
-
-template <>
-InputParameters validParams<RankTwoScalarVoidAction>();
 
 #endif // RANKTWOSCALARVOIDACTION_H

@@ -19,11 +19,10 @@
 
 registerMooseAction("RedbackApp", RankTwoCstContractionAction, "add_postprocessor");
 
-template <>
 InputParameters
-validParams<RankTwoCstContractionAction>()
+RankTwoCstContractionAction::validParams()
 {
-  InputParameters params = validParams<Action>();
+  InputParameters params = Action::validParams();
   params.addRequiredParam<MaterialPropertyName>("rank_two_tensor", "The rank two material tensor name");
   params.addParam<FunctionName>("D00", "Boundary deformation rate Dxx");
   params.addParam<FunctionName>("D11", "Boundary deformation rate Dyy");

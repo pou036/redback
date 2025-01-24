@@ -22,14 +22,13 @@ class RankTwoCstContractionAction : public Action
 public:
   RankTwoCstContractionAction(const InputParameters & params);
 
+  static InputParameters validParams();
+
   MultiMooseEnum scalarOptions();
   virtual void act() override;
 
 private:
   std::string _base_name;
 };
-
-template <>
-InputParameters validParams<RankTwoCstContractionAction>();
 
 #endif // RANKTWOCSTCONTRACTIONACTION_H
